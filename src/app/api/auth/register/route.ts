@@ -34,7 +34,16 @@ export async function POST(req: NextRequest) {
     })
 
     if (role === "ARTIST") {
-      await prisma.artist.create({ data: { userId: user.id } })
+      await prisma.artist.create({
+        data: {
+          userId: user.id,
+          bio: "",
+          genre: [],
+          styleTag: [],
+          videoReel: [],
+          socialLinks: null,
+        }
+      })
     }
     if (role === "ORGANISER") {
       await prisma.organiser.create({ data: { userId: user.id, orgName: name } })
