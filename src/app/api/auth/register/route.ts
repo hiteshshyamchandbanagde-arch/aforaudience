@@ -5,9 +5,15 @@ import bcrypt from "bcryptjs"
 export async function POST(req: NextRequest) {
   try {
     const { name, email, phone, password, role } = await req.json()
+    const normalizedRole = typeof role === "string" ? role.toUpperCase() : role
+    const validRoles = ["AUDIENCE", "ARTIST", "ORGANISER", "VENUE_OWNER"]
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !normalizedRole) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    }
+
+    if (!validRoles.includes(normalizedRole)) {
+      return NextResponse.json({ error: "Invalid role selected" }, { status: 400 })
     }
 
     if (password.length < 8) {
@@ -23,17 +29,17 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
-        phone: phone || null,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone?.trim() || null,
         password: hashedPassword,
-        role,
+        role: normalizedRole,
         isVerified: false,
-        isApproved: role === "AUDIENCE" ? true : false,
+        isApproved: normalizedRole === "AUDIENCE",
       }
     })
 
-    if (role === "ARTIST") {
+    if (normalizedRole === "ARTIST") {
       await prisma.artist.create({
         data: {
           userId: user.id,
@@ -41,7 +47,7 @@ export async function POST(req: NextRequest) {
           genre: [],
           styleTag: [],
           videoReel: [],
-          socialLinks: null,
+          socialLinks: {},
         }
       })
     }
