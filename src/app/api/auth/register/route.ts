@@ -51,17 +51,18 @@ export async function POST(req: NextRequest) {
         }
       })
     }
-    if (role === "ORGANISER") {
+    if (normalizedRole === "ORGANISER") {
       await prisma.organiser.create({ data: { userId: user.id, orgName: name } })
     }
-    if (role === "VENUE_OWNER") {
+    if (normalizedRole === "VENUE_OWNER") {
       await prisma.venueOwner.create({ data: { userId: user.id } })
     }
 
     return NextResponse.json({ message: "Account created successfully!" }, { status: 201 })
 
   } catch (error) {
-    console.error("Register error:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error("Register error:", errorMessage)
+    return NextResponse.json({ error: errorMessage || "Something went wrong" }, { status: 500 })
   }
 }

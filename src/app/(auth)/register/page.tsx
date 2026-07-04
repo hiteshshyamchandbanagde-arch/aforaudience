@@ -1,7 +1,8 @@
 import RegisterForm from "./RegisterForm"
 
-export default function RegisterPage({ searchParams }: { searchParams: { role?: string } }) {
-  const initialRole = searchParams?.role?.toUpperCase() ?? ""
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
+  const params = await searchParams
+  const initialRole = params?.role?.toUpperCase() ?? ""
   return <RegisterForm initialRole={initialRole} />
 }
 
