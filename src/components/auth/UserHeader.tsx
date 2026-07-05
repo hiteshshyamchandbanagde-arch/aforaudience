@@ -9,6 +9,23 @@ export default function UserHeader() {
   const userName = name.split(" ")[0]
   const role = (session?.user as any)?.role as string | undefined
 
+  const getDashboardLink = () => {
+    switch (role) {
+      case 'VENUE_OWNER':
+        return '/dashboard/venue'
+      case 'ARTIST':
+        return '/dashboard/artist'
+      case 'ORGANISER':
+        return '/dashboard/organiser'
+      case 'ADMIN':
+        return '/dashboard/admin'
+      default:
+        return null
+    }
+  }
+
+  const dashboardLink = getDashboardLink()
+
   return (
     <header className="w-full sticky top-0 z-50 px-4 py-4 sm:px-10 bg-[#F7F3EE] border-b border-[rgba(14,12,10,0.08)]">
       <div className="mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -26,6 +43,14 @@ export default function UserHeader() {
                 </span>
               )}
             </div>
+            {dashboardLink && (
+              <Link
+                href={dashboardLink}
+                className="text-sm font-semibold text-[#C8441A] no-underline hover:text-[#a63716] transition"
+              >
+                Dashboard
+              </Link>
+            )}
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="rounded-[8px] bg-[#C8441A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#a63716]"
