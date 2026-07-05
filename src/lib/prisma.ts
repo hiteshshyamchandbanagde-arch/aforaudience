@@ -1,10 +1,24 @@
+import { PrismaClient } from "@prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
+import type { PoolConfig } from "pg"
 
-const { PrismaClient } = require("@prisma/client")
+const getDatabaseUrl = () => {
+  const url = process.env.DATABASE_URL
+  if (!url) {
+    throw new Error("Missing DATABASE_URL environment variable")
+  }
 
-const adapter = new PrismaPg({ 
-  connectionString: process.env.DATABASE_URL! 
-})
+  return url
+}
+
+const prismaPgConfig: PoolConfig = {
+  connectionString: getDatabaseUrl(),
+  ssl: {
+    rejectUnauthorized: false,
+  },
+}
+
+const adapter = new PrismaPg(prismaPgConfig)
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })
