@@ -11,14 +11,21 @@ const getDatabaseUrl = () => {
   return url
 }
 
+const connectionString = getDatabaseUrl()
+
+if (process.env.NODE_ENV === "production") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+}
+
 const prismaPgConfig: PoolConfig = {
-  connectionString: getDatabaseUrl(),
+  connectionString,
   ssl: {
     rejectUnauthorized: false,
   },
 }
 
-const adapter = new PrismaPg(prismaPgConfig)
+const pool = new (require("pg").Pool)(prismaPgConfig)
+const adapter = new PrismaPg(pool, { disposeExternalPool: false })
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })
