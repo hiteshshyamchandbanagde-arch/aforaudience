@@ -17,6 +17,7 @@ export default function RegisterForm({ initialRole }: { initialRole?: string }) 
   const [selectedRole, setSelectedRole] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string }>({})
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" })
 
   useEffect(() => {
@@ -29,13 +30,18 @@ export default function RegisterForm({ initialRole }: { initialRole?: string }) 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+    setFieldErrors({ ...fieldErrors, [e.target.name]: undefined })
   }
 
   const handleRegister = async () => {
     if (form.password !== form.confirm) {
       setError("Passwords do not match!"); return
     }
-    setLoading(true); setError("")
+
+    setLoading(true)
+    setError("")
+    setFieldErrors({})
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -43,10 +49,26 @@ export default function RegisterForm({ initialRole }: { initialRole?: string }) 
         body: JSON.stringify({ ...form, role: selectedRole })
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || "Something went wrong"); setLoading(false); return }
+
+      if (!res.ok) {
+        const normalizedError = String(data.error || "Something went wrong")
+
+        if (normalizedError.toLowerCase().includes("email")) {
+          setFieldErrors({ email: normalizedError })
+        } else if (normalizedError.toLowerCase().includes("phone")) {
+          setFieldErrors({ phone: normalizedError })
+        } else {
+          setError(normalizedError)
+        }
+
+        setLoading(false)
+        return
+      }
+
       router.push("/login?registered=true")
     } catch {
-      setError("Something went wrong"); setLoading(false)
+      setError("Something went wrong")
+      setLoading(false)
     }
   }
 
@@ -135,8 +157,23 @@ export default function RegisterForm({ initialRole }: { initialRole?: string }) 
                       placeholder={field.placeholder}
                       value={form[field.name as keyof typeof form]}
                       onChange={handleChange}
-                      style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: "8px",
+                        border: `1.5px solid ${fieldErrors[field.name as keyof typeof fieldErrors] ? "#C8441A" : "rgba(14,12,10,0.15)"}`,
+                        fontSize: "14px",
+                        color: "#0E0C0A",
+                        background: "white",
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
                     />
+                    {fieldErrors[field.name as keyof typeof fieldErrors] && (
+                      <p style={{ marginTop: "8px", fontSize: "13px", color: "#C8441A" }}>
+                        {fieldErrors[field.name as keyof typeof fieldErrors]}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>

@@ -20,12 +20,12 @@ function LoginForm() {
     setLoading(true); setError("")
     try {
       const result = await signIn("credentials", {
-        email: form.email,
+        email: form.email.trim().toLowerCase(),
         password: form.password,
         redirect: false,
       })
       if (result?.error) {
-        setError("Invalid email or password")
+        setError(result.error === "CredentialsSignin" ? "Invalid email or password" : "Failed to sign in. Please check your credentials.")
         setLoading(false); return
       }
       router.push("/")
@@ -36,17 +36,17 @@ function LoginForm() {
   }
 
   return (
-    <div style={{ width: "100%", maxWidth: "440px" }}>
-      <div style={{ textAlign: "center", marginBottom: "32px" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
-          <span style={{ color: "#C8441A" }}>A</span>forAudience
+    <div className="w-full max-w-[440px]">
+      <div className="text-center mb-8">
+        <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
+          <span className="text-[#C8441A]">A</span>forAudience
         </Link>
-        <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, marginTop: "8px" }}>
+        <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
           Welcome back to the art world
         </p>
       </div>
 
-      <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+      <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", marginBottom: "24px" }}>
           Sign in
         </h2>
@@ -112,7 +112,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+    <main className="min-h-screen bg-[#F7F3EE] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
       <Suspense fallback={<div>Loading...</div>}>
         <LoginForm />
       </Suspense>

@@ -5,10 +5,11 @@ import bcrypt from "bcryptjs"
 export async function POST(req: NextRequest) {
   try {
     const { name, email, phone, password, role } = await req.json()
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : email
     const normalizedRole = typeof role === "string" ? role.toUpperCase() : role
     const validRoles = ["AUDIENCE", "ARTIST", "ORGANISER", "VENUE_OWNER"]
 
-    if (!name || !email || !password || !normalizedRole) {
+    if (!name || !normalizedEmail || !password || !normalizedRole) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
@@ -20,9 +21,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 })
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } })
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (existingUser) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 400 })
+      return NextResponse.json({ error: "That email address is already registered." }, { status: 400 })
+    }
+
+    if (phone?.trim()) {
+      const normalizedPhone = phone.trim()
+      const existingPhoneUser = await prisma.user.findFirst({ where: { phone: normalizedPhone } })
+      if (existingPhoneUser) {
+        return NextResponse.json({ error: "That phone number is already registered." }, { status: 400 })
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -30,7 +39,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         phone: phone?.trim() || null,
         password: hashedPassword,
         role: normalizedRole,
