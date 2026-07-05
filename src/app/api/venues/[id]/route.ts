@@ -3,9 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const venue = await prisma.venue.findUnique({ where: { id: params.id } })
+    const { id } = await params
+    const venue = await prisma.venue.findUnique({ where: { id } })
     if (!venue) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json(venue)
   } catch (err) {
@@ -13,8 +14,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -30,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     const venue = await prisma.venue.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!venue) {
@@ -52,7 +54,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const { name, address, city, capacity, acousticRating } = body
 
     const updatedVenue = await prisma.venue.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(address && { address }),
