@@ -175,15 +175,39 @@ export default function Home() {
             </p>
           </div>
           {[
-            { title: "Platform", links: ["Browse Events", "Find Artists", "Explore Venues", "Livestreams"] },
-            { title: "Join As", links: ["Artist", "Organiser", "Venue Owner", "Audience"] },
-            { title: "Company", links: ["About Us", "Blog", "Careers", "Privacy Policy"] },
+            {
+              title: "Platform",
+              links: [
+                { label: "Browse Events", href: "/events" },
+                { label: "Find Artists", href: "/artists" },
+                { label: "Explore Venues", href: "/venues" },
+                { label: "Livestreams", href: "/livestreams" },
+              ],
+            },
+            {
+              title: "Join As",
+              links: [
+                { label: "Artist", href: "/register?role=artist" },
+                { label: "Organiser", href: "/register?role=organiser" },
+                { label: "Venue Owner", href: "/register?role=venue_owner" },
+                { label: "Audience", href: "/register?role=audience" },
+              ],
+            },
+            {
+              title: "Company",
+              links: [
+                { label: "About Us", href: "/about" },
+                { label: "Blog", href: "/blog" },
+                { label: "Careers", href: "/careers" },
+                { label: "Privacy Policy", href: "/privacy" },
+              ],
+            },
           ].map((col) => (
             <div key={col.title}>
               <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9973A", marginBottom: "20px" }}>{col.title}</div>
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col.links.map((link) => (
-                  <li key={link}><Link href="#" style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link}</Link></li>
+                  <li key={link.label}><Link href={link.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
                 ))}
               </ul>
             </div>
