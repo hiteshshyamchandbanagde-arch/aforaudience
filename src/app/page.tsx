@@ -1,21 +1,11 @@
 import Link from "next/link";
+import SiteNav from "@/components/SiteNav";
 
 export default function Home() {
   return (
     <main className="min-h-screen" style={{ background: "#F7F3EE", color: "#0E0C0A", fontFamily: "Georgia, serif" }}>
 
-      {/* NAV */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 48px", background: "rgba(247,243,238,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(14,12,10,0.08)" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
-          <span style={{ color: "#C8441A" }}>A</span>forAudience
-        </Link>
-        <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
-          <Link href="/events" style={{ fontSize: "14px", fontWeight: 500, color: "#0E0C0A", textDecoration: "none", opacity: 0.7 }}>Events</Link>
-          <Link href="/artists" style={{ fontSize: "14px", fontWeight: 500, color: "#0E0C0A", textDecoration: "none", opacity: 0.7 }}>Artists</Link>
-          <Link href="/venues" style={{ fontSize: "14px", fontWeight: 500, color: "#0E0C0A", textDecoration: "none", opacity: 0.7 }}>Venues</Link>
-          <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", background: "#0E0C0A", padding: "10px 22px", borderRadius: "6px" }}>Get Started</Link>
-        </div>
-      </nav>
+      <SiteNav variant="home" />
 
       {/* HERO */}
       <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "120px 48px 80px" }}>

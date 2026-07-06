@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
+import SiteNav from "@/components/SiteNav"
 
 const EVENT_TYPES = ["All", "Open Mic", "Stand Up", "Poetry", "Theater", "Lineup"]
 const CITIES = ["All Cities", "Mumbai", "Delhi", "Bangalore", "Pune", "Hyderabad", "Chennai", "Kolkata"]
@@ -38,17 +39,7 @@ export default function EventsPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
 
-      {/* NAV */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 48px", background: "rgba(247,243,238,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(14,12,10,0.08)" }}>
-        <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
-          <span style={{ color: "#C8441A" }}>A</span>forAudience
-        </Link>
-        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <Link href="/events" style={{ fontSize: "14px", fontWeight: 600, color: "#C8441A", textDecoration: "none" }}>Events</Link>
-          <Link href="/artists" style={{ fontSize: "14px", color: "#0E0C0A", textDecoration: "none", opacity: 0.6 }}>Artists</Link>
-          <Link href="/login" style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", background: "#0E0C0A", padding: "8px 20px", borderRadius: "6px" }}>Sign In</Link>
-        </div>
-      </nav>
+      <SiteNav active="events" />
 
       {/* HERO SEARCH */}
       <div style={{ background: "#0E0C0A", padding: "56px 48px" }}>

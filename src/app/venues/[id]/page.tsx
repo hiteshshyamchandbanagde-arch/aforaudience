@@ -1,24 +1,34 @@
 import React from 'react'
+import prisma from '@/lib/prisma'
+import SiteNav from '@/components/SiteNav'
 
 async function getVenue(id: string) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/venues/${id}`, { cache: 'no-store' })
-  if (!res.ok) return null
-  return res.json()
+  try {
+    return await prisma.venue.findUnique({ where: { id } })
+  } catch (err) {
+    console.error('Failed to fetch venue:', err)
+    return null
+  }
 }
 
-export default async function VenuePage({ params }: { params: { id: string } }) {
-  const venue = await getVenue(params.id)
-
-  if (!venue) return <div className="p-8">Venue not found</div>
+export default async function VenuePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const venue = await getVenue(id)
 
   return (
-    <div className="max-w-4xl mx-auto py-12">
-      <h1 className="text-3xl font-bold">{venue.name}</h1>
-      <p className="text-sm text-muted-foreground">{venue.address}, {venue.city}</p>
-      <div className="mt-4">
-        <p>{venue.description || 'No description yet.'}</p>
-        <p className="mt-2">Capacity: {venue.capacity}</p>
-      </div>
-    </div>
+    <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <SiteNav backHref="/venues" backLabel="← Back to Venues" />
+      {!venue ? (
+        <div className="max-w-4xl mx-auto py-12 px-4">Venue not found.</div>
+      ) : (
+        <div className="max-w-4xl mx-auto py-12 px-4">
+          <h1 className="text-3xl font-bold">{venue.name}</h1>
+          <p className="text-sm text-muted-foreground">{venue.address}, {venue.city}</p>
+          <div className="mt-4">
+            <p>Capacity: {venue.capacity}</p>
+          </div>
+        </div>
+      )}
+    </main>
   )
 }
