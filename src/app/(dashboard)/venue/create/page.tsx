@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
 
 export default function CreateVenuePage() {
   const { data: session, status } = useSession()
@@ -62,16 +63,18 @@ export default function CreateVenuePage() {
     }
   }
 
-  if (status === 'loading') return <div className="p-8">Loading...</div>
-  if (!session) return null
+  if (status === 'loading') return (<><SiteNav /><div className="p-8">Loading...</div></>)
+  if (!session) return <SiteNav />
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
-      <div className="mb-8">
-        <Link href="/dashboard/venue" className="text-amber-600 hover:text-amber-700">
-          ← Back to Venues
-        </Link>
-      </div>
+    <>
+      <SiteNav />
+      <div className="max-w-4xl mx-auto py-12 px-4">
+        <div className="mb-8">
+          <Link href="/dashboard/venue" className="text-amber-600 hover:text-amber-700">
+            ← Back to Venues
+          </Link>
+        </div>
 
       <div className="bg-white border rounded-lg p-8">
         <h1 className="text-3xl font-bold mb-2">Create New Venue</h1>
@@ -178,6 +181,7 @@ export default function CreateVenuePage() {
           </div>
         </form>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

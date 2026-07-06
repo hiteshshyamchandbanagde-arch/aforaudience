@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
 
 interface Venue {
   id: string
@@ -53,13 +54,15 @@ export default function VenueDetailPage({ params }: { params: { id: string } }) 
     }
   }, [session, params.id])
 
-  if (status === 'loading' || loading) return <div className="p-8">Loading...</div>
-  if (!session) return null
-  if (error) return <div className="p-8 text-red-600">{error}</div>
-  if (!venue) return <div className="p-8">Venue not found</div>
+  if (status === 'loading' || loading) return (<><SiteNav /><div className="p-8">Loading...</div></>)
+  if (!session) return <SiteNav />
+  if (error) return (<><SiteNav /><div className="p-8 text-red-600">{error}</div></>)
+  if (!venue) return (<><SiteNav /><div className="p-8">Venue not found</div></>)
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
+    <>
+      <SiteNav />
+      <div className="max-w-4xl mx-auto py-12 px-4">
       <div className="mb-8">
         <Link href="/dashboard/venue" className="text-amber-600 hover:text-amber-700">
           ← Back to Venues
@@ -126,6 +129,7 @@ export default function VenueDetailPage({ params }: { params: { id: string } }) 
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

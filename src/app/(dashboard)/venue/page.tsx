@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import SiteNav from '@/components/SiteNav'
 
 interface Venue {
   id: string
@@ -47,11 +48,13 @@ export default function VenueDashboard() {
     }
   }, [session])
 
-  if (status === 'loading' || loading) return <div className="p-8">Loading...</div>
-  if (!session) return null
+  if (status === 'loading' || loading) return (<><SiteNav /><div className="p-8">Loading...</div></>)
+  if (!session) return <SiteNav />
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4">
+    <>
+      <SiteNav />
+      <div className="max-w-6xl mx-auto py-12 px-4">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold">Your Venues</h1>
@@ -129,6 +132,7 @@ export default function VenueDashboard() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
