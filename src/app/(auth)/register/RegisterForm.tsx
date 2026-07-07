@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -11,22 +11,27 @@ const roles = [
   { id: "VENUE_OWNER", icon: "🏛️", title: "Venue Owner", desc: "List your space for events" },
 ]
 
+const VALID_ROLES = ["AUDIENCE", "ARTIST", "ORGANISER", "VENUE_OWNER"]
+
 export default function RegisterForm({ initialRole }: { initialRole?: string }) {
   const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [selectedRole, setSelectedRole] = useState("")
+
+  // If we arrived via a role-specific link (e.g. "Book Now" -> /register?role=audience,
+  // or "I'm an Artist" -> /register?role=artist), skip the "I am a..." picker entirely
+  // and drop the user straight into step 2 with that role pre-filled. initialRole comes
+  // from a server component reading searchParams once, so it's stable for the life of
+  // this client component - safe to use directly in the initial state (no flash of step 1).
+  const normalizedInitialRole = initialRole?.toUpperCase()
+  const hasValidInitialRole = !!normalizedInitialRole && VALID_ROLES.includes(normalizedInitialRole)
+
+  const [step, setStep] = useState(hasValidInitialRole ? 2 : 1)
+  const [selectedRole, setSelectedRole] = useState(hasValidInitialRole ? normalizedInitialRole! : "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string }>({})
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" })
 
-  useEffect(() => {
-    const normalizedRole = initialRole?.toUpperCase()
-    const validRoles = ["AUDIENCE", "ARTIST", "ORGANISER", "VENUE_OWNER"]
-    if (normalizedRole && validRoles.includes(normalizedRole)) {
-      setSelectedRole(normalizedRole)
-    }
-  }, [initialRole])
+  const selectedRoleInfo = roles.find((r) => r.id === selectedRole)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -129,9 +134,21 @@ export default function RegisterForm({ initialRole }: { initialRole?: string }) 
               <button onClick={() => setStep(1)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", color: "#C8441A", marginBottom: "20px", padding: 0 }}>
                 ← Back
               </button>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", marginBottom: "24px" }}>
-                Your details
-              </h2>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+                <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", margin: 0 }}>
+                  Your details
+                </h2>
+                {selectedRoleInfo && (
+                  <button
+                    onClick={() => setStep(1)}
+                    style={{ display: "flex", alignItems: "center", gap: "6px", background: "#FFF5F2", border: "1px solid rgba(200,68,26,0.25)", borderRadius: "99px", padding: "6px 12px", cursor: "pointer" }}
+                  >
+                    <span style={{ fontSize: "15px" }}>{selectedRoleInfo.icon}</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#C8441A" }}>{selectedRoleInfo.title}</span>
+                    <span style={{ fontSize: "12px", color: "#C8441A", opacity: 0.7 }}>Change</span>
+                  </button>
+                )}
+              </div>
 
               {error && (
                 <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
