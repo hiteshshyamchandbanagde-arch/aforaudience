@@ -1,7 +1,9 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
+import AuthPromptSheet from "@/components/AuthPromptSheet"
 
 const EVENT_DATA: Record<string, any> = {
   "1": {
@@ -28,8 +30,11 @@ const EVENT_DATA: Record<string, any> = {
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
   const event = EVENT_DATA[params.id] || EVENT_DATA["1"]
+  const { data: session, status } = useSession()
   const [selectedSeats, setSelectedSeats] = useState<number[]>([])
   const [activeTab, setActiveTab] = useState<"overview"|"lineup"|"reviews"|"venue">("overview")
+  const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const [bookingConfirmed, setBookingConfirmed] = useState(false)
 
   const toggleSeat = (seat: number) => {
     if (event.bookedSeats.includes(seat)) return
@@ -39,6 +44,23 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   }
 
   const totalAmount = selectedSeats.length * event.price
+
+  const handleBookClick = () => {
+    if (selectedSeats.length === 0) return
+    if (status !== "authenticated") {
+      setShowAuthSheet(true)
+      return
+    }
+    setBookingConfirmed(true)
+  }
+
+  const handleAuthSuccess = () => {
+    // Selected seats are preserved in state (no navigation happened), so the
+    // booking resumes exactly where the user left off — per the "user lands
+    // back exactly where they were, action already queued" rule.
+    setShowAuthSheet(false)
+    setBookingConfirmed(true)
+  }
 
   return (
     <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
@@ -232,9 +254,21 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
               </div>
             )}
 
-            <Link href="/login" style={{ display: "block", width: "100%", background: selectedSeats.length > 0 ? "#C8441A" : "rgba(14,12,10,0.1)", color: selectedSeats.length > 0 ? "white" : "rgba(14,12,10,0.3)", padding: "16px", borderRadius: "10px", fontSize: "15px", fontWeight: 700, textAlign: "center", textDecoration: "none", boxSizing: "border-box", marginBottom: "12px" }}>
-              {selectedSeats.length > 0 ? `Book ${selectedSeats.length} Seat${selectedSeats.length > 1 ? "s" : ""} — ₹${totalAmount}` : "Select seats to book"}
-            </Link>
+            {bookingConfirmed ? (
+              <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "10px", padding: "16px", textAlign: "center", marginBottom: "12px" }}>
+                <div style={{ fontSize: "20px", marginBottom: "4px" }}>✅</div>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: "#276749" }}>Booking confirmed</div>
+                <div style={{ fontSize: "12px", color: "#276749", opacity: 0.8 }}>Seats {selectedSeats.join(", ")} · ₹{totalAmount}</div>
+              </div>
+            ) : (
+              <button
+                onClick={handleBookClick}
+                disabled={selectedSeats.length === 0}
+                style={{ display: "block", width: "100%", background: selectedSeats.length > 0 ? "#C8441A" : "rgba(14,12,10,0.1)", color: selectedSeats.length > 0 ? "white" : "rgba(14,12,10,0.3)", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", cursor: selectedSeats.length > 0 ? "pointer" : "not-allowed", boxSizing: "border-box", marginBottom: "12px" }}
+              >
+                {selectedSeats.length > 0 ? `Book ${selectedSeats.length} Seat${selectedSeats.length > 1 ? "s" : ""} — ₹${totalAmount}` : "Select seats to book"}
+              </button>
+            )}
 
             <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
               🔒 Secure payment · Instant confirmation · PDF ticket
@@ -242,6 +276,15 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       </div>
+
+      <AuthPromptSheet
+        open={showAuthSheet}
+        onClose={() => setShowAuthSheet(false)}
+        title="Sign in to complete your booking"
+        subtitle={`${selectedSeats.length} seat${selectedSeats.length > 1 ? "s" : ""} · ₹${totalAmount}`}
+        onSuccess={handleAuthSuccess}
+        registerHref={`/register?next=/events/${event.id}`}
+      />
     </main>
   )
 }
