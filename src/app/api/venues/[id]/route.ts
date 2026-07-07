@@ -51,7 +51,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = await req.json()
-    const { name, address, city, capacity, acousticRating } = body
+    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish } = body
+
+    const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : undefined
+    const seatMapCapacity = sections
+      ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
+      : undefined
 
     const updatedVenue = await prisma.venue.update({
       where: { id },
@@ -59,8 +64,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(name && { name }),
         ...(address && { address }),
         ...(city && { city }),
-        ...(capacity && { capacity }),
-        ...(acousticRating !== undefined && { acousticRating })
+        ...(seatMapCapacity !== undefined ? { capacity: seatMapCapacity } : capacity ? { capacity } : {}),
+        ...(acousticRating !== undefined && { acousticRating }),
+        ...(facilities !== undefined && { facilities: Array.isArray(facilities) ? facilities : [] }),
+        ...(sections !== undefined && { seatMap: { sections } }),
+        ...(publish !== undefined && { isApproved: Boolean(publish) })
       }
     })
 

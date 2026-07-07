@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 
 interface Venue {
   id: string
@@ -14,6 +15,30 @@ interface Venue {
   capacity: number
   facilities: string[]
   acousticRating?: number
+  seatMap?: { sections?: SeatSection[] } | null
+  isApproved: boolean
+}
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px 12px',
+  borderRadius: '6px',
+  border: '1px solid rgba(14,12,10,0.15)',
+  background: '#fff',
+  fontSize: '14px',
+  color: '#0E0C0A',
+}
+
+const labelStyle = {
+  display: 'block',
+  fontSize: '13px',
+  fontWeight: 600,
+  marginBottom: '6px',
+  color: '#0E0C0A',
+}
+
+function makeId() {
+  return Math.random().toString(36).slice(2, 10)
 }
 
 export default function VenueEditPage({ params }: { params: { id: string } }) {
@@ -23,7 +48,9 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState<Partial<Venue>>({})
+  const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '' })
+  const [facilitiesInput, setFacilitiesInput] = useState('')
+  const [sections, setSections] = useState<SeatSection[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -39,9 +66,20 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
           if (res.status === 403) throw new Error('You do not have access to this venue')
           throw new Error('Venue not found')
         }
-        const data = await res.json()
+        const data: Venue = await res.json()
         setVenue(data)
-        setFormData(data)
+        setFormData({
+          name: data.name,
+          address: data.address,
+          city: data.city,
+          acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
+        })
+        setFacilitiesInput((data.facilities || []).join(', '))
+        setSections(
+          data.seatMap?.sections && data.seatMap.sections.length > 0
+            ? data.seatMap.sections
+            : [{ id: makeId(), name: '', seats: '', price: '' }]
+        )
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -54,24 +92,33 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
     }
   }, [session, params.id])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'capacity' ? parseInt(value) : value
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const save = async (publishOverride?: boolean) => {
     setSaving(true)
     setError('')
+
+    const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
+    if (validSections.length === 0) {
+      setError('Add at least one seating section with a name and seat count.')
+      setSaving(false)
+      return
+    }
 
     try {
       const res = await fetch(`/api/venues/${params.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
+          facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
+          seatMap: { sections: validSections },
+          ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
+        }),
       })
 
       if (!res.ok) {
@@ -86,114 +133,112 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div className="p-8">Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !venue) return (<><SiteNav /><div className="p-8 text-red-600">{error}</div></>)
-  if (!venue) return (<><SiteNav /><div className="p-8">Venue not found</div></>)
+  if (error && !venue) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   return (
     <>
       <SiteNav />
-      <div className="max-w-4xl mx-auto py-12 px-4">
-      <div className="mb-8">
-        <Link href={`/dashboard/venue/${params.id}`} className="text-amber-600 hover:text-amber-700">
-          ← Back to Venue
-        </Link>
-      </div>
+      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
+          <Link href={`/dashboard/venue/${params.id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+            ← Back to Venue
+          </Link>
 
-      <div className="bg-white border rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-8">Edit Venue</h1>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+            Edit Venue
+          </h1>
+          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+            Update your venue details and seating layout.
+          </p>
 
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-6">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">Venue Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Address</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-              />
+          {error && (
+            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
+              {error}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">City</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-              />
-            </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Capacity</label>
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-                min="1"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Acoustic Rating (0-5)</label>
-              <input
-                type="number"
-                name="acousticRating"
-                value={formData.acousticRating || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-lg"
-                min="0"
-                max="5"
-                step="0.5"
-              />
-            </div>
-          </div>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+                Basic Details
+              </h2>
 
-          <div className="flex gap-4 pt-6">
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-            <Link
-              href={`/dashboard/venue/${params.id}`}
-              className="px-6 py-2 border rounded-lg hover:bg-gray-50 transition"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
-      </div>
-      </div>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Venue Name *</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} required />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+                <div>
+                  <label style={labelStyle}>Address *</label>
+                  <input type="text" name="address" value={formData.address} onChange={handleChange} style={inputStyle} required />
+                </div>
+                <div>
+                  <label style={labelStyle}>City *</label>
+                  <input type="text" name="city" value={formData.city} onChange={handleChange} style={inputStyle} required />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+                <div>
+                  <label style={labelStyle}>Facilities <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
+                  <input type="text" value={facilitiesInput} onChange={(e) => setFacilitiesInput(e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
+                  <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleChange} min="0" max="5" step="0.5" style={inputStyle} />
+                </div>
+              </div>
+            </section>
+
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+                Seating & Pricing
+              </h2>
+              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                Add, edit, or remove sections freely — capacity updates automatically.
+              </p>
+              <SeatSectionEditor sections={sections} onChange={setSections} />
+            </section>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => save(true)}
+                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+              >
+                {saving ? 'Saving...' : venue.isApproved ? 'Save Changes' : 'Save & Publish'}
+              </button>
+              {venue.isApproved ? (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => save(false)}
+                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                >
+                  Save & Unpublish
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => save(undefined)}
+                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                >
+                  Save as Draft
+                </button>
+              )}
+              <Link href={`/dashboard/venue/${params.id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
+                Cancel
+              </Link>
+            </div>
+          </form>
+        </div>
+      </main>
     </>
   )
 }

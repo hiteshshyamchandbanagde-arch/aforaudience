@@ -37,11 +37,23 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { name, address, city, capacity, acousticRating } = body
+    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish } = body
 
-    if (!name || !address || !city || !capacity) {
+    if (!name || !address || !city) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // If seating sections are provided, total capacity is derived from them.
+    const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : []
+    const seatMapCapacity = sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
+    const finalCapacity = sections.length > 0 ? seatMapCapacity : parseInt(capacity)
+
+    if (!finalCapacity || finalCapacity < 1) {
+      return NextResponse.json(
+        { error: 'Add at least one seating section, or provide a seating capacity' },
         { status: 400 }
       )
     }
@@ -51,12 +63,15 @@ export async function POST(req: Request) {
         name,
         address,
         city,
-        capacity: parseInt(capacity),
+        capacity: finalCapacity,
         acousticRating: acousticRating ? parseFloat(acousticRating) : null,
         ownerId: venueOwner.id,
         photos: [],
-        facilities: [],
-        isApproved: false
+        facilities: Array.isArray(facilities) ? facilities : [],
+        seatMap: sections.length > 0 ? { sections } : undefined,
+        // No admin-review pipeline exists yet, so venue owners publish their own
+        // listings directly. Gate this behind real moderation once that exists.
+        isApproved: Boolean(publish)
       }
     })
 
