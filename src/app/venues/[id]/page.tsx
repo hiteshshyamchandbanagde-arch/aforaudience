@@ -2,6 +2,9 @@ import React from 'react'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
 
+// See src/app/venues/page.tsx for why this is needed.
+export const dynamic = 'force-dynamic'
+
 interface SeatSection {
   id: string
   name: string

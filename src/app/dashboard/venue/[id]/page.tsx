@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 
@@ -26,7 +26,8 @@ interface Venue {
   createdAt: string
 }
 
-export default function VenueDetailPage({ params }: { params: { id: string } }) {
+export default function VenueDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
   const [venue, setVenue] = useState<Venue | null>(null)
@@ -42,7 +43,7 @@ export default function VenueDetailPage({ params }: { params: { id: string } }) 
 
   const fetchVenue = async () => {
     try {
-      const res = await fetch(`/api/venues/${params.id}/owner`)
+      const res = await fetch(`/api/venues/${id}/owner`)
       if (!res.ok) {
         if (res.status === 403) throw new Error('You do not have access to this venue')
         throw new Error('Venue not found')
@@ -61,7 +62,7 @@ export default function VenueDetailPage({ params }: { params: { id: string } }) 
       fetchVenue()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, params.id])
+  }, [session, id])
 
   const togglePublish = async () => {
     if (!venue) return

@@ -3,6 +3,12 @@ import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
 
+// Without this, Next.js has no dynamic API (cookies/headers/searchParams) to
+// signal that this page needs per-request data, so it can statically render
+// this page at build time and keep serving that frozen snapshot - meaning
+// newly published venues would never show up until the next deploy.
+export const dynamic = 'force-dynamic'
+
 async function getVenues() {
   try {
     const venues = await prisma.venue.findMany({

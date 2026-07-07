@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
@@ -41,7 +41,8 @@ function makeId() {
   return Math.random().toString(36).slice(2, 10)
 }
 
-export default function VenueEditPage({ params }: { params: { id: string } }) {
+export default function VenueEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
   const [venue, setVenue] = useState<Venue | null>(null)
@@ -61,7 +62,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchVenue = async () => {
       try {
-        const res = await fetch(`/api/venues/${params.id}/owner`)
+        const res = await fetch(`/api/venues/${id}/owner`)
         if (!res.ok) {
           if (res.status === 403) throw new Error('You do not have access to this venue')
           throw new Error('Venue not found')
@@ -90,7 +91,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
     if (session?.user) {
       fetchVenue()
     }
-  }, [session, params.id])
+  }, [session, id])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -109,7 +110,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
     }
 
     try {
-      const res = await fetch(`/api/venues/${params.id}`, {
+      const res = await fetch(`/api/venues/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -125,7 +126,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
         throw new Error('Failed to update venue')
       }
 
-      router.push(`/dashboard/venue/${params.id}`)
+      router.push(`/dashboard/venue/${id}`)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -143,7 +144,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={`/dashboard/venue/${params.id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Venue
           </Link>
 
@@ -232,7 +233,7 @@ export default function VenueEditPage({ params }: { params: { id: string } }) {
                   Save as Draft
                 </button>
               )}
-              <Link href={`/dashboard/venue/${params.id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
+              <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel
               </Link>
             </div>
