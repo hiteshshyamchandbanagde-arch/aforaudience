@@ -1,0 +1,115 @@
+"use client"
+
+import { useState, Suspense } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+
+function ResetPasswordForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const token = searchParams.get("token") || ""
+  const [form, setForm] = useState({ password: "", confirm: "" })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSubmit = async () => {
+    if (!token) {
+      setError("This reset link is invalid or has expired.")
+      return
+    }
+    if (form.password !== form.confirm) {
+      setError("Passwords do not match!")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password: form.password }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong")
+        setLoading(false)
+        return
+      }
+
+      router.push("/login?reset=true")
+    } catch {
+      setError("Something went wrong. Please try again.")
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-[440px]">
+      <div className="text-center mb-8">
+        <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
+          <span className="text-[#C8441A]">A</span>forAudience
+        </Link>
+        <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
+          Choose a new password
+        </p>
+      </div>
+
+      <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+        {!token ? (
+          <p style={{ fontSize: "14px", color: "#C8441A" }}>
+            This reset link is invalid or has expired. <Link href="/forgot-password" style={{ color: "#C8441A", fontWeight: 500 }}>Request a new one</Link>.
+          </p>
+        ) : (
+          <>
+            {error && (
+              <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+                {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+              {[
+                { label: "New password", name: "password", placeholder: "Min 8 characters" },
+                { label: "Confirm new password", name: "confirm", placeholder: "Repeat password" },
+              ].map((field) => (
+                <div key={field.name}>
+                  <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type="password"
+                    placeholder={field.placeholder}
+                    value={form[field.name as keyof typeof form]}
+                    onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+            >
+              {loading ? "Updating..." : "Update password"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <main className="min-h-screen bg-[#F7F3EE] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+      <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </main>
+  )
+}

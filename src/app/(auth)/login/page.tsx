@@ -8,6 +8,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const registered = searchParams.get("registered")
+  const justReset = searchParams.get("reset")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [form, setForm] = useState({ email: "", password: "" })
@@ -25,7 +26,13 @@ function LoginForm() {
         redirect: false,
       })
       if (result?.error) {
-        setError(result.error === "CredentialsSignin" ? "Invalid email or password" : "Failed to sign in. Please check your credentials.")
+        if (result.error === "LOCKED") {
+          setError("Too many attempts. Try again in 15 minutes.")
+        } else if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password")
+        } else {
+          setError("Failed to sign in. Please check your credentials.")
+        }
         setLoading(false); return
       }
       router.push("/")
@@ -54,6 +61,12 @@ function LoginForm() {
         {registered && (
           <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
             ✅ Account created! Please sign in.
+          </div>
+        )}
+
+        {justReset && (
+          <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
+            ✅ Password updated. Please sign in.
           </div>
         )}
 
@@ -94,7 +107,7 @@ function LoginForm() {
         </button>
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>
-          <Link href="#" style={{ fontSize: "13px", color: "#C8441A", textDecoration: "none" }}>
+          <Link href="/forgot-password" style={{ fontSize: "13px", color: "#C8441A", textDecoration: "none" }}>
             Forgot password?
           </Link>
         </div>
