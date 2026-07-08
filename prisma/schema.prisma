@@ -56,11 +56,31 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  artist      Artist?
-  organiser   Organiser?
-  venueOwner  VenueOwner?
-  bookings    Booking[]
-  reviews     Review[]
+  // B6 — rate limiting / account lockout
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  // B5 — bumped on every successful password reset so existing JWT
+  // sessions (which carry the tokenVersion at time of issue) stop
+  // validating in the NextAuth session callback.
+  tokenVersion Int @default(0)
+
+  artist              Artist?
+  organiser           Organiser?
+  venueOwner          VenueOwner?
+  bookings            Booking[]
+  reviews             Review[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model Artist {
