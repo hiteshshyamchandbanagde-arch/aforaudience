@@ -1,7 +1,8 @@
 "use client"
 import { useState } from "react"
-import Link from "next/link"
+import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
+import AuthPromptSheet from "@/components/AuthPromptSheet"
 
 interface Performer {
   id: string
@@ -44,7 +45,26 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 }
 
 export default function EventDetailPage({ event }: { event: EventData | null }) {
+  const { status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
+  const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const [notifyConfirmed, setNotifyConfirmed] = useState(false)
+
+  const handleNotifyClick = () => {
+    if (status !== "authenticated") {
+      setShowAuthSheet(true)
+      return
+    }
+    setNotifyConfirmed(true)
+  }
+
+  const handleAuthSuccess = () => {
+    // No navigation happens here - the user stays on this exact page and
+    // the queued action (getting on the notify list) completes in place,
+    // per the "resumes exactly where they were" rule.
+    setShowAuthSheet(false)
+    setNotifyConfirmed(true)
+  }
 
   if (!event) {
     return (
@@ -190,12 +210,20 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
               {event.availableSeats} of {event.totalSeats} seats available
             </div>
 
-            <Link
-              href="/login"
-              style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", fontSize: "15px", fontWeight: 700, textAlign: "center", textDecoration: "none", boxSizing: "border-box", marginBottom: "12px" }}
-            >
-              Log in to book
-            </Link>
+            {notifyConfirmed ? (
+              <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "10px", padding: "14px", textAlign: "center", marginBottom: "12px" }}>
+                <div style={{ fontSize: "18px", marginBottom: "2px" }}>✅</div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#276749" }}>You're on the list</div>
+                <div style={{ fontSize: "12px", color: "#276749", opacity: 0.8 }}>We'll notify you the moment booking opens.</div>
+              </div>
+            ) : (
+              <button
+                onClick={handleNotifyClick}
+                style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", cursor: "pointer", boxSizing: "border-box", marginBottom: "12px" }}
+              >
+                Log in to book
+              </button>
+            )}
 
             <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
               Online booking is launching soon — log in to be notified.
@@ -203,6 +231,14 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
           </div>
         </div>
       </div>
+
+      <AuthPromptSheet
+        open={showAuthSheet}
+        onClose={() => setShowAuthSheet(false)}
+        title="Sign in to get notified"
+        subtitle={`We'll email you the moment ${event.title} opens for booking`}
+        onSuccess={handleAuthSuccess}
+      />
     </main>
   )
 }
