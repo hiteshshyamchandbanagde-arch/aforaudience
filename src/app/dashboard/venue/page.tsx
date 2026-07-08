@@ -36,6 +36,7 @@ export default function VenueDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [venues, setVenues] = useState<Venue[]>([])
+  const [pendingBookings, setPendingBookings] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -59,8 +60,21 @@ export default function VenueDashboard() {
       }
     }
 
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch('/api/venues/my-bookings')
+        if (res.ok) {
+          const data = await res.json()
+          setPendingBookings(data.filter((b: any) => b.status === 'PENDING').length)
+        }
+      } catch {
+        // Non-critical for this view; the dedicated bookings page will surface errors.
+      }
+    }
+
     if (session?.user) {
       fetchVenues()
+      fetchBookings()
     }
   }, [session])
 
@@ -79,12 +93,25 @@ export default function VenueDashboard() {
               </h1>
               <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
             </div>
-            <Link
-              href="/dashboard/venue/create"
-              style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-            >
-              + Register Venue
-            </Link>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <Link
+                href="/dashboard/venue/bookings"
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                Booking Requests
+                {pendingBookings > 0 && (
+                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#C8441A', color: '#F7F3EE', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
+                    {pendingBookings}
+                  </span>
+                )}
+              </Link>
+              <Link
+                href="/dashboard/venue/create"
+                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                + Register Venue
+              </Link>
+            </div>
           </div>
 
           {error && (
