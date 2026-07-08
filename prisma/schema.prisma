@@ -49,7 +49,7 @@ model User {
   email       String   @unique
   phone       String?
   password    String
-  role        Role
+  role        Role     @default(AUDIENCE)
   avatar      String?
   isVerified  Boolean  @default(false)
   isApproved  Boolean  @default(false)
