@@ -2,19 +2,16 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
+// Browse-first model: registration never accepts a role. Every account is
+// created as AUDIENCE. Artist / Organiser / Venue Owner are opt-in upgrades
+// applied for later from Profile, each going through their own approval flow.
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, phone, password, role } = await req.json()
+    const { name, email, phone, password } = await req.json()
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : email
-    const normalizedRole = typeof role === "string" ? role.toUpperCase() : role
-    const validRoles = ["AUDIENCE", "ARTIST", "ORGANISER", "VENUE_OWNER"]
 
-    if (!name || !normalizedEmail || !password || !normalizedRole) {
+    if (!name || !normalizedEmail || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
-    }
-
-    if (!validRoles.includes(normalizedRole)) {
-      return NextResponse.json({ error: "Invalid role selected" }, { status: 400 })
     }
 
     if (password.length < 8) {
@@ -36,36 +33,17 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         name: name.trim(),
         email: normalizedEmail,
         phone: phone?.trim() || null,
         password: hashedPassword,
-        role: normalizedRole,
+        role: "AUDIENCE",
         isVerified: false,
-        isApproved: normalizedRole === "AUDIENCE",
+        isApproved: true,
       }
     })
-
-    if (normalizedRole === "ARTIST") {
-      await prisma.artist.create({
-        data: {
-          userId: user.id,
-          bio: "",
-          genre: [],
-          styleTag: [],
-          videoReel: [],
-          socialLinks: {},
-        }
-      })
-    }
-    if (normalizedRole === "ORGANISER") {
-      await prisma.organiser.create({ data: { userId: user.id, orgName: name } })
-    }
-    if (normalizedRole === "VENUE_OWNER") {
-      await prisma.venueOwner.create({ data: { userId: user.id } })
-    }
 
     return NextResponse.json({ message: "Account created successfully!" }, { status: 201 })
 
