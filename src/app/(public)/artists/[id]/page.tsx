@@ -9,7 +9,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     include: {
       user: { select: { name: true, avatar: true } },
       performances: { include: { event: { include: { venue: true } } } },
-      _count: { select: { performances: true } },
+      _count: { select: { performances: true, followers: true } },
     },
   })
 
