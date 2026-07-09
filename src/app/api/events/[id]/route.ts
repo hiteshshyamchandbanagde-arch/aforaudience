@@ -51,6 +51,26 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish,
     } = body
 
+    // §4.5 suggestion #1: same rule as event creation - an event with a
+    // venue can't go fully live until that venue's booking is actually
+    // confirmed. Unlike creation, this event may already have a CONFIRMED
+    // booking by the time it's edited (the Organiser saved as draft first,
+    // the Venue Owner confirmed in the meantime, now they're publishing) -
+    // so this checks the real current booking state rather than assuming.
+    let resolvedStatus: string | undefined
+    if (publish !== undefined) {
+      if (!publish) {
+        resolvedStatus = 'DRAFT'
+      } else if (!event.venueId) {
+        resolvedStatus = 'APPROVED'
+      } else {
+        const confirmedBooking = await prisma.venueBooking.findFirst({
+          where: { eventId: event.id, venueId: event.venueId, status: 'CONFIRMED' },
+        })
+        resolvedStatus = confirmedBooking ? 'APPROVED' : 'PENDING_APPROVAL'
+      }
+    }
+
     const updated = await prisma.event.update({
       where: { id },
       data: {
@@ -68,7 +88,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(dresscode !== undefined && { dresscode }),
         ...(vibe !== undefined && { vibe }),
         ...(surpriseAct !== undefined && { surpriseAct: Boolean(surpriseAct) }),
-        ...(publish !== undefined && { status: publish ? 'APPROVED' : 'DRAFT' }),
+        ...(resolvedStatus && { status: resolvedStatus }),
       },
     })
 
