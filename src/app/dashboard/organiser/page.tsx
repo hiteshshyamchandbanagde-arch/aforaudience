@@ -33,6 +33,7 @@ export default function OrganiserDashboard() {
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null } | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -41,12 +42,18 @@ export default function OrganiserDashboard() {
   }, [status, router])
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchStatusAndEvents = async () => {
       try {
-        const res = await fetch('/api/events/my-events')
-        if (!res.ok) throw new Error('Failed to fetch events')
-        const data = await res.json()
-        setEvents(data)
+        const statusRes = await fetch('/api/organisers/status')
+        if (!statusRes.ok) throw new Error('Failed to load account status')
+        const statusData = await statusRes.json()
+        setOrgStatus(statusData)
+
+        if (statusData.isOrganiser && statusData.isApproved) {
+          const res = await fetch('/api/events/my-events')
+          if (!res.ok) throw new Error('Failed to fetch events')
+          setEvents(await res.json())
+        }
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -55,12 +62,46 @@ export default function OrganiserDashboard() {
     }
 
     if (session?.user) {
-      fetchEvents()
+      fetchStatusAndEvents()
     }
   }, [session])
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
+
+  if (orgStatus && !orgStatus.isOrganiser) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
+            <p style={{ color: '#0E0C0A', opacity: 0.6, marginBottom: '24px' }}>Apply to become an Organiser from your profile to start creating events.</p>
+            <Link href="/" style={{ color: '#C8441A', fontWeight: 600, textDecoration: 'none' }}>Back to Home</Link>
+          </div>
+        </main>
+      </>
+    )
+  }
+
+  if (orgStatus && orgStatus.isOrganiser && !orgStatus.isApproved) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
+              {orgStatus.orgName ? `${orgStatus.orgName} is` : 'Your Organiser account is'} pending approval
+            </h1>
+            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>
+              Our team reviews new Organiser applications before you can create and publish events. We'll notify you as soon as you're approved.
+            </p>
+          </div>
+        </main>
+      </>
+    )
+  }
 
   return (
     <>

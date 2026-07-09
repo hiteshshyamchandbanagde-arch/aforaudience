@@ -35,6 +35,9 @@ export async function POST(req: Request) {
     if (!venueOwner) {
       return NextResponse.json({ error: 'Venue owner profile not found' }, { status: 404 })
     }
+    if (!venueOwner.isApproved) {
+      return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
+    }
 
     const body = await req.json()
     const { name, address, city, capacity, acousticRating, facilities, seatMap, publish } = body
