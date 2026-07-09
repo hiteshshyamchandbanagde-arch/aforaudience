@@ -5,7 +5,10 @@ import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const venues = await prisma.venue.findMany({ where: { isApproved: true } })
+    const venues = await prisma.venue.findMany({
+      where: { isApproved: true },
+      include: { dayRates: true },
+    })
     return NextResponse.json(venues)
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch venues' }, { status: 500 })

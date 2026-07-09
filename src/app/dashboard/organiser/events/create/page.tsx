@@ -13,12 +13,23 @@ interface SeatSection {
   price: number
 }
 
+interface VenueDayRate {
+  dayOfWeek: string
+  hourlyRate: number | null
+  dailyRate: number | null
+}
+
 interface VenueOption {
   id: string
   name: string
   city: string
   capacity: number
   seatMap?: { sections?: SeatSection[] } | null
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
+  minDurationHours?: number | null
+  dayRates?: VenueDayRate[]
 }
 
 const inputStyle = {
@@ -72,6 +83,45 @@ export default function CreateEventPage() {
   const selectedVenue = venues.find((v) => v.id === venueId)
   const venueSections = selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
   const usingTierPricing = venueSections.length > 0
+
+  // §4.5 - suggested rental amount, computed from the venue's own published
+  // rate rather than asking the Organiser to guess a number blind. Only
+  // possible for Hourly/Daily venues, which have an actual rate to compute
+  // from - Flexible venues don't publish one, that's the whole point.
+  const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
+  const eventDayOfWeek = formData.date ? DAY_NAMES[new Date(formData.date + 'T00:00:00').getDay()] : null
+  const dayOverride = selectedVenue?.dayRates?.find((d) => d.dayOfWeek === eventDayOfWeek)
+
+  const durationHours = (() => {
+    if (!formData.startTime || !formData.endTime) return null
+    const [sh, sm] = formData.startTime.split(':').map(Number)
+    const [eh, em] = formData.endTime.split(':').map(Number)
+    let mins = (eh * 60 + em) - (sh * 60 + sm)
+    if (mins <= 0) mins += 24 * 60 // crosses midnight
+    return mins / 60
+  })()
+
+  let suggestedAmount: number | null = null
+  let suggestedAmountNote = ''
+  if (selectedVenue?.rateType === 'HOURLY') {
+    const rate = dayOverride?.hourlyRate || selectedVenue.hourlyRate
+    if (rate && durationHours) {
+      const billedHours = Math.max(durationHours, selectedVenue.minDurationHours || 0)
+      suggestedAmount = Math.round(rate * billedHours)
+      suggestedAmountNote = `₹${rate}/hr × ${billedHours} hr${selectedVenue.minDurationHours && billedHours > durationHours ? ` (min ${selectedVenue.minDurationHours}hr)` : ''}${dayOverride?.hourlyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()} rate` : ''}`
+    }
+  } else if (selectedVenue?.rateType === 'DAILY') {
+    const rate = dayOverride?.dailyRate || selectedVenue.dailyRate
+    if (rate) {
+      suggestedAmount = rate
+      suggestedAmountNote = `Day rate${dayOverride?.dailyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()}` : ''}`
+    }
+  }
+
+  useEffect(() => {
+    if (suggestedAmount !== null) setBookingAmount(String(suggestedAmount))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestedAmount])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -280,8 +330,31 @@ export default function CreateEventPage() {
 
               {venueId && (
                 <div>
-                  <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— what you'll pay the venue</span></label>
-                  <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
+                  {selectedVenue?.rateType === 'FLEXIBLE' || !selectedVenue?.rateType ? (
+                    <>
+                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '10px' }}>
+                        {selectedVenue?.rateType === 'FLEXIBLE'
+                          ? "This venue uses flexible, negotiated pricing — no fixed rate published. Propose an amount below; the venue owner can confirm or come back with a different number."
+                          : "This venue hasn't set a rental rate yet — propose an amount to offer."}
+                      </p>
+                      <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— what you'll pay the venue</span></label>
+                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ background: '#F7F3EE', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '2px' }}>
+                          {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
+                          {suggestedAmountNote && ` · ${suggestedAmountNote}`}
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: 700, color: '#0E0C0A' }}>
+                          {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
+                        </div>
+                      </div>
+                      <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span></label>
+                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
+                    </>
+                  )}
                 </div>
               )}
             </section>
