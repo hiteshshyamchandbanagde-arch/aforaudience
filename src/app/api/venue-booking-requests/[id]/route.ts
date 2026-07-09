@@ -50,6 +50,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const lastOffer = request.offers[request.offers.length - 1]
     if (lastOffer && Date.now() - new Date(lastOffer.createdAt).getTime() > EXPIRY_HOURS * 60 * 60 * 1000) {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'EXPIRED' } })
+      if (request.eventId) {
+        await prisma.event.updateMany({
+          where: { id: request.eventId, status: 'PENDING_APPROVAL' },
+          data: { status: 'DRAFT' },
+        })
+      }
       return NextResponse.json({ error: 'This request expired after 48 hours with no response' }, { status: 400 })
     }
 
@@ -57,6 +63,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     if (action === 'decline') {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'DECLINED' } })
+      // Same fix as the direct-booking decline path: don't leave a
+      // PENDING_APPROVAL event stuck forever with no venue coming through.
+      if (request.eventId) {
+        await prisma.event.updateMany({
+          where: { id: request.eventId, status: 'PENDING_APPROVAL' },
+          data: { status: 'DRAFT' },
+        })
+      }
       return NextResponse.json({ message: 'Declined' })
     }
 

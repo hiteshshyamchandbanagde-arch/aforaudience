@@ -47,6 +47,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       })
     }
 
+    // Real gap found through testing: if the Venue Owner rejects instead of
+    // confirming, the event was previously left stuck at PENDING_APPROVAL
+    // forever - nothing ever moved it, and it was never publicly visible
+    // (only APPROVED events show), so it just silently died with no signal
+    // to the Organiser. Revert it to DRAFT so it's editable again (pick a
+    // different venue, or drop the venue and publish without one) rather
+    // than stuck in limbo.
+    if (status === 'CANCELLED' && booking.eventId) {
+      await prisma.event.updateMany({
+        where: { id: booking.eventId, status: 'PENDING_APPROVAL' },
+        data: { status: 'DRAFT' },
+      })
+    }
+
     return NextResponse.json(updated)
   } catch (err) {
     console.error('Error updating venue booking:', err)
