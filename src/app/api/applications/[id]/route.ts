@@ -29,9 +29,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
-    const { status } = await req.json()
+    const { status, compensationType, feeAmount, buyInAmount } = await req.json()
     if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+
+    if (status === 'APPROVED' && application.event.maxPerformers !== null) {
+      const filledSlots = await prisma.performance.count({ where: { eventId: application.eventId } })
+      if (filledSlots >= application.event.maxPerformers) {
+        return NextResponse.json({ error: 'This event\'s lineup is already full' }, { status: 409 })
+      }
     }
 
     const updated = await prisma.application.update({ where: { id }, data: { status } })
@@ -43,12 +50,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       })
       if (!existingPerformance) {
         const lineupCount = await prisma.performance.count({ where: { eventId: application.eventId } })
+        const validCompType = ['PAID', 'FREE', 'BUY_IN'].includes(compensationType) ? compensationType : 'FREE'
         await prisma.performance.create({
           data: {
             eventId: application.eventId,
             artistId: application.artistId,
             slot: lineupCount + 1,
             duration: 10,
+            compensationType: validCompType,
+            feeAmount: validCompType === 'PAID' && feeAmount ? parseFloat(feeAmount) : null,
+            // §4.5 suggestion #6 - Buy-in charges at approval, which is
+            // exactly this moment, not at application time. The actual
+            // charge/collection isn't wired up yet (needs a payment
+            // integration, EPIC C) - this records the agreed amount so
+            // that's ready to plug in without a schema change later.
+            buyInAmount: validCompType === 'BUY_IN' && buyInAmount ? parseFloat(buyInAmount) : null,
           },
         })
       }

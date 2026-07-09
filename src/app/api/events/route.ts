@@ -42,6 +42,7 @@ export async function POST(req: Request) {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct,
       venueId, bookingAmount, publish, ticketTiers,
+      maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
     } = body
 
     if (!title || !description || !type || !date || !startTime || !endTime || !totalSeats) {
@@ -80,6 +81,11 @@ export async function POST(req: Request) {
         dresscode: dresscode || null,
         vibe: vibe || null,
         surpriseAct: Boolean(surpriseAct),
+        maxPerformers: maxPerformers ? parseInt(maxPerformers) : null,
+        applicationApprovalMode: applicationApprovalMode === 'AUTO' ? 'AUTO' : 'MANUAL',
+        maxSeatsPerBooking: maxSeatsPerBooking && Number(maxSeatsPerBooking) >= 1 && Number(maxSeatsPerBooking) <= 10
+          ? parseInt(maxSeatsPerBooking)
+          : 4,
         // §4.5 suggestion #1, previously unenforced: an event with a venue
         // attached can't go fully live (APPROVED) until that venue's
         // booking is actually confirmed by the Venue Owner - the booking
@@ -133,6 +139,7 @@ export async function POST(req: Request) {
           })
         }
       } else {
+        const platformSettings = await prisma.platformSettings.findFirst()
         await prisma.venueBooking.create({
           data: {
             venueId,
@@ -142,6 +149,7 @@ export async function POST(req: Request) {
             toDate: new Date(date),
             status: 'PENDING',
             amount: bookingAmount ? parseFloat(bookingAmount) : 0,
+            platformFeeAmount: platformSettings?.flatVenueBookingFee ?? 199,
           },
         })
       }

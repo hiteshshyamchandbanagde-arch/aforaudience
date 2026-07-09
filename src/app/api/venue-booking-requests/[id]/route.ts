@@ -65,6 +65,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: 'No offer to accept yet' }, { status: 400 })
       }
 
+      const platformSettings = await prisma.platformSettings.findFirst()
+
       await prisma.$transaction([
         prisma.venueBookingRequest.update({ where: { id }, data: { status: 'ACCEPTED' } }),
         prisma.venueBooking.create({
@@ -78,6 +80,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             amount: lastOffer.amount,
             agreedRateType: 'FLEXIBLE',
             durationHours: request.durationHours,
+            platformFeeAmount: platformSettings?.flatVenueBookingFee ?? 199,
           },
         }),
         // Same auto-promote as the direct-booking confirm path: an event
