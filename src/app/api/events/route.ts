@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     const {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct,
-      venueId, bookingAmount, publish,
+      venueId, bookingAmount, publish, ticketTiers,
     } = body
 
     if (!title || !description || !type || !date || !startTime || !endTime || !totalSeats) {
@@ -52,6 +52,13 @@ export async function POST(req: Request) {
     if (!seats || seats < 1) {
       return NextResponse.json({ error: 'Total seats must be at least 1' }, { status: 400 })
     }
+
+    // §4.5 - per-section pricing, when provided. Validated here rather than
+    // trusting the client: every tier needs a real section name and a
+    // non-negative price/seat count.
+    const validTiers = Array.isArray(ticketTiers)
+      ? ticketTiers.filter((t: any) => t?.sectionName && Number(t.price) >= 0 && Number(t.totalSeats) > 0)
+      : []
 
     const event = await prisma.event.create({
       data: {
@@ -64,7 +71,10 @@ export async function POST(req: Request) {
         startTime,
         endTime,
         isFree: Boolean(isFree),
-        ticketPrice: isFree ? null : ticketPrice ? parseFloat(ticketPrice) : null,
+        // Kept for backward compat with anything still reading the flat
+        // price directly; null when per-section tiers are in play, since
+        // there's no single price to show there any more.
+        ticketPrice: isFree || validTiers.length > 0 ? null : ticketPrice ? parseFloat(ticketPrice) : null,
         totalSeats: seats,
         availableSeats: seats,
         dresscode: dresscode || null,
@@ -74,6 +84,15 @@ export async function POST(req: Request) {
         // listings directly, same bridge used for venues. Gate this behind
         // real moderation once that exists.
         status: publish ? 'APPROVED' : 'DRAFT',
+        ticketTiers: validTiers.length > 0
+          ? {
+              create: validTiers.map((t: any) => ({
+                sectionName: String(t.sectionName),
+                price: parseFloat(t.price),
+                totalSeats: parseInt(t.totalSeats),
+              })),
+            }
+          : undefined,
       },
     })
 
