@@ -40,11 +40,21 @@ export default function VenueDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const [venueStatus, setVenueStatus] = useState<{ isVenueOwner: boolean; hasProfile: boolean; isApproved: boolean } | null>(null)
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
     }
   }, [status, router])
+
+  useEffect(() => {
+    const fetchVenueOwnerStatus = async () => {
+      const res = await fetch('/api/venue-owners/status')
+      if (res.ok) setVenueStatus(await res.json())
+    }
+    if (session?.user) fetchVenueOwnerStatus()
+  }, [session])
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -80,6 +90,38 @@ export default function VenueDashboard() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
+
+  if (venueStatus && !venueStatus.isVenueOwner) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
+            <p style={{ color: '#0E0C0A', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
+            <Link href="/" style={{ color: '#C8441A', fontWeight: 600, textDecoration: 'none' }}>Back to Home</Link>
+          </div>
+        </main>
+      </>
+    )
+  }
+
+  if (venueStatus && venueStatus.isVenueOwner && !venueStatus.isApproved) {
+    return (
+      <>
+        <SiteNav />
+        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>
+            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>
+              Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
+            </p>
+          </div>
+        </main>
+      </>
+    )
+  }
 
   return (
     <>

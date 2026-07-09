@@ -33,6 +33,9 @@ export async function POST(req: Request) {
     if (!organiser) {
       return NextResponse.json({ error: 'Organiser profile not found' }, { status: 404 })
     }
+    if (!organiser.isApproved) {
+      return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
+    }
 
     const body = await req.json()
     const {
