@@ -75,6 +75,32 @@ enum OfferProposedBy {
   VENUE_OWNER
 }
 
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+// Optional per-day override on top of Venue.hourlyRate/dailyRate - a row
+// here only exists for days the owner explicitly priced differently (e.g.
+// a weekend premium). A day with no row here just uses the venue's base
+// rate. Doesn't apply to FLEXIBLE-rate venues, since those are negotiated
+// per request anyway via VenueBookingRequest/VenueBookingOffer.
+model VenueDayRate {
+  id         String    @id @default(cuid())
+  venueId    String
+  venue      Venue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  dayOfWeek  DayOfWeek
+  hourlyRate Float?
+  dailyRate  Float?
+
+  @@unique([venueId, dayOfWeek])
+}
+
 
 model User {
   id          String   @id @default(cuid())
@@ -185,6 +211,7 @@ model Venue {
   bookings      VenueBooking[]
   events        Event[]
   bookingRequests VenueBookingRequest[]
+  dayRates      VenueDayRate[]
 }
 
 model TicketTier {
