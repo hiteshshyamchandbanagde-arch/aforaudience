@@ -43,6 +43,39 @@ enum ApplicationStatus {
   REJECTED
 }
 
+// --- §4.5 Venue & Event Economics Model additions (additive only - no
+// existing fields removed or renamed, so nothing currently live breaks) ---
+
+enum RateType {
+  HOURLY
+  DAILY
+  FLEXIBLE
+}
+
+enum CompensationType {
+  PAID
+  FREE
+  BUY_IN
+}
+
+enum ApprovalMode {
+  MANUAL
+  AUTO
+}
+
+enum VenueBookingRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum OfferProposedBy {
+  ORGANISER
+  VENUE_OWNER
+}
+
+
 model User {
   id          String   @id @default(cuid())
   name        String
@@ -110,6 +143,7 @@ model Organiser {
 
   events        Event[]
   venueBookings VenueBooking[]
+  bookingRequests VenueBookingRequest[]
 }
 
 model VenueOwner {
@@ -139,10 +173,61 @@ model Venue {
   isApproved    Boolean  @default(false)
   createdAt     DateTime @default(now())
 
+  // §4.5 - rental rate type. Nullable/optional so existing venues aren't
+  // forced into a value; treat missing rateType as "not yet configured"
+  // in the UI rather than defaulting silently to one option.
+  rateType         RateType?
+  hourlyRate       Float?
+  dailyRate        Float?
+  minDurationHours Int?
+
   availability  VenueAvailability[]
   bookings      VenueBooking[]
   events        Event[]
+  bookingRequests VenueBookingRequest[]
 }
+
+model TicketTier {
+  id          String @id @default(cuid())
+  eventId     String
+  event       Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sectionName String
+  price       Float
+  totalSeats  Int
+}
+
+model VenueBookingRequest {
+  id             String                    @id @default(cuid())
+  organiserId    String
+  organiser      Organiser                 @relation(fields: [organiserId], references: [id])
+  venueId        String
+  venue          Venue                     @relation(fields: [venueId], references: [id])
+  requestedDate  DateTime
+  durationHours  Int
+  status         VenueBookingRequestStatus @default(PENDING)
+  createdAt      DateTime                  @default(now())
+
+  offers VenueBookingOffer[]
+}
+
+model VenueBookingOffer {
+  id          String               @id @default(cuid())
+  requestId   String
+  request     VenueBookingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  proposedBy  OfferProposedBy
+  amount      Float
+  createdAt   DateTime             @default(now())
+}
+
+// Singleton settings row (Admin-managed later, defaults for now) rather
+// than hardcoding the flat venue-booking fee or commission rates inline.
+model PlatformSettings {
+  id                           String @id @default(cuid())
+  flatVenueBookingFee          Float  @default(0)
+  ticketCommissionRate         Float  @default(0.08)
+  performerSlotCommissionRate  Float  @default(0.08)
+}
+
 
 model VenueAvailability {
   id          String   @id @default(cuid())
@@ -165,6 +250,13 @@ model VenueBooking {
   status       BookingStatus @default(PENDING)
   amount       Float
   createdAt    DateTime      @default(now())
+
+  // §4.5 - snapshotted at confirmation time so later changes to the
+  // Venue's published rates don't retroactively alter a confirmed booking.
+  agreedRateType    RateType?
+  durationHours     Int?
+  durationDays      Int?
+  platformFeeAmount Float?
 }
 
 model Event {
@@ -192,10 +284,18 @@ model Event {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
+  // §4.5 - ticketPrice above stays for backward compat with existing
+  // Organiser dashboard pages until they're migrated to per-section
+  // pricing via ticketTiers. New events should prefer ticketTiers.
+  maxPerformers        Int?
+  applicationApprovalMode ApprovalMode @default(MANUAL)
+  maxSeatsPerBooking   Int          @default(4)
+
   lineup        Performance[]
   applications  Application[]
   bookings      Booking[]
   reviews       Review[]
+  ticketTiers   TicketTier[]
 }
 
 model Application {
@@ -218,6 +318,12 @@ model Performance {
   slot      Int
   duration  Int
   createdAt DateTime @default(now())
+
+  // §4.5 - defaults to FREE (the existing open-mic/exposure norm) so
+  // every current Performance row is valid without a data backfill.
+  compensationType CompensationType @default(FREE)
+  feeAmount        Float?
+  buyInAmount      Float?
 
   reviews   Review[]
 }
