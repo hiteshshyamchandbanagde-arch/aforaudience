@@ -8,7 +8,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       venue: true,
-      lineup: { include: { artist: { include: { user: true } } }, orderBy: { slot: 'asc' } },
+      lineup: {
+        include: {
+          artist: { include: { user: true } },
+          reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: 'desc' } },
+        },
+        orderBy: { slot: 'asc' },
+      },
       ticketTiers: true,
     },
   })

@@ -4,6 +4,14 @@ import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 
+interface Review {
+  id: string
+  rating: number
+  comment: string | null
+  createdAt: string
+  user: { name: string }
+}
+
 interface Performer {
   id: string
   slot: number
@@ -15,6 +23,7 @@ interface Performer {
     hypScore: number
     user: { name: string }
   }
+  reviews: Review[]
 }
 
 interface TicketTier {
@@ -54,13 +63,18 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 }
 
 export default function EventDetailPage({ event }: { event: EventData | null }) {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
   const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
   const [showAuthSheet, setShowAuthSheet] = useState(false)
   const [reserving, setReserving] = useState(false)
   const [reservedMessage, setReservedMessage] = useState("")
   const [bookingError, setBookingError] = useState("")
+  const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({})
+  const [reviewSubmitting, setReviewSubmitting] = useState<string | null>(null)
+  const [reviewError, setReviewError] = useState("")
+  const [submittedReviews, setSubmittedReviews] = useState<Record<string, Review>>({})
+  const [reviewAuthTarget, setReviewAuthTarget] = useState<string | null>(null)
 
   const totalSelected = Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
   const totalAmount = event
@@ -96,6 +110,35 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
       setBookingError(err.message)
     } finally {
       setReserving(false)
+    }
+  }
+
+  const submitReview = async (performanceId: string) => {
+    if (!event) return
+    const draft = reviewDrafts[performanceId]
+    if (!draft?.rating) {
+      setReviewError("Pick a rating first")
+      return
+    }
+    if (status !== "authenticated") {
+      setReviewAuthTarget(performanceId)
+      return
+    }
+    setReviewSubmitting(performanceId)
+    setReviewError("")
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: event.id, performanceId, rating: draft.rating, comment: draft.comment }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Failed to submit review")
+      setSubmittedReviews((prev) => ({ ...prev, [performanceId]: data }))
+    } catch (err: any) {
+      setReviewError(err.message)
+    } finally {
+      setReviewSubmitting(null)
     }
   }
 
@@ -221,6 +264,60 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
                           <span style={{ fontSize: "13px", color: "#0E0C0A" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
                           <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
                         </div>
+
+                        {/* Existing reviews */}
+                        {(p.reviews.length > 0 || submittedReviews[p.id]) && (
+                          <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                            {submittedReviews[p.id] && !p.reviews.find((r) => r.id === submittedReviews[p.id].id) && (
+                              <div style={{ fontSize: "13px", color: "#0E0C0A" }}>
+                                {"⭐".repeat(submittedReviews[p.id].rating)} <span style={{ opacity: 0.6 }}>— you</span>
+                                {submittedReviews[p.id].comment && <span style={{ opacity: 0.7 }}> · {submittedReviews[p.id].comment}</span>}
+                              </div>
+                            )}
+                            {p.reviews.slice(0, 3).map((r) => (
+                              <div key={r.id} style={{ fontSize: "13px", color: "#0E0C0A" }}>
+                                {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.name}</span>
+                                {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Rate this performer */}
+                        {!submittedReviews[p.id] && !p.reviews.some((r) => r.user.name === (session?.user as any)?.name) && (
+                          <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.06)" }}>
+                            <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <button
+                                  key={n}
+                                  onClick={() => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: n, comment: prev[p.id]?.comment || "" } }))}
+                                  style={{ background: "none", border: "none", cursor: "pointer", fontSize: "18px", padding: 0, opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.25 }}
+                                >
+                                  ⭐
+                                </button>
+                              ))}
+                              {reviewDrafts[p.id]?.rating > 0 && (
+                                <button
+                                  onClick={() => submitReview(p.id)}
+                                  disabled={reviewSubmitting === p.id}
+                                  style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "#F7F3EE", background: "#C8441A", border: "none", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                >
+                                  {reviewSubmitting === p.id ? "Submitting..." : "Rate"}
+                                </button>
+                              )}
+                            </div>
+                            {reviewDrafts[p.id]?.rating > 0 && (
+                              <input
+                                type="text"
+                                placeholder="Add a comment (optional)"
+                                value={reviewDrafts[p.id]?.comment || ""}
+                                onChange={(e) => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: prev[p.id]?.rating || 0, comment: e.target.value } }))}
+                                style={{ width: "100%", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "13px", boxSizing: "border-box" }}
+                              />
+                            )}
+                            {reviewError && <p style={{ fontSize: "12px", color: "#B3261E", marginTop: "6px" }}>{reviewError}</p>}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -345,6 +442,17 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
         onSuccess={() => {
           setShowAuthSheet(false)
           reserveSeats()
+        }}
+      />
+
+      <AuthPromptSheet
+        open={reviewAuthTarget !== null}
+        onClose={() => setReviewAuthTarget(null)}
+        title="Sign in to leave a review"
+        onSuccess={() => {
+          const target = reviewAuthTarget
+          setReviewAuthTarget(null)
+          if (target) submitReview(target)
         }}
       />
     </main>
