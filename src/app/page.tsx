@@ -24,7 +24,7 @@ export default function Home() {
             <Link href="/events" style={{ background: "#C8441A", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 600, textDecoration: "none" }}>
               Explore Events
             </Link>
-            <Link href="/register" style={{ background: "transparent", color: "#0E0C0A", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
+            <Link href="/profile" style={{ background: "transparent", color: "#0E0C0A", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
               I&apos;m an Artist →
             </Link>
           </div>
@@ -157,7 +157,7 @@ export default function Home() {
           <Link href="/events" style={{ background: "white", color: "#C8441A", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 700, textDecoration: "none" }}>
             Find an Event Tonight
           </Link>
-          <Link href="/register" style={{ background: "transparent", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "2px solid rgba(255,255,255,0.4)" }}>
+          <Link href="/profile" style={{ background: "transparent", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "2px solid rgba(255,255,255,0.4)" }}>
             Join as Artist
           </Link>
         </div>

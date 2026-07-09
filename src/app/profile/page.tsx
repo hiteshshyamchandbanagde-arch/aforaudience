@@ -21,8 +21,10 @@ export default function ProfilePage() {
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
+  const [artistStatus, setArtistStatus] = useState<RoleStatus | null>(null)
   const [orgName, setOrgName] = useState('')
-  const [applying, setApplying] = useState<'organiser' | 'venue' | null>(null)
+  const [genre, setGenre] = useState('')
+  const [applying, setApplying] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -31,9 +33,10 @@ export default function ProfilePage() {
   }, [status, router])
 
   const loadStatuses = async () => {
-    const [orgRes, venueRes] = await Promise.all([
+    const [orgRes, venueRes, artistRes] = await Promise.all([
       fetch('/api/organisers/status'),
       fetch('/api/venue-owners/status'),
+      fetch('/api/artists/status'),
     ])
     if (orgRes.ok) {
       const d = await orgRes.json()
@@ -42,6 +45,10 @@ export default function ProfilePage() {
     if (venueRes.ok) {
       const d = await venueRes.json()
       setVenueStatus({ isInRole: d.isVenueOwner, isApproved: d.isApproved, hasProfile: d.hasProfile })
+    }
+    if (artistRes.ok) {
+      const d = await artistRes.json()
+      setArtistStatus({ isInRole: d.isArtist, isApproved: d.isApproved, hasProfile: d.hasProfile })
     }
   }
 
@@ -91,6 +98,27 @@ export default function ProfilePage() {
     }
   }
 
+  const applyArtist = async () => {
+    setApplying('artist')
+    setError('')
+    setMessage('')
+    try {
+      const res = await fetch('/api/artists/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genre }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      setMessage(data.message)
+      await loadStatuses()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setApplying(null)
+    }
+  }
+
   if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
 
@@ -116,6 +144,39 @@ export default function ProfilePage() {
               {error}
             </div>
           )}
+
+          {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
+          <div style={cardStyle}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+              I&apos;m an Artist
+            </h2>
+            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+              Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
+            </p>
+
+            {artistStatus?.isInRole ? (
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741' }}>
+                ✅ Visit your Artist dashboard
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  placeholder="Genres, comma separated (optional) — e.g. Stand-up, Poetry"
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+                />
+                <button
+                  onClick={applyArtist}
+                  disabled={applying === 'artist'}
+                  style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
+                >
+                  {applying === 'artist' ? 'Setting up...' : 'Become an Artist'}
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Organiser upgrade */}
           <div style={cardStyle}>
