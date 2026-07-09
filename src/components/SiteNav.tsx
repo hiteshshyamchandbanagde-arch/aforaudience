@@ -102,6 +102,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7 }}>
               Hi, {(user.name || user.email || "there").split(" ")[0]}
             </span>
+            <Link href="/profile" style={{ fontSize: "14px", fontWeight: 600, color: "#0E0C0A", textDecoration: "none" }}>
+              Profile
+            </Link>
             {dashboardLink && (
               <Link href={dashboardLink} style={{ fontSize: "14px", fontWeight: 600, color: "#C8441A", textDecoration: "none" }}>
                 Dashboard
