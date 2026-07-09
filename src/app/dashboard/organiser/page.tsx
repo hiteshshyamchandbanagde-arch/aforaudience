@@ -115,12 +115,20 @@ export default function OrganiserDashboard() {
               </h1>
               <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
             </div>
-            <Link
-              href="/dashboard/organiser/events/create"
-              style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-            >
-              + Create Event
-            </Link>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <Link
+                href="/dashboard/venue-requests"
+                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                Flexible Requests
+              </Link>
+              <Link
+                href="/dashboard/organiser/events/create"
+                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                + Create Event
+              </Link>
+            </div>
           </div>
 
           {error && (

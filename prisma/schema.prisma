@@ -229,6 +229,8 @@ model VenueBookingRequest {
   organiser      Organiser                 @relation(fields: [organiserId], references: [id])
   venueId        String
   venue          Venue                     @relation(fields: [venueId], references: [id])
+  eventId        String?
+  event          Event?                    @relation(fields: [eventId], references: [id])
   requestedDate  DateTime
   durationHours  Int
   status         VenueBookingRequestStatus @default(PENDING)
@@ -323,6 +325,7 @@ model Event {
   bookings      Booking[]
   reviews       Review[]
   ticketTiers   TicketTier[]
+  bookingRequests VenueBookingRequest[]
 }
 
 model Application {
