@@ -34,25 +34,44 @@ export default function MyTicketsPage() {
   const [bookings, setBookings] = useState<BookingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [cancelling, setCancelling] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/bookings/my')
-        if (!res.ok) throw new Error('Failed to load your tickets')
-        setBookings(await res.json())
-      } catch (err: any) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
+  const load = async () => {
+    try {
+      const res = await fetch('/api/bookings/my')
+      if (!res.ok) throw new Error('Failed to load your tickets')
+      setBookings(await res.json())
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     if (session?.user) load()
   }, [session])
+
+  const cancelBooking = async (id: string) => {
+    setCancelling(id)
+    setError('')
+    try {
+      const res = await fetch(`/api/bookings/${id}`, { method: 'PATCH' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to cancel')
+      }
+      await load()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setCancelling(null)
+    }
+  }
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
@@ -100,6 +119,15 @@ export default function MyTicketsPage() {
                     <span>{Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}</span>
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
                   </div>
+                  {b.status === 'PENDING' && (
+                    <button
+                      onClick={() => cancelBooking(b.id)}
+                      disabled={cancelling === b.id}
+                      style={{ marginTop: '12px', fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                    >
+                      {cancelling === b.id ? 'Cancelling...' : 'Cancel reservation'}
+                    </button>
+                  )}
                 </div>
               )
             })
