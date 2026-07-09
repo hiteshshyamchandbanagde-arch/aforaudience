@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npx prisma migrate deploy; fi && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "mobile:build": "next build && npx cap sync",
