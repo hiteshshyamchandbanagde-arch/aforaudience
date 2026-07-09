@@ -158,7 +158,13 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
         </div>
       </div>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: "1fr 380px", gap: "32px" }}>
+      <style>{`
+        .event-detail-grid { grid-template-columns: 1fr 380px; }
+        @media (max-width: 900px) {
+          .event-detail-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="event-detail-grid" style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px", display: "grid", gap: "32px" }}>
         {/* LEFT CONTENT */}
         <div>
           <div style={{ display: "flex", gap: "0", marginBottom: "32px", borderBottom: "2px solid rgba(14,12,10,0.1)" }}>
