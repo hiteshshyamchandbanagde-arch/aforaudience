@@ -347,6 +347,12 @@ export default function CreateEventPage() {
             </section>
 
             {/* Actions */}
+            {venueId && (
+              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                Since you've attached a venue, this event goes to <strong>Pending</strong> when published, not live yet -
+                it'll go public automatically once the venue owner confirms your booking request.
+              </p>
+            )}
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button
                 type="button"

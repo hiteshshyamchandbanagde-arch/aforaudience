@@ -80,10 +80,14 @@ export async function POST(req: Request) {
         dresscode: dresscode || null,
         vibe: vibe || null,
         surpriseAct: Boolean(surpriseAct),
-        // No admin-review pipeline exists yet, so organisers publish their own
-        // listings directly, same bridge used for venues. Gate this behind
-        // real moderation once that exists.
-        status: publish ? 'APPROVED' : 'DRAFT',
+        // §4.5 suggestion #1, previously unenforced: an event with a venue
+        // attached can't go fully live (APPROVED) until that venue's
+        // booking is actually confirmed by the Venue Owner - the booking
+        // created just below always starts PENDING, so a brand-new event
+        // with a venue can never be APPROVED at creation time, regardless
+        // of what the Organiser requested. PATCH /api/venue-bookings/[id]
+        // auto-promotes it to APPROVED once the Venue Owner confirms.
+        status: !publish ? 'DRAFT' : venueId ? 'PENDING_APPROVAL' : 'APPROVED',
         ticketTiers: validTiers.length > 0
           ? {
               create: validTiers.map((t: any) => ({

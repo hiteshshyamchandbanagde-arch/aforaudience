@@ -36,6 +36,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const updated = await prisma.venueBooking.update({ where: { id }, data: { status } })
 
+    // Closes the other half of §4.5 suggestion #1: an event was held at
+    // PENDING_APPROVAL specifically because this booking wasn't confirmed
+    // yet. Now that it is, the event can actually go live without the
+    // Organiser needing to come back and manually re-publish.
+    if (status === 'CONFIRMED' && booking.eventId) {
+      await prisma.event.updateMany({
+        where: { id: booking.eventId, status: 'PENDING_APPROVAL' },
+        data: { status: 'APPROVED' },
+      })
+    }
+
     return NextResponse.json(updated)
   } catch (err) {
     console.error('Error updating venue booking:', err)
