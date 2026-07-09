@@ -6,12 +6,19 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 
+interface SeatSection {
+  id?: string
+  name: string
+  seats: number
+  price: number
+}
+
 interface VenueOption {
   id: string
   name: string
   city: string
   capacity: number
-  seatMap?: { sections?: { price: number }[] } | null
+  seatMap?: { sections?: SeatSection[] } | null
 }
 
 const inputStyle = {
@@ -57,6 +64,14 @@ export default function CreateEventPage() {
   const [surpriseAct, setSurpriseAct] = useState(false)
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
+  // §4.5 - per-section ticket pricing. Keyed by section name, since the
+  // Organiser only ever edits price here - section names/capacities stay
+  // owned by the Venue Owner's own seat map.
+  const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
+
+  const selectedVenue = venues.find((v) => v.id === venueId)
+  const venueSections = selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
+  const usingTierPricing = venueSections.length > 0
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -79,6 +94,19 @@ export default function CreateEventPage() {
     fetchVenues()
   }, [])
 
+  useEffect(() => {
+    if (venueSections.length > 0) {
+      const initial: Record<string, string> = {}
+      venueSections.forEach((s) => {
+        initial[s.name] = s.price ? String(s.price) : ''
+      })
+      setTierPrices(initial)
+    } else {
+      setTierPrices({})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [venueId])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -88,11 +116,32 @@ export default function CreateEventPage() {
     setSaving(true)
     setError('')
 
-    if (!formData.title || !formData.description || !formData.date || !formData.startTime || !formData.endTime || !formData.totalSeats) {
+    const totalSeatsValue = usingTierPricing
+      ? String(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))
+      : formData.totalSeats
+
+    if (!formData.title || !formData.description || !formData.date || !formData.startTime || !formData.endTime || !totalSeatsValue) {
       setError('Please fill in all required fields.')
       setSaving(false)
       return
     }
+
+    if (usingTierPricing && !isFree) {
+      const missingPrice = venueSections.some((s) => !tierPrices[s.name] || Number(tierPrices[s.name]) <= 0)
+      if (missingPrice) {
+        setError('Please set a price for every section.')
+        setSaving(false)
+        return
+      }
+    }
+
+    const ticketTiers = usingTierPricing && !isFree
+      ? venueSections.map((s) => ({
+          sectionName: s.name,
+          price: Number(tierPrices[s.name]),
+          totalSeats: Number(s.seats),
+        }))
+      : undefined
 
     try {
       const res = await fetch('/api/events', {
@@ -100,8 +149,10 @@ export default function CreateEventPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          totalSeats: totalSeatsValue,
           isFree,
-          ticketPrice: isFree ? null : ticketPrice,
+          ticketPrice: isFree || usingTierPricing ? null : ticketPrice,
+          ticketTiers,
           surpriseAct,
           venueId: venueId || null,
           bookingAmount: venueId ? bookingAmount : null,
@@ -208,35 +259,7 @@ export default function CreateEventPage() {
               </label>
             </section>
 
-            {/* Seats & pricing */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
-                Seats & Ticket Price
-              </h2>
-
-              <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Total Seats *</label>
-                <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" placeholder="e.g., 50" style={inputStyle} required />
-              </div>
-
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
-                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
-                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
-                </label>
-              </div>
-
-              {!isFree && (
-                <div>
-                  <label style={labelStyle}>Ticket Price (₹)</label>
-                  <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" placeholder="e.g., 199" style={inputStyle} />
-                </div>
-              )}
-            </section>
-
-            {/* Venue booking */}
+            {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
             <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
                 Book a Venue
@@ -260,6 +283,66 @@ export default function CreateEventPage() {
                   <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— what you'll pay the venue</span></label>
                   <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
                 </div>
+              )}
+            </section>
+
+            {/* Seats & pricing */}
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+                Seats & Ticket Price
+              </h2>
+
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '18px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                  <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                  <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
+                </label>
+              </div>
+
+              {usingTierPricing ? (
+                <div>
+                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+                    Sections and seat counts come from {selectedVenue?.name}'s seat map — you only set the price per section for this event.
+                  </p>
+                  {venueSections.map((s) => (
+                    <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A' }}>{s.name}</div>
+                        <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{s.seats} seats</div>
+                      </div>
+                      {!isFree ? (
+                        <input
+                          type="number"
+                          value={tierPrices[s.name] || ''}
+                          onChange={(e) => setTierPrices((prev) => ({ ...prev, [s.name]: e.target.value }))}
+                          min="0"
+                          placeholder="₹ price"
+                          style={{ ...inputStyle, width: '120px' }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5 }}>Free</span>
+                      )}
+                    </div>
+                  ))}
+                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '14px' }}>
+                    Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '18px' }}>
+                    <label style={labelStyle}>Total Seats *</label>
+                    <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" placeholder="e.g., 50" style={inputStyle} required />
+                  </div>
+                  {!isFree && (
+                    <div>
+                      <label style={labelStyle}>Ticket Price (₹)</label>
+                      <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" placeholder="e.g., 199" style={inputStyle} />
+                    </div>
+                  )}
+                </>
               )}
             </section>
 
