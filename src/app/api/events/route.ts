@@ -100,21 +100,51 @@ export async function POST(req: Request) {
       },
     })
 
-    // Booking a venue for this event: create a request record (venue owner
-    // approval isn't built yet, so this starts PENDING and just links the
-    // venue to the event immediately).
+    // Booking a venue for this event: Hourly/Daily venues still get a
+    // direct booking request (there's a real rate to propose against).
+    // Flexible venues have no fixed rate - this now creates an actual
+    // VenueBookingRequest + opening VenueBookingOffer instead of a blind
+    // VenueBooking, so it can go through the real negotiation loop
+    // (PATCH /api/venue-booking-requests/[id]) rather than pretending a
+    // single proposed number is a booking.
     if (venueId) {
-      await prisma.venueBooking.create({
-        data: {
-          venueId,
-          organiserId: organiser.id,
-          eventId: event.id,
-          fromDate: new Date(date),
-          toDate: new Date(date),
-          status: 'PENDING',
-          amount: bookingAmount ? parseFloat(bookingAmount) : 0,
-        },
-      })
+      const venue = await prisma.venue.findUnique({ where: { id: venueId } })
+
+      if (venue?.rateType === 'FLEXIBLE') {
+        const [sh, sm] = String(startTime).split(':').map(Number)
+        const [eh, em] = String(endTime).split(':').map(Number)
+        let mins = (eh * 60 + em) - (sh * 60 + sm)
+        if (mins <= 0) mins += 24 * 60
+        const durationHours = Math.round(mins / 60)
+
+        const request = await prisma.venueBookingRequest.create({
+          data: {
+            organiserId: organiser.id,
+            venueId,
+            eventId: event.id,
+            requestedDate: new Date(date),
+            durationHours,
+            status: 'PENDING',
+          },
+        })
+        if (bookingAmount) {
+          await prisma.venueBookingOffer.create({
+            data: { requestId: request.id, proposedBy: 'ORGANISER', amount: parseFloat(bookingAmount) },
+          })
+        }
+      } else {
+        await prisma.venueBooking.create({
+          data: {
+            venueId,
+            organiserId: organiser.id,
+            eventId: event.id,
+            fromDate: new Date(date),
+            toDate: new Date(date),
+            status: 'PENDING',
+            amount: bookingAmount ? parseFloat(bookingAmount) : 0,
+          },
+        })
+      }
     }
 
     return NextResponse.json(event, { status: 201 })
