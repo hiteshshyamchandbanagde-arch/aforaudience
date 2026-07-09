@@ -45,6 +45,17 @@ export default function CreateVenuePage() {
     { id: makeId(), name: '', seats: '', price: '' },
   ])
 
+  // §4.5 - rental rate the Organiser pays to book this venue, separate
+  // from the section ticket prices above (which are for the audience).
+  const [rateType, setRateType] = useState<'HOURLY' | 'DAILY' | 'FLEXIBLE'>('FLEXIBLE')
+  const [hourlyRate, setHourlyRate] = useState('')
+  const [dailyRate, setDailyRate] = useState('')
+  const [minDurationHours, setMinDurationHours] = useState('')
+  const [useDayOverrides, setUseDayOverrides] = useState(false)
+  const [dayRates, setDayRates] = useState<Record<string, string>>({
+    MONDAY: '', TUESDAY: '', WEDNESDAY: '', THURSDAY: '', FRIDAY: '', SATURDAY: '', SUNDAY: '',
+  })
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
@@ -68,7 +79,27 @@ export default function CreateVenuePage() {
       return
     }
 
+    if (rateType === 'HOURLY' && (!hourlyRate || Number(hourlyRate) <= 0)) {
+      setError('Set an hourly rental rate.')
+      setSaving(false)
+      return
+    }
+    if (rateType === 'DAILY' && (!dailyRate || Number(dailyRate) <= 0)) {
+      setError('Set a daily rental rate.')
+      setSaving(false)
+      return
+    }
+
     try {
+      const dayRatesPayload = useDayOverrides && rateType !== 'FLEXIBLE'
+        ? Object.entries(dayRates)
+            .filter(([, v]) => v && Number(v) > 0)
+            .map(([dayOfWeek, v]) => ({
+              dayOfWeek,
+              ...(rateType === 'HOURLY' ? { hourlyRate: Number(v) } : { dailyRate: Number(v) }),
+            }))
+        : []
+
       const res = await fetch('/api/venues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,6 +108,11 @@ export default function CreateVenuePage() {
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
           seatMap: { sections: validSections },
+          rateType,
+          hourlyRate: rateType === 'HOURLY' && hourlyRate ? Number(hourlyRate) : null,
+          dailyRate: rateType === 'DAILY' && dailyRate ? Number(dailyRate) : null,
+          minDurationHours: minDurationHours ? Number(minDurationHours) : null,
+          dayRates: dayRatesPayload,
           publish,
         }),
       })
@@ -153,6 +189,93 @@ export default function CreateVenuePage() {
                   <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleChange} placeholder="e.g., 4.5" min="0" max="5" step="0.5" style={inputStyle} />
                 </div>
               </div>
+            </section>
+
+            {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+                Rental Rate
+              </h2>
+              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
+              </p>
+
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+                {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setRateType(t)}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      border: rateType === t ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                      background: rateType === t ? 'rgba(200,68,26,0.08)' : '#fff',
+                      color: rateType === t ? '#C8441A' : '#0E0C0A',
+                    }}
+                  >
+                    {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
+                  </button>
+                ))}
+              </div>
+
+              {rateType === 'HOURLY' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '8px' }}>
+                  <div>
+                    <label style={labelStyle}>Rate per hour (₹) *</label>
+                    <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" placeholder="e.g., 2500" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Minimum duration (hours)</label>
+                    <input type="number" value={minDurationHours} onChange={(e) => setMinDurationHours(e.target.value)} min="1" placeholder="e.g., 3" style={inputStyle} />
+                  </div>
+                </div>
+              )}
+
+              {rateType === 'DAILY' && (
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={labelStyle}>Rate per day (₹) *</label>
+                  <input type="number" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} min="0" placeholder="e.g., 15000" style={{ ...inputStyle, maxWidth: '240px' }} />
+                </div>
+              )}
+
+              {rateType === 'FLEXIBLE' && (
+                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                  No fixed rate published. Organisers will send you a duration and date, and you'll respond with a quote before it's confirmed.
+                </p>
+              )}
+
+              {rateType !== 'FLEXIBLE' && (
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#0E0C0A', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                    <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
+                    Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
+                  </label>
+
+                  {useDayOverrides && (
+                    <div>
+                      <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '10px' }}>
+                        Leave a day blank to use your base rate above for that day.
+                      </p>
+                      {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(14,12,10,0.05)' }}>
+                          <span style={{ fontSize: '13px', color: '#0E0C0A' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>₹</span>
+                            <input
+                              type="number"
+                              value={dayRates[day]}
+                              onChange={(e) => setDayRates((prev) => ({ ...prev, [day]: e.target.value }))}
+                              min="0"
+                              placeholder={rateType === 'HOURLY' ? hourlyRate || '—' : dailyRate || '—'}
+                              style={{ ...inputStyle, width: '110px' }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
 
             {/* Seating & pricing */}

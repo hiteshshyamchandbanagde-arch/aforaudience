@@ -40,7 +40,10 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish } = body
+    const {
+      name, address, city, capacity, acousticRating, facilities, seatMap, publish,
+      rateType, hourlyRate, dailyRate, minDurationHours, dayRates,
+    } = body
 
     if (!name || !address || !city) {
       return NextResponse.json(
@@ -48,6 +51,26 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+
+    if (rateType && !['HOURLY', 'DAILY', 'FLEXIBLE'].includes(rateType)) {
+      return NextResponse.json({ error: 'Invalid rate type' }, { status: 400 })
+    }
+    if (rateType === 'HOURLY' && !(Number(hourlyRate) > 0)) {
+      return NextResponse.json({ error: 'Set an hourly rate' }, { status: 400 })
+    }
+    if (rateType === 'DAILY' && !(Number(dailyRate) > 0)) {
+      return NextResponse.json({ error: 'Set a daily rate' }, { status: 400 })
+    }
+
+    // §4.5 - per-day rate overrides. Validated the same way as ticket
+    // tiers: real enum day, positive amount, only trusted server-side
+    // after filtering, never taken from the client as-is.
+    const validDayRates = Array.isArray(dayRates)
+      ? dayRates.filter((d: any) =>
+          ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].includes(d?.dayOfWeek)
+          && (Number(d.hourlyRate) > 0 || Number(d.dailyRate) > 0)
+        )
+      : []
 
     // If seating sections are provided, total capacity is derived from them.
     const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : []
@@ -74,7 +97,20 @@ export async function POST(req: Request) {
         seatMap: sections.length > 0 ? { sections } : undefined,
         // No admin-review pipeline exists yet, so venue owners publish their own
         // listings directly. Gate this behind real moderation once that exists.
-        isApproved: Boolean(publish)
+        isApproved: Boolean(publish),
+        rateType: rateType || null,
+        hourlyRate: rateType === 'HOURLY' && hourlyRate ? parseFloat(hourlyRate) : null,
+        dailyRate: rateType === 'DAILY' && dailyRate ? parseFloat(dailyRate) : null,
+        minDurationHours: minDurationHours ? parseInt(minDurationHours) : null,
+        dayRates: validDayRates.length > 0
+          ? {
+              create: validDayRates.map((d: any) => ({
+                dayOfWeek: d.dayOfWeek,
+                hourlyRate: d.hourlyRate ? parseFloat(d.hourlyRate) : null,
+                dailyRate: d.dailyRate ? parseFloat(d.dailyRate) : null,
+              })),
+            }
+          : undefined,
       }
     })
 
