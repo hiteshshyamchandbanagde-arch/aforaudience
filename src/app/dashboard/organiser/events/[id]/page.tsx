@@ -66,6 +66,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const [error, setError] = useState('')
   const [toggling, setToggling] = useState(false)
   const [actingOn, setActingOn] = useState<string | null>(null)
+  const [compensation, setCompensation] = useState<Record<string, { type: 'PAID' | 'FREE' | 'BUY_IN'; amount: string }>>({})
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -117,12 +118,21 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const reviewApplication = async (applicationId: string, newStatus: 'APPROVED' | 'REJECTED') => {
     setActingOn(applicationId)
     try {
+      const comp = compensation[applicationId] || { type: 'FREE', amount: '' }
       const res = await fetch(`/api/applications/${applicationId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({
+          status: newStatus,
+          compensationType: comp.type,
+          feeAmount: comp.type === 'PAID' ? comp.amount : undefined,
+          buyInAmount: comp.type === 'BUY_IN' ? comp.amount : undefined,
+        }),
       })
-      if (!res.ok) throw new Error('Failed to update application')
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to update application')
+      }
       await fetchEvent()
     } catch (err: any) {
       setError(err.message)
@@ -250,21 +260,52 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       </div>
                       {app.message && <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '10px' }}>{app.message}</p>}
                       {app.status === 'PENDING' && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => reviewApplication(app.id, 'APPROVED')}
-                            disabled={actingOn === app.id}
-                            style={{ fontSize: '12px', fontWeight: 600, color: '#F7F3EE', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => reviewApplication(app.id, 'REJECTED')}
-                            disabled={actingOn === app.id}
-                            style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
-                          >
-                            Reject
-                          </button>
+                        <div>
+                          <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                            {(['FREE', 'PAID', 'BUY_IN'] as const).map((t) => {
+                              const current = compensation[app.id]?.type || 'FREE'
+                              return (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  onClick={() => setCompensation((prev) => ({ ...prev, [app.id]: { type: t, amount: prev[app.id]?.amount || '' } }))}
+                                  style={{
+                                    padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+                                    border: current === t ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                                    background: current === t ? 'rgba(200,68,26,0.08)' : '#fff',
+                                    color: current === t ? '#C8441A' : '#0E0C0A',
+                                  }}
+                                >
+                                  {t === 'FREE' ? 'Free' : t === 'PAID' ? 'Paid' : 'Buy-in'}
+                                </button>
+                              )
+                            })}
+                            {(compensation[app.id]?.type === 'PAID' || compensation[app.id]?.type === 'BUY_IN') && (
+                              <input
+                                type="number"
+                                placeholder="₹ amount"
+                                value={compensation[app.id]?.amount || ''}
+                                onChange={(e) => setCompensation((prev) => ({ ...prev, [app.id]: { type: prev[app.id]?.type || 'PAID', amount: e.target.value } }))}
+                                style={{ width: '100px', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '12px' }}
+                              />
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              onClick={() => reviewApplication(app.id, 'APPROVED')}
+                              disabled={actingOn === app.id}
+                              style={{ fontSize: '12px', fontWeight: 600, color: '#F7F3EE', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => reviewApplication(app.id, 'REJECTED')}
+                              disabled={actingOn === app.id}
+                              style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                            >
+                              Reject
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>

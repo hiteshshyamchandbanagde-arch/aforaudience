@@ -75,6 +75,11 @@ export default function CreateEventPage() {
   const [surpriseAct, setSurpriseAct] = useState(false)
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
+  // §4.5 - performer economics + booking cap, Event-level (E8/E9/E13)
+  const [maxPerformers, setMaxPerformers] = useState('')
+  const [applicationApprovalMode, setApplicationApprovalMode] = useState<'MANUAL' | 'AUTO'>('MANUAL')
+  const [maxSeatsPerBooking, setMaxSeatsPerBooking] = useState('4')
+  const [platformFee, setPlatformFee] = useState<number | null>(null)
   // §4.5 - per-section ticket pricing. Keyed by section name, since the
   // Organiser only ever edits price here - section names/capacities stay
   // owned by the Venue Owner's own seat map.
@@ -142,6 +147,16 @@ export default function CreateEventPage() {
       }
     }
     fetchVenues()
+
+    const fetchPlatformFee = async () => {
+      try {
+        const res = await fetch('/api/platform-settings')
+        if (res.ok) setPlatformFee((await res.json()).flatVenueBookingFee)
+      } catch {
+        // Non-critical - the fee just won't show, booking still works.
+      }
+    }
+    fetchPlatformFee()
   }, [])
 
   useEffect(() => {
@@ -193,6 +208,13 @@ export default function CreateEventPage() {
         }))
       : undefined
 
+    const seatsCap = Number(maxSeatsPerBooking)
+    if (!seatsCap || seatsCap < 1 || seatsCap > 10) {
+      setError('Max seats per booking must be between 1 and 10.')
+      setSaving(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -206,6 +228,9 @@ export default function CreateEventPage() {
           surpriseAct,
           venueId: venueId || null,
           bookingAmount: venueId ? bookingAmount : null,
+          maxPerformers: maxPerformers ? Number(maxPerformers) : null,
+          applicationApprovalMode,
+          maxSeatsPerBooking: seatsCap,
           publish,
         }),
       })
@@ -355,6 +380,11 @@ export default function CreateEventPage() {
                       <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
                     </>
                   )}
+                  {platformFee !== null && platformFee > 0 && (
+                    <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginTop: '10px' }}>
+                      + ₹{platformFee.toLocaleString('en-IN')} platform booking fee, charged on top of the rental amount when this booking is confirmed.
+                    </p>
+                  )}
                 </div>
               )}
             </section>
@@ -417,6 +447,51 @@ export default function CreateEventPage() {
                   )}
                 </>
               )}
+            </section>
+
+            {/* Lineup & approvals */}
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '18px' }}>
+                Lineup &amp; Approvals
+              </h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+                <div>
+                  <label style={labelStyle}>Max Performers <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                  <input type="number" value={maxPerformers} onChange={(e) => setMaxPerformers(e.target.value)} min="1" placeholder="e.g., 6" style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Max Seats Per Booking</label>
+                  <input type="number" value={maxSeatsPerBooking} onChange={(e) => setMaxSeatsPerBooking(e.target.value)} min="1" max="10" style={inputStyle} />
+                  <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Artist Application Approval</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {(['MANUAL', 'AUTO'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setApplicationApprovalMode(mode)}
+                      style={{
+                        flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: applicationApprovalMode === mode ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : '#fff',
+                        color: applicationApprovalMode === mode ? '#C8441A' : '#0E0C0A',
+                      }}
+                    >
+                      {mode === 'MANUAL' ? 'Manual — I review each one' : 'Auto — verified artists only'}
+                    </button>
+                  ))}
+                </div>
+                {applicationApprovalMode === 'AUTO' && (
+                  <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                    Applications auto-accept as free/exposure slots up to your Max Performers cap. You can still edit compensation per performer afterward.
+                  </p>
+                )}
+              </div>
             </section>
 
             {/* Actions */}

@@ -39,14 +39,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'You already applied to this event' }, { status: 409 })
     }
 
+    // §4.5 - respect the Organiser's max performer cap, if they set one.
+    if (event.maxPerformers !== null) {
+      const filledSlots = await prisma.performance.count({ where: { eventId } })
+      if (filledSlots >= event.maxPerformers) {
+        return NextResponse.json({ error: 'This event\'s lineup is already full' }, { status: 409 })
+      }
+    }
+
+    // Auto-approval mode: verified artists skip manual review entirely and
+    // get booked as a FREE/exposure slot immediately. The Organiser can
+    // still adjust compensation for them afterward from the event page -
+    // there's no per-applicant compensation input at apply time, so Auto
+    // can only default to Free, never Paid/Buy-in.
+    const shouldAutoApprove = event.applicationApprovalMode === 'AUTO' && user.isVerified
+
     const application = await prisma.application.create({
       data: {
         eventId,
         artistId: artist.id,
         message: message || '',
-        status: 'PENDING',
+        status: shouldAutoApprove ? 'APPROVED' : 'PENDING',
       },
     })
+
+    if (shouldAutoApprove) {
+      const lineupCount = await prisma.performance.count({ where: { eventId } })
+      await prisma.performance.create({
+        data: { eventId, artistId: artist.id, slot: lineupCount + 1, duration: 10, compensationType: 'FREE' },
+      })
+    }
 
     return NextResponse.json(application, { status: 201 })
   } catch (err) {
