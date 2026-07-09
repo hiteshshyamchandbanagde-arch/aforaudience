@@ -104,7 +104,13 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
         </div>
       </div>
 
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 48px", display: "grid", gridTemplateColumns: "1fr 320px", gap: "32px" }}>
+      <style>{`
+        .artist-detail-grid { grid-template-columns: 1fr 320px; }
+        @media (max-width: 900px) {
+          .artist-detail-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="artist-detail-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 48px", display: "grid", gap: "32px" }}>
         {/* LEFT */}
         <div>
           <div style={{ display: "flex", gap: "0", marginBottom: "32px", borderBottom: "2px solid rgba(14,12,10,0.1)" }}>
