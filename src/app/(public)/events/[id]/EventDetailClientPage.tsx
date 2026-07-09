@@ -1,7 +1,8 @@
 "use client"
 import { useState } from "react"
-import Link from "next/link"
+import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
+import AuthPromptSheet from "@/components/AuthPromptSheet"
 
 interface Performer {
   id: string
@@ -16,6 +17,13 @@ interface Performer {
   }
 }
 
+interface TicketTier {
+  id: string
+  sectionName: string
+  price: number
+  totalSeats: number
+}
+
 interface EventData {
   id: string
   title: string
@@ -28,11 +36,13 @@ interface EventData {
   ticketPrice: number | null
   totalSeats: number
   availableSeats: number
+  maxSeatsPerBooking: number
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
   venue: { name: string; address: string; city: string; facilities: string[] } | null
   lineup: Performer[]
+  ticketTiers: TicketTier[]
 }
 
 const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
@@ -44,7 +54,62 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 }
 
 export default function EventDetailPage({ event }: { event: EventData | null }) {
+  const { status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
+  const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
+  const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const [reserving, setReserving] = useState(false)
+  const [reservedMessage, setReservedMessage] = useState("")
+  const [bookingError, setBookingError] = useState("")
+
+  const totalSelected = Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
+  const totalAmount = event
+    ? event.ticketTiers.length > 0
+      ? event.ticketTiers.reduce((sum, t) => sum + (selectedSeats[t.sectionName] || 0) * t.price, 0)
+      : (selectedSeats['General'] || 0) * (event.ticketPrice || 0)
+    : 0
+
+  const updateSeat = (section: string, delta: number, max: number) => {
+    setSelectedSeats((prev) => {
+      const current = prev[section] || 0
+      const next = Math.max(0, Math.min(current + delta, max, event?.maxSeatsPerBooking || 4))
+      const otherTotal = totalSelected - current
+      if (otherTotal + next > (event?.maxSeatsPerBooking || 4)) return prev
+      return { ...prev, [section]: next }
+    })
+  }
+
+  const reserveSeats = async () => {
+    if (!event) return
+    setReserving(true)
+    setBookingError("")
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: event.id, seats: selectedSeats }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Failed to reserve seats")
+      setReservedMessage(data.message)
+    } catch (err: any) {
+      setBookingError(err.message)
+    } finally {
+      setReserving(false)
+    }
+  }
+
+  const handleBookClick = () => {
+    if (totalSelected === 0) {
+      setBookingError("Select at least one seat first")
+      return
+    }
+    if (status !== "authenticated") {
+      setShowAuthSheet(true)
+      return
+    }
+    reserveSeats()
+  }
 
   if (!event) {
     return (
@@ -183,26 +248,99 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
         {/* RIGHT — INFO PANEL */}
         <div style={{ position: "sticky", top: "80px", height: "fit-content" }}>
           <div style={{ background: "white", borderRadius: "16px", padding: "24px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>
-              {event.isFree ? "Free Entry" : event.ticketPrice ? `₹${event.ticketPrice} / seat` : "Price TBD"}
-            </div>
-            <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, marginBottom: "24px" }}>
-              {event.availableSeats} of {event.totalSeats} seats available
-            </div>
+            {reservedMessage ? (
+              <div>
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px" }}>
+                  Seats reserved
+                </div>
+                <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7, lineHeight: 1.6 }}>{reservedMessage}</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>
+                  {event.isFree ? "Free Entry" : event.ticketTiers.length > 0 ? "Choose your section" : event.ticketPrice ? `₹${event.ticketPrice} / seat` : "Price TBD"}
+                </div>
+                <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, marginBottom: "20px" }}>
+                  {event.availableSeats} of {event.totalSeats} seats total · max {event.maxSeatsPerBooking} per booking
+                </div>
 
-            <Link
-              href="/login"
-              style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", fontSize: "15px", fontWeight: 700, textAlign: "center", textDecoration: "none", boxSizing: "border-box", marginBottom: "12px" }}
-            >
-              Log in to book
-            </Link>
+                {!event.isFree && (
+                  <div style={{ marginBottom: "16px" }}>
+                    {event.ticketTiers.length > 0 ? (
+                      event.ticketTiers.map((t) => (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}>
+                          <div>
+                            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>{t.sectionName}</div>
+                            <div style={{ fontSize: "11px", color: "#0E0C0A", opacity: 0.5 }}>₹{t.price}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                            <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats[t.sectionName] || 0}</span>
+                            <button onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>General Admission</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
+                          <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-            <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
-              Online booking is launching soon — log in to be notified.
-            </div>
+                {event.isFree && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>Seats</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                      <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
+                      <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                    </div>
+                  </div>
+                )}
+
+                {bookingError && (
+                  <div style={{ fontSize: "12px", color: "#B3261E", marginBottom: "12px" }}>{bookingError}</div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+                  <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
+                  <span style={{ fontSize: "18px", fontWeight: 700, color: "#0E0C0A" }}>{totalAmount > 0 ? `₹${totalAmount.toLocaleString("en-IN")}` : "Free"}</span>
+                </div>
+
+                <button
+                  onClick={handleBookClick}
+                  disabled={reserving}
+                  style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving ? "default" : "pointer", opacity: reserving ? 0.7 : 1 }}
+                >
+                  {reserving ? "Reserving..." : "Reserve Seats"}
+                </button>
+
+                <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
+                  Online payment isn't live yet — this reserves your seats, we'll email you when checkout is ready.
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      <AuthPromptSheet
+        open={showAuthSheet}
+        onClose={() => setShowAuthSheet(false)}
+        title="Sign in to reserve your seats"
+        subtitle={`${totalSelected} seat${totalSelected === 1 ? "" : "s"}${totalAmount > 0 ? ` · ₹${totalAmount.toLocaleString("en-IN")}` : ""}`}
+        onSuccess={() => {
+          setShowAuthSheet(false)
+          reserveSeats()
+        }}
+      />
     </main>
   )
 }
