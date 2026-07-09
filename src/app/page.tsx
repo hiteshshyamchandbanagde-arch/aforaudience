@@ -30,7 +30,7 @@ export default function Home() {
           </div>
 
           {/* STATS */}
-          <div style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)" }}>
+          <div style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)", flexWrap: "wrap" }}>
             {[{ num: "2,400+", label: "Artists" }, { num: "840+", label: "Events Monthly" }, { num: "120+", label: "Cities" }].map((s) => (
               <div key={s.label}>
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1, marginBottom: "4px" }}>{s.num}</div>
@@ -120,7 +120,7 @@ export default function Home() {
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "#0E0C0A", opacity: 0.6, maxWidth: "560px", margin: "0 auto 56px", lineHeight: 1.7 }}>
           The 9 emotions of Indian classical art. Search events by the feeling you want to experience tonight.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
           {[
             { emoji: "❤️", name: "Shringara", sanskrit: "Love" },
             { emoji: "😂", name: "Hasya", sanskrit: "Laughter" },
@@ -165,7 +165,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "64px 48px 32px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "48px", marginBottom: "48px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
           <div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#F7F3EE", marginBottom: "12px" }}>
               <span style={{ color: "#C8441A" }}>A</span>forAudience
@@ -213,7 +213,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "rgba(247,243,238,0.3)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
           <span>© 2025 AforAudience. All rights reserved.</span>
           <span>Made with ❤️ for the art world</span>
         </div>
