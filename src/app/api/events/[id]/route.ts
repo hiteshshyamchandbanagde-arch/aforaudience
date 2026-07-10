@@ -43,6 +43,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!organiser || organiser.userId !== user.id) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+      if (!organiser.isApproved) {
+        return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
+      }
     }
 
     const body = await req.json()

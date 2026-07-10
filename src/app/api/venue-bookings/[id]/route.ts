@@ -27,6 +27,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!venueOwner || venueOwner.userId !== user.id) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+      if (!venueOwner.isApproved) {
+        return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
+      }
     }
 
     const { status } = await req.json()
