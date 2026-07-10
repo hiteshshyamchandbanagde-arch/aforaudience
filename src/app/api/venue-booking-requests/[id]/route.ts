@@ -31,10 +31,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     let callerSide: 'ORGANISER' | 'VENUE_OWNER' | null = null
     if (user.role === 'ORGANISER') {
       const organiser = await prisma.organiser.findUnique({ where: { userId: user.id } })
-      if (organiser?.id === request.organiserId) callerSide = 'ORGANISER'
+      if (organiser?.id === request.organiserId) {
+        if (!organiser.isApproved) {
+          return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
+        }
+        callerSide = 'ORGANISER'
+      }
     } else if (user.role === 'VENUE_OWNER') {
       const venueOwner = await prisma.venueOwner.findUnique({ where: { userId: user.id } })
-      if (venueOwner?.id === request.venue.ownerId) callerSide = 'VENUE_OWNER'
+      if (venueOwner?.id === request.venue.ownerId) {
+        if (!venueOwner.isApproved) {
+          return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
+        }
+        callerSide = 'VENUE_OWNER'
+      }
     } else if (user.role === 'ADMIN') {
       callerSide = 'VENUE_OWNER' // admins can act on behalf of a venue owner if needed
     }
