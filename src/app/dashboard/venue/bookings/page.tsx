@@ -32,6 +32,11 @@ export default function VenueBookingsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [actingOn, setActingOn] = useState<string | null>(null)
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const d = new Date()
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+  })
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -82,6 +87,45 @@ export default function VenueBookingsPage() {
   const pending = bookings.filter((b) => b.status === 'PENDING')
   const resolved = bookings.filter((b) => b.status !== 'PENDING')
 
+  // F3 - revenue summary. Gross amounts only (the rental fee the Organiser
+  // pays), not netted against the platform's flat booking fee - that's a
+  // separate, smaller number this view isn't trying to reconcile against.
+  const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
+  const now = new Date()
+  const thisMonthRevenue = confirmed
+    .filter((b) => {
+      const d = new Date(b.fromDate)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+    .reduce((sum, b) => sum + b.amount, 0)
+  const totalRevenue = confirmed.reduce((sum, b) => sum + b.amount, 0)
+  const pendingValue = pending.reduce((sum, b) => sum + b.amount, 0)
+
+  // F3 - month calendar. Multi-day (Daily-rate) bookings are only marked
+  // on their start date (fromDate) for simplicity, not every day they span.
+  const bookingsByDate: Record<string, BookingRequest[]> = {}
+  bookings.forEach((b) => {
+    const key = new Date(b.fromDate).toDateString()
+    if (!bookingsByDate[key]) bookingsByDate[key] = []
+    bookingsByDate[key].push(b)
+  })
+
+  const monthStart = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1)
+  const monthEnd = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0)
+  const leadingBlanks = monthStart.getDay()
+  const daysInMonth = monthEnd.getDate()
+  const calendarCells: (Date | null)[] = [
+    ...Array(leadingBlanks).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), i + 1)),
+  ]
+
+  const CAL_STATUS_DOT: Record<string, string> = {
+    PENDING: '#C9973A',
+    CONFIRMED: '#4A6741',
+    CANCELLED: '#B3261E',
+    REFUNDED: '#8a877e',
+  }
+
   return (
     <>
       <SiteNav />
@@ -92,10 +136,10 @@ export default function VenueBookingsPage() {
           </Link>
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '6px' }}>
-            Booking Requests
+            Bookings, Revenue &amp; Calendar
           </h1>
           <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Organisers requesting to book your venues.
+            Revenue is gross rental income (not netted against the platform's flat booking fee). Multi-day bookings are marked on their start date only.
           </p>
 
           {error && (
@@ -103,6 +147,86 @@ export default function VenueBookingsPage() {
               {error}
             </div>
           )}
+
+          {/* F3 - Revenue summary */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '32px' }}>
+            {[
+              { label: 'This month', value: thisMonthRevenue },
+              { label: 'Total confirmed', value: totalRevenue },
+              { label: 'Pending value', value: pendingValue },
+            ].map((s) => (
+              <div key={s.label} style={{ background: '#fff', borderRadius: '12px', padding: '18px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 6px' }}>{s.label}</p>
+                <p style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* F3 - Calendar */}
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <button
+                onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
+                style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer', color: '#0E0C0A', opacity: 0.6, padding: '4px 8px' }}
+              >
+                ←
+              </button>
+              <p style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
+                {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+              </p>
+              <button
+                onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)); setSelectedDay(null) }}
+                style={{ background: 'none', border: 'none', fontSize: '16px', cursor: 'pointer', color: '#0E0C0A', opacity: 0.6, padding: '4px 8px' }}
+              >
+                →
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                <div key={i} style={{ textAlign: 'center', fontSize: '11px', fontWeight: 600, color: '#0E0C0A', opacity: 0.4, padding: '4px 0' }}>{d}</div>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+              {calendarCells.map((day, i) => {
+                if (!day) return <div key={i} />
+                const key = day.toDateString()
+                const dayBookings = bookingsByDate[key] || []
+                const isSelected = selectedDay === key
+                return (
+                  <button
+                    key={i}
+                    onClick={() => dayBookings.length > 0 && setSelectedDay(isSelected ? null : key)}
+                    style={{
+                      aspectRatio: '1', borderRadius: '8px', border: isSelected ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.06)',
+                      background: isSelected ? 'rgba(200,68,26,0.06)' : '#fff', cursor: dayBookings.length > 0 ? 'pointer' : 'default',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', padding: 0,
+                    }}
+                  >
+                    <span style={{ fontSize: '13px', color: '#0E0C0A' }}>{day.getDate()}</span>
+                    {dayBookings.length > 0 && (
+                      <div style={{ display: 'flex', gap: '2px' }}>
+                        {dayBookings.slice(0, 3).map((b) => (
+                          <span key={b.id} style={{ width: '5px', height: '5px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status] }} />
+                        ))}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {selectedDay && bookingsByDate[selectedDay] && (
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                {bookingsByDate[selectedDay].map((b) => (
+                  <div key={b.id} style={{ fontSize: '13px', color: '#0E0C0A', padding: '4px 0' }}>
+                    <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: '6px' }} />
+                    {b.event?.title || 'Untitled event'} — {b.venue.name} · ₹{b.amount.toLocaleString('en-IN')} · <span style={{ opacity: 0.6 }}>{b.status.toLowerCase()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Pending */}
           <div style={{ marginBottom: '32px' }}>
