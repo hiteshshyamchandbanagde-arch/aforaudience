@@ -154,6 +154,12 @@ export default function VenueDashboard() {
                 Flexible Requests
               </Link>
               <Link
+                href="/dashboard/venue/calendar"
+                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                Revenue &amp; Calendar
+              </Link>
+              <Link
                 href="/dashboard/venue/create"
                 style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
