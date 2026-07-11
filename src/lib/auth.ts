@@ -74,6 +74,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           tokenVersion: user.tokenVersion,
+          code: user.code,
         }
       }
     }),
@@ -114,6 +115,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           tokenVersion: user.tokenVersion,
+          code: user.code,
         }
       }
     })
@@ -124,13 +126,15 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role
         token.id = user.id
         token.tokenVersion = (user as any).tokenVersion
+        token.code = (user as any).code
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
-        (session.user as any).id = token.id
+        (session.user as any).id = token.id;
+        (session.user as any).code = token.code
 
         // B5 - if the password has been reset since this JWT was issued,
         // tokenVersion will have moved on. Flag the session as invalid

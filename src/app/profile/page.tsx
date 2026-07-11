@@ -122,7 +122,7 @@ export default function ProfilePage() {
   if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
 
-  const user = session.user as { name?: string | null; email?: string | null }
+  const user = session.user as { name?: string | null; email?: string | null; code?: string | null }
 
   return (
     <>
@@ -132,7 +132,12 @@ export default function ProfilePage() {
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
             {user?.name || 'Your Profile'}
           </h1>
-          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>{user?.email}</p>
+          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
+          {user?.code && (
+            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
+              Your login code: <span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+            </p>
+          )}
 
           {message && (
             <div style={{ padding: '14px 16px', background: '#F0FFF4', border: '1px solid #68D391', borderRadius: '8px', color: '#276749', fontSize: '14px', marginBottom: '20px' }}>

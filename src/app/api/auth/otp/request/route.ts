@@ -25,8 +25,25 @@ export async function POST(req: NextRequest) {
   } else if (purpose === "LOGIN") {
     if (!identifier) return NextResponse.json({ error: "Identifier required." }, { status: 400 })
     const user = await resolveIdentifierToUser(identifier)
+    const isMock = (process.env.OTP_PROVIDER ?? "msg91") === "mock"
+
     if (!user || !user.phone) {
-      // Deliberately vague - don't reveal whether the identifier exists.
+      if (isMock) {
+        // QA only - anti-enumeration protection isn't the concern here, and
+        // silently returning ok:true left testers staring at a fake OTP
+        // screen that never had a real code behind it. Give an honest error
+        // instead so the client doesn't advance past this step.
+        return NextResponse.json(
+          {
+            error: user
+              ? "This account has no phone number on file, so OTP login isn't available for it."
+              : "No account found for that identifier.",
+          },
+          { status: 400 }
+        )
+      }
+      // Deliberately vague in production - don't reveal whether the
+      // identifier exists or whether it has a phone on file.
       return NextResponse.json(
         { ok: true, message: "If this account exists and has a phone on file, a code has been sent." },
         { status: 200 }
