@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import EnvBadge from "@/components/EnvBadge"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -34,6 +35,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
             <span className="text-[#C8441A]">A</span>forAudience
+            <EnvBadge />
           </Link>
           <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
             Reset your password

@@ -3,6 +3,7 @@ import { useState, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
+import EnvBadge from "@/components/EnvBadge"
 
 function LoginForm() {
   const router = useRouter()
@@ -47,6 +48,7 @@ function LoginForm() {
       <div className="text-center mb-8">
         <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
           <span className="text-[#C8441A]">A</span>forAudience
+          <EnvBadge />
         </Link>
         <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
           Welcome back to the art world
