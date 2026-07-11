@@ -22,3 +22,24 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
     `,
   })
 }
+
+// Fire-and-forget from register/route.ts - deliberately does not block
+// signup completion. Phone OTP is the one mandatory verification gate;
+// email verification is a background nudge, not a login requirement.
+export async function sendEmailVerificationEmail(to: string, verifyUrl: string) {
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set, skipping send. Verify URL:", verifyUrl)
+    return
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Verify your AforAudience email",
+    html: `
+      <p>Welcome to AforAudience! Confirm this is your email address.</p>
+      <p><a href="${verifyUrl}">Verify your email</a></p>
+      <p>This link expires in 24 hours. You can keep using your account either way - this is just a confirmation.</p>
+    `,
+  })
+}

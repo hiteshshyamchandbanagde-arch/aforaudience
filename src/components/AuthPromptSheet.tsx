@@ -31,7 +31,7 @@ export default function AuthPromptSheet({
   subtitle,
   onSuccess,
 }: AuthPromptSheetProps) {
-  const [form, setForm] = useState({ email: "", password: "" })
+  const [form, setForm] = useState({ identifier: "", password: "" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -46,7 +46,7 @@ export default function AuthPromptSheet({
     setError("")
     try {
       const result = await signIn("credentials", {
-        email: form.email.trim().toLowerCase(),
+        identifier: form.identifier.trim(),
         password: form.password,
         redirect: false,
       })
@@ -54,7 +54,7 @@ export default function AuthPromptSheet({
         if (result.error === "LOCKED") {
           setError("Too many attempts. Try again in 15 minutes.")
         } else if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password")
+          setError("Invalid credentials")
         } else {
           setError("Failed to sign in. Please check your credentials.")
         }
@@ -128,7 +128,7 @@ export default function AuthPromptSheet({
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
           {[
-            { label: "Email", name: "email", type: "email", placeholder: "you@example.com" },
+            { label: "Email / Phone / Username / Code", name: "identifier", type: "text", placeholder: "you@example.com" },
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>

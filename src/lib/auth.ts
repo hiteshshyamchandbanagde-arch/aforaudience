@@ -3,29 +3,35 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { resolveIdentifierToUser } from "@/lib/auth-helpers"
+import { verifyOtp } from "@/lib/otp"
 
 const LOCKOUT_THRESHOLD = 5
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 
-// Precomputed once at cold start so a lookup on a nonexistent email still
-// does a bcrypt.compare of similar cost to a real one - keeps response
-// timing from being a trivial way to enumerate accounts.
+// Precomputed once at cold start so a lookup on a nonexistent identifier
+// still does a bcrypt.compare of similar cost to a real one - keeps
+// response timing from being a trivial way to enumerate accounts.
 const DUMMY_HASH = bcrypt.hashSync("aforaudience-timing-guard", 12)
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        // Accepts email, phone, username, or AFA/ART/ORG/VEN code - see
+        // resolveIdentifierToUser for resolution order. Field is still
+        // called "identifier" (not "email") end to end, including on the
+        // login page.
+        identifier: { label: "Email / Phone / Username / Code", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        if (!credentials?.identifier || !credentials?.password) return null
 
-        const email = credentials.email.trim().toLowerCase()
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await resolveIdentifierToUser(credentials.identifier)
 
         if (!user) {
           await bcrypt.compare(credentials.password, DUMMY_HASH)
@@ -55,6 +61,46 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Successful login clears any prior failed-attempt count/lock.
+        if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginAttempts: 0, lockedUntil: null },
+          })
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tokenVersion: user.tokenVersion,
+        }
+      }
+    }),
+    // Separate provider (not a branch inside "credentials") so the login
+    // page calls signIn("otp-login", {...}) explicitly - keeps the two
+    // auth factors from being silently interchangeable inside one handler.
+    // Deliberately does NOT check password lockedUntil: OTP possession is
+    // an independent, already rate-limited factor (see lib/otp.ts) and
+    // proves control of the phone, a stronger signal than the thing a
+    // password lockout is protecting against. If you'd rather OTP respect
+    // the same lock, add the same check as above here.
+    CredentialsProvider({
+      id: "otp-login",
+      name: "otp-login",
+      credentials: {
+        identifier: { label: "Email / Phone / Username / Code", type: "text" },
+        code: { label: "OTP", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.identifier || !credentials?.code) return null
+
+        const user = await resolveIdentifierToUser(credentials.identifier)
+        if (!user || !user.phone) return null
+
+        const result = await verifyOtp(user.phone, credentials.code, "LOGIN")
+        if (!result.ok) return null
+
         if (user.failedLoginAttempts > 0 || user.lockedUntil) {
           await prisma.user.update({
             where: { id: user.id },

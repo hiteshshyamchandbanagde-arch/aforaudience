@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 
+type Mode = "password" | "otp-request" | "otp-verify"
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -12,28 +14,69 @@ function LoginForm() {
   const justReset = searchParams.get("reset")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [form, setForm] = useState({ email: "", password: "" })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
+  const [mode, setMode] = useState<Mode>("password")
+  const [otpCode, setOtpCode] = useState("")
+  const [devOtp, setDevOtp] = useState<string | null>(null) // only ever set in QA
 
   const handleLogin = async () => {
     setLoading(true); setError("")
     try {
       const result = await signIn("credentials", {
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
+        identifier: identifier.trim(),
+        password,
         redirect: false,
       })
       if (result?.error) {
         if (result.error === "LOCKED") {
           setError("Too many attempts. Try again in 15 minutes.")
         } else if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password")
+          setError("Invalid credentials")
         } else {
           setError("Failed to sign in. Please check your credentials.")
         }
+        setLoading(false); return
+      }
+      router.push("/")
+    } catch {
+      setError("Something went wrong")
+      setLoading(false)
+    }
+  }
+
+  const handleRequestOtp = async () => {
+    setLoading(true); setError("")
+    try {
+      const res = await fetch("/api/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purpose: "LOGIN", identifier: identifier.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Could not send code.")
+        setLoading(false); return
+      }
+      setDevOtp(data.devOtp ?? null)
+      setMode("otp-verify")
+      setLoading(false)
+    } catch {
+      setError("Could not send code.")
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    setLoading(true); setError("")
+    try {
+      const result = await signIn("otp-login", {
+        identifier: identifier.trim(),
+        code: otpCode,
+        redirect: false,
+      })
+      if (result?.error) {
+        setError("Invalid or expired code.")
         setLoading(false); return
       }
       router.push("/")
@@ -65,48 +108,116 @@ function LoginForm() {
             ✅ Account created! Please sign in.
           </div>
         )}
-
         {justReset && (
           <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
             ✅ Password updated. Please sign in.
           </div>
         )}
-
         {error && (
           <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
             {error}
           </div>
         )}
+        {devOtp && mode === "otp-verify" && (
+          <div style={{ background: "#FFF8E1", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "#0E0C0A" }}>
+            QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
+          </div>
+        )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-          {[
-            { label: "Email", name: "email", type: "email", placeholder: "you@example.com" },
-            { label: "Password", name: "password", type: "password", placeholder: "Your password" },
-          ].map((field) => (
-            <div key={field.name}>
+        {mode !== "otp-verify" && (
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              Email / Phone / Username / Code
+            </label>
+            <input
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="you@example.com, phone, username, or AFA code"
+              onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
+              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+        )}
+
+        {mode === "password" && (
+          <>
+            <div style={{ marginBottom: "24px" }}>
               <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-                {field.label}
+                Password
               </label>
               <input
-                name={field.name}
-                type={field.type}
-                placeholder={field.placeholder}
-                value={form[field.name as keyof typeof form]}
-                onChange={handleChange}
+                type="password"
+                placeholder="Your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                 style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
-          ))}
-        </div>
+            <button
+              onClick={handleLogin}
+              disabled={loading || !identifier || !password}
+              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+            <button
+              onClick={() => { setMode("otp-request"); setError("") }}
+              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+            >
+              Use OTP instead
+            </button>
+          </>
+        )}
 
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
-        >
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
+        {mode === "otp-request" && (
+          <>
+            <button
+              onClick={handleRequestOtp}
+              disabled={loading || !identifier}
+              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+            >
+              {loading ? "Sending..." : "Send code"}
+            </button>
+            <button
+              onClick={() => { setMode("password"); setError("") }}
+              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+            >
+              Use password instead
+            </button>
+          </>
+        )}
+
+        {mode === "otp-verify" && (
+          <>
+            <div style={{ marginBottom: "24px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                Enter 6-digit code
+              </label>
+              <input
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                maxLength={6}
+                onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <button
+              onClick={handleVerifyOtp}
+              disabled={loading || otpCode.length !== 6}
+              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+            >
+              {loading ? "Verifying..." : "Verify & Sign In"}
+            </button>
+            <button
+              onClick={handleRequestOtp}
+              disabled={loading}
+              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+            >
+              Resend code
+            </button>
+          </>
+        )}
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>
           <Link href="/forgot-password" style={{ fontSize: "13px", color: "#C8441A", textDecoration: "none" }}>
