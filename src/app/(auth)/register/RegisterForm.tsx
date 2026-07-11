@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import EnvBadge from "@/components/EnvBadge"
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -61,6 +62,7 @@ export default function RegisterForm() {
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
             <span style={{ color: "#C8441A" }}>A</span>forAudience
+            <EnvBadge />
           </Link>
           <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, marginTop: "8px" }}>
             Create your account
