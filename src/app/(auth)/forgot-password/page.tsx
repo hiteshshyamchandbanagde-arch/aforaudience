@@ -51,6 +51,9 @@ export default function ForgotPasswordPage() {
               <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.7, lineHeight: 1.6 }}>
                 If an account exists for <strong>{email}</strong>, we&apos;ve sent a link to reset your password. It expires in 1 hour.
               </p>
++             <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, lineHeight: 1.6, marginTop: "16px" }}>
++               Didn&apos;t get anything? Double-check the email address for typos, look in your spam folder, or make sure you&apos;re using the email you originally signed up with.
++             </p>
             </div>
           ) : (
             <div>
