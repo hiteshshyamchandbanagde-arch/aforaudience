@@ -14,6 +14,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   await resend.emails.send({
     from: FROM,
     to,
+    replyTo: "info@aforaudience.com",
     subject: "Reset your AforAudience password",
     html: `
       <p>We received a request to reset your AforAudience password.</p>
@@ -35,6 +36,7 @@ export async function sendEmailVerificationEmail(to: string, verifyUrl: string) 
   await resend.emails.send({
     from: FROM,
     to,
+    replyTo: "info@aforaudience.com",
     subject: "Verify your AforAudience email",
     html: `
       <p>Welcome to AforAudience! Confirm this is your email address.</p>
