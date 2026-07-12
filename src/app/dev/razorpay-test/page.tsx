@@ -17,11 +17,18 @@ import Link from "next/link"
 // bypassable. If someone navigates to /dev/razorpay-test on the real prod
 // site, they get a 404, not a warning banner.
 //
-// Test card values (Razorpay's public documentation):
-//   Card:   4111 1111 1111 1111
+// Test card values (Razorpay India test mode — the global Visa test card
+// 4111 1111 1111 1111 is rejected here as "international not supported"
+// because our merchant account is India-registered, so a real India-
+// issued test card is required):
+//   Card:   5267 3181 8797 5449   (Mastercard, India)
 //   CVV:    any 3 digits (e.g. 123)
 //   Expiry: any future date (e.g. 12/30)
 //   OTP:    1234
+//
+// Alternative when cards fail: pick Netbanking from the modal and any
+// bank. On the fake bank page that opens, click "Success" to complete.
+// Netbanking is often the most reliable path in Razorpay Test.
 // ---------------------------------------------------------------------------
 
 // Razorpay's Checkout script attaches to window.Razorpay. TS doesn't know
@@ -273,12 +280,24 @@ export default function RazorpayTestPage() {
           }}
         >
           <div style={{ fontWeight: 700, marginBottom: "8px", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "11px", color: EMBER }}>
-            Test card values
+            Test card values (Razorpay India)
           </div>
-          Card: 4111 1111 1111 1111<br />
+          Card: 5267 3181 8797 5449<br />
           CVV: any 3 digits (e.g. 123)<br />
           Expiry: any future date (e.g. 12/30)<br />
           OTP if prompted: 1234
+          <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: `1px dashed ${MIST}`, opacity: 0.75 }}>
+            Global test cards (like 4111 1111 1111 1111) are rejected as
+            &quot;international not supported&quot; on India accounts. If the
+            card above fails too, pick <strong>Netbanking</strong> in the
+            modal, choose any bank, then click <strong>Success</strong> on
+            the simulated bank page — it almost always works.
+          </div>
+          <div style={{ marginTop: "10px", opacity: 0.6, fontSize: "12px" }}>
+            Note: Razorpay Test sends a real SMS OTP for card-save
+            tokenization, not for the payment itself. Safe to ignore or
+            enter — no real money moves in Test Mode.
+          </div>
         </div>
 
         {sessionStatus === "loading" ? (
