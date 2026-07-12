@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 
 type RoleStatus = { isInRole: boolean; isApproved: boolean; hasProfile: boolean }
@@ -160,9 +161,9 @@ export default function ProfilePage() {
             </p>
 
             {artistStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741' }}>
-                ✅ Visit your Artist dashboard
-              </div>
+              <Link href="/dashboard/artist" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
+                ✅ Visit your Artist dashboard →
+              </Link>
             ) : (
               <>
                 <input
@@ -193,9 +194,15 @@ export default function ProfilePage() {
             </p>
 
             {orgStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: orgStatus.isApproved ? '#4A6741' : '#8a6a1f' }}>
-                {orgStatus.isApproved ? '✅ Approved — visit your Organiser dashboard' : '⏳ Application pending approval'}
-              </div>
+              orgStatus.isApproved ? (
+                <Link href="/dashboard/organiser" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
+                  ✅ Approved — visit your Organiser dashboard →
+                </Link>
+              ) : (
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>
+                  ⏳ Application pending approval
+                </div>
+              )
             ) : (
               <>
                 <input
@@ -226,9 +233,15 @@ export default function ProfilePage() {
             </p>
 
             {venueStatus?.isInRole ? (
-              <div style={{ fontSize: '14px', fontWeight: 600, color: venueStatus.isApproved ? '#4A6741' : '#8a6a1f' }}>
-                {venueStatus.isApproved ? '✅ Approved — visit your Venue dashboard' : '⏳ Application pending approval'}
-              </div>
+              venueStatus.isApproved ? (
+                <Link href="/dashboard/venue" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
+                  ✅ Approved — visit your Venue dashboard →
+                </Link>
+              ) : (
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>
+                  ⏳ Application pending approval
+                </div>
+              )
             ) : (
               <button
                 onClick={applyVenueOwner}
