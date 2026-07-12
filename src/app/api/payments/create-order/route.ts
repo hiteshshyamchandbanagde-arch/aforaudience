@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import {
@@ -133,21 +134,31 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Razorpay's `receipt` field has a hard 40-character limit (validated
+    // server-side; requests over the limit fail with input_validation_failed).
+    // We use a short random ID here purely as a client-side reference for
+    // the order — the actual "who is this user, what booking is this for"
+    // context goes into `notes` below, which has no length restriction and
+    // appears alongside the order in the Razorpay dashboard.
+    //
+    // Format: "chk1_" (5) + 16 hex chars (from 8 random bytes) = 21 chars.
+    // Well under the 40-char cap with room for a future prefix change.
+    const receipt = `chk1_${crypto.randomBytes(8).toString("hex")}`
+
+    const userId = (session.user as any).id
+    const userIdShort = typeof userId === "string" ? userId.slice(0, 40) : "anon"
+
     const order = await client.orders.create({
       amount,
       currency,
-      // receipt is a short client-side reference for our own reconciliation;
-      // Razorpay stores it verbatim and it appears in their dashboard.
-      // Timestamp + user id is enough for now — Checkpoint 2 will replace
-      // with a proper booking reference.
-      // (session.user as any).id matches the existing codebase pattern —
-      // the NextAuth session type isn't augmented globally; every route
-      // that reads the user id casts through any. Preserving that here
-      // rather than introducing a one-off type change.
-      receipt: `chk1_${(session.user as any).id ?? "anon"}_${Date.now()}`,
+      receipt,
       notes: notes ?? {
         checkpoint: "1",
         purpose: "test-payment",
+        // Notes field has no strict length cap and is where any tracking
+        // metadata belongs — Razorpay stores it alongside the order in the
+        // dashboard. Truncated for defense-in-depth against oversized values.
+        userId: userIdShort,
       },
     })
 
