@@ -85,6 +85,17 @@ enum DayOfWeek {
   SUNDAY
 }
 
+// Checkpoint 2 — Razorpay payment lifecycle.
+// See prisma/migrations/20260713000000_checkpoint_2_payments/migration.sql
+// for the reasoning behind each state.
+enum PaymentStatus {
+  CREATED            // Razorpay order created; user hasn't paid yet
+  VERIFIED           // Frontend signature verified; booking marked CONFIRMED
+  WEBHOOK_CONFIRMED  // Webhook also confirmed; safety net check passed
+  FAILED             // Payment failed at Razorpay
+  MISMATCH           // Frontend + webhook disagree; needs human review
+}
+
 // Optional per-day override on top of Venue.hourlyRate/dailyRate - a row
 // here only exists for days the owner explicitly priced differently (e.g.
 // a weekend premium). A day with no row here just uses the venue's base
@@ -438,9 +449,47 @@ model Booking {
   seats       Json
   totalAmount Float
   status      BookingStatus @default(PENDING)
+  // Checkpoint 2 — deprecated in favor of the Payment model (below). Kept
+  // in the schema for migration safety; nothing in the new payment flow
+  // reads or writes it. Remove in a later cleanup once we're sure no old
+  // code references it.
   paymentId   String?
   ticketCode  String?       @unique
   createdAt   DateTime      @default(now())
+
+  // Checkpoint 2 — 15-minute TTL on PENDING bookings, so an abandoned
+  // checkout doesn't permanently eat capacity. Set at creation time to
+  // NOW + 15min; cleared when the booking transitions to CONFIRMED.
+  // Capacity checks filter out PENDING rows where expiresAt < NOW().
+  expiresAt   DateTime?
+
+  payment     Payment?
+
+  @@index([status, expiresAt])
+}
+
+// Checkpoint 2 — one Payment per Booking. Kept as a separate table (not
+// fields on Booking) so future flows (tips, subscriptions, refunds) can
+// attach payments without conflating them with tickets.
+//
+// `amount` is stored in PAISE (integer), never rupees (float). Razorpay
+// itself uses paise, and floats accumulate rounding errors on totals.
+model Payment {
+  id                String        @id @default(cuid())
+  bookingId         String        @unique
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?       @unique
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(CREATED)
+  verifiedAt        DateTime?
+  webhookReceivedAt DateTime?
+  failureReason     String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([razorpayOrderId])
 }
 
 model Review {
