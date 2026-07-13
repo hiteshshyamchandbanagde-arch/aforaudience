@@ -338,13 +338,25 @@ model VenueBookingOffer {
   createdAt   DateTime             @default(now())
 }
 
-// Singleton settings row (Admin-managed later, defaults for now) rather
-// than hardcoding the flat venue-booking fee or commission rates inline.
+// Singleton config row. The DEAD columns (flatVenueBookingFee,
+// ticketCommissionRate, performerSlotCommissionRate) are from a
+// pre-fifth-amendment design and are never read by application code;
+// they're kept only to match the actual DB shape. See master design
+// doc §4.5 / §9.5 for why they're retired.
+//
+// audienceBookingFee is the live field (Checkpoint 4). Stored in
+// PAISE (integer) for consistency with Payment.amount. UI converts
+// to/from rupees on display + save. Value of 0 means "no fee".
 model PlatformSettings {
-  id                           String @id @default(cuid())
-  flatVenueBookingFee          Float  @default(0)
-  ticketCommissionRate         Float  @default(0.08)
-  performerSlotCommissionRate  Float  @default(0.08)
+  id                           String   @id @default("singleton")
+  audienceBookingFee           Int      @default(0)
+  /// @deprecated dead per fifth amendment — do not read
+  flatVenueBookingFee          Float    @default(0)
+  /// @deprecated dead per fifth amendment — do not read
+  ticketCommissionRate         Float    @default(0.08)
+  /// @deprecated dead per fifth amendment — do not read
+  performerSlotCommissionRate  Float    @default(0.08)
+  updatedAt                    DateTime @updatedAt
 }
 
 
@@ -532,29 +544,4 @@ model Review {
   comment       String?
   createdAt     DateTime     @default(now())
 }
-// Checkpoint 4 — single-row platform-wide config table. All fields
-// have safe defaults; the singleton row is upserted by the migration.
-// Keyed by a fixed string id ("singleton") so there's no ambiguity
-// about which row holds the current config.
-//
-// audienceBookingFee is stored in PAISE (integer) for consistency
-// with Payment.amount. UI converts to/from rupees on display + save.
-// A value of 0 means "no fee" — checkout, PDF, and email skip fee
-// display entirely, behaving exactly like Checkpoint 3.
-//
-// The three fields below audienceBookingFee are DEAD columns from a
-// pre-fifth-amendment design that had percentage commissions and a
-// flat venue fee. Left in schema (and DB) to match the actual table
-// shape but never read by application code. Do not add UI for them,
-// do not use in any calculation. See master design doc §4.5 / §9.5.
-model PlatformSettings {
-  id                          String   @id @default("singleton")
-  audienceBookingFee          Int      @default(0)
-  /// @deprecated dead per fifth amendment — do not read
-  flatVenueBookingFee         Int?
-  /// @deprecated dead per fifth amendment — do not read
-  ticketCommissionRate        Float?
-  /// @deprecated dead per fifth amendment — do not read
-  performerSlotCommissionRate Float?
-  updatedAt                   DateTime @updatedAt
-}
+
