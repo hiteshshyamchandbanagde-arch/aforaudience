@@ -72,6 +72,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          displayName: user.displayName,
           role: user.role,
           tokenVersion: user.tokenVersion,
           code: user.code,
@@ -113,6 +114,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          displayName: user.displayName,
           role: user.role,
           tokenVersion: user.tokenVersion,
           code: user.code,
@@ -127,6 +129,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.tokenVersion = (user as any).tokenVersion
         token.code = (user as any).code
+        token.displayName = (user as any).displayName
       }
       return token
     },
@@ -134,15 +137,24 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).role = token.role;
         (session.user as any).id = token.id;
-        (session.user as any).code = token.code
+        (session.user as any).code = token.code;
+        (session.user as any).displayName = token.displayName
 
         // B5 - if the password has been reset since this JWT was issued,
         // tokenVersion will have moved on. Flag the session as invalid
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { tokenVersion: true },
+          select: { tokenVersion: true, displayName: true },
         })
+
+        // Refresh displayName on every session check so that a user who
+        // just edited it in Profile sees the new value in the header
+        // greeting immediately, without re-login. Cheap select, already
+        // needed for the tokenVersion check.
+        if (currentUser) {
+          (session.user as any).displayName = currentUser.displayName
+        }
 
         if (!currentUser || currentUser.tokenVersion !== token.tokenVersion) {
           (session as any).error = "SessionInvalidated"

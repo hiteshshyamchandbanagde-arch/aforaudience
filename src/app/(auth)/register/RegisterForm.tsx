@@ -31,9 +31,8 @@ export default function RegisterForm() {
   const [usernameSuggestion, setUsernameSuggestion] = useState<string | null>(null)
 
   // Auto-suggest username from Full Name, until the user edits it themselves.
-  // Full Name itself is only used to seed this suggestion - it isn't sent
-  // to the server as a separate field, the account's stored identity is
-  // email + username.
+  // Full Name itself IS also sent to the server (as displayName) and shows
+  // up on tickets/emails; only the username gets sliced/lowercased here.
   useEffect(() => {
     if (!usernameTouched && form.fullName) {
       const suggested = form.fullName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 20)
@@ -103,6 +102,7 @@ export default function RegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fullName: form.fullName,
           username: form.username,
           email: form.email,
           phone,
