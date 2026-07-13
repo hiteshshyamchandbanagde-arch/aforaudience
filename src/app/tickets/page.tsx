@@ -151,6 +151,16 @@ export default function MyTicketsPage() {
                       </button>
                     </div>
                   )}
+                  {eff === 'CONFIRMED' && (
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <a
+                        href={`/api/bookings/${b.id}/ticket`}
+                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: '#0E0C0A', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                      >
+                        Download ticket (PDF)
+                      </a>
+                    </div>
+                  )}
                 </div>
               )
             })

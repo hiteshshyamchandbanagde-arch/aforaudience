@@ -4,6 +4,7 @@ import {
   getWebhookSecret,
   verifyWebhookSignature,
 } from '@/lib/razorpay'
+import { deliverTicket } from '@/lib/ticket-delivery'
 
 // POST /api/payments/webhook
 //
@@ -206,6 +207,14 @@ export async function POST(req: Request) {
         },
       }),
     ])
+
+    // Trigger ticket delivery. Idempotent — if the browser confirm path
+    // already fired this, deliverTicket() no-ops on its atomic
+    // `deliveredAt IS NULL` claim. Not awaited: Razorpay expects a
+    // fast 200 from webhook handlers and will retry on timeout.
+    deliverTicket(payment.bookingId).catch((err) => {
+      console.error('[webhook] Background deliverTicket threw:', err)
+    })
 
     return NextResponse.json({ ok: true, marked: 'WEBHOOK_CONFIRMED' })
   } catch (err) {
