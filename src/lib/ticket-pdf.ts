@@ -50,6 +50,8 @@ export type TicketData = {
   venueCity: string | null
   seats: Record<string, number>
   totalAmount: number
+  subtotalAmount: number
+  bookingFeeAmount: number
   attendeeName: string
   purchasedAt: Date
 }
@@ -215,9 +217,31 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   const col1X = marginX
   const col2X = marginX + 200
   drawDetail(page, sansBold, sans, col1X, cursorY, "ATTENDEE", t.attendeeName)
-  drawDetail(page, sansBold, sans, col2X, cursorY, "AMOUNT PAID",
-    t.totalAmount > 0 ? `INR ${t.totalAmount.toLocaleString("en-IN")}` : "Free entry"
-  )
+
+  // Amount displayed on the ticket. When a booking fee was applied,
+  // break it out honestly so the attendee sees where the money went.
+  // When there's no fee, just show "AMOUNT PAID" like before.
+  if (t.bookingFeeAmount > 0) {
+    drawDetail(
+      page,
+      sansBold,
+      sans,
+      col2X,
+      cursorY,
+      "TICKET",
+      `INR ${t.subtotalAmount.toLocaleString("en-IN")}`
+    )
+  } else {
+    drawDetail(
+      page,
+      sansBold,
+      sans,
+      col2X,
+      cursorY,
+      "AMOUNT PAID",
+      t.totalAmount > 0 ? `INR ${t.totalAmount.toLocaleString("en-IN")}` : "Free entry"
+    )
+  }
   cursorY -= 54
 
   const seatSummary = Object.entries(t.seats)
@@ -225,10 +249,40 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     .map(([s, q]) => `${s} x ${q}`)
     .join(", ")
   drawDetail(page, sansBold, sans, col1X, cursorY, "SEATS", seatSummary || "General")
-  drawDetail(page, sansBold, sans, col2X, cursorY, "PURCHASED",
-    formatDate(t.purchasedAt)
-  )
+  if (t.bookingFeeAmount > 0) {
+    drawDetail(
+      page,
+      sansBold,
+      sans,
+      col2X,
+      cursorY,
+      "BOOKING FEE",
+      `INR ${t.bookingFeeAmount.toLocaleString("en-IN")}`
+    )
+  } else {
+    drawDetail(page, sansBold, sans, col2X, cursorY, "PURCHASED",
+      formatDate(t.purchasedAt)
+    )
+  }
   cursorY -= 54
+
+  // If we had to sacrifice PURCHASED above to fit BOOKING FEE, show
+  // TOTAL PAID + PURCHASED on this row instead of just BOOKING ID.
+  if (t.bookingFeeAmount > 0) {
+    drawDetail(
+      page,
+      sansBold,
+      sans,
+      col1X,
+      cursorY,
+      "TOTAL PAID",
+      `INR ${t.totalAmount.toLocaleString("en-IN")}`
+    )
+    drawDetail(page, sansBold, sans, col2X, cursorY, "PURCHASED",
+      formatDate(t.purchasedAt)
+    )
+    cursorY -= 54
+  }
 
   drawDetail(page, sansBold, sans, col1X, cursorY, "BOOKING ID", t.bookingId, 9)
 

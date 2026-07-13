@@ -37,6 +37,8 @@ type BookingState = {
     status: string
     seats: Record<string, number>
     totalAmount: number
+    subtotalAmount: number
+    bookingFeeAmount: number
     expiresAt: string | null
     isExpired: boolean
     createdAt: string
@@ -453,8 +455,34 @@ export default function CheckoutPage() {
                 <span>
                   {section} × {qty}
                 </span>
+                <span style={{ opacity: 0.7 }}>
+                  ₹{state.booking.subtotalAmount.toLocaleString('en-IN')}
+                </span>
               </div>
             ))}
+            {state.booking.bookingFeeAmount > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '10px 0 4px',
+                  fontSize: 13,
+                  opacity: 0.75,
+                  borderTop: '1px dashed rgba(14,12,10,0.08)',
+                  marginTop: 6,
+                }}
+              >
+                <span>
+                  Booking fee
+                  <span style={{ fontSize: 11, opacity: 0.75, display: 'block', marginTop: 2 }}>
+                    Supports the artist ecosystem — keeps the platform free for artists and venues.
+                  </span>
+                </span>
+                <span>
+                  ₹{state.booking.bookingFeeAmount.toLocaleString('en-IN')}
+                </span>
+              </div>
+            )}
           </div>
 
           <div

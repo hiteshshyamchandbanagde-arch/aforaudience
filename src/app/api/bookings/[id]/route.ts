@@ -60,6 +60,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         status: booking.status,
         seats: booking.seats,
         totalAmount: booking.totalAmount,
+        subtotalAmount: booking.subtotalAmount,
+        bookingFeeAmount: booking.bookingFeeAmount,
         expiresAt: booking.expiresAt,
         isExpired,
         createdAt: booking.createdAt,

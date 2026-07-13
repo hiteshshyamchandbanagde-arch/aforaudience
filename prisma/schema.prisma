@@ -456,6 +456,15 @@ model Booking {
   event       Event         @relation(fields: [eventId], references: [id])
   seats       Json
   totalAmount Float
+  // Checkpoint 4 — audience booking fee split.
+  // subtotalAmount    = ticket revenue that goes to the Organiser
+  // bookingFeeAmount  = platform's cut (audience-side booking fee)
+  // totalAmount       = grand total the audience pays (subtotal + fee)
+  // Backfilled on migration: existing rows get subtotal = totalAmount,
+  // bookingFeeAmount = 0. Free events stay 0/0/0 forever — per About
+  // page, the platform doesn't tax free events.
+  subtotalAmount   Float @default(0)
+  bookingFeeAmount Float @default(0)
   status      BookingStatus @default(PENDING)
   // Checkpoint 2 — deprecated in favor of the Payment model (below). Kept
   // in the schema for migration safety; nothing in the new payment flow
@@ -522,4 +531,30 @@ model Review {
   rating        Int
   comment       String?
   createdAt     DateTime     @default(now())
+}
+// Checkpoint 4 — single-row platform-wide config table. All fields
+// have safe defaults; the singleton row is upserted by the migration.
+// Keyed by a fixed string id ("singleton") so there's no ambiguity
+// about which row holds the current config.
+//
+// audienceBookingFee is stored in PAISE (integer) for consistency
+// with Payment.amount. UI converts to/from rupees on display + save.
+// A value of 0 means "no fee" — checkout, PDF, and email skip fee
+// display entirely, behaving exactly like Checkpoint 3.
+//
+// The three fields below audienceBookingFee are DEAD columns from a
+// pre-fifth-amendment design that had percentage commissions and a
+// flat venue fee. Left in schema (and DB) to match the actual table
+// shape but never read by application code. Do not add UI for them,
+// do not use in any calculation. See master design doc §4.5 / §9.5.
+model PlatformSettings {
+  id                          String   @id @default("singleton")
+  audienceBookingFee          Int      @default(0)
+  /// @deprecated dead per fifth amendment — do not read
+  flatVenueBookingFee         Int?
+  /// @deprecated dead per fifth amendment — do not read
+  ticketCommissionRate        Float?
+  /// @deprecated dead per fifth amendment — do not read
+  performerSlotCommissionRate Float?
+  updatedAt                   DateTime @updatedAt
 }

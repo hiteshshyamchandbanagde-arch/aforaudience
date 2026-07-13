@@ -62,6 +62,8 @@ export type TicketEmailInput = {
   venueLine: string | null
   seatsSummary: string
   totalAmount: number
+  subtotalAmount: number
+  bookingFeeAmount: number
   bookingId: string
   ticketPdf: Uint8Array
 }
@@ -81,10 +83,40 @@ export async function sendTicketEmail(input: TicketEmailInput) {
     return
   }
 
-  const amountLine =
-    input.totalAmount > 0
-      ? `₹${input.totalAmount.toLocaleString("en-IN")}`
-      : "Free entry"
+  const hasFee = input.bookingFeeAmount > 0
+
+  // When a fee applied, break out the numbers honestly instead of
+  // showing a single AMOUNT PAID that hides where the money went.
+  const amountRows = hasFee
+    ? `
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">TICKET</div>
+          <div style="font-size: 14px;">₹${input.subtotalAmount.toLocaleString("en-IN")}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">BOOKING FEE</div>
+          <div style="font-size: 14px;">₹${input.bookingFeeAmount.toLocaleString("en-IN")}</div>
+          <div style="font-size: 11px; color: #8a827a; margin-top: 3px;">Supports the artist ecosystem.</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; border-top: 1px solid rgba(14,12,10,0.08);">
+          <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">TOTAL PAID</div>
+          <div style="font-size: 14px; font-weight: 600;">₹${input.totalAmount.toLocaleString("en-IN")}</div>
+        </td>
+      </tr>
+    `
+    : `
+      <tr>
+        <td style="padding: 8px 0;">
+          <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">AMOUNT PAID</div>
+          <div style="font-size: 14px;">${input.totalAmount > 0 ? `₹${input.totalAmount.toLocaleString("en-IN")}` : "Free entry"}</div>
+        </td>
+      </tr>
+    `
 
   await resend.emails.send({
     from: TICKETS_FROM,
@@ -128,12 +160,7 @@ export async function sendTicketEmail(input: TicketEmailInput) {
               <div style="font-size: 14px;">${escapeHtml(input.seatsSummary)}</div>
             </td>
           </tr>
-          <tr>
-            <td style="padding: 8px 0;">
-              <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">AMOUNT PAID</div>
-              <div style="font-size: 14px;">${escapeHtml(amountLine)}</div>
-            </td>
-          </tr>
+          ${amountRows}
           <tr>
             <td style="padding: 8px 0;">
               <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">BOOKING ID</div>
