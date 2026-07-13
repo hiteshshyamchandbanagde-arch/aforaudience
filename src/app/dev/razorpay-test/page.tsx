@@ -31,38 +31,12 @@ import Link from "next/link"
 // Netbanking is often the most reliable path in Razorpay Test.
 // ---------------------------------------------------------------------------
 
-// Razorpay's Checkout script attaches to window.Razorpay. TS doesn't know
-// about it by default, so a minimal type declaration here.
-declare global {
-  interface Window {
-    Razorpay?: new (options: RazorpayOptions) => { open: () => void }
-  }
-}
-
-type RazorpayOptions = {
-  key: string
-  amount: number
-  currency: string
-  order_id: string
-  name: string
-  description?: string
-  handler: (response: {
-    razorpay_order_id: string
-    razorpay_payment_id: string
-    razorpay_signature: string
-  }) => void
-  modal?: {
-    ondismiss?: () => void
-  }
-  theme?: {
-    color?: string
-  }
-  prefill?: {
-    name?: string
-    email?: string
-    contact?: string
-  }
-}
+// Razorpay's Checkout script attaches to window.Razorpay. The type
+// declaration for it now lives in src/lib/razorpay-checkout.ts — that
+// module's `declare global` block is ambient and covers this page too.
+// This page keeps its own script loader (below) since it needs the
+// boolean-return shape rather than the throwing-Promise shape used by
+// razorpay-checkout.ts.
 
 type Status =
   | { kind: "idle" }
