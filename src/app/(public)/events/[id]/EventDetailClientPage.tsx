@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
@@ -63,6 +64,7 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 }
 
 export default function EventDetailPage({ event }: { event: EventData | null }) {
+  const router = useRouter()
   const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
   const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
@@ -105,6 +107,16 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to reserve seats")
+
+      // Two possible responses:
+      //   - payment is attached → Razorpay was configured; go to checkout
+      //   - no payment (message only) → this env doesn't have Razorpay
+      //     yet, so keep the Checkpoint 1 "reserved, we'll email you"
+      //     behavior right here on this page.
+      if (data.payment && data.booking) {
+        router.push(`/checkout/${data.booking.id}`)
+        return
+      }
       setReservedMessage(data.message)
     } catch (err: any) {
       setBookingError(err.message)
@@ -422,11 +434,13 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
                   disabled={reserving}
                   style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving ? "default" : "pointer", opacity: reserving ? 0.7 : 1 }}
                 >
-                  {reserving ? "Reserving..." : "Reserve Seats"}
+                  {reserving ? "Reserving..." : event.isFree ? "Confirm Free Booking" : "Continue to Checkout"}
                 </button>
 
                 <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
-                  Online payment isn't live yet — this reserves your seats, we'll email you when checkout is ready.
+                  {event.isFree
+                    ? "Free entry — we'll confirm your seat instantly."
+                    : "Secure payment by Razorpay · UPI, card, netbanking"}
                 </div>
               </>
             )}

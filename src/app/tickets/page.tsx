@@ -11,6 +11,7 @@ interface BookingItem {
   seats: Record<string, number>
   totalAmount: number
   status: string
+  expiresAt: string | null
   createdAt: string
   event: {
     id: string
@@ -22,10 +23,20 @@ interface BookingItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Reserved — payment pending' },
+  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Reserved — pay to confirm' },
+  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Expired — book again' },
   CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741', label: 'Confirmed' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E', label: 'Cancelled' },
   REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Refunded' },
+}
+
+// A booking's display status can differ from its DB status: an expired
+// PENDING is functionally dead even though the row still says PENDING.
+function effectiveStatus(b: BookingItem): string {
+  if (b.status === 'PENDING' && b.expiresAt && new Date(b.expiresAt) < new Date()) {
+    return 'EXPIRED'
+  }
+  return b.status
 }
 
 export default function MyTicketsPage() {
@@ -85,7 +96,7 @@ export default function MyTicketsPage() {
             My Tickets
           </h1>
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Online payment isn't live yet, so tickets here are reservations, not confirmed purchases — we'll email you when checkout opens.
+            Reserved bookings need to be paid to lock in your seats. Confirmed bookings are yours.
           </p>
 
           {error && (
@@ -100,7 +111,9 @@ export default function MyTicketsPage() {
             </div>
           ) : (
             bookings.map((b) => {
-              const s = STATUS_STYLE[b.status] || STATUS_STYLE.PENDING
+              const eff = effectiveStatus(b)
+              const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
+              const isLivePending = eff === 'PENDING'
               return (
                 <div key={b.id} style={{ background: '#fff', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -119,14 +132,24 @@ export default function MyTicketsPage() {
                     <span>{Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}</span>
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
                   </div>
-                  {b.status === 'PENDING' && (
-                    <button
-                      onClick={() => cancelBooking(b.id)}
-                      disabled={cancelling === b.id}
-                      style={{ marginTop: '12px', fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
-                    >
-                      {cancelling === b.id ? 'Cancelling...' : 'Cancel reservation'}
-                    </button>
+                  {isLivePending && (
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {b.totalAmount > 0 && (
+                        <Link
+                          href={`/checkout/${b.id}`}
+                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: '#C8441A', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                        >
+                          Pay now →
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => cancelBooking(b.id)}
+                        disabled={cancelling === b.id}
+                        style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                      >
+                        {cancelling === b.id ? 'Cancelling...' : 'Cancel'}
+                      </button>
+                    </div>
                   )}
                 </div>
               )
