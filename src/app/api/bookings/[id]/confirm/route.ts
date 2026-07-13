@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { verifyPaymentSignature } from '@/lib/razorpay'
+import { deliverTicket } from '@/lib/ticket-delivery'
 
 // POST /api/bookings/[id]/confirm
 //
@@ -179,6 +180,16 @@ export async function POST(
         },
       }),
     ])
+
+    // Fire ticket delivery in the background. Deliberately not awaited:
+    // the user is staring at a spinner right now and Resend can take
+    // 300-800ms. The delivery function is idempotent (claims via
+    // `deliveredAt IS NULL`) so the webhook can safely retry-trigger
+    // if this attempt fails silently. Errors are captured to
+    // Payment.deliveryError — the booking stays CONFIRMED either way.
+    deliverTicket(booking.id).catch((err) => {
+      console.error('[confirm] Background deliverTicket threw:', err)
+    })
 
     return NextResponse.json({
       ok: true,

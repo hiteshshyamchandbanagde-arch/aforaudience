@@ -486,6 +486,17 @@ model Payment {
   verifiedAt        DateTime?
   webhookReceivedAt DateTime?
   failureReason     String?
+
+  // Checkpoint 3 — ticket delivery (email + PDF) tracking. Delivery is
+  // triggered atomically when payment moves to VERIFIED or
+  // WEBHOOK_CONFIRMED, gated on `deliveredAt IS NULL` so browser + webhook
+  // races don't double-send. deliveryError captures the reason if a send
+  // fails so an admin retry endpoint can act on it later. Booking status
+  // is decoupled from delivery — a failed delivery does NOT rollback a
+  // CONFIRMED booking, because the user paid and owns the ticket.
+  deliveredAt       DateTime?
+  deliveryError     String?
+
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 

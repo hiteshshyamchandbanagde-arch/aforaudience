@@ -247,6 +247,20 @@ export default function CheckoutPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <a
+              href={`/api/bookings/${state.booking.id}/ticket`}
+              style={{
+                background: '#0E0C0A',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: 10,
+                fontWeight: 600,
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              Download ticket (PDF)
+            </a>
             <Link
               href="/tickets"
               style={{
@@ -276,6 +290,9 @@ export default function CheckoutPage() {
               Browse more events
             </Link>
           </div>
+          <p style={{ fontSize: 12, color: '#8a827a', marginTop: 16, lineHeight: 1.6 }}>
+            We've also emailed the ticket to you. Show the QR at the door — screen or print is fine.
+          </p>
         </main>
       </>
     )
