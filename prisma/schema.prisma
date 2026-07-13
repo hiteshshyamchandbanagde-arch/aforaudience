@@ -338,13 +338,25 @@ model VenueBookingOffer {
   createdAt   DateTime             @default(now())
 }
 
-// Singleton settings row (Admin-managed later, defaults for now) rather
-// than hardcoding the flat venue-booking fee or commission rates inline.
+// Singleton config row. The DEAD columns (flatVenueBookingFee,
+// ticketCommissionRate, performerSlotCommissionRate) are from a
+// pre-fifth-amendment design and are never read by application code;
+// they're kept only to match the actual DB shape. See master design
+// doc §4.5 / §9.5 for why they're retired.
+//
+// audienceBookingFee is the live field (Checkpoint 4). Stored in
+// PAISE (integer) for consistency with Payment.amount. UI converts
+// to/from rupees on display + save. Value of 0 means "no fee".
 model PlatformSettings {
-  id                           String @id @default(cuid())
-  flatVenueBookingFee          Float  @default(0)
-  ticketCommissionRate         Float  @default(0.08)
-  performerSlotCommissionRate  Float  @default(0.08)
+  id                           String   @id @default("singleton")
+  audienceBookingFee           Int      @default(0)
+  /// @deprecated dead per fifth amendment — do not read
+  flatVenueBookingFee          Float    @default(0)
+  /// @deprecated dead per fifth amendment — do not read
+  ticketCommissionRate         Float    @default(0.08)
+  /// @deprecated dead per fifth amendment — do not read
+  performerSlotCommissionRate  Float    @default(0.08)
+  updatedAt                    DateTime @updatedAt
 }
 
 
@@ -456,6 +468,15 @@ model Booking {
   event       Event         @relation(fields: [eventId], references: [id])
   seats       Json
   totalAmount Float
+  // Checkpoint 4 — audience booking fee split.
+  // subtotalAmount    = ticket revenue that goes to the Organiser
+  // bookingFeeAmount  = platform's cut (audience-side booking fee)
+  // totalAmount       = grand total the audience pays (subtotal + fee)
+  // Backfilled on migration: existing rows get subtotal = totalAmount,
+  // bookingFeeAmount = 0. Free events stay 0/0/0 forever — per About
+  // page, the platform doesn't tax free events.
+  subtotalAmount   Float @default(0)
+  bookingFeeAmount Float @default(0)
   status      BookingStatus @default(PENDING)
   // Checkpoint 2 — deprecated in favor of the Payment model (below). Kept
   // in the schema for migration safety; nothing in the new payment flow
@@ -523,3 +544,4 @@ model Review {
   comment       String?
   createdAt     DateTime     @default(now())
 }
+

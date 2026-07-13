@@ -6,6 +6,7 @@ import {
   createRazorpayOrder,
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
+import { getPlatformSettings } from '@/lib/platform-settings'
 
 // PENDING bookings expire after this window if payment doesn't complete.
 // Keeps abandoned checkouts from permanently eating capacity. 15 minutes
@@ -83,6 +84,12 @@ export async function POST(req: Request) {
     const now = new Date()
     const razorpayReady = razorpayCredentialsPresent()
 
+    // Load audience booking fee before opening the transaction. Cheap
+    // Prisma query on a single-row table; doing it here rather than
+    // inside tx keeps the transaction pure DB work and avoids the 5s
+    // timeout risk if this ever grows to an external call.
+    const feeSettings = await getPlatformSettings()
+
     const booking = await prisma.$transaction(async (tx: any) => {
       const event = await tx.event.findUnique({
         where: { id: eventId },
@@ -124,7 +131,7 @@ export async function POST(req: Request) {
         }
       }
 
-      let totalAmount = 0
+      let subtotalAmount = 0
 
       if (event.ticketTiers.length > 0) {
         for (const [sectionName, qty] of requestedEntries) {
@@ -136,7 +143,7 @@ export async function POST(req: Request) {
           if (already + Number(qty) > tier.totalSeats) {
             throw new Error(`Not enough seats left in ${sectionName}`)
           }
-          totalAmount += tier.price * Number(qty)
+          subtotalAmount += tier.price * Number(qty)
         }
       } else {
         // Flat-price event, single implicit "General" section.
@@ -144,16 +151,28 @@ export async function POST(req: Request) {
         if (already + totalRequested > event.totalSeats) {
           throw new Error('Not enough seats left')
         }
-        totalAmount = event.isFree
+        subtotalAmount = event.isFree
           ? 0
           : (event.ticketPrice || 0) * totalRequested
       }
+
+      // Audience booking fee — only charged on paid bookings. Free
+      // events (subtotalAmount === 0) never see a fee, per the About
+      // page's "we don't tax the scene" promise applied at the extreme:
+      // if the ticket costs nothing, the platform takes nothing.
+      // Fee stored in paise on PlatformSettings; convert to rupees here
+      // to keep Booking's Float columns consistent.
+      const bookingFeeRupees =
+        subtotalAmount > 0 ? feeSettings.audienceBookingFee / 100 : 0
+      const totalAmount = subtotalAmount + bookingFeeRupees
 
       return tx.booking.create({
         data: {
           userId: user.id,
           eventId,
           seats,
+          subtotalAmount,
+          bookingFeeAmount: bookingFeeRupees,
           totalAmount,
           status: 'PENDING',
           expiresAt:

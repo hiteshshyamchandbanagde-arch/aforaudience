@@ -84,9 +84,14 @@ export default function AdminDashboard() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '32px' }}>
-            Pending Approvals
-          </h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
+              Pending Approvals
+            </h1>
+            <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
+              Platform settings →
+            </a>
+          </div>
 
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>
             Organisers ({organisers.length})
