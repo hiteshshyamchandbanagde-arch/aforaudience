@@ -116,6 +116,14 @@ model VenueDayRate {
 model User {
   id          String   @id @default(cuid())
   name        String   @unique // also doubles as the login "username"
+  // Optional human-readable display name. `name` is the login username
+  // (3-20 chars, [a-zA-Z0-9_]) — historically we also displayed `name`
+  // to the user, which meant tickets/emails showed a squished-together
+  // lowercase string. `displayName` is where the register form's
+  // "Full Name" now lands, and every user-facing surface reads
+  // `displayName ?? name`. Existing users have null and can set theirs
+  // from Profile.
+  displayName String?
   email       String   @unique
   phone       String?
   password    String

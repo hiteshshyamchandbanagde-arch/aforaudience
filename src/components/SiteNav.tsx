@@ -52,7 +52,7 @@ function getDashboardLink(role?: string) {
 export default function SiteNav({ active, variant = "page", backHref, backLabel }: SiteNavProps) {
   const isHome = variant === "home"
   const { data: session, status } = useSession()
-  const user = session?.user as { name?: string | null; email?: string | null; role?: string } | undefined
+  const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -113,7 +113,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           {status === "loading" ? null : user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7 }}>
-                Hi, {(user.name || user.email || "there").split(" ")[0]}
+                Hi, {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
               {accountLinks.map((l) => (
                 <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "#C8441A" : "#0E0C0A", textDecoration: "none" }}>
@@ -169,7 +169,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         {status === "loading" ? null : user ? (
           <>
             <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6, padding: "12px 0 4px" }}>
-              Signed in as {user.name || user.email}
+              Signed in as {user.displayName || user.name || user.email}
             </div>
             {accountLinks.map((l) => (
               <Link

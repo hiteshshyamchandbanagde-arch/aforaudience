@@ -66,7 +66,8 @@ export async function GET(
       venueCity: booking.event.venue?.city ?? null,
       seats: (booking.seats as Record<string, number>) ?? {},
       totalAmount: booking.totalAmount,
-      attendeeName: booking.user?.name ?? 'Guest',
+      attendeeName:
+        booking.user?.displayName ?? booking.user?.name ?? 'Guest',
       purchasedAt: booking.createdAt,
     }
 

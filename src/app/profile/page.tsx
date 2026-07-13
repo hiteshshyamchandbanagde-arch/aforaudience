@@ -29,16 +29,31 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  // Display name lives separately from the login username. Loaded from
+  // /api/users/me on mount so we know whether it's blank; edited via
+  // PATCH. Deliberately not read from session — the session cache doesn't
+  // include displayName (yet) and we want the latest value from the DB.
+  const [displayName, setDisplayName] = useState('')
+  const [initialDisplayName, setInitialDisplayName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
   const loadStatuses = async () => {
-    const [orgRes, venueRes, artistRes] = await Promise.all([
+    const [meRes, orgRes, venueRes, artistRes] = await Promise.all([
+      fetch('/api/users/me'),
       fetch('/api/organisers/status'),
       fetch('/api/venue-owners/status'),
       fetch('/api/artists/status'),
     ])
+    if (meRes.ok) {
+      const d = await meRes.json()
+      const current = d.user?.displayName ?? ''
+      setDisplayName(current)
+      setInitialDisplayName(current)
+    }
     if (orgRes.ok) {
       const d = await orgRes.json()
       setOrgStatus({ isInRole: d.isOrganiser, isApproved: d.isApproved, hasProfile: d.hasProfile })
@@ -50,6 +65,27 @@ export default function ProfilePage() {
     if (artistRes.ok) {
       const d = await artistRes.json()
       setArtistStatus({ isInRole: d.isArtist, isApproved: d.isApproved, hasProfile: d.hasProfile })
+    }
+  }
+
+  const saveDisplayName = async () => {
+    setSavingName(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName: displayName.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      setInitialDisplayName(data.user?.displayName ?? '')
+      setMessage('Display name saved.')
+    } catch (err: any) {
+      setError(err.message || 'Failed to save')
+    } finally {
+      setSavingName(false)
     }
   }
 
@@ -131,7 +167,7 @@ export default function ProfilePage() {
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
-            {user?.name || 'Your Profile'}
+            {initialDisplayName || user?.name || 'Your Profile'}
           </h1>
           <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
           {user?.code && (
@@ -150,6 +186,43 @@ export default function ProfilePage() {
               {error}
             </div>
           )}
+
+          {/* Display name — separate from the login username. Shows on
+              tickets, emails, and greetings. Falls back to username if
+              blank, so existing users see no change until they set one. */}
+          <div style={cardStyle}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+              Display name
+            </h2>
+            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+              What appears on your tickets and emails. Your login username <strong>{user?.name}</strong> stays the same either way.
+            </p>
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Your full name, e.g. Hitesh Bangade"
+              maxLength={120}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+            />
+            <button
+              onClick={saveDisplayName}
+              disabled={savingName || displayName.trim() === initialDisplayName.trim()}
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'white',
+                background: '#C8441A',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                cursor: savingName || displayName.trim() === initialDisplayName.trim() ? 'default' : 'pointer',
+                opacity: savingName || displayName.trim() === initialDisplayName.trim() ? 0.5 : 1,
+              }}
+            >
+              {savingName ? 'Saving…' : 'Save display name'}
+            </button>
+          </div>
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div style={cardStyle}>

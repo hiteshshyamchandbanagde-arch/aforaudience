@@ -18,10 +18,17 @@ import { sendEmailVerificationEmail } from "@/lib/email"
 // Only +91 numbers actually receive an OTP right now (MSG91 is India-only).
 export async function POST(req: NextRequest) {
   try {
-    const { username, email, phone, password } = await req.json()
+    const { username, email, phone, password, fullName } = await req.json()
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : email
     const normalizedUsername = typeof username === "string" ? username.trim() : username
     const normalizedPhone = typeof phone === "string" ? phone.trim() : phone
+    // Human-readable display name. Optional in the request for backward
+    // compatibility with any older client, but the new register form
+    // always sends it. Trimmed and length-capped to a reasonable ceiling
+    // (120 chars — long enough for any real name, short enough to fit
+    // on a ticket PDF and in an email subject line without weirdness).
+    const rawFullName = typeof fullName === "string" ? fullName.trim() : ""
+    const normalizedDisplayName = rawFullName.length > 0 ? rawFullName.slice(0, 120) : null
 
     if (!normalizedUsername || !normalizedEmail || !normalizedPhone || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
@@ -65,6 +72,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name: normalizedUsername,
+        displayName: normalizedDisplayName,
         email: normalizedEmail,
         phone: normalizedPhone,
         password: hashedPassword,
