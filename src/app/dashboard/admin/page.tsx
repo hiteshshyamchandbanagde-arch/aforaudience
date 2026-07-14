@@ -88,9 +88,14 @@ export default function AdminDashboard() {
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
               Pending Approvals
             </h1>
-            <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-              Platform settings →
-            </a>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
+                Platform settings →
+              </a>
+              <a href="/dashboard/admin/feedback" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
+                Feedback →
+              </a>
+            </div>
           </div>
 
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>
