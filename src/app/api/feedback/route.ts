@@ -19,6 +19,12 @@ import prisma from '@/lib/prisma';
 
 const VALID_CATEGORIES = ['BUG', 'FEATURE_IDEA', 'QUESTION', 'GENERAL', 'OTHER'] as const;
 const MAX_MESSAGE_LENGTH = 2000;
+// Base64 data URLs run ~33% larger than the underlying bytes, so a 1.4MB
+// cap here corresponds to roughly ~1MB of actual image data — matches
+// the client-side resize target in SupportWidget.tsx. Rejected outright
+// rather than silently truncated (a truncated data URL is corrupt, not
+// smaller).
+const MAX_ATTACHMENT_DATA_URL_LENGTH = 1_400_000;
 
 export async function POST(req: Request) {
   let body: {
@@ -26,6 +32,7 @@ export async function POST(req: Request) {
     message?: string;
     pageUrl?: string;
     fromChatbot?: boolean;
+    attachmentData?: string;
   };
   try {
     body = await req.json();
@@ -33,7 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { category, message, pageUrl, fromChatbot } = body;
+  const { category, message, pageUrl, fromChatbot, attachmentData } = body;
 
   if (!category || !VALID_CATEGORIES.includes(category as (typeof VALID_CATEGORIES)[number])) {
     return NextResponse.json(
@@ -53,6 +60,21 @@ export async function POST(req: Request) {
     );
   }
 
+  if (attachmentData !== undefined) {
+    if (typeof attachmentData !== 'string' || !attachmentData.startsWith('data:image/')) {
+      return NextResponse.json(
+        { error: 'attachmentData must be an image data URL' },
+        { status: 400 }
+      );
+    }
+    if (attachmentData.length > MAX_ATTACHMENT_DATA_URL_LENGTH) {
+      return NextResponse.json(
+        { error: 'Attachment is too large. Please attach a smaller screenshot.' },
+        { status: 400 }
+      );
+    }
+  }
+
   // Attach the user if logged in, but never require it.
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
@@ -64,6 +86,7 @@ export async function POST(req: Request) {
       pageUrl: typeof pageUrl === 'string' ? pageUrl.slice(0, 500) : null,
       userId,
       fromChatbot: Boolean(fromChatbot),
+      attachmentData: attachmentData ?? null,
     },
     select: { id: true },
   });

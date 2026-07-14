@@ -26,6 +26,12 @@ export default function AdminSettingsPage() {
   const [feeRupees, setFeeRupees] = useState<string>('')
   const [initialPaise, setInitialPaise] = useState<number>(0)
   const [maxPaise, setMaxPaise] = useState<number>(50000)
+  const [chatCap, setChatCap] = useState<string>('')
+  const [initialChatCap, setInitialChatCap] = useState<number>(15)
+  const [maxChatCap, setMaxChatCap] = useState<number>(200)
+  const [chatSaving, setChatSaving] = useState(false)
+  const [chatMessage, setChatMessage] = useState('')
+  const [chatError, setChatError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [forbidden, setForbidden] = useState(false)
@@ -51,6 +57,11 @@ export default function AdminSettingsPage() {
         setInitialPaise(paise)
         setFeeRupees((paise / 100).toString())
         setMaxPaise(data.limits.maxBookingFeePaise)
+
+        const cap = data.settings.chatMaxMessagesPerSession
+        setInitialChatCap(cap)
+        setChatCap(String(cap))
+        setMaxChatCap(data.limits.maxChatMessagesCap)
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -92,6 +103,39 @@ export default function AdminSettingsPage() {
   const currentPaise = Math.round(Number(feeRupees || 0) * 100)
   const isDirty = currentPaise !== initialPaise
   const isValid = Number.isFinite(Number(feeRupees)) && Number(feeRupees) >= 0
+
+  const saveChatCap = async () => {
+    setChatSaving(true)
+    setChatMessage('')
+    setChatError('')
+    try {
+      const cap = Number(chatCap)
+      if (!Number.isInteger(cap)) {
+        throw new Error('Message cap must be a whole number')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatMaxMessagesPerSession: cap }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialChatCap(data.settings.chatMaxMessagesPerSession)
+      setChatMessage(
+        data.settings.chatMaxMessagesPerSession <= 0
+          ? 'Saved. Chat is now disabled — visitors see a "temporarily unavailable" message and the feedback form.'
+          : `Saved. Visitors can send up to ${data.settings.chatMaxMessagesPerSession} messages per browser session before being pointed to the feedback form.`
+      )
+    } catch (err: any) {
+      setChatError(err.message)
+    } finally {
+      setChatSaving(false)
+    }
+  }
+
+  const currentChatCap = Math.round(Number(chatCap || 0))
+  const isChatCapDirty = currentChatCap !== initialChatCap
+  const isChatCapValid = Number.isInteger(Number(chatCap))
 
   if (loading) {
     return (
@@ -246,6 +290,106 @@ export default function AdminSettingsPage() {
             }}
           >
             {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginTop: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Support chat message cap
+          </h2>
+          <p style={{ fontSize: 13, color: '#8a827a', lineHeight: 1.6, marginBottom: 16 }}>
+            The support chatbot is free to use for everyone — guests and paying audience alike — no gate, no login required. This cap only bounds how many messages a single visitor can send per browser session, as a cost/abuse guard. Once reached, the chat tab points them to the feedback form instead. Set to 0 to disable chat entirely (emergency killswitch) without a deploy.
+          </p>
+
+          {chatMessage && (
+            <div
+              style={{
+                padding: '10px 12px',
+                background: '#F0FFF4',
+                border: '1px solid #68D391',
+                borderRadius: 8,
+                color: '#276749',
+                fontSize: 13,
+                marginBottom: 16,
+              }}
+            >
+              {chatMessage}
+            </div>
+          )}
+          {chatError && (
+            <div
+              style={{
+                padding: '10px 12px',
+                background: '#FDECEA',
+                border: '1px solid #F5C2C0',
+                borderRadius: 8,
+                color: '#B3261E',
+                fontSize: 13,
+                marginBottom: 16,
+              }}
+            >
+              {chatError}
+            </div>
+          )}
+
+          <label
+            style={{
+              display: 'block',
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#C8441A',
+              letterSpacing: '0.06em',
+              marginBottom: 6,
+            }}
+          >
+            MAX MESSAGES PER SESSION
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step="1"
+              value={chatCap}
+              onChange={(e) => setChatCap(e.target.value)}
+              placeholder="15"
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                borderRadius: 6,
+                border: '1px solid rgba(14,12,10,0.15)',
+                fontSize: 15,
+              }}
+            />
+          </div>
+          <p style={{ fontSize: 11, color: '#8a827a', marginBottom: 20 }}>
+            Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
+          </p>
+
+          <button
+            onClick={saveChatCap}
+            disabled={chatSaving || !isChatCapDirty || !isChatCapValid}
+            style={{
+              background: '#C8441A',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: chatSaving || !isChatCapDirty || !isChatCapValid ? 'default' : 'pointer',
+              opacity: chatSaving || !isChatCapDirty || !isChatCapValid ? 0.5 : 1,
+            }}
+          >
+            {chatSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
 

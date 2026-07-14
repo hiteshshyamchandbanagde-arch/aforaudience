@@ -17,6 +17,7 @@ import prisma from "@/lib/prisma"
 
 export type PlatformSettings = {
   audienceBookingFee: number // paise
+  chatMaxMessagesPerSession: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -26,9 +27,12 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
     where: { id: SINGLETON_ID },
     update: {},
     create: { id: SINGLETON_ID, audienceBookingFee: 0 },
-    select: { audienceBookingFee: true },
+    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
   })
-  return { audienceBookingFee: row.audienceBookingFee }
+  return {
+    audienceBookingFee: row.audienceBookingFee,
+    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
+  }
 }
 
 /**
@@ -53,7 +57,42 @@ export async function setAudienceBookingFee(paise: number): Promise<PlatformSett
     where: { id: SINGLETON_ID },
     update: { audienceBookingFee: paise },
     create: { id: SINGLETON_ID, audienceBookingFee: paise },
-    select: { audienceBookingFee: true },
+    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
   })
-  return { audienceBookingFee: row.audienceBookingFee }
+  return {
+    audienceBookingFee: row.audienceBookingFee,
+    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
+  }
+}
+
+/**
+ * Admin-only setter for the chatbot's per-session message cap. 0 (or
+ * any non-positive value) is treated as an emergency killswitch —
+ * disables the chat tab entirely (widget shows a "temporarily
+ * unavailable, use feedback" message) without needing a deploy.
+ * Ceiling of 200 is a sanity guard, not a real expectation of use —
+ * if a legitimate case for more ever comes up, bump this constant
+ * deliberately.
+ */
+export const MAX_CHAT_MESSAGES_CAP = 200
+
+export async function setChatMaxMessagesPerSession(
+  cap: number
+): Promise<PlatformSettings> {
+  if (!Number.isInteger(cap)) {
+    throw new Error("chatMaxMessagesPerSession must be an integer")
+  }
+  if (cap > MAX_CHAT_MESSAGES_CAP) {
+    throw new Error(`chatMaxMessagesPerSession cannot exceed ${MAX_CHAT_MESSAGES_CAP}`)
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { chatMaxMessagesPerSession: cap },
+    create: { id: SINGLETON_ID, chatMaxMessagesPerSession: cap },
+    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
+  })
+  return {
+    audienceBookingFee: row.audienceBookingFee,
+    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
+  }
 }
