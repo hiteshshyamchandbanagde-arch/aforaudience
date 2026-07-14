@@ -191,6 +191,13 @@ model Feedback {
   user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   fromChatbot Boolean          @default(false)
   status      String           @default("NEW")
+  // Optional screenshot, stored as a base64 data URL directly on the
+  // row. Client resizes/recompresses to fit well under ~1MB before
+  // encoding (see SupportWidget.tsx) so this stays cheap on Postgres.
+  // NOT a scalable pattern past low volume — if attachments become
+  // heavily used, migrate to Vercel Blob (or S3) and store a URL here
+  // instead of the data itself. Fine for an MVP feedback widget.
+  attachmentData String?
   createdAt   DateTime         @default(now())
 
   @@index([status, createdAt])
@@ -384,6 +391,15 @@ model VenueBookingOffer {
 model PlatformSettings {
   id                           String   @id @default("singleton")
   audienceBookingFee           Int      @default(0)
+  // Support chatbot per-session message cap. Enforced client-side via
+  // sessionStorage (see SupportWidget.tsx) — not hardened against a
+  // determined user clearing storage, but that's a deliberate trade-off:
+  // the goal is cost/abuse control against ordinary usage patterns, not
+  // security. A server-side counter would need a session/identity model
+  // this guest-accessible feature doesn't otherwise need. Configurable
+  // so Hitesh can raise/lower it from /dashboard/admin/settings without
+  // a deploy. 0 or negative disables chat entirely as an emergency killswitch.
+  chatMaxMessagesPerSession    Int      @default(15)
   /// @deprecated dead per fifth amendment — do not read
   flatVenueBookingFee          Float    @default(0)
   /// @deprecated dead per fifth amendment — do not read

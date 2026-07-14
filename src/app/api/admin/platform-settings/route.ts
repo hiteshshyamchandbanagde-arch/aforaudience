@@ -5,7 +5,9 @@ import prisma from '@/lib/prisma'
 import {
   getPlatformSettings,
   setAudienceBookingFee,
+  setChatMaxMessagesPerSession,
   MAX_BOOKING_FEE_PAISE,
+  MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
 
 // GET /api/admin/platform-settings
@@ -39,6 +41,7 @@ export async function GET() {
     settings,
     limits: {
       maxBookingFeePaise: MAX_BOOKING_FEE_PAISE,
+      maxChatMessagesCap: MAX_CHAT_MESSAGES_CAP,
     },
   })
 }
@@ -56,25 +59,44 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  // audienceBookingFee accepted as PAISE (integer). The UI converts
-  // from rupees on submit so the wire format stays consistent with
-  // Payment.amount and the rest of the money-handling code.
-  if (!Object.prototype.hasOwnProperty.call(body, 'audienceBookingFee')) {
+  const hasBookingFee = Object.prototype.hasOwnProperty.call(body, 'audienceBookingFee')
+  const hasChatCap = Object.prototype.hasOwnProperty.call(body, 'chatMaxMessagesPerSession')
+
+  if (!hasBookingFee && !hasChatCap) {
     return NextResponse.json(
-      { error: 'audienceBookingFee is required' },
-      { status: 400 }
-    )
-  }
-  const paise = body.audienceBookingFee
-  if (typeof paise !== 'number' || !Number.isFinite(paise)) {
-    return NextResponse.json(
-      { error: 'audienceBookingFee must be a number (paise)' },
+      { error: 'audienceBookingFee or chatMaxMessagesPerSession is required' },
       { status: 400 }
     )
   }
 
   try {
-    const updated = await setAudienceBookingFee(Math.round(paise))
+    let updated = await getPlatformSettings()
+
+    // audienceBookingFee accepted as PAISE (integer). The UI converts
+    // from rupees on submit so the wire format stays consistent with
+    // Payment.amount and the rest of the money-handling code.
+    if (hasBookingFee) {
+      const paise = body.audienceBookingFee
+      if (typeof paise !== 'number' || !Number.isFinite(paise)) {
+        return NextResponse.json(
+          { error: 'audienceBookingFee must be a number (paise)' },
+          { status: 400 }
+        )
+      }
+      updated = await setAudienceBookingFee(Math.round(paise))
+    }
+
+    if (hasChatCap) {
+      const cap = body.chatMaxMessagesPerSession
+      if (typeof cap !== 'number' || !Number.isFinite(cap)) {
+        return NextResponse.json(
+          { error: 'chatMaxMessagesPerSession must be a number' },
+          { status: 400 }
+        )
+      }
+      updated = await setChatMaxMessagesPerSession(Math.round(cap))
+    }
+
     return NextResponse.json({ settings: updated })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Update failed'
