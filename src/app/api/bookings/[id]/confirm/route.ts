@@ -186,7 +186,7 @@ export async function POST(
     // 300-800ms. The delivery function is idempotent (claims via
     // `deliveredAt IS NULL`) so the webhook can safely retry-trigger
     // if this attempt fails silently. Errors are captured to
-    // Payment.deliveryError — the booking stays CONFIRMED either way.
+    // Booking.deliveryError — the booking stays CONFIRMED either way.
     deliverTicket(booking.id).catch((err) => {
       console.error('[confirm] Background deliverTicket threw:', err)
     })

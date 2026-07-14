@@ -5,16 +5,26 @@ import { sendTicketEmail } from "@/lib/email"
 // ---------------------------------------------------------------------------
 // Ticket delivery orchestrator.
 //
-// Single-flight semantics: this is called from both /api/bookings/[id]/confirm
-// (browser HMAC path) and /api/payments/webhook (server-to-server path).
-// Both may fire for the same booking — deliberately, that's the belt-and-
-// suspenders design — but the audience must only receive ONE email.
+// Single-flight semantics: this is called from three paths:
+//   1. /api/bookings/[id]/confirm       — browser HMAC verify (paid)
+//   2. /api/payments/webhook            — server-to-server webhook (paid)
+//   3. /api/bookings           (POST)   — free event auto-confirm
 //
-// Concurrency control: we claim delivery by setting `Payment.deliveredAt`
+// Paths 1 and 2 may fire for the same booking within the same second —
+// deliberately, that's the belt-and-suspenders design — but the audience
+// must only receive ONE email. Path 3 is single-caller (no webhook for
+// free events) but still uses the same claim for consistency and to be
+// robust if the endpoint is ever retried.
+//
+// Concurrency control: we claim delivery by setting `Booking.deliveredAt`
 // atomically via a conditional update (`WHERE deliveredAt IS NULL`). If
 // the update affects 0 rows, someone else already claimed it and we bail.
-// If it affects 1 row, we own the delivery attempt. This works even if
-// both the confirm endpoint and the webhook fire within the same second.
+// If it affects 1 row, we own the delivery attempt.
+//
+// The claim lives on Booking (not Payment) so free events — which have
+// no Payment row at all — participate in the same guarantee. Previously
+// the claim was on Payment.updateMany, which silently no-op'd for free
+// events. See Master Design Doc §9.2 / EPIC M for the history.
 //
 // Delivery is non-blocking to the caller. The confirm endpoint returns
 // success to the user the moment the DB transaction commits — waiting
@@ -22,13 +32,16 @@ import { sendTicketEmail } from "@/lib/email"
 // third-party latency, and worse, could roll back the confirmation on
 // a transient delivery error (which would be wrong — the user paid).
 //
-// Errors are captured to `Payment.deliveryError` so an admin retry
-// endpoint (future work, not this checkpoint) can act on them.
+// Errors are captured to `Booking.deliveryError` so an admin retry
+// endpoint (future work) can act on them.
 // ---------------------------------------------------------------------------
 
 /**
  * Attempts to deliver the ticket for a booking. Idempotent: safe to call
  * multiple times; second call short-circuits on the deliveredAt claim.
+ *
+ * Works for both paid and free events — the claim is on Booking, not
+ * Payment, so absence of a Payment row does not skip delivery.
  *
  * NEVER throws. Deliberately swallows errors after logging them — the
  * caller's control flow (transitioning a booking to CONFIRMED) is
@@ -38,9 +51,9 @@ export async function deliverTicket(bookingId: string): Promise<void> {
   try {
     // Claim delivery. updateMany because update() would throw on 0
     // rows; we want the graceful "someone else has it" branch.
-    const claim = await prisma.payment.updateMany({
+    const claim = await prisma.booking.updateMany({
       where: {
-        bookingId,
+        id: bookingId,
         deliveredAt: null,
       },
       data: {
@@ -48,8 +61,8 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       },
     })
     if (claim.count === 0) {
-      // Someone else beat us to it (or the booking has no Payment row —
-      // e.g. free events, which don't need a ticket email either).
+      // Someone else beat us to it, or the booking doesn't exist.
+      // Either way we're done.
       return
     }
 
@@ -150,13 +163,13 @@ export async function deliverTicket(bookingId: string): Promise<void> {
 // clears deliveredAt before calling deliverTicket() again.
 async function recordFailure(bookingId: string, reason: string): Promise<void> {
   console.error("[deliverTicket] Failure for", bookingId, "→", reason)
-  await prisma.payment
-    .updateMany({
-      where: { bookingId },
+  await prisma.booking
+    .update({
+      where: { id: bookingId },
       data: { deliveryError: reason.slice(0, 500) },
     })
     .catch(() => {
-      /* Payment may not exist for free events; that's fine */
+      /* nothing left to try */
     })
 }
 
