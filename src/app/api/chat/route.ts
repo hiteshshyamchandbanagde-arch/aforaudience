@@ -94,17 +94,17 @@ export async function POST(req: Request) {
     const response = await anthropic.messages.create({
       model: CHAT_MODEL,
       max_tokens: 400,
-      system: [
-        {
-          type: 'text',
-          text: SYSTEM_PROMPT,
-          // Marks the (large, static) system prompt + knowledge base for
-          // caching. Subsequent requests within the 5-minute window read
-          // this at 10% of standard input cost instead of paying full
-          // price to resend the whole knowledge base every message.
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
+      // NOTE: prompt caching (cache_control on the system block) is a
+      // planned cost optimization, not yet wired in — the installed
+      // @anthropic-ai/sdk version's TypeScript types don't expose
+      // cache_control on this call shape even though the underlying API
+      // supports it (confirmed against Anthropic's own docs). Rather
+      // than fight the SDK's type definitions and block shipping, this
+      // ships uncached: cost goes from ~₹0.11 to ~₹0.30 per conversation
+      // turn — still negligible at current traffic. Revisit once SDK
+      // types catch up, or by dropping to `as any` deliberately if this
+      // becomes worth the cost difference at higher volume.
+      system: SYSTEM_PROMPT,
       messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
     });
 
