@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 
 export const metadata: Metadata = {
@@ -57,11 +56,46 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/*
+          Inline service worker registration.
+
+          Deliberately placed in the raw HTML head (not a React component)
+          for two reasons:
+
+          1. PWA validators (PWABuilder, Lighthouse) do a static scan of
+             the initial HTML response. A registration inside a client
+             component only fires after React hydrates, which the
+             validators don't wait for — so they mark the SW as missing
+             even when it exists and works fine at runtime. Inline here,
+             they see it immediately in the raw HTML.
+
+          2. Chrome will register the SW even before hydration finishes,
+             so the offline shell + caching kicks in on the very first
+             visit rather than waiting for the JS bundle to hydrate.
+
+          Kept short and dependency-free. The actual SW logic lives in
+          /public/sw.js. Guarded on `'serviceWorker' in navigator` so it
+          silently no-ops on browsers that don't support it (older iOS,
+          some WebViews).
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .catch(function (err) { console.warn('[sw] register failed', err); });
+                });
+              }
+            `,
+          }}
+        />
+      </head>
       <body>
         <Providers>
           {children}
         </Providers>
-        <ServiceWorkerRegistration />
         <InstallPrompt />
       </body>
     </html>
