@@ -158,6 +158,7 @@ model User {
   passwordResetTokens    PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   follows                Follow[]
+  feedback               Feedback[]
 }
 
 model PasswordResetToken {
@@ -168,6 +169,39 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+}
+
+// Support widget: one table serves two entry points — the manual
+// "Report a bug / suggest a feature" form, and the support chatbot's
+// "I don't know that — want to send it to the team?" fallback.
+// `fromChatbot` distinguishes them without needing two tables.
+//
+// `userId` is nullable — guests can submit feedback too (browse-first
+// model, no reason to gate this behind login; see design doc §2).
+//
+// No admin UI to review these yet — that's a follow-up story. For now,
+// query via Supabase MCP or curl the table directly. Kept deliberately
+// minimal: this model's only job is to reliably capture the message.
+model Feedback {
+  id          String           @id @default(cuid())
+  category    FeedbackCategory
+  message     String
+  pageUrl     String?
+  userId      String?
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fromChatbot Boolean          @default(false)
+  status      String           @default("NEW")
+  createdAt   DateTime         @default(now())
+
+  @@index([status, createdAt])
+}
+
+enum FeedbackCategory {
+  BUG
+  FEATURE_IDEA
+  QUESTION
+  GENERAL
+  OTHER
 }
 
 // Mirrors PasswordResetToken's shape. Email verification is deliberately
