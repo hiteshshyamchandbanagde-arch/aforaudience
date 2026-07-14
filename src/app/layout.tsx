@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
+import DisplayNameNudge from "@/components/DisplayNameNudge";
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
@@ -94,6 +95,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <DisplayNameNudge />
           {children}
         </Providers>
         <InstallPrompt />
