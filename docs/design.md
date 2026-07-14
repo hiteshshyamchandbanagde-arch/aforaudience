@@ -1,4 +1,4 @@
-# AforAudience — Master Design Document v2.3
+# AforAudience — Master Design Document v2.4
 ### The World's First Live Art Universe — Consolidated Product, Engineering & Delivery Plan
 **Status:** Living document | **Supersedes:** onboarding sections of the original Web & Mobile design docs
 **Working model:** Solo founder-developer + Claude acting as Architect / Senior Developer / QA collaborator
@@ -36,6 +36,8 @@ Also fixed a real, previously-undiagnosed mobile bug: **no viewport meta tag exi
 **Sixth amendment — QA shipping session, consolidated (13 Jul 2026).** Four PRs merged to `qa` in a single working day, taking Release 1 from ~20% shipped to mostly shipped. Checkpoint 2 (Razorpay payment integration) went end-to-end with a real card in QA: SDK wrapper, POST `/api/bookings` creates a PENDING booking in a Prisma transaction then a Razorpay order outside it (dodges the 5-second transaction timeout), redirects to `/checkout/[bookingId]`, verifies HMAC signature via confirm endpoint, transitions to CONFIRMED. Webhook at POST `/api/payments/webhook` handles browser-death race conditions. Free events auto-confirm immediately. Payment amounts stored in paise as integers, 15-minute PENDING TTL. Checkpoint 3 (ticket delivery) shipped PDF generation via pdf-lib (A4 editorial-tone), QR code encoding the booking ID (physically scan-verified), Resend email delivery with PDF attachment from `tickets@mail.aforaudience.com`, atomic single-flight delivery, on-demand ticket download endpoint, Download buttons on checkout success page and `/tickets` list. Checkpoint 4 (audience booking fee, EPIC K1) shipped end-to-end: fee configurable at `/dashboard/admin/settings` (ceiling ₹500, ships at ₹0 default), captured to `Booking.bookingFeeAmount`, visible as a separate line item at checkout. Fix B (User Display Name, new retrospective EPIC L) shipped: `User.displayName` separate from `User.name` (username), register form persists Full Name as displayName, Profile page lets existing users set/edit, tickets/emails/greetings use displayName with fallback to name. QA env: separate Supabase project (`aforaudience-qa`), qa branch auto-deploys to `qa.aforaudience.com` via a second Vercel project, prod stays on main → `www.aforaudience.com`. Env-label badge (`NEXT_PUBLIC_ENV_LABEL`) distinguishes Beta v1 (prod) from QA (preview). Transactional email working in QA via Resend with `mail.aforaudience.com` as the dedicated sending subdomain, DMARC monitoring in place. Real bug caught only through live testing and not code review: **free events auto-confirm but never receive PDF/email** — recorded as EPIC M for the next session (now shipped, see seventh amendment).
 
 **Seventh amendment — This session (14 Jul 2026).** Two things shipped, both small: (1) EPIC M1 — the free-event ticket-delivery gap from the sixth amendment. Root cause: the atomic single-flight claim in `deliverTicket()` ran on `Payment.updateMany WHERE deliveredAt IS NULL`; free events have no Payment row, so the claim always affected 0 rows and delivery silently no-op'd. Additionally the free-event auto-confirm path in POST `/api/bookings` never called `deliverTicket()` in the first place. Fix: moved the claim from `Payment.deliveredAt` to `Booking.deliveredAt` so it works for both flows, wired the free-event auto-confirm path to fire `deliverTicket()` background-style (same pattern as the paid confirm route). `Payment.deliveredAt` / `Payment.deliveryError` are kept in the schema marked `@deprecated` to preserve historical audit trail; existing paid bookings' delivered state was backfilled onto Booking at migration time so any future admin-retry pathway doesn't re-fire them. Migration `20260714000000_ticket_delivery_on_booking` applied to `aforaudience-qa` before the code deploy (forward-compatible ordering). (2) This design document was consolidated into the repo as `docs/design.md` — previously it lived in project files and drifted between chat sessions. Going forward, doc edits go through PRs like any other code change; the doc is versioned with the code that implements it. Also this session: established the discipline that handoffs should be ≤60 lines (previous 300+ line format was burning 30–40% of every subsequent session's context budget for no useful gain), and that the design doc lives in the repo rather than in project files (the old habit was loading the entire 445-line doc into every message regardless of relevance).
+
+**Eighth amendment — Same 14 Jul 2026 session, continued.** With Checkpoints 2–4 all shipped and the M1 free-event fix landed, the session had headroom for smaller loop-closers and mobile groundwork. Six PRs merged in this session total (#39 free-event delivery, #40 design doc consolidation, #41 PWA installable, #42 PWA score improvements, #43 admin retry endpoint, #44 displayName nudge). Notable landings: (1) **PWA — the app is installable on Android.** `src/app/manifest.ts` completed with maskable icons + shortcuts (Events/Tickets/Venues) + `lang`/`dir`; hand-written `public/sw.js` (~150 lines, no next-pwa/workbox dependency) implements network-first-with-offline-fallback for navigations, cache-first for `_next/static/`, stale-while-revalidate for `_next/image/`, and never-cache for `/api/`; a brand-consistent `public/offline.html`; inline `<script>` in the layout `<head>` registers the SW (moved from React client component after learning that PWA validators are static scanners that don't wait for hydration); a `beforeinstallprompt` interceptor renders a subtle install CTA with a 14-day dismissal window; brand icons at 192/512/maskable/apple/favicon sizes generated programmatically by `scripts/gen-pwa-icons.py` so future rebrands are reproducible in one command. Vercel Deployment Protection turned off across the project so PWABuilder.com could validate the manifest. **PWABuilder generated a working Android APK** (package ID `com.aforaudience.qa.twa`, throwaway signing key) — under the hood it uses Google's Bubblewrap tool. The APK was downloaded to Hitesh's phone but not yet installed; assetlinks.json setup is the next step to hide the URL bar in the TWA. (2) **EPIC M1's follow-up — admin retry endpoint.** `POST /api/admin/redeliver-ticket/[bookingId]` (ADMIN role required) atomically resets `Booking.deliveredAt`/`deliveryError` under a two-branch WHERE (either "previous attempt failed" or "delivered >30s ago so force-resend is safe"), then fires `deliverTicket()` background-style. 30-second cooldown protects against admin double-tap and against races with in-flight deliveries from the confirm/webhook path. Closes the loop `Booking.deliveryError` opened. No UI yet — Hitesh calls it via curl until an admin bookings list exists. (3) **EPIC L5 — displayName backfill nudge.** Subtle sticky top banner in brand-warm palette appears when a logged-in user has null `displayName`, links to `/profile`, dismissible for 14 days, self-hides on `/auth`, `/checkout`, `/api`, `/admin`. Deliberately no soft-gate on booking — respects the "browse-first, never block" line from §2. Prod path for the mobile app is now clearly documented in §11: same PWABuilder workflow with package ID `com.aforaudience.app` (reserved, not yet used) and a permanent signing key — Hitesh will run that separately when Razorpay live keys land and real Play Store submission is ready.
 
 ---
 
@@ -335,7 +337,7 @@ Retrospective epic to record Fix B work.
 | L2 | Register form's Full Name persists as displayName | ✅ Shipped |
 | L3 | Profile page lets existing users set/edit displayName | ✅ Shipped |
 | L4 | Tickets/emails/greetings use displayName-with-fallback-to-name | ✅ Shipped |
-| L5 | Backfill hint / one-time nudge for null-displayName users | ⬜ Not started |
+| L5 | Backfill hint / one-time nudge for null-displayName users | ✅ Shipped (eighth amendment, PR #44) — sticky top banner, dismissible for 14 days, self-hides on auth/checkout/api/admin |
 
 ### EPIC M — Free-Event Ticket Delivery (retrospective, sixth/seventh amendments)
 
@@ -445,12 +447,12 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 - Refund policy decisions (unblocks Checkpoint 5 / C5 refund half)
 
 **Best-unblocked next work (session-friendly, no external unblocks needed):**
-1. L5 — displayName backfill hint UI (~30 min)
-2. Admin retry endpoint for failed ticket deliveries (~30 min, closes the `Booking.deliveryError` loop)
-3. F6 — rate snapshot display on confirmed VenueBookings (~1 hr)
-4. E3 — lineup drag-and-drop builder (larger, standalone)
-5. E5 — real-time ticket sales dashboard (larger, standalone)
-6. Mobile app (Release 3) — see §11 for the recommended path (PWA → TWA, not React Native yet)
+1. `assetlinks.json` at `/public/.well-known/assetlinks.json` with the QA APK's SHA-256 fingerprint — hides the URL bar in the installed TWA (~5 min once the fingerprint is copied from PWABuilder's ZIP)
+2. F6 — rate snapshot display on confirmed VenueBookings (~1 hr)
+3. E3 — lineup drag-and-drop builder (larger, standalone)
+4. E5 — real-time ticket sales dashboard (larger, standalone)
+5. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
+6. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
 
 ### 9.2 Real gaps found through live testing (not hypothetical)
 
@@ -471,7 +473,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 - **E3** — lineup drag-and-drop builder (performer slots exist in schema)
 - **E5** — real-time ticket sales view
 - **H3** — flag/suspend accounts
-- **Admin retry endpoint for failed ticket deliveries** — `Booking.deliveryError` is captured but not surfaced. Story: `POST /api/admin/redeliver-ticket/[bookingId]` that clears `deliveredAt` and calls `deliverTicket()`. ~30 min.
+- **Admin bookings list surfacing `Booking.deliveryError`** — the retry endpoint (`POST /api/admin/redeliver-ticket/[bookingId]`) shipped in the eighth amendment (PR #43); still no admin UI that lists bookings with delivery errors and calls it. Admin currently calls it via curl. ~2 hr for a proper admin bookings page.
 - **K4** — Admin revenue dashboard (config surface exists at `/dashboard/admin/settings` but no revenue view)
 
 ### 9.4 Not started at all
@@ -499,23 +501,29 @@ Two rules that make future sessions efficient, given the collaborator-and-contex
 
 ---
 
-## 11. Mobile App Strategy (established seventh amendment)
+## 11. Mobile App Strategy (established seventh amendment; QA APK validated eighth amendment)
 
 The original plan (Release 3, ~₹6.4L outsourced, ~5 months to build React Native parity) still stands as the eventual goal but is deliberately deferred until after MVP revenue is proven. In the meantime, the recommended path to an Android-installable app is:
 
-**Stage 1 — PWA-ify the Next.js app.** `manifest.json`, service worker, app icons, install prompt. ~2 hours of work. Installable from Chrome on Android ("Add to Home Screen") — home-screen icon, fullscreen, offline shell for saved ticket QRs. Ships to prod through a normal PR.
+**Stage 1 — PWA-ify the Next.js app.** `manifest.json`, service worker, app icons, install prompt. Shipped in PRs #41 and #42 (eighth amendment). Installable from Chrome on Android ("Add to Home Screen") — home-screen icon, fullscreen, offline shell for saved ticket QRs.
 
-**Stage 2 — Wrap the PWA as a TWA (Trusted Web Activity).** Feed the public prod URL into PWABuilder.com. Produces a signed Android APK, Play Store-ready. ~10 minutes of your time, no code from Claude.
+**Stage 2 — Wrap the PWA as a TWA (Trusted Web Activity).** Feed the public prod URL into PWABuilder.com. Produces a signed Android APK, Play Store-ready. **QA APK generated in the eighth amendment** with package ID `com.aforaudience.qa.twa` (throwaway signing key — QA never goes on Play Store). PWABuilder uses Bubblewrap under the hood; if PWABuilder ever becomes flaky, running Bubblewrap locally produces the same output. Time from starting Stage 2 to APK in hand: ~15 minutes.
 
-Advantages: one codebase, ships to every phone the same day, no Play Store review cycle, no React Native / Expo divergence, no separate ~5-month build. Push notifications via Web Push API cover most of what the notification table in EPIC J needs.
+**Prod path (when ready — post-KYC, post-live-keys):**
+- URL: `https://www.aforaudience.com` (not qa)
+- Package ID: `com.aforaudience.app` — **reserved permanently for prod, do not use anywhere else**
+- Signing key: generate new one via PWABuilder, save the keystore + password to at least three locations (drive, laptop, one more). Loss of this key = new Play Store listing forever.
+- Upload the resulting `.aab` to Play Store. Review takes 3-7 days first time.
+- Digital Asset Links: `public/.well-known/assetlinks.json` with the app's SHA-256 fingerprint (from the ZIP's `assetlinks.json` file). Without this, the app shows a URL bar. Same setup will apply for QA — a follow-up story.
+
+Advantages of the PWA+TWA path over React Native: one codebase, ships to every phone the same day, no Play Store review cycle for web updates, no React Native/Expo divergence, no separate ~5-month build. Push notifications via Web Push API cover most of what the notification table in EPIC J needs.
 
 **Constraints:**
-- TWA validates against a public URL; deployment protection must be off or bypassed. Points to prod, not `qa.aforaudience.com` (which is protected).
-- Prod isn't live in the checkout sense yet (Razorpay live keys pending KYC).
+- TWA validates against a public URL; deployment protection must be off or bypassed. Turned off across the project in the eighth amendment.
 - If the TWA hits a wall on a genuinely-native capability (e.g. a QR scanner for venue-door check-ins in Phase 4), then that specific feature justifies going React Native — not the whole app all at once.
 
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 2.3 — Seventh amendment (free-event ticket delivery fix; doc consolidated into repo)*
+*Document version: 2.4 — Eighth amendment (six PRs merged in one working day: free-event delivery fix, docs into repo, PWA installable + score, admin retry endpoint, displayName nudge; QA Android APK validated end-to-end via PWABuilder/Bubblewrap)*
 *Confidential — Do not share*
