@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import DisplayNameNudge from "@/components/DisplayNameNudge";
+import SupportWidget from "@/components/SupportWidget";
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
@@ -99,6 +100,7 @@ export default function RootLayout({
           {children}
         </Providers>
         <InstallPrompt />
+        <SupportWidget />
       </body>
     </html>
   );
