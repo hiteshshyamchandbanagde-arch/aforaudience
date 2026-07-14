@@ -492,6 +492,14 @@ model Booking {
   // Capacity checks filter out PENDING rows where expiresAt < NOW().
   expiresAt   DateTime?
 
+  // Ticket delivery tracking. Lives on Booking (not Payment) so free
+  // events — which have no Payment row — can be tracked by the same
+  // single-flight claim. Backfilled from Payment on migration; new rows
+  // set this at delivery time via `updateMany WHERE deliveredAt IS NULL`.
+  // See Master Design Doc §9.2 / EPIC M for the bug this fixes.
+  deliveredAt   DateTime?
+  deliveryError String?
+
   payment     Payment?
 
   @@index([status, expiresAt])
@@ -516,13 +524,12 @@ model Payment {
   webhookReceivedAt DateTime?
   failureReason     String?
 
-  // Checkpoint 3 — ticket delivery (email + PDF) tracking. Delivery is
-  // triggered atomically when payment moves to VERIFIED or
-  // WEBHOOK_CONFIRMED, gated on `deliveredAt IS NULL` so browser + webhook
-  // races don't double-send. deliveryError captures the reason if a send
-  // fails so an admin retry endpoint can act on it later. Booking status
-  // is decoupled from delivery — a failed delivery does NOT rollback a
-  // CONFIRMED booking, because the user paid and owns the ticket.
+  // Checkpoint 3 — ticket delivery tracking.
+  // @deprecated — source of truth moved to Booking.deliveredAt /
+  // Booking.deliveryError in the 20260714 migration so free events
+  // (which have no Payment row) can be tracked by the same claim.
+  // Kept nullable for historical rows' audit trail. Do NOT read or
+  // write from application code. Safe to drop in a future cleanup.
   deliveredAt       DateTime?
   deliveryError     String?
 

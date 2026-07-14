@@ -7,6 +7,7 @@ import {
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
 import { getPlatformSettings } from '@/lib/platform-settings'
+import { deliverTicket } from '@/lib/ticket-delivery'
 
 // PENDING bookings expire after this window if payment doesn't complete.
 // Keeps abandoned checkouts from permanently eating capacity. 15 minutes
@@ -188,6 +189,15 @@ export async function POST(req: Request) {
       const confirmed = await prisma.booking.update({
         where: { id: booking.id },
         data: { status: 'CONFIRMED', expiresAt: null },
+      })
+      // Fire ticket delivery in the background — same pattern as the
+      // paid confirm route. deliverTicket is idempotent and never throws;
+      // we don't await it because the audience response shouldn't block
+      // on Resend/PDF generation. The claim in deliverTicket now lives
+      // on Booking (not Payment), so free events actually go through —
+      // previously they silently no-op'd. See Master Design Doc EPIC M.
+      deliverTicket(booking.id).catch((err) => {
+        console.error('[bookings] Background deliverTicket threw:', err)
       })
       return NextResponse.json(
         {
