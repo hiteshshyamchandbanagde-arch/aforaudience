@@ -103,7 +103,7 @@ export default function AdminBookingsPage() {
       } else {
         const err =
           res.status === 409
-            ? 'Booking was updated too recently to safely retry (30s cooldown).'
+            ? 'Booking was updated too recently to safely retry (30s cooldown, or booking is under 5 min old).'
             : body.error || `Retry failed (${res.status}).`
         setRetryMessage({ id, kind: 'err', text: err })
       }
@@ -172,7 +172,7 @@ export default function AdminBookingsPage() {
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: '#166534' }
     if (b.deliveryError) return { label: 'Delivery failed', color: BRAND_ACCENT }
-    return { label: 'In flight', color: BRAND_MUTED }
+    return { label: 'Pending delivery', color: BRAND_MUTED }
   }
 
   return (
@@ -188,7 +188,7 @@ export default function AdminBookingsPage() {
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
             {tabButton('errored', 'Failed', counts.errored)}
-            {tabButton('pending', 'In flight', counts.pending)}
+            {tabButton('pending', 'Pending delivery', counts.pending)}
             {tabButton('delivered', 'Delivered', counts.delivered)}
             {tabButton('all', 'All confirmed', counts.all)}
           </div>
@@ -200,7 +200,7 @@ export default function AdminBookingsPage() {
               {tab === 'errored'
                 ? 'Nothing failed. Ticket delivery is healthy.'
                 : tab === 'pending'
-                ? 'No deliveries in flight right now.'
+                ? 'No pending deliveries.'
                 : 'No bookings match this filter.'}
             </div>
           ) : (
@@ -293,7 +293,7 @@ export default function AdminBookingsPage() {
                       </div>
                     ) : null}
 
-                    {isErrored ? (
+                    {!isDelivered ? (
                       <div style={{ marginTop: '12px' }}>
                         <button
                           onClick={() => retry(b.id)}
@@ -309,7 +309,11 @@ export default function AdminBookingsPage() {
                             fontFamily: 'system-ui, sans-serif',
                           }}
                         >
-                          {retryingId === b.id ? 'Retrying…' : 'Retry delivery'}
+                          {retryingId === b.id
+                            ? 'Retrying…'
+                            : isErrored
+                            ? 'Retry delivery'
+                            : 'Attempt delivery'}
                         </button>
                       </div>
                     ) : null}
