@@ -434,10 +434,15 @@ model VenueBooking {
 
   // §4.5 - snapshotted at confirmation time so later changes to the
   // Venue's published rates don't retroactively alter a confirmed booking.
-  agreedRateType    RateType?
-  durationHours     Int?
-  durationDays      Int?
-  platformFeeAmount Float?
+  // F6: snapshotHourlyRate / snapshotDailyRate added to fully close the
+  // rate-drift gap; the pre-existing four fields captured the deal shape
+  // (duration, type, platform fee) but not the actual rate applied.
+  agreedRateType     RateType?
+  durationHours      Int?
+  durationDays       Int?
+  platformFeeAmount  Float?
+  snapshotHourlyRate Float?
+  snapshotDailyRate  Float?
 }
 
 model Event {
