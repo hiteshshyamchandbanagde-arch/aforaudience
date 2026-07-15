@@ -13,16 +13,26 @@ import { renderKnowledgeBaseForPrompt } from '@/lib/site-knowledge';
 // payments, and a wrong refund-policy answer from a bot is a real
 // trust/liability problem, not just an embarrassing typo.
 //
-// Cost note: prompt caching (which would cut the knowledge-base
-// portion of each request to ~10% of its input cost) is not used here
-// — it lives under a `beta` namespace in the pinned SDK version
-// (0.32.1) rather than the stable `messages.create()` surface, and
-// reaching into a beta API for a small saving isn't worth the added
-// fragility. At current traffic this is a non-issue: even uncached,
-// a full conversation turn costs a fraction of a rupee (see the cost
-// analysis this feature was built against). Revisit once the SDK is
-// bumped to a version with stable caching support, or once real
-// traffic volume actually makes the saving worth it.
+// Cost note: prompt caching is not used here, and after a second look
+// it wouldn't help even if wired. Two independent blockers, both real:
+//
+//   1. In the pinned SDK (@anthropic-ai/sdk 0.32.1) `cache_control`
+//      lives only under `client.beta.messages` and
+//      `client.beta.promptCaching.messages` — not on the stable
+//      `client.messages.create()` surface used below. Fixable by
+//      switching to the beta client.
+//
+//   2. The deeper blocker: the rendered system prompt is ~1.2-1.3k
+//      tokens (SITE_KNOWLEDGE + strict-rules preamble). Anthropic's
+//      Haiku prompt-caching minimum is 2048 tokens. Below that, the
+//      API silently doesn't cache — so even a fully-wired PR would
+//      change nothing at today's knowledge-base size.
+//
+// Making caching actually pay off would need one of: SITE_KNOWLEDGE
+// grown by ~800 tokens (a product call, not engineering), or switching
+// to Sonnet (which costs MORE per token — defeats the purpose). At
+// current traffic a full turn is ~₹0.30, still negligible, so this is
+// intentionally left off.
 //
 // No conversation persistence: each request carries its own short
 // history from the client. Nothing is stored server-side beyond what
@@ -94,16 +104,11 @@ export async function POST(req: Request) {
     const response = await anthropic.messages.create({
       model: CHAT_MODEL,
       max_tokens: 400,
-      // NOTE: prompt caching (cache_control on the system block) is a
-      // planned cost optimization, not yet wired in — the installed
-      // @anthropic-ai/sdk version's TypeScript types don't expose
-      // cache_control on this call shape even though the underlying API
-      // supports it (confirmed against Anthropic's own docs). Rather
-      // than fight the SDK's type definitions and block shipping, this
-      // ships uncached: cost goes from ~₹0.11 to ~₹0.30 per conversation
-      // turn — still negligible at current traffic. Revisit once SDK
-      // types catch up, or by dropping to `as any` deliberately if this
-      // becomes worth the cost difference at higher volume.
+      // See the file-level comment above for the full "why not prompt
+      // caching" analysis - short version: SDK stable shape doesn't
+      // expose cache_control, AND the system prompt is below Haiku's
+      // 2048-token cache minimum, so even a fully-wired PR would
+      // change nothing at today's knowledge-base size.
       system: SYSTEM_PROMPT,
       messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
     });
