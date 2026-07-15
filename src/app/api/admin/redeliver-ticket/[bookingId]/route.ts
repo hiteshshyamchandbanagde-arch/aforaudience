@@ -20,11 +20,15 @@ import { deliverTicket } from '@/lib/ticket-delivery'
  *     CANCELLED — those aren't eligible for delivery in the first
  *     place).
  *   - Atomically resets `deliveredAt` and `deliveryError` to NULL,
- *     gated on the booking either being in a failed state
- *     (`deliveredAt IS NULL AND deliveryError IS NOT NULL`) or having
- *     been "delivered" more than 30 seconds ago. This 30-second window
- *     protects against admin double-tap and against a race with an
- *     in-flight delivery attempt fired by the confirm route or webhook.
+ *     gated on the booking being in one of three safe-to-clear states:
+ *     (a) failed (`deliveredAt IS NULL AND deliveryError IS NOT NULL`),
+ *     (b) previously delivered more than 30 seconds ago (force-resend),
+ *     or (c) never attempted (`deliveredAt IS NULL AND deliveryError
+ *     IS NULL`) and the booking is older than 5 minutes. The 30-second
+ *     window protects against admin double-tap and against a race with
+ *     an in-flight delivery attempt fired by the confirm route or
+ *     webhook; the 5-minute age guard on (c) prevents racing with a
+ *     currently-executing delivery whose atomic claim hasn't landed.
  *   - Fires `deliverTicket()` in the background (same pattern as the
  *     confirm route — never blocks the admin's HTTP request on Resend).
  *
@@ -46,6 +50,12 @@ import { deliverTicket } from '@/lib/ticket-delivery'
  */
 
 const RETRY_COOLDOWN_MS = 30 * 1000
+// Bookings that were never delivered AND never captured an error are
+// eligible for retry only after this age — that guard prevents racing
+// with a currently-executing delivery attempt whose own atomic claim
+// hasn't landed yet. In practice deliverTicket claims and settles in
+// well under a second; five minutes is very generous.
+const NEVER_ATTEMPTED_MIN_AGE_MS = 5 * 60 * 1000
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -97,7 +107,7 @@ export async function POST(
     )
   }
 
-  // Atomic reset gated on state. Two branches are safe to clear:
+  // Atomic reset gated on state. Three branches are safe to clear:
   //
   //   (a) Previous delivery attempt captured an error but never fully
   //       delivered — `deliveredAt IS NULL AND deliveryError IS NOT NULL`.
@@ -107,16 +117,28 @@ export async function POST(
   //       so a manual re-send is safe (e.g., audience says "didn't get
   //       the email" — admin force-resends).
   //
-  // If neither matches, either the delivery is currently in-flight
-  // (deliveredAt set <30s ago by our own claim) or already null and
-  // fine (a claim is running right now). Return 409 in that case.
+  //   (c) Never attempted — `deliveredAt IS NULL AND deliveryError IS
+  //       NULL` AND the booking is older than NEVER_ATTEMPTED_MIN_AGE_MS.
+  //       This covers historical residue: bookings that predate the
+  //       delivery pipeline (Checkpoint 3, 13 Jul), free-event bookings
+  //       created before M1 landed (14 Jul), or any other row that
+  //       slipped through a code path without a delivery attempt firing.
+  //       The age guard prevents racing with a currently-executing
+  //       delivery attempt whose atomic claim hasn't landed yet.
+  //
+  // If none match, either the delivery is currently in-flight
+  // (deliveredAt set <30s ago by our own claim), the booking is too
+  // young for the never-attempted branch, or already null and fine
+  // (a claim is running right now). Return 409 in that case.
   const cutoff = new Date(Date.now() - RETRY_COOLDOWN_MS)
+  const neverAttemptedCutoff = new Date(Date.now() - NEVER_ATTEMPTED_MIN_AGE_MS)
   const reset = await prisma.booking.updateMany({
     where: {
       id: bookingId,
       OR: [
         { deliveredAt: null, deliveryError: { not: null } },
         { deliveredAt: { lt: cutoff } },
+        { deliveredAt: null, deliveryError: null, createdAt: { lt: neverAttemptedCutoff } },
       ],
     },
     data: {
