@@ -1,4 +1,4 @@
-# AforAudience — Master Design Document v2.7
+# AforAudience — Master Design Document v2.8
 ### The World's First Live Art Universe — Consolidated Product, Engineering & Delivery Plan
 **Status:** Living document | **Supersedes:** onboarding sections of the original Web & Mobile design docs
 **Working model:** Solo founder-developer + Claude acting as Architect / Senior Developer / QA collaborator
@@ -351,6 +351,19 @@ Retrospective epic to record Fix B work.
 |---|---|---|---|
 | M1 | Free events get PDF + email on auto-confirmation (delivery claim moved from Payment to Booking) | 3 | ✅ Shipped (seventh amendment) |
 
+### EPIC N — Check-In / Scan Flow (twelfth amendment)
+
+Real gap found in review, not hypothetical: the ticket PDF's QR has always encoded the raw `booking.id` (see comment in `src/lib/ticket-pdf.ts`), but until now nothing validated it or marked a ticket used - any booking, confirmed or not, could be "let in" indefinitely and repeatedly by anyone holding the QR image or just the printed Booking ID text.
+
+| ID | Story | Status |
+|---|---|---|
+| N1 | `Booking.checkedInAt` / `checkedInByUserId` - once-only used-state, audit trail of who scanned | ✅ Shipped |
+| N2 | `POST /api/events/[id]/checkin` - validates event match, `CONFIRMED` status, not-already-used; Organiser (owner) or Admin only | ✅ Shipped |
+| N3 | `GET /api/events/[id]/checkin` - live checked-in/total counts for the scanner header | ✅ Shipped |
+| N4 | Scanner UI (`/dashboard/organiser/events/[id]/checkin`) - camera QR scan (`html5-qrcode`) + manual booking-ID entry fallback, pass/fail card with attendee name + section | ✅ Shipped |
+
+**Deliberately deferred:** the QR payload itself is still unsigned (just the raw booking ID) - anti-forgery lives entirely at scan time via the DB lookup/single-use check above, not at PDF-generation time. Signing/tokenizing the QR payload is a smaller follow-up, not blocking, since a forged code still has to guess a real unused `cuid` to do anything.
+
 ---
 
 ## 7. Key Use Cases (Detailed Flows)
@@ -456,6 +469,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 3. E5 — real-time ticket sales dashboard (larger, standalone)
 4. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
 5. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
+6. Legal pages — `/privacy` is currently a `ComingSoon` stub, `/terms` doesn't exist as a route at all. Both required before company registration. Needs content draft + Hitesh sign-off before implementation - not an engineering-only task.
 
 ### 9.2 Real gaps found through live testing (not hypothetical)
 
@@ -528,5 +542,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 2.7 — Eleventh amendment (17 Jul 2026: three bug fixes shipped — homepage marquee loop, mobile events-filter misalignment, server-side email validation; phone-verification gate identified and properly backlogged rather than rushed; PRs #58, #59, #60)*
+*Document version: 2.8 — Twelfth amendment (17 Jul 2026: EPIC N — check-in/scan flow shipped end-to-end, schema+API+scanner UI with camera + manual entry; Venue.mapsUrl field added; legal-pages gap formally logged in backlog; PRs #64, #65)*
 *Confidential — Do not share*

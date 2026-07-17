@@ -556,6 +556,14 @@ model Booking {
   deliveredAt   DateTime?
   deliveryError String?
 
+  // Check-in/scan flow (EPIC N). Set once, at the door, by whoever scans
+  // the QR (or enters the code manually) - Organiser of the event or an
+  // Admin. checkedInByUserId is a plain scalar (not a relation) since it
+  // just needs to be a display-only "who scanned this" audit trail, not
+  // something queried from the User side.
+  checkedInAt       DateTime?
+  checkedInByUserId String?
+
   payment     Payment?
 
   @@index([status, expiresAt])
