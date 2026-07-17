@@ -1,10 +1,11 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, use, useCallback, useRef, ReactNode } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, use, useCallback, useRef, ReactNode, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import RangePicker from '@/components/RangePicker'
 
 interface Tier {
   sectionName: string
@@ -60,10 +61,12 @@ function timeAgo(iso: string) {
   return `${hrs}h ago`
 }
 
-export default function EventSalesPage({ params }: { params: Promise<{ id: string }> }) {
+function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [range, setRange] = useState(searchParams.get('range') || 'all')
   const [data, setData] = useState<SalesData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -76,9 +79,9 @@ export default function EventSalesPage({ params }: { params: Promise<{ id: strin
     }
   }, [status, router])
 
-  const fetchSales = useCallback(async () => {
+  const fetchSales = useCallback(async (r: string) => {
     try {
-      const res = await fetch(`/api/events/${id}/sales`)
+      const res = await fetch(`/api/events/${id}/sales?range=${r}`)
       if (!res.ok) {
         if (res.status === 403) throw new Error('You do not have access to this event')
         throw new Error('Could not load sales data')
@@ -96,12 +99,14 @@ export default function EventSalesPage({ params }: { params: Promise<{ id: strin
 
   useEffect(() => {
     if (status !== 'authenticated') return
-    fetchSales()
-    pollRef.current = setInterval(fetchSales, POLL_MS)
+    setLoading(true)
+    fetchSales(range)
+    if (pollRef.current) clearInterval(pollRef.current)
+    pollRef.current = setInterval(() => fetchSales(range), POLL_MS)
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
     }
-  }, [status, fetchSales])
+  }, [status, range, fetchSales])
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
@@ -117,11 +122,16 @@ export default function EventSalesPage({ params }: { params: Promise<{ id: strin
       <SiteNav />
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to event
-          </Link>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+              ← Back to event
+            </Link>
+            <Link href="/dashboard/organiser/sales" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+              All events →
+            </Link>
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '28px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A' }}>
               📊 {event.title} — Sales
             </h1>
@@ -130,15 +140,19 @@ export default function EventSalesPage({ params }: { params: Promise<{ id: strin
             </span>
           </div>
 
+          <div style={{ marginBottom: '24px' }}>
+            <RangePicker value={range} onChange={setRange} />
+          </div>
+
           {error && (
             <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub={`${money(totals.subtotalRevenue)} tickets + ${money(totals.bookingFeeRevenue)} fees`} />
-            <SummaryCard label="Tickets Sold" value={`${totals.totalSeatsSold} / ${totals.totalCapacity}`} sub={`${pctSold}% of capacity`} />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
+            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub={`${money(totals.subtotalRevenue)} tickets + ${money(totals.bookingFeeRevenue)} fees — this range`} />
+            <SummaryCard label="Seats Sold (all-time)" value={`${totals.totalSeatsSold} / ${totals.totalCapacity}`} sub={`${pctSold}% of capacity`} />
+            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub="this range" />
             <SummaryCard
               label="Reserved (payment in progress)"
               value={String(totals.pendingSeats)}
@@ -226,5 +240,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
+  )
+}
+
+export default function EventSalesPage(props: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>}>
+      <EventSalesPageInner {...props} />
+    </Suspense>
   )
 }
