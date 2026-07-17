@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const {
       name, address, city, capacity, acousticRating, facilities, seatMap, publish,
-      rateType, hourlyRate, dailyRate, minDurationHours, dayRates,
+      rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl,
     } = body
 
     if (!name || !address || !city) {
@@ -94,6 +94,7 @@ export async function POST(req: Request) {
         city,
         capacity: finalCapacity,
         acousticRating: acousticRating ? parseFloat(acousticRating) : null,
+        mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null,
         ownerId: venueOwner.id,
         photos: [],
         facilities: Array.isArray(facilities) ? facilities : [],

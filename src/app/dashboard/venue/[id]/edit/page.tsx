@@ -15,6 +15,7 @@ interface Venue {
   capacity: number
   facilities: string[]
   acousticRating?: number
+  mapsUrl?: string | null
   seatMap?: { sections?: SeatSection[] } | null
   isApproved: boolean
 }
@@ -49,7 +50,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '' })
+  const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '', mapsUrl: '' })
   const [facilitiesInput, setFacilitiesInput] = useState('')
   const [sections, setSections] = useState<SeatSection[]>([])
 
@@ -74,6 +75,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           address: data.address,
           city: data.city,
           acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
+          mapsUrl: data.mapsUrl || '',
         })
         setFacilitiesInput((data.facilities || []).join(', '))
         setSections(
@@ -183,7 +185,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Facilities <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
                   <input type="text" value={facilitiesInput} onChange={(e) => setFacilitiesInput(e.target.value)} style={inputStyle} />
@@ -192,6 +194,14 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
                   <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleChange} min="0" max="5" step="0.5" style={inputStyle} />
                 </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Google Maps Link <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                  Paste a share link from Google Maps for an exact pin. If left blank, we'll use your address to build directions.
+                </p>
               </div>
             </section>
 

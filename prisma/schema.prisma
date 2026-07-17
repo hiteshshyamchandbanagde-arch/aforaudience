@@ -322,6 +322,7 @@ model Venue {
   city          String
   lat           Float?
   lng           Float?
+  mapsUrl       String?
   capacity      Int
   photos        String[]
   facilities    String[]
