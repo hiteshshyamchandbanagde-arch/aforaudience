@@ -1,4 +1,4 @@
-# AforAudience — Master Design Document v2.6
+# AforAudience — Master Design Document v2.7
 ### The World's First Live Art Universe — Consolidated Product, Engineering & Delivery Plan
 **Status:** Living document | **Supersedes:** onboarding sections of the original Web & Mobile design docs
 **Working model:** Solo founder-developer + Claude acting as Architect / Senior Developer / QA collaborator
@@ -43,7 +43,9 @@ Also fixed a real, previously-undiagnosed mobile bug: **no viewport meta tag exi
 
 **Tenth amendment — 15 Jul 2026 morning session.** Two PRs merged (#52 F6, #53 RLS), plus this doc update. **(1) F6 — VenueBooking rate snapshot fully wired.** The schema comment on `VenueBooking` (§4.5) had claimed since the fifth amendment that `agreedRateType`/`durationHours`/`durationDays`/`platformFeeAmount` were "snapshotted at confirmation time so later changes to the Venue's published rates don't retroactively alter a confirmed booking." Reading the actual confirm code path (`PATCH /api/venue-bookings/[id]`) turned up two real gaps: (a) the **actual rate values** (`Venue.hourlyRate`, `Venue.dailyRate`) were never snapshotted onto the booking, only the derived shape — so a Venue Owner editing their published rate today would retroactively shift the effective rate of every already-confirmed HOURLY/DAILY booking against that venue; and (b) even the four fields that *were* meant to be snapshotted were being silently left `null` on the PENDING → CONFIRMED transition, because the confirm handler was writing `{ status }` only. The QA data made the bug visible in real terms: three CONFIRMED bookings existed against real venues, and their `amount` fields didn't cleanly divide by the *current* venue rates (e.g. The Vintage Club at hourlyRate 1000 had a 2500 booking → 2.5 hrs, non-integer, meaning the venue rate has changed since confirmation and we now have no way to know what it was). Migration `20260715000000_venue_booking_rate_snapshot` added `snapshotHourlyRate` and `snapshotDailyRate` (both `Float?`, nullable and additive, no backfill — writing today's Venue rates onto historical bookings would fabricate history worse than leaving null). Confirm handler now snapshots rate + duration + rate type on the PENDING → CONFIRMED transition for HOURLY/DAILY venues, with an idempotence guard (`agreedRateType === null`) so flipping status back and forth doesn't overwrite the original capture. FLEXIBLE flow untouched — it goes through the `VenueBookingRequest` negotiation loop and already snapshots what applies there; there is no published rate for FLEXIBLE, `amount` IS the negotiated deal. §9.3 updated: F6 moves off the "backend ready, waiting on frontend" list — the frontend didn't need a change, the backend just wasn't finished. **(2) RLS on `Payment` and `Feedback` — deny-by-default.** Supabase's security advisor flagged both tables as RLS-disabled, meaning anyone holding the anon key could construct a Supabase client and read/modify every row (Razorpay IDs and amounts on `Payment`; guest bug reports and attached screenshots on `Feedback`). Access-pattern audit before deciding the shape: **zero uses of `@supabase/supabase-js` anywhere in `src/`** (verified via grep across `.ts` and `.tsx`), all reads/writes go through Prisma against `DATABASE_URL` → Session Pooler as the `postgres` role, which has `BYPASSRLS`. Given that: `ENABLE ROW LEVEL SECURITY` on both tables with **no policies** is the correct default — zero blast radius on the app (Prisma continues unchanged), while the entire anon/authenticated JWT read path against these tables is killed. `FORCE ROW LEVEL SECURITY` intentionally not applied (`FORCE` would subject the postgres role to RLS too, breaking Prisma). If a future feature ever needs client-side reads on these tables, a targeted `CREATE POLICY` scoped to the specific authenticated user should be added in that PR — not by loosening this deny-by-default. Both migrations applied to QA Supabase before the code deploys, verified via `information_schema` and `pg_class`. Prod Supabase is now two migrations behind QA; that gap closes on the next `qa → main` promotion.
 
----
+**Eleventh amendment — 17 Jul 2026 session.** Three bug-fix PRs merged (#58 homepage marquee loop, #59 mobile events-filter/sort-dropdown misalignment, #60 server-side email format validation), plus doc cleanup. **(1) Marquee loop (#58):** homepage ticker array was 7 unique items followed by only the first 3 repeated (10 total, not a clean duplicate) — the `translateX(-50%)` keyframe only loops seamlessly when the two rendered halves are identical, so the mismatch caused a visible jump each cycle. Fixed by rendering the 7 unique items duplicated exactly once. A residual jank concern (raised, not confirmed) was parked as low-impact/no clear repro rather than chased further. **(2) Mobile filter-bar misalignment (#59):** the events-page filters row (type pills, city select, price pills, view toggle) had no responsive layout at all, unlike `SiteNav` which already has a 780px breakpoint — on narrow viewports the row wrapped unpredictably and a fixed-height divider floated misaligned against whatever wrapped next to it. Fixed with an explicit mobile layout at the same 780px breakpoint: column stack, divider hidden, select full-width. **(3) Server-side email validation (#60):** registration only checked email was non-empty and unique; format was client-side only (`<input type="email">`, bypassable via autofill/disabled-JS/direct API call). Two real QA users had malformed emails (`amolgokhe893gmail.com`, `amolgokhe.com`) live in the database, confirmed via direct query before fixing — not hypothetical. New `src/lib/validation.ts` with `isValidEmailFormat()`, wired into `POST /api/auth/register`. Scope-checked first: register is the only endpoint that writes a new email (`users/me` only reads it, `forgot-password` only looks one up, both harmless as-is). Already-malformed DB rows deliberately left untouched — a data decision, not folded into the fix. **(4) Phone-verification gap found, not fixed this session:** investigating #60 surfaced that neither password login nor either booking route checks `User.isVerified` — an account can skip phone-OTP entirely and still book/pay for a real ticket. A booking-gate fix was drafted and then deliberately reverted before shipping, because no UI exists for a user to complete phone verification after the immediate post-registration screen — shipping the gate alone would strand legitimate unverified users at checkout with no way out. Logged properly as backlog (§9.1 #1, §9.2) rather than rushed. Confirmed as a non-issue in the same investigation: email verification is already correctly non-blocking by design (`verify-email/route.ts` deliberately never touches `isVerified`), so no work needed there. **(5) Doc hygiene:** found and fixed stale status markers from the tenth amendment that never got updated when F6 shipped — the epics table (§6) still said "Not started", the backlog-order snapshot (§8.2) still listed F6 (and L5, also shipped in the eighth amendment) as remaining work, and §9.1's "next up" list still carried F6 and `assetlinks.json` as unblocked work despite both having shipped in the tenth and ninth amendments respectively.
+
+
 
 ## 1. Vision, Brand, Personas (carried forward, unchanged)
 
@@ -296,7 +298,7 @@ Story points use Fibonacci (1, 2, 3, 5, 8, 13). Estimates assume a solo develope
 | F3 | As a Venue Owner, I can view booking calendar and revenue | 5 | ✅ Shipped — revenue cards (this month/total/pending) + a lightweight custom month calendar, built into the existing bookings page |
 | F4 | As a Venue Owner, I can choose a rental rate type — Hourly, Daily, or Flexible — for my venue and set the base rate(s) for it | 5 | ✅ Shipped — including optional day-of-week overrides, verified live |
 | F5 | As a Venue Owner, I can review an Organiser's Flexible booking request and respond by accepting, declining, or sending a counter-offer amount | 5 | ✅ Shipped |
-| F6 | As a Venue Owner, I can see the agreed rate/duration snapshotted on each confirmed VenueBooking, unaffected by later changes to my published rates | 3 | ⬜ Not started |
+| F6 | As a Venue Owner, I can see the agreed rate/duration snapshotted on each confirmed VenueBooking, unaffected by later changes to my published rates | 3 | ✅ Shipped (tenth amendment) |
 | F7 | As a Venue Owner, when an Organiser counters my quote, I see their new number alongside the full offer history and can accept, decline, or counter again | 5 | ✅ Shipped |
 
 ### EPIC G — Reviews, Tips, Follow
@@ -401,15 +403,13 @@ Since this is one person collaborating with Claude as architect/dev/QA rather th
 
 ### 8.2 Backlog Order (maps to §4 phasing)
 
-**Status snapshot as of seventh amendment:** Release 0 is complete and live in prod. Release 1 (MVP Core) is **mostly shipped** — Checkpoints 2, 3, 4 all live in QA and stable. What remains from the originally-scoped ~135 points:
+**Status snapshot as of tenth amendment:** Release 0 is complete and live in prod. Release 1 (MVP Core) is **mostly shipped** — Checkpoints 2, 3, 4 all live in QA and stable. What remains from the originally-scoped ~135 points:
 
 - Checkpoint 5 (refunds) — needs business decisions before build (§9.5)
 - E3 (lineup drag-and-drop) — not started, standalone
 - E5 (real-time ticket sales dashboard) — not started
-- F6 (rate snapshot on confirmed bookings) — not started
 - K2 completion (Route split) — deferred to post-Organiser-onboarding
 - SMS via MSG91 — blocked on DLT template registration
-- L5 (displayName backfill hint) — not started
 
 The original release ordering:
 
@@ -451,12 +451,11 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 - Refund policy decisions (unblocks Checkpoint 5 / C5 refund half)
 
 **Best-unblocked next work (session-friendly, no external unblocks needed):**
-1. `assetlinks.json` at `/public/.well-known/assetlinks.json` with the QA APK's SHA-256 fingerprint — hides the URL bar in the installed TWA (~5 min once the fingerprint is copied from PWABuilder's ZIP)
-2. F6 — rate snapshot display on confirmed VenueBookings (~1 hr)
-3. E3 — lineup drag-and-drop builder (larger, standalone)
-4. E5 — real-time ticket sales dashboard (larger, standalone)
-5. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
-6. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
+1. Gate ticket booking on phone-verified users only — see finding in §9.2. Needs a "verify your phone" completion flow first (no UI exists today outside the immediate post-registration OTP screen); reuse existing OTP send/verify endpoints rather than building new ones. Small-medium — real UI flow, not a one-file patch.
+2. E3 — lineup drag-and-drop builder (larger, standalone)
+3. E5 — real-time ticket sales dashboard (larger, standalone)
+4. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
+5. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
 
 ### 9.2 Real gaps found through live testing (not hypothetical)
 
@@ -470,6 +469,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 | Dashboard nav link | Role-based users can only reach Dashboard via Profile, not from the header nav. Small nav-only fix. |
 | Homepage hero right-column void | Noted, not addressed. |
 | Free events not getting PDF/email | ~~Root cause identified~~ ✅ **Fixed seventh amendment (EPIC M1).** |
+| Ticket booking has no phone-verification gate | Password login and both booking routes (`/api/bookings`, `/api/venue-bookings`) never check `User.isVerified`. An account can register, skip the phone-OTP step entirely, and book/pay for a real ticket with a phone nobody can reach — real money and event-day logistics (ticket delivery, no-show/dispute resolution) riding on an unverified contact. Deliberately not fixed same-session: doing it properly needs a "verify your phone" completion UI first (only entry point today is the immediate post-registration OTP screen), not just adding the check. See §9.1 #1. Email verification, by contrast, is already correctly non-blocking by design — confirmed via code review, no gap there (see `verify-email/route.ts` comment). |
 
 ### 9.3 Schema exists, no UI yet (backend ready, waiting on frontend)
 
@@ -528,5 +528,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 2.6 — Tenth amendment (15 Jul 2026 morning: F6 rate snapshot fully wired end-to-end, RLS enabled deny-by-default on Payment and Feedback after access-pattern audit confirmed zero client-side Supabase usage; PRs #52 and #53)*
+*Document version: 2.7 — Eleventh amendment (17 Jul 2026: three bug fixes shipped — homepage marquee loop, mobile events-filter misalignment, server-side email validation; phone-verification gate identified and properly backlogged rather than rushed; PRs #58, #59, #60)*
 *Confidential — Do not share*
