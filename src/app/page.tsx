@@ -1,6 +1,9 @@
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 
+const TICKER_UNIQUE_ITEMS = ["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata"];
+const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS];
+
 export default function Home() {
   return (
     <main className="min-h-screen" style={{ background: "#F7F3EE", color: "#0E0C0A", fontFamily: "Georgia, serif" }}>
@@ -44,7 +47,7 @@ export default function Home() {
       {/* TICKER */}
       <div style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "14px 0", overflow: "hidden", borderTop: "2px solid #C8441A" }}>
         <div style={{ display: "flex", gap: "0", whiteSpace: "nowrap", animation: "ticker 28s linear infinite" }}>
-          {["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata", "Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore"].map((item, i) => (
+          {tickerItems.map((item, i) => (
             <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "16px", padding: "0 32px", fontFamily: "monospace", fontSize: "13px" }}>
               <span style={{ color: "#C8441A" }}>◆</span> {item}
             </span>
