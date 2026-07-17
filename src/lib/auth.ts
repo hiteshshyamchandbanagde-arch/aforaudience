@@ -145,15 +145,16 @@ export const authOptions: NextAuthOptions = {
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { tokenVersion: true, displayName: true },
+          select: { tokenVersion: true, displayName: true, isVerified: true },
         })
 
-        // Refresh displayName on every session check so that a user who
-        // just edited it in Profile sees the new value in the header
-        // greeting immediately, without re-login. Cheap select, already
-        // needed for the tokenVersion check.
+        // Refresh displayName and isVerified on every session check - the
+        // former so a Profile edit shows up immediately, the latter so
+        // completing phone verification (see /verify-phone) unblocks
+        // booking without requiring a re-login.
         if (currentUser) {
           (session.user as any).displayName = currentUser.displayName
+          ;(session.user as any).isVerified = currentUser.isVerified
         }
 
         if (!currentUser || currentUser.tokenVersion !== token.tokenVersion) {

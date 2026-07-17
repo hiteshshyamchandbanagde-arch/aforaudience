@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import DisplayNameNudge from "@/components/DisplayNameNudge";
+import PhoneVerifyNudge from "@/components/PhoneVerifyNudge";
 import SupportWidget from "@/components/SupportWidget";
 
 export const metadata: Metadata = {
@@ -96,6 +97,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <PhoneVerifyNudge />
           <DisplayNameNudge />
           {children}
         </Providers>

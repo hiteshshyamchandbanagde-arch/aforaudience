@@ -22,6 +22,7 @@ export async function GET() {
       email: true,
       phone: true,
       code: true,
+      isVerified: true,
     },
   })
   if (!user) {
