@@ -5,6 +5,7 @@ import { isUsernameAvailable } from "@/lib/auth-helpers"
 import { generateAndSendOtp } from "@/lib/otp"
 import { generateResetToken } from "@/lib/tokens" // generic sha256 token - reused for email verification too
 import { sendEmailVerificationEmail } from "@/lib/email"
+import { isValidEmailFormat } from "@/lib/validation"
 
 // Browse-first model: registration never accepts a role. Every account is
 // created as AUDIENCE. Artist / Organiser / Venue Owner are opt-in upgrades
@@ -32,6 +33,13 @@ export async function POST(req: NextRequest) {
 
     if (!normalizedUsername || !normalizedEmail || !normalizedPhone || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    }
+
+    // Browser <input type="email"> validation is client-side only and can
+    // be bypassed (autofill, disabled JS, direct API calls). Two QA users
+    // slipped malformed emails (missing "@") through this exact gap.
+    if (!isValidEmailFormat(normalizedEmail)) {
+      return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 })
     }
 
     if (password.length < 8) {
