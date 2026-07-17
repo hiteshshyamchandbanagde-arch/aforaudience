@@ -2,15 +2,24 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { parseRange, getRangeStart, bucketKeyFor } from '@/lib/sales-range'
 
-// GET /api/venues/[id]/sales — revenue dashboard for a Venue Owner (or
-// Admin), same shape/intent as the Organiser ticket-sales dashboard (E5)
-// but for venue rentals rather than ticket sales.
+// GET /api/venues/[id]/sales?range=week|month|quarter|year|all — revenue
+// dashboard for a Venue Owner (or Admin), same shape/intent as the
+// Organiser ticket-sales dashboard (E5) but for venue rentals rather
+// than ticket sales.
 //
 // Per the fifth amendment ("never tax the scene"), the platform takes no
 // cut of venue rentals — VenueBooking.amount IS the venue owner's full
 // revenue, no fee to subtract. So this is simpler than the ticket-sales
 // endpoint: no subtotal/fee split, just CONFIRMED booking amounts.
+//
+// `range` scopes revenue/timeline/recent-bookings/confirmed-count to
+// "bookings made in this window" (createdAt) — same convention as the
+// per-event ticket-sales endpoint. Upcoming/completed counts and pending
+// (awaiting confirmation) bookings stay all-time/current-state: whether
+// a booking's *event dates* are upcoming or past, and what's currently
+// awaiting confirmation, aren't "per period" figures.
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: venueId } = await params
@@ -37,9 +46,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
+    const { searchParams } = new URL(req.url)
+    const range = parseRange(searchParams.get('range'))
     const now = new Date()
+    const rangeStart = getRangeStart(range, now)
 
-    const [confirmed, pending] = await Promise.all([
+    const [allConfirmed, pending] = await Promise.all([
       prisma.venueBooking.findMany({
         where: { venueId, status: 'CONFIRMED' },
         include: { organiser: { select: { orgName: true } } },
@@ -51,30 +63,35 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       }),
     ])
 
-    const grossRevenue = confirmed.reduce((sum, b) => sum + b.amount, 0)
-    const upcomingCount = confirmed.filter((b) => b.fromDate >= now).length
-    const completedCount = confirmed.filter((b) => b.toDate < now).length
+    // All-time: upcoming vs completed, based on the booking's own event
+    // dates (not a "per period" figure).
+    const upcomingCount = allConfirmed.filter((b) => b.fromDate >= now).length
+    const completedCount = allConfirmed.filter((b) => b.toDate < now).length
+
+    // Range-scoped: revenue, timeline, recent bookings, confirmed count.
+    const inRange = rangeStart ? allConfirmed.filter((b) => b.createdAt >= rangeStart) : allConfirmed
+    const grossRevenue = inRange.reduce((sum, b) => sum + b.amount, 0)
 
     const pendingValue = pending.reduce((sum, b) => sum + b.amount, 0)
 
     // Event title isn't a declared Prisma relation on VenueBooking (same
     // gap noted in /api/venues/my-bookings) — attach manually.
-    const eventIds = confirmed.map((b) => b.eventId).filter(Boolean) as string[]
+    const eventIds = inRange.map((b) => b.eventId).filter(Boolean) as string[]
     const events = eventIds.length
       ? await prisma.event.findMany({ where: { id: { in: eventIds } }, select: { id: true, title: true } })
       : []
     const eventTitleMap = new Map(events.map((e) => [e.id, e.title]))
 
     const timelineMap: Record<string, number> = {}
-    for (const b of confirmed) {
-      const day = b.createdAt.toISOString().slice(0, 10)
-      timelineMap[day] = (timelineMap[day] || 0) + b.amount
+    for (const b of inRange) {
+      const key = bucketKeyFor(range, b.createdAt)
+      timelineMap[key] = (timelineMap[key] || 0) + b.amount
     }
     const timeline = Object.entries(timelineMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, revenue]) => ({ date, revenue }))
 
-    const recentBookings = confirmed.slice(0, 10).map((b) => ({
+    const recentBookings = inRange.slice(0, 10).map((b) => ({
       id: b.id,
       organiserName: b.organiser.orgName,
       eventTitle: b.eventId ? eventTitleMap.get(b.eventId) || null : null,
@@ -85,10 +102,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }))
 
     return NextResponse.json({
+      range,
       venue: { id: venue.id, name: venue.name, city: venue.city, capacity: venue.capacity },
       totals: {
         grossRevenue,
-        confirmedBookingsCount: confirmed.length,
+        confirmedBookingsCount: inRange.length,
         upcomingCount,
         completedCount,
         pendingCount: pending.length,
