@@ -15,6 +15,13 @@ type ScanResult = {
   checkedInAt?: string
 }
 
+type Attendee = {
+  bookingId: string
+  name: string
+  seats: Record<string, number>
+  checkedInAt: string | null
+}
+
 function seatsSummary(seats?: Record<string, number>) {
   if (!seats) return ''
   return Object.entries(seats)
@@ -43,6 +50,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const scanningRef = useRef(false) // guards against double-fires while a request is in flight
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [listOpen, setListOpen] = useState(false)
+  const [attendees, setAttendees] = useState<Attendee[] | null>(null)
+  const [listFilter, setListFilter] = useState<'all' | 'checked_in' | 'pending'>('all')
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
@@ -57,6 +68,18 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       if (res.ok) setCounts(await res.json())
     } catch {
       // non-critical - the counter just won't update this round
+    }
+  }, [eventId])
+
+  const refreshAttendees = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/attendees`)
+      if (res.ok) {
+        const data = await res.json()
+        setAttendees(data.attendees)
+      }
+    } catch {
+      // non-critical - list just won't refresh this round
     }
   }, [eventId])
 
@@ -106,6 +129,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       if (data.ok) {
         setManualCode('')
         refreshCounts()
+        if (listOpen) refreshAttendees()
       }
     } catch {
       setLastResult({ ok: false, message: 'Network error - try again.' })
@@ -117,7 +141,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       // same still-visible QR code before the person walks off.
       setTimeout(() => { scanningRef.current = false }, 1500)
     }
-  }, [eventId, refreshCounts])
+  }, [eventId, refreshCounts, listOpen, refreshAttendees])
 
   useEffect(() => {
     if (!cameraOn) return
@@ -264,6 +288,82 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 Check In
               </button>
             </div>
+          </div>
+
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <button
+              onClick={() => {
+                const next = !listOpen
+                setListOpen(next)
+                if (next && !attendees) refreshAttendees()
+              }}
+              style={{
+                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent',
+                border: 'none', cursor: 'pointer', padding: 0,
+              }}
+            >
+              <span>Attendee List</span>
+              <span style={{ fontSize: '13px', opacity: 0.6 }}>{listOpen ? '▲ Hide' : '▼ Show'}</span>
+            </button>
+
+            {listOpen && (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                  {(['all', 'checked_in', 'pending'] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setListFilter(f)}
+                      style={{
+                        flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                        border: listFilter === f ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                        background: listFilter === f ? 'rgba(200,68,26,0.08)' : '#fff',
+                        color: listFilter === f ? '#C8441A' : '#0E0C0A',
+                      }}
+                    >
+                      {f === 'all' ? 'All' : f === 'checked_in' ? 'Checked In' : 'Pending'}
+                    </button>
+                  ))}
+                </div>
+
+                {attendees === null ? (
+                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>Loading...</p>
+                ) : (
+                  (() => {
+                    const filtered = attendees.filter((a) =>
+                      listFilter === 'all' ? true : listFilter === 'checked_in' ? !!a.checkedInAt : !a.checkedInAt
+                    )
+                    if (filtered.length === 0) {
+                      return <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>No one in this list yet.</p>
+                    }
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {filtered.map((a) => (
+                          <div
+                            key={a.bookingId}
+                            style={{
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                              padding: '10px 12px', borderRadius: '8px',
+                              background: a.checkedInAt ? '#EAF3E7' : '#F7F3EE',
+                            }}
+                          >
+                            <div>
+                              <p style={{ fontSize: '13px', fontWeight: 600, color: '#0E0C0A' }}>{a.name}</p>
+                              {seatsSummary(a.seats) && (
+                                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
+                              )}
+                            </div>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: a.checkedInAt ? '#4A6741' : '#0E0C0A', opacity: a.checkedInAt ? 1 : 0.4 }}>
+                              {a.checkedInAt ? '✓ In' : 'Pending'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })()
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
