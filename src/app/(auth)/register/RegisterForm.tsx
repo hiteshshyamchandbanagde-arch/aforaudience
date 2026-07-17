@@ -30,6 +30,12 @@ export default function RegisterForm() {
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle")
   const [usernameSuggestion, setUsernameSuggestion] = useState<string | null>(null)
 
+  // Feedback widget request (cmrlxz35q): let users verify what they typed
+  // before submitting, for both the password and confirm-password fields
+  // independently.
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
   // Auto-suggest username from Full Name, until the user edits it themselves.
   // Full Name itself IS also sent to the server (as displayName) and shows
   // up on tickets/emails; only the username gets sliced/lowercased here.
@@ -345,25 +351,45 @@ export default function RegisterForm() {
 
             <div>
               <label style={labelStyle}>Password</label>
-              <input
-                name="password"
-                type="password"
-                placeholder="Min 8 characters"
-                value={form.password}
-                onChange={handleChange}
-                style={inputStyle()}
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min 8 characters"
+                  value={form.password}
+                  onChange={handleChange}
+                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
             <div>
               <label style={labelStyle}>Confirm Password</label>
-              <input
-                name="confirm"
-                type="password"
-                placeholder="Repeat password"
-                value={form.confirm}
-                onChange={handleChange}
-                style={inputStyle()}
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  name="confirm"
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Repeat password"
+                  value={form.confirm}
+                  onChange={handleChange}
+                  style={{ ...inputStyle(), paddingRight: "44px" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                >
+                  {showConfirm ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
           </div>
 

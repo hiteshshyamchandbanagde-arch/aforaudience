@@ -43,9 +43,21 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
           {venue.name}
         </h1>
-        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '28px' }}>
+        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>
           {venue.address}, {venue.city}
         </p>
+        <a
+          href={
+            venue.lat != null && venue.lng != null
+              ? `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.address}, ${venue.city}`)}`
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#C8441A', textDecoration: 'none', marginBottom: '28px' }}
+        >
+          📍 Get Directions
+        </a>
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
