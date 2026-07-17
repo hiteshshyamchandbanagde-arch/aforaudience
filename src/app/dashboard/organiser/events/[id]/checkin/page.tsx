@@ -41,11 +41,15 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const [cameraError, setCameraError] = useState('')
   const scannerRef = useRef<any>(null)
   const scanningRef = useRef(false) // guards against double-fires while a request is in flight
-  const resultRef = useRef<HTMLDivElement>(null)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
+
+  useEffect(() => {
+    return () => { if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current) }
+  }, [])
 
   const refreshCounts = useCallback(async () => {
     try {
@@ -88,19 +92,25 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       const data: ScanResult = await res.json()
       setLastResult(data)
       // Haptic feedback so a scan register is felt without having to look
-      // away from lining the QR up with the camera - the result card can
-      // be out of view while the camera fills the screen.
+      // away from lining the QR up with the camera.
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(data.ok ? 120 : [80, 60, 80])
       }
-      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // The result is shown as a fixed overlay (not inline in the page
+      // flow) specifically so it's never dependent on scroll position -
+      // an inline card was missed entirely while the camera view filled
+      // the screen. Auto-dismiss after a few seconds so it doesn't sit
+      // there blocking the next scan.
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => setLastResult(null), 4000)
       if (data.ok) {
         setManualCode('')
         refreshCounts()
       }
     } catch {
       setLastResult({ ok: false, message: 'Network error - try again.' })
-      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => setLastResult(null), 4000)
     } finally {
       setSubmitting(false)
       // Small cooldown so the camera loop doesn't instantly re-fire on the
@@ -148,6 +158,38 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   return (
     <>
       <SiteNav />
+
+      {/* Fixed overlay, not inline in page flow - guarantees visibility
+          regardless of scroll position while the camera view fills the
+          screen. This replaced an inline card that was easy to miss. */}
+      {lastResult && (
+        <div
+          role="status"
+          onClick={() => setLastResult(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+            padding: '18px 20px', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
+            background: lastResult.ok ? '#2F4A28' : '#B3261E',
+            color: '#F7F3EE', boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+            cursor: 'pointer',
+          }}
+        >
+          <p style={{ fontSize: '18px', fontWeight: 700, marginBottom: '4px' }}>
+            {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
+          </p>
+          {lastResult.attendeeName && (
+            <p style={{ fontSize: '15px', marginBottom: '2px' }}>{lastResult.attendeeName}</p>
+          )}
+          {lastResult.seats && seatsSummary(lastResult.seats) && (
+            <p style={{ fontSize: '13px', opacity: 0.85, marginBottom: '2px' }}>{seatsSummary(lastResult.seats)}</p>
+          )}
+          {lastResult.message && (
+            <p style={{ fontSize: '13px', opacity: 0.85 }}>{lastResult.message}</p>
+          )}
+          <p style={{ fontSize: '11px', opacity: 0.7, marginTop: '6px' }}>Tap to dismiss</p>
+        </div>
+      )}
+
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px 64px' }}>
           <Link href={`/dashboard/organiser/events/${eventId}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
@@ -162,30 +204,6 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             <p style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', marginBottom: '24px' }}>
               {counts.checkedIn} of {counts.total} checked in
             </p>
-          )}
-
-          {lastResult && (
-            <div
-              ref={resultRef}
-              style={{
-                borderRadius: '12px', padding: '20px', marginBottom: '20px',
-                background: lastResult.ok ? '#EAF3E7' : '#FDECEA',
-                border: `2px solid ${lastResult.ok ? '#4A6741' : '#B3261E'}`,
-              }}
-            >
-              <p style={{ fontSize: '17px', fontWeight: 700, color: lastResult.ok ? '#2F4A28' : '#B3261E', marginBottom: '6px' }}>
-                {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
-              </p>
-              {lastResult.attendeeName && (
-                <p style={{ fontSize: '14px', color: '#0E0C0A', marginBottom: '2px' }}>{lastResult.attendeeName}</p>
-              )}
-              {lastResult.seats && seatsSummary(lastResult.seats) && (
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '2px' }}>{seatsSummary(lastResult.seats)}</p>
-              )}
-              {lastResult.message && (
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7 }}>{lastResult.message}</p>
-              )}
-            </div>
           )}
 
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
