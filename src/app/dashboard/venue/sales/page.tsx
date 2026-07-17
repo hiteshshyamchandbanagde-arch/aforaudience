@@ -1,43 +1,47 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, use, useCallback, useRef, ReactNode, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import RangePicker from '@/components/RangePicker'
+
+interface VenueRow {
+  id: string
+  name: string
+  city: string
+  capacity: number
+  revenue: number
+  bookings: number
+}
+
+interface OrganiserRow {
+  organiserId: string
+  orgName: string
+  revenue: number
+  bookings: number
+}
 
 interface TimelinePoint {
   date: string
   revenue: number
 }
 
-interface RecentBooking {
-  id: string
-  organiserName: string
-  eventTitle: string | null
-  fromDate: string
-  toDate: string
-  amount: number
-  createdAt: string
-}
-
-interface VenueSalesData {
-  venue: { id: string; name: string; city: string; capacity: number }
+interface OverviewData {
+  range: string
   totals: {
     grossRevenue: number
+    venuesCount: number
     confirmedBookingsCount: number
-    upcomingCount: number
-    completedCount: number
-    pendingCount: number
-    pendingValue: number
   }
+  venues: VenueRow[]
+  organisers: OrganiserRow[]
   timeline: TimelinePoint[]
-  recentBookings: RecentBooking[]
   generatedAt: string
 }
 
-const POLL_MS = 20000
+const POLL_MS = 30000
 
 const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
 
@@ -51,17 +55,11 @@ function timeAgo(iso: string) {
   return `${hrs}h ago`
 }
 
-function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
-}
-
-function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function VenueOwnerSalesOverviewPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [range, setRange] = useState(searchParams.get('range') || 'all')
-  const [data, setData] = useState<VenueSalesData | null>(null)
+  const [range, setRange] = useState('all')
+  const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
@@ -73,12 +71,12 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [status, router])
 
-  const fetchSales = useCallback(async (r: string) => {
+  const fetchOverview = useCallback(async (r: string) => {
     try {
-      const res = await fetch(`/api/venues/${id}/sales?range=${r}`)
+      const res = await fetch(`/api/venues/sales-overview?range=${r}`)
       if (!res.ok) {
-        if (res.status === 403) throw new Error('You do not have access to this venue')
-        throw new Error('Could not load revenue data')
+        if (res.status === 403) throw new Error('You do not have access to this page')
+        throw new Error('Could not load revenue overview')
       }
       const json = await res.json()
       setData(json)
@@ -89,47 +87,42 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [])
 
   useEffect(() => {
     if (status !== 'authenticated') return
     setLoading(true)
-    fetchSales(range)
+    fetchOverview(range)
     if (pollRef.current) clearInterval(pollRef.current)
-    pollRef.current = setInterval(() => fetchSales(range), POLL_MS)
+    pollRef.current = setInterval(() => fetchOverview(range), POLL_MS)
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
     }
-  }, [status, range, fetchSales])
+  }, [status, range, fetchOverview])
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
-  const { venue, totals, timeline, recentBookings } = data
+  const { totals, venues, organisers, timeline } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
 
   return (
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-              ← Back to venue
-            </Link>
-            <Link href="/dashboard/venue/sales" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
-              All venues →
-            </Link>
-          </div>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
+          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+            ← Back to dashboard
+          </Link>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A' }}>
-              📊 {venue.name} — Revenue
+              📊 Revenue Overview
             </h1>
             <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
-              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
+              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
             </span>
           </div>
 
@@ -141,20 +134,12 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
-          {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub="this range, no platform cut" />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} sub="this range" />
-            <SummaryCard label="Upcoming / Completed (all-time)" value={`${totals.upcomingCount} / ${totals.completedCount}`} />
-            <SummaryCard
-              label="Pending (awaiting confirmation)"
-              value={String(totals.pendingCount)}
-              sub={totals.pendingCount > 0 ? `${money(totals.pendingValue)} at stake` : 'none right now'}
-              muted
-            />
+            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub="no platform cut" />
+            <SummaryCard label="Venues" value={String(totals.venuesCount)} />
+            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
           </div>
 
-          {/* Timeline */}
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
               <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No confirmed bookings in this range.</p>
@@ -172,19 +157,59 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             )}
           </Section>
 
-          {/* Recent bookings */}
-          <Section title="Recent bookings">
-            {recentBookings.length === 0 ? (
+          <Section title="By venue">
+            {venues.length === 0 ? (
+              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No venues yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(14,12,10,0.5)', padding: '0 12px' }}>
+                  <span>Venue</span>
+                  <span>City</span>
+                  <span>Revenue</span>
+                  <span>Bookings</span>
+                </div>
+                {venues.map((v) => (
+                  <Link
+                    key={v.id}
+                    href={`/dashboard/venue/${v.id}/sales?range=${range}`}
+                    style={{
+                      display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
+                      fontSize: '13px', padding: '12px', background: '#fff', borderRadius: '8px',
+                      border: '1px solid rgba(14,12,10,0.06)', textDecoration: 'none', color: '#0E0C0A',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>{v.name}</span>
+                    <span style={{ color: 'rgba(14,12,10,0.6)' }}>{v.city}</span>
+                    <span>{money(v.revenue)}</span>
+                    <span>{v.bookings}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Section title="By organiser">
+            {organisers.length === 0 ? (
               <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: '#fff', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
-                    <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
-                    <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.4)' }}>{timeAgo(b.createdAt)}</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(14,12,10,0.5)', padding: '0 12px' }}>
+                  <span>Organiser</span>
+                  <span>Revenue</span>
+                  <span>Bookings</span>
+                </div>
+                {organisers.map((o) => (
+                  <div
+                    key={o.organiserId}
+                    style={{
+                      display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
+                      fontSize: '13px', padding: '12px', background: '#fff', borderRadius: '8px',
+                      border: '1px solid rgba(14,12,10,0.06)',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>{o.orgName}</span>
+                    <span>{money(o.revenue)}</span>
+                    <span>{o.bookings}</span>
                   </div>
                 ))}
               </div>
@@ -196,9 +221,9 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   )
 }
 
-function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
+function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: muted ? 'rgba(14,12,10,0.03)' : '#fff', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: '#fff', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>{value}</p>
       {sub && <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '4px' }}>{sub}</p>}
@@ -212,13 +237,5 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
-  )
-}
-
-export default function VenueSalesPage(props: { params: Promise<{ id: string }> }) {
-  return (
-    <Suspense fallback={<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>}>
-      <VenueSalesPageInner {...props} />
-    </Suspense>
   )
 }
