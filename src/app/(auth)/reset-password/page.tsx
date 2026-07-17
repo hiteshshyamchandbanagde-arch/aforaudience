@@ -12,6 +12,9 @@ function ResetPasswordForm() {
   const [form, setForm] = useState({ password: "", confirm: "" })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  // Same eye-toggle pattern as register (PR #62) and login, applied here
+  // too for consistency across every password-entry field in the app.
+  const [visible, setVisible] = useState({ password: false, confirm: false })
 
   const handleSubmit = async () => {
     if (!token) {
@@ -80,14 +83,24 @@ function ResetPasswordForm() {
                   <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                     {field.label}
                   </label>
-                  <input
-                    type="password"
-                    placeholder={field.placeholder}
-                    value={form[field.name as keyof typeof form]}
-                    onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
-                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
-                  />
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={visible[field.name as keyof typeof visible] ? "text" : "password"}
+                      placeholder={field.placeholder}
+                      value={form[field.name as keyof typeof form]}
+                      onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setVisible({ ...visible, [field.name]: !visible[field.name as keyof typeof visible] })}
+                      aria-label={visible[field.name as keyof typeof visible] ? "Hide password" : "Show password"}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                    >
+                      {visible[field.name as keyof typeof visible] ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
