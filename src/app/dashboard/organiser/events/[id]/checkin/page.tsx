@@ -41,6 +41,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const [cameraError, setCameraError] = useState('')
   const scannerRef = useRef<any>(null)
   const scanningRef = useRef(false) // guards against double-fires while a request is in flight
+  const resultRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -86,12 +87,20 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       })
       const data: ScanResult = await res.json()
       setLastResult(data)
+      // Haptic feedback so a scan register is felt without having to look
+      // away from lining the QR up with the camera - the result card can
+      // be out of view while the camera fills the screen.
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(data.ok ? 120 : [80, 60, 80])
+      }
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       if (data.ok) {
         setManualCode('')
         refreshCounts()
       }
     } catch {
       setLastResult({ ok: false, message: 'Network error - try again.' })
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     } finally {
       setSubmitting(false)
       // Small cooldown so the camera loop doesn't instantly re-fire on the
@@ -155,6 +164,30 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </p>
           )}
 
+          {lastResult && (
+            <div
+              ref={resultRef}
+              style={{
+                borderRadius: '12px', padding: '20px', marginBottom: '20px',
+                background: lastResult.ok ? '#EAF3E7' : '#FDECEA',
+                border: `2px solid ${lastResult.ok ? '#4A6741' : '#B3261E'}`,
+              }}
+            >
+              <p style={{ fontSize: '17px', fontWeight: 700, color: lastResult.ok ? '#2F4A28' : '#B3261E', marginBottom: '6px' }}>
+                {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
+              </p>
+              {lastResult.attendeeName && (
+                <p style={{ fontSize: '14px', color: '#0E0C0A', marginBottom: '2px' }}>{lastResult.attendeeName}</p>
+              )}
+              {lastResult.seats && seatsSummary(lastResult.seats) && (
+                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '2px' }}>{seatsSummary(lastResult.seats)}</p>
+              )}
+              {lastResult.message && (
+                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7 }}>{lastResult.message}</p>
+              )}
+            </div>
+          )}
+
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             {!cameraOn ? (
               <button
@@ -214,29 +247,6 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               </button>
             </div>
           </div>
-
-          {lastResult && (
-            <div
-              style={{
-                borderRadius: '12px', padding: '20px',
-                background: lastResult.ok ? '#EAF3E7' : '#FDECEA',
-                border: `1px solid ${lastResult.ok ? '#B9D6B0' : '#F5C2C0'}`,
-              }}
-            >
-              <p style={{ fontSize: '15px', fontWeight: 700, color: lastResult.ok ? '#2F4A28' : '#B3261E', marginBottom: '6px' }}>
-                {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
-              </p>
-              {lastResult.attendeeName && (
-                <p style={{ fontSize: '14px', color: '#0E0C0A', marginBottom: '2px' }}>{lastResult.attendeeName}</p>
-              )}
-              {lastResult.seats && seatsSummary(lastResult.seats) && (
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '2px' }}>{seatsSummary(lastResult.seats)}</p>
-              )}
-              {lastResult.message && (
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7 }}>{lastResult.message}</p>
-              )}
-            </div>
-          )}
         </div>
       </main>
     </>
