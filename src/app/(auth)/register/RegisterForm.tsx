@@ -400,6 +400,11 @@ export default function RegisterForm() {
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>
+            By creating an account, you agree to our{" "}
+            <Link href="/terms" style={{ color: "#C8441A", textDecoration: "none" }}>Terms of Service</Link> and{" "}
+            <Link href="/privacy" style={{ color: "#C8441A", textDecoration: "none" }}>Privacy Policy</Link>.
+          </p>
         </div>
 
         <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "#0E0C0A", opacity: 0.6 }}>

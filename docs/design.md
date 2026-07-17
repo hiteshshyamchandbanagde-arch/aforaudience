@@ -1,4 +1,4 @@
-# AforAudience — Master Design Document v2.8
+# AforAudience — Master Design Document v2.9
 ### The World's First Live Art Universe — Consolidated Product, Engineering & Delivery Plan
 **Status:** Living document | **Supersedes:** onboarding sections of the original Web & Mobile design docs
 **Working model:** Solo founder-developer + Claude acting as Architect / Senior Developer / QA collaborator
@@ -469,7 +469,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 3. E5 — real-time ticket sales dashboard (larger, standalone)
 4. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
 5. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
-6. Legal pages — `/privacy` is currently a `ComingSoon` stub, `/terms` doesn't exist as a route at all. Both required before company registration. Needs content draft + Hitesh sign-off before implementation - not an engineering-only task.
+6. Legal pages — ✅ Drafted and live on QA (`/privacy`, `/terms`) with a visible "Draft — pending legal review" banner and bracketed placeholders (exact booking fee, refund policy, legal entity name/address, Grievance Officer, payout mechanism). Deliberately not final: needs a CA/lawyer review pass once the company is registered, then placeholders filled and the banner removed before promoting to prod.
 
 ### 9.2 Real gaps found through live testing (not hypothetical)
 
@@ -542,5 +542,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 2.8 — Twelfth amendment (17 Jul 2026: EPIC N — check-in/scan flow shipped end-to-end, schema+API+scanner UI with camera + manual entry; Venue.mapsUrl field added; legal-pages gap formally logged in backlog; PRs #64, #65)*
+*Document version: 2.9 — Thirteenth amendment (17 Jul 2026: attendee list added to check-in screen (all/checked-in/pending), several check-in-visibility bug fixes; legal pages (Privacy/Terms) drafted and published to QA with a visible pending-review banner and placeholders, per plan to CA/lawyer-review before prod; PRs #68, #69, plus legal-pages PR)*
 *Confidential — Do not share*
