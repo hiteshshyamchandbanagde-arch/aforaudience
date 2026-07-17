@@ -48,7 +48,9 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         </p>
         <a
           href={
-            venue.lat != null && venue.lng != null
+            venue.mapsUrl
+              ? venue.mapsUrl
+              : venue.lat != null && venue.lng != null
               ? `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`
               : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.address}, ${venue.city}`)}`
           }

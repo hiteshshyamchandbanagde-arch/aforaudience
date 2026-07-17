@@ -54,7 +54,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = await req.json()
-    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish } = body
+    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish, mapsUrl } = body
 
     const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : undefined
     const seatMapCapacity = sections
@@ -69,6 +69,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(city && { city }),
         ...(seatMapCapacity !== undefined ? { capacity: seatMapCapacity } : capacity ? { capacity } : {}),
         ...(acousticRating !== undefined && { acousticRating }),
+        ...(mapsUrl !== undefined && { mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null }),
         ...(facilities !== undefined && { facilities: Array.isArray(facilities) ? facilities : [] }),
         ...(sections !== undefined && { seatMap: { sections } }),
         ...(publish !== undefined && { isApproved: Boolean(publish) })
