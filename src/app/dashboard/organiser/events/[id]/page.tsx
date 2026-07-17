@@ -322,6 +322,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             >
               Edit Event
             </Link>
+            <Link
+              href={`/dashboard/organiser/events/${event.id}/checkin`}
+              style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+            >
+              🎟 Check-In
+            </Link>
             <button
               onClick={togglePublish}
               disabled={toggling}
