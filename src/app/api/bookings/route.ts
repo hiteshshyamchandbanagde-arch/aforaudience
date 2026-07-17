@@ -50,6 +50,17 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    // §9.2 finding: booking with real money and event-day logistics riding
+    // on an unreachable phone was a real gap - gate it here, at the one
+    // place a ticket actually gets created, rather than at login (browse-
+    // first stays intact; verification is only required to *book*, not to
+    // look around).
+    if (!user.isVerified) {
+      return NextResponse.json(
+        { error: 'Verify your phone number before booking a ticket.', reason: 'PHONE_NOT_VERIFIED' },
+        { status: 403 }
+      )
+    }
 
     const { eventId, seats } = await req.json()
     if (!eventId || !seats || typeof seats !== 'object') {

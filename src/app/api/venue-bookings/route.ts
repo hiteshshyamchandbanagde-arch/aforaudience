@@ -14,6 +14,12 @@ export async function POST(req: Request) {
     if (!user || user.role !== 'ORGANISER') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+    if (!user.isVerified) {
+      return NextResponse.json(
+        { error: 'Verify your phone number before booking a venue.', reason: 'PHONE_NOT_VERIFIED' },
+        { status: 403 }
+      )
+    }
 
     const organiser = await prisma.organiser.findUnique({ where: { userId: user.id } })
     if (!organiser) {

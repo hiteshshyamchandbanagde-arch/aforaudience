@@ -154,7 +154,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
       // Venue booking is a separate resource, so it's updated as its own request.
       if (venueId && (!event?.venue || event.venue.id !== venueId)) {
-        await fetch('/api/venue-bookings', {
+        const vbRes = await fetch('/api/venue-bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -165,6 +165,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             amount: bookingAmount,
           }),
         })
+        if (!vbRes.ok) {
+          const vbData = await vbRes.json().catch(() => ({}))
+          if (vbData.reason === 'PHONE_NOT_VERIFIED') {
+            router.push(`/verify-phone?next=${encodeURIComponent(`/dashboard/organiser/events/${id}/edit`)}`)
+            return
+          }
+          throw new Error(vbData.error || 'Failed to book venue')
+        }
       }
 
       router.push(`/dashboard/organiser/events/${id}`)

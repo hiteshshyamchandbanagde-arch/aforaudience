@@ -106,7 +106,13 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
         body: JSON.stringify({ eventId: event.id, seats: selectedSeats }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Failed to reserve seats")
+      if (!res.ok) {
+        if (data.reason === "PHONE_NOT_VERIFIED") {
+          router.push(`/verify-phone?next=${encodeURIComponent(`/events/${event.id}`)}`)
+          return
+        }
+        throw new Error(data.error || "Failed to reserve seats")
+      }
 
       // Two possible responses:
       //   - payment is attached → Razorpay was configured; go to checkout

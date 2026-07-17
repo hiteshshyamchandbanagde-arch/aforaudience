@@ -1,4 +1,4 @@
-# AforAudience — Master Design Document v2.9
+# AforAudience — Master Design Document v3.0
 ### The World's First Live Art Universe — Consolidated Product, Engineering & Delivery Plan
 **Status:** Living document | **Supersedes:** onboarding sections of the original Web & Mobile design docs
 **Working model:** Solo founder-developer + Claude acting as Architect / Senior Developer / QA collaborator
@@ -464,7 +464,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 - Refund policy decisions (unblocks Checkpoint 5 / C5 refund half)
 
 **Best-unblocked next work (session-friendly, no external unblocks needed):**
-1. Gate ticket booking on phone-verified users only — see finding in §9.2. Needs a "verify your phone" completion flow first (no UI exists today outside the immediate post-registration OTP screen); reuse existing OTP send/verify endpoints rather than building new ones. Small-medium — real UI flow, not a one-file patch.
+1. ✅ Gate ticket booking on phone-verified users only — shipped. `/verify-phone` is a standalone completion flow (reuses the existing SIGNUP_VERIFY OTP endpoints), reachable any time via a sticky nudge banner or a direct redirect when `/api/bookings`/`/api/venue-bookings` reject an unverified user. Non-dismissible nudge (unlike the displayName one) since booking is now actually gated on it.
 2. E3 — lineup drag-and-drop builder (larger, standalone)
 3. E5 — real-time ticket sales dashboard (larger, standalone)
 4. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
@@ -483,7 +483,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 | Dashboard nav link | Role-based users can only reach Dashboard via Profile, not from the header nav. Small nav-only fix. |
 | Homepage hero right-column void | Noted, not addressed. |
 | Free events not getting PDF/email | ~~Root cause identified~~ ✅ **Fixed seventh amendment (EPIC M1).** |
-| Ticket booking has no phone-verification gate | Password login and both booking routes (`/api/bookings`, `/api/venue-bookings`) never check `User.isVerified`. An account can register, skip the phone-OTP step entirely, and book/pay for a real ticket with a phone nobody can reach — real money and event-day logistics (ticket delivery, no-show/dispute resolution) riding on an unverified contact. Deliberately not fixed same-session: doing it properly needs a "verify your phone" completion UI first (only entry point today is the immediate post-registration OTP screen), not just adding the check. See §9.1 #1. Email verification, by contrast, is already correctly non-blocking by design — confirmed via code review, no gap there (see `verify-email/route.ts` comment). |
+| Ticket booking has no phone-verification gate | ~~Real gap~~ ✅ **Fixed (thirteenth amendment).** `/api/bookings` and `/api/venue-bookings` now reject unverified users (`reason: PHONE_NOT_VERIFIED`); frontend redirects to the new `/verify-phone` completion flow. Email verification, by contrast, is already correctly non-blocking by design — confirmed via code review, no gap there (see `verify-email/route.ts` comment). |
 
 ### 9.3 Schema exists, no UI yet (backend ready, waiting on frontend)
 
@@ -542,5 +542,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 2.9 — Thirteenth amendment (17 Jul 2026: attendee list added to check-in screen (all/checked-in/pending), several check-in-visibility bug fixes; legal pages (Privacy/Terms) drafted and published to QA with a visible pending-review banner and placeholders, per plan to CA/lawyer-review before prod; PRs #68, #69, plus legal-pages PR)*
+*Document version: 3.0 — Fourteenth amendment (17 Jul 2026: phone-verification booking gate shipped end-to-end — `/verify-phone` standalone completion flow, session now carries `isVerified` refreshed per-request, `/api/bookings` + `/api/venue-bookings` reject unverified users, non-dismissible nudge banner)*
 *Confidential — Do not share*
