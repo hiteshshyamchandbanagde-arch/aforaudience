@@ -277,7 +277,7 @@ Story points use Fibonacci (1, 2, 3, 5, 8, 13). Estimates assume a solo develope
 |---|---|---|---|
 | E1 | As a user, I can apply to become an Organiser via Profile | 3 | ✅ Shipped — verified live |
 | E2 | As an approved Organiser, I can create an event via a guided wizard | 8 | ✅ Shipped (pre-existing, predates this doc) |
-| E3 | As an Organiser, I can build a lineup (drag/drop, time blocks) | 8 | ⬜ Not started — performer slots exist in schema, no lineup-builder UI |
+| E3 | As an Organiser, I can build a lineup (drag/drop, time blocks) | 8 | ✅ Shipped (eighteenth amendment) — `/dashboard/organiser/events/[id]/lineup`. Touch-compatible drag reorder via `@dnd-kit` (new dependency — no drag library existed, native HTML5 DnD doesn't work on touch), per-slot duration input, computed start/end time blocks (derived from `event.startTime` + cumulative duration, not stored). |
 | E4 | As an Organiser, I can approve/reject Artist applications | 3 | ✅ Shipped — confirmed directly in code; was mislabeled not-started in earlier passes of this doc |
 | E5 | As an Organiser, I can view real-time ticket sales | 5 | ✅ Shipped (fifteenth amendment — per-event dashboard; sixteenth — organiser overview + range filters; seventeenth — venue owner overview + organiser breakdown). Per-event: polling dashboard (20s), per-tier sold counts, revenue split, sales timeline, recent bookings. Organiser overview (`/dashboard/organiser/sales`) and Venue Owner overview (`/dashboard/venue/sales`) both have Week/Month/Quarter/Year/All Time range filters and drill-down into their respective per-entity pages. |
 | E6 | As an Organiser, I can set/edit ticket price independently per seat section, matching the venue's seat map zones | 5 | ✅ Shipped |
@@ -465,7 +465,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 
 **Best-unblocked next work (session-friendly, no external unblocks needed):**
 1. ✅ Gate ticket booking on phone-verified users only — shipped. `/verify-phone` is a standalone completion flow (reuses the existing SIGNUP_VERIFY OTP endpoints), reachable any time via a sticky nudge banner or a direct redirect when `/api/bookings`/`/api/venue-bookings` reject an unverified user. Non-dismissible nudge (unlike the displayName one) since booking is now actually gated on it.
-2. E3 — lineup drag-and-drop builder (larger, standalone)
+2. ✅ E3 — lineup drag-and-drop builder — shipped (eighteenth amendment).
 3. ✅ E5 — real-time ticket sales dashboard — shipped: per-event dashboard (fifteenth amendment) + overview with Week/Month/Quarter/Year/All Time range filters (sixteenth amendment). Venue Owner revenue view shipped same session as a same-shape extension.
 4. ✅ **Venue Owner sales overview** — shipped (seventeenth amendment). `/dashboard/venue/sales`: same pattern as the Organiser overview — range filter, per-venue drill-down, plus an organiser-breakdown table (which organisers rent the most / spend the most). Table on the overview, no dedicated per-organiser page, per the phasing decision.
 5. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
@@ -488,7 +488,6 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 
 ### 9.3 Schema exists, no UI yet (backend ready, waiting on frontend)
 
-- **E3** — lineup drag-and-drop builder (performer slots exist in schema)
 - **H3** — flag/suspend accounts
 - **Admin bookings list surfacing `Booking.deliveryError`** — the retry endpoint (`POST /api/admin/redeliver-ticket/[bookingId]`) shipped in the eighth amendment (PR #43); still no admin UI that lists bookings with delivery errors and calls it. Admin currently calls it via curl. ~2 hr for a proper admin bookings page.
 - **K4** — Admin revenue dashboard (config surface exists at `/dashboard/admin/settings` but no revenue view). Note: a per-venue Venue Owner revenue view now exists (`/dashboard/venue/[id]/sales`, fifteenth amendment) — K4 is specifically the platform-wide admin rollup, still not built.
@@ -542,5 +541,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 3.0 — Seventeenth amendment (17 Jul 2026: E5 fully shipped, venue side — Venue Owner sales overview at `/dashboard/venue/sales` with the same Week/Month/Quarter/Year/All Time range filters as the Organiser overview, per-venue drill-down, and an organiser-breakdown table. Per-venue endpoint retrofitted with the same range param — upcoming/completed counts and pending stay all-time/current-state, revenue/timeline/recent-bookings scope to the range. PR #77, merged directly by Hitesh via git.)*
+*Document version: 3.0 — Eighteenth amendment (17 Jul 2026: E3 shipped — lineup drag-and-drop builder at `/dashboard/organiser/events/[id]/lineup`, `@dnd-kit` added as a new touch-compatible drag dependency, computed (not stored) time blocks from event.startTime + cumulative duration. PR #79 merged to qa. With E3 and E5 (both sides) now shipped, every §9.1 "session-friendly, no external unblock" item is closed out — remaining next-up items are either external-blocked or waiting on Hitesh (PWA screenshots). §9.3 candidates for a following session: admin bookings list surfacing `Booking.deliveryError`, K4 admin-wide revenue rollup, H3 flag/suspend accounts.)*
 *Confidential — Do not share*
