@@ -117,6 +117,12 @@ export default function OrganiserDashboard() {
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <Link
+                href="/dashboard/organiser/sales"
+                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                📊 Sales Overview
+              </Link>
+              <Link
                 href="/dashboard/venue-requests"
                 style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
