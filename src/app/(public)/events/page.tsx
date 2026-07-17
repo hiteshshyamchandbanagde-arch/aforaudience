@@ -102,8 +102,20 @@ export default function EventsPage() {
         )}
 
         {/* FILTERS */}
+        <style>{`
+          .events-filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+          .events-filters-divider { width: 1px; height: 32px; background: rgba(14,12,10,0.1); flex-shrink: 0; }
+          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(14,12,10,0.12); font-size: 13px; color: #0E0C0A; background: white; cursor: pointer; outline: none; }
+          .events-filters-view-toggle { margin-left: auto; display: flex; gap: 4px; }
+          @media (max-width: 780px) {
+            .events-filters-row { flex-direction: column; align-items: stretch; gap: 12px; }
+            .events-filters-divider { display: none; }
+            .events-filters-select { width: 100%; box-sizing: border-box; }
+            .events-filters-view-toggle { margin-left: 0; justify-content: flex-end; }
+          }
+        `}</style>
         <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
+          <div className="events-filters-row">
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {TYPE_OPTIONS.map((type) => (
                 <button
@@ -122,12 +134,12 @@ export default function EventsPage() {
               ))}
             </div>
 
-            <div style={{ width: "1px", height: "32px", background: "rgba(14,12,10,0.1)" }} />
+            <div className="events-filters-divider" />
 
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              style={{ padding: "8px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", color: "#0E0C0A", background: "white", cursor: "pointer", outline: "none" }}
+              className="events-filters-select"
             >
               <option>All Cities</option>
               {cities.map((c) => <option key={c}>{c}</option>)}
@@ -151,7 +163,7 @@ export default function EventsPage() {
               ))}
             </div>
 
-            <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
+            <div className="events-filters-view-toggle">
               <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "#0E0C0A" : "transparent", color: view === "grid" ? "white" : "#0E0C0A", cursor: "pointer", fontSize: "16px" }}>⊞</button>
               <button onClick={() => setView("list")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "list" ? "#0E0C0A" : "transparent", color: view === "list" ? "white" : "#0E0C0A", cursor: "pointer", fontSize: "16px" }}>☰</button>
             </div>
