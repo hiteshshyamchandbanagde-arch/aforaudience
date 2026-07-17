@@ -279,7 +279,7 @@ Story points use Fibonacci (1, 2, 3, 5, 8, 13). Estimates assume a solo develope
 | E2 | As an approved Organiser, I can create an event via a guided wizard | 8 | ✅ Shipped (pre-existing, predates this doc) |
 | E3 | As an Organiser, I can build a lineup (drag/drop, time blocks) | 8 | ⬜ Not started — performer slots exist in schema, no lineup-builder UI |
 | E4 | As an Organiser, I can approve/reject Artist applications | 3 | ✅ Shipped — confirmed directly in code; was mislabeled not-started in earlier passes of this doc |
-| E5 | As an Organiser, I can view real-time ticket sales | 5 | ⬜ Not started |
+| E5 | As an Organiser, I can view real-time ticket sales | 5 | ✅ Shipped (fifteenth amendment) — polling dashboard (20s), per-tier sold counts, revenue split, sales timeline, recent bookings. Extended same session to a Venue Owner revenue view (booking revenue, no platform cut) — not originally scoped as E5 but same shape of gap. |
 | E6 | As an Organiser, I can set/edit ticket price independently per seat section, matching the venue's seat map zones | 5 | ✅ Shipped |
 | E7 | As an Organiser, I can mark each lineup slot as Paid (Organiser owes the Artist a fee, settled between them off-platform for MVP), Free (no money either way), or Buy-in (the Artist pays the Organiser a spot fee, e.g. ₹200 — also settled between them off-platform for MVP). Platform records the promise for both sides' clarity but does not process the payment or take a cut. | 8 | ✅ Shipped — compensation choice happens at application-approval time. The stored `feeAmount` and `buyInAmount` fields are records of the between-parties promise. |
 | E8 | As an Organiser, I can set a maximum number of performers for an event/slot | 2 | ✅ Shipped — enforced on both auto- and manual-approval paths |
@@ -466,7 +466,7 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 **Best-unblocked next work (session-friendly, no external unblocks needed):**
 1. ✅ Gate ticket booking on phone-verified users only — shipped. `/verify-phone` is a standalone completion flow (reuses the existing SIGNUP_VERIFY OTP endpoints), reachable any time via a sticky nudge banner or a direct redirect when `/api/bookings`/`/api/venue-bookings` reject an unverified user. Non-dismissible nudge (unlike the displayName one) since booking is now actually gated on it.
 2. E3 — lineup drag-and-drop builder (larger, standalone)
-3. E5 — real-time ticket sales dashboard (larger, standalone)
+3. ✅ E5 — real-time ticket sales dashboard — shipped (fifteenth amendment), plus a Venue Owner revenue view as a same-session extension.
 4. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
 5. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
 6. Legal pages — ✅ Drafted and live on QA (`/privacy`, `/terms`) with a visible "Draft — pending legal review" banner and bracketed placeholders (exact booking fee, refund policy, legal entity name/address, Grievance Officer, payout mechanism). Deliberately not final: needs a CA/lawyer review pass once the company is registered, then placeholders filled and the banner removed before promoting to prod.
@@ -488,10 +488,9 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 ### 9.3 Schema exists, no UI yet (backend ready, waiting on frontend)
 
 - **E3** — lineup drag-and-drop builder (performer slots exist in schema)
-- **E5** — real-time ticket sales view
 - **H3** — flag/suspend accounts
 - **Admin bookings list surfacing `Booking.deliveryError`** — the retry endpoint (`POST /api/admin/redeliver-ticket/[bookingId]`) shipped in the eighth amendment (PR #43); still no admin UI that lists bookings with delivery errors and calls it. Admin currently calls it via curl. ~2 hr for a proper admin bookings page.
-- **K4** — Admin revenue dashboard (config surface exists at `/dashboard/admin/settings` but no revenue view)
+- **K4** — Admin revenue dashboard (config surface exists at `/dashboard/admin/settings` but no revenue view). Note: a per-venue Venue Owner revenue view now exists (`/dashboard/venue/[id]/sales`, fifteenth amendment) — K4 is specifically the platform-wide admin rollup, still not built.
 
 ### 9.4 Not started at all
 - **G3 — Tip.** Razorpay is now live in QA, so the blocker is gone; hasn't been scheduled.
@@ -542,5 +541,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 3.0 — Fourteenth amendment (17 Jul 2026: phone-verification booking gate shipped end-to-end — `/verify-phone` standalone completion flow, session now carries `isVerified` refreshed per-request, `/api/bookings` + `/api/venue-bookings` reject unverified users, non-dismissible nudge banner)*
+*Document version: 3.0 — Fifteenth amendment (17 Jul 2026: E5 shipped — Organiser real-time ticket sales dashboard at `/dashboard/organiser/events/[id]/sales`, polling-based, no websocket infra added. Extended same session to a Venue Owner revenue view at `/dashboard/venue/[id]/sales`, PR #72 merged to qa.)*
 *Confidential — Do not share*
