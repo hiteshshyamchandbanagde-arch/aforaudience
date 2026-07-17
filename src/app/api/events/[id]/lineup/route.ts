@@ -134,7 +134,7 @@ function computeTimeBlocks(eventStartTime: string, performances: any[]) {
   // not showing computed clock times if it doesn't parse rather than
   // guessing wrong.
   const base = parseTimeToMinutes(eventStartTime)
-  let cursor = base
+  let cursor = base ?? 0
 
   return performances.map((p) => {
     const startMinutes = cursor
