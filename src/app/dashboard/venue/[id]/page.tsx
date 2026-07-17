@@ -202,6 +202,12 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             >
               Edit Venue
             </Link>
+            <Link
+              href={`/dashboard/venue/${venue.id}/sales`}
+              style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+            >
+              📊 Revenue
+            </Link>
             <button
               onClick={togglePublish}
               disabled={toggling}
