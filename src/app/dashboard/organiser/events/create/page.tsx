@@ -88,6 +88,21 @@ export default function CreateEventPage() {
   const [maxPerformers, setMaxPerformers] = useState('')
   const [applicationApprovalMode, setApplicationApprovalMode] = useState<'MANUAL' | 'AUTO'>('MANUAL')
   const [maxSeatsPerBooking, setMaxSeatsPerBooking] = useState('4')
+
+  // Same class of bug as the Seating & Pricing totals (PR #102): the
+  // input's `max` attribute is cosmetic on this custom-submit form,
+  // so it doesn't stop anyone typing past it - the label right below
+  // promises "1-10" but nothing enforced that at the field itself.
+  const handleMaxSeatsPerBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setMaxSeatsPerBooking('')
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    setMaxSeatsPerBooking(String(Math.max(1, Math.min(num, 10))))
+  }
   const [platformFee, setPlatformFee] = useState<number | null>(null)
   // §4.5 - per-section ticket pricing. Keyed by section name, since the
   // Organiser only ever edits price here - section names/capacities stay
@@ -480,7 +495,7 @@ export default function CreateEventPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Max Seats Per Booking</label>
-                  <input type="number" value={maxSeatsPerBooking} onChange={(e) => setMaxSeatsPerBooking(e.target.value)} min="1" max="10" style={inputStyle} />
+                  <input type="number" value={maxSeatsPerBooking} onChange={handleMaxSeatsPerBookingChange} min="1" max="10" maxLength={2} style={inputStyle} />
                   <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
                 </div>
               </div>
