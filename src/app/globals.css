@@ -128,3 +128,12 @@
     @apply font-sans;
   }
 }
+.hero-rotator {
+  height: 560px;
+}
+
+@media (max-width: 900px) {
+  .hero-rotator {
+    height: 320px;
+  }
+}

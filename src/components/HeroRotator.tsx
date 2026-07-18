@@ -8,6 +8,8 @@ const SLIDES = [
   '/hero/slide-3.jpg',
   '/hero/slide-4.jpg',
   '/hero/slide-5.jpg',
+  '/hero/slide-6.jpg',
+  '/hero/slide-7.jpg',
 ]
 
 const INTERVAL_MS = 3500
@@ -24,10 +26,10 @@ export default function HeroRotator() {
 
   return (
     <div
+      className="hero-rotator"
       style={{
         position: 'relative',
         width: '100%',
-        aspectRatio: '4 / 3',
         borderRadius: '16px',
         overflow: 'hidden',
         background: '#0E0C0A',
