@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -181,15 +181,14 @@ export async function POST(
       }),
     ])
 
-    // Fire ticket delivery in the background. Deliberately not awaited:
-    // the user is staring at a spinner right now and Resend can take
-    // 300-800ms. The delivery function is idempotent (claims via
-    // `deliveredAt IS NULL`) so the webhook can safely retry-trigger
-    // if this attempt fails silently. Errors are captured to
-    // Booking.deliveryError — the booking stays CONFIRMED either way.
-    deliverTicket(booking.id).catch((err) => {
-      console.error('[confirm] Background deliverTicket threw:', err)
-    })
+    // Fire ticket delivery via after() rather than a bare un-awaited
+    // call — the user is staring at a spinner right now so this still
+    // doesn't block the response, but Vercel can freeze the runtime the
+    // instant the response goes out, which was silently killing this
+    // (and the milestone push nested inside it) before completion.
+    // Idempotent either way (claims via `deliveredAt IS NULL`), so the
+    // webhook can still safely retry-trigger if needed.
+    after(() => deliverTicket(booking.id))
 
     return NextResponse.json({
       ok: true,

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { sendPushToUser } from '@/lib/push'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -78,14 +78,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // PENDING is an internal reset (e.g. undoing a rejection), not
     // something the artist needs a push for.
     if (status === 'APPROVED' || status === 'REJECTED') {
-      sendPushToUser(application.artist.userId, {
-        title: status === 'APPROVED' ? "You're in the lineup!" : 'Application update',
-        body:
-          status === 'APPROVED'
-            ? `You've been approved to perform at "${application.event.title}".`
-            : `Your application to "${application.event.title}" wasn't approved this time.`,
-        url: '/dashboard/artist/events',
-      }).catch((err) => console.error('[push] application-decision notify failed', err))
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(application.artist.userId, {
+            title: status === 'APPROVED' ? "You're in the lineup!" : 'Application update',
+            body:
+              status === 'APPROVED'
+                ? `You've been approved to perform at "${application.event.title}".`
+                : `Your application to "${application.event.title}" wasn't approved this time.`,
+            url: '/dashboard/artist/events',
+          }),
+        'application-decision'
+      )
     }
 
     return NextResponse.json(updated)

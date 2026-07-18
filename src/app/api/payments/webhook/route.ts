@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import prisma from '@/lib/prisma'
 import {
   getWebhookSecret,
@@ -210,11 +210,12 @@ export async function POST(req: Request) {
 
     // Trigger ticket delivery. Idempotent — if the browser confirm path
     // already fired this, deliverTicket() no-ops on its atomic
-    // `deliveredAt IS NULL` claim. Not awaited: Razorpay expects a
-    // fast 200 from webhook handlers and will retry on timeout.
-    deliverTicket(payment.bookingId).catch((err) => {
-      console.error('[webhook] Background deliverTicket threw:', err)
-    })
+    // `deliveredAt IS NULL` claim. Scheduled via after() rather than a
+    // bare un-awaited call: Razorpay still gets its fast 200, but Vercel
+    // won't freeze the runtime mid-delivery the way a bare fire-and-forget
+    // call risked (confirmed happening to the sales-milestone push nested
+    // inside this same function).
+    after(() => deliverTicket(payment.bookingId))
 
     return NextResponse.json({ ok: true, marked: 'WEBHOOK_CONFIRMED' })
   } catch (err) {
