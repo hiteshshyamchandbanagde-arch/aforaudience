@@ -194,8 +194,17 @@ export default function CreateEventPage() {
       ? String(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))
       : formData.totalSeats
 
-    if (!formData.title || !formData.description || !formData.date || !formData.startTime || !formData.endTime || !totalSeatsValue) {
-      fail('Please fill in all required fields.')
+    const requiredFields: [unknown, string][] = [
+      [formData.title, 'Title'],
+      [formData.description, 'Description'],
+      [formData.date, 'Date'],
+      [formData.startTime, 'Start time'],
+      [formData.endTime, 'End time'],
+      [totalSeatsValue, 'Total seats'],
+    ]
+    const missing = requiredFields.filter(([value]) => !value).map(([, label]) => label)
+    if (missing.length > 0) {
+      fail(`Please fill in the required fields: ${missing.join(', ')}.`)
       setSaving(false)
       return
     }

@@ -78,6 +78,20 @@ export default function CreateVenuePage() {
     setSaving(true)
     setError('')
 
+    const requiredFields: [string, string][] = [
+      ['name', 'Venue Name'],
+      ['address', 'Address'],
+      ['city', 'City'],
+    ]
+    const missing = requiredFields
+      .filter(([key]) => !String(formData[key as keyof typeof formData]).trim())
+      .map(([, label]) => label)
+    if (missing.length > 0) {
+      fail(`Please fill in the required fields: ${missing.join(', ')}.`)
+      setSaving(false)
+      return
+    }
+
     const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
 
     if (validSections.length === 0) {
