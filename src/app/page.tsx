@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
+import HeroRotator from "@/components/HeroRotator";
 
 const TICKER_UNIQUE_ITEMS = ["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata"];
 const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS];
@@ -11,8 +12,8 @@ export default function Home() {
       <SiteNav variant="home" />
 
       {/* HERO */}
-      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "120px 48px 80px" }}>
-        <div style={{ maxWidth: "640px" }}>
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "120px 48px 80px", gap: "48px", flexWrap: "wrap" }}>
+        <div style={{ maxWidth: "640px", flex: "1 1 480px" }}>
           <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ display: "inline-block", width: "32px", height: "1px", background: "#C8441A" }}></span>
             Live Art. Real Moments.
@@ -41,6 +42,9 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+        <div style={{ flex: "1 1 400px", maxWidth: "480px" }}>
+          <HeroRotator />
         </div>
       </section>
 
