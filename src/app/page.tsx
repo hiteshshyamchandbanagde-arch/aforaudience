@@ -65,7 +65,7 @@ export default function Home() {
 
       {/* TICKER */}
       <div style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "14px 0", overflow: "hidden", borderTop: "2px solid #C8441A" }}>
-        <div style={{ display: "flex", gap: "0", whiteSpace: "nowrap", animation: "ticker 28s linear infinite" }}>
+        <div style={{ display: "flex", gap: "0", whiteSpace: "nowrap", animation: "ticker 28s linear infinite", willChange: "transform", backfaceVisibility: "hidden" }}>
           {tickerItems.map((item, i) => (
             <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "16px", padding: "0 32px", fontFamily: "monospace", fontSize: "13px" }}>
               <span style={{ color: "#C8441A" }}>◆</span> {item}
@@ -243,8 +243,8 @@ export default function Home() {
 
       <style>{`
         @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
         @media (min-width: 1600px) {
           .hero-stats-inline { display: none !important; }
