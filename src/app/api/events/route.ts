@@ -58,6 +58,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Total seats must be at least 1' }, { status: 400 })
     }
 
+    // Backdating check. Combine date + startTime into an actual instant and
+    // compare to now - a bare `date` check alone would still let someone
+    // pick today's date with a startTime that already passed. Client-side
+    // datepicker constraints are trivially bypassed by calling this route
+    // directly, so this has to be enforced here, not just in the form.
+    const startTimeMatch = /^(\d{1,2}):(\d{2})$/.exec(String(startTime))
+    if (!startTimeMatch) {
+      return NextResponse.json({ error: 'Invalid start time' }, { status: 400 })
+    }
+    const eventDate = new Date(date)
+    if (Number.isNaN(eventDate.getTime())) {
+      return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
+    }
+    eventDate.setHours(Number(startTimeMatch[1]), Number(startTimeMatch[2]), 0, 0)
+    if (eventDate.getTime() < Date.now()) {
+      return NextResponse.json({ error: 'Event date and time must be in the future' }, { status: 400 })
+    }
+    if (!/^\d{1,2}:\d{2}$/.test(String(endTime))) {
+      return NextResponse.json({ error: 'Invalid end time' }, { status: 400 })
+    }
+
     // §4.5 - per-section pricing, when provided. Validated here rather than
     // trusting the client: every tier needs a real section name and a
     // non-negative price/seat count.
