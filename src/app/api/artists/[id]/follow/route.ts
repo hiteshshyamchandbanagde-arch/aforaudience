@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -41,5 +42,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   await prisma.follow.create({ data: { userId, artistId: id } })
+
+  // Only on a new follow, not unfollow - nobody needs a push for someone
+  // quietly un-following them.
+  const follower = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, displayName: true } })
+  notifyAfterResponse(
+    () =>
+      sendPushToUser(artist.userId, {
+        title: 'New follower',
+        body: `${follower?.displayName || follower?.name || 'Someone'} started following you.`,
+        url: '/dashboard/artist',
+      }),
+    'new-follower'
+  )
+
   return NextResponse.json({ following: true })
 }
