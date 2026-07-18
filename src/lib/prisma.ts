@@ -33,6 +33,27 @@ const prismaPgConfig: PoolConfig = {
   ssl: {
     rejectUnauthorized: false,
   },
+  // No max was set here at all, which means node-postgres' default of 10
+  // connections PER Pool instance. Vercel spins up a separate serverless
+  // instance (with its own module scope, hence its own Pool) per
+  // concurrent invocation - so even 2 concurrent instances at the old
+  // default could open up to 20 connections against Supabase's Session
+  // Pooler, which caps at 15 total. Confirmed live: (EMAXCONNSESSION)
+  // "max clients reached in session mode - max clients are limited to
+  // pool_size: 15" errors across /artists/[id], /api/artists/me,
+  // /api/auth/[...nextauth], /api/reviews, and more - a real, live bug
+  // affecting real users, not a testing artifact, first seen July 9 and
+  // made worse by heavier concurrent traffic.
+  //
+  // Standard fix for Prisma + node-postgres + Supabase + serverless:
+  // each invocation typically only needs one connection at a time, so
+  // cap it there and let Supabase's own pooler handle multiplexing
+  // across however many concurrent instances Vercel actually runs.
+  max: 1,
+  // Release a connection back quickly rather than holding it open
+  // between requests on a warm instance - keeps the aggregate count
+  // low even under sustained concurrent traffic.
+  idleTimeoutMillis: 10_000,
 }
 
 const pool = new (require("pg").Pool)(prismaPgConfig)
