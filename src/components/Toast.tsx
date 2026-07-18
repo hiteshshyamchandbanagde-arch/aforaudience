@@ -57,8 +57,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <style>{`
         @keyframes toast-in {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(12px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toast-countdown {
+          from { width: 100%; }
+          to { width: 0%; }
         }
       `}</style>
       <div
@@ -70,7 +74,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
-          gap: 10,
+          gap: 12,
           maxWidth: 'calc(100vw - 32px)',
           width: 420,
           // The rest of the app sets fontFamily per-page (e.g. `main`'s
@@ -81,33 +85,82 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           fontFamily: 'system-ui, sans-serif',
         }}
       >
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            role="alert"
-            onClick={() => dismiss(t.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 10,
-              background: t.kind === 'error' ? '#FDECEA' : '#E7F4EC',
-              color: t.kind === 'error' ? '#B3261E' : '#1E4620',
-              border: `1px solid ${t.kind === 'error' ? '#F5C2C0' : '#B7DEC2'}`,
-              borderRadius: 10,
-              padding: '14px 16px',
-              fontSize: 14,
-              lineHeight: 1.4,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-              cursor: 'pointer',
-              animation: 'toast-in 0.2s ease-out',
-            }}
-          >
-            <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1.2 }}>
-              {t.kind === 'error' ? '⚠️' : '✓'}
-            </span>
-            <span style={{ flex: 1 }}>{t.message}</span>
-          </div>
-        ))}
+        {toasts.map((t) => {
+          const accent = t.kind === 'error' ? '#C8441A' : '#2D6A4F'
+          const bg = t.kind === 'error' ? '#FDECEA' : '#E7F4EC'
+          const text = t.kind === 'error' ? '#7A281F' : '#1E4620'
+          return (
+            <div
+              key={t.id}
+              role="alert"
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 12,
+                background: bg,
+                color: text,
+                borderRadius: 12,
+                borderLeft: `4px solid ${accent}`,
+                padding: '14px 16px 16px',
+                fontSize: 14,
+                lineHeight: 1.45,
+                boxShadow: '0 10px 30px rgba(14,12,10,0.16)',
+                animation: 'toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                overflow: 'hidden',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  flexShrink: 0,
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  background: accent,
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  marginTop: 1,
+                }}
+              >
+                {t.kind === 'error' ? '!' : '✓'}
+              </span>
+              <span style={{ flex: 1, fontWeight: 500 }}>{t.message}</span>
+              <button
+                aria-label="Dismiss"
+                onClick={() => dismiss(t.id)}
+                style={{
+                  flexShrink: 0,
+                  background: 'transparent',
+                  border: 'none',
+                  color: text,
+                  opacity: 0.5,
+                  fontSize: 16,
+                  lineHeight: 1,
+                  cursor: 'pointer',
+                  padding: 2,
+                }}
+              >
+                ×
+              </button>
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  height: 3,
+                  background: accent,
+                  opacity: 0.4,
+                  animation: `toast-countdown ${AUTO_DISMISS_MS}ms linear forwards`,
+                }}
+              />
+            </div>
+          )
+        })}
       </div>
     </ToastContext.Provider>
   );
