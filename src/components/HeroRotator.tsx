@@ -8,6 +8,8 @@ const SLIDES = [
   '/hero/slide-3.jpg',
   '/hero/slide-4.jpg',
   '/hero/slide-5.jpg',
+  '/hero/slide-6.jpg',
+  '/hero/slide-7.jpg',
 ]
 
 const INTERVAL_MS = 3500
