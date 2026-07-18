@@ -116,8 +116,11 @@ export async function POST(req: Request) {
     // single proposed number is a booking.
     if (venueId) {
       const venue = await prisma.venue.findUnique({ where: { id: venueId }, include: { owner: true } })
+      if (!venue) {
+        return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
+      }
 
-      if (venue?.rateType === 'FLEXIBLE') {
+      if (venue.rateType === 'FLEXIBLE') {
         const [sh, sm] = String(startTime).split(':').map(Number)
         const [eh, em] = String(endTime).split(':').map(Number)
         let mins = (eh * 60 + em) - (sh * 60 + sm)
