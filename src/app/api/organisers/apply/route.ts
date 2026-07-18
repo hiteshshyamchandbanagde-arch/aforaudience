@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToRole } from '@/lib/push'
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
@@ -31,6 +32,15 @@ export async function POST(req: Request) {
     prisma.user.update({ where: { id: user.id }, data: { role: 'ORGANISER' } }),
     prisma.organiser.create({ data: { userId: user.id, orgName, bio: body?.bio || null, isApproved: false } }),
   ])
+
+  // Fire-and-forget - an admin push shouldn't block or fail the applicant's
+  // own request. If it silently fails, the item is still sitting in the
+  // admin dashboard's Pending Approvals list either way.
+  sendPushToRole('ADMIN', {
+    title: 'New Organiser application',
+    body: `${orgName} applied to become an Organiser.`,
+    url: '/dashboard/admin',
+  }).catch((err) => console.error('[push] organiser-apply notify failed', err))
 
   return NextResponse.json({ message: 'Application submitted. We review new Organiser applications before you can create events.' })
 }

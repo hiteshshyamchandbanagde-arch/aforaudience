@@ -175,3 +175,48 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// Web Push. Payload shape is { title, body, url } - see src/lib/push.ts,
+// which is the only place that sends notifications, so this stays in
+// sync with that file's PushPayload type by convention (no shared import
+// possible across the SW/app boundary without a build step for this file).
+self.addEventListener('push', (event) => {
+  let data = { title: 'AforAudience', body: 'You have a new notification.', url: '/' };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch (err) {
+    console.warn('[sw] push event had non-JSON payload', err);
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icon-192x192.png',
+      badge: '/icon-192x192.png',
+      data: { url: data.url || '/' },
+    })
+  );
+});
+
+// Focus an already-open tab on the target URL if one exists, otherwise
+// open a new one. Standard pattern - without it, clicking a notification
+// just does nothing.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    (async () => {
+      const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clientsList) {
+        const clientUrl = new URL(client.url);
+        if (clientUrl.origin === self.location.origin) {
+          await client.focus();
+          if ('navigate' in client) await client.navigate(targetUrl);
+          return;
+        }
+      }
+      await self.clients.openWindow(targetUrl);
+    })()
+  );
+});
