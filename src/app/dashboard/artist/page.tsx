@@ -42,6 +42,12 @@ interface Performance {
   reviews: Review[]
 }
 
+interface Follower {
+  id: string
+  createdAt: string
+  user: { name: string; displayName: string | null; avatar: string | null }
+}
+
 interface ArtistProfile {
   id: string
   bio: string
@@ -51,6 +57,7 @@ interface ArtistProfile {
   name: string
   applications: Application[]
   performances: Performance[]
+  followers: Follower[]
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
@@ -115,7 +122,9 @@ export default function ArtistDashboard() {
               <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
                 {profile.name}
               </h1>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>Hype Score: {profile.hypScore.toFixed(1)}</p>
+              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>
+                Hype Score: {profile.hypScore.toFixed(1)} · {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
+              </p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <Link
@@ -182,6 +191,38 @@ export default function ArtistDashboard() {
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Followers */}
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
+              Followers
+            </h2>
+            {profile.followers.length === 0 ? (
+              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+                No followers yet. They&apos;ll show up here as people find your profile.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {profile.followers.map((f) => {
+                  const label = f.user.displayName || f.user.name
+                  return (
+                    <div key={f.id} style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        width: '32px', height: '32px', borderRadius: '50%', background: '#0E0C0A', color: '#F7F3EE',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, flexShrink: 0,
+                      }}>
+                        {label.charAt(0).toUpperCase()}
+                      </div>
+                      <span style={{ fontSize: '14px', color: '#0E0C0A', fontWeight: 500 }}>{label}</span>
+                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4, marginLeft: 'auto' }}>
+                        since {new Date(f.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>

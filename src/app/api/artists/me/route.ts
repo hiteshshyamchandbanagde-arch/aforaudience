@@ -31,6 +31,10 @@ export async function GET() {
             },
           },
         },
+        followers: {
+          include: { user: { select: { name: true, displayName: true, avatar: true } } },
+          orderBy: { createdAt: 'desc' },
+        },
       },
     })
 
