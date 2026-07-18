@@ -55,6 +55,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
+      <style>{`
+        @keyframes toast-in {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       <div
         style={{
           position: 'fixed',
@@ -67,6 +73,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           gap: 10,
           maxWidth: 'calc(100vw - 32px)',
           width: 420,
+          // The rest of the app sets fontFamily per-page (e.g. `main`'s
+          // system-ui, sans-serif) - this renders as a sibling of page
+          // content, outside that wrapper, so without setting it here
+          // explicitly it silently falls back to the browser's default
+          // serif font. That mismatch is what read as "flat/rough."
+          fontFamily: 'system-ui, sans-serif',
         }}
       >
         {toasts.map((t) => (
@@ -75,6 +87,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             role="alert"
             onClick={() => dismiss(t.id)}
             style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
               background: t.kind === 'error' ? '#FDECEA' : '#E7F4EC',
               color: t.kind === 'error' ? '#B3261E' : '#1E4620',
               border: `1px solid ${t.kind === 'error' ? '#F5C2C0' : '#B7DEC2'}`,
@@ -82,11 +97,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               padding: '14px 16px',
               fontSize: 14,
               lineHeight: 1.4,
-              boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
               cursor: 'pointer',
+              animation: 'toast-in 0.2s ease-out',
             }}
           >
-            {t.message}
+            <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1.2 }}>
+              {t.kind === 'error' ? '⚠️' : '✓'}
+            </span>
+            <span style={{ flex: 1 }}>{t.message}</span>
           </div>
         ))}
       </div>
