@@ -100,6 +100,21 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Same class of bug as the Seating & Pricing totals (PR #102): the
+  // input's `max` attribute is cosmetic on these custom-submit forms,
+  // so it doesn't stop anyone typing past it. Clamp on change instead.
+  const handleAcousticRatingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setFormData((prev) => ({ ...prev, acousticRating: '' }))
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    const clamped = Math.max(0, Math.min(num, 5))
+    setFormData((prev) => ({ ...prev, acousticRating: String(clamped) }))
+  }
+
   const save = async (publishOverride?: boolean) => {
     setSaving(true)
     setError('')
@@ -192,7 +207,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 </div>
                 <div>
                   <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                  <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleChange} min="0" max="5" step="0.5" style={inputStyle} />
+                  <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} min="0" max="5" step="0.5" maxLength={3} style={inputStyle} />
                 </div>
               </div>
 
