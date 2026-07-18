@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import { formatEventTimeRange } from "@/lib/eventTime"
 
 interface Review {
   id: string
@@ -208,7 +209,7 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
           <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
             {[
               { icon: "📅", text: new Date(event.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) },
-              { icon: "🕐", text: `${event.startTime} – ${event.endTime}` },
+              { icon: "🕐", text: formatEventTimeRange(event.startTime, event.endTime) },
               { icon: "📍", text: event.venue ? `${event.venue.name}, ${event.venue.city}` : "Venue TBD" },
             ].map((item) => (
               <div key={item.text} style={{ display: "flex", alignItems: "center", gap: "6px", color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
