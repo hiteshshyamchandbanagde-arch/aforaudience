@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToRole } from '@/lib/push'
 
 // The opt-in upgrade path referenced throughout the design doc but never
 // built until now: an AUDIENCE user applies here, gets flipped to
@@ -29,6 +30,12 @@ export async function POST() {
     prisma.user.update({ where: { id: user.id }, data: { role: 'VENUE_OWNER' } }),
     prisma.venueOwner.create({ data: { userId: user.id, isApproved: false } }),
   ])
+
+  sendPushToRole('ADMIN', {
+    title: 'New Venue Owner application',
+    body: `${user.displayName || user.name} applied to become a Venue Owner.`,
+    url: '/dashboard/admin',
+  }).catch((err) => console.error('[push] venue-owner-apply notify failed', err))
 
   return NextResponse.json({ message: 'Application submitted. We review new Venue Owner applications before you can list a venue.' })
 }
