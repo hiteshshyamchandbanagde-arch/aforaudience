@@ -5,6 +5,8 @@ import HeroRotator from "@/components/HeroRotator";
 const TICKER_UNIQUE_ITEMS = ["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata"];
 const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS];
 
+const HERO_STATS = [{ num: "2,400+", label: "Artists" }, { num: "840+", label: "Events Monthly" }, { num: "120+", label: "Cities" }];
+
 export default function Home() {
   return (
     <main className="min-h-screen" style={{ background: "#F7F3EE", color: "#0E0C0A", fontFamily: "Georgia, serif" }}>
@@ -14,7 +16,7 @@ export default function Home() {
       {/* HERO */}
       <section style={{ padding: "96px 48px 80px" }}>
         <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", gap: "48px", flexWrap: "wrap" }}>
-        <div style={{ maxWidth: "660px", flex: "1 1 480px" }}>
+        <div style={{ maxWidth: "560px", flex: "1 1 480px" }}>
           <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ display: "inline-block", width: "32px", height: "1px", background: "#C8441A" }}></span>
             Live Art. Real Moments.
@@ -34,9 +36,9 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* STATS */}
-          <div style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)", flexWrap: "wrap" }}>
-            {[{ num: "2,400+", label: "Artists" }, { num: "840+", label: "Events Monthly" }, { num: "120+", label: "Cities" }].map((s) => (
+          {/* STATS (default position — under CTAs, all screen sizes) */}
+          <div className="hero-stats-inline" style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)", flexWrap: "wrap" }}>
+            {HERO_STATS.map((s) => (
               <div key={s.label}>
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1, marginBottom: "4px" }}>{s.num}</div>
                 <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#0E0C0A", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
@@ -44,7 +46,18 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div style={{ flex: "1 1 400px", maxWidth: "580px" }}>
+
+        {/* STATS (wide-screen only — fills the gap between text and hero image; hidden below 1600px, inline version above hidden above it) */}
+        <div className="hero-stats-gap" style={{ flex: "0 0 auto", display: "none", flexDirection: "column", justifyContent: "center", gap: "36px", padding: "0 4px" }}>
+          {HERO_STATS.map((s) => (
+            <div key={s.label}>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1, marginBottom: "4px", whiteSpace: "nowrap" }}>{s.num}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#0E0C0A", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ flex: "1 1 400px", maxWidth: "720px" }}>
           <HeroRotator />
         </div>
         </div>
@@ -232,6 +245,10 @@ export default function Home() {
         @keyframes ticker {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
+        }
+        @media (min-width: 1600px) {
+          .hero-stats-inline { display: none !important; }
+          .hero-stats-gap { display: flex !important; }
         }
       `}</style>
     </main>
