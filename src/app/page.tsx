@@ -43,7 +43,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div style={{ flex: "1 1 400px", maxWidth: "480px" }}>
+        <div style={{ flex: "1 1 400px", maxWidth: "540px" }}>
           <HeroRotator />
         </div>
       </section>
