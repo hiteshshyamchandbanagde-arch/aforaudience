@@ -45,6 +45,37 @@ export default function NotificationOptIn() {
     setDismissed(window.sessionStorage.getItem(DISMISSED_KEY) === '1');
   }, []);
 
+  // Handles the case the banner-based flow above can't: permission was
+  // already granted (on any account, possibly a while ago) and the person
+  // has since switched to a different logged-in account on this same
+  // device/browser. Notification.permission is a per-origin browser
+  // setting, not per-account, so once it's 'granted' our banner correctly
+  // never asks again - but that also means a newly logged-in account never
+  // gets its own PushSubscription row without this. No permission prompt
+  // needed here since the browser already decided; just re-point the
+  // existing subscription's userId to whoever is logged in now (the
+  // subscribe endpoint already upserts on endpoint + reassigns userId).
+  useEffect(() => {
+    if (status !== 'authenticated' || !session?.user) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (!sub) return; // granted but never actually subscribed on this device - nothing to re-link
+        await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription: sub.toJSON() }),
+        });
+      } catch (err) {
+        console.warn('[push] re-link on account switch failed', err);
+      }
+    })();
+  }, [status, (session?.user as any)?.id]);
+
   const enable = async () => {
     setBusy(true);
     try {
