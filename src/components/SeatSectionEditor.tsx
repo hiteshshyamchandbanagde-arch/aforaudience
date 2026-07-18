@@ -23,13 +23,28 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     onChange([...sections, { id: makeId(), name: "", seats: "", price: "" }])
   }
 
+  // Cosmetic `max` attributes on the inputs don't stop anyone from
+  // typing past them (these forms use custom onChange handlers, not
+  // native form submission - see PR #100's key learning). Left
+  // unclamped, a long run of digits parses into a valid but absurd JS
+  // number (e.g. a 200-digit string of 1s), which then flows straight
+  // into the totals below and renders as unreadable scientific
+  // notation. Clamp at the point of state update so the field itself
+  // never holds a value beyond what's meaningful.
+  const SEATS_MAX = 100000
+  const PRICE_MAX = 10000000
+
   const updateSection = (id: string, field: keyof SeatSection, value: string) => {
     onChange(
-      sections.map((s) =>
-        s.id === id
-          ? { ...s, [field]: field === "name" ? value : value === "" ? "" : Number(value) }
-          : s
-      )
+      sections.map((s) => {
+        if (s.id !== id) return s
+        if (field === "name") return { ...s, name: value }
+        if (value === "") return { ...s, [field]: "" }
+        const num = Number(value)
+        if (!Number.isFinite(num)) return s
+        const max = field === "seats" ? SEATS_MAX : PRICE_MAX
+        return { ...s, [field]: Math.max(0, Math.min(num, max)) }
+      })
     )
   }
 
@@ -87,6 +102,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               placeholder="Seats"
               min={0}
               max={100000}
+              maxLength={6}
               value={section.seats}
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
               style={inputStyle}
@@ -98,6 +114,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 placeholder="Price"
                 min={0}
                 max={10000000}
+                maxLength={8}
                 value={section.price}
                 onChange={(e) => updateSection(section.id, "price", e.target.value)}
                 style={{ ...inputStyle, paddingLeft: "26px" }}
