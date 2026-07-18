@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { requireVerifiedPhone } from '@/lib/verification'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
 const EXPIRY_HOURS = 48
@@ -110,6 +111,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!lastOffer) {
         return NextResponse.json({ error: 'No offer to accept yet' }, { status: 400 })
       }
+      const verifyError = requireVerifiedPhone(user)
+      if (verifyError) return verifyError
 
       const platformSettings = await prisma.platformSettings.findFirst()
 

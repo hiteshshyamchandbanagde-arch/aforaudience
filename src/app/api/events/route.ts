@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { requireVerifiedPhone } from '@/lib/verification'
 
 export async function GET() {
   try {
@@ -37,6 +38,8 @@ export async function POST(req: Request) {
     if (!organiser.isApproved) {
       return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
     }
+    const verifyError = requireVerifiedPhone(user)
+    if (verifyError) return verifyError
 
     const body = await req.json()
     const {

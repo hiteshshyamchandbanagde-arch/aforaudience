@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { requireVerifiedPhone } from '@/lib/verification'
 
 export async function POST(req: Request) {
   try {
@@ -20,6 +21,8 @@ export async function POST(req: Request) {
     if (!artist) {
       return NextResponse.json({ error: 'Artist profile not found' }, { status: 404 })
     }
+    const verifyError = requireVerifiedPhone(user)
+    if (verifyError) return verifyError
 
     const body = await req.json()
     const { eventId, message } = body
@@ -48,12 +51,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // Auto-approval mode: verified artists skip manual review entirely and
-    // get booked as a FREE/exposure slot immediately. The Organiser can
+    // Auto-approval mode: with verification now required to even submit,
+    // every applicant here is already verified - Auto just means the
+    // Organiser doesn't want to manually review, so we skip straight to
+    // approved as a FREE/exposure slot immediately. The Organiser can
     // still adjust compensation for them afterward from the event page -
     // there's no per-applicant compensation input at apply time, so Auto
     // can only default to Free, never Paid/Buy-in.
-    const shouldAutoApprove = event.applicationApprovalMode === 'AUTO' && user.isVerified
+    const shouldAutoApprove = event.applicationApprovalMode === 'AUTO'
 
     const application = await prisma.application.create({
       data: {
