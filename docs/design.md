@@ -304,9 +304,9 @@ Story points use Fibonacci (1, 2, 3, 5, 8, 13). Estimates assume a solo develope
 ### EPIC G — Reviews, Tips, Follow
 | ID | Story | Pts | Status |
 |---|---|---|---|
-| G1 | As audience, I can follow an artist (gated) | 2 | ✅ Shipped |
-| G2 | As audience, I can rate/review a performer post-show (gated) | 3 | ✅ Shipped — not restricted to actual attendees, since there's no check-in/attendance system yet |
-| G3 | As audience, I can tip an artist directly, 100% passthrough (gated) | 5 | ⬜ Not started — Razorpay is now live in QA (sixth amendment), so the technical blocker is gone; ship when it fits priority |
+| G1 | As audience, I can follow an artist (gated) | 2 | ✅ Shipped. Nineteenth amendment: follower list + count now visible on the Artist dashboard (was previously invisible even though the data existed — the new-follower push linked to a page with nothing on it), and a push notification fires on new follow (not unfollow). |
+| G2 | As audience, I can rate/review a performer post-show (gated) | 3 | ✅ Shipped. Nineteenth amendment: now actually gated on attendance — requires a `CONFIRMED` booking with `checkedInAt` set (EPIC N's check-in system made this buildable; the original "not restricted to attendees" limitation is closed). Server-side only — the review widget's UI still renders unconditionally, see EPIC J follow-ups. |
+| G3 | As audience, I can tip an artist directly, 100% passthrough (gated) | 5 | ⬜ Not started — Razorpay is now live in QA (sixth amendment), so the technical blocker is gone; ship when it fits priority. Feedback also asks for the reverse view (artist seeing who tipped them) — same story. |
 
 ### EPIC H — Admin & Trust
 | ID | Story | Pts | Status |
@@ -319,8 +319,42 @@ Story points use Fibonacci (1, 2, 3, 5, 8, 13). Estimates assume a solo develope
 ### EPIC I — Mobile-Exclusive (Phase 4)
 Shake to Discover (5), QR Check-in (5), Offline tickets (5), AR Venue Preview (13), Live Reaction Feed (8), Pre-Show Chat (5), Add to Wallet (5).
 
-### EPIC J — Notifications
-Push/SMS/email triggers per Design Doc §11 table — one story per channel per trigger type, 2–3 pts each. SMS remains blocked on MSG91 DLT registration; email is live via Resend (ticket delivery only, other triggers not yet wired).
+### EPIC J — Notifications (rewritten nineteenth amendment — shipped this session)
+
+Web Push (not SMS/email) is now the primary channel. VAPID-based, works on any installed PWA or browser tab with permission granted — no native app required. SMS remains blocked on MSG91 DLT registration; email stays ticket-delivery-only, unchanged.
+
+**Infrastructure:**
+| Piece | Detail |
+|---|---|
+| `PushSubscription` model | Keyed to `userId`, unique on `endpoint`. Upsert-safe — re-subscribing (new device, or an already-granted device switching to a different logged-in account) reassigns the row rather than erroring or duplicating. |
+| `src/lib/push.ts` | `sendPushToUser` / `sendPushToRole`, no-ops with a warning if VAPID env vars aren't set. `notifyAfterResponse(fn, label)` wraps every call site — see the `after()` note below, this is not optional plumbing. |
+| `/api/push/subscribe` | POST upsert, DELETE scoped to the caller's own endpoint only. |
+| `sw.js` | `push` + `notificationclick` handlers — focuses an existing tab if one's open, else opens a new one at the notification's target URL. |
+| `NotificationOptIn.tsx` | Dismissible opt-in banner (any logged-in role, not gated to one). Also handles the "device already granted permission under a different account" case silently — re-links or creates a subscription for whoever's currently logged in without a re-prompt, since the browser already decided. |
+
+**Two engineering bugs found live-testing, both fixed — worth remembering for any future background-work pattern in this codebase:**
+1. **Vercel can freeze a serverless function's runtime the instant its response is sent**, silently killing any bare un-awaited `promise.catch(...)` fire-and-forget call before it completes — no error, no log, it just never finishes. Confirmed happening: a push worked twice, then silently dropped a third time with zero trace anywhere. Fix: Next.js `after()` (15.1+) wraps every push send and every `deliverTicket()` call site now — runs after the response, but guarantees completion. `sendPushToRole`/`sendPushToUser` calls must go through `notifyAfterResponse()`, never called bare with `.catch()`.
+2. **Default push urgency ('normal') lets Android's Doze/battery optimization defer delivery** by minutes on an idle device — confirmed live (a sales-milestone push arrived several minutes late, not dropped). Fixed via `options.urgency: 'high'` in `sendPushToUser` — note `@types/web-push`'s `RequestOptions` doesn't declare this field even though the runtime supports it (checked `node_modules/web-push/src` directly), hence a local type augmentation rather than fighting the incomplete types package. TTL also set to 1 hour (was the library default of 4 weeks) — a stale approval/negotiation notification surfacing hours later isn't useful for this app's notification types.
+
+**Notification matrix (all confirmed working live, in this order of build):**
+| Notify | Trigger |
+|---|---|
+| Admin | New Organiser/VenueOwner application |
+| Organiser/VenueOwner applicant | Admin's approve/reject decision |
+| Organiser | New artist application (manual-review events only — auto-approved events notify the Artist instead, since there's nothing for the Organiser to act on) |
+| Artist | Application approved/rejected, or auto-approved |
+| VenueOwner | New venue booking request (both the Flexible-negotiation and direct-booking paths) |
+| Organiser/VenueOwner | Other side accepted/declined/countered in a negotiation (turn-based — whoever didn't just act gets pushed) |
+| Artist | New performer-specific review |
+| Organiser | New general event review (no `Review`→`Venue` link exists in the schema, so VenueOwners aren't reachable from a review yet) |
+| Organiser | Ticket sale milestone — first sale / 50% / sold out (never per-ticket, would spam a popular event; only the single highest threshold a given booking crosses fires) |
+| Artist | New follower |
+
+**Deliberately not built (flagged, not silently skipped):**
+- 48h negotiation-expiry notification — needs a cron job; no scheduled-task infra exists in this codebase yet (no `vercel.json`, no cron routes). Separate scope/decision.
+- Audience "booking confirmed" push — redundant with the existing ticket email/PDF.
+- Review widget's client-side gating — the check-in requirement (see EPIC N amendment below) is enforced server-side only; the review UI on the event detail page still renders the rating widget unconditionally, so a non-checked-in user sees a generic 403 rather than the widget being hidden/disabled. Small follow-up.
+- Android `.apk`/TWA-specific notification checks — `POST_NOTIFICATIONS` runtime permission (Android 13+) and notification delegation (`enableNotificationDelegation`) live in the PWABuilder/Bubblewrap-generated Android project, not this repo. Confirmed conceptually works the same way (same Chrome engine, same service worker) but not verified against the actual QA `.apk`.
 
 ### EPIC K — Platform Revenue (per fifth amendment / About page)
 | ID | Story | Pts | Status |
@@ -468,29 +502,50 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 2. ✅ E3 — lineup drag-and-drop builder — shipped (eighteenth amendment).
 3. ✅ E5 — real-time ticket sales dashboard — shipped: per-event dashboard (fifteenth amendment) + overview with Week/Month/Quarter/Year/All Time range filters (sixteenth amendment). Venue Owner revenue view shipped same session as a same-shape extension.
 4. ✅ **Venue Owner sales overview** — shipped (seventeenth amendment). `/dashboard/venue/sales`: same pattern as the Organiser overview — range filter, per-venue drill-down, plus an organiser-breakdown table (which organisers rent the most / spend the most). Table on the overview, no dedicated per-organiser page, per the phasing decision.
-5. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
-6. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
-7. Legal pages — ✅ Drafted and live on QA (`/privacy`, `/terms`) with a visible "Draft — pending legal review" banner and bracketed placeholders (exact booking fee, refund policy, legal entity name/address, Grievance Officer, payout mechanism). Deliberately not final: needs a CA/lawyer review pass once the company is registered, then placeholders filled and the banner removed before promoting to prod.
+5. ✅ **EPIC J — full push notification system** — shipped nineteenth amendment. See EPIC J for the complete matrix.
+6. ✅ **Postgres connection pool exhaustion** — shipped nineteenth amendment. See §9.2.
+7. PWA screenshots in the manifest — needs 2-3 real screenshots of the app on a phone; ~15 min from Claude once the images exist
+8. Prod Play Store package — repeat PWABuilder against `https://www.aforaudience.com` with package ID `com.aforaudience.app` (reserved for this) and a **permanent signing key** (never lose). Only when Razorpay live keys are in and real Play Store submission is desired (weeks out).
+9. Legal pages — ✅ Drafted and live on QA (`/privacy`, `/terms`) with a visible "Draft — pending legal review" banner and bracketed placeholders (exact booking fee, refund policy, legal entity name/address, Grievance Officer, payout mechanism). Deliberately not final: needs a CA/lawyer review pass once the company is registered, then placeholders filled and the banner removed before promoting to prod.
+
+**Newly unblocked, not yet started (identified nineteenth amendment):**
+- Hide/disable the review-rating widget client-side when the viewer isn't checked in, instead of letting them fill it out and hit a 403 (see EPIC J follow-ups) — small, contained.
+- Header not reflecting a just-corrected displayName without a full reload (§9.2) — likely a missing `useSession().update()` call, small.
+- Two stacked `position: sticky; top: 0` banners (`PhoneVerifyNudge`, `NotificationOptIn`) probably need a z-index/offset reconciliation (§9.2) — small.
+- Android `.apk`/TWA push notification checks (`POST_NOTIFICATIONS` permission, notification delegation) — needs the PWABuilder/Bubblewrap-generated Android project's files, not just this repo.
+- "Wall of Fame" — Artist of the Month / Event of the Month, computed directly from existing `Review.rating` (already tied to Event + optional Performance). See §9.3 — schema-ready, no UI.
+- Persona value-prop blocks (Audience / Organiser / Venue / Artist) on the homepage — copy + layout only, no backend.
+
+
 
 ### 9.2 Real gaps found through live testing (not hypothetical)
 
 | Item | Detail |
 |---|---|
 | Dashboard "1fr 1fr" form grids not fully verified on mobile | Systematic search found many `1fr 1fr` grids across Organiser/Venue/Artist dashboard forms. Lower risk than the fixed-pixel-column bugs already fixed — spot-checked, not exhaustively tested. |
-| Flexible negotiation has no notifications | Either side has to manually check `/dashboard/venue-requests` to know it's their turn to respond — no indication anywhere else in the app. |
+| Flexible negotiation has no notifications | ~~Real gap~~ ✅ **Fixed nineteenth amendment.** Both sides now get pushed on every state change (new request, accept/decline/counter) — see EPIC J. |
+| **Postgres connection pool exhaustion — live bug, real users affected** | ✅ **Fixed nineteenth amendment.** `EMAXCONNSESSION: max clients reached in session mode - max clients are limited to pool_size: 15` was hitting many routes (`/artists/[id]`, `/api/artists/me`, `/api/auth/[...nextauth]`, `/api/reviews`, more) — first occurrence July 9, so pre-existing, but this session's heavier concurrent testing pushed it into visibly broken pages. Root cause: `prismaPgConfig` in `src/lib/prisma.ts` had no `max` set, so node-postgres defaulted to 10 connections **per Pool instance** — and Vercel spins up a separate instance (own module scope, own Pool) per concurrent invocation, so even 2 concurrent instances could open up to 20 connections against a 15-client cap. Fixed: `max: 1` + `idleTimeoutMillis: 10_000`. Worth remembering for any future serverless-DB config in this codebase. |
 | PENDING bookings expire on payment path but not on prod | 15-minute TTL is live on the Razorpay-integrated payment path (sixth amendment), but prod has no Razorpay yet, so an abandoned reservation there still holds capacity indefinitely. Fixes itself when prod gets Razorpay. |
 | Postgres-specific TLS bypass still in place | `ssl: { rejectUnauthorized: false }` in `src/lib/prisma.ts` is deliberately still there. Worth testing removal against a real deploy; Supabase's certificate is normally CA-signed, so this may not be necessary at all. |
 | Existing users' `displayName` is null | Fix B added the Profile-page edit surface; users must opt in. No backfill was done for existing users. L5 is the follow-up story. |
+| **Header doesn't reflect a just-corrected displayName** | From live feedback (`/profile`, 18 Jul): editing displayName updates the Profile page immediately but the header nav still shows the old value until a full navigation/re-render. Likely a stale session object not being re-fetched — `useSession()` may need an explicit `update()` call after the PATCH succeeds. Not investigated further this session. |
+| **Venue Owner application doesn't require phone verification** | From live feedback (18 Jul) — confirmed by code read: `/api/venue-owners/apply` (and `/api/organisers/apply`) have no `isVerified` check, by design (this session confirmed it doesn't block the apply flow). Whether this *should* be required is a product call, not filed as a bug fix — flagging here since a real user expected it. |
+| **Phone-verify nudge banner not sticky on scroll-down** | From the same feedback report — the banner is visible when scrolled to top but not when scrolled further down the page. `PhoneVerifyNudge` uses `position: sticky; top: 0`, which should keep it pinned; worth a direct look, could be a z-index/stacking-context conflict with another sticky element now that `NotificationOptIn` also uses `position: sticky; top: 0` at a lower z-index — two sticky banners stacking at the same `top` needs an offset, not investigated yet. |
 | Dashboard nav link | Role-based users can only reach Dashboard via Profile, not from the header nav. Small nav-only fix. |
-| Homepage hero right-column void | Noted, not addressed. |
+| Homepage hero right-column void | ~~Noted, not addressed.~~ ✅ **Fixed (PR #85, this session)** — see hero section history in recent PR commits. |
 | Free events not getting PDF/email | ~~Root cause identified~~ ✅ **Fixed seventh amendment (EPIC M1).** |
 | Ticket booking has no phone-verification gate | ~~Real gap~~ ✅ **Fixed (thirteenth amendment).** `/api/bookings` and `/api/venue-bookings` now reject unverified users (`reason: PHONE_NOT_VERIFIED`); frontend redirects to the new `/verify-phone` completion flow. Email verification, by contrast, is already correctly non-blocking by design — confirmed via code review, no gap there (see `verify-email/route.ts` comment). |
+| Free event checkout shows "₹0" instead of "Free" | From live feedback (15 Jul, category BUG) — "paid event in free amount to replace 0 rupees." Cosmetic, not investigated this session. |
+| Artist username auto-suggestion not working | From live feedback (15 Jul) — register form's username suggestion feature reportedly broken. Not investigated this session. |
+| Admin/Organiser dashboard "arrow-connected sections" UX | Recurring feedback (15 Jul and 18 Jul, two separate reports) — sections like Feedback → Bookings → Settings are visually connected by arrows in a way testers find confusing; both suggest simple buttons/tabs instead. Worth a dedicated small design pass since it's been raised twice independently. |
 
 ### 9.3 Schema exists, no UI yet (backend ready, waiting on frontend)
 
 - **H3** — flag/suspend accounts
 - **Admin bookings list surfacing `Booking.deliveryError`** — the retry endpoint (`POST /api/admin/redeliver-ticket/[bookingId]`) shipped in the eighth amendment (PR #43); still no admin UI that lists bookings with delivery errors and calls it. Admin currently calls it via curl. ~2 hr for a proper admin bookings page.
 - **K4** — Admin revenue dashboard (config surface exists at `/dashboard/admin/settings` but no revenue view). Note: a per-venue Venue Owner revenue view now exists (`/dashboard/venue/[id]/sales`, fifteenth amendment) — K4 is specifically the platform-wide admin rollup, still not built.
+- **"Wall of Fame" — Artist of the Month / Event of the Month.** Directly computable from existing `Review.rating` (already tied to `Event` + optional `Performance`). Decision made in discussion, not yet built: minimum 3 reviews to qualify (same floor already used for Top Venues/Organisers below), scope to calendar month not rolling 30 days. Longer-term idea, not this story: the hero rotator (currently curated stock photos) could eventually pull from the winning artist's real event photos — ties the existing "For artists, featured here" hero caption to something real.
+- **Top Venues / Top Organisers leaderboard.** No direct rating model exists for either — decided proxy: average rating of their events, minimum 3 reviews to qualify (same rule as above, for consistency).
 
 ### 9.4 Not started at all
 - **G3 — Tip.** Razorpay is now live in QA, so the blocker is gone; hasn't been scheduled.
@@ -498,12 +553,25 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 - **A5 — Search.** No standalone search feature exists; only in-page filters on Events/Artists listings.
 - **D2, D4** (Artist profile builder beyond what exists, Hype Score/growth report display).
 - **K3** (checkout tip widget), **K5–K8** (Pro subscriptions, promoted placements) — all deliberately Phase B/C, not MVP.
+- **Artist "who tipped me" view** — surfaces once G3 (tipping) ships; same shape as the new followers/reviews sections on the Artist dashboard (nineteenth amendment).
+- **Profile completion nudge/percentage** — from live feedback (18 Jul): "Notify user profile completion percentage... recommend for early completion for better result." Reasonable gamification pattern (bio/genre/styleTag/socialLinks filled = higher %), not scoped or built.
+- **Netflix-style intro/splash screen** — from live feedback (18 Jul), cosmetic, low priority.
+- **Hero banner GIF/video clip (~5s)** — from live feedback (18 Jul). Would replace or supplement the current curated-photo rotator (`HeroRotator.tsx`); larger asset-pipeline question (video hosting/compression) than the existing static-photo approach, not just a swap.
+- **Chatbot icon redesign** — from live feedback (18 Jul), suggests something more on-brand (e.g. a mic-in-hand) than the current generic icon.
+- **Comment box in the venue negotiation flow** — from live feedback (18 Jul), filed by an actual tester of the Flexible negotiation feature this session: alongside counter-offer amounts, a free-text comment field would let either side explain context ("can do ₹4000 but need load-in by 6pm"), not just throw numbers back and forth. Real, well-timed suggestion — came from someone who'd just used the feature.
+- **Smaller cosmetic/UX items from earlier feedback (15 Jul, status REVIEWED, none built yet):** Rasa emotion descriptions need to be more visually prominent on the homepage; footer heading font size too small for the visual hierarchy it's meant to convey; mobile events page doesn't need a List/Grid view toggle since both look near-identical at that width (`/events`) — all small, independent CSS-level fixes.
+- **"Search Engine Suggestion" (15 Jul feedback)** — ties directly to **A5 — Search** above (still not started); logged here as evidence someone specifically wants it, not just a nice-to-have on the roadmap.
+- **Artist profile clickable from an Event's lineup section (15 Jul feedback, category BUG, ambiguous)** — the feedback text just states the behavior ("Users can view an artist's profile by clicking the artist listed under the Event → Line-up section") without saying whether that's wanted or unwanted. Needs re-triage with whoever filed it before treating as a bug or a confirmation.
+- **"You can have your own event sometimes" (14 Jul feedback, unclear intent)** — vague as filed; not actionable without clarification from the source.
 
 ### 9.5 Business decisions still open, not engineering ones
 - **The exact audience booking fee amount** for prod launch — Checkpoint 4 ships at ₹0 default; production launch needs the real number. About page describes it as "small flat fee (e.g., ₹10–15)" — pick the specific value.
 - **Refund policy for Checkpoint 5.** Full refund? Partial refund? Cutoff window (e.g., 24hr before event)? Does the platform's booking fee refund with the ticket, or is it non-refundable as an operational cost? These are founder-and-legal calls, not engineering ones.
 - **Whether to include the optional checkout tip (K3)** in Phase A or defer to Phase B. Small either way.
 - **When exactly to introduce Venue Pro (K5).** The About page commits to "earn the right to charge before we charge" — observed, not planned.
+- **Compensation transparency at apply-time.** Two related live-feedback reports (18 Jul), both from an Artist account mid-session: currently the Organiser decides buy-in/paid/free per applicant only *after* approving them (§4.5 note in the Application flow) — an Artist applying has no visibility into which of the three it'll be before applying, and can't see it while browsing events to decide whether to apply at all. Real product question, not a bug: should this be Organiser-published upfront (locks them into declaring paid/free/buy-in and possibly an amount, before any applications come in), or Organiser-set-at-approval as today (more flexible for the Organiser, less transparent for the Artist)? Needs a founder call before scoping the schema/UI change.
+- **Venue Owner application phone-verification requirement.** See §9.2 — currently not required, whether it should be is a product call, not filed as a bug.
+- **Email verification as a gate before account activation.** Live feedback (15 Jul) requests this — but it directly conflicts with an already-documented deliberate decision (`verify-email/route.ts`'s own comment, referenced in §9.2/EPIC B): email verification is intentionally non-blocking, only phone/OTP gates real actions like booking. Needs a founder re-confirmation of the existing decision, not a default implementation of the feedback as filed — a real user expected stricter gating than what was deliberately chosen.
 
 ---
 
@@ -541,5 +609,5 @@ Advantages of the PWA+TWA path over React Native: one codebase, ships to every p
 Full React Native (Release 3) revisits after MVP traction has been observed on the PWA/TWA path.
 
 ---
-*Document version: 3.0 — Eighteenth amendment (17 Jul 2026: E3 shipped — lineup drag-and-drop builder at `/dashboard/organiser/events/[id]/lineup`, `@dnd-kit` added as a new touch-compatible drag dependency, computed (not stored) time blocks from event.startTime + cumulative duration. PR #79 merged to qa. With E3 and E5 (both sides) now shipped, every §9.1 "session-friendly, no external unblock" item is closed out — remaining next-up items are either external-blocked or waiting on Hitesh (PWA screenshots). §9.3 candidates for a following session: admin bookings list surfacing `Booking.deliveryError`, K4 admin-wide revenue rollup, H3 flag/suspend accounts.)*
+*Document version: 3.0 — Nineteenth amendment (18 Jul 2026: full push notification system shipped — EPIC J rewritten, PRs #85–#96 merged to qa. Web Push infra (VAPID, `PushSubscription` model, service worker handlers), the complete notification matrix (Admin/Organiser/Artist/VenueOwner/ticket-milestones/reviews/followers), two engineering reliability bugs found and fixed live (Vercel serverless-freeze-before-completion on fire-and-forget async work, fixed via `after()`; Android Doze deferring normal-urgency push, fixed via `urgency: high`), reviews now gated on EPIC N check-in (closing a gap the code itself had flagged since it was written), and a live production bug found and fixed — Postgres Session Pooler exhaustion (`EMAXCONNSESSION`, pre-existing since July 9, `max:1` fix on the pg.Pool config). Also: hero dead-space fix (#85), marquee GPU-hardening (#86). Full backlog refresh in §9 folding in the current Feedback table (14 unresolved NEW + several still-unactioned REVIEWED items) alongside prior session knowledge — see §9.1–9.5 for the complete current picture. §9.3 candidates for a following session: Wall of Fame / Top Venues-Organisers leaderboard (both schema-ready), admin bookings list surfacing `Booking.deliveryError`, K4 admin-wide revenue rollup, H3 flag/suspend accounts.)*
 *Confidential — Do not share*
