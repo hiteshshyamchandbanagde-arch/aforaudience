@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface SeatSection {
   id?: string
@@ -55,9 +56,17 @@ const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
 export default function CreateEventPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { showToast } = useToast()
   const [venues, setVenues] = useState<VenueOption[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  // Surfaces an error both inline (existing banner, kept for context/
+  // accessibility) and as a toast (visible without scrolling back up -
+  // this form is long and the submit button sits well below the fold).
+  const fail = (message: string) => {
+    setError(message)
+    showToast(message, 'error')
+  }
 
   const [formData, setFormData] = useState({
     title: '',
@@ -185,8 +194,17 @@ export default function CreateEventPage() {
       ? String(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))
       : formData.totalSeats
 
-    if (!formData.title || !formData.description || !formData.date || !formData.startTime || !formData.endTime || !totalSeatsValue) {
-      setError('Please fill in all required fields.')
+    const requiredFields: [unknown, string][] = [
+      [formData.title, 'Title'],
+      [formData.description, 'Description'],
+      [formData.date, 'Date'],
+      [formData.startTime, 'Start time'],
+      [formData.endTime, 'End time'],
+      [totalSeatsValue, 'Total seats'],
+    ]
+    const missing = requiredFields.filter(([value]) => !value).map(([, label]) => label)
+    if (missing.length > 0) {
+      fail(`Please fill in the required fields: ${missing.join(', ')}.`)
       setSaving(false)
       return
     }
@@ -194,7 +212,7 @@ export default function CreateEventPage() {
     if (usingTierPricing && !isFree) {
       const missingPrice = venueSections.some((s) => !tierPrices[s.name] || Number(tierPrices[s.name]) <= 0)
       if (missingPrice) {
-        setError('Please set a price for every section.')
+        fail('Please set a price for every section.')
         setSaving(false)
         return
       }
@@ -210,7 +228,7 @@ export default function CreateEventPage() {
 
     const seatsCap = Number(maxSeatsPerBooking)
     if (!seatsCap || seatsCap < 1 || seatsCap > 10) {
-      setError('Max seats per booking must be between 1 and 10.')
+      fail('Max seats per booking must be between 1 and 10.')
       setSaving(false)
       return
     }
@@ -243,7 +261,7 @@ export default function CreateEventPage() {
       const newEvent = await res.json()
       router.push(`/dashboard/organiser/events/${newEvent.id}`)
     } catch (err: any) {
-      setError(err.message)
+      fail(err.message)
     } finally {
       setSaving(false)
     }

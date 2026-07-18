@@ -2,12 +2,13 @@
 
 import { SessionProvider } from "next-auth/react"
 import SessionGuard from "@/components/SessionGuard"
+import { ToastProvider } from "@/components/Toast"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <SessionGuard />
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </SessionProvider>
   )
 }
