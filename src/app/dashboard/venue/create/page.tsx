@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 
 const inputStyle = {
@@ -32,8 +33,13 @@ function makeId() {
 export default function CreateVenuePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { showToast } = useToast()
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const fail = (message: string) => {
+    setError(message)
+    showToast(message, 'error')
+  }
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -75,18 +81,18 @@ export default function CreateVenuePage() {
     const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
 
     if (validSections.length === 0) {
-      setError('Add at least one seating section with a name and seat count.')
+      fail('Add at least one seating section with a name and seat count.')
       setSaving(false)
       return
     }
 
     if (rateType === 'HOURLY' && (!hourlyRate || Number(hourlyRate) <= 0)) {
-      setError('Set an hourly rental rate.')
+      fail('Set an hourly rental rate.')
       setSaving(false)
       return
     }
     if (rateType === 'DAILY' && (!dailyRate || Number(dailyRate) <= 0)) {
-      setError('Set a daily rental rate.')
+      fail('Set a daily rental rate.')
       setSaving(false)
       return
     }
@@ -126,7 +132,7 @@ export default function CreateVenuePage() {
       const newVenue = await res.json()
       router.push(`/dashboard/venue/${newVenue.id}`)
     } catch (err: any) {
-      setError(err.message)
+      fail(err.message)
     } finally {
       setSaving(false)
     }
