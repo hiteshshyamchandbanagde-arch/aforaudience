@@ -72,7 +72,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     <nav
       style={{
         position: isHome ? "fixed" : "sticky",
-        top: 0,
+        top: "var(--nudge-stack-height, 0px)",
         left: isHome ? 0 : undefined,
         right: isHome ? 0 : undefined,
         zIndex: 100,

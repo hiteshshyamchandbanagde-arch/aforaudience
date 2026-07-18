@@ -127,9 +127,6 @@ export default function NotificationOptIn() {
       role="status"
       aria-label="Enable notifications"
       style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 39,
         background: '#0E0C0A',
         color: '#F7F3EE',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
