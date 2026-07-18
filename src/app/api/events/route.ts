@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser } from '@/lib/push'
 
 export async function GET() {
   try {
@@ -114,9 +115,12 @@ export async function POST(req: Request) {
     // (PATCH /api/venue-booking-requests/[id]) rather than pretending a
     // single proposed number is a booking.
     if (venueId) {
-      const venue = await prisma.venue.findUnique({ where: { id: venueId } })
+      const venue = await prisma.venue.findUnique({ where: { id: venueId }, include: { owner: true } })
+      if (!venue) {
+        return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
+      }
 
-      if (venue?.rateType === 'FLEXIBLE') {
+      if (venue.rateType === 'FLEXIBLE') {
         const [sh, sm] = String(startTime).split(':').map(Number)
         const [eh, em] = String(endTime).split(':').map(Number)
         let mins = (eh * 60 + em) - (sh * 60 + sm)
@@ -138,6 +142,12 @@ export async function POST(req: Request) {
             data: { requestId: request.id, proposedBy: 'ORGANISER', amount: parseFloat(bookingAmount) },
           })
         }
+
+        sendPushToUser(venue.owner.userId, {
+          title: 'New venue booking request',
+          body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+          url: '/dashboard/venue-requests',
+        }).catch((err) => console.error('[push] venue-booking-request notify failed', err))
       } else {
         const platformSettings = await prisma.platformSettings.findFirst()
         await prisma.venueBooking.create({
@@ -152,6 +162,12 @@ export async function POST(req: Request) {
             platformFeeAmount: platformSettings?.flatVenueBookingFee ?? 199,
           },
         })
+
+        sendPushToUser(venue.owner.userId, {
+          title: 'New venue booking request',
+          body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+          url: '/dashboard/venue-requests',
+        }).catch((err) => console.error('[push] venue-booking-request notify failed', err))
       }
     }
 
