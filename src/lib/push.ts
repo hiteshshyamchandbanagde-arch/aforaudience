@@ -39,6 +39,27 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 
   const body = JSON.stringify(payload)
 
+  const pushOptions: webpush.RequestOptions & { urgency?: "very-low" | "low" | "normal" | "high" } = {
+    // Default urgency is 'normal', which Android's Doze/battery
+    // optimization is allowed to defer for minutes at a time on an idle
+    // device - confirmed happening live (a sales-milestone push arrived
+    // several minutes late). 'high' tells the push service (FCM under
+    // the hood for Chrome/Android) this should wake the device promptly.
+    //
+    // web-push's own runtime (web-push-lib.js) reads options.urgency
+    // directly and sets the Urgency header itself, unconditionally
+    // overwriting anything passed via options.headers.Urgency - so this
+    // has to go through options.urgency, not headers. @types/web-push's
+    // RequestOptions doesn't declare this field even though the JS
+    // implementation supports it (checked node_modules/web-push/src
+    // directly), hence the local type augmentation above.
+    urgency: "high",
+    // Don't let an old notification surface hours later if the device
+    // was offline - 1 hour covers "was in a dead zone", not "was off
+    // for a week".
+    TTL: 60 * 60,
+  }
+
   await Promise.all(
     subs.map(async (sub) => {
       try {
@@ -47,7 +68,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             endpoint: sub.endpoint,
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
-          body
+          body,
+          pushOptions
         )
       } catch (err: any) {
         if (err?.statusCode === 404 || err?.statusCode === 410) {
