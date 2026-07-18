@@ -56,11 +56,11 @@ export default function HeroRotator() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(0deg, rgba(14,12,10,0.75) 0%, rgba(14,12,10,0.15) 45%, rgba(14,12,10,0) 65%)',
+          background: 'linear-gradient(180deg, rgba(14,12,10,0.7) 0%, rgba(14,12,10,0.1) 40%, rgba(14,12,10,0) 55%)',
           pointerEvents: 'none',
         }}
       />
-      <div style={{ position: 'absolute', left: '24px', right: '24px', bottom: '22px' }}>
+      <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: '#F5A26E', textTransform: 'uppercase', marginBottom: '6px' }}>
           For artists
         </div>
