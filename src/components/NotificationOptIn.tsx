@@ -30,6 +30,34 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 }
 
+async function subscribeAndSave() {
+  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!vapidKey) {
+    console.warn('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not set');
+    return;
+  }
+
+  const reg = await navigator.serviceWorker.ready;
+  const existing = await reg.pushManager.getSubscription();
+  // Permission being 'granted' does NOT guarantee a subscription object
+  // exists on this device - e.g. if permission was granted at some point
+  // before the VAPID public key was available client-side, subscribe()
+  // was never actually called. Create one now if that's the case; since
+  // permission is already decided, this won't show any prompt.
+  const sub =
+    existing ||
+    (await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    }));
+
+  await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subscription: sub.toJSON() }),
+  });
+}
+
 export default function NotificationOptIn() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
@@ -45,35 +73,27 @@ export default function NotificationOptIn() {
     setDismissed(window.sessionStorage.getItem(DISMISSED_KEY) === '1');
   }, []);
 
-  // Handles the case the banner-based flow above can't: permission was
-  // already granted (on any account, possibly a while ago) and the person
-  // has since switched to a different logged-in account on this same
-  // device/browser. Notification.permission is a per-origin browser
-  // setting, not per-account, so once it's 'granted' our banner correctly
-  // never asks again - but that also means a newly logged-in account never
-  // gets its own PushSubscription row without this. No permission prompt
-  // needed here since the browser already decided; just re-point the
-  // existing subscription's userId to whoever is logged in now (the
-  // subscribe endpoint already upserts on endpoint + reassigns userId).
+  // Handles two cases the banner-based flow above can't reach:
+  //   1. Permission was already granted (on any account, possibly a while
+  //      ago) and the person has since switched to a different logged-in
+  //      account on this same device/browser. Notification.permission is a
+  //      per-origin browser setting, not per-account, so once it's
+  //      'granted' the banner correctly never asks again - but that also
+  //      means a newly logged-in account never gets its own
+  //      PushSubscription row without this.
+  //   2. Permission is 'granted' but no subscription object was ever
+  //      actually created (e.g. granted before the VAPID key was live -
+  //      see subscribeAndSave's comment). subscribeAndSave() handles
+  //      creating one silently in that case too.
+  // No permission prompt needed either way since the browser already
+  // decided; the subscribe endpoint upserts on endpoint + reassigns
+  // userId, so this is safe to call on every login.
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user) return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
 
-    (async () => {
-      try {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        if (!sub) return; // granted but never actually subscribed on this device - nothing to re-link
-        await fetch('/api/push/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription: sub.toJSON() }),
-        });
-      } catch (err) {
-        console.warn('[push] re-link on account switch failed', err);
-      }
-    })();
+    subscribeAndSave().catch((err) => console.warn('[push] silent subscribe/re-link failed', err));
   }, [status, (session?.user as any)?.id]);
 
   const enable = async () => {
@@ -82,27 +102,7 @@ export default function NotificationOptIn() {
       const perm = await Notification.requestPermission();
       setPermission(perm);
       if (perm !== 'granted') return;
-
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!vapidKey) {
-        console.warn('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not set');
-        return;
-      }
-
-      const reg = await navigator.serviceWorker.ready;
-      const existing = await reg.pushManager.getSubscription();
-      const sub =
-        existing ||
-        (await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
-        }));
-
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON() }),
-      });
+      await subscribeAndSave();
     } finally {
       setBusy(false);
     }
