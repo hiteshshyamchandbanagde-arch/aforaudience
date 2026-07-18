@@ -4,10 +4,12 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
-// G2 - rate a performer post-show. Not restricted to confirmed/attended
-// bookings - there's no check-in/attendance-verification system yet, so
-// this just requires being logged in, same as every other gated action.
-// Worth tightening once ticket check-in exists.
+// G2 - rate a performer post-show. Gated on the reviewer having an actual
+// CONFIRMED + checked-in booking for this event - EPIC N's check-in
+// system (src/app/api/events/[id]/checkin) now exists, so this can
+// finally be tightened as the original comment here flagged. Without
+// this, anyone logged in could rate an event/performer they never
+// attended.
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -24,6 +26,16 @@ export async function POST(req: Request) {
 
     if (!eventId || !rating || Number(rating) < 1 || Number(rating) > 5) {
       return NextResponse.json({ error: 'A rating from 1 to 5 is required' }, { status: 400 })
+    }
+
+    const checkedInBooking = await prisma.booking.findFirst({
+      where: { userId: user.id, eventId, status: 'CONFIRMED', checkedInAt: { not: null } },
+    })
+    if (!checkedInBooking) {
+      return NextResponse.json(
+        { error: 'You can review this event after checking in at the door.' },
+        { status: 403 }
+      )
     }
 
     const existing = await prisma.review.findFirst({
