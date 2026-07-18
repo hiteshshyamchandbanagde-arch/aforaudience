@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { formatEventTimeRange } from '@/lib/eventTime'
 import {
   loadRazorpayCheckoutScript,
   openRazorpayCheckout,
@@ -426,7 +427,7 @@ export default function CheckoutPage() {
               day: 'numeric',
               month: 'long',
             })}{' '}
-            · {state.booking.event.startTime} – {state.booking.event.endTime}
+            · {formatEventTimeRange(state.booking.event.startTime, state.booking.event.endTime)}
             {state.booking.event.venue && (
               <>
                 {' · '}

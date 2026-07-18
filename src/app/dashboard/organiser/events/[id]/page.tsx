@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { formatEventTimeRange } from '@/lib/eventTime'
 
 interface Application {
   id: string
@@ -163,7 +164,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 {event.title}
               </h1>
               <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>
-                {new Date(event.date).toLocaleDateString()} · {event.startTime}–{event.endTime}
+                {new Date(event.date).toLocaleDateString()} · {formatEventTimeRange(event.startTime, event.endTime)}
               </p>
             </div>
             <span
