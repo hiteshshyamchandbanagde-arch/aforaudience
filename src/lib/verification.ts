@@ -6,10 +6,14 @@ import { NextResponse } from 'next/server'
 // Organiser builds a lineup on. NOT for browsing, profile edits, or role
 // apply itself (see design.md §9.5 - verify at first external commitment,
 // not at signup).
-export function requireVerifiedPhone(user: { isVerified: boolean }) {
+//
+// `action` names what's actually being gated so the message can say why,
+// not just assert a rule - e.g. "publishing this venue" instead of a
+// generic "doing this" reused across four unrelated actions.
+export function requireVerifiedPhone(user: { isVerified: boolean }, action: string) {
   if (!user.isVerified) {
     return NextResponse.json(
-      { error: 'Please verify your mobile number before doing this.' },
+      { error: `Please verify your mobile number before ${action}.` },
       { status: 403 }
     )
   }

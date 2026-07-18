@@ -111,7 +111,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!lastOffer) {
         return NextResponse.json({ error: 'No offer to accept yet' }, { status: 400 })
       }
-      const verifyError = requireVerifiedPhone(user)
+      const verifyError = requireVerifiedPhone(user, 'confirming this booking')
       if (verifyError) return verifyError
 
       const platformSettings = await prisma.platformSettings.findFirst()

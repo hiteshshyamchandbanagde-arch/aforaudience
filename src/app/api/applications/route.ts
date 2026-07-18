@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     if (!artist) {
       return NextResponse.json({ error: 'Artist profile not found' }, { status: 404 })
     }
-    const verifyError = requireVerifiedPhone(user)
+    const verifyError = requireVerifiedPhone(user, 'applying - the organiser is building their lineup on it')
     if (verifyError) return verifyError
 
     const body = await req.json()
