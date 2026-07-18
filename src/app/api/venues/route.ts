@@ -79,7 +79,44 @@ export async function POST(req: Request) {
       : []
 
     // If seating sections are provided, total capacity is derived from them.
+    // Sane upper bounds - the client's number inputs only had `min`, no
+    // `max`, and the form's custom submit handler doesn't run native HTML5
+    // validation anyway, so a 13-digit seat count or price was reaching
+    // this route unchecked (observed live: 2.2e90 total seats). Bounds
+    // are generous on purpose - real venues, not a hard business rule.
+    const MAX_SEATS_PER_SECTION = 100_000
+    const MAX_PRICE_PER_SEAT = 10_000_000 // ₹1 crore
     const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : []
+    for (const s of sections) {
+      const seatCount = Number(s?.seats)
+      const price = s?.price !== undefined && s?.price !== null && s?.price !== '' ? Number(s.price) : 0
+      if (!Number.isFinite(seatCount) || !Number.isInteger(seatCount) || seatCount < 1 || seatCount > MAX_SEATS_PER_SECTION) {
+        return NextResponse.json(
+          { error: `Each section's seat count must be a whole number between 1 and ${MAX_SEATS_PER_SECTION.toLocaleString('en-IN')}.` },
+          { status: 400 }
+        )
+      }
+      if (!Number.isFinite(price) || price < 0 || price > MAX_PRICE_PER_SEAT) {
+        return NextResponse.json(
+          { error: `Price per seat must be between ₹0 and ₹${MAX_PRICE_PER_SEAT.toLocaleString('en-IN')}.` },
+          { status: 400 }
+        )
+      }
+    }
+    if (acousticRating !== undefined && acousticRating !== null && acousticRating !== '') {
+      const rating = Number(acousticRating)
+      if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
+        return NextResponse.json({ error: 'Acoustic rating must be between 0 and 5.' }, { status: 400 })
+      }
+    }
+    if (mapsUrl && mapsUrl.trim()) {
+      try {
+        const parsed = new URL(mapsUrl.trim())
+        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('bad protocol')
+      } catch {
+        return NextResponse.json({ error: 'Google Maps link must be a valid URL (starting with https://).' }, { status: 400 })
+      }
+    }
     const seatMapCapacity = sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
     const finalCapacity = sections.length > 0 ? seatMapCapacity : parseInt(capacity)
 

@@ -86,6 +86,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               type="number"
               placeholder="Seats"
               min={0}
+              max={100000}
               value={section.seats}
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
               style={inputStyle}
@@ -96,6 +97,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 type="number"
                 placeholder="Price"
                 min={0}
+                max={10000000}
                 value={section.price}
                 onChange={(e) => updateSection(section.id, "price", e.target.value)}
                 style={{ ...inputStyle, paddingLeft: "26px" }}

@@ -57,6 +57,32 @@ export async function POST(req: Request) {
     if (!seats || seats < 1) {
       return NextResponse.json({ error: 'Total seats must be at least 1' }, { status: 400 })
     }
+    // Same unbounded-input gap as venue creation (§9.2) - generous but
+    // real-world caps, not a business rule.
+    const MAX_EVENT_SEATS = 100_000
+    const MAX_TICKET_PRICE = 10_000_000 // ₹1 crore
+    if (seats > MAX_EVENT_SEATS) {
+      return NextResponse.json({ error: `Total seats can't exceed ${MAX_EVENT_SEATS.toLocaleString('en-IN')}.` }, { status: 400 })
+    }
+    if (!isFree && ticketPrice !== undefined && ticketPrice !== null && ticketPrice !== '') {
+      const price = Number(ticketPrice)
+      if (!Number.isFinite(price) || price < 0 || price > MAX_TICKET_PRICE) {
+        return NextResponse.json({ error: `Ticket price must be between ₹0 and ₹${MAX_TICKET_PRICE.toLocaleString('en-IN')}.` }, { status: 400 })
+      }
+    }
+    if (Array.isArray(ticketTiers)) {
+      for (const t of ticketTiers) {
+        if (!t?.sectionName) continue
+        const tierSeats = Number(t.totalSeats)
+        const tierPrice = Number(t.price)
+        if (Number.isFinite(tierSeats) && (!Number.isInteger(tierSeats) || tierSeats > MAX_EVENT_SEATS)) {
+          return NextResponse.json({ error: `Each section's seat count must be a whole number up to ${MAX_EVENT_SEATS.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+        if (Number.isFinite(tierPrice) && tierPrice > MAX_TICKET_PRICE) {
+          return NextResponse.json({ error: `Price per seat must be at most ₹${MAX_TICKET_PRICE.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+      }
+    }
 
     // Backdating check. Combine date + startTime into an actual instant and
     // compare to now - a bare `date` check alone would still let someone
