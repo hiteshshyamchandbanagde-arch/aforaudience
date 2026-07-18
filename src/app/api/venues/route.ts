@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     if (!venueOwner.isApproved) {
       return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
     }
-    const verifyError = requireVerifiedPhone(user)
+    const verifyError = requireVerifiedPhone(user, 'publishing this venue - organisers plan real bookings around it')
     if (verifyError) return verifyError
 
     const body = await req.json()

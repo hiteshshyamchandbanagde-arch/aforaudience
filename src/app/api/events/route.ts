@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     if (!organiser.isApproved) {
       return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
     }
-    const verifyError = requireVerifiedPhone(user)
+    const verifyError = requireVerifiedPhone(user, 'publishing this event')
     if (verifyError) return verifyError
 
     const body = await req.json()
