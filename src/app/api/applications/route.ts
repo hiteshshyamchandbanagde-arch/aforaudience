@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser } from '@/lib/push'
 
 export async function POST(req: Request) {
   try {
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
     }
 
-    const event = await prisma.event.findUnique({ where: { id: eventId } })
+    const event = await prisma.event.findUnique({ where: { id: eventId }, include: { organiser: true } })
     if (!event || event.status !== 'APPROVED') {
       return NextResponse.json({ error: 'Event not found or not open for applications' }, { status: 404 })
     }
@@ -68,6 +69,24 @@ export async function POST(req: Request) {
       await prisma.performance.create({
         data: { eventId, artistId: artist.id, slot: lineupCount + 1, duration: 10, compensationType: 'FREE' },
       })
+
+      // Auto-approved - the Organiser doesn't need to review anything, so
+      // the artist is the one who needs to know they're locked into the
+      // lineup (mirrors the manual-decision push in applications/[id]).
+      sendPushToUser(user.id, {
+        title: "You're in the lineup!",
+        body: `Your application to "${event.title}" was auto-approved.`,
+        url: `/dashboard/artist/events`,
+      }).catch((err) => console.error('[push] application-auto-approve notify failed', err))
+    } else {
+      // Manual review needed - this is the Organiser's actual queue, not
+      // just Admin's. Skip entirely on auto-approve (above) since there's
+      // nothing for the Organiser to act on in that case.
+      sendPushToUser(event.organiser.userId, {
+        title: 'New application to review',
+        body: `An artist applied to perform at "${event.title}".`,
+        url: `/dashboard/organiser/events/${eventId}`,
+      }).catch((err) => console.error('[push] new-application notify failed', err))
     }
 
     return NextResponse.json(application, { status: 201 })

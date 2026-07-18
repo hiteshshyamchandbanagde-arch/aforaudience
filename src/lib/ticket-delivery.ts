@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma"
 import { generateTicketPdf, TicketData } from "@/lib/ticket-pdf"
 import { sendTicketEmail } from "@/lib/email"
+import { sendPushToUser } from "@/lib/push"
 
 // ---------------------------------------------------------------------------
 // Ticket delivery orchestrator.
@@ -71,7 +72,7 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       where: { id: bookingId },
       include: {
         user: true,
-        event: { include: { venue: true } },
+        event: { include: { venue: true, organiser: true } },
       },
     })
     if (!booking) {
@@ -82,6 +83,16 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       await recordFailure(bookingId, "User has no email address on file")
       return
     }
+
+    // Organiser milestone notifications - fire-and-forget, never blocks
+    // ticket delivery. Deliberately NOT a push per ticket sold (would
+    // spam a popular event); only first sale / 50% / sold-out, and only
+    // the single highest threshold this booking just crossed (a bulk
+    // booking that jumps straight to sold-out shouldn't also fire
+    // "first sale").
+    notifySalesMilestone(booking.eventId, booking.event.organiser.userId, booking.event.totalSeats, booking.seats as Record<string, number>).catch(
+      (err) => console.error('[push] sales-milestone notify failed', err)
+    )
 
     const ticketData: TicketData = {
       bookingId: booking.id,
@@ -180,4 +191,60 @@ function formatDateHuman(d: Date, startTime: string): string {
     month: "long",
     year: "numeric",
   })} at ${startTime}`
+}
+
+/**
+ * Sales milestone push for the Organiser: first sale / 50% / sold out.
+ * "Sold" is the sum of seats across CONFIRMED bookings, same computation
+ * as the sales dashboard (src/app/api/events/[id]/sales/route.ts) - NOT
+ * Event.availableSeats, which is never actually decremented anywhere in
+ * this codebase.
+ *
+ * Deterministic without needing new schema state: compute the total sold
+ * INCLUDING this booking (newSold), subtract this booking's own seat
+ * count to get what it was BEFORE (previousSold), then check which
+ * threshold newSold crossed that previousSold hadn't already crossed.
+ * Only the highest one fires, so a bulk booking that jumps straight to
+ * sold-out doesn't also fire "first sale".
+ */
+async function notifySalesMilestone(
+  eventId: string,
+  organiserUserId: string,
+  totalSeats: number,
+  thisBookingSeats: Record<string, number>
+): Promise<void> {
+  if (!totalSeats || totalSeats <= 0) return
+
+  const confirmedBookings = await prisma.booking.findMany({
+    where: { eventId, status: "CONFIRMED" },
+    select: { seats: true },
+  })
+  const newSold = confirmedBookings.reduce((sum, b) => {
+    const seats = (b.seats as Record<string, number>) || {}
+    return sum + Object.values(seats).reduce((s, qty) => s + Number(qty), 0)
+  }, 0)
+  const thisCount = Object.values(thisBookingSeats || {}).reduce((s, qty) => s + Number(qty), 0)
+  const previousSold = newSold - thisCount
+
+  const half = totalSeats / 2
+
+  if (previousSold < totalSeats && newSold >= totalSeats) {
+    await sendPushToUser(organiserUserId, {
+      title: "Sold out! 🎉",
+      body: "Your event is completely sold out.",
+      url: `/dashboard/organiser/events/${eventId}`,
+    })
+  } else if (previousSold < half && newSold >= half) {
+    await sendPushToUser(organiserUserId, {
+      title: "Halfway there",
+      body: "Your event has sold 50% of its seats.",
+      url: `/dashboard/organiser/events/${eventId}`,
+    })
+  } else if (previousSold === 0 && newSold > 0) {
+    await sendPushToUser(organiserUserId, {
+      title: "First ticket sold!",
+      body: "Someone just booked a ticket to your event.",
+      url: `/dashboard/organiser/events/${eventId}`,
+    })
+  }
 }
