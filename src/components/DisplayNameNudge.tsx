@@ -98,9 +98,6 @@ export default function DisplayNameNudge() {
       role="status"
       aria-label="Add your display name"
       style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
         background: '#FFF3E6',
         color: '#4A2E1A',
         borderBottom: '1px solid #F0D9BF',
