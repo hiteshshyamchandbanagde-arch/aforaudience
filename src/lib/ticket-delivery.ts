@@ -84,15 +84,21 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       return
     }
 
-    // Organiser milestone notifications - fire-and-forget, never blocks
-    // ticket delivery. Deliberately NOT a push per ticket sold (would
-    // spam a popular event); only first sale / 50% / sold-out, and only
-    // the single highest threshold this booking just crossed (a bulk
-    // booking that jumps straight to sold-out shouldn't also fire
-    // "first sale").
-    notifySalesMilestone(booking.eventId, booking.event.organiser.userId, booking.event.totalSeats, booking.seats as Record<string, number>).catch(
-      (err) => console.error('[push] sales-milestone notify failed', err)
-    )
+    // Organiser milestone notifications - awaited (not fire-and-forget)
+    // so deliverTicket's own returned promise doesn't resolve before this
+    // finishes. Callers now wrap the whole deliverTicket(...) call in
+    // after(), which only guarantees completion of what this function's
+    // promise actually waits for - an un-awaited call in here would
+    // silently reintroduce the exact bug this was built to fix, just one
+    // level deeper. Never a push per ticket sold (would spam a popular
+    // event); only first sale / 50% / sold-out, and only the single
+    // highest threshold this booking just crossed.
+    await notifySalesMilestone(
+      booking.eventId,
+      booking.event.organiser.userId,
+      booking.event.totalSeats,
+      booking.seats as Record<string, number>
+    ).catch((err) => console.error('[push] sales-milestone notify failed', err))
 
     const ticketData: TicketData = {
       bookingId: booking.id,

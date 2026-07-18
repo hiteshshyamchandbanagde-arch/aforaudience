@@ -1,4 +1,5 @@
 import webpush from "web-push"
+import { after } from "next/server"
 import prisma from "@/lib/prisma"
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -67,4 +68,19 @@ export async function sendPushToRole(role: "ADMIN" | "ORGANISER" | "VENUE_OWNER"
   }
   const users = await prisma.user.findMany({ where: { role }, select: { id: true } })
   await Promise.all(users.map((u) => sendPushToUser(u.id, payload)))
+}
+
+/**
+ * Fire a push send without blocking the response, but WITHOUT the risk
+ * of a bare un-awaited call: Vercel serverless functions can freeze the
+ * runtime as soon as the response is sent, silently killing any in-flight
+ * work that wasn't explicitly kept alive - no error, no log, it just
+ * never finishes. `after()` (Next.js 15.1+) is exactly the guarantee
+ * needed here: run this after the response is sent, but don't let the
+ * function terminate until it's done. Discovered this the hard way - a
+ * bare `sendPushToUser(...).catch(...)` worked twice, then silently
+ * dropped a third time with zero trace anywhere.
+ */
+export function notifyAfterResponse(fn: () => Promise<void>, label: string) {
+  after(() => fn().catch((err) => console.error(`[push] ${label} notify failed`, err)))
 }

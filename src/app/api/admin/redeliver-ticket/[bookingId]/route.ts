@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -161,15 +161,12 @@ export async function POST(
     )
   }
 
-  // Fire the redelivery. Background pattern — the admin's HTTP request
-  // shouldn't block on Resend/PDF. `deliverTicket` is idempotent and
-  // never throws, so we don't have to unwind on failure.
-  deliverTicket(bookingId).catch((err) => {
-    console.error(
-      '[admin/redeliver-ticket] Background deliverTicket threw:',
-      err
-    )
-  })
+  // Fire the redelivery via after() - Vercel can freeze the runtime the
+  // moment this response is sent, killing a bare un-awaited call before
+  // it finishes (discovered this affecting push notifications; the same
+  // risk applies here to ticket email/PDF delivery). after() guarantees
+  // completion without adding latency to this response.
+  after(() => deliverTicket(bookingId))
 
   return NextResponse.json({
     ok: true,

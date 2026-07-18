@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { sendPushToUser } from '@/lib/push'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 export async function GET() {
   try {
@@ -143,11 +143,15 @@ export async function POST(req: Request) {
           })
         }
 
-        sendPushToUser(venue.owner.userId, {
-          title: 'New venue booking request',
-          body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
-          url: '/dashboard/venue-requests',
-        }).catch((err) => console.error('[push] venue-booking-request notify failed', err))
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(venue.owner.userId, {
+              title: 'New venue booking request',
+              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'venue-booking-request'
+        )
       } else {
         const platformSettings = await prisma.platformSettings.findFirst()
         await prisma.venueBooking.create({
@@ -163,11 +167,15 @@ export async function POST(req: Request) {
           },
         })
 
-        sendPushToUser(venue.owner.userId, {
-          title: 'New venue booking request',
-          body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
-          url: '/dashboard/venue-requests',
-        }).catch((err) => console.error('[push] venue-booking-request notify failed', err))
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(venue.owner.userId, {
+              title: 'New venue booking request',
+              body: `${venue.name} has a new booking request for ${new Date(date).toLocaleDateString('en-IN')}.`,
+              url: '/dashboard/venue-requests',
+            }),
+          'venue-booking-request'
+        )
       }
     }
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { sendPushToUser } from '@/lib/push'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
 const EXPIRY_HOURS = 48
@@ -91,14 +91,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           data: { status: 'DRAFT' },
         })
       }
-      sendPushToUser(otherSideUserId(), {
-        title: 'Venue booking request declined',
-        body:
-          callerSide === 'VENUE_OWNER'
-            ? `${request.venue.name} declined your booking request.`
-            : `The Organiser withdrew their request for ${request.venue.name}.`,
-        url: '/dashboard/venue-requests',
-      }).catch((err) => console.error('[push] booking-request-decline notify failed', err))
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'Venue booking request declined',
+            body:
+              callerSide === 'VENUE_OWNER'
+                ? `${request.venue.name} declined your booking request.`
+                : `The Organiser withdrew their request for ${request.venue.name}.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-decline'
+      )
       return NextResponse.json({ message: 'Declined' })
     }
 
@@ -133,11 +137,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           : []),
       ])
 
-      sendPushToUser(otherSideUserId(), {
-        title: 'Venue booking confirmed!',
-        body: `Your booking at ${request.venue.name} for ₹${lastOffer.amount} is confirmed.`,
-        url: '/dashboard/venue-requests',
-      }).catch((err) => console.error('[push] booking-request-accept notify failed', err))
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'Venue booking confirmed!',
+            body: `Your booking at ${request.venue.name} for ₹${lastOffer.amount} is confirmed.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-accept'
+      )
 
       return NextResponse.json({ message: 'Accepted - booking confirmed' })
     }
@@ -159,11 +167,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         data: { requestId: id, proposedBy: callerSide, amount: parseFloat(amount) },
       })
 
-      sendPushToUser(otherSideUserId(), {
-        title: 'New counter-offer',
-        body: `${request.venue.name} negotiation: counter-offer of ₹${amount}.`,
-        url: '/dashboard/venue-requests',
-      }).catch((err) => console.error('[push] booking-request-counter notify failed', err))
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(otherSideUserId(), {
+            title: 'New counter-offer',
+            body: `${request.venue.name} negotiation: counter-offer of ₹${amount}.`,
+            url: '/dashboard/venue-requests',
+          }),
+        'booking-request-counter'
+      )
 
       return NextResponse.json({ message: 'Counter-offer sent' })
     }

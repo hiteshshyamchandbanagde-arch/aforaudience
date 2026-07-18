@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { sendPushToUser } from '@/lib/push'
+import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
 // G2 - rate a performer post-show. Not restricted to confirmed/attended
 // bookings - there's no check-in/attendance-verification system yet, so
@@ -54,20 +54,28 @@ export async function POST(req: Request) {
         include: { artist: true },
       })
       if (performance) {
-        sendPushToUser(performance.artist.userId, {
-          title: `New ${Number(rating)}★ review`,
-          body: comment?.trim() ? `"${comment.trim().slice(0, 80)}"` : 'Someone rated your performance.',
-          url: '/dashboard/artist',
-        }).catch((err) => console.error('[push] review-artist notify failed', err))
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(performance.artist.userId, {
+              title: `New ${Number(rating)}★ review`,
+              body: comment?.trim() ? `"${comment.trim().slice(0, 80)}"` : 'Someone rated your performance.',
+              url: '/dashboard/artist',
+            }),
+          'review-artist'
+        )
       }
     } else {
       const event = await prisma.event.findUnique({ where: { id: eventId }, include: { organiser: true } })
       if (event) {
-        sendPushToUser(event.organiser.userId, {
-          title: `New ${Number(rating)}★ review for ${event.title}`,
-          body: comment?.trim() ? `"${comment.trim().slice(0, 80)}"` : 'A new review came in.',
-          url: `/dashboard/organiser/events/${eventId}`,
-        }).catch((err) => console.error('[push] review-organiser notify failed', err))
+        notifyAfterResponse(
+          () =>
+            sendPushToUser(event.organiser.userId, {
+              title: `New ${Number(rating)}★ review for ${event.title}`,
+              body: comment?.trim() ? `"${comment.trim().slice(0, 80)}"` : 'A new review came in.',
+              url: `/dashboard/organiser/events/${eventId}`,
+            }),
+          'review-organiser'
+        )
       }
     }
 

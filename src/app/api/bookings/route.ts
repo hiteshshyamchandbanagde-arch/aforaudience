@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -201,15 +201,12 @@ export async function POST(req: Request) {
         where: { id: booking.id },
         data: { status: 'CONFIRMED', expiresAt: null },
       })
-      // Fire ticket delivery in the background — same pattern as the
-      // paid confirm route. deliverTicket is idempotent and never throws;
-      // we don't await it because the audience response shouldn't block
-      // on Resend/PDF generation. The claim in deliverTicket now lives
-      // on Booking (not Payment), so free events actually go through —
-      // previously they silently no-op'd. See Master Design Doc EPIC M.
-      deliverTicket(booking.id).catch((err) => {
-        console.error('[bookings] Background deliverTicket threw:', err)
-      })
+      // Fire ticket delivery via after() — same reasoning as the paid
+      // confirm route: the audience response shouldn't block on Resend/
+      // PDF generation, but a bare un-awaited call risks Vercel freezing
+      // the runtime before delivery (and the milestone push nested
+      // inside it) actually completes.
+      after(() => deliverTicket(booking.id))
       return NextResponse.json(
         {
           booking: confirmed,
