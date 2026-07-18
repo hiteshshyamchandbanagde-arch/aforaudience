@@ -12,7 +12,7 @@ export default function Home() {
       <SiteNav variant="home" />
 
       {/* HERO */}
-      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "120px 48px 80px", gap: "48px", flexWrap: "wrap" }}>
+      <section style={{ display: "flex", alignItems: "stretch", padding: "96px 48px 80px", gap: "48px", flexWrap: "wrap" }}>
         <div style={{ maxWidth: "640px", flex: "1 1 480px" }}>
           <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ display: "inline-block", width: "32px", height: "1px", background: "#C8441A" }}></span>
