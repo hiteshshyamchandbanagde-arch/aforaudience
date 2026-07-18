@@ -12,8 +12,9 @@ export default function Home() {
       <SiteNav variant="home" />
 
       {/* HERO */}
-      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "120px 48px 80px", gap: "48px", flexWrap: "wrap" }}>
-        <div style={{ maxWidth: "640px", flex: "1 1 480px" }}>
+      <section style={{ padding: "96px 48px 80px" }}>
+        <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", gap: "48px", flexWrap: "wrap" }}>
+        <div style={{ maxWidth: "660px", flex: "1 1 480px" }}>
           <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ display: "inline-block", width: "32px", height: "1px", background: "#C8441A" }}></span>
             Live Art. Real Moments.
@@ -43,8 +44,9 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div style={{ flex: "1 1 400px", maxWidth: "540px" }}>
+        <div style={{ flex: "1 1 400px", maxWidth: "580px" }}>
           <HeroRotator />
+        </div>
         </div>
       </section>
 

@@ -129,11 +129,13 @@
   }
 }
 .hero-rotator {
-  height: 560px;
+  height: 100%;
+  min-height: 360px;
 }
 
 @media (max-width: 900px) {
   .hero-rotator {
     height: 320px;
+    min-height: 0;
   }
 }

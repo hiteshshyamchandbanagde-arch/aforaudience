@@ -52,6 +52,22 @@ export default function HeroRotator() {
           }}
         />
       ))}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, rgba(14,12,10,0.7) 0%, rgba(14,12,10,0.1) 40%, rgba(14,12,10,0) 55%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: '#F5A26E', textTransform: 'uppercase', marginBottom: '6px' }}>
+          For artists
+        </div>
+        <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '19px', color: '#F7F3EE', lineHeight: 1.3 }}>
+          Your best performance, featured here.
+        </div>
+      </div>
     </div>
   )
 }
