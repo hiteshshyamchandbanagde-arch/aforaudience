@@ -20,6 +20,14 @@ interface Application {
   }
 }
 
+interface Review {
+  id: string
+  rating: number
+  comment: string | null
+  createdAt: string
+  user: { name: string; displayName: string | null }
+}
+
 interface Performance {
   id: string
   slot: number
@@ -31,6 +39,7 @@ interface Performance {
     startTime: string
     venue: { name: string; city: string } | null
   }
+  reviews: Review[]
 }
 
 interface ArtistProfile {
@@ -91,6 +100,11 @@ export default function ArtistDashboard() {
     .filter((p) => new Date(p.event.date) >= new Date(new Date().toDateString()))
     .sort((a, b) => new Date(a.event.date).getTime() - new Date(b.event.date).getTime())
 
+  const allReviews = profile.performances
+    .flatMap((p) => p.reviews.map((r) => ({ ...r, eventTitle: p.event.title })))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const avgRating = allReviews.length > 0 ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length : null
+
   return (
     <>
       <SiteNav />
@@ -131,6 +145,42 @@ export default function ArtistDashboard() {
                 ))}
                 {profile.styleTag.map((s) => (
                   <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: 'rgba(200,68,26,0.08)', borderRadius: '999px', color: '#C8441A' }}>{s}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Reviews */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '14px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A' }}>
+                Reviews
+              </h2>
+              {avgRating !== null && (
+                <span style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                  {'⭐'.repeat(Math.round(avgRating))} {avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}
+                </span>
+              )}
+            </div>
+            {allReviews.length === 0 ? (
+              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+                No reviews yet. Audiences can rate you after checking in at a show.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {allReviews.map((r) => (
+                  <div key={r.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
+                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{r.eventTitle}</span>
+                    </div>
+                    {r.comment && (
+                      <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
+                    )}
+                    <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4 }}>
+                      {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 ))}
               </div>
             )}

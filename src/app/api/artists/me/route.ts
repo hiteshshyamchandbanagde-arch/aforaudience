@@ -23,7 +23,13 @@ export async function GET() {
           orderBy: { createdAt: 'desc' },
         },
         performances: {
-          include: { event: { include: { venue: true } } },
+          include: {
+            event: { include: { venue: true } },
+            reviews: {
+              include: { user: { select: { name: true, displayName: true } } },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
         },
       },
     })
