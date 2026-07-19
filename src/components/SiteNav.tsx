@@ -5,7 +5,7 @@ import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 
-type NavLinkKey = "events" | "artists" | "venues"
+type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
 type SiteNavProps = {
   /** Highlights the matching link as the current section. */
@@ -21,6 +21,7 @@ const NAV_LINKS: { key: NavLinkKey; href: string; label: string }[] = [
   { key: "events", href: "/events", label: "Events" },
   { key: "artists", href: "/artists", label: "Artists" },
   { key: "venues", href: "/venues", label: "Venues" },
+  { key: "wall-of-fame", href: "/wall-of-fame", label: "Wall of Fame" },
 ]
 
 function getDashboardLink(role?: string) {
