@@ -6,9 +6,14 @@ import prisma from '@/lib/prisma'
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const event = await prisma.event.findUnique({ where: { id }, include: { venue: true } })
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: { venue: true, organiser: { include: { user: { select: { isSuspended: true } } } } },
+    })
 
-    if (!event || event.status !== 'APPROVED') {
+    // H3 - same suspension gate as the public listing (GET /api/events),
+    // applied here too so a direct/bookmarked link doesn't bypass it.
+    if (!event || event.status !== 'APPROVED' || event.organiser.user.isSuspended) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 

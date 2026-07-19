@@ -7,7 +7,8 @@ import { requireVerifiedPhone } from '@/lib/verification'
 export async function GET() {
   try {
     const venues = await prisma.venue.findMany({
-      where: { isApproved: true },
+      // H3 - same suspension gate as events GET, see comment there.
+      where: { isApproved: true, owner: { user: { isSuspended: false } } },
       include: { dayRates: true },
     })
     return NextResponse.json(venues)

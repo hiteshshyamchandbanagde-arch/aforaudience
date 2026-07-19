@@ -105,6 +105,9 @@ export default function AdminDashboard() {
               <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
                 Revenue →
               </a>
+              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
+                Accounts →
+              </a>
               <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
                 Bookings →
               </a>

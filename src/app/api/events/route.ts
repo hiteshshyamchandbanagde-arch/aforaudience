@@ -8,7 +8,11 @@ import { requireVerifiedPhone } from '@/lib/verification'
 export async function GET() {
   try {
     const events = await prisma.event.findMany({
-      where: { status: 'APPROVED' },
+      // H3 - a suspended Organiser's future events drop out of public
+      // listings immediately (no new tickets sold while suspended), but
+      // this deliberately does NOT touch existing confirmed bookings for
+      // events already sold - see User.isSuspended comment in schema.
+      where: { status: 'APPROVED', organiser: { user: { isSuspended: false } } },
       include: { venue: true, lineup: true },
       orderBy: { date: 'asc' },
     })

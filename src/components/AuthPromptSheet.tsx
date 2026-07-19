@@ -53,6 +53,8 @@ export default function AuthPromptSheet({
       if (result?.error) {
         if (result.error === "LOCKED") {
           setError("Too many attempts. Try again in 15 minutes.")
+        } else if (result.error === "SUSPENDED") {
+          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
         } else if (result.error === "CredentialsSignin") {
           setError("Invalid credentials")
         } else {

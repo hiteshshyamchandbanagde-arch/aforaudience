@@ -44,6 +44,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("LOCKED")
         }
 
+        // H3 - suspended accounts can't log in at all, checked before the
+        // password so a suspended user gets a clear reason rather than a
+        // generic credentials error.
+        if (user.isSuspended) {
+          throw new Error("SUSPENDED")
+        }
+
         const isValid = await bcrypt.compare(credentials.password, user.password)
 
         if (!isValid) {
@@ -100,6 +107,11 @@ export const authOptions: NextAuthOptions = {
         const user = await resolveIdentifierToUser(credentials.identifier)
         if (!user || !user.phone) return null
 
+        // H3 - same suspension gate as the credentials provider.
+        if (user.isSuspended) {
+          throw new Error("SUSPENDED")
+        }
+
         const result = await verifyOtp(user.phone, credentials.code, "LOGIN")
         if (!result.ok) return null
 
@@ -145,7 +157,7 @@ export const authOptions: NextAuthOptions = {
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { tokenVersion: true, displayName: true, isVerified: true },
+          select: { tokenVersion: true, displayName: true, isVerified: true, isSuspended: true },
         })
 
         // Refresh displayName and isVerified on every session check - the
@@ -157,7 +169,12 @@ export const authOptions: NextAuthOptions = {
           ;(session.user as any).isVerified = currentUser.isVerified
         }
 
-        if (!currentUser || currentUser.tokenVersion !== token.tokenVersion) {
+        // H3 - a suspension applied mid-session shouldn't wait out the
+        // JWT's 7-day life. Checked ahead of tokenVersion so the message
+        // is specific rather than falling through to the generic one.
+        if (currentUser?.isSuspended) {
+          (session as any).error = "AccountSuspended"
+        } else if (!currentUser || currentUser.tokenVersion !== token.tokenVersion) {
           (session as any).error = "SessionInvalidated"
         }
       }

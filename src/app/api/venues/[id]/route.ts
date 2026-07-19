@@ -6,8 +6,12 @@ import prisma from '@/lib/prisma'
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const venue = await prisma.venue.findUnique({ where: { id } })
-    if (!venue) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const venue = await prisma.venue.findUnique({
+      where: { id },
+      include: { owner: { include: { user: { select: { isSuspended: true } } } } },
+    })
+    // H3 - same suspension gate as the public listing (GET /api/venues).
+    if (!venue || venue.owner.user.isSuspended) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json(venue)
   } catch (err) {
     return NextResponse.json({ error: 'Failed to fetch venue' }, { status: 500 })
