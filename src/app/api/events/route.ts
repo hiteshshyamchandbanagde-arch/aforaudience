@@ -61,8 +61,15 @@ export async function POST(req: Request) {
     // real-world caps, not a business rule.
     const MAX_EVENT_SEATS = 100_000
     const MAX_TICKET_PRICE = 10_000_000 // ₹1 crore
+    const MAX_PERFORMERS = 500
     if (seats > MAX_EVENT_SEATS) {
       return NextResponse.json({ error: `Total seats can't exceed ${MAX_EVENT_SEATS.toLocaleString('en-IN')}.` }, { status: 400 })
+    }
+    if (maxPerformers !== undefined && maxPerformers !== null && maxPerformers !== '') {
+      const mp = Number(maxPerformers)
+      if (!Number.isFinite(mp) || !Number.isInteger(mp) || mp < 1 || mp > MAX_PERFORMERS) {
+        return NextResponse.json({ error: `Max performers must be a whole number between 1 and ${MAX_PERFORMERS}.` }, { status: 400 })
+      }
     }
     if (!isFree && ticketPrice !== undefined && ticketPrice !== null && ticketPrice !== '') {
       const price = Number(ticketPrice)
