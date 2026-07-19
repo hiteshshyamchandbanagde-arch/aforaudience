@@ -94,7 +94,7 @@ export async function suggestAvailableUsername(seed: string): Promise<string> {
   const base = seed.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 20) || "user"
 
   let candidate = base
-  let suffix = 1
+  let suffix = 0
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const existing = await prisma.user.findFirst({
