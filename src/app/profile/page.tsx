@@ -17,7 +17,7 @@ const cardStyle = {
 }
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update: updateSession } = useSession()
   const router = useRouter()
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
@@ -82,6 +82,12 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error(data.error || 'Failed to save')
       setInitialDisplayName(data.user?.displayName ?? '')
       setMessage('Display name saved.')
+      // Force NextAuth to re-run the session callback now, instead of
+      // waiting for the next window-focus/interval refetch - the session
+      // callback already re-reads displayName from the DB (see auth.ts),
+      // this just triggers it immediately so the header updates without
+      // a manual refocus.
+      await updateSession()
     } catch (err: any) {
       setError(err.message || 'Failed to save')
     } finally {
