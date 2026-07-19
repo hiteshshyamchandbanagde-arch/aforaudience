@@ -3,11 +3,27 @@
 import { useEffect, useState } from 'react'
 
 const SESSION_KEY = 'introShown'
-// Timings: in 600ms, hold 700ms, out 450ms - kept snappy since, unlike
-// Netflix, this plays in front of a free product every session start
-// rather than a paid one people are settled in for. Long enough to read
-// as a "moment", short enough not to feel like a tax on repeat visits.
-const HOLD_MS = 600 + 700
+
+// Timeline (all ms from mount):
+//   0    - bottom bar (white) starts sliding/fading in
+//   150  - middle bar (amber) starts
+//   300  - top bar (orange) starts, each bar takes 260ms so the mark is
+//          fully settled by ~560ms
+//   950  - icon starts crossfading into the wordmark (300ms fade)
+//   950  - wordmark starts its scale-in (600ms) - overlapping the icon's
+//          fade-out is the crossfade itself, not two separate beats
+//   2250 - wordmark has held long enough to read
+//   2700 - overlay finishes fading out, component unmounts
+// Deliberately reuses the app's own icon mark (src/app/icon.svg - three
+// bars, bottom-up: #F7F3EE, #C9973A, #C8441A) rather than a generic
+// spinner, so this continues the same mark Android's own PWA splash
+// screen already showed on cold launch instead of feeling like two
+// unrelated screens back to back.
+const ICON_BAR_DELAYS = { bottom: 0, middle: 150, top: 300 }
+const ICON_BAR_DURATION = 260
+const WORDMARK_START = 950
+const WORDMARK_IN_MS = 600
+const HOLD_MS = WORDMARK_START + WORDMARK_IN_MS + 700
 const TOTAL_MS = HOLD_MS + 450
 
 export default function IntroSplash() {
@@ -65,6 +81,14 @@ export default function IntroSplash() {
       }}
     >
       <style>{`
+        @keyframes intro-bar-in {
+          0% { opacity: 0; transform: translateX(-10px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes intro-icon-out {
+          0% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.92); }
+        }
         @keyframes intro-scale-in {
           0% { opacity: 0; transform: scale(0.82); }
           100% { opacity: 1; transform: scale(1); }
@@ -83,17 +107,47 @@ export default function IntroSplash() {
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: intro-shimmer 1.3s ease-in-out 200ms both;
+            animation: intro-shimmer 1.3s ease-in-out ${WORDMARK_START + 200}ms both;
           }
         }
       `}</style>
+
+      {/* Icon mark: same three bars as src/app/icon.svg, bottom-up reveal,
+          then crossfades into the wordmark below. Positioned absolutely
+          so both layers can overlap during the crossfade window. */}
+      <svg
+        viewBox="0 0 64 64"
+        width="72"
+        height="72"
+        style={{
+          position: 'absolute',
+          animation: `intro-icon-out 300ms ease ${WORDMARK_START}ms both`,
+        }}
+      >
+        <rect
+          x="18" y="42" width="14" height="8"
+          fill="#F7F3EE"
+          style={{ animation: `intro-bar-in ${ICON_BAR_DURATION}ms ease-out ${ICON_BAR_DELAYS.bottom}ms both` }}
+        />
+        <rect
+          x="18" y="30" width="20" height="8"
+          fill="#C9973A"
+          style={{ animation: `intro-bar-in ${ICON_BAR_DURATION}ms ease-out ${ICON_BAR_DELAYS.middle}ms both` }}
+        />
+        <rect
+          x="18" y="18" width="28" height="8"
+          fill="#C8441A"
+          style={{ animation: `intro-bar-in ${ICON_BAR_DURATION}ms ease-out ${ICON_BAR_DELAYS.top}ms both` }}
+        />
+      </svg>
+
       <div
         style={{
           fontFamily: 'Georgia, serif',
           fontSize: 'clamp(36px, 9vw, 64px)',
           fontWeight: 700,
           color: '#F7F3EE',
-          animation: 'intro-scale-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both',
+          animation: `intro-scale-in ${WORDMARK_IN_MS}ms cubic-bezier(0.22, 1, 0.36, 1) ${WORDMARK_START}ms both`,
         }}
       >
         <span className="intro-splash-a">A</span>
