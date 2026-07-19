@@ -91,6 +91,16 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           overflow: 'hidden',
         }}
       >
+        <div
+          style={{
+            position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
+            width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px',
+            background: '#0E0C0A', color: '#fff', fontSize: '10px', fontWeight: 700,
+            letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
+          }}
+        >
+          Stage
+        </div>
         {seats.map((s) => {
           const isSelected = selected.includes(s.id)
           const bg =
