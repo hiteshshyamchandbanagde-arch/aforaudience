@@ -11,6 +11,7 @@ interface Offer {
   id: string
   proposedBy: 'ORGANISER' | 'VENUE_OWNER'
   amount: number
+  comment: string | null
   createdAt: string
 }
 
@@ -40,6 +41,7 @@ export default function VenueRequestsPage() {
   const [loadError, setLoadError] = useState('')
   const { showToast } = useToast()
   const [counterInputs, setCounterInputs] = useState<Record<string, string>>({})
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [actingOn, setActingOn] = useState<string | null>(null)
 
   const role = (session?.user as any)?.role as string | undefined
@@ -73,11 +75,12 @@ export default function VenueRequestsPage() {
       const res = await fetch(`/api/venue-booking-requests/${reqId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, amount: counterInputs[reqId] }),
+        body: JSON.stringify({ action, amount: counterInputs[reqId], comment: commentInputs[reqId] }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Action failed')
       await load()
+      setCommentInputs((prev) => ({ ...prev, [reqId]: '' }))
       showToast(
         action === 'accept' ? 'Offer accepted.' : action === 'decline' ? 'Request declined.' : 'Counter-offer sent.',
         'success'
@@ -144,11 +147,18 @@ export default function VenueRequestsPage() {
                   {r.offers.length > 0 && (
                     <div style={{ background: '#F7F3EE', borderRadius: '8px', padding: '10px 12px', margin: '14px 0' }}>
                       {r.offers.map((o) => (
-                        <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '13px' }}>
-                          <span style={{ color: '#0E0C0A', opacity: 0.6 }}>
-                            {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
-                          </span>
-                          <span style={{ fontWeight: 600, color: '#0E0C0A' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                        <div key={o.id} style={{ padding: '4px 0' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                            <span style={{ color: '#0E0C0A', opacity: 0.6 }}>
+                              {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
+                            </span>
+                            <span style={{ fontWeight: 600, color: '#0E0C0A' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                          </div>
+                          {o.comment && (
+                            <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.65, fontStyle: 'italic', margin: '2px 0 0' }}>
+                              "{o.comment}"
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -169,6 +179,16 @@ export default function VenueRequestsPage() {
                           value={counterInputs[r.id] || ''}
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
                           style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                        />
+                      </div>
+                      <div style={{ marginBottom: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Add a note (optional) — e.g. can do ₹4000 but need load-in by 6pm"
+                          value={commentInputs[r.id] || ''}
+                          onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
+                          maxLength={300}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>

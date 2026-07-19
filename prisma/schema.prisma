@@ -409,6 +409,12 @@ model VenueBookingOffer {
   request     VenueBookingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
   proposedBy  OfferProposedBy
   amount      Float
+  // From live feedback (18 Jul) - a tester who'd just used the Flexible
+  // negotiation flow asked for a free-text field alongside the amount so
+  // either side can add context ("can do ₹4000 but need load-in by 6pm")
+  // instead of just exchanging bare numbers. Optional, not required at
+  // any point in the flow.
+  comment     String?
   createdAt   DateTime             @default(now())
 }
 

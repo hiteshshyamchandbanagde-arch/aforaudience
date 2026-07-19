@@ -80,7 +80,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'This request expired after 48 hours with no response' }, { status: 400 })
     }
 
-    const { action, amount } = await req.json()
+    const { action, amount, comment } = await req.json()
 
     if (action === 'decline') {
       await prisma.venueBookingRequest.update({ where: { id }, data: { status: 'DECLINED' } })
@@ -166,15 +166,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: "Waiting on the other side to respond" }, { status: 400 })
       }
 
+      // Optional free-text alongside the amount - not required, capped to
+      // keep it a quick note rather than a full negotiation thread.
+      const trimmedComment = typeof comment === 'string' ? comment.trim().slice(0, 300) : null
+
       await prisma.venueBookingOffer.create({
-        data: { requestId: id, proposedBy: callerSide, amount: parseFloat(amount) },
+        data: { requestId: id, proposedBy: callerSide, amount: parseFloat(amount), comment: trimmedComment || null },
       })
 
       notifyAfterResponse(
         () =>
           sendPushToUser(otherSideUserId(), {
             title: 'New counter-offer',
-            body: `${request.venue.name} negotiation: counter-offer of ₹${amount}.`,
+            body: trimmedComment
+              ? `${request.venue.name} negotiation: counter-offer of ₹${amount} — "${trimmedComment}"`
+              : `${request.venue.name} negotiation: counter-offer of ₹${amount}.`,
             url: '/dashboard/venue-requests',
           }),
         'booking-request-counter'
