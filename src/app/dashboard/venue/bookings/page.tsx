@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface BookingRequest {
   id: string
@@ -30,7 +31,8 @@ export default function VenueBookingsPage() {
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingRequest[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const { showToast } = useToast()
   const [actingOn, setActingOn] = useState<string | null>(null)
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date()
@@ -51,7 +53,7 @@ export default function VenueBookingsPage() {
       const data = await res.json()
       setBookings(data)
     } catch (err: any) {
-      setError(err.message)
+      setLoadError(err.message)
     } finally {
       setLoading(false)
     }
@@ -74,8 +76,9 @@ export default function VenueBookingsPage() {
       })
       if (!res.ok) throw new Error('Failed to update booking')
       await fetchBookings()
+      showToast(newStatus === 'CONFIRMED' ? 'Booking confirmed.' : 'Booking rejected.', 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to update booking', 'error')
     } finally {
       setActingOn(null)
     }
@@ -142,9 +145,9 @@ export default function VenueBookingsPage() {
             Revenue is gross rental income (not netted against the platform's flat booking fee). Multi-day bookings are marked on their start date only.
           </p>
 
-          {error && (
+          {loadError && (
             <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
+              {loadError}
             </div>
           )}
 
