@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface Offer {
   id: string
@@ -36,7 +37,8 @@ export default function VenueRequestsPage() {
   const router = useRouter()
   const [requests, setRequests] = useState<RequestItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const { showToast } = useToast()
   const [counterInputs, setCounterInputs] = useState<Record<string, string>>({})
   const [actingOn, setActingOn] = useState<string | null>(null)
 
@@ -54,7 +56,7 @@ export default function VenueRequestsPage() {
       if (!res.ok) throw new Error('Failed to load requests')
       setRequests(await res.json())
     } catch (err: any) {
-      setError(err.message)
+      setLoadError(err.message)
     } finally {
       setLoading(false)
     }
@@ -67,7 +69,6 @@ export default function VenueRequestsPage() {
 
   const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
     setActingOn(reqId)
-    setError('')
     try {
       const res = await fetch(`/api/venue-booking-requests/${reqId}`, {
         method: 'PATCH',
@@ -77,8 +78,12 @@ export default function VenueRequestsPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Action failed')
       await load()
+      showToast(
+        action === 'accept' ? 'Offer accepted.' : action === 'decline' ? 'Request declined.' : 'Counter-offer sent.',
+        'success'
+      )
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Action failed', 'error')
     } finally {
       setActingOn(null)
     }
@@ -102,9 +107,9 @@ export default function VenueRequestsPage() {
             Flexible-rate venue negotiations — {callerSide === 'VENUE_OWNER' ? 'requests against your venues' : 'your outstanding requests'}.
           </p>
 
-          {error && (
+          {loadError && (
             <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
+              {loadError}
             </div>
           )}
 
