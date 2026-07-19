@@ -12,6 +12,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const registered = searchParams.get("registered")
   const justReset = searchParams.get("reset")
+  const wasSuspended = searchParams.get("suspended")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [identifier, setIdentifier] = useState("")
@@ -34,6 +35,8 @@ function LoginForm() {
       if (result?.error) {
         if (result.error === "LOCKED") {
           setError("Too many attempts. Try again in 15 minutes.")
+        } else if (result.error === "SUSPENDED") {
+          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
         } else if (result.error === "CredentialsSignin") {
           setError("Invalid credentials")
         } else {
@@ -79,7 +82,11 @@ function LoginForm() {
         redirect: false,
       })
       if (result?.error) {
-        setError("Invalid or expired code.")
+        if (result.error === "SUSPENDED") {
+          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
+        } else {
+          setError("Invalid or expired code.")
+        }
         setLoading(false); return
       }
       router.push("/")
@@ -114,6 +121,11 @@ function LoginForm() {
         {justReset && (
           <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
             ✅ Password updated. Please sign in.
+          </div>
+        )}
+        {wasSuspended && (
+          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+            Your account has been suspended. Contact support if you believe this is a mistake.
           </div>
         )}
         {error && (
