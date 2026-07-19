@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface EventItem {
   id: string
@@ -24,7 +25,7 @@ export default function BrowseEventsToApplyPage() {
   const [events, setEvents] = useState<EventItem[]>([])
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [message, setMessage] = useState<Record<string, string>>({})
   const [applying, setApplying] = useState<string | null>(null)
   const [justApplied, setJustApplied] = useState<Set<string>>(new Set())
@@ -51,7 +52,7 @@ export default function BrowseEventsToApplyPage() {
           setAppliedIds(new Set((profile.applications || []).map((a: any) => a.event.id)))
         }
       } catch (err: any) {
-        setError(err.message)
+        showToast(err.message || 'Failed to load events', 'error')
       } finally {
         setLoading(false)
       }
@@ -64,7 +65,6 @@ export default function BrowseEventsToApplyPage() {
 
   const apply = async (eventId: string) => {
     setApplying(eventId)
-    setError('')
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
@@ -77,7 +77,7 @@ export default function BrowseEventsToApplyPage() {
       }
       setJustApplied((prev) => new Set(prev).add(eventId))
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to apply', 'error')
     } finally {
       setApplying(null)
     }
@@ -101,12 +101,6 @@ export default function BrowseEventsToApplyPage() {
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
             Apply to perform at published events.
           </p>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
 
           {events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 24px', background: '#fff', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
