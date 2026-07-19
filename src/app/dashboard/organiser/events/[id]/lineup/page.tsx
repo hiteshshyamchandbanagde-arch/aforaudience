@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 import {
   DndContext,
   closestCenter,
@@ -138,7 +139,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
-  const [saveMessage, setSaveMessage] = useState('')
+  const { showToast } = useToast()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -184,7 +185,6 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
       return reordered
     })
     setDirty(true)
-    setSaveMessage('')
   }
 
   const handleDurationChange = (itemId: string, duration: number) => {
@@ -193,12 +193,10 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
       return recomputeLabels(updated, event?.startTime)
     })
     setDirty(true)
-    setSaveMessage('')
   }
 
   const handleSave = async () => {
     setSaving(true)
-    setSaveMessage('')
     try {
       const res = await fetch(`/api/events/${id}/lineup`, {
         method: 'PATCH',
@@ -209,9 +207,9 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
       const json = await res.json()
       setLineup(json.lineup)
       setDirty(false)
-      setSaveMessage('Saved')
+      showToast('Lineup saved.', 'success')
     } catch (err: any) {
-      setSaveMessage(err.message || 'Save failed')
+      showToast(err.message || 'Save failed', 'error')
     } finally {
       setSaving(false)
     }
@@ -263,9 +261,6 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
           {lineup.length > 0 && (
             <div style={{ position: 'sticky', bottom: '24px', marginTop: '24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
-              {saveMessage && (
-                <span style={{ fontSize: '13px', color: saveMessage === 'Saved' ? '#4A6741' : '#B3261E' }}>{saveMessage}</span>
-              )}
               <button
                 onClick={handleSave}
                 disabled={!dirty || saving}
