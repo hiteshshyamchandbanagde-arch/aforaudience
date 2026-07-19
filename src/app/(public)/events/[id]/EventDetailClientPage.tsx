@@ -64,7 +64,7 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
   LINEUP: { emoji: "🌟", color: "#1a1000", label: "Lineup" },
 }
 
-export default function EventDetailPage({ event }: { event: EventData | null }) {
+export default function EventDetailPage({ event, canReview }: { event: EventData | null; canReview: boolean }) {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
@@ -302,8 +302,12 @@ export default function EventDetailPage({ event }: { event: EventData | null }) 
                           </div>
                         )}
 
-                        {/* Rate this performer */}
-                        {!submittedReviews[p.id] && !p.reviews.some((r) => r.user.name === (session?.user as any)?.name) && (
+                        {/* Rate this performer — only shown to viewers the server has
+                            confirmed have a checked-in booking for this event (canReview,
+                            computed in the parent server component). Previously this
+                            rendered unconditionally and let anyone fill it out only to
+                            hit a 403 from POST /api/reviews on submit. */}
+                        {canReview && !submittedReviews[p.id] && !p.reviews.some((r) => r.user.name === (session?.user as any)?.name) && (
                           <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.06)" }}>
                             <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
                               {[1, 2, 3, 4, 5].map((n) => (
