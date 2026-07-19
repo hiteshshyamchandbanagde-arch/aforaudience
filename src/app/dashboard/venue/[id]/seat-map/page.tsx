@@ -38,6 +38,85 @@ function makeClientId() {
   return Math.random().toString(36).slice(2, 10)
 }
 
+// §9.4 - spreadsheet-style row lettering (A..Z, AA, AB...) since real
+// venues (Hitesh's 30-row reference scenario) exceed 26 rows.
+function rowLetterAt(index: number): string {
+  let i = index + 1
+  let s = ''
+  while (i > 0) {
+    const rem = (i - 1) % 26
+    s = String.fromCharCode(65 + rem) + s
+    i = Math.floor((i - 1) / 26)
+  }
+  return s
+}
+
+type RowGroup = { id: string; rows: number; columns: number }
+type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
+
+type GridConfig = {
+  blockCount: 1 | 2
+  leftTier: string
+  rightTier: string
+  centerAislePx: number
+  sideMarginPx: number
+  seatSpacingX: number
+  seatSpacingY: number
+  rowGroups: RowGroup[]
+  aisles: HorizontalAisle[]
+}
+
+// Pure function - given a config, returns the seats it describes. Kept
+// separate from React state so it's easy to reason about (and test by
+// hand against Hitesh's two reference scenarios) independent of the UI.
+// STAGE-FACING CONVENTION: canvas x increases left-to-right as if you
+// are standing on stage looking out at the audience - "Left" block/seat
+// numbering matches the performer's left, not the audience's.
+function computeGridSeats(config: GridConfig, originX: number, originY: number): Omit<SeatDraft, 'clientId'>[] {
+  const totalRows = config.rowGroups.reduce((sum, g) => sum + g.rows, 0)
+  const seats: Omit<SeatDraft, 'clientId'>[] = []
+
+  // Expand row-groups into a flat per-row column-count lookup.
+  const columnsForRow: number[] = []
+  for (const g of config.rowGroups) {
+    for (let i = 0; i < g.rows; i++) columnsForRow.push(g.columns)
+  }
+
+  let y = originY
+  for (let r = 0; r < totalRows; r++) {
+    // Horizontal aisle gaps accumulate extra vertical space BEFORE this
+    // row if one was configured to land here (e.g. "gap after row 10"
+    // adds space before row 11 - a 1-based, human-facing row count).
+    const aisleHere = config.aisles.find((a) => a.afterRow === r)
+    if (aisleHere) y += aisleHere.gapPx
+
+    const cols = columnsForRow[r] || 0
+    const rowLetter = rowLetterAt(r)
+
+    // Block 1 (or the only block) starts at originX + side margin.
+    let blockX = originX + config.sideMarginPx
+    for (let c = 0; c < cols; c++) {
+      seats.push({ tierLabel: config.leftTier, row: rowLetter, number: String(c + 1), x: blockX + c * config.seatSpacingX, y })
+    }
+
+    if (config.blockCount === 2) {
+      const block1Width = cols * config.seatSpacingX
+      const block2X = blockX + block1Width + config.centerAislePx
+      // Numbering continues across the aisle (row B: 1-20 left, 21-40
+      // right) rather than restarting at 1 - matches real theater
+      // signage, and avoids a (venueId, row, number) collision that a
+      // restart would cause since both blocks share the same row letter.
+      for (let c = 0; c < cols; c++) {
+        seats.push({ tierLabel: config.rightTier, row: rowLetter, number: String(cols + c + 1), x: block2X + c * config.seatSpacingX, y })
+      }
+    }
+
+    y += config.seatSpacingY
+  }
+
+  return seats
+}
+
 const inputStyle = {
   padding: '8px 10px',
   borderRadius: '6px',
@@ -71,6 +150,51 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [nextNumber, setNextNumber] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
+
+  // §9.4 - Grid Generator state. Kept separate from the freeform seats
+  // array - Generate computes seats and appends them, manual placement
+  // still works on top of a generated layout.
+  const [showGenerator, setShowGenerator] = useState(false)
+  const [gridConfig, setGridConfig] = useState<GridConfig>({
+    blockCount: 1,
+    leftTier: 'General',
+    rightTier: 'General',
+    centerAislePx: 60,
+    sideMarginPx: 30,
+    seatSpacingX: 26,
+    seatSpacingY: 30,
+    rowGroups: [{ id: makeClientId(), rows: 5, columns: 10 }],
+    aisles: [],
+  })
+
+  const addRowGroup = () => setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10 }] }))
+  const removeRowGroup = (id: string) => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.filter((r) => r.id !== id) }))
+  const updateRowGroup = (id: string, field: 'rows' | 'columns', value: number) =>
+    setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, [field]: Math.max(1, value) } : r)) }))
+
+  const addAisle = () => setGridConfig((g) => ({ ...g, aisles: [...g.aisles, { id: makeClientId(), afterRow: g.rowGroups.reduce((s, r) => s + r.rows, 0), gapPx: 30 }] }))
+  const removeAisle = (id: string) => setGridConfig((g) => ({ ...g, aisles: g.aisles.filter((a) => a.id !== id) }))
+  const updateAisle = (id: string, field: 'afterRow' | 'gapPx', value: number) =>
+    setGridConfig((g) => ({ ...g, aisles: g.aisles.map((a) => (a.id === id ? { ...a, [field]: Math.max(0, value) } : a)) }))
+
+  const generateGrid = () => {
+    const totalRows = gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)
+    if (totalRows === 0) {
+      showToast('Add at least one row group first.', 'error')
+      return
+    }
+    const generated = computeGridSeats(gridConfig, 40, 40)
+    setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
+    showToast(`Generated ${generated.length} seats.`, 'success')
+    setShowGenerator(false)
+  }
+
+  const resetLayout = () => {
+    if (seats.length === 0) return
+    if (!window.confirm('Clear the entire layout? This only affects your local edits - nothing is deleted until you Save.')) return
+    setSeats([])
+    setSelectedId(null)
+  }
 
   const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -114,6 +238,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const x = Math.round(e.clientX - rect.left)
     const y = Math.round(e.clientY - rect.top)
     if (x < 0 || y < 0 || x > CANVAS_WIDTH || y > CANVAS_HEIGHT) return
+    if (y < 40) {
+      showToast("That's the stage — seats go below it.", 'error')
+      return
+    }
     if (!activeTier.trim()) {
       showToast('Set a section/tier name first.', 'error')
       return
@@ -251,6 +379,99 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && (
           <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div>
+              <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '10px', fontStyle: 'italic' }}>
+                Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                <button
+                  onClick={() => setShowGenerator((v) => !v)}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: '#C8441A', color: '#fff' }}
+                >
+                  {showGenerator ? 'Close Grid Generator' : '+ Generate Grid'}
+                </button>
+                <button
+                  onClick={resetLayout}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid #B3261E', background: '#fff', color: '#B3261E' }}
+                >
+                  Reset Layout
+                </button>
+              </div>
+
+              {showGenerator && (
+                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.1)' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: '13px', fontWeight: 600 }}>Layout:</label>
+                    <button
+                      onClick={() => setGridConfig((g) => ({ ...g, blockCount: 1 }))}
+                      style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.blockCount === 1 ? 'none' : '1px solid rgba(14,12,10,0.15)', background: gridConfig.blockCount === 1 ? '#0E0C0A' : '#fff', color: gridConfig.blockCount === 1 ? '#fff' : '#0E0C0A' }}
+                    >
+                      Single Block
+                    </button>
+                    <button
+                      onClick={() => setGridConfig((g) => ({ ...g, blockCount: 2 }))}
+                      style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.blockCount === 2 ? 'none' : '1px solid rgba(14,12,10,0.15)', background: gridConfig.blockCount === 2 ? '#0E0C0A' : '#fff', color: gridConfig.blockCount === 2 ? '#fff' : '#0E0C0A' }}
+                    >
+                      Two Blocks (Left / Right)
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>{gridConfig.blockCount === 2 ? 'Left tier name:' : 'Tier name:'}</label>
+                    <input style={{ ...inputStyle, width: '130px' }} value={gridConfig.leftTier} onChange={(e) => setGridConfig((g) => ({ ...g, leftTier: e.target.value.slice(0, 60) }))} />
+                    {gridConfig.blockCount === 2 && (
+                      <>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>Right tier name:</label>
+                        <input style={{ ...inputStyle, width: '130px' }} value={gridConfig.rightTier} onChange={(e) => setGridConfig((g) => ({ ...g, rightTier: e.target.value.slice(0, 60) }))} />
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>Center aisle (px):</label>
+                        <input type="number" style={{ ...inputStyle, width: '70px' }} value={gridConfig.centerAislePx} onChange={(e) => setGridConfig((g) => ({ ...g, centerAislePx: Math.max(0, Number(e.target.value) || 0) }))} />
+                      </>
+                    )}
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin (px):</label>
+                    <input type="number" style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} onChange={(e) => setGridConfig((g) => ({ ...g, sideMarginPx: Math.max(0, Number(e.target.value) || 0) }))} />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing X/Y (px):</label>
+                    <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingX: Math.max(10, Number(e.target.value) || 10) }))} />
+                    <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingY: Math.max(10, Number(e.target.value) || 10) }))} />
+                  </div>
+
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Row groups (rows can taper — different column counts per range)</div>
+                  {gridConfig.rowGroups.map((rg, i) => (
+                    <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Group {i + 1}:</span>
+                      <label style={{ fontSize: '12px' }}>Rows:</label>
+                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
+                      <label style={{ fontSize: '12px' }}>Columns:</label>
+                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                      <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                    </div>
+                  ))}
+                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
+                    + Add row group
+                  </button>
+
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Horizontal aisles (a walking gap between two rows, e.g. a gangway)</div>
+                  {gridConfig.aisles.map((a) => (
+                    <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px' }}>After row #:</label>
+                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
+                      <label style={{ fontSize: '12px' }}>Gap (px):</label>
+                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.gapPx} onChange={(e) => updateAisle(a.id, 'gapPx', Number(e.target.value) || 0)} />
+                      <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                    </div>
+                  ))}
+                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
+                    + Add horizontal aisle
+                  </button>
+
+                  <button onClick={generateGrid} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: '#0E0C0A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                    Generate Seats
+                  </button>
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <label style={{ fontSize: '13px', fontWeight: 600 }}>Section/Tier:</label>
                 <input
@@ -268,7 +489,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   value={nextNumber}
                   onChange={(e) => setNextNumber(Math.max(1, Number(e.target.value) || 1))}
                 />
-                <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>Click the canvas to place a seat</span>
+                <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
 
               <div
@@ -285,6 +506,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   overflow: 'hidden',
                 }}
               >
+                <div
+                  style={{
+                    position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
+                    width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px',
+                    background: '#0E0C0A', color: '#fff', fontSize: '11px', fontWeight: 700,
+                    letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
+                  }}
+                >
+                  Stage
+                </div>
                 {seats.map((s) => (
                   <div
                     key={s.clientId}
