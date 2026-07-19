@@ -246,7 +246,7 @@ export default function CheckoutPage() {
             </div>
             <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Amount paid</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>
-              ₹{state.booking.totalAmount.toLocaleString('en-IN')}
+              {state.booking.totalAmount > 0 ? `₹${state.booking.totalAmount.toLocaleString('en-IN')}` : 'Free'}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -497,7 +497,7 @@ export default function CheckoutPage() {
           >
             <span style={{ fontSize: 14, opacity: 0.6 }}>Total</span>
             <span style={{ fontSize: 22, fontWeight: 700 }}>
-              ₹{state.booking.totalAmount.toLocaleString('en-IN')}
+              {state.booking.totalAmount > 0 ? `₹${state.booking.totalAmount.toLocaleString('en-IN')}` : 'Free'}
             </span>
           </div>
         </div>
@@ -537,7 +537,9 @@ export default function CheckoutPage() {
             ? 'Confirming your booking…'
             : paying
               ? 'Opening payment…'
-              : `Pay ₹${state.booking.totalAmount.toLocaleString('en-IN')}`}
+              : state.booking.totalAmount > 0
+                ? `Pay ₹${state.booking.totalAmount.toLocaleString('en-IN')}`
+                : 'Confirm Free Booking'}
         </button>
 
         <div
