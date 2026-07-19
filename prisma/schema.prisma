@@ -52,6 +52,12 @@ enum RateType {
   FLEXIBLE
 }
 
+// §9.4 twenty-fourth amendment - opt-in numbered seating per venue.
+enum VenueSeatingMode {
+  GENERAL_ADMISSION
+  NUMBERED
+}
+
 enum CompensationType {
   PAID
   FREE
@@ -371,11 +377,61 @@ model Venue {
   dailyRate        Float?
   minDurationHours Int?
 
+  // §9.4 twenty-fourth amendment - opt-in numbered seating, additive only.
+  // GENERAL_ADMISSION (default) is the existing tier/quantity flow, fully
+  // untouched. NUMBERED venues get a real Seat layout via the builder;
+  // Bookings for NUMBERED events use BookingSeat instead of the seats
+  // Json qty map on Booking. Old venues never touch this - column has a
+  // default, no backfill needed.
+  seatingMode   VenueSeatingMode @default(GENERAL_ADMISSION)
+  seats         Seat[]
+
   availability  VenueAvailability[]
   bookings      VenueBooking[]
   events        Event[]
   bookingRequests VenueBookingRequest[]
   dayRates      VenueDayRate[]
+}
+
+// §9.4 twenty-fourth amendment - real x/y canvas coordinates (not a
+// rows x columns grid) so the builder can represent true venue shapes.
+// tierLabel is a free-text section/price-tier name, deliberately not a
+// foreign key to TicketTier - TicketTier is per-Event, Seat is per-Venue
+// (a venue's physical layout doesn't change per event), so pricing for
+// a given event/tier combination is resolved at booking time by matching
+// tierLabel, not by a hard relation.
+model Seat {
+  id        String @id @default(cuid())
+  venueId   String
+  venue     Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  tierLabel String
+  row       String
+  number    String
+  x         Float
+  y         Float
+
+  bookingSeats BookingSeat[]
+
+  @@unique([venueId, row, number])
+  @@index([venueId, tierLabel])
+}
+
+// §9.4 twenty-fourth amendment - join table for NUMBERED-mode bookings.
+// Deliberately separate from Booking.seats (the GA qty map) rather than
+// overloading that Json field with a different shape per event mode -
+// keeps the existing GA capacity-check code path completely untouched.
+// Occupancy for a NUMBERED event's seat is: any BookingSeat whose
+// Booking is CONFIRMED, or PENDING with expiresAt in the future (mirrors
+// the existing TicketTier capacity-check pattern in POST /api/bookings).
+model BookingSeat {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seatId    String
+  seat      Seat    @relation(fields: [seatId], references: [id])
+
+  @@unique([bookingId, seatId])
+  @@index([seatId])
 }
 
 model TicketTier {
@@ -603,6 +659,7 @@ model Booking {
   checkedInByUserId String?
 
   payment     Payment?
+  bookingSeats BookingSeat[]
 
   @@index([status, expiresAt])
 }
