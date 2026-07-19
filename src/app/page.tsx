@@ -112,19 +112,48 @@ export default function Home() {
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "#0E0C0A", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
           Whether you perform, organise, own a space or simply love live art — AforAudience is built for you.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
           {[
-            { icon: "🎤", name: "Artist", desc: "Build your profile, apply for spots, grow your fanbase.", tag: "Comedian · Poet · Musician" },
-            { icon: "🎪", name: "Organiser", desc: "Post events, manage lineups, sell tickets, book venues.", tag: "Event Manager" },
-            { icon: "🏛️", name: "Venue Owner", desc: "List your space, build seat maps, set availability.", tag: "Cafe · Theater · Rooftop" },
-            { icon: "👥", name: "Audience", desc: "Discover, book, experience and review live performances.", tag: "Art Lover" },
-            { icon: "🛡️", name: "Admin", desc: "Approve, manage and grow the platform ecosystem.", tag: "Platform Trust" },
+            {
+              icon: "👥", name: "Audience", tag: "Art Lover",
+              pitch: "Never miss a show that matches your mood.",
+              benefits: ["Filter events by Navarasa — the feeling you want tonight", "Instant PDF ticket, no queue at the door", "Rate and tip artists directly after the show"],
+              cta: "Explore Events", href: "/events",
+            },
+            {
+              icon: "🎤", name: "Artist", tag: "Comedian · Poet · Musician",
+              pitch: "Get discovered. Get booked. Build a reputation that travels with you.",
+              benefits: ["A portable Hype Score and review history — yours, not the venue's", "Apply to open mics and shows across cities, not just one scene", "Zero commission on your slot or your tips"],
+              cta: "Apply as Artist", href: "/profile",
+            },
+            {
+              icon: "🎪", name: "Organiser", tag: "Event Manager",
+              pitch: "Run the whole show — lineup to ticket to payout — from one place.",
+              benefits: ["Post events and manage lineups without spreadsheets or group chats", "Sell tickets with built-in payments, no manual reconciliation", "Never taxed on venue rentals, performer slots, or ticket sales"],
+              cta: "Become an Organiser", href: "/profile",
+            },
+            {
+              icon: "🏛️", name: "Venue Owner", tag: "Cafe · Theater · Rooftop",
+              pitch: "Turn empty hours into booked nights.",
+              benefits: ["List your space and set availability in minutes", "Get matched with organisers actively looking for a room", "Keep 100% of your rental — AforAudience takes no cut"],
+              cta: "List Your Venue", href: "/profile",
+            },
           ].map((role) => (
-            <div key={role.name} style={{ border: "1.5px solid rgba(14,12,10,0.1)", borderRadius: "12px", padding: "32px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: "40px", marginBottom: "16px" }}>{role.icon}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px" }}>{role.name}</div>
-              <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "#0E0C0A", opacity: 0.55, lineHeight: 1.5, marginBottom: "14px" }}>{role.desc}</div>
-              <span style={{ fontFamily: "monospace", fontSize: "11px", padding: "4px 10px", borderRadius: "4px", background: "#E8E2D9", color: "#0E0C0A", opacity: 0.7 }}>{role.tag}</span>
+            <div key={role.name} style={{ border: "1.5px solid rgba(14,12,10,0.1)", borderRadius: "12px", padding: "32px 28px", display: "flex", flexDirection: "column" }}>
+              <div style={{ fontSize: "36px", marginBottom: "16px" }}>{role.icon}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>{role.name}</div>
+              <span style={{ fontFamily: "monospace", fontSize: "10px", padding: "3px 9px", borderRadius: "4px", background: "#E8E2D9", color: "#0E0C0A", opacity: 0.7, alignSelf: "flex-start", marginBottom: "16px" }}>{role.tag}</span>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", fontStyle: "italic", color: "#C8441A", lineHeight: 1.5, marginBottom: "18px" }}>{role.pitch}</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+                {role.benefits.map((b) => (
+                  <li key={b} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "#0E0C0A", opacity: 0.65, lineHeight: 1.5, display: "flex", gap: "8px" }}>
+                    <span style={{ color: "#C8441A", flexShrink: 0 }}>✓</span>{b}
+                  </li>
+                ))}
+              </ul>
+              <Link href={role.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", fontWeight: 600, color: "#C8441A", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                {role.cta} →
+              </Link>
             </div>
           ))}
         </div>
