@@ -229,6 +229,12 @@ export default function VenueDashboard() {
                     >
                       Edit
                     </Link>
+                    <Link
+                      href={`/dashboard/venue/${venue.id}/seat-map`}
+                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#0E0C0A', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                    >
+                      Seat Map
+                    </Link>
                   </div>
                 </div>
               ))}
