@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 // /dashboard/admin/settings
 //
@@ -30,13 +31,11 @@ export default function AdminSettingsPage() {
   const [initialChatCap, setInitialChatCap] = useState<number>(15)
   const [maxChatCap, setMaxChatCap] = useState<number>(200)
   const [chatSaving, setChatSaving] = useState(false)
-  const [chatMessage, setChatMessage] = useState('')
-  const [chatError, setChatError] = useState('')
+  const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [forbidden, setForbidden] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -63,7 +62,7 @@ export default function AdminSettingsPage() {
         setChatCap(String(cap))
         setMaxChatCap(data.limits.maxChatMessagesCap)
       } catch (err: any) {
-        setError(err.message)
+        setLoadError(err.message)
       } finally {
         setLoading(false)
       }
@@ -72,8 +71,6 @@ export default function AdminSettingsPage() {
 
   const save = async () => {
     setSaving(true)
-    setMessage('')
-    setError('')
     try {
       const rupees = Number(feeRupees)
       if (!Number.isFinite(rupees) || rupees < 0) {
@@ -88,13 +85,14 @@ export default function AdminSettingsPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
       setInitialPaise(data.settings.audienceBookingFee)
-      setMessage(
+      showToast(
         data.settings.audienceBookingFee === 0
           ? 'Saved. No booking fee will be charged.'
-          : `Saved. New bookings will be charged ₹${(data.settings.audienceBookingFee / 100).toLocaleString('en-IN')} per booking.`
+          : `Saved. New bookings will be charged ₹${(data.settings.audienceBookingFee / 100).toLocaleString('en-IN')} per booking.`,
+        'success'
       )
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Save failed', 'error')
     } finally {
       setSaving(false)
     }
@@ -106,8 +104,6 @@ export default function AdminSettingsPage() {
 
   const saveChatCap = async () => {
     setChatSaving(true)
-    setChatMessage('')
-    setChatError('')
     try {
       const cap = Number(chatCap)
       if (!Number.isInteger(cap)) {
@@ -121,13 +117,14 @@ export default function AdminSettingsPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
       setInitialChatCap(data.settings.chatMaxMessagesPerSession)
-      setChatMessage(
+      showToast(
         data.settings.chatMaxMessagesPerSession <= 0
           ? 'Saved. Chat is now disabled — visitors see a "temporarily unavailable" message and the feedback form.'
-          : `Saved. Visitors can send up to ${data.settings.chatMaxMessagesPerSession} messages per browser session before being pointed to the feedback form.`
+          : `Saved. Visitors can send up to ${data.settings.chatMaxMessagesPerSession} messages per browser session before being pointed to the feedback form.`,
+        'success'
       )
     } catch (err: any) {
-      setChatError(err.message)
+      showToast(err.message || 'Save failed', 'error')
     } finally {
       setChatSaving(false)
     }
@@ -193,22 +190,7 @@ export default function AdminSettingsPage() {
           Changes here take effect immediately — the next booking anyone starts will use the new values.
         </p>
 
-        {message && (
-          <div
-            style={{
-              padding: '12px 14px',
-              background: '#F0FFF4',
-              border: '1px solid #68D391',
-              borderRadius: 8,
-              color: '#276749',
-              fontSize: 13,
-              marginBottom: 20,
-            }}
-          >
-            {message}
-          </div>
-        )}
-        {error && (
+        {loadError && (
           <div
             style={{
               padding: '12px 14px',
@@ -220,7 +202,7 @@ export default function AdminSettingsPage() {
               marginBottom: 20,
             }}
           >
-            {error}
+            {loadError}
           </div>
         )}
 
@@ -308,37 +290,6 @@ export default function AdminSettingsPage() {
           <p style={{ fontSize: 13, color: '#8a827a', lineHeight: 1.6, marginBottom: 16 }}>
             The support chatbot is free to use for everyone — guests and paying audience alike — no gate, no login required. This cap only bounds how many messages a single visitor can send per browser session, as a cost/abuse guard. Once reached, the chat tab points them to the feedback form instead. Set to 0 to disable chat entirely (emergency killswitch) without a deploy.
           </p>
-
-          {chatMessage && (
-            <div
-              style={{
-                padding: '10px 12px',
-                background: '#F0FFF4',
-                border: '1px solid #68D391',
-                borderRadius: 8,
-                color: '#276749',
-                fontSize: 13,
-                marginBottom: 16,
-              }}
-            >
-              {chatMessage}
-            </div>
-          )}
-          {chatError && (
-            <div
-              style={{
-                padding: '10px 12px',
-                background: '#FDECEA',
-                border: '1px solid #F5C2C0',
-                borderRadius: 8,
-                color: '#B3261E',
-                fontSize: 13,
-                marginBottom: 16,
-              }}
-            >
-              {chatError}
-            </div>
-          )}
 
           <label
             style={{
