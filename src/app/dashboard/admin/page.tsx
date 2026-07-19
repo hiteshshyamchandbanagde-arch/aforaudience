@@ -14,6 +14,23 @@ interface PendingItem {
   user: { name: string | null; email: string | null; createdAt: string }
 }
 
+// H-arrow-UX fix (Feedback, 15 Jul + 18 Jul, two testers independently) -
+// the admin nav used to render as plain text links each suffixed with
+// " →" (e.g. "Feedback →"), which in a row reads as a connected
+// sequence/breadcrumb ("Feedback → Bookings → Settings") rather than
+// five independent destinations. Distinct bordered pill buttons with no
+// arrow read as separate actions instead.
+const adminNavPillStyle: React.CSSProperties = {
+  fontSize: '13px',
+  color: '#0E0C0A',
+  fontWeight: 600,
+  textDecoration: 'none',
+  padding: '8px 14px',
+  borderRadius: '999px',
+  border: '1px solid rgba(14,12,10,0.15)',
+  background: '#fff',
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -98,22 +115,12 @@ export default function AdminDashboard() {
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
               Pending Approvals
             </h1>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-                Platform settings →
-              </a>
-              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-                Revenue →
-              </a>
-              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-                Accounts →
-              </a>
-              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-                Bookings →
-              </a>
-              <a href="/dashboard/admin/feedback" style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}>
-                Feedback →
-              </a>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <a href="/dashboard/admin/settings" style={adminNavPillStyle}>Platform Settings</a>
+              <a href="/dashboard/admin/revenue" style={adminNavPillStyle}>Revenue</a>
+              <a href="/dashboard/admin/users" style={adminNavPillStyle}>Accounts</a>
+              <a href="/dashboard/admin/bookings" style={adminNavPillStyle}>Bookings</a>
+              <a href="/dashboard/admin/feedback" style={adminNavPillStyle}>Feedback</a>
             </div>
           </div>
 
