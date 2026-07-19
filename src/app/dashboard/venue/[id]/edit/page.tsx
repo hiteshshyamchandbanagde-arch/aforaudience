@@ -224,6 +224,21 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 Add, edit, or remove sections freely — capacity updates automatically.
               </p>
               <SeatSectionEditor sections={sections} onChange={setSections} />
+
+              <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>Have real numbered seats instead?</div>
+                  <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
+                    Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
+                  </div>
+                </div>
+                <Link
+                  href={`/dashboard/venue/${id}/seat-map`}
+                  style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                >
+                  Open Seat Map Builder →
+                </Link>
+              </div>
             </section>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
