@@ -9,21 +9,32 @@ const SESSION_KEY = 'introShown'
 //   150  - middle bar (amber) starts
 //   300  - top bar (orange) starts, each bar takes 260ms so the mark is
 //          fully settled by ~560ms
-//   950  - icon starts crossfading into the wordmark (300ms fade)
-//   950  - wordmark starts its scale-in (600ms) - overlapping the icon's
-//          fade-out is the crossfade itself, not two separate beats
-//   2250 - wordmark has held long enough to read
-//   2700 - overlay finishes fading out, component unmounts
-// Deliberately reuses the app's own icon mark (src/app/icon.svg - three
-// bars, bottom-up: #F7F3EE, #C9973A, #C8441A) rather than a generic
-// spinner, so this continues the same mark Android's own PWA splash
-// screen already showed on cold launch instead of feeling like two
-// unrelated screens back to back.
+//   750  - icon starts shrinking + fading (350ms) while the wordmark's
+//          "A" fades in at the same spot (400ms) - a crossfade dressed
+//          up as the big icon "becoming" the small A, not a literal
+//          shape morph, but reads as continuous rather than two
+//          unrelated beats
+//   1150 - "forAudience" starts cascading in letter by letter (35ms
+//          stagger, 350ms per letter) - last letter starts at 1500ms
+//   1850 - cascade finished, full wordmark visible
+//   2500 - held long enough to read
+//   2950 - overlay finishes fading out, component unmounts
+// Icon sized closer to what Android's own PWA splash shows (a large
+// centered glyph) rather than jumping straight to something small -
+// per Hitesh's feedback that the size mismatch between the OS splash
+// and our original small icon felt like a jarring cut.
 const ICON_BAR_DELAYS = { bottom: 0, middle: 150, top: 300 }
 const ICON_BAR_DURATION = 260
-const WORDMARK_START = 950
-const WORDMARK_IN_MS = 600
-const HOLD_MS = WORDMARK_START + WORDMARK_IN_MS + 700
+const ICON_HOLD_END = 750
+const ICON_SHRINK_MS = 350
+const A_START = 750
+const A_IN_MS = 400
+const CASCADE_START = A_START + A_IN_MS
+const LETTER_STAGGER = 35
+const LETTER_DURATION = 350
+const REST_OF_WORDMARK = 'forAudience'
+const CASCADE_END = CASCADE_START + (REST_OF_WORDMARK.length - 1) * LETTER_STAGGER + LETTER_DURATION
+const HOLD_MS = CASCADE_END + 650
 const TOTAL_MS = HOLD_MS + 450
 
 export default function IntroSplash() {
@@ -85,13 +96,13 @@ export default function IntroSplash() {
           0% { opacity: 0; transform: translateX(-10px); }
           100% { opacity: 1; transform: translateX(0); }
         }
-        @keyframes intro-icon-out {
+        @keyframes intro-icon-shrink {
           0% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(0.92); }
+          100% { opacity: 0; transform: scale(0.3); }
         }
-        @keyframes intro-scale-in {
-          0% { opacity: 0; transform: scale(0.82); }
-          100% { opacity: 1; transform: scale(1); }
+        @keyframes intro-letter-in {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes intro-shimmer {
           0%, 40% { background-position: -120% 0; }
@@ -107,21 +118,21 @@ export default function IntroSplash() {
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: intro-shimmer 1.3s ease-in-out ${WORDMARK_START + 200}ms both;
+            animation: intro-shimmer 1.3s ease-in-out ${A_START + 250}ms both;
           }
         }
       `}</style>
 
-      {/* Icon mark: same three bars as src/app/icon.svg, bottom-up reveal,
-          then crossfades into the wordmark below. Positioned absolutely
-          so both layers can overlap during the crossfade window. */}
+      {/* Icon mark: same three bars as src/app/icon.svg, bottom-up
+          reveal, sized close to Android's own PWA splash glyph, then
+          shrinks away as the wordmark's "A" fades in at the same spot. */}
       <svg
         viewBox="0 0 64 64"
-        width="72"
-        height="72"
         style={{
           position: 'absolute',
-          animation: `intro-icon-out 300ms ease ${WORDMARK_START}ms both`,
+          width: 'clamp(120px, 34vw, 220px)',
+          height: 'clamp(120px, 34vw, 220px)',
+          animation: `intro-icon-shrink ${ICON_SHRINK_MS}ms ease ${ICON_HOLD_END}ms both`,
         }}
       >
         <rect
@@ -147,11 +158,27 @@ export default function IntroSplash() {
           fontSize: 'clamp(36px, 9vw, 64px)',
           fontWeight: 700,
           color: '#F7F3EE',
-          animation: `intro-scale-in ${WORDMARK_IN_MS}ms cubic-bezier(0.22, 1, 0.36, 1) ${WORDMARK_START}ms both`,
+          opacity: 0,
+          animation: `intro-letter-in 300ms ease-out ${A_START}ms both`,
         }}
       >
-        <span className="intro-splash-a">A</span>
-        forAudience
+        <span
+          className="intro-splash-a"
+          style={{ animation: `intro-letter-in ${A_IN_MS}ms ease-out ${A_START}ms both` }}
+        >
+          A
+        </span>
+        {REST_OF_WORDMARK.split('').map((ch, i) => (
+          <span
+            key={i}
+            style={{
+              display: 'inline-block',
+              animation: `intro-letter-in ${LETTER_DURATION}ms ease-out ${CASCADE_START + i * LETTER_STAGGER}ms both`,
+            }}
+          >
+            {ch}
+          </span>
+        ))}
       </div>
     </div>
   )
