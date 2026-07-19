@@ -6,6 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
+import { useToast } from '@/components/Toast'
 
 interface Venue {
   id: string
@@ -49,6 +50,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [venue, setVenue] = useState<Venue | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '', mapsUrl: '' })
   const [facilitiesInput, setFacilitiesInput] = useState('')
@@ -117,11 +119,10 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
   const save = async (publishOverride?: boolean) => {
     setSaving(true)
-    setError('')
 
     const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
     if (validSections.length === 0) {
-      setError('Add at least one seating section with a name and seat count.')
+      showToast('Add at least one seating section with a name and seat count.', 'error')
       setSaving(false)
       return
     }
@@ -143,9 +144,10 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
         throw new Error('Failed to update venue')
       }
 
+      showToast('Venue saved.', 'success')
       router.push(`/dashboard/venue/${id}`)
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to update venue', 'error')
     } finally {
       setSaving(false)
     }
@@ -171,12 +173,6 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
             Update your venue details and seating layout.
           </p>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
