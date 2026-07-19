@@ -3,11 +3,20 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 
+interface LeaderboardEntry {
+  id: string
+  name: string
+  avgRating: number
+  reviewCount: number
+}
+
 interface WallOfFameData {
   month: string
   minReviews: number
   artistOfMonth: { id: string; name: string; avatar: string | null; avgRating: number; reviewCount: number } | null
   eventOfMonth: { id: string; title: string; posterImage: string | null; avgRating: number; reviewCount: number } | null
+  topOrganisers: LeaderboardEntry[]
+  topVenues: LeaderboardEntry[]
 }
 
 export default function WallOfFamePage() {
@@ -118,6 +127,50 @@ export default function WallOfFamePage() {
                   <Link href={`/events/${data.eventOfMonth.id}`} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "#C8441A", textDecoration: "none" }}>
                     View event →
                   </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TOP VENUES / TOP ORGANISERS — all-time leaderboard, separate from the monthly awards above */}
+        {!loading && data && (data.topVenues.length > 0 || data.topOrganisers.length > 0) && (
+          <div style={{ marginTop: "40px" }}>
+            <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#C8441A", marginBottom: "16px", textAlign: "center" }}>
+              All-Time Leaderboard
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "16px" }}>🎪 Top Organisers</div>
+                {data.topOrganisers.length === 0 ? (
+                  <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5 }}>No organiser has {data.minReviews}+ reviews yet.</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {data.topOrganisers.map((o, i) => (
+                      <div key={o.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 0", borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none" }}>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "#C8441A", width: "20px" }}>{i + 1}</div>
+                        <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "#0E0C0A" }}>{o.name}</div>
+                        <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "16px" }}>🏛️ Top Venues</div>
+                {data.topVenues.length === 0 ? (
+                  <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5 }}>No venue has {data.minReviews}+ reviews yet.</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {data.topVenues.map((v, i) => (
+                      <div key={v.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 0", borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none" }}>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "#C8441A", width: "20px" }}>{i + 1}</div>
+                        <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "#0E0C0A" }}>{v.name}</div>
+                        <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
