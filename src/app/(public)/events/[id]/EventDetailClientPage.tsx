@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import SeatPicker from "@/components/SeatPicker"
 import { formatEventTimeRange } from "@/lib/eventTime"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 
@@ -52,7 +53,7 @@ interface EventData {
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
-  venue: { name: string; address: string; city: string; facilities: string[] } | null
+  venue: { name: string; address: string; city: string; facilities: string[]; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
   lineup: Performer[]
   ticketTiers: TicketTier[]
 }
@@ -70,6 +71,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState<"overview" | "lineup" | "venue">("overview")
   const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
+  const isNumbered = event?.venue?.seatingMode === 'NUMBERED'
+  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([])
+  const [numberedAmount, setNumberedAmount] = useState(0)
   const [showAuthSheet, setShowAuthSheet] = useState(false)
   const [reserving, setReserving] = useState(false)
   const [reservedMessage, setReservedMessage] = useState("")
@@ -80,8 +84,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const [submittedReviews, setSubmittedReviews] = useState<Record<string, Review>>({})
   const [reviewAuthTarget, setReviewAuthTarget] = useState<string | null>(null)
 
-  const totalSelected = Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
-  const totalAmount = event
+  const totalSelected = isNumbered ? selectedSeatIds.length : Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
+  const totalAmount = isNumbered
+    ? numberedAmount
+    : event
     ? event.ticketTiers.length > 0
       ? event.ticketTiers.reduce((sum, t) => sum + (selectedSeats[t.sectionName] || 0) * t.price, 0)
       : (selectedSeats['General'] || 0) * (event.ticketPrice || 0)
@@ -105,7 +111,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId: event.id, seats: selectedSeats }),
+        body: JSON.stringify(
+          isNumbered ? { eventId: event.id, seatIds: selectedSeatIds } : { eventId: event.id, seats: selectedSeats }
+        ),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -403,7 +411,21 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   )
                 })()}
 
-                {!event.isFree && (
+                {!event.isFree && isNumbered && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <SeatPicker
+                      eventId={event.id}
+                      maxSeatsPerBooking={event.maxSeatsPerBooking}
+                      selected={selectedSeatIds}
+                      onChange={(ids, amount) => {
+                        setSelectedSeatIds(ids)
+                        setNumberedAmount(amount)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {!event.isFree && !isNumbered && (
                   <div style={{ marginBottom: "16px" }}>
                     {event.ticketTiers.length > 0 ? (
                       event.ticketTiers.map((t) => (
