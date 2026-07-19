@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface VenueOption {
   id: string
@@ -64,6 +65,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [venues, setVenues] = useState<VenueOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -135,7 +137,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
   const save = async (publishOverride?: boolean) => {
     setSaving(true)
-    setError('')
 
     try {
       const res = await fetch(`/api/events/${id}`, {
@@ -175,9 +176,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         }
       }
 
+      showToast('Event saved.', 'success')
       router.push(`/dashboard/organiser/events/${id}`)
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to save event', 'error')
     } finally {
       setSaving(false)
     }
@@ -203,12 +205,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
             Update your event details, seats, pricing, and venue.
           </p>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
