@@ -6,6 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { formatEventTimeRange } from '@/lib/eventTime'
+import { useToast } from '@/components/Toast'
 
 interface Application {
   id: string
@@ -65,6 +66,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const [event, setEvent] = useState<EventDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [toggling, setToggling] = useState(false)
   const [actingOn, setActingOn] = useState<string | null>(null)
   const [compensation, setCompensation] = useState<Record<string, { type: 'PAID' | 'FREE' | 'BUY_IN'; amount: string }>>({})
@@ -101,16 +103,18 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const togglePublish = async () => {
     if (!event) return
     setToggling(true)
+    const willPublish = event.status !== 'APPROVED'
     try {
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publish: event.status !== 'APPROVED' }),
+        body: JSON.stringify({ publish: willPublish }),
       })
       if (!res.ok) throw new Error('Failed to update publish status')
       await fetchEvent()
+      showToast(willPublish ? 'Event published.' : 'Event unpublished.', 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to update publish status', 'error')
     } finally {
       setToggling(false)
     }
@@ -135,8 +139,9 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
         throw new Error(data.error || 'Failed to update application')
       }
       await fetchEvent()
+      showToast(newStatus === 'APPROVED' ? 'Application approved.' : 'Application rejected.', 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to update application', 'error')
     } finally {
       setActingOn(null)
     }
@@ -176,12 +181,6 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               {statusStyle.label}
             </span>
           </div>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
-          )}
 
           {/* Overview */}
           <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
