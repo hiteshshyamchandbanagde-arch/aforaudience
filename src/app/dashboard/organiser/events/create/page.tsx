@@ -52,6 +52,11 @@ const labelStyle = {
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
+// Generous but real-world cap, same reasoning as MAX_EVENT_SEATS server-side
+// (src/app/api/events/route.ts) - no legitimate lineup approaches this,
+// it's here purely to stop a fat-fingered huge number from reaching the
+// DB unclamped.
+const MAX_PERFORMERS = 500
 
 export default function CreateEventPage() {
   const { data: session, status } = useSession()
@@ -102,6 +107,22 @@ export default function CreateEventPage() {
     const num = Number(value)
     if (!Number.isFinite(num)) return
     setMaxSeatsPerBooking(String(Math.max(1, Math.min(num, 10))))
+  }
+  // Same class of bug as PR #100/#102/#103 (unbounded numeric inputs) -
+  // this field was missed in those passes. A user typed an enormous
+  // number here (1e18), which had no server-side cap and no client-side
+  // clamp, and crashed prisma.event.create() with a Postgres integer
+  // overflow instead of a real validation message. Found via a live
+  // feedback report + Vercel runtime error correlation, not code review.
+  const handleMaxPerformersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setMaxPerformers('')
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    setMaxPerformers(String(Math.max(1, Math.min(num, MAX_PERFORMERS))))
   }
   const [platformFee, setPlatformFee] = useState<number | null>(null)
   // §4.5 - per-section ticket pricing. Keyed by section name, since the
@@ -491,7 +512,7 @@ export default function CreateEventPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Max Performers <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
-                  <input type="number" value={maxPerformers} onChange={(e) => setMaxPerformers(e.target.value)} min="1" placeholder="e.g., 6" style={inputStyle} />
+                  <input type="number" value={maxPerformers} onChange={handleMaxPerformersChange} min="1" max={MAX_PERFORMERS} maxLength={3} placeholder="e.g., 6" style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>Max Seats Per Booking</label>
