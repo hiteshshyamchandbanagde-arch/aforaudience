@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface PendingItem {
   id: string
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
   const [actioningId, setActioningId] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -49,12 +51,20 @@ export default function AdminDashboard() {
   const act = async (type: 'organiser' | 'venueOwner', id: string, action: 'approve' | 'reject') => {
     setActioningId(id)
     try {
-      await fetch('/api/admin/approvals', {
+      const res = await fetch('/api/admin/approvals', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, id, action }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(data.error || 'Failed to update — please try again.', 'error')
+        return
+      }
+      showToast(action === 'approve' ? 'Approved.' : 'Rejected.', 'success')
       await load()
+    } catch {
+      showToast('Failed to update — please try again.', 'error')
     } finally {
       setActioningId(null)
     }

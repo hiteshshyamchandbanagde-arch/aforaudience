@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 // /dashboard/admin/feedback
 //
@@ -56,6 +57,7 @@ export default function AdminFeedbackPage() {
   const [filter, setFilter] = useState<string>('NEW')
   const [actioningId, setActioningId] = useState<string | null>(null)
   const [expandedAttachment, setExpandedAttachment] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -83,14 +85,22 @@ export default function AdminFeedbackPage() {
   const setItemStatus = async (id: string, newStatus: string) => {
     setActioningId(id)
     try {
-      await fetch('/api/admin/feedback', {
+      const res = await fetch('/api/admin/feedback', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status: newStatus }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(data.error || 'Failed to update status — please try again.', 'error')
+        return
+      }
       setItems((prev) =>
         prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
       )
+      showToast(`Marked ${newStatus.charAt(0) + newStatus.slice(1).toLowerCase()}.`, 'success')
+    } catch {
+      showToast('Failed to update status — please try again.', 'error')
     } finally {
       setActioningId(null)
     }
