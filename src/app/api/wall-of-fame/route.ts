@@ -9,14 +9,22 @@ import prisma from '@/lib/prisma'
 //     Venues/Organisers proxy, for consistency)
 //   - Scoped to the current calendar month, not a rolling 30 days
 //
+// Also serves Top Venues / Top Organisers — a separate §9.3 decision:
+// same 3-review floor, but deliberately NOT calendar-month scoped.
+// design.md only attaches the monthly window to the "of the Month"
+// awards; the leaderboard is described as an ongoing ranking ("Top
+// Venues/Organisers"), not a monthly one, so it aggregates all-time.
+//
 // No new schema — Review already ties to Event and (optionally) to a
 // Performance, which ties to an Artist. Review volume is low enough
 // (mirrors the ~20-lifetime-booking scale noted on the admin bookings
 // page) that aggregating in JS after one findMany is simpler and safer
 // than a raw-SQL groupBy across two levels (Review -> Performance ->
 // Artist can't be expressed in a single Prisma groupBy since artistId
-// isn't a field on Review).
+// isn't a field on Review; same reasoning applies to Event -> Venue /
+// Event -> Organiser for the leaderboard).
 const MIN_REVIEWS = 3
+const LEADERBOARD_SIZE = 5
 
 export async function GET() {
   try {
@@ -83,7 +91,56 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ month: monthLabel, artistOfMonth, eventOfMonth, minReviews: MIN_REVIEWS })
+    // Top Venues / Top Organisers — all-time, separate query (the
+    // monthly `reviews` fetch above only covers the current month).
+    const allTimeReviews = await prisma.review.findMany({
+      select: {
+        rating: true,
+        event: {
+          select: {
+            organiserId: true,
+            organiser: { select: { orgName: true } },
+            venueId: true,
+            venue: { select: { name: true } },
+          },
+        },
+      },
+    })
+
+    const organiserAgg = new Map<string, { count: number; sum: number; name: string }>()
+    const venueAgg = new Map<string, { count: number; sum: number; name: string }>()
+    for (const r of allTimeReviews) {
+      const oId = r.event.organiserId
+      const oExisting = organiserAgg.get(oId)
+      if (oExisting) {
+        oExisting.count += 1
+        oExisting.sum += r.rating
+      } else {
+        organiserAgg.set(oId, { count: 1, sum: r.rating, name: r.event.organiser.orgName })
+      }
+
+      if (r.event.venueId && r.event.venue) {
+        const vExisting = venueAgg.get(r.event.venueId)
+        if (vExisting) {
+          vExisting.count += 1
+          vExisting.sum += r.rating
+        } else {
+          venueAgg.set(r.event.venueId, { count: 1, sum: r.rating, name: r.event.venue.name })
+        }
+      }
+    }
+
+    const rankLeaderboard = (agg: Map<string, { count: number; sum: number; name: string }>) =>
+      Array.from(agg.entries())
+        .map(([id, { count, sum, name }]) => ({ id, name, avgRating: sum / count, reviewCount: count }))
+        .filter((e) => e.reviewCount >= MIN_REVIEWS)
+        .sort((a, b) => b.avgRating - a.avgRating || b.reviewCount - a.reviewCount)
+        .slice(0, LEADERBOARD_SIZE)
+
+    const topOrganisers = rankLeaderboard(organiserAgg)
+    const topVenues = rankLeaderboard(venueAgg)
+
+    return NextResponse.json({ month: monthLabel, artistOfMonth, eventOfMonth, topOrganisers, topVenues, minReviews: MIN_REVIEWS })
   } catch (err) {
     console.error('Error computing wall of fame:', err)
     return NextResponse.json({ error: 'Failed to compute wall of fame' }, { status: 500 })

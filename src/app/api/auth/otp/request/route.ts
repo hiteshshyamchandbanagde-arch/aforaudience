@@ -54,6 +54,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid purpose." }, { status: 400 })
   }
 
+  // Every branch above either returns early or sets targetPhone to a
+  // real string — this check is redundant today but narrows the type
+  // for TS (the if/else reassignment chain above doesn't narrow on its
+  // own) and is a safe guard against a future edit reintroducing a gap.
+  if (!targetPhone) {
+    return NextResponse.json({ error: "Phone required." }, { status: 400 })
+  }
+
   try {
     const result = await generateAndSendOtp(targetPhone, purpose)
     return NextResponse.json({ ok: true, devOtp: result.devCode }) // devOtp only present in QA
