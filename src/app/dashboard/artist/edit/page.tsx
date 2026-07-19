@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 const inputStyle = {
   width: '100%',
@@ -28,7 +29,7 @@ export default function EditArtistProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
   const [bio, setBio] = useState('')
   const [genreInput, setGenreInput] = useState('')
@@ -55,7 +56,7 @@ export default function EditArtistProfilePage() {
         setInstagram(links.instagram || '')
         setYoutube(links.youtube || '')
       } catch (err: any) {
-        setError(err.message)
+        showToast(err.message || 'Failed to load profile', 'error')
       } finally {
         setLoading(false)
       }
@@ -68,7 +69,6 @@ export default function EditArtistProfilePage() {
 
   const save = async () => {
     setSaving(true)
-    setError('')
     try {
       const res = await fetch('/api/artists/me', {
         method: 'PATCH',
@@ -81,9 +81,10 @@ export default function EditArtistProfilePage() {
         }),
       })
       if (!res.ok) throw new Error('Failed to save profile')
+      showToast('Profile saved.', 'success')
       router.push('/dashboard/artist')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to save profile', 'error')
     } finally {
       setSaving(false)
     }
@@ -107,12 +108,6 @@ export default function EditArtistProfilePage() {
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
             This is what organisers see when you apply to their events.
           </p>
-
-          {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
 
           <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
