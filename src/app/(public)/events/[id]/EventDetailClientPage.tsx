@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import { formatEventTimeRange } from "@/lib/eventTime"
+import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 
 interface Review {
   id: string
@@ -387,9 +388,20 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>
                   {event.isFree ? "Free Entry" : event.ticketTiers.length > 0 ? "Choose your section" : event.ticketPrice ? `₹${event.ticketPrice} / seat` : "Price TBD"}
                 </div>
-                <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, marginBottom: "20px" }}>
+                <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, marginBottom: "10px" }}>
                   {event.availableSeats} of {event.totalSeats} seats total · max {event.maxSeatsPerBooking} per booking
                 </div>
+                {(() => {
+                  const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
+                  const badge = AVAILABILITY_BADGE[status]
+                  return (
+                    <div style={{ marginBottom: "16px" }}>
+                      <span style={{ background: badge.bg, color: badge.color, fontSize: "12px", fontWeight: 700, padding: "5px 12px", borderRadius: "999px" }}>
+                        {status === 'filling-fast' ? `🔥 ${badge.label}` : badge.label}
+                      </span>
+                    </div>
+                  )
+                })()}
 
                 {!event.isFree && (
                   <div style={{ marginBottom: "16px" }}>

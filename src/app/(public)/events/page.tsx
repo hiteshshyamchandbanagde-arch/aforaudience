@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
+import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 
 interface EventItem {
   id: string
@@ -207,11 +208,16 @@ export default function EventsPage() {
                       <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "#2D6A4F" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                         {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                       </span>
-                      {event.availableSeats < 10 && (
-                        <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "#ef4444", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                          🔥 {event.availableSeats} seats left
-                        </span>
-                      )}
+                      {(() => {
+                        const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
+                        if (status === 'available') return null
+                        const badge = AVAILABILITY_BADGE[status]
+                        return (
+                          <span style={{ position: "absolute", bottom: "12px", right: "12px", background: badge.bg, color: badge.color, fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
+                            {status === 'filling-fast' ? `🔥 ${badge.label} · ${event.availableSeats} left` : badge.label}
+                          </span>
+                        )
+                      })()}
                     </div>
                   )}
 
@@ -241,7 +247,16 @@ export default function EventsPage() {
                             {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                           </span>
                           <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>{meta.label}</span>
-                          {event.availableSeats < 10 && <span style={{ fontSize: "12px", color: "#ef4444", fontWeight: 600 }}>🔥 {event.availableSeats} left</span>}
+                          {(() => {
+                            const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
+                            if (status === 'available') return null
+                            const badge = AVAILABILITY_BADGE[status]
+                            return (
+                              <span style={{ fontSize: "12px", color: status === 'sold-out' ? "#0E0C0A" : "#ef4444", fontWeight: 600 }}>
+                                {status === 'filling-fast' ? `🔥 ${badge.label} · ${event.availableSeats} left` : badge.label}
+                              </span>
+                            )
+                          })()}
                         </div>
                       )}
                     </div>
