@@ -62,28 +62,43 @@ export async function POST(req: Request) {
       )
     }
 
-    const { eventId, seats } = await req.json()
-    if (!eventId || !seats || typeof seats !== 'object') {
+    const { eventId, seats, seatIds } = await req.json()
+    if (!eventId) {
+      return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
+    }
+
+    // §9.4 twenty-fourth amendment - NUMBERED-mode bookings send seatIds
+    // instead of a section/qty map. Kept as a fully separate branch below
+    // rather than folded into the seats-map shape, so the existing GA
+    // path (still 100% of live traffic) is untouched by this addition.
+    const isNumberedRequest = Array.isArray(seatIds)
+
+    if (!isNumberedRequest && (!seats || typeof seats !== 'object')) {
       return NextResponse.json(
         { error: 'Missing eventId or seats' },
         { status: 400 }
       )
     }
 
-    const requestedEntries = Object.entries(seats).filter(
-      ([, qty]) => Number(qty) > 0
-    ) as [string, number][]
-    if (requestedEntries.length === 0) {
+    if (isNumberedRequest && seatIds.length === 0) {
+      return NextResponse.json({ error: 'Select at least one seat' }, { status: 400 })
+    }
+
+    const requestedEntries = isNumberedRequest
+      ? []
+      : (Object.entries(seats).filter(
+          ([, qty]) => Number(qty) > 0
+        ) as [string, number][])
+    if (!isNumberedRequest && requestedEntries.length === 0) {
       return NextResponse.json(
         { error: 'Select at least one seat' },
         { status: 400 }
       )
     }
 
-    const totalRequested = requestedEntries.reduce(
-      (sum, [, qty]) => sum + Number(qty),
-      0
-    )
+    const totalRequested = isNumberedRequest
+      ? seatIds.length
+      : requestedEntries.reduce((sum, [, qty]) => sum + Number(qty), 0)
 
     // Phase 1 — DB transaction: capacity check + PENDING booking.
     //
@@ -105,7 +120,7 @@ export async function POST(req: Request) {
     const booking = await prisma.$transaction(async (tx: any) => {
       const event = await tx.event.findUnique({
         where: { id: eventId },
-        include: { ticketTiers: true },
+        include: { ticketTiers: true, venue: true },
       })
       if (!event || event.status !== 'APPROVED') {
         throw new Error('Event not found or not open for booking')
@@ -115,6 +130,70 @@ export async function POST(req: Request) {
         throw new Error(
           `Max ${event.maxSeatsPerBooking} seats per booking for this event`
         )
+      }
+
+      // §9.4 twenty-fourth amendment - NUMBERED path. Kept fully separate
+      // from the GA capacity-check/pricing block below rather than
+      // unified, since the two modes have genuinely different occupancy
+      // models (per-seat rows vs. a tier-count subquery) - forcing one
+      // shape onto both would make each harder to read, not easier.
+      if (isNumberedRequest) {
+        if (!event.venue || event.venue.seatingMode !== 'NUMBERED') {
+          throw new Error('This event is not configured for numbered seating')
+        }
+
+        const requestedSeats = await tx.seat.findMany({
+          where: { id: { in: seatIds }, venueId: event.venueId },
+        })
+        if (requestedSeats.length !== seatIds.length) {
+          throw new Error('One or more selected seats are invalid')
+        }
+
+        // Occupancy is scoped to THIS event - the same physical seats
+        // are reused across different events at the same venue over time.
+        const heldRows = await tx.bookingSeat.findMany({
+          where: {
+            seatId: { in: seatIds },
+            booking: {
+              eventId,
+              OR: [
+                { status: 'CONFIRMED' },
+                { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+              ],
+            },
+          },
+          select: { seatId: true },
+        })
+        if (heldRows.length > 0) {
+          throw new Error('One or more selected seats are no longer available')
+        }
+
+        let subtotalAmount = 0
+        for (const s of requestedSeats) {
+          const tier = event.ticketTiers.find((t: any) => t.sectionName === s.tierLabel)
+          if (!tier) throw new Error(`No pricing configured for section: ${s.tierLabel}`)
+          subtotalAmount += tier.price
+        }
+
+        const bookingFeeRupees = subtotalAmount > 0 ? feeSettings.audienceBookingFee / 100 : 0
+        const totalAmount = subtotalAmount + bookingFeeRupees
+
+        return tx.booking.create({
+          data: {
+            userId: user.id,
+            eventId,
+            seats: {},
+            subtotalAmount,
+            bookingFeeAmount: bookingFeeRupees,
+            totalAmount,
+            status: 'PENDING',
+            expiresAt:
+              razorpayReady && totalAmount > 0
+                ? new Date(now.getTime() + PENDING_TTL_MS)
+                : null,
+            bookingSeats: { create: seatIds.map((seatId: string) => ({ seatId })) },
+          },
+        })
       }
 
       // Capacity uses only PENDING-not-yet-expired and CONFIRMED bookings.
