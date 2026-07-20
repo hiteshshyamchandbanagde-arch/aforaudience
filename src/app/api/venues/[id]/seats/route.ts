@@ -16,7 +16,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       select: {
         seatingMode: true,
         seats: {
-          select: { id: true, tierLabel: true, row: true, number: true, x: true, y: true },
+          select: { id: true, tierLabel: true, level: true, row: true, number: true, x: true, y: true },
+        },
+        zonePrices: {
+          select: { level: true, zoneName: true, suggestedPrice: true },
         },
       },
     })
@@ -64,13 +67,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const body = await req.json()
-    const { seatingMode, seats } = body
+    const { seatingMode, seats, zonePrices } = body
 
     if (seatingMode !== 'GENERAL_ADMISSION' && seatingMode !== 'NUMBERED') {
       return NextResponse.json({ error: 'Invalid seatingMode' }, { status: 400 })
     }
     if (!Array.isArray(seats)) {
       return NextResponse.json({ error: 'seats must be an array' }, { status: 400 })
+    }
+    if (zonePrices !== undefined && !Array.isArray(zonePrices)) {
+      return NextResponse.json({ error: 'zonePrices must be an array' }, { status: 400 })
     }
     if (seats.length > 5000) {
       return NextResponse.json({ error: 'Too many seats (max 5000)' }, { status: 400 })
@@ -86,13 +92,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         typeof s.row !== 'string' || !s.row.trim() ||
         typeof s.number !== 'string' || !s.number.trim() ||
         typeof s.x !== 'number' || !Number.isFinite(s.x) ||
-        typeof s.y !== 'number' || !Number.isFinite(s.y)
+        typeof s.y !== 'number' || !Number.isFinite(s.y) ||
+        (s.level !== undefined && typeof s.level !== 'string')
       ) {
         return NextResponse.json({ error: 'Malformed seat entry' }, { status: 400 })
       }
-      const key = `${s.row}::${s.number}`
+      // Level-scoped uniqueness - the same row/number legitimately repeats
+      // across different levels (Ground row A vs Balcony row A).
+      const key = `${(s.level || '').trim()}::${s.row}::${s.number}`
       if (seenKeys.has(key)) {
-        return NextResponse.json({ error: `Duplicate row/number: ${s.row}${s.number}` }, { status: 400 })
+        return NextResponse.json({ error: `Duplicate row/number: ${s.row}${s.number}${s.level ? ` (level: ${s.level})` : ''}` }, { status: 400 })
       }
       seenKeys.add(key)
     }
@@ -112,11 +121,29 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
           data: seats.map((s: any) => ({
             venueId: id,
             tierLabel: s.tierLabel.trim().slice(0, 60),
+            level: (s.level || '').trim().slice(0, 60),
             row: s.row.trim().slice(0, 10),
             number: s.number.trim().slice(0, 10),
             x: clamp(s.x),
             y: clamp(s.y),
           })),
+        })
+      }
+      // Same full-replace pattern as seats - zonePrices is small (one row
+      // per zone, not per seat) and this stays a single atomic operation
+      // alongside the seat replace rather than a separate round trip.
+      await tx.venueZonePrice.deleteMany({ where: { venueId: id } })
+      if (Array.isArray(zonePrices) && zonePrices.length > 0) {
+        await tx.venueZonePrice.createMany({
+          data: zonePrices
+            .filter((z: any) => typeof z.zoneName === 'string' && z.zoneName.trim())
+            .map((z: any) => ({
+              venueId: id,
+              level: (z.level || '').trim().slice(0, 60),
+              zoneName: z.zoneName.trim().slice(0, 60),
+              suggestedPrice:
+                typeof z.suggestedPrice === 'number' && Number.isFinite(z.suggestedPrice) ? clamp(z.suggestedPrice) : null,
+            })),
         })
       }
       await tx.venue.update({

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import { useToast } from '@/components/Toast'
 
 interface SeatSection {
   id: string
@@ -34,6 +35,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [toggling, setToggling] = useState(false)
+  const { showToast } = useToast()
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -73,11 +75,17 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ publish: !venue.isApproved }),
       })
-      if (!res.ok) throw new Error('Failed to update publish status')
-      const updated = await res.json()
-      setVenue(updated)
+      const data = await res.json()
+      // The server already gives a specific, actionable message (e.g. the
+      // publish-gate reason for NUMBERED venues) - a hardcoded generic
+      // string here was throwing that away. Surfacing via toast instead of
+      // the page-level `error` state, since that state blanks the entire
+      // page (looked like a navigation/redirect, not an inline error).
+      if (!res.ok) throw new Error(data.error || 'Failed to update publish status')
+      setVenue(data)
+      showToast(data.isApproved ? 'Venue published.' : 'Venue unpublished.', 'success')
     } catch (err: any) {
-      setError(err.message)
+      showToast(err.message || 'Failed to update publish status', 'error')
     } finally {
       setToggling(false)
     }

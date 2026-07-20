@@ -62,7 +62,6 @@ function rowLetterAt(index: number): string {
 // zone (a walking gap, no pricing of their own); horizontal aisles are
 // usually where one zone ends and the next begins, though that's a
 // convention, not enforced.
-type RowGroup = { id: string; rows: number; columns: number; zoneName: string }
 type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
 // A vertical aisle is the mirror of a horizontal aisle - a gap after
 // column N instead of after row N. It is purely structural: it splits a
@@ -76,7 +75,12 @@ type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
 // a fixed column position pins one side to a constant width while the
 // other side absorbs the entire taper, producing a lopsided layout
 // instead of both sides growing together like a real fan-shaped hall.
+//
+// Lives on the RowGroup (zone), not globally - confirmed with Hitesh
+// that different zones can have entirely different aisle layouts (e.g.
+// a 16-column zone split into 4 blocks, a 20-column zone split into 2).
 type VerticalAisle = { id: string; afterFraction: number; gapPx: number }
+type RowGroup = { id: string; rows: number; columns: number; zoneName: string; verticalAisles: VerticalAisle[] }
 
 type GridConfig = {
   sideMarginPx: number
@@ -84,7 +88,6 @@ type GridConfig = {
   seatSpacingY: number
   rowGroups: RowGroup[]
   aisles: HorizontalAisle[]
-  verticalAisles: VerticalAisle[]
   // How rows of DIFFERENT widths (tapering row-groups) line up against
   // each other. 'left' packs every row flush against the same left
   // edge, so wider rows only grow rightward - a staircase, not a fan.
@@ -106,27 +109,27 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
   const totalRows = config.rowGroups.reduce((sum, g) => sum + g.rows, 0)
   const seats: Omit<SeatDraft, 'clientId'>[] = []
 
-  // Expand row-groups into flat per-row lookups. `columns` is the TOTAL
-  // column count for that row - vertical aisles subdivide it, they don't
-  // add to it. `zoneName` carries each row-group's pricing identity onto
-  // every row it covers - this is a seat's tierLabel, full stop; vertical
-  // aisles never change it.
+  // Expand row-groups into flat per-row lookups, including each row's
+  // OWN vertical-aisle set - zones can have entirely different aisle
+  // layouts (different column counts, different split counts/positions).
   const columnsForRow: number[] = []
   const zoneForRow: string[] = []
+  const vAislesForRow: VerticalAisle[][] = []
   for (const g of config.rowGroups) {
+    const sortedVAisles = [...g.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
     for (let i = 0; i < g.rows; i++) {
       columnsForRow.push(g.columns)
       zoneForRow.push(g.zoneName || 'General')
+      vAislesForRow.push(sortedVAisles)
     }
   }
 
-  const sortedVAisles = [...config.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
-  const totalAisleGapPx = sortedVAisles.reduce((sum, a) => sum + a.gapPx, 0)
-  // Pixel width of a row with `cols` seats - every row has the same
-  // number of vertical aisles (just at different cut points), so the
-  // gap total is constant regardless of which row it is.
-  const rowWidthPx = (cols: number) => cols * config.seatSpacingX + totalAisleGapPx
-  const maxRowWidthPx = Math.max(0, ...columnsForRow.map(rowWidthPx))
+  // Pixel width of a row with `cols` seats and its own aisle set - each
+  // zone can have a different aisle count/width now, so this is computed
+  // per-row rather than once globally.
+  const rowWidthPx = (cols: number, vAisles: VerticalAisle[]) =>
+    cols * config.seatSpacingX + vAisles.reduce((sum, a) => sum + a.gapPx, 0)
+  const maxRowWidthPx = Math.max(0, ...columnsForRow.map((cols, i) => rowWidthPx(cols, vAislesForRow[i])))
 
   let y = originY
   for (let r = 0; r < totalRows; r++) {
@@ -139,6 +142,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     const cols = columnsForRow[r] || 0
     const zoneName = zoneForRow[r] || 'General'
     const rowLetter = rowLetterAt(r)
+    const vAisles = vAislesForRow[r] || []
 
     // Convert each aisle's fraction into THIS row's actual cut point -
     // e.g. a 0.5 aisle lands after column 5 on a 10-wide row and after
@@ -147,7 +151,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     // narrow rows with multiple aisles can't collapse two cuts onto the
     // same column.
     let prevCut = 0
-    const cutPointsForRow = sortedVAisles.map((a) => {
+    const cutPointsForRow = vAisles.map((a) => {
       const cut = Math.max(prevCut + 1, Math.min(cols - 1, Math.round(cols * a.afterFraction)))
       prevCut = cut
       return cut
@@ -157,7 +161,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     // layout - 'left' puts all of it on the right (unchanged rows start
     // at the same spot), 'right' puts all of it on the left, 'center'
     // splits it evenly so every row shares the same central axis.
-    const slack = maxRowWidthPx - rowWidthPx(cols)
+    const slack = maxRowWidthPx - rowWidthPx(cols, vAisles)
     const leftInset = config.rowAlignment === 'center' ? slack / 2 : config.rowAlignment === 'right' ? slack : 0
 
     let x = originX + config.sideMarginPx + leftInset
@@ -169,7 +173,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     // and still matches real theater signage.
     for (let c = 1; c <= cols; c++) {
       while (segment < cutPointsForRow.length && cutPointsForRow[segment] === c - 1) {
-        x += sortedVAisles[segment].gapPx
+        x += vAisles[segment].gapPx
         segment++
       }
       seats.push({ tierLabel: zoneName, row: rowLetter, number: String(c), x, y })
@@ -214,6 +218,38 @@ function contentBounds(points: { x: number; y: number }[]) {
   }
 }
 
+// Preview-only sizing (wizard step 4) - deliberately WITHOUT the
+// CANVAS_WIDTH/HEIGHT floor that contentBounds uses for the editable
+// canvas. A small layout (e.g. 5 rows) doesn't need a 900x560 box with
+// mostly-empty space and a needless scrollbar; it should size tightly to
+// its own content and center in the available width. Only genuinely
+// large layouts scroll, and only horizontally/vertically as needed.
+function previewBounds(points: { x: number; y: number }[]) {
+  const maxX = points.reduce((m, p) => Math.max(m, p.x), 0)
+  const maxY = points.reduce((m, p) => Math.max(m, p.y), 0)
+  return {
+    width: Math.max(280, maxX + 60),
+    height: Math.max(180, maxY + 60),
+  }
+}
+
+// Fresh default config for a level that doesn't have one yet - a plain
+// factory (not React state) since each level in gridConfigByLevel needs
+// its own independent starting point.
+function defaultGridConfig(): GridConfig {
+  return {
+    sideMarginPx: 30,
+    seatSpacingX: 26,
+    seatSpacingY: 30,
+    rowGroups: [{ id: makeClientId(), rows: 5, columns: 10, zoneName: 'General', verticalAisles: [] }],
+    aisles: [],
+    // 'center' is the realistic default for a real hall (rows widen
+    // symmetrically around a shared axis) and is a no-op whenever every
+    // row is the same width, so it's safe as a default either way.
+    rowAlignment: 'center',
+  }
+}
+
 export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -225,7 +261,67 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [saving, setSaving] = useState(false)
 
   const [seatingMode, setSeatingMode] = useState<'GENERAL_ADMISSION' | 'NUMBERED'>('GENERAL_ADMISSION')
-  const [seats, setSeats] = useState<SeatDraft[]>([])
+
+  // §9.4 - venue Levels (Ground Floor, Balcony, 1st, 2nd...). Starts as a
+  // single implicit level ('') that stays invisible in the UI unless the
+  // owner adds a real one - confirmed with Hitesh this needs to live in
+  // the wizard/canvas entry point, not an advanced-only panel, for
+  // international multi-level venues. Everything below (seats,
+  // gridConfig, builderPath, per-zone suggested prices) is scoped PER
+  // LEVEL so each level gets its own independent layout.
+  const [levels, setLevels] = useState<string[]>([''])
+  const [activeLevel, setActiveLevel] = useState<string>('')
+  const levelLabel = (lvl: string) => lvl || 'Main'
+
+  const [seatsByLevel, setSeatsByLevel] = useState<Record<string, SeatDraft[]>>({})
+  const seats = seatsByLevel[activeLevel] || []
+  const setSeats = (updater: (prev: SeatDraft[]) => SeatDraft[]) =>
+    setSeatsByLevel((prev) => ({ ...prev, [activeLevel]: updater(prev[activeLevel] || []) }))
+
+  const [gridConfigByLevel, setGridConfigByLevel] = useState<Record<string, GridConfig>>({})
+  const gridConfig = gridConfigByLevel[activeLevel] || defaultGridConfig()
+  const setGridConfig = (updater: (prev: GridConfig) => GridConfig) =>
+    setGridConfigByLevel((prev) => ({ ...prev, [activeLevel]: updater(prev[activeLevel] || defaultGridConfig()) }))
+
+  // Per-zone SUGGESTED price (decision: organiser-facing prefill only,
+  // never a lock - organiser can still override at event creation, same
+  // as today's TicketTier.price model). Kept as its own small map rather
+  // than on RowGroup, since RowGroup state isn't reconstructed from saved
+  // seats on reload (only the seats themselves are) - this map
+  // round-trips independently via VenueZonePrice.
+  const [zonePricesByLevel, setZonePricesByLevel] = useState<Record<string, Record<string, string>>>({})
+  const zonePrices = zonePricesByLevel[activeLevel] || {}
+  const setZonePrice = (zoneName: string, price: string) =>
+    setZonePricesByLevel((prev) => ({ ...prev, [activeLevel]: { ...(prev[activeLevel] || {}), [zoneName]: price } }))
+
+  const [builderPathByLevel, setBuilderPathByLevel] = useState<Record<string, 'choose' | 'wizard' | 'canvas' | null>>({})
+  const builderPath = builderPathByLevel[activeLevel] ?? null
+  const setBuilderPath = (path: 'choose' | 'wizard' | 'canvas' | null) =>
+    setBuilderPathByLevel((prev) => ({ ...prev, [activeLevel]: path }))
+
+  const addLevel = () => {
+    const name = window.prompt('Name this level (e.g. "Ground Floor", "Balcony", "1st Floor")')
+    if (name === null) return
+    const trimmed = name.trim().slice(0, 60)
+    if (!trimmed) { showToast('Level name cannot be empty.', 'error'); return }
+    if (levels.includes(trimmed)) { showToast('A level with that name already exists.', 'error'); return }
+    setLevels((prev) => [...prev, trimmed])
+    setActiveLevel(trimmed)
+  }
+  const removeLevel = (name: string) => {
+    if (levels.length <= 1) return
+    if (!window.confirm(`Remove level "${levelLabel(name)}"? This clears its local layout - nothing is deleted server-side until you Save.`)) return
+    setLevels((prev) => prev.filter((l) => l !== name))
+    setSeatsByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
+    setGridConfigByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
+    setBuilderPathByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
+    setZonePricesByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
+    if (activeLevel === name) {
+      const remaining = levels.filter((l) => l !== name)
+      setActiveLevel(remaining[0] || '')
+    }
+  }
+
   const [activeTier, setActiveTier] = useState('General')
   const [nextRow, setNextRow] = useState('A')
   const [nextNumber, setNextNumber] = useState(1)
@@ -236,18 +332,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // array - Generate computes seats and appends them, manual placement
   // still works on top of a generated layout.
   const [showGenerator, setShowGenerator] = useState(false)
-  const [gridConfig, setGridConfig] = useState<GridConfig>({
-    sideMarginPx: 30,
-    seatSpacingX: 26,
-    seatSpacingY: 30,
-    rowGroups: [{ id: makeClientId(), rows: 5, columns: 10, zoneName: 'General' }],
-    aisles: [],
-    verticalAisles: [],
-    // 'center' is the realistic default for a real hall (rows widen
-    // symmetrically around a shared axis) and is a no-op whenever every
-    // row is the same width, so it's safe as a default either way.
-    rowAlignment: 'center',
-  })
 
   // Guided Setup (wizard) - a plain-language front door onto the SAME
   // gridConfig/computeGridSeats engine the advanced Generate Grid panel
@@ -256,10 +340,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // dense all-at-once form. "Draw It Myself" (existing canvas) stays a
   // fully first-class second path, not a fallback - some venue owners
   // want hands-on creative control and shouldn't be funneled away from it.
-  // Step order: shape -> zones (rows + zone names, one row-group per
-  // zone) -> vertical walkway (pure aisle, no naming) -> horizontal
-  // aisle -> preview.
-  const [builderPath, setBuilderPath] = useState<'choose' | 'wizard' | 'canvas' | null>(null)
+  // Step order: shape -> zones (rows + zone names + suggested price per
+  // zone) -> vertical walkway -> row alignment -> horizontal aisle(s) ->
+  // preview.
   const effectivePath = builderPath ?? (seats.length > 0 ? 'canvas' : 'choose')
   const [wizardStep, setWizardStep] = useState(0)
   const [wizardShape, setWizardShape] = useState<'rows' | 'other' | null>(null)
@@ -282,28 +365,33 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       const totalRows = gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0) || 5
       const columns = gridConfig.rowGroups[0]?.columns || 10
       const zoneName = gridConfig.rowGroups[0]?.zoneName || 'General'
-      setGridConfig((g) => ({ ...g, rowGroups: [{ id: makeClientId(), rows: totalRows, columns, zoneName }] }))
+      const verticalAisles = gridConfig.rowGroups[0]?.verticalAisles || []
+      setGridConfig((g) => ({ ...g, rowGroups: [{ id: makeClientId(), rows: totalRows, columns, zoneName, verticalAisles }] }))
     } else if (gridConfig.rowGroups.length < 2) {
       setGridConfig((g) => ({
         ...g,
         rowGroups: [
-          g.rowGroups[0] || { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Front' },
-          { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Back' },
+          g.rowGroups[0] || { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Front', verticalAisles: [] },
+          { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Back', verticalAisles: [] },
         ],
       }))
     }
   }
 
-  // Wizard offers a single yes/no walkway (arbitrary N stays in the
-  // advanced panel, which already has full vertical-aisle control) -
-  // places it at the row's midpoint (50%), which scales with tapering
-  // rows instead of pinning one side to a fixed width. Purely a walking
-  // gap - it does not create a separate pricing section.
+  // Wizard offers a single yes/no walkway (per-zone divergence stays in
+  // the advanced panel, which has full per-zone vertical-aisle control) -
+  // applies the SAME starting aisle to every current zone at the row's
+  // midpoint (50%), which scales with tapering rows instead of pinning
+  // one side to a fixed width. Purely a walking gap - it does not create
+  // a separate pricing section.
   const setWizardVerticalAisle = (has: boolean) => {
     setWizardHasVerticalAisle(has)
     setGridConfig((g) => ({
       ...g,
-      verticalAisles: has ? [{ id: makeClientId(), afterFraction: 0.5, gapPx: 60 }] : [],
+      rowGroups: g.rowGroups.map((rg) => ({
+        ...rg,
+        verticalAisles: has ? [{ id: makeClientId(), afterFraction: 0.5, gapPx: 60 }] : [],
+      })),
     }))
   }
 
@@ -321,7 +409,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   }
 
   const addRowGroup = () =>
-    setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: `Zone ${g.rowGroups.length + 1}` }] }))
+    setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: `Zone ${g.rowGroups.length + 1}`, verticalAisles: [] }] }))
   const removeRowGroup = (id: string) => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.filter((r) => r.id !== id) }))
   const updateRowGroup = (id: string, field: 'rows' | 'columns', value: number) =>
     setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, [field]: Math.max(1, value) } : r)) }))
@@ -333,23 +421,37 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const updateAisle = (id: string, field: 'afterRow' | 'gapPx', value: number) =>
     setGridConfig((g) => ({ ...g, aisles: g.aisles.map((a) => (a.id === id ? { ...a, [field]: Math.max(0, value) } : a)) }))
 
-  // Vertical aisles are pure positioning now - no section-name syncing
-  // needed, since pricing identity comes from the zone (row-group), not
-  // the aisle segment. New aisles default to an even spread across
-  // existing ones rather than a fixed column - stays sensible regardless
-  // of row width.
-  const addVerticalAisle = () =>
-    setGridConfig((g) => {
-      const defaultFraction = (g.verticalAisles.length + 1) / (g.verticalAisles.length + 2)
-      return { ...g, verticalAisles: [...g.verticalAisles, { id: makeClientId(), afterFraction: defaultFraction, gapPx: 60 }] }
-    })
-  const removeVerticalAisle = (id: string) =>
-    setGridConfig((g) => ({ ...g, verticalAisles: g.verticalAisles.filter((a) => a.id !== id) }))
-  const updateVerticalAisle = (id: string, field: 'afterFraction' | 'gapPx', value: number) =>
+  // Vertical aisles now live per-zone (per-RowGroup) - different zones
+  // can have entirely different split counts/positions (confirmed with
+  // Hitesh: a 16-column zone might need 4 splits, a 20-column zone only
+  // 2). New aisles default to an even spread within that zone rather
+  // than a fixed column - stays sensible regardless of that zone's width.
+  const addVerticalAisleToGroup = (groupId: string) =>
     setGridConfig((g) => ({
       ...g,
-      verticalAisles: g.verticalAisles.map((a) =>
-        a.id === id ? { ...a, [field]: field === 'afterFraction' ? Math.min(0.95, Math.max(0.05, value)) : Math.max(0, value) } : a
+      rowGroups: g.rowGroups.map((rg) => {
+        if (rg.id !== groupId) return rg
+        const defaultFraction = (rg.verticalAisles.length + 1) / (rg.verticalAisles.length + 2)
+        return { ...rg, verticalAisles: [...rg.verticalAisles, { id: makeClientId(), afterFraction: defaultFraction, gapPx: 60 }] }
+      }),
+    }))
+  const removeVerticalAisleFromGroup = (groupId: string, aisleId: string) =>
+    setGridConfig((g) => ({
+      ...g,
+      rowGroups: g.rowGroups.map((rg) => (rg.id === groupId ? { ...rg, verticalAisles: rg.verticalAisles.filter((a) => a.id !== aisleId) } : rg)),
+    }))
+  const updateVerticalAisleInGroup = (groupId: string, aisleId: string, field: 'afterFraction' | 'gapPx', value: number) =>
+    setGridConfig((g) => ({
+      ...g,
+      rowGroups: g.rowGroups.map((rg) =>
+        rg.id !== groupId
+          ? rg
+          : {
+              ...rg,
+              verticalAisles: rg.verticalAisles.map((a) =>
+                a.id === aisleId ? { ...a, [field]: field === 'afterFraction' ? Math.min(0.95, Math.max(0.05, value)) : Math.max(0, value) } : a
+              ),
+            }
       ),
     }))
 
@@ -367,8 +469,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const resetLayout = () => {
     if (seats.length === 0) return
-    if (!window.confirm('Clear the entire layout? This only affects your local edits - nothing is deleted until you Save.')) return
-    setSeats([])
+    if (!window.confirm(`Clear the layout for ${levelLabel(activeLevel)}? This only affects your local edits - nothing is deleted until you Save.`)) return
+    setSeats(() => [])
     setSelectedId(null)
   }
 
@@ -385,16 +487,28 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         if (!res.ok) throw new Error('Venue not found')
         const data = await res.json()
         setSeatingMode(data.seatingMode || 'GENERAL_ADMISSION')
-        setSeats(
-          (data.seats || []).map((s: any) => ({
-            clientId: makeClientId(),
-            tierLabel: s.tierLabel,
-            row: s.row,
-            number: s.number,
-            x: s.x,
-            y: s.y,
-          }))
-        )
+
+        // Group loaded seats by level - each distinct level value found
+        // becomes a tab. Existing single-level venues have every seat at
+        // level '' and end up with exactly one (invisible-by-default) tab.
+        const byLevel: Record<string, SeatDraft[]> = {}
+        for (const s of data.seats || []) {
+          const lvl = s.level || ''
+          if (!byLevel[lvl]) byLevel[lvl] = []
+          byLevel[lvl].push({ clientId: makeClientId(), tierLabel: s.tierLabel, row: s.row, number: s.number, x: s.x, y: s.y })
+        }
+        const foundLevels = Object.keys(byLevel)
+        setSeatsByLevel(byLevel)
+        setLevels(foundLevels.length > 0 ? foundLevels : [''])
+        setActiveLevel(foundLevels[0] ?? '')
+
+        const priceByLevel: Record<string, Record<string, string>> = {}
+        for (const z of data.zonePrices || []) {
+          const lvl = z.level || ''
+          if (!priceByLevel[lvl]) priceByLevel[lvl] = {}
+          priceByLevel[lvl][z.zoneName] = z.suggestedPrice != null ? String(z.suggestedPrice) : ''
+        }
+        setZonePricesByLevel(priceByLevel)
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -474,13 +588,39 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const selected = seats.find((s) => s.clientId === selectedId) || null
 
   const save = async () => {
-    // Duplicate row/number check client-side first, mirrors the server
-    // validation in PUT so the error surfaces before a wasted round trip.
+    // Mid-wizard with nothing generated yet used to silently save 0
+    // seats and show a false green "Saved 0 seats" success toast - the
+    // button was reachable at every wizard step. Now it warns instead of
+    // proceeding silently, but doesn't block Save outright, since other
+    // levels may already have a real, finished layout worth saving.
+    if (effectivePath === 'wizard' && seats.length === 0) {
+      if (!window.confirm(`You haven't finished Guided Setup for ${levelLabel(activeLevel)} yet - it will save with 0 seats. Continue?`)) {
+        return
+      }
+    }
+
+    // Full-venue replace - flatten every level's seats/zone-prices into
+    // one payload (the API always replaces the WHOLE venue's layout, not
+    // just the active level), so saving while level B is mid-setup must
+    // not lose level A's already-built seats.
+    const allSeats = Object.entries(seatsByLevel).flatMap(([level, lvlSeats]) =>
+      lvlSeats.map((s) => ({ tierLabel: s.tierLabel, row: s.row, number: s.number, x: s.x, y: s.y, level }))
+    )
+    const allZonePrices = Object.entries(zonePricesByLevel).flatMap(([level, prices]) =>
+      Object.entries(prices)
+        .filter(([, price]) => price.trim() !== '')
+        .map(([zoneName, price]) => ({ level, zoneName, suggestedPrice: parseFloat(price) }))
+    )
+
+    // Duplicate row/number check client-side first (level-scoped, since
+    // the same row/number legitimately repeats across different levels)
+    // - mirrors the server validation in PUT so the error surfaces
+    // before a wasted round trip.
     const seen = new Set<string>()
-    for (const s of seats) {
-      const key = `${s.row}::${s.number}`
+    for (const s of allSeats) {
+      const key = `${s.level}::${s.row}::${s.number}`
       if (seen.has(key)) {
-        showToast(`Duplicate seat label: Row ${s.row}, Seat ${s.number}. Fix before saving.`, 'error')
+        showToast(`Duplicate seat label: Row ${s.row}, Seat ${s.number}${s.level ? ` (${s.level})` : ''}. Fix before saving.`, 'error')
         return
       }
       seen.add(key)
@@ -491,14 +631,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       const res = await fetch(`/api/venues/${id}/seats`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          seatingMode,
-          seats: seats.map((s) => ({ tierLabel: s.tierLabel, row: s.row, number: s.number, x: s.x, y: s.y })),
-        }),
+        body: JSON.stringify({ seatingMode, seats: allSeats, zonePrices: allZonePrices }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
-      showToast(`Saved ${data.seatCount} seat${data.seatCount === 1 ? '' : 's'}.`, 'success')
+      showToast(`Saved ${data.seatCount} seat${data.seatCount === 1 ? '' : 's'} across ${levels.length} level${levels.length === 1 ? '' : 's'}.`, 'success')
     } catch (err: any) {
       showToast(err.message, 'error')
     } finally {
@@ -551,6 +688,55 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, fontStyle: 'italic' }}>
             This venue uses General Admission (section + quantity). Section names, seat counts, and pricing are managed from the venue's Edit page, not here. Switch to Numbered Seating above to build a real seat layout.
           </p>
+        )}
+
+        {seatingMode === 'NUMBERED' && (
+          <div style={{ marginBottom: '20px' }}>
+            {levels.length === 1 ? (
+              <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                + This venue has more than one level (e.g. Balcony, 1st Floor)
+              </button>
+            ) : (
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0E0C0A', opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Level</div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {levels.map((lvl) => (
+                    <div key={lvl} style={{ display: 'flex', alignItems: 'center' }}>
+                      <button
+                        onClick={() => setActiveLevel(lvl)}
+                        style={{
+                          padding: '7px 14px', borderRadius: '8px 0 0 8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                          border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                          background: activeLevel === lvl ? '#0E0C0A' : '#fff',
+                          color: activeLevel === lvl ? '#fff' : '#0E0C0A',
+                        }}
+                      >
+                        {levelLabel(lvl)}
+                      </button>
+                      <button
+                        onClick={() => removeLevel(lvl)}
+                        title={`Remove ${levelLabel(lvl)}`}
+                        style={{
+                          padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
+                          border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)', borderLeft: 'none',
+                          background: activeLevel === lvl ? '#0E0C0A' : '#fff',
+                          color: activeLevel === lvl ? '#fff' : '#B3261E',
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+                    + Add level
+                  </button>
+                </div>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                  Each level has its own independent seat layout - build them one at a time using Guided Setup or Draw It Myself below.
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {seatingMode === 'NUMBERED' && effectivePath === 'choose' && (
@@ -642,6 +828,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Zone name</label>
                       <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
                     </div>
+                    <div>
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Suggested price (optional)</label>
+                      <input
+                        type="number"
+                        style={{ ...inputStyle, width: '120px' }}
+                        placeholder="₹"
+                        value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
+                        onChange={(e) => gridConfig.rowGroups[0] && setZonePrice(gridConfig.rowGroups[0].zoneName, e.target.value)}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -657,6 +853,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
+                        <label style={{ fontSize: '12px' }}>Price:</label>
+                        <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
@@ -683,7 +881,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows, like left/right?</h3>
                 <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
-                  This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step.
+                  This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step. This sets the same walkway for every zone to start; if different zones need different splits, fine-tune each one separately afterward in the advanced Generate Grid panel.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                   <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === false ? '#fff' : '#0E0C0A' }}>
@@ -694,7 +892,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   </button>
                 </div>
                 <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
-                  Need more than one walkway? Finish here, then use the advanced Generate Grid panel afterward — it supports any number.
+                  Need more than one walkway, or a different split per zone? Finish here, then use the advanced Generate Grid panel afterward — it supports any number, independently per zone.
                 </p>
 
                 {wizardHasVerticalAisle === true && (
@@ -702,7 +900,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>How wide should the walkway be?</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                       {[{ label: 'Narrow', px: 40 }, { label: 'Standard', px: 60 }, { label: 'Wide', px: 90 }].map((opt) => (
-                        <button key={opt.label} onClick={() => setGridConfig((g) => ({ ...g, verticalAisles: g.verticalAisles.map((a, i) => (i === 0 ? { ...a, gapPx: opt.px } : a)) }))} style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.verticalAisles[0]?.gapPx === opt.px ? '#0E0C0A' : '#fff', color: gridConfig.verticalAisles[0]?.gapPx === opt.px ? '#fff' : '#0E0C0A' }}>
+                        <button
+                          key={opt.label}
+                          onClick={() => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((rg) => ({ ...rg, verticalAisles: rg.verticalAisles.map((a, i) => (i === 0 ? { ...a, gapPx: opt.px } : a)) })) }))}
+                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? '#0E0C0A' : '#fff', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? '#fff' : '#0E0C0A' }}
+                        >
                           {opt.label}
                         </button>
                       ))}
@@ -719,18 +921,59 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
             {wizardStep === 3 && (
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway partway through the rows, like a gangway after a certain row?</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>How should rows of different widths line up?</h3>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                  Only matters if your zones have different seats-per-row (tapering rows). Referenced to the stage, not the audience.
+                </p>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                  {(['left', 'center', 'right'] as const).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
+                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowAlignment === opt ? '#0E0C0A' : '#fff', color: gridConfig.rowAlignment === opt ? '#fff' : '#0E0C0A' }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
+                  {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides — every zone shares one central aisle, like a real fan-style hall.'}
+                  {gridConfig.rowAlignment === 'left' && 'Every row starts at the stage-left edge — wider rows only grow toward stage-right. Use this if stage-left is against a wall.'}
+                  {gridConfig.rowAlignment === 'right' && 'Every row ends at the stage-right edge — wider rows only grow toward stage-left.'}
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
+                </div>
+              </div>
+            )}
+
+            {wizardStep === 4 && (
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any gangways between rows (front-to-back walkways)?</h3>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                  e.g. a walking gap after row 10, so rows 11+ have extra space in front of them. You can add more than one - answering Yes adds a row-number field below for each gangway.
+                </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                   <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === true ? '#0E0C0A' : '#fff', color: wizardHasAisle === true ? '#fff' : '#0E0C0A' }}>Yes</button>
                   <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === false ? '#0E0C0A' : '#fff', color: wizardHasAisle === false ? '#fff' : '#0E0C0A' }}>No</button>
                 </div>
 
-                {wizardHasAisle === true && gridConfig.aisles.map((a) => (
-                  <div key={a.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '16px' }}>
-                    <label style={{ fontSize: '13px', fontWeight: 600 }}>After row #</label>
-                    <input type="number" style={{ ...inputStyle, width: '70px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
+                {wizardHasAisle === true && (
+                  <div style={{ marginBottom: '16px' }}>
+                    {gridConfig.aisles.map((a, i) => (
+                      <div key={a.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Gangway {i + 1}:</span>
+                        <label style={{ fontSize: '13px', fontWeight: 600 }}>After row #</label>
+                        <input type="number" style={{ ...inputStyle, width: '70px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
+                        {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                      </div>
+                    ))}
+                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                      + Add another gangway
+                    </button>
                   </div>
-                ))}
+                )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
@@ -739,20 +982,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
             )}
 
-            {wizardStep === 4 && (
+            {wizardStep === 5 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Preview</h3>
                 <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '12px' }}>
                   This is exactly what your audience will see. {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows.
-                  {contentBounds(wizardPreviewSeats).overflowsDefault && ' This layout is larger than the default view — scroll inside the box below to see all of it.'}
                 </p>
                 <div
                   style={{
-                    maxWidth: '100%', maxHeight: '420px', overflow: 'auto',
-                    background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px',
+                    maxWidth: '100%', maxHeight: '420px', overflow: 'auto', display: 'flex', justifyContent: 'center',
+                    background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px', padding: '10px 0',
                   }}
                 >
-                  <div style={{ position: 'relative', width: `${contentBounds(wizardPreviewSeats).width}px`, height: `${contentBounds(wizardPreviewSeats).height}px` }}>
+                  <div style={{ position: 'relative', flexShrink: 0, width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
                     <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px', background: '#0E0C0A', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       Stage
                     </div>
@@ -834,42 +1076,47 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
                   </p>
 
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Row groups (rows can taper — different column counts per range, counted across the whole row)</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Zones / row groups (rows can taper — different column counts per range, counted across the whole row)</div>
                   {gridConfig.rowGroups.map((rg, i) => (
-                    <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Group {i + 1}:</span>
-                      <label style={{ fontSize: '12px' }}>Rows:</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
-                      <label style={{ fontSize: '12px' }}>Columns:</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
-                      <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                    <div key={rg.id} style={{ border: '1px solid rgba(14,12,10,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Zone {i + 1}:</span>
+                        <label style={{ fontSize: '12px' }}>Rows:</label>
+                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
+                        <label style={{ fontSize: '12px' }}>Columns:</label>
+                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                        <label style={{ fontSize: '12px' }}>Name:</label>
+                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
+                        <label style={{ fontSize: '12px' }}>Price:</label>
+                        <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
+                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                      </div>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#0E0C0A', opacity: 0.55, marginBottom: '4px' }}>
+                        Vertical aisles for this zone only (different zones can have different splits)
+                      </div>
+                      {rg.verticalAisles.map((a) => (
+                        <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '12px' }}>Position (% from left):</label>
+                          <input
+                            type="number"
+                            min={5}
+                            max={95}
+                            style={{ ...inputStyle, width: '55px' }}
+                            value={Math.round(a.afterFraction * 100)}
+                            onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', (Number(e.target.value) || 50) / 100)}
+                          />
+                          <label style={{ fontSize: '12px' }}>Gap (px):</label>
+                          <input type="number" style={{ ...inputStyle, width: '55px' }} value={a.gapPx} onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', Number(e.target.value) || 0)} />
+                          <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                        </div>
+                      ))}
+                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
+                        + Add vertical aisle to this zone
+                      </button>
                     </div>
                   ))}
                   <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
-                    + Add row group
-                  </button>
-
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>
-                    Vertical aisles (a walking gap, positioned as a % across each row so it scales with tapering rows — 0 aisles = one block, 1 aisle = left/right, 2+ = as many sections as you like)
-                  </div>
-                  {gridConfig.verticalAisles.map((a) => (
-                    <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '12px' }}>Position (% from left):</label>
-                      <input
-                        type="number"
-                        min={5}
-                        max={95}
-                        style={{ ...inputStyle, width: '60px' }}
-                        value={Math.round(a.afterFraction * 100)}
-                        onChange={(e) => updateVerticalAisle(a.id, 'afterFraction', (Number(e.target.value) || 50) / 100)}
-                      />
-                      <label style={{ fontSize: '12px' }}>Gap (px):</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.gapPx} onChange={(e) => updateVerticalAisle(a.id, 'gapPx', Number(e.target.value) || 0)} />
-                      <button onClick={() => removeVerticalAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
-                    </div>
-                  ))}
-                  <button onClick={addVerticalAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
-                    + Add vertical aisle
+                    + Add row group / zone
                   </button>
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Horizontal aisles (a walking gap between two rows, e.g. a gangway)</div>
@@ -1009,17 +1256,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        <button
-          onClick={save}
-          disabled={saving}
-          style={{
-            marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
-            background: '#C8441A', color: '#fff', fontSize: '14px', fontWeight: 700,
-            cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
-          }}
-        >
-          {saving ? 'Saving...' : 'Save Seat Map'}
-        </button>
+        {!(seatingMode === 'NUMBERED' && effectivePath === 'wizard') && (
+          <button
+            onClick={save}
+            disabled={saving}
+            style={{
+              marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
+              background: '#C8441A', color: '#fff', fontSize: '14px', fontWeight: 700,
+              cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
+            }}
+          >
+            {saving ? 'Saving...' : 'Save Seat Map'}
+          </button>
+        )}
       </div>
     </>
   )
