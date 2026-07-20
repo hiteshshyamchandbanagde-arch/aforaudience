@@ -33,6 +33,11 @@ type SeatDraft = {
 const CANVAS_WIDTH = 900
 const CANVAS_HEIGHT = 560
 const SEAT_SIZE = 22
+// Stage bar sits at top:8px with ~8px padding top/bottom around an 11px
+// label - roughly 37px tall in total. 40px of clearance let the first
+// row's seat squares (11px half-height) draw underneath/behind it.
+// 70px gives clear breathing room between the stage and row A.
+const STAGE_CLEARANCE_Y = 70
 
 function makeClientId() {
   return Math.random().toString(36).slice(2, 10)
@@ -206,7 +211,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     else if (gridConfig.aisles.length === 0) addAisle()
   }
 
-  const wizardPreviewSeats = computeGridSeats(gridConfig, 40, 40)
+  const wizardPreviewSeats = computeGridSeats(gridConfig, 40, STAGE_CLEARANCE_Y)
 
   const finishWizard = () => {
     generateGrid()
@@ -229,7 +234,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       showToast('Add at least one row group first.', 'error')
       return
     }
-    const generated = computeGridSeats(gridConfig, 40, 40)
+    const generated = computeGridSeats(gridConfig, 40, STAGE_CLEARANCE_Y)
     setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
     showToast(`Generated ${generated.length} seats.`, 'success')
     setShowGenerator(false)
@@ -284,7 +289,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const x = Math.round(e.clientX - rect.left)
     const y = Math.round(e.clientY - rect.top)
     if (x < 0 || y < 0 || x > CANVAS_WIDTH || y > CANVAS_HEIGHT) return
-    if (y < 40) {
+    if (y < STAGE_CLEARANCE_Y) {
       showToast("That's the stage — seats go below it.", 'error')
       return
     }
