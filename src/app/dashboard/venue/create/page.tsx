@@ -391,17 +391,19 @@ export default function CreateVenuePage() {
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => submit(true)}
-                style={{
-                  fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A',
-                  border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
-                }}
-              >
-                {saving ? 'Publishing...' : 'Publish Venue'}
-              </button>
+              {seatingChoice === 'GENERAL_ADMISSION' && (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => submit(true)}
+                  style={{
+                    fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A',
+                    border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
+                  }}
+                >
+                  {saving ? 'Publishing...' : 'Publish Venue'}
+                </button>
+              )}
               <button
                 type="button"
                 disabled={saving}
@@ -418,7 +420,9 @@ export default function CreateVenuePage() {
               </Link>
             </div>
             <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '14px' }}>
-              Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.
+              {seatingChoice === 'GENERAL_ADMISSION'
+                ? 'Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.'
+                : "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real zones to price against, so publishing happens after the map is real."}
             </p>
           </form>
         </div>
