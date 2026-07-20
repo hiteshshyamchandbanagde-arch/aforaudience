@@ -147,12 +147,14 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     // Convert each aisle's fraction into THIS row's actual cut point -
     // e.g. a 0.5 aisle lands after column 5 on a 10-wide row and after
     // column 8 on a 16-wide row, so both sides taper together instead
-    // of one side staying a fixed width. Clamped strictly increasing so
-    // narrow rows with multiple aisles can't collapse two cuts onto the
-    // same column.
-    let prevCut = 0
+    // of one side staying a fixed width. Range is [0, cols] inclusive -
+    // 0 means a walkway BEFORE the first seat (against the wall), cols
+    // means a walkway AFTER the last seat - not just strictly between
+    // two seats. Clamped strictly increasing so narrow rows with
+    // multiple aisles can't collapse two cuts onto the same column.
+    let prevCut = -1
     const cutPointsForRow = vAisles.map((a) => {
-      const cut = Math.max(prevCut + 1, Math.min(cols - 1, Math.round(cols * a.afterFraction)))
+      const cut = Math.max(prevCut + 1, Math.min(cols, Math.round(cols * a.afterFraction)))
       prevCut = cut
       return cut
     })
@@ -178,6 +180,15 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
       }
       seats.push({ tierLabel: zoneName, row: rowLetter, number: String(c), x, y })
       x += config.seatSpacingX
+    }
+    // A trailing edge aisle (cut === cols) sits after the last seat, so
+    // it never triggers inside the loop above (which only checks up to
+    // c === cols, i.e. cut === cols - 1). It's still correctly counted
+    // in rowWidthPx/maxRowWidthPx for alignment purposes even though
+    // nothing renders after it - this just consumes the segment pointer
+    // for correctness rather than leaving it dangling.
+    while (segment < cutPointsForRow.length && cutPointsForRow[segment] === cols) {
+      segment++
     }
 
     y += config.seatSpacingY
@@ -327,6 +338,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [nextNumber, setNextNumber] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
+  // A click on the canvas used to always place a new seat - which meant
+  // simply reviewing/scrolling a Guided-Setup-generated layout could
+  // silently scatter stray seats wherever the owner clicked (live bug,
+  // 20 Jul session). Defaults OFF after Guided Setup (safe to click
+  // around and inspect), ON for Draw It Myself (where click-to-place is
+  // the entire point) - toggleable either way at any time.
+  const [manualPlacement, setManualPlacement] = useState(false)
 
   // §9.4 - Grid Generator state. Kept separate from the freeform seats
   // array - Generate computes seats and appends them, manual placement
@@ -351,7 +369,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [wizardHasAisle, setWizardHasAisle] = useState<boolean | null>(null)
 
   const startWizard = () => { setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardMultiZone(null); setWizardHasVerticalAisle(null); setWizardHasAisle(null) }
-  const startDrawMyself = () => setBuilderPath('canvas')
+  const startDrawMyself = () => { setBuilderPath('canvas'); setManualPlacement(true) }
   const backToChoice = () => { setBuilderPath('choose'); setWizardStep(0) }
   const wizardNext = () => setWizardStep((s) => s + 1)
   const wizardBack = () => setWizardStep((s) => Math.max(0, s - 1))
@@ -405,6 +423,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const finishWizard = () => {
     generateGrid()
+    setManualPlacement(false)
     setBuilderPath('canvas')
   }
 
@@ -449,7 +468,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           : {
               ...rg,
               verticalAisles: rg.verticalAisles.map((a) =>
-                a.id === aisleId ? { ...a, [field]: field === 'afterFraction' ? Math.min(0.95, Math.max(0.05, value)) : Math.max(0, value) } : a
+                a.id === aisleId ? { ...a, [field]: field === 'afterFraction' ? Math.min(1, Math.max(0, value)) : Math.max(0, value) } : a
               ),
             }
       ),
@@ -523,6 +542,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const placeSeat = (e: React.MouseEvent<HTMLDivElement>) => {
     if (seatingMode !== 'NUMBERED') return
+    if (!manualPlacement) return
     if (dragId) return // don't place while finishing a drag
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return
@@ -1026,7 +1046,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <button
                   onClick={() => setShowGenerator((v) => !v)}
                   style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: '#C8441A', color: '#fff' }}
@@ -1039,7 +1059,24 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 >
                   Reset Layout
                 </button>
+                <button
+                  onClick={() => setManualPlacement((v) => !v)}
+                  title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
+                  style={{
+                    padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                    border: manualPlacement ? 'none' : '1px solid rgba(14,12,10,0.2)',
+                    background: manualPlacement ? '#0E0C0A' : '#fff',
+                    color: manualPlacement ? '#fff' : '#0E0C0A',
+                  }}
+                >
+                  {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
+                </button>
               </div>
+              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '-6px', marginBottom: '12px' }}>
+                {manualPlacement
+                  ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
+                  : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
+              </p>
 
               {showGenerator && (
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.1)' }}>
@@ -1092,18 +1129,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: '#0E0C0A', opacity: 0.55, marginBottom: '4px' }}>
-                        Vertical aisles for this zone only (different zones can have different splits)
+                        Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat
                       </div>
                       {rg.verticalAisles.map((a) => (
                         <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '12px' }}>Position (% from left):</label>
                           <input
                             type="number"
-                            min={5}
-                            max={95}
+                            min={0}
+                            max={100}
                             style={{ ...inputStyle, width: '55px' }}
                             value={Math.round(a.afterFraction * 100)}
-                            onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', (Number(e.target.value) || 50) / 100)}
+                            onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', (Number(e.target.value) || 0) / 100)}
                           />
                           <label style={{ fontSize: '12px' }}>Gap (px):</label>
                           <input type="number" style={{ ...inputStyle, width: '55px' }} value={a.gapPx} onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', Number(e.target.value) || 0)} />
@@ -1174,7 +1211,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     width: `${canvasBounds.width}px`,
                     height: `${canvasBounds.height}px`,
                     background: '#FBF8F3',
-                    cursor: 'crosshair',
+                    cursor: manualPlacement ? 'crosshair' : 'default',
                   }}
                 >
                   <div
@@ -1216,8 +1253,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     </div>
                   ))}
                   {seats.length === 0 && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0E0C0A', opacity: 0.35, fontSize: '14px' }}>
-                      Click anywhere to place your first seat
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0E0C0A', opacity: 0.35, fontSize: '14px', textAlign: 'center', padding: '0 20px' }}>
+                      {manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats'}
                     </div>
                   )}
                 </div>
