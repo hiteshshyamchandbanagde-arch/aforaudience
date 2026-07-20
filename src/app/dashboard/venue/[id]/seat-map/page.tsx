@@ -81,6 +81,14 @@ type GridConfig = {
   // to-right order. Length is always verticalAisles.length + 1 - kept in
   // sync by addVerticalAisle/removeVerticalAisle below.
   sectionTiers: string[]
+  // How rows of DIFFERENT widths (tapering row-groups) line up against
+  // each other. 'left' packs every row flush against the same left
+  // edge, so wider rows only grow rightward - a staircase, not a fan.
+  // 'center' (the realistic default for a real hall) shares one central
+  // axis across every row, so narrower rows are inset equally on both
+  // sides. 'right' is the mirror of 'left'. Rows of equal width look
+  // identical under all three - this only matters once rows taper.
+  rowAlignment: 'left' | 'center' | 'right'
 }
 
 // Pure function - given a config, returns the seats it describes. Kept
@@ -103,6 +111,12 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
   }
 
   const sortedVAisles = [...config.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
+  const totalAisleGapPx = sortedVAisles.reduce((sum, a) => sum + a.gapPx, 0)
+  // Pixel width of a row with `cols` seats - every row has the same
+  // number of vertical aisles (just at different cut points), so the
+  // gap total is constant regardless of which row it is.
+  const rowWidthPx = (cols: number) => cols * config.seatSpacingX + totalAisleGapPx
+  const maxRowWidthPx = Math.max(0, ...columnsForRow.map(rowWidthPx))
 
   let y = originY
   for (let r = 0; r < totalRows; r++) {
@@ -128,7 +142,14 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
       return cut
     })
 
-    let x = originX + config.sideMarginPx
+    // Slack is how much narrower this row is than the widest row in the
+    // layout - 'left' puts all of it on the right (unchanged rows start
+    // at the same spot), 'right' puts all of it on the left, 'center'
+    // splits it evenly so every row shares the same central axis.
+    const slack = maxRowWidthPx - rowWidthPx(cols)
+    const leftInset = config.rowAlignment === 'center' ? slack / 2 : config.rowAlignment === 'right' ? slack : 0
+
+    let x = originX + config.sideMarginPx + leftInset
     let segment = 0
     // Numbering is continuous 1..cols across every section in the row -
     // this was special-cased for exactly two blocks before (and had to
@@ -213,6 +234,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     aisles: [],
     verticalAisles: [],
     sectionTiers: ['General'],
+    // 'center' is the realistic default for a real hall (rows widen
+    // symmetrically around a shared axis) and is a no-op whenever every
+    // row is the same width, so it's safe as a default either way.
+    rowAlignment: 'center',
   })
 
   // Guided Setup (wizard) - a plain-language front door onto the SAME
@@ -762,6 +787,31 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingX: Math.max(10, Number(e.target.value) || 10) }))} />
                     <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingY: Math.max(10, Number(e.target.value) || 10) }))} />
                   </div>
+
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>
+                      Row alignment (only matters when rows taper to different widths):
+                    </label>
+                    {(['left', 'center', 'right'] as const).map((opt) => (
+                      <button
+                        key={opt}
+                        onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
+                        style={{
+                          padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
+                          border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                          background: gridConfig.rowAlignment === opt ? '#0E0C0A' : '#fff',
+                          color: gridConfig.rowAlignment === opt ? '#fff' : '#0E0C0A',
+                        }}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
+                    {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides, so every row shares one central aisle — the shape of a real fan-style hall.'}
+                    {gridConfig.rowAlignment === 'left' && 'Every row starts at the same left edge — wider rows only grow to the right. Use this if one side of your venue is against a wall.'}
+                    {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
+                  </p>
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Row groups (rows can taper — different column counts per range, counted across the whole row)</div>
                   {gridConfig.rowGroups.map((rg, i) => (
