@@ -63,7 +63,12 @@ type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
 // 0 vertical aisles = 1 section (old "Single Block"), 1 aisle = 2
 // sections (old "Two Blocks"), N aisles = N+1 sections - no hardcoded
 // cap, and no separate blockCount concept to keep in sync with it.
-type VerticalAisle = { id: string; afterColumn: number; gapPx: number }
+// Position is a FRACTION of each row's width (0-1), not an absolute
+// column - with tapering rows (different column counts per row-group),
+// a fixed column position pins one side to a constant width while the
+// other side absorbs the entire taper, producing a lopsided layout
+// instead of both sides growing together like a real fan-shaped hall.
+type VerticalAisle = { id: string; afterFraction: number; gapPx: number }
 
 type GridConfig = {
   sideMarginPx: number
@@ -97,7 +102,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     for (let i = 0; i < g.rows; i++) columnsForRow.push(g.columns)
   }
 
-  const sortedVAisles = [...config.verticalAisles].sort((a, b) => a.afterColumn - b.afterColumn)
+  const sortedVAisles = [...config.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
 
   let y = originY
   for (let r = 0; r < totalRows; r++) {
@@ -110,6 +115,19 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     const cols = columnsForRow[r] || 0
     const rowLetter = rowLetterAt(r)
 
+    // Convert each aisle's fraction into THIS row's actual cut point -
+    // e.g. a 0.5 aisle lands after column 5 on a 10-wide row and after
+    // column 8 on a 16-wide row, so both sides taper together instead
+    // of one side staying a fixed width. Clamped strictly increasing so
+    // narrow rows with multiple aisles can't collapse two cuts onto the
+    // same column.
+    let prevCut = 0
+    const cutPointsForRow = sortedVAisles.map((a) => {
+      const cut = Math.max(prevCut + 1, Math.min(cols - 1, Math.round(cols * a.afterFraction)))
+      prevCut = cut
+      return cut
+    })
+
     let x = originX + config.sideMarginPx
     let segment = 0
     // Numbering is continuous 1..cols across every section in the row -
@@ -118,7 +136,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     // total columns it falls out naturally, no special-casing needed,
     // and still matches real theater signage.
     for (let c = 1; c <= cols; c++) {
-      while (segment < sortedVAisles.length && sortedVAisles[segment].afterColumn === c - 1) {
+      while (segment < cutPointsForRow.length && cutPointsForRow[segment] === c - 1) {
         x += sortedVAisles[segment].gapPx
         segment++
       }
@@ -235,18 +253,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   // Wizard only offers 1 or 2 sections (arbitrary N stays in the
   // advanced panel below, which already has full vertical-aisle control)
-  // - auto-places the walkway at the midpoint of the widest row so the
-  // owner doesn't have to do column-counting math themselves.
+  // - places the walkway at the row's midpoint (50%), which scales with
+  // tapering rows instead of pinning one side to a fixed width.
   const setWizardSections = (count: 1 | 2) => {
     setWizardSectionCount(count)
     if (count === 1) {
       setGridConfig((g) => ({ ...g, verticalAisles: [], sectionTiers: [g.sectionTiers[0] || 'General'] }))
     } else {
-      const widestCols = Math.max(1, ...gridConfig.rowGroups.map((r) => r.columns))
-      const midpoint = Math.max(1, Math.floor(widestCols / 2))
       setGridConfig((g) => ({
         ...g,
-        verticalAisles: [{ id: makeClientId(), afterColumn: midpoint, gapPx: 60 }],
+        verticalAisles: [{ id: makeClientId(), afterFraction: 0.5, gapPx: 60 }],
         sectionTiers: [g.sectionTiers[0] || 'Left', g.sectionTiers[1] || 'Right'],
       }))
     }
@@ -277,10 +293,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   // Vertical aisles keep sectionTiers in sync (length = aisles.length+1)
   // so every segment always has a name field, in left-to-right order.
+  // New aisles default to an even spread across existing ones rather
+  // than a fixed column - stays sensible regardless of row width.
   const addVerticalAisle = () =>
     setGridConfig((g) => {
-      const widestCols = Math.max(1, ...g.rowGroups.map((r) => r.columns))
-      const verticalAisles = [...g.verticalAisles, { id: makeClientId(), afterColumn: Math.max(1, Math.floor(widestCols / 2)), gapPx: 60 }]
+      const defaultFraction = (g.verticalAisles.length + 1) / (g.verticalAisles.length + 2)
+      const verticalAisles = [...g.verticalAisles, { id: makeClientId(), afterFraction: defaultFraction, gapPx: 60 }]
       const sectionTiers = [...g.sectionTiers]
       while (sectionTiers.length < verticalAisles.length + 1) sectionTiers.push(`Section ${sectionTiers.length + 1}`)
       return { ...g, verticalAisles, sectionTiers }
@@ -291,8 +309,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       const sectionTiers = g.sectionTiers.slice(0, verticalAisles.length + 1)
       return { ...g, verticalAisles, sectionTiers }
     })
-  const updateVerticalAisle = (id: string, field: 'afterColumn' | 'gapPx', value: number) =>
-    setGridConfig((g) => ({ ...g, verticalAisles: g.verticalAisles.map((a) => (a.id === id ? { ...a, [field]: Math.max(field === 'afterColumn' ? 1 : 0, value) } : a)) }))
+  const updateVerticalAisle = (id: string, field: 'afterFraction' | 'gapPx', value: number) =>
+    setGridConfig((g) => ({
+      ...g,
+      verticalAisles: g.verticalAisles.map((a) =>
+        a.id === id ? { ...a, [field]: field === 'afterFraction' ? Math.min(0.95, Math.max(0.05, value)) : Math.max(0, value) } : a
+      ),
+    }))
   const updateSectionTier = (index: number, value: string) =>
     setGridConfig((g) => ({ ...g, sectionTiers: g.sectionTiers.map((t, i) => (i === index ? value.slice(0, 60) : t)) }))
 
@@ -756,12 +779,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   </button>
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>
-                    Vertical aisles (a walking gap between two columns — 0 aisles = one block, 1 aisle = left/right, 2+ = as many sections as you like)
+                    Vertical aisles (a walking gap, positioned as a % across each row so it scales with tapering rows — 0 aisles = one block, 1 aisle = left/right, 2+ = as many sections as you like)
                   </div>
                   {gridConfig.verticalAisles.map((a) => (
                     <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '12px' }}>After column #:</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.afterColumn} onChange={(e) => updateVerticalAisle(a.id, 'afterColumn', Number(e.target.value) || 1)} />
+                      <label style={{ fontSize: '12px' }}>Position (% from left):</label>
+                      <input
+                        type="number"
+                        min={5}
+                        max={95}
+                        style={{ ...inputStyle, width: '60px' }}
+                        value={Math.round(a.afterFraction * 100)}
+                        onChange={(e) => updateVerticalAisle(a.id, 'afterFraction', (Number(e.target.value) || 50) / 100)}
+                      />
                       <label style={{ fontSize: '12px' }}>Gap (px):</label>
                       <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.gapPx} onChange={(e) => updateVerticalAisle(a.id, 'gapPx', Number(e.target.value) || 0)} />
                       <button onClick={() => removeVerticalAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
