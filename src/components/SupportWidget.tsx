@@ -30,6 +30,31 @@ import { usePathname } from 'next/navigation';
 
 type Panel = 'closed' | 'chat' | 'feedback';
 
+/** On-brand mic icon (replaces a generic speech-bubble emoji) — a warm
+ * spotlight glow behind a simple stage mic, matching the "live performance"
+ * theme rather than a generic chatbot look. Uses currentColor for the mic
+ * so it inherits the button/text color it's placed in. */
+function MicIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="9" r="9" fill="#C8441A" opacity="0.18" />
+      <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
+      <path d="M5.5 10.5a6.5 6.5 0 0 0 13 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <line x1="12" y1="17" x2="12" y2="20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="8.5" y1="20.5" x2="15.5" y2="20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -298,7 +323,7 @@ export default function SupportWidget() {
           justifyContent: 'center',
         }}
       >
-        {panel === 'closed' ? '💬' : '×'}
+        {panel === 'closed' ? <MicIcon size={26} /> : <CloseIcon size={22} />}
       </button>
 
       {panel !== 'closed' && (
@@ -363,7 +388,9 @@ export default function SupportWidget() {
             <>
               {!chatEnabled ? (
                 <div style={{ flex: 1, padding: 20, textAlign: 'center' }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: '#0E0C0A' }}>
+                    <MicIcon size={36} />
+                  </div>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     Chat is temporarily unavailable.
                   </div>
