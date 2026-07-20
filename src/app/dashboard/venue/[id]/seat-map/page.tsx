@@ -681,27 +681,24 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
             {wizardStep === 2 && (
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows into sections, like left/right?</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows, like left/right?</h3>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                  This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step.
+                </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardSections(1)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardSectionCount === 1 ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardSectionCount === 1 ? '#0E0C0A' : '#fff', color: wizardSectionCount === 1 ? '#fff' : '#0E0C0A' }}>
-                    No, one section
+                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === false ? '#fff' : '#0E0C0A' }}>
+                    No, one solid block
                   </button>
-                  <button onClick={() => setWizardSections(2)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardSectionCount === 2 ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardSectionCount === 2 ? '#0E0C0A' : '#fff', color: wizardSectionCount === 2 ? '#fff' : '#0E0C0A' }}>
-                    Yes, two sections with a walkway
+                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === true ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === true ? '#fff' : '#0E0C0A' }}>
+                    Yes, a center walkway
                   </button>
                 </div>
                 <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
-                  Need three or more sections? Finish here with one or two, then use the advanced Generate Grid panel afterward — it supports any number of walkways.
+                  Need more than one walkway? Finish here, then use the advanced Generate Grid panel afterward — it supports any number.
                 </p>
 
-                <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>{wizardSectionCount === 2 ? 'What do you call the left section?' : 'What do you call this section?'}</label>
-                <input style={{ ...inputStyle, width: '220px', marginBottom: '12px' }} value={gridConfig.sectionTiers[0] || ''} placeholder="e.g. General" onChange={(e) => updateSectionTier(0, e.target.value)} />
-
-                {wizardSectionCount === 2 && (
+                {wizardHasVerticalAisle === true && (
                   <>
-                    <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>What do you call the right section?</label>
-                    <input style={{ ...inputStyle, width: '220px', marginBottom: '12px' }} value={gridConfig.sectionTiers[1] || ''} placeholder="e.g. General" onChange={(e) => updateSectionTier(1, e.target.value)} />
-
                     <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>How wide should the walkway be?</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                       {[{ label: 'Narrow', px: 40 }, { label: 'Standard', px: 60 }, { label: 'Wide', px: 90 }].map((opt) => (
@@ -715,7 +712,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                   <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardSectionCount === null || !gridConfig.sectionTiers[0]?.trim() || (wizardSectionCount === 2 && !gridConfig.sectionTiers[1]?.trim())} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardSectionCount === null || !gridConfig.sectionTiers[0]?.trim() || (wizardSectionCount === 2 && !gridConfig.sectionTiers[1]?.trim())) ? 0.5 : 1 }}>Next</button>
+                  <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
                 </div>
               </div>
             )}
@@ -760,7 +757,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       Stage
                     </div>
                     {wizardPreviewSeats.map((s, i) => (
-                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, gridConfig.sectionTiers), opacity: 0.85, color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel)))), opacity: 0.85, color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {s.row}{s.number}
                       </div>
                     ))}
@@ -874,13 +871,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <button onClick={addVerticalAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
                     + Add vertical aisle
                   </button>
-
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Section names ({gridConfig.sectionTiers.length} section{gridConfig.sectionTiers.length === 1 ? '' : 's'}, left to right)</div>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                    {gridConfig.sectionTiers.map((tier, i) => (
-                      <input key={i} style={{ ...inputStyle, width: '140px' }} value={tier} placeholder={`Section ${i + 1}`} onChange={(e) => updateSectionTier(i, e.target.value)} />
-                    ))}
-                  </div>
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Horizontal aisles (a walking gap between two rows, e.g. a gangway)</div>
                   {gridConfig.aisles.map((a) => (
