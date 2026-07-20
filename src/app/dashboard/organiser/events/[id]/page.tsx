@@ -111,8 +111,23 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
         body: JSON.stringify({ publish: willPublish }),
       })
       if (!res.ok) throw new Error('Failed to update publish status')
-      await fetchEvent()
-      showToast(willPublish ? 'Event published.' : 'Event unpublished.', 'success')
+      const updated = await res.json()
+      setEvent(updated)
+      // The server re-checks the venue booking's confirmation status on
+      // every call - clicking "publish" on an already-pending event isn't
+      // a no-op, it's a legitimate recheck (useful if the venue owner
+      // approved since the page last loaded). The toast used to always
+      // say "Event published." regardless of what actually came back,
+      // which was misleading when the real result was still pending.
+      if (!willPublish) {
+        showToast('Event unpublished.', 'success')
+      } else if (updated.status === 'APPROVED') {
+        showToast('Event published and live.', 'success')
+      } else if (updated.status === 'PENDING_APPROVAL') {
+        showToast('Submitted - waiting on the venue owner to confirm the booking.', 'success')
+      } else {
+        showToast('Event updated.', 'success')
+      }
     } catch (err: any) {
       showToast(err.message || 'Failed to update publish status', 'error')
     } finally {
@@ -343,6 +358,11 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             <button
               onClick={togglePublish}
               disabled={toggling}
+              title={
+                event.status === 'PENDING_APPROVAL'
+                  ? 'Waiting on the venue owner to confirm the booking - click to check again'
+                  : undefined
+              }
               style={{
                 fontSize: '14px', fontWeight: 600, color: event.status === 'APPROVED' ? '#0E0C0A' : '#F7F3EE',
                 background: event.status === 'APPROVED' ? 'transparent' : '#C8441A',
@@ -350,7 +370,13 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', opacity: toggling ? 0.6 : 1,
               }}
             >
-              {toggling ? 'Updating...' : event.status === 'APPROVED' ? 'Unpublish' : 'Publish Event'}
+              {toggling
+                ? 'Updating...'
+                : event.status === 'APPROVED'
+                ? 'Unpublish'
+                : event.status === 'PENDING_APPROVAL'
+                ? 'Check approval status'
+                : 'Publish Event'}
             </button>
           </div>
         </div>
