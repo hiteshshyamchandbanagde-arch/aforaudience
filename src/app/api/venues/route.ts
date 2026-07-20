@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const {
       name, address, city, capacity, acousticRating, facilities, seatMap, publish,
-      rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl,
+      rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl, seatingMode,
     } = body
 
     if (!name || !address || !city) {
@@ -118,8 +118,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Google Maps link must be a valid URL (starting with https://).' }, { status: 400 })
       }
     }
+    const resolvedSeatingMode = seatingMode === 'NUMBERED' ? 'NUMBERED' : 'GENERAL_ADMISSION'
+    // NUMBERED venues skip the mandatory section-editor at creation time -
+    // the create form sends a plain capacity number instead of seatMap
+    // sections. Real per-seat layout is built later via the Seat Map
+    // Builder (Venue.seats), not stored in seatMap for this mode.
     const seatMapCapacity = sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
-    const finalCapacity = sections.length > 0 ? seatMapCapacity : parseInt(capacity)
+    const finalCapacity = resolvedSeatingMode === 'GENERAL_ADMISSION' && sections.length > 0 ? seatMapCapacity : parseInt(capacity)
 
     if (!finalCapacity || finalCapacity < 1) {
       return NextResponse.json(
@@ -139,7 +144,8 @@ export async function POST(req: Request) {
         ownerId: venueOwner.id,
         photos: [],
         facilities: Array.isArray(facilities) ? facilities : [],
-        seatMap: sections.length > 0 ? { sections } : undefined,
+        seatMap: resolvedSeatingMode === 'GENERAL_ADMISSION' && sections.length > 0 ? { sections } : undefined,
+        seatingMode: resolvedSeatingMode,
         // No admin-review pipeline exists yet, so venue owners publish their own
         // listings directly. Gate this behind real moderation once that exists.
         isApproved: Boolean(publish),
