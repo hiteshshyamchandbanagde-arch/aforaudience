@@ -56,13 +56,21 @@ function rowLetterAt(index: number): string {
   return s
 }
 
-type RowGroup = { id: string; rows: number; columns: number }
+// A zone is a named group of rows sharing the same seat count and price
+// identity (e.g. "Front", "Mid", "Recliner") - a real venue's actual
+// pricing structure. Vertical aisles are pure seat separators WITHIN a
+// zone (a walking gap, no pricing of their own); horizontal aisles are
+// usually where one zone ends and the next begins, though that's a
+// convention, not enforced.
+type RowGroup = { id: string; rows: number; columns: number; zoneName: string }
 type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
 // A vertical aisle is the mirror of a horizontal aisle - a gap after
-// column N instead of after row N. "Blocks" fall out of this for free:
-// 0 vertical aisles = 1 section (old "Single Block"), 1 aisle = 2
-// sections (old "Two Blocks"), N aisles = N+1 sections - no hardcoded
-// cap, and no separate blockCount concept to keep in sync with it.
+// column N instead of after row N. It is purely structural: it splits a
+// zone's seats for walking room, but does NOT create a separate pricing
+// identity - that comes from the zone (row-group) alone. "Blocks" fall
+// out of this for free: 0 vertical aisles = seats packed solid, 1 aisle
+// = a center walkway, N aisles = N+1 walking segments, all in the same
+// zone - no hardcoded cap, no separate blockCount concept.
 // Position is a FRACTION of each row's width (0-1), not an absolute
 // column - with tapering rows (different column counts per row-group),
 // a fixed column position pins one side to a constant width while the
@@ -77,10 +85,6 @@ type GridConfig = {
   rowGroups: RowGroup[]
   aisles: HorizontalAisle[]
   verticalAisles: VerticalAisle[]
-  // One tier/section name per segment between vertical aisles, in left-
-  // to-right order. Length is always verticalAisles.length + 1 - kept in
-  // sync by addVerticalAisle/removeVerticalAisle below.
-  sectionTiers: string[]
   // How rows of DIFFERENT widths (tapering row-groups) line up against
   // each other. 'left' packs every row flush against the same left
   // edge, so wider rows only grow rightward - a staircase, not a fan.
@@ -102,12 +106,18 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
   const totalRows = config.rowGroups.reduce((sum, g) => sum + g.rows, 0)
   const seats: Omit<SeatDraft, 'clientId'>[] = []
 
-  // Expand row-groups into a flat per-row column-count lookup. `columns`
-  // is now the TOTAL column count for that row across every section -
-  // vertical aisles subdivide it, they don't add to it.
+  // Expand row-groups into flat per-row lookups. `columns` is the TOTAL
+  // column count for that row - vertical aisles subdivide it, they don't
+  // add to it. `zoneName` carries each row-group's pricing identity onto
+  // every row it covers - this is a seat's tierLabel, full stop; vertical
+  // aisles never change it.
   const columnsForRow: number[] = []
+  const zoneForRow: string[] = []
   for (const g of config.rowGroups) {
-    for (let i = 0; i < g.rows; i++) columnsForRow.push(g.columns)
+    for (let i = 0; i < g.rows; i++) {
+      columnsForRow.push(g.columns)
+      zoneForRow.push(g.zoneName || 'General')
+    }
   }
 
   const sortedVAisles = [...config.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
@@ -127,6 +137,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     if (aisleHere) y += aisleHere.gapPx
 
     const cols = columnsForRow[r] || 0
+    const zoneName = zoneForRow[r] || 'General'
     const rowLetter = rowLetterAt(r)
 
     // Convert each aisle's fraction into THIS row's actual cut point -
@@ -161,8 +172,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
         x += sortedVAisles[segment].gapPx
         segment++
       }
-      const tierLabel = config.sectionTiers[segment] || config.sectionTiers[0] || 'General'
-      seats.push({ tierLabel, row: rowLetter, number: String(c), x, y })
+      seats.push({ tierLabel: zoneName, row: rowLetter, number: String(c), x, y })
       x += config.seatSpacingX
     }
 
@@ -230,10 +240,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     sideMarginPx: 30,
     seatSpacingX: 26,
     seatSpacingY: 30,
-    rowGroups: [{ id: makeClientId(), rows: 5, columns: 10 }],
+    rowGroups: [{ id: makeClientId(), rows: 5, columns: 10, zoneName: 'General' }],
     aisles: [],
     verticalAisles: [],
-    sectionTiers: ['General'],
     // 'center' is the realistic default for a real hall (rows widen
     // symmetrically around a shared axis) and is a no-op whenever every
     // row is the same width, so it's safe as a default either way.
@@ -247,50 +256,55 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // dense all-at-once form. "Draw It Myself" (existing canvas) stays a
   // fully first-class second path, not a fallback - some venue owners
   // want hands-on creative control and shouldn't be funneled away from it.
-  // Step order: shape -> rows (need a column count before sections can
-  // auto-place a walkway) -> sections -> horizontal aisle -> preview.
+  // Step order: shape -> zones (rows + zone names, one row-group per
+  // zone) -> vertical walkway (pure aisle, no naming) -> horizontal
+  // aisle -> preview.
   const [builderPath, setBuilderPath] = useState<'choose' | 'wizard' | 'canvas' | null>(null)
   const effectivePath = builderPath ?? (seats.length > 0 ? 'canvas' : 'choose')
   const [wizardStep, setWizardStep] = useState(0)
   const [wizardShape, setWizardShape] = useState<'rows' | 'other' | null>(null)
-  const [wizardUniform, setWizardUniform] = useState<boolean | null>(null)
-  const [wizardSectionCount, setWizardSectionCount] = useState<1 | 2 | null>(null)
+  const [wizardMultiZone, setWizardMultiZone] = useState<boolean | null>(null)
+  const [wizardHasVerticalAisle, setWizardHasVerticalAisle] = useState<boolean | null>(null)
   const [wizardHasAisle, setWizardHasAisle] = useState<boolean | null>(null)
 
-  const startWizard = () => { setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardUniform(null); setWizardSectionCount(null); setWizardHasAisle(null) }
+  const startWizard = () => { setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardMultiZone(null); setWizardHasVerticalAisle(null); setWizardHasAisle(null) }
   const startDrawMyself = () => setBuilderPath('canvas')
   const backToChoice = () => { setBuilderPath('choose'); setWizardStep(0) }
   const wizardNext = () => setWizardStep((s) => s + 1)
   const wizardBack = () => setWizardStep((s) => Math.max(0, s - 1))
 
-  const setUniformRows = (uniform: boolean) => {
-    setWizardUniform(uniform)
-    if (uniform) {
-      // Collapse to a single row-group so "rows" and "seats per row" map
-      // to one clean pair of numbers instead of the tapering-groups list.
+  // "Multiple zones" just means "more than one row-group" - each
+  // row-group already IS a zone (rows + seat count + a name). Single
+  // zone collapses to exactly one row-group spanning every row.
+  const setMultiZone = (multi: boolean) => {
+    setWizardMultiZone(multi)
+    if (!multi) {
       const totalRows = gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0) || 5
       const columns = gridConfig.rowGroups[0]?.columns || 10
-      setGridConfig((g) => ({ ...g, rowGroups: [{ id: makeClientId(), rows: totalRows, columns }] }))
-    } else if (gridConfig.rowGroups.length === 0) {
-      setGridConfig((g) => ({ ...g, rowGroups: [{ id: makeClientId(), rows: 5, columns: 10 }] }))
+      const zoneName = gridConfig.rowGroups[0]?.zoneName || 'General'
+      setGridConfig((g) => ({ ...g, rowGroups: [{ id: makeClientId(), rows: totalRows, columns, zoneName }] }))
+    } else if (gridConfig.rowGroups.length < 2) {
+      setGridConfig((g) => ({
+        ...g,
+        rowGroups: [
+          g.rowGroups[0] || { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Front' },
+          { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Back' },
+        ],
+      }))
     }
   }
 
-  // Wizard only offers 1 or 2 sections (arbitrary N stays in the
-  // advanced panel below, which already has full vertical-aisle control)
-  // - places the walkway at the row's midpoint (50%), which scales with
-  // tapering rows instead of pinning one side to a fixed width.
-  const setWizardSections = (count: 1 | 2) => {
-    setWizardSectionCount(count)
-    if (count === 1) {
-      setGridConfig((g) => ({ ...g, verticalAisles: [], sectionTiers: [g.sectionTiers[0] || 'General'] }))
-    } else {
-      setGridConfig((g) => ({
-        ...g,
-        verticalAisles: [{ id: makeClientId(), afterFraction: 0.5, gapPx: 60 }],
-        sectionTiers: [g.sectionTiers[0] || 'Left', g.sectionTiers[1] || 'Right'],
-      }))
-    }
+  // Wizard offers a single yes/no walkway (arbitrary N stays in the
+  // advanced panel, which already has full vertical-aisle control) -
+  // places it at the row's midpoint (50%), which scales with tapering
+  // rows instead of pinning one side to a fixed width. Purely a walking
+  // gap - it does not create a separate pricing section.
+  const setWizardVerticalAisle = (has: boolean) => {
+    setWizardHasVerticalAisle(has)
+    setGridConfig((g) => ({
+      ...g,
+      verticalAisles: has ? [{ id: makeClientId(), afterFraction: 0.5, gapPx: 60 }] : [],
+    }))
   }
 
   const setWizardAisle = (has: boolean) => {
@@ -306,34 +320,31 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setBuilderPath('canvas')
   }
 
-  const addRowGroup = () => setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10 }] }))
+  const addRowGroup = () =>
+    setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: `Zone ${g.rowGroups.length + 1}` }] }))
   const removeRowGroup = (id: string) => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.filter((r) => r.id !== id) }))
   const updateRowGroup = (id: string, field: 'rows' | 'columns', value: number) =>
     setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, [field]: Math.max(1, value) } : r)) }))
+  const updateRowGroupZone = (id: string, zoneName: string) =>
+    setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, zoneName: zoneName.slice(0, 60) } : r)) }))
 
   const addAisle = () => setGridConfig((g) => ({ ...g, aisles: [...g.aisles, { id: makeClientId(), afterRow: g.rowGroups.reduce((s, r) => s + r.rows, 0), gapPx: 30 }] }))
   const removeAisle = (id: string) => setGridConfig((g) => ({ ...g, aisles: g.aisles.filter((a) => a.id !== id) }))
   const updateAisle = (id: string, field: 'afterRow' | 'gapPx', value: number) =>
     setGridConfig((g) => ({ ...g, aisles: g.aisles.map((a) => (a.id === id ? { ...a, [field]: Math.max(0, value) } : a)) }))
 
-  // Vertical aisles keep sectionTiers in sync (length = aisles.length+1)
-  // so every segment always has a name field, in left-to-right order.
-  // New aisles default to an even spread across existing ones rather
-  // than a fixed column - stays sensible regardless of row width.
+  // Vertical aisles are pure positioning now - no section-name syncing
+  // needed, since pricing identity comes from the zone (row-group), not
+  // the aisle segment. New aisles default to an even spread across
+  // existing ones rather than a fixed column - stays sensible regardless
+  // of row width.
   const addVerticalAisle = () =>
     setGridConfig((g) => {
       const defaultFraction = (g.verticalAisles.length + 1) / (g.verticalAisles.length + 2)
-      const verticalAisles = [...g.verticalAisles, { id: makeClientId(), afterFraction: defaultFraction, gapPx: 60 }]
-      const sectionTiers = [...g.sectionTiers]
-      while (sectionTiers.length < verticalAisles.length + 1) sectionTiers.push(`Section ${sectionTiers.length + 1}`)
-      return { ...g, verticalAisles, sectionTiers }
+      return { ...g, verticalAisles: [...g.verticalAisles, { id: makeClientId(), afterFraction: defaultFraction, gapPx: 60 }] }
     })
   const removeVerticalAisle = (id: string) =>
-    setGridConfig((g) => {
-      const verticalAisles = g.verticalAisles.filter((a) => a.id !== id)
-      const sectionTiers = g.sectionTiers.slice(0, verticalAisles.length + 1)
-      return { ...g, verticalAisles, sectionTiers }
-    })
+    setGridConfig((g) => ({ ...g, verticalAisles: g.verticalAisles.filter((a) => a.id !== id) }))
   const updateVerticalAisle = (id: string, field: 'afterFraction' | 'gapPx', value: number) =>
     setGridConfig((g) => ({
       ...g,
@@ -341,8 +352,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         a.id === id ? { ...a, [field]: field === 'afterFraction' ? Math.min(0.95, Math.max(0.05, value)) : Math.max(0, value) } : a
       ),
     }))
-  const updateSectionTier = (index: number, value: string) =>
-    setGridConfig((g) => ({ ...g, sectionTiers: g.sectionTiers.map((t, i) => (i === index ? value.slice(0, 60) : t)) }))
 
   const generateGrid = () => {
     const totalRows = gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)
@@ -606,78 +615,90 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
             {wizardStep === 1 && (
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do all rows have the same number of seats?</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do you want different pricing zones by row depth?</h3>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                  e.g. "Front" costs more than "Back". Each zone is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
+                </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setUniformRows(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardUniform === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardUniform === true ? '#0E0C0A' : '#fff', color: wizardUniform === true ? '#fff' : '#0E0C0A' }}>
-                    Yes, same for every row
+                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === false ? '#0E0C0A' : '#fff', color: wizardMultiZone === false ? '#fff' : '#0E0C0A' }}>
+                    No, one zone for everything
                   </button>
-                  <button onClick={() => setUniformRows(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardUniform === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardUniform === false ? '#0E0C0A' : '#fff', color: wizardUniform === false ? '#fff' : '#0E0C0A' }}>
-                    No, it tapers (e.g. fewer seats near the stage)
+                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === true ? '#0E0C0A' : '#fff', color: wizardMultiZone === true ? '#fff' : '#0E0C0A' }}>
+                    Yes, multiple zones
                   </button>
                 </div>
 
-                {wizardUniform === true && (
-                  <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                {wizardMultiZone === false && (
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <div>
                       <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Total rows</label>
                       <input type="number" style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.rows || 1} onChange={(e) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'rows', Number(e.target.value) || 1)} />
                     </div>
                     <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Seats per row (total across the whole row)</label>
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Seats per row</label>
                       <input type="number" style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.columns || 1} onChange={(e) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'columns', Number(e.target.value) || 1)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Zone name</label>
+                      <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
                     </div>
                   </div>
                 )}
 
-                {wizardUniform === false && (
+                {wizardMultiZone === true && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>Add a group for each range of rows that shares the same seat count (e.g. rows 1-3 with 8 seats, rows 4-10 with 14 seats).</div>
+                    <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>Add a zone for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
                     {gridConfig.rowGroups.map((rg, i) => (
-                      <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '60px' }}>Group {i + 1}:</span>
+                      <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Zone {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
-                        <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
+                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
                         <label style={{ fontSize: '12px' }}>Seats:</label>
-                        <input type="number" style={{ ...inputStyle, width: '60px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                        <label style={{ fontSize: '12px' }}>Name:</label>
+                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
                     <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
-                      + Add another range
+                      + Add another zone
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardUniform === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardUniform === null ? 0.5 : 1 }}>Next</button>
+                  <button
+                    onClick={wizardNext}
+                    disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())}
+                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())) ? 0.5 : 1 }}
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             )}
 
             {wizardStep === 2 && (
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows into sections, like left/right?</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows, like left/right?</h3>
+                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                  This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step.
+                </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardSections(1)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardSectionCount === 1 ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardSectionCount === 1 ? '#0E0C0A' : '#fff', color: wizardSectionCount === 1 ? '#fff' : '#0E0C0A' }}>
-                    No, one section
+                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === false ? '#fff' : '#0E0C0A' }}>
+                    No, one solid block
                   </button>
-                  <button onClick={() => setWizardSections(2)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardSectionCount === 2 ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardSectionCount === 2 ? '#0E0C0A' : '#fff', color: wizardSectionCount === 2 ? '#fff' : '#0E0C0A' }}>
-                    Yes, two sections with a walkway
+                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === true ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === true ? '#fff' : '#0E0C0A' }}>
+                    Yes, a center walkway
                   </button>
                 </div>
                 <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
-                  Need three or more sections? Finish here with one or two, then use the advanced Generate Grid panel afterward — it supports any number of walkways.
+                  Need more than one walkway? Finish here, then use the advanced Generate Grid panel afterward — it supports any number.
                 </p>
 
-                <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>{wizardSectionCount === 2 ? 'What do you call the left section?' : 'What do you call this section?'}</label>
-                <input style={{ ...inputStyle, width: '220px', marginBottom: '12px' }} value={gridConfig.sectionTiers[0] || ''} placeholder="e.g. General" onChange={(e) => updateSectionTier(0, e.target.value)} />
-
-                {wizardSectionCount === 2 && (
+                {wizardHasVerticalAisle === true && (
                   <>
-                    <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>What do you call the right section?</label>
-                    <input style={{ ...inputStyle, width: '220px', marginBottom: '12px' }} value={gridConfig.sectionTiers[1] || ''} placeholder="e.g. General" onChange={(e) => updateSectionTier(1, e.target.value)} />
-
                     <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>How wide should the walkway be?</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                       {[{ label: 'Narrow', px: 40 }, { label: 'Standard', px: 60 }, { label: 'Wide', px: 90 }].map((opt) => (
@@ -691,7 +712,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                   <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardSectionCount === null || !gridConfig.sectionTiers[0]?.trim() || (wizardSectionCount === 2 && !gridConfig.sectionTiers[1]?.trim())} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardSectionCount === null || !gridConfig.sectionTiers[0]?.trim() || (wizardSectionCount === 2 && !gridConfig.sectionTiers[1]?.trim())) ? 0.5 : 1 }}>Next</button>
+                  <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
                 </div>
               </div>
             )}
@@ -736,7 +757,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       Stage
                     </div>
                     {wizardPreviewSeats.map((s, i) => (
-                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, gridConfig.sectionTiers), opacity: 0.85, color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel)))), opacity: 0.85, color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {s.row}{s.number}
                       </div>
                     ))}
@@ -850,13 +871,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <button onClick={addVerticalAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
                     + Add vertical aisle
                   </button>
-
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Section names ({gridConfig.sectionTiers.length} section{gridConfig.sectionTiers.length === 1 ? '' : 's'}, left to right)</div>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                    {gridConfig.sectionTiers.map((tier, i) => (
-                      <input key={i} style={{ ...inputStyle, width: '140px' }} value={tier} placeholder={`Section ${i + 1}`} onChange={(e) => updateSectionTier(i, e.target.value)} />
-                    ))}
-                  </div>
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Horizontal aisles (a walking gap between two rows, e.g. a gangway)</div>
                   {gridConfig.aisles.map((a) => (
