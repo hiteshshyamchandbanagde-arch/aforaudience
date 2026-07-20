@@ -52,6 +52,14 @@ export default function CreateVenuePage() {
     { id: makeId(), name: '', seats: '', price: '' },
   ])
 
+  // Decouples venue creation from the GA section/price form - an owner
+  // who plans to use Numbered Seating shouldn't have to invent a
+  // throwaway section just to get past this form. They still need SOME
+  // capacity number for listing/search purposes until they build the
+  // real seat map, so we ask for one plain number instead.
+  const [seatingChoice, setSeatingChoice] = useState<'GENERAL_ADMISSION' | 'NUMBERED'>('GENERAL_ADMISSION')
+  const [approxCapacity, setApproxCapacity] = useState('')
+
   // §4.5 - rental rate the Organiser pays to book this venue, separate
   // from the section ticket prices above (which are for the audience).
   const [rateType, setRateType] = useState<'HOURLY' | 'DAILY' | 'FLEXIBLE'>('FLEXIBLE')
@@ -109,8 +117,13 @@ export default function CreateVenuePage() {
 
     const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
 
-    if (validSections.length === 0) {
+    if (seatingChoice === 'GENERAL_ADMISSION' && validSections.length === 0) {
       fail('Add at least one seating section with a name and seat count.')
+      setSaving(false)
+      return
+    }
+    if (seatingChoice === 'NUMBERED' && !(Number(approxCapacity) > 0)) {
+      fail('Enter an approximate seating capacity (you\'ll build the real seat-by-seat layout after creating this venue).')
       setSaving(false)
       return
     }
@@ -143,7 +156,9 @@ export default function CreateVenuePage() {
           ...formData,
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
-          seatMap: { sections: validSections },
+          seatingMode: seatingChoice,
+          seatMap: seatingChoice === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
+          capacity: seatingChoice === 'NUMBERED' ? Number(approxCapacity) : undefined,
           rateType,
           hourlyRate: rateType === 'HOURLY' && hourlyRate ? Number(hourlyRate) : null,
           dailyRate: rateType === 'DAILY' && dailyRate ? Number(dailyRate) : null,
@@ -327,10 +342,51 @@ export default function CreateVenuePage() {
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
-                Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
+              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+                How is this venue's seating arranged?
               </p>
-              <SeatSectionEditor sections={sections} onChange={setSections} />
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '18px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSeatingChoice('GENERAL_ADMISSION')}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'GENERAL_ADMISSION' ? '#0E0C0A' : '#fff', color: seatingChoice === 'GENERAL_ADMISSION' ? '#F7F3EE' : '#0E0C0A' }}
+                >
+                  Section-based (General Admission)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSeatingChoice('NUMBERED')}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'NUMBERED' ? '#0E0C0A' : '#fff', color: seatingChoice === 'NUMBERED' ? '#F7F3EE' : '#0E0C0A' }}
+                >
+                  Numbered seats — I'll build this after
+                </button>
+              </div>
+
+              {seatingChoice === 'GENERAL_ADMISSION' && (
+                <>
+                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                    Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
+                  </p>
+                  <SeatSectionEditor sections={sections} onChange={setSections} />
+                </>
+              )}
+
+              {seatingChoice === 'NUMBERED' && (
+                <div>
+                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+                    You'll place real, numbered seats on a canvas shaped like your venue from the Seat Map Builder once this venue is created. For now, just give an approximate total capacity — used for listings until your real layout is saved.
+                  </p>
+                  <label style={labelStyle}>Approximate total capacity</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={approxCapacity}
+                    onChange={(e) => setApproxCapacity(e.target.value)}
+                    placeholder="e.g. 250"
+                    style={{ ...inputStyle, maxWidth: '160px' }}
+                  />
+                </div>
+              )}
             </section>
 
             {/* Actions */}
