@@ -147,7 +147,8 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
       })
 
       if (!res.ok) {
-        throw new Error('Failed to update venue')
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to update venue')
       }
 
       showToast('Venue saved.', 'success')

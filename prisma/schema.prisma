@@ -385,6 +385,7 @@ model Venue {
   // default, no backfill needed.
   seatingMode   VenueSeatingMode @default(GENERAL_ADMISSION)
   seats         Seat[]
+  zonePrices    VenueZonePrice[]
 
   availability  VenueAvailability[]
   bookings      VenueBooking[]
@@ -405,6 +406,10 @@ model Seat {
   venueId   String
   venue     Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
   tierLabel String
+  // Venue level (Ground Floor, Balcony, etc). Empty string is the
+  // implicit single level - existing single-level venues need no
+  // backfill, stays invisible in the UI unless the owner adds a level.
+  level     String @default("")
   row       String
   number    String
   x         Float
@@ -412,8 +417,27 @@ model Seat {
 
   bookingSeats BookingSeat[]
 
-  @@unique([venueId, row, number])
+  // Rows can legitimately repeat across levels (Ground row A vs Balcony
+  // row A), so uniqueness must include level, not just venueId+row+number.
+  @@unique([venueId, level, row, number])
   @@index([venueId, tierLabel])
+}
+
+// Per-zone suggested/default price, shown to the organiser at event
+// creation as a prefill they can override - NOT a lock. The actual price
+// an audience member pays still comes from TicketTier.price per event,
+// same as today; this table only removes the "start from a blank field"
+// gap for NUMBERED venues. Separate table (not a Seat column) since a
+// zone spans many seats and a price shouldn't be denormalized per-seat.
+model VenueZonePrice {
+  id             String @id @default(cuid())
+  venueId        String
+  venue          Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  level          String @default("")
+  zoneName       String
+  suggestedPrice Float?
+
+  @@unique([venueId, level, zoneName])
 }
 
 // §9.4 twenty-fourth amendment - join table for NUMBERED-mode bookings.
