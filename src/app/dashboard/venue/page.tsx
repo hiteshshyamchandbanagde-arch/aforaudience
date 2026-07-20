@@ -37,6 +37,7 @@ export default function VenueDashboard() {
   const router = useRouter()
   const [venues, setVenues] = useState<Venue[]>([])
   const [pendingBookings, setPendingBookings] = useState(0)
+  const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -82,9 +83,26 @@ export default function VenueDashboard() {
       }
     }
 
+    // Same pending-count badge pattern as Booking Requests above, for the
+    // Flexible-rate negotiation inbox - previously had no indicator at all,
+    // so a pending request against a Flexible venue was easy to miss unless
+    // the owner specifically thought to check this separate page.
+    const fetchFlexRequests = async () => {
+      try {
+        const res = await fetch('/api/venue-booking-requests')
+        if (res.ok) {
+          const data = await res.json()
+          setPendingFlexRequests(data.filter((r: any) => r.status === 'PENDING').length)
+        }
+      } catch {
+        // Non-critical for this view; the dedicated requests page will surface errors.
+      }
+    }
+
     if (session?.user) {
       fetchVenues()
       fetchBookings()
+      fetchFlexRequests()
     }
   }, [session])
 
@@ -155,9 +173,14 @@ export default function VenueDashboard() {
               </Link>
               <Link
                 href="/dashboard/venue-requests"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Flexible Requests
+                {pendingFlexRequests > 0 && (
+                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#C8441A', color: '#F7F3EE', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
+                    {pendingFlexRequests}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/dashboard/venue/create"

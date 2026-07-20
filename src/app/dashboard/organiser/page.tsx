@@ -34,6 +34,7 @@ export default function OrganiserDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null } | null>(null)
+  const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -61,8 +62,25 @@ export default function OrganiserDashboard() {
       }
     }
 
+    // Same pending-count badge pattern as the Venue Owner side's Booking
+    // Requests badge - the Flexible-rate negotiation inbox previously had
+    // no indicator, so a request sitting on the Organiser's own turn to
+    // respond was easy to miss.
+    const fetchFlexRequests = async () => {
+      try {
+        const res = await fetch('/api/venue-booking-requests')
+        if (res.ok) {
+          const data = await res.json()
+          setPendingFlexRequests(data.filter((r: any) => r.status === 'PENDING').length)
+        }
+      } catch {
+        // Non-critical for this view; the dedicated requests page will surface errors.
+      }
+    }
+
     if (session?.user) {
       fetchStatusAndEvents()
+      fetchFlexRequests()
     }
   }, [session])
 
@@ -124,9 +142,14 @@ export default function OrganiserDashboard() {
               </Link>
               <Link
                 href="/dashboard/venue-requests"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Flexible Requests
+                {pendingFlexRequests > 0 && (
+                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#C8441A', color: '#F7F3EE', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
+                    {pendingFlexRequests}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/dashboard/organiser/events/create"
