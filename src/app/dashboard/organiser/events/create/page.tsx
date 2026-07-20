@@ -26,6 +26,9 @@ interface VenueOption {
   city: string
   capacity: number
   seatMap?: { sections?: SeatSection[] } | null
+  seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
+  seats?: { tierLabel: string }[]
+  zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
   rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
   hourlyRate?: number | null
   dailyRate?: number | null
@@ -131,7 +134,31 @@ export default function CreateEventPage() {
   const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
 
   const selectedVenue = venues.find((v) => v.id === venueId)
-  const venueSections = selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
+  // GA: unchanged, reads the Venue Owner's own seatMap.sections. NUMBERED:
+  // that field is dead weight for these venues (never populated by the
+  // seat-map builder) - real pricing sections come from Seat.tierLabel
+  // (the zone) grouped into counts, with VenueZonePrice as a starting
+  // suggested price the organiser can still override below, same as GA.
+  // Known simplification: zones are aggregated by name across ALL levels
+  // - a same-named zone on two different levels merges into one priced
+  // tier here. Level-aware event pricing is a separate follow-up.
+  const numberedZoneSections: SeatSection[] =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? Object.entries(
+          (selectedVenue.seats || []).reduce<Record<string, number>>((acc, s) => {
+            acc[s.tierLabel] = (acc[s.tierLabel] || 0) + 1
+            return acc
+          }, {})
+        ).map(([zoneName, seatCount]) => ({
+          name: zoneName,
+          seats: seatCount,
+          price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName)?.suggestedPrice || 0,
+        }))
+      : []
+  const venueSections =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? numberedZoneSections
+      : selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
   const usingTierPricing = venueSections.length > 0
 
   // §4.5 - suggested rental amount, computed from the venue's own published

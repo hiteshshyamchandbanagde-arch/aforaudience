@@ -9,7 +9,15 @@ export async function GET() {
     const venues = await prisma.venue.findMany({
       // H3 - same suspension gate as events GET, see comment there.
       where: { isApproved: true, owner: { user: { isSuspended: false } } },
-      include: { dayRates: true },
+      include: {
+        dayRates: true,
+        // NUMBERED venues have no seatMap.sections (that field is GA-only
+        // dead weight for them) - the event-creation page derives its
+        // pricing sections from real Seat/VenueZonePrice data instead.
+        // tierLabel-only select keeps this cheap even for large layouts.
+        seats: { select: { tierLabel: true } },
+        zonePrices: { select: { level: true, zoneName: true, suggestedPrice: true } },
+      },
     })
     return NextResponse.json(venues)
   } catch (err) {
