@@ -19,6 +19,7 @@ interface Venue {
   mapsUrl?: string | null
   seatMap?: { sections?: SeatSection[] } | null
   isApproved: boolean
+  seatingMode: 'GENERAL_ADMISSION' | 'NUMBERED'
 }
 
 const inputStyle = {
@@ -121,7 +122,12 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     setSaving(true)
 
     const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
-    if (validSections.length === 0) {
+    // Same decoupling as venue creation (PR #146) - a NUMBERED venue's
+    // real seat structure lives in Seat Map Builder, not this GA section
+    // editor. This form was never updated for that when #146 shipped,
+    // so editing a NUMBERED venue was incorrectly forced through GA
+    // section validation regardless of seatingMode.
+    if (venue?.seatingMode === 'GENERAL_ADMISSION' && validSections.length === 0) {
       showToast('Add at least one seating section with a name and seat count.', 'error')
       setSaving(false)
       return
@@ -135,7 +141,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           ...formData,
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
-          seatMap: { sections: validSections },
+          seatMap: venue?.seatingMode === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -220,25 +226,47 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
-                Add, edit, or remove sections freely — capacity updates automatically.
-              </p>
-              <SeatSectionEditor sections={sections} onChange={setSections} />
 
-              <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>Have real numbered seats instead?</div>
-                  <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
-                    Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
+              {venue.seatingMode === 'GENERAL_ADMISSION' && (
+                <>
+                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                    Add, edit, or remove sections freely — capacity updates automatically.
+                  </p>
+                  <SeatSectionEditor sections={sections} onChange={setSections} />
+
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>Have real numbered seats instead?</div>
+                      <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
+                        Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
+                      </div>
+                    </div>
+                    <Link
+                      href={`/dashboard/venue/${id}/seat-map`}
+                      style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                    >
+                      Open Seat Map Builder →
+                    </Link>
                   </div>
+                </>
+              )}
+
+              {venue.seatingMode === 'NUMBERED' && (
+                <div style={{ padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>This venue uses Numbered Seating</div>
+                    <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
+                      Seats, rows, and zones are managed entirely in the Seat Map Builder — nothing to fill in here. Capacity ({venue.capacity} seats) reflects your saved seat map.
+                    </div>
+                  </div>
+                  <Link
+                    href={`/dashboard/venue/${id}/seat-map`}
+                    style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                  >
+                    Open Seat Map Builder →
+                  </Link>
                 </div>
-                <Link
-                  href={`/dashboard/venue/${id}/seat-map`}
-                  style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
-                >
-                  Open Seat Map Builder →
-                </Link>
-              </div>
+              )}
             </section>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>

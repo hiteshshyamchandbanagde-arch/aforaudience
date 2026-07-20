@@ -133,6 +133,19 @@ export async function POST(req: Request) {
       )
     }
 
+    // Publish gate: a NUMBERED venue has zero real seats at creation time
+    // by construction (the seat map is built afterward in a separate
+    // step), so publishing here would always mean "live with nothing an
+    // organiser can price against." Force draft; the owner publishes
+    // later from Edit once the real seat map exists (PATCH /api/venues/[id]
+    // enforces the same check there).
+    if (publish === true && resolvedSeatingMode === 'NUMBERED') {
+      return NextResponse.json(
+        { error: 'Numbered venues publish after the seat map is built, not at creation. Save as draft, build your seat map, then publish from the venue\'s Edit page.' },
+        { status: 400 }
+      )
+    }
+
     const venue = await prisma.venue.create({
       data: {
         name,

@@ -65,6 +65,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
 
+    // Publish gate: an organiser prices their event off whatever zones
+    // exist on a NUMBERED venue's real seat map, so a venue can't go
+    // live with nothing built yet - draft is fine, publish isn't, until
+    // there's at least one real saved seat. GA venues are unaffected
+    // (their own section requirement is enforced client-side as today).
+    if (publish === true && venue.seatingMode === 'NUMBERED') {
+      const seatCount = await prisma.seat.count({ where: { venueId: id } })
+      if (seatCount === 0) {
+        return NextResponse.json(
+          { error: 'Build your seat map before publishing - organisers price events off it, so it needs to be real first. Save as draft, then publish once seats are saved.' },
+          { status: 400 }
+        )
+      }
+    }
+
     const updatedVenue = await prisma.venue.update({
       where: { id },
       data: {

@@ -119,7 +119,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
           })),
         })
       }
-      await tx.venue.update({ where: { id }, data: { seatingMode } })
+      await tx.venue.update({
+        where: { id },
+        data: {
+          seatingMode,
+          // Capacity was only ever a placeholder number entered at
+          // creation for NUMBERED venues (no real seats existed yet).
+          // Once a real seat map is saved, capacity should reflect it -
+          // otherwise listings/search keep showing a stale guess forever.
+          ...(seatingMode === 'NUMBERED' ? { capacity: seats.length } : {}),
+        },
+      })
     })
 
     return NextResponse.json({ ok: true, seatCount: seats.length, seatingMode })
