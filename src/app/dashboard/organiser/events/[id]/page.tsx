@@ -34,6 +34,7 @@ interface EventDetail {
   endTime: string
   isFree: boolean
   ticketPrice: number | null
+  ticketTiers?: { id: string; sectionName: string; price: number; totalSeats: number }[]
   totalSeats: number
   availableSeats: number
   dresscode?: string | null
@@ -208,7 +209,20 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               </div>
               <div>
                 <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Ticket Price</p>
-                <p style={{ fontSize: '20px', fontWeight: 700, color: '#0E0C0A' }}>{event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}</p>
+                <p style={{ fontSize: '20px', fontWeight: 700, color: '#0E0C0A' }}>
+                  {event.isFree
+                    ? 'Free'
+                    : event.ticketPrice
+                    ? `₹${event.ticketPrice}`
+                    : event.ticketTiers && event.ticketTiers.length > 0
+                    ? (() => {
+                        const prices = event.ticketTiers.map((t) => t.price)
+                        const min = Math.min(...prices)
+                        const max = Math.max(...prices)
+                        return min === max ? `₹${min}` : `₹${min} – ₹${max}`
+                      })()
+                    : '—'}
+                </p>
               </div>
               {event.dresscode && (
                 <div>
