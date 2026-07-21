@@ -30,7 +30,16 @@ type Props = {
 
 const CANVAS_WIDTH = 900
 const CANVAS_HEIGHT = 560
+// Seat size as a fraction of the canvas, not a fixed pixel value - x/y
+// positions are already percentage-based (scale with the container), so
+// a fixed-px seat size stayed constant while spacing shrank at narrower
+// render widths (e.g. inside this sidebar panel), causing seats to
+// visually overlap. Expressing width/height as their own axis's
+// percentage of SEAT_SIZE/CANVAS_* keeps the seat square and in sync
+// with the container at any width - see SeatPicker overlap bug, 22 Jul.
 const SEAT_SIZE = 22
+const SEAT_WIDTH_PCT = (SEAT_SIZE / CANVAS_WIDTH) * 100
+const SEAT_HEIGHT_PCT = (SEAT_SIZE / CANVAS_HEIGHT) * 100
 
 export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onChange }: Props) {
   const [seats, setSeats] = useState<SeatInfo[]>([])
@@ -89,7 +98,8 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           border: '1px solid rgba(14,12,10,0.15)',
           borderRadius: '10px',
           overflow: 'hidden',
-        }}
+          containerType: 'inline-size',
+        } as any}
       >
         <div
           style={{
@@ -120,14 +130,20 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 position: 'absolute',
                 left: `${(s.x / CANVAS_WIDTH) * 100}%`,
                 top: `${(s.y / CANVAS_HEIGHT) * 100}%`,
-                width: `${SEAT_SIZE}px`,
-                height: `${SEAT_SIZE}px`,
-                marginLeft: `-${SEAT_SIZE / 2}px`,
-                marginTop: `-${SEAT_SIZE / 2}px`,
+                width: `${SEAT_WIDTH_PCT}%`,
+                height: `${SEAT_HEIGHT_PCT}%`,
+                marginLeft: `-${SEAT_WIDTH_PCT / 2}%`,
+                // CSS quirk: percentage margin-top/-bottom resolve against the
+                // containing block's WIDTH, not its height, even though this is
+                // a vertical offset. Since the seat is square (width_px ===
+                // height_px by construction above), the width-based percentage
+                // here is the correct value - using SEAT_HEIGHT_PCT would be
+                // computed against the wrong axis and mis-center vertically.
+                marginTop: `-${SEAT_WIDTH_PCT / 2}%`,
                 borderRadius: '5px',
                 background: bg,
                 color: s.status === 'taken' || s.status === 'priceUnset' ? '#0E0C0A66' : '#fff',
-                fontSize: '9px',
+                fontSize: 'clamp(5px, 1.3cqw, 9px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
