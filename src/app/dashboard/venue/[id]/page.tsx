@@ -23,6 +23,9 @@ interface Venue {
   acousticRating?: number
   facilities: string[]
   seatMap?: { sections?: SeatSection[] } | null
+  seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
+  seats?: { tierLabel: string }[]
+  zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
   isApproved: boolean
   createdAt: string
 }
@@ -97,6 +100,29 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   const sections = venue.seatMap?.sections || []
+
+  // NUMBERED venues have no seatMap.sections - their zones live in real
+  // Seat/VenueZonePrice rows instead (same data event-creation pricing
+  // reads). Grouping by level+zoneName so same-named zones on different
+  // levels stay distinct, consistent with the design.md §9 zone model.
+  const numberedZones = (() => {
+    if (venue.seatingMode !== 'NUMBERED' || !venue.seats) return []
+    const counts = new Map<string, { level: string; zoneName: string; count: number }>()
+    for (const seat of venue.seats) {
+      const key = seat.tierLabel
+      const existing = counts.get(key)
+      if (existing) existing.count += 1
+      else counts.set(key, { level: '', zoneName: seat.tierLabel, count: 1 })
+    }
+    const priceByZone = new Map<string, number | null>()
+    for (const zp of venue.zonePrices || []) {
+      priceByZone.set(`${zp.level}::${zp.zoneName}`, zp.suggestedPrice)
+    }
+    return Array.from(counts.values()).map((z) => ({
+      ...z,
+      price: priceByZone.get(`${z.level}::${z.zoneName}`) ?? null,
+    }))
+  })()
   const prices = sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
   const minPrice = prices.length ? Math.min(...prices) : null
   const maxPrice = prices.length ? Math.max(...prices) : null
@@ -177,7 +203,37 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
             <div>
               <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Seating Sections</h2>
-              {sections.length === 0 ? (
+              {venue.seatingMode === 'NUMBERED' ? (
+                numberedZones.length === 0 ? (
+                  <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+                    No seat map built yet — use Seat Map Builder to add zones and seats.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {numberedZones.map((z) => (
+                      <div
+                        key={`${z.level}::${z.zoneName}`}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          padding: '12px 16px',
+                          background: '#F7F3EE',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, color: '#0E0C0A' }}>
+                          {z.zoneName}{z.level ? ` · ${z.level}` : ''}
+                        </span>
+                        <span style={{ color: '#0E0C0A', opacity: 0.7 }}>{z.count} seats</span>
+                        <span style={{ fontWeight: 700, color: '#C8441A' }}>
+                          {z.price ? `₹${z.price}` : '—'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : sections.length === 0 ? (
                 <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>No seating sections defined yet.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
