@@ -157,16 +157,23 @@ export const authOptions: NextAuthOptions = {
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { tokenVersion: true, displayName: true, isVerified: true, isSuspended: true },
+          select: { role: true, tokenVersion: true, displayName: true, isVerified: true, isSuspended: true },
         })
 
-        // Refresh displayName and isVerified on every session check - the
-        // former so a Profile edit shows up immediately, the latter so
+        // Refresh displayName, isVerified, and role on every session check -
+        // the first so a Profile edit shows up immediately, the second so
         // completing phone verification (see /verify-phone) unblocks
-        // booking without requiring a re-login.
+        // booking without requiring a re-login, and the third so a one-time
+        // Audience -> Organiser/Venue Owner/Artist elevation approved mid-
+        // session takes effect immediately instead of waiting out the JWT's
+        // life. Role only ever moves one-way from Audience, never laterally
+        // between the elevated roles, so this can't downgrade an already-
+        // elevated session - it only ever catches the session up to a
+        // legitimate approval that happened after login.
         if (currentUser) {
           (session.user as any).displayName = currentUser.displayName
           ;(session.user as any).isVerified = currentUser.isVerified
+          ;(session.user as any).role = currentUser.role
         }
 
         // H3 - a suspension applied mid-session shouldn't wait out the

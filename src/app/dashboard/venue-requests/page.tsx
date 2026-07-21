@@ -100,14 +100,17 @@ export default function VenueRequestsPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : '/dashboard/organiser'} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : callerSide === 'ORGANISER' ? '/dashboard/organiser' : '/'} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Dashboard
           </Link>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
             Venue Booking Requests
           </h1>
           <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
-            Flexible-rate venue negotiations — {callerSide === 'VENUE_OWNER' ? 'requests against your venues' : 'your outstanding requests'}.
+            Flexible-rate venue negotiations
+            {callerSide === 'VENUE_OWNER' ? ' — requests against your venues.'
+              : callerSide === 'ORGANISER' ? ' — your outstanding requests.'
+              : '.'}
           </p>
 
           {loadError && (

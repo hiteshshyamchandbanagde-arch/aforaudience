@@ -42,9 +42,6 @@ export async function POST(req: Request) {
     if (!organiser.isApproved) {
       return NextResponse.json({ error: 'Your Organiser account is still pending approval' }, { status: 403 })
     }
-    const verifyError = requireVerifiedPhone(user, 'publishing this event')
-    if (verifyError) return verifyError
-
     const body = await req.json()
     const {
       title, description, type, date, startTime, endTime,
@@ -52,6 +49,15 @@ export async function POST(req: Request) {
       venueId, bookingAmount, publish, ticketTiers,
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
     } = body
+
+    // Verify-gate only applies at Publish - a Draft isn't a commitment an
+    // Organiser plans around yet (see lib/verification.ts doc comment).
+    // Body is parsed first so Draft saves for unverified organisers always
+    // reach here instead of being rejected before their data is even read.
+    if (publish === true) {
+      const verifyError = requireVerifiedPhone(user, 'publishing this event')
+      if (verifyError) return verifyError
+    }
 
     if (!title || !description || !type || !date || !startTime || !endTime || !totalSeats) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
