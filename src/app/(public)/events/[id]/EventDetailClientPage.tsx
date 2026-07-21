@@ -94,6 +94,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
     : 0
 
   const updateSeat = (section: string, delta: number, max: number) => {
+    setBookingError("")
     setSelectedSeats((prev) => {
       const current = prev[section] || 0
       const next = Math.max(0, Math.min(current + delta, max, event?.maxSeatsPerBooking || 4))
@@ -418,6 +419,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       maxSeatsPerBooking={event.maxSeatsPerBooking}
                       selected={selectedSeatIds}
                       onChange={(ids, amount) => {
+                        setBookingError("")
                         setSelectedSeatIds(ids)
                         setNumberedAmount(amount)
                       }}

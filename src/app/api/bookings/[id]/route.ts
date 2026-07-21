@@ -39,6 +39,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           },
         },
         payment: true,
+        // Numbered-venue bookings store `seats: {}` (empty) by design -
+        // the real per-seat picks live here instead. Without this include,
+        // the checkout page had no data path to show which seats were
+        // booked. See §9.2 "checkout page missing seat/zone breakdown",
+        // 22 Jul.
+        bookingSeats: { include: { seat: true } },
       },
     })
     if (!booking) {
@@ -54,11 +60,22 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       booking.expiresAt !== null &&
       booking.expiresAt < now
 
+    // Same price-resolution rule as GET /api/events/[id]/seats - Seat.tierLabel
+    // isn't a hard FK to TicketTier, matched by name instead.
+    const priceByTier = new Map(booking.event.ticketTiers.map((t) => [t.sectionName, t.price]))
+    const numberedSeats = booking.bookingSeats.map((bs) => ({
+      tierLabel: bs.seat.tierLabel,
+      row: bs.seat.row,
+      number: bs.seat.number,
+      price: priceByTier.get(bs.seat.tierLabel) ?? null,
+    }))
+
     return NextResponse.json({
       booking: {
         id: booking.id,
         status: booking.status,
         seats: booking.seats,
+        numberedSeats,
         totalAmount: booking.totalAmount,
         subtotalAmount: booking.subtotalAmount,
         bookingFeeAmount: booking.bookingFeeAmount,

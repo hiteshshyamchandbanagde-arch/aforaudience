@@ -37,6 +37,7 @@ type BookingState = {
     id: string
     status: string
     seats: Record<string, number>
+    numberedSeats: { tierLabel: string; row: string; number: string; price: number | null }[]
     totalAmount: number
     subtotalAmount: number
     bookingFeeAmount: number
@@ -197,6 +198,27 @@ export default function CheckoutPage() {
     )
   }
 
+  // Seat display, GA or Numbered. GA bookings keep using `booking.seats`
+  // ({ sectionName: qty }) exactly as before - untouched. Numbered bookings
+  // store `seats: {}` by design (real picks live in `numberedSeats` instead,
+  // see GET /api/bookings/[id]) - group those by tier for display.
+  const gaSeatEntries = Object.entries(state.booking.seats).filter(
+    ([, q]) => Number(q) > 0
+  ) as [string, number][]
+  const numberedGroups = Object.values(
+    state.booking.numberedSeats.reduce((acc, s) => {
+      const key = s.tierLabel
+      if (!acc[key]) acc[key] = { tierLabel: key, count: 0, price: s.price, seatLabels: [] as string[] }
+      acc[key].count += 1
+      acc[key].seatLabels.push(`${s.row}${s.number}`)
+      return acc
+    }, {} as Record<string, { tierLabel: string; count: number; price: number | null; seatLabels: string[] }>)
+  )
+  const seatsSummaryText =
+    numberedGroups.length > 0
+      ? numberedGroups.map((g) => `${g.tierLabel} (${g.seatLabels.join(', ')})`).join(', ')
+      : gaSeatEntries.map(([s, q]) => `${s} × ${q}`).join(', ')
+
   // --- Confirmed state
   if (confirmed) {
     return (
@@ -239,10 +261,7 @@ export default function CheckoutPage() {
             </div>
             <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Seats</div>
             <div style={{ fontSize: 14, marginBottom: 12 }}>
-              {Object.entries(state.booking.seats)
-                .filter(([, q]) => Number(q) > 0)
-                .map(([s, q]) => `${s} × ${q}`)
-                .join(', ')}
+              {seatsSummaryText}
             </div>
             <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Amount paid</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>
@@ -379,10 +398,6 @@ export default function CheckoutPage() {
   }
 
   // --- Normal checkout state
-  const seatLines = Object.entries(state.booking.seats).filter(
-    ([, q]) => Number(q) > 0
-  ) as [string, number][]
-
   return (
     <>
       <SiteNav backHref={`/events/${state.booking.event.id}`} backLabel="← Back to event" />
@@ -443,24 +458,46 @@ export default function CheckoutPage() {
               marginBottom: 12,
             }}
           >
-            {seatLines.map(([section, qty]) => (
-              <div
-                key={section}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '6px 0',
-                  fontSize: 14,
-                }}
-              >
-                <span>
-                  {section} × {qty}
-                </span>
-                <span style={{ opacity: 0.7 }}>
-                  ₹{state.booking.subtotalAmount.toLocaleString('en-IN')}
-                </span>
-              </div>
-            ))}
+            {numberedGroups.length > 0
+              ? numberedGroups.map((g) => (
+                  <div
+                    key={g.tierLabel}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '6px 0',
+                      fontSize: 14,
+                    }}
+                  >
+                    <span>
+                      {g.tierLabel} × {g.count}
+                      <span style={{ fontSize: 11, opacity: 0.6, display: 'block', marginTop: 2 }}>
+                        Seat{g.count === 1 ? '' : 's'} {g.seatLabels.join(', ')}
+                      </span>
+                    </span>
+                    <span style={{ opacity: 0.7 }}>
+                      {g.price !== null ? `₹${(g.price * g.count).toLocaleString('en-IN')}` : '—'}
+                    </span>
+                  </div>
+                ))
+              : gaSeatEntries.map(([section, qty]) => (
+                  <div
+                    key={section}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '6px 0',
+                      fontSize: 14,
+                    }}
+                  >
+                    <span>
+                      {section} × {qty}
+                    </span>
+                    <span style={{ opacity: 0.7 }}>
+                      ₹{state.booking.subtotalAmount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                ))}
             {state.booking.bookingFeeAmount > 0 && (
               <div
                 style={{

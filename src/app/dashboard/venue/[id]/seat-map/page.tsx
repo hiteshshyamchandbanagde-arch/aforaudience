@@ -1038,11 +1038,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '10px', fontStyle: 'italic' }}>
-                {seats.length === 0 && (
-                  <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: '#0E0C0A', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
-                    ← Back to setup options
-                  </button>
-                )}
+                <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: '#0E0C0A', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
+                  ← Back to setup options
+                </button>
                 Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
               </div>
 
