@@ -13,7 +13,7 @@ import { createContext, useCallback, useContext, useState } from 'react';
  * Usage: const { showToast } = useToast(); showToast('Something went wrong', 'error')
  */
 
-type ToastKind = 'error' | 'success';
+type ToastKind = 'error' | 'success' | 'info';
 
 interface Toast {
   id: number;
@@ -86,9 +86,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       >
         {toasts.map((t) => {
-          const accent = t.kind === 'error' ? '#C8441A' : '#2D6A4F'
-          const bg = t.kind === 'error' ? '#FDECEA' : '#E7F4EC'
-          const text = t.kind === 'error' ? '#7A281F' : '#1E4620'
+          const accent = t.kind === 'error' ? '#C8441A' : t.kind === 'info' ? '#C9973A' : '#2D6A4F'
+          const bg = t.kind === 'error' ? '#FDECEA' : t.kind === 'info' ? '#FBF3E4' : '#E7F4EC'
+          const text = t.kind === 'error' ? '#7A281F' : t.kind === 'info' ? '#8a6a1f' : '#1E4620'
           return (
             <div
               key={t.id}
@@ -127,7 +127,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   marginTop: 1,
                 }}
               >
-                {t.kind === 'error' ? '!' : '✓'}
+                {t.kind === 'error' ? '!' : t.kind === 'info' ? 'i' : '✓'}
               </span>
               <span style={{ flex: 1, fontWeight: 500 }}>{t.message}</span>
               <button

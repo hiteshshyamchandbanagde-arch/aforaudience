@@ -51,14 +51,20 @@ export async function POST(req: Request) {
     if (!venueOwner.isApproved) {
       return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
     }
-    const verifyError = requireVerifiedPhone(user, 'publishing this venue - organisers plan real bookings around it')
-    if (verifyError) return verifyError
-
     const body = await req.json()
     const {
       name, address, city, capacity, acousticRating, facilities, seatMap, publish,
       rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl, seatingMode,
     } = body
+
+    // Verify-gate only applies at Publish - a Draft isn't a commitment an
+    // Organiser plans around yet (see lib/verification.ts doc comment).
+    // Body is parsed first so Draft saves for unverified owners always
+    // reach here instead of being rejected before their data is even read.
+    if (publish === true) {
+      const verifyError = requireVerifiedPhone(user, 'publishing this venue - organisers plan real bookings around it')
+      if (verifyError) return verifyError
+    }
 
     if (!name || !address || !city) {
       return NextResponse.json(

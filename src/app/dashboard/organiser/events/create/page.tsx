@@ -322,6 +322,12 @@ export default function CreateEventPage() {
       }
 
       const newEvent = await res.json()
+      const isVerified = (session?.user as any)?.isVerified
+      if (!publish && !isVerified) {
+        showToast('Saved as draft. Kindly verify your mobile number to publish this without hassle.', 'info')
+      } else if (publish && venueId) {
+        showToast('Event submitted — pending venue owner confirmation before it goes live.', 'info')
+      }
       router.push(`/dashboard/organiser/events/${newEvent.id}`)
     } catch (err: any) {
       fail(err.message)

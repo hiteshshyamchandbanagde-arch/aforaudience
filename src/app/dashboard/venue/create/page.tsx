@@ -77,6 +77,58 @@ export default function CreateVenuePage() {
     }
   }, [status, router])
 
+  // Draft persistence across the verify-phone redirect (bug: form state
+  // was purely in-memory, so clicking "Verify now" mid-fill and coming
+  // back via /verify-phone?next=... remounted this page empty). Restored
+  // once on mount, kept fresh on every change, cleared on successful
+  // submit. sessionStorage (not localStorage) so it doesn't linger across
+  // unrelated tabs/sessions once this tab is closed.
+  const DRAFT_KEY = 'afa:venueCreateDraft'
+  const [draftRestored, setDraftRestored] = useState(false)
+
+  useEffect(() => {
+    if (draftRestored) return
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const draft = JSON.parse(raw)
+        if (draft.formData) setFormData(draft.formData)
+        if (typeof draft.facilitiesInput === 'string') setFacilitiesInput(draft.facilitiesInput)
+        if (Array.isArray(draft.sections)) setSections(draft.sections)
+        if (draft.seatingChoice) setSeatingChoice(draft.seatingChoice)
+        if (typeof draft.approxCapacity === 'string') setApproxCapacity(draft.approxCapacity)
+        if (draft.rateType) setRateType(draft.rateType)
+        if (typeof draft.hourlyRate === 'string') setHourlyRate(draft.hourlyRate)
+        if (typeof draft.dailyRate === 'string') setDailyRate(draft.dailyRate)
+        if (typeof draft.minDurationHours === 'string') setMinDurationHours(draft.minDurationHours)
+        if (typeof draft.useDayOverrides === 'boolean') setUseDayOverrides(draft.useDayOverrides)
+        if (draft.dayRates) setDayRates(draft.dayRates)
+        showToast('Restored your in-progress venue details.', 'success')
+      }
+    } catch {
+      // Corrupt/unreadable draft - ignore and start fresh rather than block the page.
+    } finally {
+      setDraftRestored(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!draftRestored) return // don't overwrite a saved draft with pre-restore defaults
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+        formData, facilitiesInput, sections, seatingChoice, approxCapacity,
+        rateType, hourlyRate, dailyRate, minDurationHours, useDayOverrides, dayRates,
+      }))
+    } catch {
+      // Storage full/unavailable - not worth surfacing to the user mid-fill.
+    }
+  }, [draftRestored, formData, facilitiesInput, sections, seatingChoice, approxCapacity, rateType, hourlyRate, dailyRate, minDurationHours, useDayOverrides, dayRates])
+
+  const clearDraft = () => {
+    try { sessionStorage.removeItem(DRAFT_KEY) } catch { /* noop */ }
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -174,6 +226,11 @@ export default function CreateVenuePage() {
       }
 
       const newVenue = await res.json()
+      clearDraft()
+      const isVerified = (session?.user as any)?.isVerified
+      if (!publish && !isVerified) {
+        showToast('Saved as draft. Kindly verify your mobile number to publish this without hassle.', 'info')
+      }
       router.push(`/dashboard/venue/${newVenue.id}`)
     } catch (err: any) {
       fail(err.message)
@@ -415,7 +472,7 @@ export default function CreateVenuePage() {
               >
                 Save as Draft
               </button>
-              <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
+              <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
                 Cancel
               </Link>
             </div>
