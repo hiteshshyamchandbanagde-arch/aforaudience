@@ -33,8 +33,13 @@ export async function registerTestAudience(page: Page) {
 
   // Registration moves to an inline OTP stage on the same page (not a
   // redirect) and renders the dev code directly - read it off the DOM.
+  // Generous timeout: the first request of a whole test run can hit a cold
+  // Vercel function + Supabase pool wake-up (confirmed via a real run, 22
+  // Jul - only the very first request across the whole suite was slow,
+  // everything after was fast) - this isn't flakiness to paper over, it's
+  // a real property of this environment.
   const devOtpBox = page.getByText(/QA Mode — dev OTP:/i);
-  await expect(devOtpBox).toBeVisible({ timeout: 10_000 });
+  await expect(devOtpBox).toBeVisible({ timeout: 25_000 });
   const devOtpText = await devOtpBox.locator("strong").innerText();
   const code = devOtpText.trim();
   expect(code).toMatch(/^\d{6}$/);
@@ -45,7 +50,9 @@ export async function registerTestAudience(page: Page) {
   await otpInput.fill(code);
   await page.getByRole("button", { name: /verify/i }).click();
 
-  await expect(page).toHaveURL(/\/login\?registered=true/, { timeout: 10_000 });
+  // Next.js appends a trailing slash before the query string here
+  // ("/login/?registered=true", confirmed via a real QA run) - allow it.
+  await expect(page).toHaveURL(/\/login\/?\?registered=true/, { timeout: 15_000 });
 
   return { username, email, phone: `+91${phoneDigits}`, password, fullName };
 }
