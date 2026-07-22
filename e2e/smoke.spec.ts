@@ -8,7 +8,9 @@ import { test, expect } from "@playwright/test";
 
 test("homepage loads and shows persona value props", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/AforAudience/i);
+  // Real title has spaces: "A for Audience — Where Art Finds Its Crowd" -
+  // not "AforAudience" as one word (confirmed via a real QA run, 22 Jul).
+  await expect(page).toHaveTitle(/A\s*for\s*Audience/i);
 });
 
 test("events listing renders at least one published event", async ({ page }) => {
