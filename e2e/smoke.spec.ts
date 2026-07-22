@@ -22,8 +22,18 @@ test("events listing renders at least one published event", async ({ page }) => 
 
 test("Jaipur Mic Gala 100 event detail page loads with seat picker", async ({ page }) => {
   await page.goto("/events");
-  const eventLink = page.getByText("Jaipur Mic Gala 100", { exact: false });
-  await expect(eventLink).toBeVisible({ timeout: 10_000 });
-  await eventLink.first().click();
-  await expect(page).toHaveURL(/\/events\//);
+  // Only "View Event" is a real <Link> - the card title text itself isn't
+  // clickable (confirmed via a real trace, 23 Jul: clicking the bare title
+  // did nothing, and a loose /events/ regex silently "passed" anyway since
+  // it also matches the listing page itself).
+  const card = page
+    .locator("div")
+    .filter({ hasText: "Jaipur Mic Gala 100" })
+    .filter({ has: page.getByRole("link", { name: /view event/i }) })
+    .last();
+  await card.getByRole("link", { name: /view event/i }).click();
+  // Require an actual id segment after /events/ - the loose /\/events\//
+  // regex matches the listing page too and would false-pass even with no
+  // navigation at all.
+  await expect(page).toHaveURL(/\/events\/[^/?]+\/?($|\?)/, { timeout: 10_000 });
 });

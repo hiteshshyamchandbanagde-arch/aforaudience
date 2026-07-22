@@ -33,8 +33,21 @@ test("audience member can register, log in, select seats, and reach checkout wit
   await expect(page).toHaveURL(/\/$/, { timeout: 10_000 }); // login redirects to "/"
 
   await page.goto("/events");
-  await page.getByText("Jaipur Mic Gala 100", { exact: false }).first().click();
-  await expect(page).toHaveURL(/\/events\//);
+  // Only "View Event" is a real <Link> - the card title text itself isn't
+  // clickable (confirmed via a real trace, 23 Jul: clicking the bare title
+  // did nothing, and a loose /events/ regex silently "passed" anyway since
+  // it also matches the listing page itself, hiding the real failure until
+  // the seat locator timed out several steps later).
+  const card = page
+    .locator("div")
+    .filter({ hasText: "Jaipur Mic Gala 100" })
+    .filter({ has: page.getByRole("link", { name: /view event/i }) })
+    .last();
+  await card.getByRole("link", { name: /view event/i }).click();
+  // Require an actual id segment after /events/ - the loose /\/events\//
+  // regex matches the listing page too and would false-pass with zero
+  // navigation.
+  await expect(page).toHaveURL(/\/events\/[^/?]+\/?($|\?)/, { timeout: 10_000 });
 
   // SeatPicker has no data-* status attribute - the only real signal is the
   // title tooltip, which reads "Row X, Seat N — ₹price" for available seats
