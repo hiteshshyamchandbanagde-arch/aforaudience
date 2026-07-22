@@ -26,13 +26,18 @@ tests interactively and seeing exactly which selector matched.
 - `smoke.spec.ts` — no-auth checks (homepage, events listing, event detail
   page load). These always run and are the fastest signal something is
   actually broken vs. a test needing an update.
-- `numbered-seat-booking.spec.ts` — the real audience seat-booking flow.
-  **Currently `test.skip`'d** — completing a real booking requires passing
-  phone OTP verification (`requireVerifiedPhone`), and there's no QA-only
-  OTP bypass yet. See the file header for the three options; needs a
-  decision from Hitesh before this can be unskipped. Do not add a bypass
-  without an explicit decision — a standing test-auth shortcut is exactly
-  the kind of thing that must never leak into prod.
+- `numbered-seat-booking.spec.ts` — registers a fresh throwaway audience
+  account, verifies its phone using the real on-screen QA dev-OTP (see
+  `helpers/auth.ts` — this is the actual code the app generated, read off
+  the DOM, not a bypass), logs in, selects a seat on "Jaipur Mic Gala 100",
+  and confirms checkout shows the correct seat + amount. **Runs for real,
+  not skipped.**
+  A second test in the same file (`test.skip`) is the one remaining gap:
+  completing the actual Razorpay payment. Selectors for Razorpay's hosted
+  checkout iframe aren't guessed/hardcoded here — run
+  `npx playwright codegen <qa-url>/events/<event-id>` once, click through a
+  real test-mode payment (card `4111 1111 1111 1111`), and the real
+  selectors fall out of the recording. Unskip once that's done.
 
 ## Adding a new test
 
