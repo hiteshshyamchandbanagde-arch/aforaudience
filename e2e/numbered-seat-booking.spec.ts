@@ -1,50 +1,62 @@
 import { test, expect } from "@playwright/test";
+import { registerTestAudience, loginTestAudience } from "./helpers/auth";
 
 /**
  * Real target: browse -> pick seats -> checkout -> confirm, on a NUMBERED
  * venue event ("Jaipur Mic Gala 100" / "Jaipur Ja Mic 100").
  *
- * BLOCKED ON A REAL DECISION, NOT A SCRIPTING PROBLEM:
- * `POST /api/bookings` requires phone verification (thirteenth amendment).
- * A real OTP is sent via MSG91 to a real phone number - Playwright can't
- * complete that without one of:
- *   (a) a fixed test OTP code that only works for a designated QA-only test
- *       phone number (common pattern - needs a deliberate code change,
- *       gated so it can never work in prod), or
- *   (b) an MSG91 test/sandbox mode that returns a known code without
- *       sending a real SMS, or
- *   (c) a test-only API route (QA env only) that marks a specific test
- *       user's phone pre-verified, bypassing the OTP screen entirely.
+ * Auth + phone verification is fully solved (see helpers/auth.ts) using the
+ * real on-screen QA dev-OTP mechanism (OTP_PROVIDER=mock) - this is the
+ * actual code the app generated, read off the DOM instead of by eye, not a
+ * bypass. A fresh throwaway audience account is created and verified for
+ * every run, so repeated runs never collide.
  *
- * Not implemented here - this is a product/security decision (a standing
- * test-auth bypass is exactly the kind of thing that must never leak into
- * prod), not something to default into silently. Flagging for Hitesh.
- *
- * Until one of those exists, this suite documents the intended flow and
- * stops right before the OTP wall so it's ready to complete the moment
- * a bypass is chosen. Skipped by default so it doesn't fail CI on a known,
- * not-yet-resolved gap.
+ * STILL OPEN: completing the real Razorpay payment step. This event is a
+ * paid, multi-tier event, so a full round trip needs to click through
+ * Razorpay's hosted checkout (test-mode card 4111 1111 1111 1111 is the
+ * standard Razorpay test card). Not implemented yet because I can't safely
+ * guess the checkout iframe's selectors without seeing them render live -
+ * hardcoding blind risks a test that looks like it passes but silently
+ * checks nothing. Fastest path to finishing this: run
+ * `npx playwright codegen <qa-url>/events/<id>` once, click through a real
+ * test payment, and the exact selectors/flow fall out of the recording.
  */
 
-test.skip("audience member can select seats on a Numbered event", async ({ page }) => {
+test("audience member can register, log in, select seats, and reach checkout with correct amount", async ({
+  page,
+}) => {
+  const account = await registerTestAudience(page);
+
+  // registerTestAudience ends on /login?registered=true - account exists
+  // and is phone-verified, but not yet signed in for this browser session.
+  await loginTestAudience(page, account.email, account.password);
+  await expect(page).toHaveURL(/\/$/, { timeout: 10_000 }); // login redirects to "/"
+
   await page.goto("/events");
   await page.getByText("Jaipur Mic Gala 100", { exact: false }).first().click();
+  await expect(page).toHaveURL(/\/events\//);
 
-  // Select at least one available (non-greyed-out) seat.
-  const seat = page.locator("[data-seat-status='available']").first();
+  // SeatPicker has no data-* status attribute - the only real signal is the
+  // title tooltip, which reads "Row X, Seat N — ₹price" for available seats
+  // and "— taken" / "— not on sale" otherwise. Match on that rather than
+  // adding a new attribute to a live money-path component just for testing.
+  const seat = page.locator('[title*="₹"]').first();
+  await expect(seat).toBeVisible({ timeout: 10_000 });
   await seat.click();
 
-  await expect(page.getByText(/continue to checkout/i)).toBeEnabled();
-  await page.getByText(/continue to checkout/i).click();
+  const continueButton = page.getByRole("button", { name: /continue to checkout/i });
+  await expect(continueButton).toBeEnabled();
+  await continueButton.click();
 
-  await expect(page).toHaveURL(/checkout/);
+  await expect(page).toHaveURL(/checkout/, { timeout: 10_000 });
   // Numbered bookings should show seat labels + per-tier amount (PR #157),
   // not just a bare fee + total.
   await expect(page.locator("body")).toContainText(/seat/i);
 });
 
-test.skip("audience member completes a real booking end to end (needs OTP bypass - see file header)", async ({
+test.skip("audience member completes a real paid booking end to end (needs Razorpay test-checkout selectors - see file header)", async ({
   page,
 }) => {
-  // Intentionally left unimplemented until Hitesh picks an OTP-bypass approach.
+  // Intentionally left unimplemented until selectors are recorded via
+  // `npx playwright codegen` against a real test-mode Razorpay checkout.
 });
