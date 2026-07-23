@@ -6,7 +6,18 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 
-type RoleStatus = { isInRole: boolean; isApproved: boolean; hasProfile: boolean }
+type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
+
+const DASHBOARD_PATH: Record<'artist' | 'organiser' | 'venue', string> = {
+  artist: '/dashboard/artist',
+  organiser: '/dashboard/organiser',
+  venue: '/dashboard/venue',
+}
+const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
+  artist: 'ARTIST',
+  organiser: 'ORGANISER',
+  venue: 'VENUE_OWNER',
+}
 
 const cardStyle = {
   background: '#fff',
@@ -26,6 +37,7 @@ export default function ProfilePage() {
   const [orgName, setOrgName] = useState('')
   const [genre, setGenre] = useState('')
   const [applying, setApplying] = useState<'organiser' | 'venue' | 'artist' | null>(null)
+  const [switching, setSwitching] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -56,15 +68,15 @@ export default function ProfilePage() {
     }
     if (orgRes.ok) {
       const d = await orgRes.json()
-      setOrgStatus({ isInRole: d.isOrganiser, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setOrgStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
     }
     if (venueRes.ok) {
       const d = await venueRes.json()
-      setVenueStatus({ isInRole: d.isVenueOwner, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setVenueStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
     }
     if (artistRes.ok) {
       const d = await artistRes.json()
-      setArtistStatus({ isInRole: d.isArtist, isApproved: d.isApproved, hasProfile: d.hasProfile })
+      setArtistStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
     }
   }
 
@@ -82,11 +94,6 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error(data.error || 'Failed to save')
       setInitialDisplayName(data.user?.displayName ?? '')
       setMessage('Display name saved.')
-      // Force NextAuth to re-run the session callback now, instead of
-      // waiting for the next window-focus/interval refetch - the session
-      // callback already re-reads displayName from the DB (see auth.ts),
-      // this just triggers it immediately so the header updates without
-      // a manual refocus.
       await updateSession()
     } catch (err: any) {
       setError(err.message || 'Failed to save')
@@ -116,6 +123,7 @@ export default function ProfilePage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to submit application')
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -133,6 +141,7 @@ export default function ProfilePage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to submit application')
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -154,6 +163,7 @@ export default function ProfilePage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to submit application')
       setMessage(data.message)
+      await updateSession()
       await loadStatuses()
     } catch (err: any) {
       setError(err.message)
@@ -162,10 +172,66 @@ export default function ProfilePage() {
     }
   }
 
+  // Switches the active role to one the user already holds an approved
+  // profile for - the second half of multi-role support. Applying never
+  // silently changes the active role past the first-role case; this is
+  // the explicit action that does, and only for roles already approved.
+  const switchRole = async (kind: 'organiser' | 'venue' | 'artist') => {
+    setSwitching(kind)
+    setError('')
+    setMessage('')
+    try {
+      const res = await fetch('/api/users/me/switch-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: SWITCH_ROLE_VALUE[kind] }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to switch role')
+      await updateSession()
+      router.push(DASHBOARD_PATH[kind])
+    } catch (err: any) {
+      setError(err.message)
+      setSwitching(null)
+    }
+  }
+
   if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
 
   const user = session.user as { name?: string | null; email?: string | null; code?: string | null }
+
+  // Small, reusable status block covering the four states any of the
+  // three role cards below can be in: no profile, pending approval,
+  // active (visit its own dashboard), or approved-but-not-active (switch
+  // to it). Artist never has a pending state (isApproved always true once
+  // hasProfile is true).
+  const renderRoleStatus = (
+    roleStatus: RoleStatus | null,
+    kind: 'organiser' | 'venue' | 'artist',
+    label: string
+  ) => {
+    if (!roleStatus?.hasProfile) return null
+    if (!roleStatus.isApproved) {
+      return <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>⏳ Application pending approval</div>
+    }
+    if (roleStatus.isActive) {
+      return (
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
+          ✅ Visit your {label} dashboard →
+        </Link>
+      )
+    }
+    return (
+      <button
+        onClick={() => switchRole(kind)}
+        disabled={switching === kind}
+        style={{ fontSize: '14px', fontWeight: 600, color: '#C8441A', background: 'transparent', border: '1.5px solid #C8441A', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
+      >
+        {switching === kind ? 'Switching...' : `✅ Approved — Switch to your ${label} dashboard`}
+      </button>
+    )
+  }
 
   return (
     <>
@@ -239,10 +305,8 @@ export default function ProfilePage() {
               Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
             </p>
 
-            {artistStatus?.isInRole ? (
-              <Link href="/dashboard/artist" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
-                ✅ Visit your Artist dashboard →
-              </Link>
+            {artistStatus?.hasProfile ? (
+              renderRoleStatus(artistStatus, 'artist', 'Artist')
             ) : (
               <>
                 <input
@@ -272,16 +336,8 @@ export default function ProfilePage() {
               Create and publish your own events.
             </p>
 
-            {orgStatus?.isInRole ? (
-              orgStatus.isApproved ? (
-                <Link href="/dashboard/organiser" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
-                  ✅ Approved — visit your Organiser dashboard →
-                </Link>
-              ) : (
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>
-                  ⏳ Application pending approval
-                </div>
-              )
+            {orgStatus?.hasProfile ? (
+              renderRoleStatus(orgStatus, 'organiser', 'Organiser')
             ) : (
               <>
                 <input
@@ -311,16 +367,8 @@ export default function ProfilePage() {
               Rent out your space and manage bookings.
             </p>
 
-            {venueStatus?.isInRole ? (
-              venueStatus.isApproved ? (
-                <Link href="/dashboard/venue" style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
-                  ✅ Approved — visit your Venue dashboard →
-                </Link>
-              ) : (
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>
-                  ⏳ Application pending approval
-                </div>
-              )
+            {venueStatus?.hasProfile ? (
+              renderRoleStatus(venueStatus, 'venue', 'Venue')
             ) : (
               <button
                 onClick={applyVenueOwner}
