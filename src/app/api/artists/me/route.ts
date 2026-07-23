@@ -75,7 +75,12 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json()
-    const { bio, genre, styleTag, socialLinks } = body
+    const { bio, genre, styleTag, socialLinks, tagline, fullBiography, journey, influences, acknowledgments, goals } = body
+
+    // Simple length caps, consistent with other free-text fields in this
+    // codebase (displayName 120, review comment 500) - generous enough
+    // for real storytelling, not unbounded.
+    const capped = (v: any, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) || null : undefined)
 
     const updated = await prisma.artist.update({
       where: { id: artist.id },
@@ -84,6 +89,12 @@ export async function PATCH(req: Request) {
         ...(Array.isArray(genre) && { genre }),
         ...(Array.isArray(styleTag) && { styleTag }),
         ...(socialLinks !== undefined && { socialLinks }),
+        ...(tagline !== undefined && { tagline: capped(tagline, 200) }),
+        ...(fullBiography !== undefined && { fullBiography: capped(fullBiography, 5000) }),
+        ...(journey !== undefined && { journey: capped(journey, 5000) }),
+        ...(influences !== undefined && { influences: capped(influences, 2000) }),
+        ...(acknowledgments !== undefined && { acknowledgments: capped(acknowledgments, 2000) }),
+        ...(goals !== undefined && { goals: capped(goals, 2000) }),
       },
     })
 
