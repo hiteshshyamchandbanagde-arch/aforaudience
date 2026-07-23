@@ -41,6 +41,12 @@ enum ApplicationStatus {
   PENDING
   APPROVED
   REJECTED
+  // Applied when the event's lineup (Event.maxPerformers) was already
+  // full at application time - a real queue instead of a hard rejection.
+  // FCFS by createdAt. Promotion to APPROVED on a cancellation isn't
+  // wired up yet (no cancellation mechanism exists in the app at all -
+  // separate gap, see design.md 9.4) - this ships the queue itself first.
+  WAITLISTED
 }
 
 // --- §4.5 Venue & Event Economics Model additions (additive only - no

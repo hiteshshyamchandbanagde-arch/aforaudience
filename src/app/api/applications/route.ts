@@ -44,10 +44,17 @@ export async function POST(req: Request) {
     }
 
     // §4.5 - respect the Organiser's max performer cap, if they set one.
+    // A full lineup no longer hard-rejects the application outright -
+    // it queues as WAITLISTED instead (Hitesh's own admin note, 22 Jul).
+    // FCFS by createdAt. Promotion on a cancellation isn't wired up yet
+    // (no cancellation mechanism exists in the app at all) - this ships
+    // the queue itself; an Organiser can still manually approve a
+    // waitlisted applicant the normal way if a slot frees up.
+    let isWaitlisted = false
     if (event.maxPerformers !== null) {
       const filledSlots = await prisma.performance.count({ where: { eventId } })
       if (filledSlots >= event.maxPerformers) {
-        return NextResponse.json({ error: 'This event\'s lineup is already full' }, { status: 409 })
+        isWaitlisted = true
       }
     }
 
@@ -57,19 +64,33 @@ export async function POST(req: Request) {
     // approved as a FREE/exposure slot immediately. The Organiser can
     // still adjust compensation for them afterward from the event page -
     // there's no per-applicant compensation input at apply time, so Auto
-    // can only default to Free, never Paid/Buy-in.
-    const shouldAutoApprove = event.applicationApprovalMode === 'AUTO'
+    // can only default to Free, never Paid/Buy-in. Waitlisted applicants
+    // never auto-approve, even in Auto mode - there's genuinely no slot.
+    const shouldAutoApprove = event.applicationApprovalMode === 'AUTO' && !isWaitlisted
 
     const application = await prisma.application.create({
       data: {
         eventId,
         artistId: artist.id,
         message: message || '',
-        status: shouldAutoApprove ? 'APPROVED' : 'PENDING',
+        status: isWaitlisted ? 'WAITLISTED' : shouldAutoApprove ? 'APPROVED' : 'PENDING',
       },
     })
 
-    if (shouldAutoApprove) {
+    if (isWaitlisted) {
+      const waitlistPosition = await prisma.application.count({
+        where: { eventId, status: 'WAITLISTED', createdAt: { lt: application.createdAt } },
+      })
+      notifyAfterResponse(
+        () =>
+          sendPushToUser(user.id, {
+            title: 'Added to waitlist',
+            body: `"${event.title}"'s lineup is full - you're #${waitlistPosition + 1} on the waitlist.`,
+            url: `/dashboard/artist/events`,
+          }),
+        'application-waitlisted'
+      )
+    } else if (shouldAutoApprove) {
       const lineupCount = await prisma.performance.count({ where: { eventId } })
       await prisma.performance.create({
         data: { eventId, artistId: artist.id, slot: lineupCount + 1, duration: 10, compensationType: 'FREE' },
@@ -87,10 +108,10 @@ export async function POST(req: Request) {
           }),
         'application-auto-approve'
       )
-    } else {
+    } else if (!isWaitlisted) {
       // Manual review needed - this is the Organiser's actual queue, not
-      // just Admin's. Skip entirely on auto-approve (above) since there's
-      // nothing for the Organiser to act on in that case.
+      // just Admin's. Skip entirely on auto-approve or waitlist (above) -
+      // nothing for the Organiser to act on in either case right now.
       notifyAfterResponse(
         () =>
           sendPushToUser(event.organiser.userId, {
