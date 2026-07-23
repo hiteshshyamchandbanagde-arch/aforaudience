@@ -31,10 +31,6 @@ export async function GET() {
             },
           },
         },
-        followers: {
-          include: { user: { select: { name: true, displayName: true, avatar: true } } },
-          orderBy: { createdAt: 'desc' },
-        },
       },
     })
 
@@ -42,7 +38,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Artist profile not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ ...artist, name: user.name, email: user.email })
+    // Follow is now polymorphic (no direct Artist.followers relation to
+    // include above) - fetched separately, same shape as before so this
+    // response doesn't change for whatever consumes it.
+    const followers = await prisma.follow.findMany({
+      where: { targetType: 'ARTIST', targetId: artist.id },
+      include: { user: { select: { name: true, displayName: true, avatar: true } } },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return NextResponse.json({ ...artist, followers, name: user.name, email: user.email })
   } catch (err) {
     console.error('Error fetching artist profile:', err)
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
