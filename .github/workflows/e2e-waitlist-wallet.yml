@@ -1,0 +1,48 @@
+name: E2E - Waitlist/Wallet-Credit Spec (manual only)
+
+# Deliberately separate from e2e.yml's push/nightly cadence. This spec is
+# new and unproven - runs only on a manual click until a first real pass
+# has been watched end to end (see e2e/waitlist-wallet-credit.spec.ts
+# header for the full flow + a known non-idempotency caveat on repeated
+# runs). Fold into e2e.yml's regular triggers once confirmed stable.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  e2e-waitlist-wallet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser (chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run only the waitlist/wallet-credit spec
+        run: npx playwright test e2e/waitlist-wallet-credit.spec.ts
+        env:
+          CI: true
+
+      - name: Upload Playwright report (always, even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-waitlist-wallet
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload traces/videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-waitlist-wallet
+          path: test-results/
+          retention-days: 14
