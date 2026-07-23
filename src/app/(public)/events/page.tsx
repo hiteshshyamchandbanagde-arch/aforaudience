@@ -112,7 +112,7 @@ export default function EventsPage() {
             .events-filters-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .events-filters-divider { display: none; }
             .events-filters-select { width: 100%; box-sizing: border-box; }
-            .events-filters-view-toggle { margin-left: 0; justify-content: flex-end; }
+            .events-filters-view-toggle { display: none; }
           }
         `}</style>
         <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
