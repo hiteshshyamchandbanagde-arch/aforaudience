@@ -14,6 +14,7 @@ interface Review {
   comment: string | null
   createdAt: string
   user: { name: string }
+  reply: { text: string; author: { name: string; displayName: string | null } } | null
 }
 
 interface Performer {
@@ -373,9 +374,16 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               </div>
                             )}
                             {p.reviews.slice(0, 3).map((r) => (
-                              <div key={r.id} style={{ fontSize: "13px", color: "#0E0C0A" }}>
-                                {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.name}</span>
-                                {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
+                              <div key={r.id}>
+                                <div style={{ fontSize: "13px", color: "#0E0C0A" }}>
+                                  {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.name}</span>
+                                  {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
+                                </div>
+                                {r.reply && (
+                                  <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.75, marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(200,68,26,0.3)" }}>
+                                    <strong>{r.reply.author.displayName || r.reply.author.name}</strong> replied: {r.reply.text}
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
