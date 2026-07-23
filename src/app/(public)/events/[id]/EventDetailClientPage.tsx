@@ -149,6 +149,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       setReviewError("Pick a rating first")
       return
     }
+    if (status === "loading") {
+      return
+    }
     if (status !== "authenticated") {
       setReviewAuthTarget(performanceId)
       return
@@ -174,6 +177,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const handleBookClick = () => {
     if (totalSelected === 0) {
       setBookingError("Select at least one seat first")
+      return
+    }
+    if (status === "loading") {
       return
     }
     if (status !== "authenticated") {
@@ -478,10 +484,16 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
                 <button
                   onClick={handleBookClick}
-                  disabled={reserving}
-                  style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving ? "default" : "pointer", opacity: reserving ? 0.7 : 1 }}
+                  disabled={reserving || status === "loading"}
+                  style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving || status === "loading" ? "default" : "pointer", opacity: reserving || status === "loading" ? 0.7 : 1 }}
                 >
-                  {reserving ? "Reserving..." : event.isFree ? "Confirm Free Booking" : "Continue to Checkout"}
+                  {reserving
+                    ? "Reserving..."
+                    : status === "loading"
+                    ? "Loading..."
+                    : event.isFree
+                    ? "Confirm Free Booking"
+                    : "Continue to Checkout"}
                 </button>
 
                 <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
