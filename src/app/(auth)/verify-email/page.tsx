@@ -42,7 +42,7 @@ function VerifyEmailContent() {
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
         <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-ink)] no-underline">
-          <span className="text-[var(--afa-terracotta)]">A</span>forAudience
+          <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
       </div>

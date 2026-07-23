@@ -194,7 +194,7 @@ export default function RegisterForm() {
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
-              <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
+              <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               <EnvBadge />
             </Link>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
@@ -248,7 +248,7 @@ export default function RegisterForm() {
       <div style={{ width: "100%", maxWidth: "480px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
-            <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
+            <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             <EnvBadge />
           </Link>
           <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>

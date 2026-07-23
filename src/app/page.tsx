@@ -167,7 +167,7 @@ export default function Home() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
           <div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "12px" }}>
-              <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
+              <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             </div>
             <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
               The world&apos;s first live art universe — where every comedian, poet, musician, organiser, venue and fan is connected.
