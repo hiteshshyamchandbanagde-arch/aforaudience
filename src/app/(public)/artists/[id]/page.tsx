@@ -25,7 +25,27 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     ? { ...artist, _count: { ...artist._count, followers: followerCount } }
     : null
 
-  return <ArtistProfileClientPage artist={artistWithFollowers ? JSON.parse(JSON.stringify(artistWithFollowers)) : null} />
+  // Verified badge (blue tick) - automatic, from live feedback (18 Jul).
+  // Same 4-field completion check as the dashboard's completion nudge,
+  // plus a minimum track record (3+ performances, matching the existing
+  // "3-review floor" already used for Wall of Fame elsewhere - reusing
+  // an established threshold rather than inventing a new number).
+  const isVerified = !!artist && (() => {
+    const complete = [
+      !!artist.bio?.trim(),
+      artist.genre.length > 0,
+      artist.styleTag.length > 0,
+      !!artist.socialLinks && Object.values(artist.socialLinks as Record<string, string>).some((v) => !!v),
+    ].every(Boolean)
+    return complete && artist._count.performances >= 3
+  })()
+
+  return (
+    <ArtistProfileClientPage
+      artist={artistWithFollowers ? JSON.parse(JSON.stringify(artistWithFollowers)) : null}
+      isVerified={isVerified}
+    />
+  )
 }
 
 // Same reasoning as venues/page.tsx and events/[id]/page.tsx - no dynamic
