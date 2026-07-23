@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
 
 interface Application {
   id: string
@@ -158,7 +159,7 @@ export default function ArtistDashboard() {
     return start.getTime() - Date.now() >= 24 * 60 * 60 * 1000
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
   if (!profile) return (<><SiteNav /><div style={{ padding: '32px' }}>Profile not found</div></>)

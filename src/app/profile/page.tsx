@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
 
 type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
 
@@ -196,7 +197,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
   const user = session.user as { name?: string | null; email?: string | null; code?: string | null }
