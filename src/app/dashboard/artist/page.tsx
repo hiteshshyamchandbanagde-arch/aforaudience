@@ -26,6 +26,7 @@ interface Review {
   comment: string | null
   createdAt: string
   user: { name: string; displayName: string | null }
+  reply: { text: string; author: { name: string; displayName: string | null } } | null
 }
 
 interface Performance {
@@ -72,6 +73,33 @@ export default function ArtistDashboard() {
   const [profile, setProfile] = useState<ArtistProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
+  const [replySubmitting, setReplySubmitting] = useState<string | null>(null)
+  const [localReplies, setLocalReplies] = useState<Record<string, { text: string; author: { name: string; displayName: string | null } }>>({})
+
+  const submitReply = async (reviewId: string) => {
+    const text = (replyDrafts[reviewId] || '').trim()
+    if (!text) return
+    setReplySubmitting(reviewId)
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send reply')
+      setLocalReplies((prev) => ({
+        ...prev,
+        [reviewId]: { text: data.text, author: { name: profile?.name || '', displayName: null } },
+      }))
+      setReplyDrafts((prev) => ({ ...prev, [reviewId]: '' }))
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setReplySubmitting(null)
+    }
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -177,20 +205,53 @@ export default function ArtistDashboard() {
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {allReviews.map((r) => (
-                  <div key={r.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                      <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
-                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{r.eventTitle}</span>
+                {allReviews.map((r) => {
+                  const reply = r.reply || localReplies[r.id]
+                  return (
+                    <div key={r.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
+                        <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{r.eventTitle}</span>
+                      </div>
+                      {r.comment && (
+                        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
+                      )}
+                      <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
+                        {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
+                      </p>
+
+                      {reply ? (
+                        <div style={{ marginTop: '4px', paddingTop: '10px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                          <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.85, lineHeight: 1.5 }}>
+                            <strong>Your reply:</strong> {reply.text}
+                          </p>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(14,12,10,0.06)', display: 'flex', gap: '8px' }}>
+                          <input
+                            type="text"
+                            placeholder="Write a reply..."
+                            value={replyDrafts[r.id] || ''}
+                            onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                            maxLength={500}
+                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                          />
+                          <button
+                            onClick={() => submitReply(r.id)}
+                            disabled={replySubmitting === r.id || !(replyDrafts[r.id] || '').trim()}
+                            style={{
+                              fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none',
+                              background: '#C8441A', color: 'white', cursor: replySubmitting === r.id ? 'default' : 'pointer',
+                              opacity: replySubmitting === r.id || !(replyDrafts[r.id] || '').trim() ? 0.6 : 1,
+                            }}
+                          >
+                            {replySubmitting === r.id ? 'Sending...' : 'Reply'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {r.comment && (
-                      <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
-                    )}
-                    <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4 }}>
-                      {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
