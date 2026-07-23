@@ -48,7 +48,7 @@ interface EventDetail {
   venue: { id: string; name: string; city: string; address: string } | null
   applications: Application[]
   lineup: Performance[]
-  venueBooking: { id: string; status: string; amount: number; fromDate: string; toDate: string } | null
+  venueBooking: { id: string; status: string; amount: number; fromDate: string; toDate: string; platformFeeAmount: number | null } | null
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
@@ -82,6 +82,8 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const [toggling, setToggling] = useState(false)
   const [actingOn, setActingOn] = useState<string | null>(null)
   const [compensation, setCompensation] = useState<Record<string, { type: 'PAID' | 'FREE' | 'BUY_IN'; amount: string }>>({})
+  const [walletBalance, setWalletBalance] = useState(0)
+  const [applyingWallet, setApplyingWallet] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -98,10 +100,32 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       }
       const data = await res.json()
       setEvent(data)
+
+      const statusRes = await fetch('/api/organisers/status')
+      if (statusRes.ok) {
+        const statusData = await statusRes.json()
+        setWalletBalance(statusData.walletBalance || 0)
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const applyWalletCredit = async () => {
+    if (!event?.venueBooking) return
+    setApplyingWallet(true)
+    try {
+      const res = await fetch(`/api/venue-bookings/${event.venueBooking.id}/apply-wallet`, { method: 'PATCH' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to apply wallet credit')
+      await fetchEvent()
+      showToast(`₹${data.applied.toLocaleString('en-IN')} wallet credit applied.`, 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Failed to apply wallet credit', 'error')
+    } finally {
+      setApplyingWallet(false)
     }
   }
 
@@ -278,16 +302,34 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 <p style={{ fontSize: '15px', fontWeight: 600, color: '#0E0C0A' }}>{event.venue.name}</p>
                 <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '10px' }}>{event.venue.address}, {event.venue.city}</p>
                 {event.venueBooking && (
-                  <span
-                    style={{
-                      fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                      padding: '5px 10px', borderRadius: '999px',
-                      background: event.venueBooking.status === 'CONFIRMED' ? 'rgba(74,103,65,0.12)' : event.venueBooking.status === 'CANCELLED' ? 'rgba(179,38,30,0.1)' : 'rgba(201,151,58,0.15)',
-                      color: event.venueBooking.status === 'CONFIRMED' ? '#4A6741' : event.venueBooking.status === 'CANCELLED' ? '#B3261E' : '#8a6a1f',
-                    }}
-                  >
-                    Booking {event.venueBooking.status.toLowerCase()}
-                  </span>
+                  <>
+                    <span
+                      style={{
+                        fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                        padding: '5px 10px', borderRadius: '999px',
+                        background: event.venueBooking.status === 'CONFIRMED' ? 'rgba(74,103,65,0.12)' : event.venueBooking.status === 'CANCELLED' ? 'rgba(179,38,30,0.1)' : 'rgba(201,151,58,0.15)',
+                        color: event.venueBooking.status === 'CONFIRMED' ? '#4A6741' : event.venueBooking.status === 'CANCELLED' ? '#B3261E' : '#8a6a1f',
+                      }}
+                    >
+                      Booking {event.venueBooking.status.toLowerCase()}
+                    </span>
+                    {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
+                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                        <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: walletBalance > 0 ? '8px' : 0 }}>
+                          Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
+                        </p>
+                        {walletBalance > 0 && (
+                          <button
+                            onClick={applyWalletCredit}
+                            disabled={applyingWallet}
+                            style={{ fontSize: '12px', fontWeight: 600, color: '#8a6a1f', background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.3)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: applyingWallet ? 0.6 : 1 }}
+                          >
+                            {applyingWallet ? 'Applying...' : `💰 Apply wallet credit (₹${walletBalance.toLocaleString('en-IN')} available)`}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
