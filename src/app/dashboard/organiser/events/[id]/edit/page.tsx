@@ -29,6 +29,7 @@ interface EventDetail {
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
+  plusOnesRequired: number
   venue: { id: string } | null
   venueBooking: { amount: number; fromDate: string; toDate: string } | null
 }
@@ -75,6 +76,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [isFree, setIsFree] = useState(true)
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
+  const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
 
@@ -111,6 +113,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setIsFree(data.isFree)
         setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : '')
         setSurpriseAct(data.surpriseAct)
+        setPlusOnesRequired(String(data.plusOnesRequired ?? 0))
         setVenueId(data.venue?.id || '')
         setBookingAmount(data.venueBooking?.amount != null ? String(data.venueBooking.amount) : '')
 
@@ -135,6 +138,19 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Same clamp-on-change discipline as the create page's equivalent field -
+  // client-side is decorative, PATCH /api/events/[id] validates independently.
+  const handlePlusOnesRequiredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setPlusOnesRequired('')
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    setPlusOnesRequired(String(Math.max(0, Math.min(num, 20))))
+  }
+
   const save = async (publishOverride?: boolean) => {
     setSaving(true)
 
@@ -147,6 +163,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           isFree,
           ticketPrice: isFree ? null : ticketPrice,
           surpriseAct,
+          plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -273,6 +290,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Total Seats *</label>
                 <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" style={{ ...inputStyle, maxWidth: '120px' }} />
+                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
+                  Each artist in the lineup must have this many audience members confirm support - included in their spot fee. Set to 0 if not required.
+                </p>
               </div>
 
               <div style={{ display: 'flex', gap: '20px', marginBottom: '14px' }}>
