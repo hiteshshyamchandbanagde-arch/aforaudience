@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
@@ -53,6 +53,7 @@ interface EventData {
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
+  plusOnesRequired: number
   venue: { name: string; address: string; city: string; facilities: string[]; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
   lineup: Performer[]
   ticketTiers: TicketTier[]
@@ -83,6 +84,39 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const [reviewError, setReviewError] = useState("")
   const [submittedReviews, setSubmittedReviews] = useState<Record<string, Review>>({})
   const [reviewAuthTarget, setReviewAuthTarget] = useState<string | null>(null)
+  const [plusOneStatus, setPlusOneStatus] = useState<Record<string, { required: number; confirmedCount: number; alreadyConfirmed: boolean; fulfilled: boolean }>>({})
+  const [plusOneBusy, setPlusOneBusy] = useState<string | null>(null)
+  const [plusOneAuthTarget, setPlusOneAuthTarget] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!event || event.plusOnesRequired === 0) return
+    event.lineup.forEach((p) => {
+      fetch(`/api/performances/${p.id}/plus-ones`)
+        .then((res) => res.json())
+        .then((data) => setPlusOneStatus((prev) => ({ ...prev, [p.id]: data })))
+        .catch(() => {})
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event?.id])
+
+  const confirmPlusOne = async (performanceId: string) => {
+    if (status !== "authenticated") {
+      setPlusOneAuthTarget(performanceId)
+      return
+    }
+    setPlusOneBusy(performanceId)
+    try {
+      const res = await fetch(`/api/performances/${performanceId}/plus-ones`, { method: "POST" })
+      const data = await res.json()
+      if (res.ok) {
+        setPlusOneStatus((prev) => ({ ...prev, [performanceId]: data }))
+      } else {
+        setBookingError(data.error || "Couldn't confirm right now - please try again")
+      }
+    } finally {
+      setPlusOneBusy(null)
+    }
+  }
 
   const totalSelected = isNumbered ? selectedSeatIds.length : Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
   const totalAmount = isNumbered
@@ -299,6 +333,35 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                           <span style={{ fontSize: "13px", color: "#0E0C0A" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
                           <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
                         </div>
+
+                        {event.plusOnesRequired > 0 && plusOneStatus[p.id] && (
+                          <div style={{ marginTop: "10px" }}>
+                            {plusOneStatus[p.id].alreadyConfirmed ? (
+                              <span style={{ fontSize: "12px", fontWeight: 600, color: "#2F7D4A", background: "#F0FFF4", padding: "5px 12px", borderRadius: "999px" }}>
+                                ✓ You're confirmed as {p.artist.user.name.split(" ")[0]}'s +1
+                              </span>
+                            ) : plusOneStatus[p.id].fulfilled ? (
+                              <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>
+                                ✓ Fully supported ({plusOneStatus[p.id].confirmedCount}/{plusOneStatus[p.id].required})
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => confirmPlusOne(p.id)}
+                                disabled={plusOneBusy === p.id}
+                                style={{
+                                  fontSize: "12px", fontWeight: 600, padding: "6px 14px", borderRadius: "999px",
+                                  border: "1.5px solid #C8441A", background: "transparent", color: "#C8441A",
+                                  cursor: plusOneBusy === p.id ? "default" : "pointer",
+                                  opacity: plusOneBusy === p.id ? 0.6 : 1,
+                                }}
+                              >
+                                {plusOneBusy === p.id
+                                  ? "Confirming..."
+                                  : `I'll be there for ${p.artist.user.name.split(" ")[0]} (${plusOneStatus[p.id].confirmedCount}/${plusOneStatus[p.id].required})`}
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         {/* Existing reviews */}
                         {(p.reviews.length > 0 || submittedReviews[p.id]) && (
@@ -526,6 +589,17 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           const target = reviewAuthTarget
           setReviewAuthTarget(null)
           if (target) submitReview(target)
+        }}
+      />
+
+      <AuthPromptSheet
+        open={plusOneAuthTarget !== null}
+        onClose={() => setPlusOneAuthTarget(null)}
+        title="Sign in to confirm as a +1"
+        onSuccess={() => {
+          const target = plusOneAuthTarget
+          setPlusOneAuthTarget(null)
+          if (target) confirmPlusOne(target)
         }}
       />
     </main>
