@@ -34,6 +34,8 @@ function getDashboardLink(role?: string) {
       return "/dashboard/organiser"
     case "ADMIN":
       return "/dashboard/admin"
+    case "AUDIENCE":
+      return "/dashboard/audience"
     default:
       return null
   }
