@@ -128,6 +128,22 @@ export default function CreateEventPage() {
     setMaxPerformers(String(Math.max(1, Math.min(num, MAX_PERFORMERS))))
   }
   const [platformFee, setPlatformFee] = useState<number | null>(null)
+  const [plusOnesRequired, setPlusOnesRequired] = useState('0')
+  // Same clamp-on-change discipline as maxSeatsPerBooking/maxPerformers
+  // above - unbounded numeric inputs have crashed prisma.event.create()
+  // before (PR #100-103), server-side cap exists too, this is just the UX
+  // half. 20 is a generous ceiling - no realistic open-mic circuit needs
+  // more mandatory supporters than that per artist.
+  const handlePlusOnesRequiredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    if (value === '') {
+      setPlusOnesRequired('')
+      return
+    }
+    const num = Number(value)
+    if (!Number.isFinite(num)) return
+    setPlusOnesRequired(String(Math.max(0, Math.min(num, 20))))
+  }
   // §4.5 - per-section ticket pricing. Keyed by section name, since the
   // Organiser only ever edits price here - section names/capacities stay
   // owned by the Venue Owner's own seat map.
@@ -312,6 +328,7 @@ export default function CreateEventPage() {
           maxPerformers: maxPerformers ? Number(maxPerformers) : null,
           applicationApprovalMode,
           maxSeatsPerBooking: seatsCap,
+          plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
           publish,
         }),
       })
@@ -552,6 +569,14 @@ export default function CreateEventPage() {
                   <input type="number" value={maxSeatsPerBooking} onChange={handleMaxSeatsPerBookingChange} min="1" max="10" maxLength={2} style={inputStyle} />
                   <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
                 </div>
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
+                <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" maxLength={2} placeholder="0" style={{ ...inputStyle, maxWidth: '120px' }} />
+                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
+                  Each artist in the lineup must have this many audience members confirm they're coming to support them - included in the artist&apos;s spot fee, no extra charge. Set to 0 if not required.
+                </p>
               </div>
 
               <div>

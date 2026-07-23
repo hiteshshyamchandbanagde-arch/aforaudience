@@ -184,6 +184,7 @@ model User {
   follows                Follow[]
   feedback               Feedback[]
   pushSubscriptions      PushSubscription[]
+  plusOnes               PlusOne[]
 }
 
 model PushSubscription {
@@ -606,6 +607,14 @@ model Event {
   applicationApprovalMode ApprovalMode @default(MANUAL)
   maxSeatsPerBooking   Int          @default(4)
 
+  // "+1" mandatory audience support - Organiser sets this at event level
+  // (applies to every artist in the lineup independently, not shared - two
+  // different artists each need their own N supporters). 0 = not required.
+  // Exists because some Organisers charge a spot fee but still can't fill
+  // the room, so require each artist to bring guaranteed audience - this
+  // was previously an off-platform WhatsApp/friend-network scramble.
+  plusOnesRequired Int @default(0)
+
   lineup        Performance[]
   applications  Application[]
   bookings      Booking[]
@@ -642,6 +651,28 @@ model Performance {
   buyInAmount      Float?
 
   reviews   Review[]
+  plusOnes  PlusOne[]
+}
+
+// A "+1" pledge - an audience member confirming they'll be a specific
+// artist's guaranteed guest for an event that requires it (Event.plusOnesRequired).
+// Deliberately per-Performance (artist's slot), not per-Event, even though
+// the requirement is set event-wide - each artist in a lineup fills their
+// own N independently. bookingId always points at a real, confirmed ticket
+// (₹0 if the user had none yet, or their existing booking if they already
+// had one for this event) so door check-in has something scannable - a
+// pledge with nothing to show at the door doesn't solve the actual problem.
+model PlusOne {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  performanceId String
+  performance   Performance @relation(fields: [performanceId], references: [id])
+  bookingId     String
+  booking       Booking     @relation(fields: [bookingId], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, performanceId])
 }
 
 model Booking {
@@ -694,6 +725,7 @@ model Booking {
 
   payment     Payment?
   bookingSeats BookingSeat[]
+  plusOnes    PlusOne[]
 
   @@index([status, expiresAt])
 }
