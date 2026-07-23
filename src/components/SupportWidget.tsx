@@ -34,10 +34,26 @@ type Panel = 'closed' | 'chat' | 'feedback';
  * spotlight glow behind a simple stage mic, matching the "live performance"
  * theme rather than a generic chatbot look. Uses currentColor for the mic
  * so it inherits the button/text color it's placed in. */
-function MicIcon({ size = 24 }: { size?: number }) {
+/** On-brand mic icon (replaces a generic speech-bubble emoji) — a warm
+ * spotlight glow behind a simple stage mic, matching the "live performance"
+ * theme rather than a generic chatbot look. Uses currentColor for the mic
+ * so it inherits the button/text color it's placed in.
+ *
+ * `pulse` adds a subtle breathing animation to the spotlight glow - used
+ * only on the closed floating button (an idle "waiting for someone to
+ * step up" cue), not once the panel is open, where it'd just be
+ * distracting. Pure SVG SMIL animation, no separate stylesheet needed. */
+function MicIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="9" r="9" fill="#C8441A" opacity="0.18" />
+      <circle cx="12" cy="9" r="9" fill="#C8441A" opacity="0.18">
+        {pulse && (
+          <>
+            <animate attributeName="opacity" values="0.18;0.32;0.18" dur="2.6s" repeatCount="indefinite" />
+            <animate attributeName="r" values="9;10;9" dur="2.6s" repeatCount="indefinite" />
+          </>
+        )}
+      </circle>
       <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
       <path d="M5.5 10.5a6.5 6.5 0 0 0 13 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
       <line x1="12" y1="17" x2="12" y2="20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -323,7 +339,7 @@ export default function SupportWidget() {
           justifyContent: 'center',
         }}
       >
-        {panel === 'closed' ? <MicIcon size={26} /> : <CloseIcon size={22} />}
+        {panel === 'closed' ? <MicIcon size={26} pulse /> : <CloseIcon size={22} />}
       </button>
 
       {panel !== 'closed' && (
