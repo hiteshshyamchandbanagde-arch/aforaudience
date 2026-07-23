@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { notifyFollowersOfNewEvent } from '@/lib/follow'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -99,6 +100,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(resolvedStatus && { status: resolvedStatus }),
       },
     })
+
+    // Only a genuine DRAFT/PENDING_APPROVAL -> APPROVED transition counts as
+    // "new event" - re-saving an already-live event must not re-notify.
+    if (resolvedStatus === 'APPROVED' && event.status !== 'APPROVED') {
+      notifyFollowersOfNewEvent('ORGANISER', event.organiserId, updated)
+      if (event.venueId) notifyFollowersOfNewEvent('VENUE', event.venueId, updated)
+    }
 
     return NextResponse.json(updated)
   } catch (err) {
