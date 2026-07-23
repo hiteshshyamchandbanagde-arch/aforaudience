@@ -36,6 +36,7 @@ interface Performance {
   compensationType: 'PAID' | 'FREE' | 'BUY_IN'
   feeAmount: number | null
   buyInAmount: number | null
+  cancelledAt: string | null
   event: {
     id: string
     title: string
@@ -76,6 +77,7 @@ export default function ArtistDashboard() {
   const [profile, setProfile] = useState<ArtistProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [cancelling, setCancelling] = useState<string | null>(null)
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
   const [replySubmitting, setReplySubmitting] = useState<string | null>(null)
   const [localReplies, setLocalReplies] = useState<Record<string, { text: string; author: { name: string; displayName: string | null } }>>({})
@@ -129,13 +131,39 @@ export default function ArtistDashboard() {
     }
   }, [session])
 
+  const cancelPerformance = async (performanceId: string) => {
+    if (!window.confirm("Cancel this performance? If it's a Buy-in slot, your payment is recorded as refunded.")) return
+    setCancelling(performanceId)
+    try {
+      const res = await fetch(`/api/performances/${performanceId}/cancel`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to cancel')
+      const refreshed = await fetch('/api/artists/me')
+      if (refreshed.ok) setProfile(await refreshed.json())
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setCancelling(null)
+    }
+  }
+
+  // Client-side mirror of the server's 24h gate - purely so the button
+  // can be disabled/labeled correctly before a click; the real
+  // enforcement is server-side in POST /api/performances/[id]/cancel.
+  const canCancel = (p: Performance) => {
+    const [h, m] = p.event.startTime.split(':').map(Number)
+    const start = new Date(p.event.date)
+    start.setHours(h, m, 0, 0)
+    return start.getTime() - Date.now() >= 24 * 60 * 60 * 1000
+  }
+
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
   if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
   if (!profile) return (<><SiteNav /><div style={{ padding: '32px' }}>Profile not found</div></>)
 
   const upcoming = profile.performances
-    .filter((p) => new Date(p.event.date) >= new Date(new Date().toDateString()))
+    .filter((p) => !p.cancelledAt && new Date(p.event.date) >= new Date(new Date().toDateString()))
     .sort((a, b) => new Date(a.event.date).getTime() - new Date(b.event.date).getTime())
 
   const allReviews = profile.performances
@@ -352,7 +380,22 @@ export default function ArtistDashboard() {
                         {new Date(p.event.date).toLocaleDateString()} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
                       </p>
                     </div>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#C8441A' }}>Slot #{p.slot} · {p.duration} min</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#C8441A' }}>Slot #{p.slot} · {p.duration} min</span>
+                      {canCancel(p) ? (
+                        <button
+                          onClick={() => cancelPerformance(p.id)}
+                          disabled={cancelling === p.id}
+                          style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
+                        >
+                          {cancelling === p.id ? 'Cancelling...' : 'Cancel'}
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
+                          Too close to cancel
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
