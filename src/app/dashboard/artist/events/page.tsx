@@ -19,6 +19,8 @@ interface EventItem {
   defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
   defaultFeeAmount: number | null
   defaultBuyInAmount: number | null
+  maxPerformers: number | null
+  lineup: { id: string }[]
   venue: { name: string; city: string } | null
 }
 
@@ -32,16 +34,30 @@ function compensationBadge(event: EventItem): { label: string; bg: string; color
   return { label: 'Free / Exposure slot', bg: 'rgba(14,12,10,0.06)', color: '#0E0C0A' }
 }
 
+// Full lineups no longer hard-block applying - they queue as WAITLISTED
+// instead (Hitesh's own admin note, 22 Jul). FCFS, promoted manually by
+// the Organiser for now - no auto-cancellation-triggered promotion exists
+// yet, that's a separate gap (see design.md 9.4).
+function isEventFull(event: EventItem): boolean {
+  return event.maxPerformers !== null && event.lineup.length >= event.maxPerformers
+}
+
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  PENDING: { label: '✓ Applied - pending review', color: '#4A6741' },
+  APPROVED: { label: "✓ You're in the lineup!", color: '#4A6741' },
+  WAITLISTED: { label: '⏳ Waitlisted', color: '#8a6a1f' },
+  REJECTED: { label: 'Not selected this time', color: '#0E0C0A' },
+}
+
 export default function BrowseEventsToApplyPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
-  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
+  const [applicationStatus, setApplicationStatus] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
   const [message, setMessage] = useState<Record<string, string>>({})
   const [applying, setApplying] = useState<string | null>(null)
-  const [justApplied, setJustApplied] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -62,7 +78,11 @@ export default function BrowseEventsToApplyPage() {
 
         if (profileRes.ok) {
           const profile = await profileRes.json()
-          setAppliedIds(new Set((profile.applications || []).map((a: any) => a.event.id)))
+          const statusMap: Record<string, string> = {}
+          for (const a of profile.applications || []) {
+            statusMap[a.event.id] = a.status
+          }
+          setApplicationStatus(statusMap)
         }
       } catch (err: any) {
         showToast(err.message || 'Failed to load events', 'error')
@@ -84,11 +104,11 @@ export default function BrowseEventsToApplyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, message: message[eventId] || '' }),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || 'Failed to apply')
       }
-      setJustApplied((prev) => new Set(prev).add(eventId))
+      setApplicationStatus((prev) => ({ ...prev, [eventId]: data.status }))
     } catch (err: any) {
       showToast(err.message || 'Failed to apply', 'error')
     } finally {
@@ -122,8 +142,9 @@ export default function BrowseEventsToApplyPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {events.map((event) => {
-                const alreadyApplied = appliedIds.has(event.id) || justApplied.has(event.id)
+                const existingStatus = applicationStatus[event.id]
                 const comp = compensationBadge(event)
+                const full = isEventFull(event)
                 return (
                   <div key={event.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
@@ -138,14 +159,23 @@ export default function BrowseEventsToApplyPage() {
                       </span>
                     </div>
 
-                    <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', marginBottom: '12px', background: comp.bg, color: comp.color }}>
-                      {comp.label}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                      <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: comp.bg, color: comp.color }}>
+                        {comp.label}
+                      </div>
+                      {full && !existingStatus && (
+                        <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: 'rgba(14,12,10,0.06)', color: '#0E0C0A' }}>
+                          Lineup full - waitlist only
+                        </div>
+                      )}
                     </div>
 
                     <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
-                    {alreadyApplied ? (
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#4A6741' }}>✓ Applied</span>
+                    {existingStatus ? (
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || '#0E0C0A' }}>
+                        {STATUS_LABEL[existingStatus]?.label || existingStatus}
+                      </span>
                     ) : (
                       <div>
                         <textarea
@@ -158,9 +188,14 @@ export default function BrowseEventsToApplyPage() {
                         <button
                           onClick={() => apply(event.id)}
                           disabled={applying === event.id}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: 'pointer', opacity: applying === event.id ? 0.6 : 1 }}
+                          style={{
+                            fontSize: '13px', fontWeight: 600, color: full ? '#0E0C0A' : '#F7F3EE',
+                            background: full ? 'transparent' : '#C8441A',
+                            border: full ? '1.5px solid rgba(14,12,10,0.2)' : 'none',
+                            borderRadius: '6px', padding: '8px 20px', cursor: 'pointer', opacity: applying === event.id ? 0.6 : 1,
+                          }}
                         >
-                          {applying === event.id ? 'Applying...' : 'Apply to Perform'}
+                          {applying === event.id ? 'Submitting...' : full ? 'Join Waitlist' : 'Apply to Perform'}
                         </button>
                       </div>
                     )}
