@@ -39,11 +39,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  BUG: '#B3261E',
-  FEATURE_IDEA: '#4A6741',
-  QUESTION: '#C8441A',
-  GENERAL: '#8a827a',
-  OTHER: '#8a827a',
+  BUG: 'var(--afa-error)',
+  FEATURE_IDEA: 'var(--afa-sage)',
+  QUESTION: 'var(--afa-terracotta)',
+  GENERAL: 'var(--afa-taupe)',
+  OTHER: 'var(--afa-taupe)',
 }
 
 const STATUS_FILTERS = ['ALL', 'NEW', 'REVIEWED', 'RESOLVED']
@@ -119,12 +119,12 @@ export default function AdminFeedbackPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
               Admin access only
             </h1>
-            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>
+            <p style={{ color: 'var(--afa-ink)', opacity: 0.6 }}>
               This page is restricted to platform administrators.
             </p>
           </div>
@@ -142,7 +142,7 @@ export default function AdminFeedbackPage() {
   }
 
   const cardStyle = {
-    background: '#fff',
+    background: 'var(--afa-white)',
     borderRadius: '12px',
     padding: '20px',
     border: '1px solid rgba(14,12,10,0.08)',
@@ -152,7 +152,7 @@ export default function AdminFeedbackPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px' }}>
           <div
             style={{
@@ -169,7 +169,7 @@ export default function AdminFeedbackPage() {
                 fontFamily: 'Georgia, serif',
                 fontSize: '32px',
                 fontWeight: 700,
-                color: '#0E0C0A',
+                color: 'var(--afa-ink)',
                 margin: 0,
               }}
             >
@@ -177,12 +177,12 @@ export default function AdminFeedbackPage() {
             </h1>
             <a
               href="/dashboard/admin"
-              style={{ fontSize: '13px', color: '#C8441A', fontWeight: 700, textDecoration: 'none' }}
+              style={{ fontSize: '13px', color: 'var(--afa-terracotta)', fontWeight: 700, textDecoration: 'none' }}
             >
               ← Admin
             </a>
           </div>
-          <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '24px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '24px' }}>
             Submitted via the support widget — both the manual form and questions the chatbot
             couldn&apos;t answer.
           </p>
@@ -198,8 +198,8 @@ export default function AdminFeedbackPage() {
                   padding: '6px 14px',
                   borderRadius: '999px',
                   border: filter === f ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                  background: filter === f ? '#0E0C0A' : 'transparent',
-                  color: filter === f ? '#F7F3EE' : '#0E0C0A',
+                  background: filter === f ? 'var(--afa-ink)' : 'transparent',
+                  color: filter === f ? 'var(--afa-cream)' : 'var(--afa-ink)',
                   cursor: 'pointer',
                 }}
               >
@@ -209,7 +209,7 @@ export default function AdminFeedbackPage() {
           </div>
 
           {visibleItems.length === 0 && (
-            <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+            <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
               Nothing here{filter !== 'ALL' ? ` in ${filter.toLowerCase()}` : ''}.
             </p>
           )}
@@ -232,7 +232,7 @@ export default function AdminFeedbackPage() {
                       fontWeight: 700,
                       letterSpacing: '0.04em',
                       color: 'white',
-                      background: CATEGORY_COLORS[item.category] || '#8a827a',
+                      background: CATEGORY_COLORS[item.category] || 'var(--afa-taupe)',
                       padding: '3px 10px',
                       borderRadius: '999px',
                     }}
@@ -240,9 +240,9 @@ export default function AdminFeedbackPage() {
                     {CATEGORY_LABELS[item.category] || item.category}
                   </span>
                   {item.fromChatbot && (
-                    <span style={{ fontSize: '11px', color: '#8a827a' }}>via chatbot</span>
+                    <span style={{ fontSize: '11px', color: 'var(--afa-taupe)' }}>via chatbot</span>
                   )}
-                  <span style={{ fontSize: '11px', color: '#8a827a' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--afa-taupe)' }}>
                     {new Date(item.createdAt).toLocaleString('en-IN', {
                       dateStyle: 'medium',
                       timeStyle: 'short',
@@ -258,7 +258,7 @@ export default function AdminFeedbackPage() {
                       style={{
                         fontSize: '12px',
                         fontWeight: 600,
-                        color: '#0E0C0A',
+                        color: 'var(--afa-ink)',
                         background: 'transparent',
                         border: '1px solid rgba(14,12,10,0.15)',
                         borderRadius: '6px',
@@ -273,7 +273,7 @@ export default function AdminFeedbackPage() {
                 </div>
               </div>
 
-              <div style={{ fontSize: '14px', color: '#0E0C0A', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+              <div style={{ fontSize: '14px', color: 'var(--afa-ink)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                 {item.message}
               </div>
 
@@ -297,7 +297,7 @@ export default function AdminFeedbackPage() {
                 </div>
               )}
 
-              <div style={{ fontSize: '12px', color: '#8a827a', marginTop: '10px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--afa-taupe)', marginTop: '10px' }}>
                 {item.pageUrl && <span>Page: {item.pageUrl}</span>}
                 {item.user && (
                   <span>

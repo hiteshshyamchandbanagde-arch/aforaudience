@@ -86,9 +86,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       >
         {toasts.map((t) => {
-          const accent = t.kind === 'error' ? '#C8441A' : t.kind === 'info' ? '#C9973A' : '#2D6A4F'
-          const bg = t.kind === 'error' ? '#FDECEA' : t.kind === 'info' ? '#FBF3E4' : '#E7F4EC'
-          const text = t.kind === 'error' ? '#7A281F' : t.kind === 'info' ? '#8a6a1f' : '#1E4620'
+          const accent = t.kind === 'error' ? 'var(--afa-terracotta)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
+          const bg = t.kind === 'error' ? 'var(--afa-error-bg)' : t.kind === 'info' ? 'var(--afa-cream-tint-3)' : 'var(--afa-mint-tint-2)'
+          const text = t.kind === 'error' ? 'var(--afa-maroon)' : t.kind === 'info' ? 'var(--afa-gold)' : 'var(--afa-green-forest)'
           return (
             <div
               key={t.id}

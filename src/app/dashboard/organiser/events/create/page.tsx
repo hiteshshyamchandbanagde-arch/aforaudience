@@ -41,9 +41,9 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
   fontSize: '14px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const labelStyle = {
@@ -51,7 +51,7 @@ const labelStyle = {
   fontSize: '13px',
   fontWeight: 600,
   marginBottom: '6px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
@@ -365,29 +365,29 @@ export default function CreateEventPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Events
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Create an Event
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Set up your event details, book a venue, and publish when ready.
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
               {error}
             </div>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Event Details
               </h2>
 
@@ -438,18 +438,18 @@ export default function CreateEventPage() {
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: '#0E0C0A' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Book a Venue
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                 Optional — you can add this later. Booking requests are sent as pending until the venue owner responds.
               </p>
 
@@ -467,7 +467,7 @@ export default function CreateEventPage() {
                 <div>
                   {selectedVenue?.rateType === 'FLEXIBLE' || !selectedVenue?.rateType ? (
                     <>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '10px' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '10px' }}>
                         {selectedVenue?.rateType === 'FLEXIBLE'
                           ? "This venue uses flexible, negotiated pricing — no fixed rate published. Propose an amount below; the venue owner can confirm or come back with a different number."
                           : "This venue hasn't set a rental rate yet — propose an amount to offer."}
@@ -477,12 +477,12 @@ export default function CreateEventPage() {
                     </>
                   ) : (
                     <>
-                      <div style={{ background: '#F7F3EE', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
-                        <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '2px' }}>
+                      <div style={{ background: 'var(--afa-cream)', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '2px' }}>
                           {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
                           {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                         </div>
-                        <div style={{ fontSize: '18px', fontWeight: 700, color: '#0E0C0A' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)' }}>
                           {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
                         </div>
                       </div>
@@ -491,7 +491,7 @@ export default function CreateEventPage() {
                     </>
                   )}
                   {platformFee !== null && platformFee > 0 && (
-                    <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginTop: '10px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '10px' }}>
                       + ₹{platformFee.toLocaleString('en-IN')} platform booking fee, charged on top of the rental amount when this booking is confirmed.
                     </p>
                   )}
@@ -500,30 +500,30 @@ export default function CreateEventPage() {
             </section>
 
             {/* Seats & pricing */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Seats & Ticket Price
               </h2>
 
               <div style={{ display: 'flex', gap: '20px', marginBottom: '18px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                   <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                   <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
                 </label>
               </div>
 
               {usingTierPricing ? (
                 <div>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>
                     Sections and seat counts come from {selectedVenue?.name}'s seat map — you only set the price per section for this event.
                   </p>
                   {venueSections.map((s) => (
                     <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A' }}>{s.name}</div>
-                        <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{s.seats} seats</div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
                       </div>
                       {!isFree ? (
                         <input
@@ -535,11 +535,11 @@ export default function CreateEventPage() {
                           style={{ ...inputStyle, width: '120px' }}
                         />
                       ) : (
-                        <span style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5 }}>Free</span>
+                        <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
                       )}
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>
                     Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
                   </p>
                 </div>
@@ -560,8 +560,8 @@ export default function CreateEventPage() {
             </section>
 
             {/* Lineup & approvals */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '18px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '18px' }}>
                 Lineup &amp; Approvals
               </h2>
 
@@ -573,21 +573,21 @@ export default function CreateEventPage() {
                 <div>
                   <label style={labelStyle}>Max Seats Per Booking</label>
                   <input type="number" value={maxSeatsPerBooking} onChange={handleMaxSeatsPerBookingChange} min="1" max="10" maxLength={2} style={inputStyle} />
-                  <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
                 </div>
               </div>
 
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" maxLength={2} placeholder="0" style={{ ...inputStyle, maxWidth: '120px' }} />
-                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
+                <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px' }}>
                   Each artist in the lineup must have this many audience members confirm they're coming to support them - included in the artist&apos;s spot fee, no extra charge. Set to 0 if not required.
                 </p>
               </div>
 
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Artist Payment Terms</label>
-                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginBottom: '8px' }}>
+                <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>
                   Shown to Artists before they apply, so it's clear upfront - you can still negotiate a different amount with a specific artist when approving their application.
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
@@ -602,9 +602,9 @@ export default function CreateEventPage() {
                       onClick={() => setDefaultCompensationType(opt.value)}
                       style={{
                         padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: defaultCompensationType === opt.value ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
-                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : '#fff',
-                        color: defaultCompensationType === opt.value ? '#C8441A' : '#0E0C0A',
+                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
+                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                        color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
                       }}
                     >
                       {opt.label}
@@ -629,9 +629,9 @@ export default function CreateEventPage() {
                       onClick={() => setApplicationApprovalMode(mode)}
                       style={{
                         flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: applicationApprovalMode === mode ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
-                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : '#fff',
-                        color: applicationApprovalMode === mode ? '#C8441A' : '#0E0C0A',
+                        border: applicationApprovalMode === mode ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
+                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                        color: applicationApprovalMode === mode ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
                       }}
                     >
                       {mode === 'MANUAL' ? 'Manual — I review each one' : 'Auto — verified artists only'}
@@ -639,7 +639,7 @@ export default function CreateEventPage() {
                   ))}
                 </div>
                 {applicationApprovalMode === 'AUTO' && (
-                  <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
                     Applications auto-accept as free/exposure slots up to your Max Performers cap. You can still edit compensation per performer afterward.
                   </p>
                 )}
@@ -648,7 +648,7 @@ export default function CreateEventPage() {
 
             {/* Actions */}
             {venueId && (
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
                 Since you've attached a venue, this event goes to <strong>Pending</strong> when published, not live yet -
                 it'll go public automatically once the venue owner confirms your booking request.
               </p>
@@ -658,7 +658,7 @@ export default function CreateEventPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => submit(true)}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Publishing...' : 'Publish Event'}
               </button>
@@ -666,11 +666,11 @@ export default function CreateEventPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => submit(false)}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 Save as Draft
               </button>
-              <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
+              <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
                 Cancel
               </Link>
             </div>

@@ -27,9 +27,9 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
   fontSize: '14px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const labelStyle = {
@@ -37,7 +37,7 @@ const labelStyle = {
   fontSize: '13px',
   fontWeight: 600,
   marginBottom: '6px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 function makeId() {
@@ -162,28 +162,28 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !venue) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error && !venue) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Venue
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Edit Venue
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Update your venue details and seating layout.
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Basic Details
               </h2>
 
@@ -217,34 +217,34 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               <div>
                 <label style={labelStyle}>Google Maps Link <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
                   Paste a share link from Google Maps for an exact pin. If left blank, we'll use your address to build directions.
                 </p>
               </div>
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
 
               {venue.seatingMode === 'GENERAL_ADMISSION' && (
                 <>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                     Add, edit, or remove sections freely — capacity updates automatically.
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
-                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>Have real numbered seats instead?</div>
-                      <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)' }}>Have real numbered seats instead?</div>
+                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                         Section pricing above is for General Admission. Use the Seat Map builder to lay out individual numbered seats on a canvas matching your venue's shape.
                       </div>
                     </div>
                     <Link
                       href={`/dashboard/venue/${id}/seat-map`}
-                      style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                      style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: 'var(--afa-cream)', background: 'var(--afa-ink)', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
                     >
                       Open Seat Map Builder →
                     </Link>
@@ -253,16 +253,16 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {venue.seatingMode === 'NUMBERED' && (
-                <div style={{ padding: '16px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0E0C0A' }}>This venue uses Numbered Seating</div>
-                    <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)' }}>This venue uses Numbered Seating</div>
+                    <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                       Seats, rows, and zones are managed entirely in the Seat Map Builder — nothing to fill in here. Capacity ({venue.capacity} seats) reflects your saved seat map.
                     </div>
                   </div>
                   <Link
                     href={`/dashboard/venue/${id}/seat-map`}
-                    style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+                    style={{ flexShrink: 0, fontSize: '13px', fontWeight: 700, color: 'var(--afa-cream)', background: 'var(--afa-ink)', textDecoration: 'none', padding: '10px 18px', borderRadius: '8px', whiteSpace: 'nowrap' }}
                   >
                     Open Seat Map Builder →
                   </Link>
@@ -275,7 +275,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 type="button"
                 disabled={saving}
                 onClick={() => save(true)}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Saving...' : venue.isApproved ? 'Save Changes' : 'Save & Publish'}
               </button>
@@ -284,7 +284,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save & Unpublish
                 </button>
@@ -293,12 +293,12 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(undefined)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </button>
               )}
-              <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
+              <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel
               </Link>
             </div>

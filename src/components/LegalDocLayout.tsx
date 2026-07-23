@@ -1,10 +1,10 @@
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 
-const INK = "#0E0C0A"
-const PAPER = "#F7F3EE"
-const EMBER = "#C8441A"
-const MIST = "#E8E2D9"
+const INK = "var(--afa-ink)"
+const PAPER = "var(--afa-cream)"
+const EMBER = "var(--afa-terracotta)"
+const MIST = "var(--afa-mist)"
 const SERIF = "Georgia, 'Playfair Display', serif"
 const SANS = "system-ui, -apple-system, sans-serif"
 
@@ -33,11 +33,11 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
             marginBottom: "32px",
             padding: "16px 20px",
             borderRadius: "10px",
-            background: "#FDF3E8",
+            background: "var(--afa-cream-tint-2)",
             border: "1px solid #E8C9A0",
           }}
         >
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "#8A5A1E", marginBottom: "4px" }}>
+          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--afa-brown-gold)", marginBottom: "4px" }}>
             Draft — pending legal review
           </p>
           <p style={{ fontSize: "13px", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
@@ -91,7 +91,7 @@ export function LI({ children }: { children: React.ReactNode }) {
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "#FDF3E8", color: "#8A5A1E", padding: "1px 6px", borderRadius: "4px", fontWeight: 600 }}>
+    <span style={{ background: "var(--afa-cream-tint-2)", color: "var(--afa-brown-gold)", padding: "1px 6px", borderRadius: "4px", fontWeight: 600 }}>
       {children}
     </span>
   )

@@ -45,9 +45,9 @@ interface EventInfo {
 }
 
 const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
-  PAID: { label: 'Paid', bg: 'rgba(74,103,65,0.12)', color: '#4A6741' },
-  FREE: { label: 'Free', bg: 'rgba(14,12,10,0.06)', color: '#0E0C0A' },
-  BUY_IN: { label: 'Buy-in', bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f' },
+  PAID: { label: 'Paid', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
+  FREE: { label: 'Free', bg: 'rgba(14,12,10,0.06)', color: 'var(--afa-ink)' },
+  BUY_IN: { label: 'Buy-in', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
 }
 
 function SortableRow({
@@ -75,7 +75,7 @@ function SortableRow({
         alignItems: 'center',
         gap: '12px',
         padding: '14px',
-        background: '#fff',
+        background: 'var(--afa-white)',
         borderRadius: '10px',
         border: '1px solid rgba(14,12,10,0.08)',
       }}
@@ -97,12 +97,12 @@ function SortableRow({
         ⠿
       </button>
 
-      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0E0C0A', color: '#F7F3EE', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-ink)', color: 'var(--afa-cream)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {item.slot}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontWeight: 600, fontSize: '14px', color: '#0E0C0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--afa-ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {item.artistName}
         </p>
         {item.startLabel && item.endLabel && (
@@ -217,19 +217,19 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
-          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to event
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A', marginTop: '12px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.55)', marginBottom: '24px' }}>
@@ -238,11 +238,11 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           </p>
 
           {error && (
-            <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error}</div>
+            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.06)' }}>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.06)' }}>
               <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.6)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>
@@ -265,8 +265,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                 onClick={handleSave}
                 disabled={!dirty || saving}
                 style={{
-                  fontSize: '14px', fontWeight: 600, color: '#F7F3EE',
-                  background: dirty ? '#C8441A' : 'rgba(14,12,10,0.3)',
+                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)',
+                  background: dirty ? 'var(--afa-terracotta)' : 'rgba(14,12,10,0.3)',
                   border: 'none', padding: '12px 28px', borderRadius: '8px',
                   cursor: dirty && !saving ? 'pointer' : 'not-allowed',
                 }}

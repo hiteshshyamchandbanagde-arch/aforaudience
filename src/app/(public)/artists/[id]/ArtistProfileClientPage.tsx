@@ -101,7 +101,7 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
 
   if (!artist) {
     return (
-      <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav backHref="/artists" backLabel="← Back to Artists" />
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px" }}>Artist not found.</div>
       </main>
@@ -119,11 +119,11 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
   const socialEntries = Object.entries(artist.socialLinks || {}).filter(([, v]) => v)
 
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav backHref="/artists" backLabel="← Back to Artists" />
 
       {/* HERO */}
-      <div style={{ background: "#1a0a1a", padding: "64px 48px 40px" }}>
+      <div style={{ background: "var(--afa-plum-black)", padding: "64px 48px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "32px", alignItems: "flex-end", flexWrap: "wrap" }}>
           <div style={{ width: "140px", height: "140px", borderRadius: "50%", background: artist.user.avatar ? `url(${artist.user.avatar}) center/cover` : "rgba(255,255,255,0.1)", border: "4px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "56px", fontWeight: 700, color: "white", flexShrink: 0 }}>
             {!artist.user.avatar && artist.user.name.charAt(0).toUpperCase()}
@@ -132,7 +132,7 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
           <div>
             <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
               {artist.genre.map((g) => (
-                <span key={g} style={{ background: "#C8441A", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
+                <span key={g} style={{ background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
               ))}
               <span style={{ background: "rgba(201,151,58,0.9)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>🔥 Hype {artist.hypScore.toFixed(1)}</span>
             </div>
@@ -141,7 +141,7 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
               {isVerified && (
                 <span
                   title="Verified: complete profile with an established track record"
-                  style={{ fontSize: "0.45em", background: "#1D9BF0", color: "white", width: "1.1em", height: "1.1em", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                  style={{ fontSize: "0.45em", background: "var(--afa-social-blue)", color: "white", width: "1.1em", height: "1.1em", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                 >
                   ✓
                 </span>
@@ -159,7 +159,7 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
                 style={{
                   fontSize: "13px", fontWeight: 700, padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
                   border: following ? "1.5px solid rgba(255,255,255,0.4)" : "none",
-                  background: following ? "transparent" : "#C8441A",
+                  background: following ? "transparent" : "var(--afa-terracotta)",
                   color: "white",
                   opacity: followBusy ? 0.6 : 1,
                 }}
@@ -203,8 +203,8 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
             { num: upcomingShows.length, label: "Upcoming" },
           ].map((stat) => (
             <div key={stat.label}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1 }}>{stat.num}</div>
-              <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>{stat.label}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1 }}>{stat.num}</div>
+              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -224,7 +224,7 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "#C8441A" : "#0E0C0A", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "#C8441A" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
+                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "var(--afa-terracotta)" : "var(--afa-ink)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-terracotta)" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
               >
                 {tab}
               </button>
@@ -233,8 +233,8 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
 
           {activeTab === "about" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "12px" }}>About</h2>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "#0E0C0A", opacity: artist.bio ? 0.75 : 0.4, marginBottom: "32px", fontStyle: artist.bio ? "normal" : "italic" }}>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>About</h2>
+              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "var(--afa-ink)", opacity: artist.bio ? 0.75 : 0.4, marginBottom: "32px", fontStyle: artist.bio ? "normal" : "italic" }}>
                 {artist.bio || "This artist hasn't added a bio yet."}
               </p>
 
@@ -246,10 +246,10 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
                 { label: "Goals & Ambitions", value: artist.goals },
               ].filter((section) => section.value).map((section) => (
                 <div key={section.label} style={{ marginBottom: "28px" }}>
-                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "10px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>
                     {section.label}
                   </h3>
-                  <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#0E0C0A", opacity: 0.75, whiteSpace: "pre-wrap" }}>
+                  <p style={{ fontSize: "14px", lineHeight: 1.8, color: "var(--afa-ink)", opacity: 0.75, whiteSpace: "pre-wrap" }}>
                     {section.value}
                   </p>
                 </div>
@@ -257,10 +257,10 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
 
               {artist.videoReel.length > 0 && (
                 <>
-                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "12px" }}>Reels</h3>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>Reels</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {artist.videoReel.map((url) => (
-                      <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "13px", color: "#C8441A", wordBreak: "break-all" }}>{url}</a>
+                      <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "13px", color: "var(--afa-terracotta)", wordBreak: "break-all" }}>{url}</a>
                     ))}
                   </div>
                 </>
@@ -270,36 +270,36 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
 
           {activeTab === "shows" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "20px" }}>Upcoming Shows</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>Upcoming Shows</h2>
               {upcomingShows.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, marginBottom: "32px" }}>No upcoming shows booked yet.</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "32px" }}>No upcoming shows booked yet.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                   {upcomingShows.map((p) => (
                     <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                       <div>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "6px" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.55 }}>📍 {p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
-                        <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.55 }}>📅 {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "6px" }}>{p.event.title}</div>
+                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>📍 {p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
+                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>📅 {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
-                      <Link href={`/events/${p.event.id}`} style={{ background: "#0E0C0A", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>View Event</Link>
+                      <Link href={`/events/${p.event.id}`} style={{ background: "var(--afa-ink)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>View Event</Link>
                     </div>
                   ))}
                 </div>
               )}
 
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "20px" }}>Past Shows</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>Past Shows</h2>
               {pastShows.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5 }}>No past shows yet.</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>No past shows yet.</p>
               ) : (
                 <div style={{ position: "relative", paddingLeft: "24px" }}>
                   <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "rgba(14,12,10,0.1)" }} />
                   {pastShows.map((p, i) => (
                     <div key={p.id} style={{ position: "relative", marginBottom: "20px" }}>
-                      <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "#C8441A" : "rgba(14,12,10,0.2)" }} />
+                      <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-terracotta)" : "rgba(14,12,10,0.2)" }} />
                       <div style={{ background: "white", borderRadius: "10px", padding: "14px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
-                        <div style={{ fontWeight: 600, fontSize: "14px", color: "#0E0C0A", marginBottom: "4px" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--afa-ink)", marginBottom: "4px" }}>{p.event.title}</div>
+                        <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
                     </div>
                   ))}
@@ -313,20 +313,20 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {socialEntries.length > 0 && (
             <div style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)" }}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "#0E0C0A", marginBottom: "16px" }}>Connect</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}>
                   <span style={{ fontSize: "18px" }}>{SOCIAL_ICON[platform] || "🔗"}</span>
-                  <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
+                  <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
                 </a>
               ))}
             </div>
           )}
 
-          <div style={{ background: "#0E0C0A", borderRadius: "12px", padding: "20px" }}>
+          <div style={{ background: "var(--afa-ink)", borderRadius: "12px", padding: "20px" }}>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "8px" }}>🎤 Book for your event</div>
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {artist.user.name} to apply for your event.</p>
-            <Link href="/login" style={{ display: "block", background: "#C8441A", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
+            <Link href="/login" style={{ display: "block", background: "var(--afa-terracotta)", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
               Log In
             </Link>
           </div>

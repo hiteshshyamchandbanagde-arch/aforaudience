@@ -134,7 +134,7 @@ export function openRazorpayCheckout(
       name: "AforAudience",
       description: params.eventTitle,
       prefill: params.prefill,
-      theme: { color: "#C8441A" }, // Ember, matches brand
+      theme: { color: "var(--afa-terracotta)" }, // Ember, matches brand
       handler: (response) => {
         settled = true
         resolve(response)

@@ -48,9 +48,9 @@ interface Counts {
 
 type Tab = 'errored' | 'pending' | 'delivered' | 'all'
 
-const BRAND_BG = '#F7F3EE'
-const BRAND_INK = '#0E0C0A'
-const BRAND_ACCENT = '#C2410C' // warm-orange for retry / errors
+const BRAND_BG = 'var(--afa-cream)'
+const BRAND_INK = 'var(--afa-ink)'
+const BRAND_ACCENT = 'var(--afa-orange-dark)' // warm-orange for retry / errors
 const BRAND_MUTED = 'rgba(14,12,10,0.55)'
 const CARD_BORDER = '1px solid rgba(14,12,10,0.08)'
 
@@ -150,7 +150,7 @@ export default function AdminBookingsPage() {
           padding: '8px 14px',
           borderRadius: '999px',
           border: active ? `1px solid ${BRAND_INK}` : CARD_BORDER,
-          background: active ? BRAND_INK : '#fff',
+          background: active ? BRAND_INK : 'var(--afa-white)',
           color: active ? BRAND_BG : BRAND_INK,
           fontSize: '14px',
           cursor: 'pointer',
@@ -170,7 +170,7 @@ export default function AdminBookingsPage() {
     })
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
-    if (b.deliveredAt) return { label: 'Delivered', color: '#166534' }
+    if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }
     if (b.deliveryError) return { label: 'Delivery failed', color: BRAND_ACCENT }
     return { label: 'Pending delivery', color: BRAND_MUTED }
   }
@@ -214,7 +214,7 @@ export default function AdminBookingsPage() {
                   <div
                     key={b.id}
                     style={{
-                      background: '#fff',
+                      background: 'var(--afa-white)',
                       borderRadius: '12px',
                       padding: '18px 20px',
                       border: CARD_BORDER,
@@ -286,7 +286,7 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '10px',
                           fontSize: '13px',
-                          color: retryMessage.kind === 'ok' ? '#166534' : BRAND_ACCENT,
+                          color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : BRAND_ACCENT,
                         }}
                       >
                         {retryMessage.text}
@@ -303,7 +303,7 @@ export default function AdminBookingsPage() {
                             borderRadius: '999px',
                             border: 'none',
                             background: retryingId === b.id ? BRAND_MUTED : BRAND_ACCENT,
-                            color: '#fff',
+                            color: 'var(--afa-white)',
                             fontSize: '13px',
                             cursor: retryingId === b.id ? 'default' : 'pointer',
                             fontFamily: 'system-ui, sans-serif',

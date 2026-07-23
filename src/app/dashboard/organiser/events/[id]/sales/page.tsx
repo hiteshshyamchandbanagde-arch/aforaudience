@@ -110,7 +110,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   const { event, tiers, totals, timeline, recentBookings } = data
@@ -120,19 +120,19 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
               ← Back to event
             </Link>
-            <Link href="/dashboard/organiser/sales" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href="/dashboard/organiser/sales" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
               All events →
             </Link>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)' }}>
               📊 {event.title} — Sales
             </h1>
             <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
@@ -145,7 +145,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           {/* Summary cards */}
@@ -169,11 +169,11 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                 return (
                   <div key={t.sectionName}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: 600, color: '#0E0C0A' }}>{t.sectionName} {t.price > 0 ? `· ₹${t.price}` : '· Free'}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>{t.sectionName} {t.price > 0 ? `· ₹${t.price}` : '· Free'}</span>
                       <span style={{ color: 'rgba(14,12,10,0.6)' }}>{t.sold} / {t.totalSeats}</span>
                     </div>
                     <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(14,12,10,0.08)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: '#4A6741', borderRadius: '4px', transition: 'width 0.3s' }} />
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'var(--afa-sage)', borderRadius: '4px', transition: 'width 0.3s' }} />
                     </div>
                   </div>
                 )
@@ -189,7 +189,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${t.seats} seats, ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: '#C8441A', borderRadius: '3px 3px 0 0' }} />
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }} />
                     <span style={{ fontSize: '9px', color: 'rgba(14,12,10,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
@@ -206,7 +206,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '10px 12px', background: '#fff', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-white)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.name}</span>
                     <span style={{ color: 'rgba(14,12,10,0.6)' }}>
                       {Object.entries(b.seats).map(([s, q]) => `${q}× ${s}`).join(', ')}
@@ -226,9 +226,9 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
-    <div style={{ background: muted ? 'rgba(14,12,10,0.03)' : '#fff', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: muted ? 'rgba(14,12,10,0.03)' : 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
-      <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>{value}</p>
+      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-ink)' }}>{value}</p>
       {sub && <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
@@ -236,8 +236,8 @@ function SummaryCard({ label, value, sub, muted }: { label: string; value: strin
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>{title}</h2>
+    <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
   )

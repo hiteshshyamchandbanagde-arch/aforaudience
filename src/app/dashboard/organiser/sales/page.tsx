@@ -96,7 +96,7 @@ export default function OrganiserSalesOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   const { totals, events, timeline } = data
@@ -105,14 +105,14 @@ export default function OrganiserSalesOverviewPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to dashboard
           </Link>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)' }}>
               📊 Sales Overview
             </h1>
             <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
@@ -125,7 +125,7 @@ export default function OrganiserSalesOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
@@ -142,7 +142,7 @@ export default function OrganiserSalesOverviewPage() {
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: '#C8441A', borderRadius: '3px 3px 0 0' }} />
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }} />
                     <span style={{ fontSize: '9px', color: 'rgba(14,12,10,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
@@ -169,8 +169,8 @@ export default function OrganiserSalesOverviewPage() {
                     href={`/dashboard/organiser/events/${e.id}/sales?range=${range}`}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: '#fff', borderRadius: '8px',
-                      border: '1px solid rgba(14,12,10,0.06)', textDecoration: 'none', color: '#0E0C0A',
+                      fontSize: '13px', padding: '12px', background: 'var(--afa-white)', borderRadius: '8px',
+                      border: '1px solid rgba(14,12,10,0.06)', textDecoration: 'none', color: 'var(--afa-ink)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -190,17 +190,17 @@ export default function OrganiserSalesOverviewPage() {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
-      <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>{value}</p>
+      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-ink)' }}>{value}</p>
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>{title}</h2>
+    <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
   )

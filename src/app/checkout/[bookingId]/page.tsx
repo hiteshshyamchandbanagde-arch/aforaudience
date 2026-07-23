@@ -174,7 +174,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: '#0E0C0A' }}>
+        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-ink)' }}>
           Loading your checkout…
         </div>
       </>
@@ -189,8 +189,8 @@ export default function CheckoutPage() {
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 16 }}>
             Something went wrong
           </h1>
-          <p style={{ color: '#B3261E', marginBottom: 24 }}>{error || 'Booking not found'}</p>
-          <Link href="/events" style={{ color: '#C8441A', fontWeight: 600 }}>
+          <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || 'Booking not found'}</p>
+          <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
             ← Back to events
           </Link>
         </div>
@@ -230,7 +230,7 @@ export default function CheckoutPage() {
             maxWidth: 560,
             margin: '0 auto',
             fontFamily: 'system-ui, sans-serif',
-            color: '#0E0C0A',
+            color: 'var(--afa-ink)',
           }}
         >
           <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
@@ -248,7 +248,7 @@ export default function CheckoutPage() {
           </p>
           <div
             style={{
-              background: '#F7F3EE',
+              background: 'var(--afa-cream)',
               border: '1px solid rgba(14,12,10,0.08)',
               borderRadius: 12,
               padding: 20,
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
             <a
               href={`/api/bookings/${state.booking.id}/ticket`}
               style={{
-                background: '#0E0C0A',
+                background: 'var(--afa-ink)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: 10,
@@ -286,7 +286,7 @@ export default function CheckoutPage() {
             <Link
               href="/tickets"
               style={{
-                background: '#C8441A',
+                background: 'var(--afa-terracotta)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: 10,
@@ -300,7 +300,7 @@ export default function CheckoutPage() {
             <Link
               href="/events"
               style={{
-                color: '#0E0C0A',
+                color: 'var(--afa-ink)',
                 padding: '12px 20px',
                 borderRadius: 10,
                 fontWeight: 600,
@@ -312,7 +312,7 @@ export default function CheckoutPage() {
               Browse more events
             </Link>
           </div>
-          <p style={{ fontSize: 12, color: '#8a827a', marginTop: 16, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 12, color: 'var(--afa-taupe)', marginTop: 16, lineHeight: 1.6 }}>
             We've also emailed the ticket to you. Show the QR at the door — screen or print is fine.
           </p>
         </main>
@@ -334,7 +334,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href={`/events/${state.booking.event.id}`}
-            style={{ color: '#C8441A', fontWeight: 600 }}
+            style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
           >
             ← Back to event
           </Link>
@@ -358,7 +358,7 @@ export default function CheckoutPage() {
           <Link
             href={`/events/${state.booking.event.id}`}
             style={{
-              background: '#C8441A',
+              background: 'var(--afa-terracotta)',
               color: 'white',
               padding: '12px 20px',
               borderRadius: 10,
@@ -388,7 +388,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href="/tickets"
-            style={{ color: '#C8441A', fontWeight: 600 }}
+            style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
           >
             View my reservations →
           </Link>
@@ -407,7 +407,7 @@ export default function CheckoutPage() {
           maxWidth: 560,
           margin: '0 auto',
           fontFamily: 'system-ui, sans-serif',
-          color: '#0E0C0A',
+          color: 'var(--afa-ink)',
         }}
       >
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
@@ -543,7 +543,7 @@ export default function CheckoutPage() {
           <div
             style={{
               background: 'rgba(179,38,30,0.08)',
-              color: '#B3261E',
+              color: 'var(--afa-error)',
               padding: '10px 14px',
               borderRadius: 8,
               fontSize: 13,
@@ -559,7 +559,7 @@ export default function CheckoutPage() {
           disabled={paying || confirming}
           style={{
             width: '100%',
-            background: '#C8441A',
+            background: 'var(--afa-terracotta)',
             color: 'white',
             padding: 16,
             border: 'none',

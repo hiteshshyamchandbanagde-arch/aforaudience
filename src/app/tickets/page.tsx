@@ -23,11 +23,11 @@ interface BookingItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Reserved — pay to confirm' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Expired — book again' },
-  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741', label: 'Confirmed' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E', label: 'Cancelled' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Refunded' },
+  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Reserved — pay to confirm' },
+  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Expired — book again' },
+  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Confirmed' },
+  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
+  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Refunded' },
 }
 
 // A booking's display status can differ from its DB status: an expired
@@ -90,24 +90,24 @@ export default function MyTicketsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
             My Tickets
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Reserved bookings need to be paid to lock in your seats. Confirmed bookings are yours.
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
               {error}
             </div>
           )}
 
           {bookings.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: '#0E0C0A', opacity: 0.6 }}>
-              No tickets yet. <Link href="/events" style={{ color: '#C8441A', fontWeight: 600 }}>Browse events</Link>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-ink)', opacity: 0.6 }}>
+              No tickets yet. <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Browse events</Link>
             </div>
           ) : (
             bookings.map((b) => {
@@ -115,20 +115,20 @@ export default function MyTicketsPage() {
               const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
               const isLivePending = eff === 'PENDING'
               return (
-                <div key={b.id} style={{ background: '#fff', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: '#0E0C0A', textDecoration: 'none' }}>
+                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', textDecoration: 'none' }}>
                       {b.event.title}
                     </Link>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
                       {s.label}
                     </span>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, margin: '0 0 10px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
                     {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
                     {b.event.venue && <> · {b.event.venue.name}, {b.event.venue.city}</>}
                   </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#0E0C0A' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-ink)' }}>
                     <span>{Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}</span>
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
                   </div>
@@ -137,7 +137,7 @@ export default function MyTicketsPage() {
                       {b.totalAmount > 0 && (
                         <Link
                           href={`/checkout/${b.id}`}
-                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: '#C8441A', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                         >
                           Pay now →
                         </Link>
@@ -145,7 +145,7 @@ export default function MyTicketsPage() {
                       <button
                         onClick={() => cancelBooking(b.id)}
                         disabled={cancelling === b.id}
-                        style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                        style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
                       >
                         {cancelling === b.id ? 'Cancelling...' : 'Cancel'}
                       </button>
@@ -155,7 +155,7 @@ export default function MyTicketsPage() {
                     <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <a
                         href={`/api/bookings/${b.id}/ticket`}
-                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: '#0E0C0A', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-ink)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                       >
                         Download ticket (PDF)
                       </a>

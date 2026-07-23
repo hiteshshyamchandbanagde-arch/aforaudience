@@ -95,7 +95,7 @@ export default function AuthPromptSheet({
           position: "relative",
           width: "100%",
           maxWidth: "480px",
-          background: "#F7F3EE",
+          background: "var(--afa-cream)",
           borderRadius: "20px 20px 0 0",
           padding: "8px 24px 28px",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
@@ -116,14 +116,14 @@ export default function AuthPromptSheet({
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "#0E0C0A", marginBottom: subtitle ? "4px" : 0 }}>
+          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: subtitle ? "4px" : 0 }}>
             {title}
           </h2>
-          {subtitle && <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.55 }}>{subtitle}</div>}
+          {subtitle && <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>{subtitle}</div>}
         </div>
 
         {error && (
-          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "#C8441A" }}>
+          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "var(--afa-terracotta)" }}>
             {error}
           </div>
         )}
@@ -134,7 +134,7 @@ export default function AuthPromptSheet({
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                 {field.label}
               </label>
               <input
@@ -144,7 +144,7 @@ export default function AuthPromptSheet({
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}
@@ -153,21 +153,21 @@ export default function AuthPromptSheet({
         <button
           onClick={handleSignIn}
           disabled={loading}
-          style={{ width: "100%", background: "#C8441A", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
+          style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
         >
           {loading ? "Signing in..." : "Sign In & Continue"}
         </button>
 
-        <div style={{ textAlign: "center", fontSize: "13px", color: "#0E0C0A", opacity: 0.6, marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "4px" }}>
           New here?{" "}
-          <Link href="/register" style={{ color: "#C8441A", fontWeight: 600, textDecoration: "none" }}>
+          <Link href="/register" style={{ color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none" }}>
             Create an account
           </Link>
         </div>
 
         <button
           onClick={onClose}
-          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "#0E0C0A", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
+          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-ink)", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
         >
           Keep browsing
         </button>

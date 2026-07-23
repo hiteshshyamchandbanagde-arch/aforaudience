@@ -27,10 +27,10 @@ interface RequestItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f', label: 'Pending' },
-  ACCEPTED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741', label: 'Accepted' },
-  DECLINED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E', label: 'Declined' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: '#0E0C0A', label: 'Expired' },
+  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
+  ACCEPTED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Accepted' },
+  DECLINED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Declined' },
+  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Expired' },
 }
 
 export default function VenueRequestsPage() {
@@ -98,15 +98,15 @@ export default function VenueRequestsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : callerSide === 'ORGANISER' ? '/dashboard/organiser' : '/'} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : callerSide === 'ORGANISER' ? '/dashboard/organiser' : '/'} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Dashboard
           </Link>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Venue Booking Requests
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Flexible-rate venue negotiations
             {callerSide === 'VENUE_OWNER' ? ' — requests against your venues.'
               : callerSide === 'ORGANISER' ? ' — your outstanding requests.'
@@ -114,13 +114,13 @@ export default function VenueRequestsPage() {
           </p>
 
           {loadError && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
               {loadError}
             </div>
           )}
 
           {requests.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: '#0E0C0A', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-ink)', opacity: 0.6 }}>
               No booking requests yet.
             </div>
           ) : (
@@ -131,13 +131,13 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <div key={r.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={r.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                     <div>
-                      <p style={{ fontSize: '16px', fontWeight: 600, color: '#0E0C0A', margin: 0 }}>
+                      <p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', margin: 0 }}>
                         {r.event?.title || 'Untitled event'}
                       </p>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, margin: '2px 0 0' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '2px 0 0' }}>
                         {r.venue.name}, {r.venue.city} · {new Date(r.requestedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {r.durationHours}hr
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
@@ -148,17 +148,17 @@ export default function VenueRequestsPage() {
                   </div>
 
                   {r.offers.length > 0 && (
-                    <div style={{ background: '#F7F3EE', borderRadius: '8px', padding: '10px 12px', margin: '14px 0' }}>
+                    <div style={{ background: 'var(--afa-cream)', borderRadius: '8px', padding: '10px 12px', margin: '14px 0' }}>
                       {r.offers.map((o) => (
                         <div key={o.id} style={{ padding: '4px 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                            <span style={{ color: '#0E0C0A', opacity: 0.6 }}>
+                            <span style={{ color: 'var(--afa-ink)', opacity: 0.6 }}>
                               {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
                             </span>
-                            <span style={{ fontWeight: 600, color: '#0E0C0A' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>₹{o.amount.toLocaleString('en-IN')}</span>
                           </div>
                           {o.comment && (
-                            <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.65, fontStyle: 'italic', margin: '2px 0 0' }}>
+                            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.65, fontStyle: 'italic', margin: '2px 0 0' }}>
                               "{o.comment}"
                             </p>
                           )}
@@ -168,7 +168,7 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && (
-                    <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, margin: '0 0 12px' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, margin: '0 0 12px' }}>
                       Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
                     </p>
                   )}
@@ -199,7 +199,7 @@ export default function VenueRequestsPage() {
                           <button
                             onClick={() => act(r.id, 'accept')}
                             disabled={actingOn === r.id}
-                            style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
+                            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
                           >
                             Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
                           </button>
@@ -207,14 +207,14 @@ export default function VenueRequestsPage() {
                         <button
                           onClick={() => act(r.id, 'counter')}
                           disabled={actingOn === r.id || roundsUsed >= 6}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
+                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
                           {lastOffer ? 'Counter' : 'Send quote'}
                         </button>
                         <button
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
+                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
                         >
                           Decline
                         </button>
@@ -223,7 +223,7 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && !canRespond && (
-                    <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5, fontStyle: 'italic' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, fontStyle: 'italic' }}>
                       Waiting on the other side to respond.
                     </p>
                   )}

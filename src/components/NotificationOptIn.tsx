@@ -127,8 +127,8 @@ export default function NotificationOptIn() {
       role="status"
       aria-label="Enable notifications"
       style={{
-        background: '#0E0C0A',
-        color: '#F7F3EE',
+        background: 'var(--afa-ink)',
+        color: 'var(--afa-cream)',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
         display: 'flex',
         alignItems: 'center',
@@ -148,7 +148,7 @@ export default function NotificationOptIn() {
         onClick={enable}
         disabled={busy}
         style={{
-          background: '#C8441A',
+          background: 'var(--afa-terracotta)',
           color: 'white',
           padding: '6px 14px',
           borderRadius: 999,

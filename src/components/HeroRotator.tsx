@@ -56,7 +56,7 @@ export default function HeroRotator() {
         width: '100%',
         borderRadius: '16px',
         overflow: 'hidden',
-        background: '#0E0C0A',
+        background: 'var(--afa-ink)',
       }}
     >
       {SLIDES.map((slide, i) => {
@@ -94,10 +94,10 @@ export default function HeroRotator() {
         }}
       />
       <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
-        <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: '#F5A26E', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
           For artists
         </div>
-        <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '19px', color: '#F7F3EE', lineHeight: 1.3 }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-cream)', lineHeight: 1.3 }}>
           Your best performance, featured here.
         </div>
       </div>

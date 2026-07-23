@@ -117,13 +117,13 @@ export default function AdminUsersPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/admin" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/admin" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to dashboard
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: '#0E0C0A', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '8px' }}>
             🚩 Accounts
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
@@ -148,12 +148,12 @@ export default function AdminUsersPage() {
                 <option key={r} value={r}>{r || 'All roles'}</option>
               ))}
             </select>
-            <button type="submit" style={{ padding: '10px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+            <button type="submit" style={{ padding: '10px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
               Search
             </button>
           </form>
 
-          {error && <div style={{ fontSize: '13px', color: '#B3261E', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {users.length === 0 && !loading && (
@@ -163,19 +163,19 @@ export default function AdminUsersPage() {
               <div
                 key={u.id}
                 style={{
-                  background: '#fff', borderRadius: '10px', padding: '16px',
-                  border: u.isSuspended ? '1px solid #C8441A' : '1px solid rgba(14,12,10,0.08)',
+                  background: 'var(--afa-white)', borderRadius: '10px', padding: '16px',
+                  border: u.isSuspended ? '1px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <p style={{ fontSize: '15px', fontWeight: 700, color: '#0E0C0A' }}>
+                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-ink)' }}>
                       {u.displayName || u.name}
-                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: '#C8441A', textTransform: 'uppercase' }}>Suspended</span>}
+                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
                     <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
-                      <p style={{ fontSize: '12px', color: '#C8441A', marginTop: '6px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-terracotta)', marginTop: '6px' }}>
                         Reason: {u.suspendReason}
                       </p>
                     )}
@@ -186,7 +186,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #4A6741', background: '#fff', color: '#4A6741', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-sage)', background: 'var(--afa-white)', color: 'var(--afa-sage)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
                       >
                         Unsuspend
                       </button>
@@ -201,7 +201,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => handleSuspend(u.id)}
                           disabled={actioningId === u.id}
-                          style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                          style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
                         >
                           Suspend
                         </button>

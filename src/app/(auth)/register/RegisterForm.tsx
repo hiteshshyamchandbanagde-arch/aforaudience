@@ -9,15 +9,15 @@ const inputStyle = (hasError?: boolean) => ({
   width: "100%",
   padding: "12px 14px",
   borderRadius: "8px",
-  border: `1.5px solid ${hasError ? "#C8441A" : "rgba(14,12,10,0.15)"}`,
+  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
   fontSize: "14px",
-  color: "#0E0C0A",
+  color: "var(--afa-ink)",
   background: "white",
   outline: "none",
   boxSizing: "border-box" as const,
 })
 
-const labelStyle = { fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }
+const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -190,26 +190,26 @@ export default function RegisterForm() {
 
   if (stage === "otp") {
     return (
-      <main style={{ minHeight: "100vh", background: "#F7F3EE", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
-              <span style={{ color: "#C8441A" }}>A</span>forAudience
+            <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
+              <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
               <EnvBadge />
             </Link>
-            <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, marginTop: "8px" }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
               Verify your mobile number
             </p>
           </div>
 
           <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
             {devOtp && (
-              <div style={{ background: "#FFF8E1", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "#0E0C0A" }}>
+              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
             {error && (
-              <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+              <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
                 {error}
               </div>
             )}
@@ -226,14 +226,14 @@ export default function RegisterForm() {
             <button
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? "Verifying..." : "Verify"}
             </button>
             <button
               onClick={handleResendOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               Resend code
             </button>
@@ -244,21 +244,21 @@ export default function RegisterForm() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: "480px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}>
-            <span style={{ color: "#C8441A" }}>A</span>forAudience
+          <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
+            <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
             <EnvBadge />
           </Link>
-          <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, marginTop: "8px" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
             Create your account
           </p>
         </div>
 
         <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
           {error && (
-            <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+            <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
               {error}
             </div>
           )}
@@ -287,19 +287,19 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
               />
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>Checking availability...</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>Checking availability...</p>
               )}
               {usernameStatus === "available" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "#276749" }}>Available</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>Available</p>
               )}
               {usernameStatus === "taken" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "#C8441A" }}>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-terracotta)" }}>
                   Taken.{" "}
                   {usernameSuggestion && (
                     <button
                       type="button"
                       onClick={() => { setUsernameTouched(true); setForm((f) => ({ ...f, username: usernameSuggestion })) }}
-                      style={{ color: "#C8441A", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
+                      style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
                     >
                       Use &quot;{usernameSuggestion}&quot; instead
                     </button>
@@ -307,7 +307,7 @@ export default function RegisterForm() {
                 </p>
               )}
               {fieldErrors.username && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "#C8441A" }}>{fieldErrors.username}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.username}</p>
               )}
             </div>
 
@@ -322,14 +322,14 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.email)}
               />
               {fieldErrors.email && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "#C8441A" }}>{fieldErrors.email}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.email}</p>
               )}
             </div>
 
             <div>
               <label style={labelStyle}>Mobile number</label>
               <div style={{ display: "flex", gap: "8px" }}>
-                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "#F7F3EE" }}>
+                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "var(--afa-cream)" }}>
                   +91
                 </div>
                 <input
@@ -341,11 +341,11 @@ export default function RegisterForm() {
                   style={{ ...inputStyle(!!fieldErrors.phone), flex: 1 }}
                 />
               </div>
-              <p style={{ marginTop: "6px", fontSize: "12px", color: "#0E0C0A", opacity: 0.45 }}>
+              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45 }}>
                 Used to verify your account with a one-time code.
               </p>
               {fieldErrors.phone && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "#C8441A" }}>{fieldErrors.phone}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.phone}</p>
               )}
             </div>
 
@@ -396,22 +396,22 @@ export default function RegisterForm() {
           <button
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken"}
-            style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
+            style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
             By creating an account, you agree to our{" "}
-            <Link href="/terms" style={{ color: "#C8441A", textDecoration: "none" }}>Terms of Service</Link> and{" "}
-            <Link href="/privacy" style={{ color: "#C8441A", textDecoration: "none" }}>Privacy Policy</Link>.
+            <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>Terms of Service</Link> and{" "}
+            <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>Privacy Policy</Link>.
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "#0E0C0A", opacity: 0.6 }}>
+        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
           Already have an account? {" "}
-          <Link href="/login" style={{ color: "#C8441A", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
+          <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
         </p>
-        <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "#0E0C0A", opacity: 0.45 }}>
+        <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45 }}>
           Everyone joins as Audience. You can apply to become an Artist, Organiser, or Venue Owner later from your profile.
         </p>
       </div>

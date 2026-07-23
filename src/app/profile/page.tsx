@@ -21,7 +21,7 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
 }
 
 const cardStyle = {
-  background: '#fff',
+  background: 'var(--afa-white)',
   borderRadius: '12px',
   padding: '24px',
   border: '1px solid rgba(14,12,10,0.08)',
@@ -214,11 +214,11 @@ export default function ProfilePage() {
   ) => {
     if (!roleStatus?.hasProfile) return null
     if (!roleStatus.isApproved) {
-      return <div style={{ fontSize: '14px', fontWeight: 600, color: '#8a6a1f' }}>⏳ Application pending approval</div>
+      return <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-gold)' }}>⏳ Application pending approval</div>
     }
     if (roleStatus.isActive) {
       return (
-        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: '14px', fontWeight: 600, color: '#4A6741', textDecoration: 'none' }}>
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
           ✅ Visit your {label} dashboard →
         </Link>
       )
@@ -227,7 +227,7 @@ export default function ProfilePage() {
       <button
         onClick={() => switchRole(kind)}
         disabled={switching === kind}
-        style={{ fontSize: '14px', fontWeight: 600, color: '#C8441A', background: 'transparent', border: '1.5px solid #C8441A', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
+        style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1.5px solid var(--afa-terracotta)', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
         {switching === kind ? 'Switching...' : `✅ Approved — Switch to your ${label} dashboard`}
       </button>
@@ -237,25 +237,25 @@ export default function ProfilePage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
             {initialDisplayName || user?.name || 'Your Profile'}
           </h1>
-          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
+          <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
           {user?.code && (
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
               Your login code: <span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
             </p>
           )}
 
           {message && (
-            <div style={{ padding: '14px 16px', background: '#F0FFF4', border: '1px solid #68D391', borderRadius: '8px', color: '#276749', fontSize: '14px', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-success-bg)', border: '1px solid #68D391', borderRadius: '8px', color: 'var(--afa-green-dark)', fontSize: '14px', marginBottom: '20px' }}>
               {message}
             </div>
           )}
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
               {error}
             </div>
           )}
@@ -264,10 +264,10 @@ export default function ProfilePage() {
               tickets, emails, and greetings. Falls back to username if
               blank, so existing users see no change until they set one. */}
           <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               Display name
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               What appears on your tickets and emails. Your login username <strong>{user?.name}</strong> stays the same either way.
             </p>
             <input
@@ -285,7 +285,7 @@ export default function ProfilePage() {
                 fontSize: '13px',
                 fontWeight: 600,
                 color: 'white',
-                background: '#C8441A',
+                background: 'var(--afa-terracotta)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 16px',
@@ -299,10 +299,10 @@ export default function ProfilePage() {
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               I&apos;m an Artist
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
             </p>
 
@@ -320,7 +320,7 @@ export default function ProfilePage() {
                 <button
                   onClick={applyArtist}
                   disabled={applying === 'artist'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
                 >
                   {applying === 'artist' ? 'Setting up...' : 'Become an Artist'}
                 </button>
@@ -330,10 +330,10 @@ export default function ProfilePage() {
 
           {/* Organiser upgrade */}
           <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               Become an Organiser
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               Create and publish your own events.
             </p>
 
@@ -351,7 +351,7 @@ export default function ProfilePage() {
                 <button
                   onClick={applyOrganiser}
                   disabled={applying === 'organiser'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
                 >
                   {applying === 'organiser' ? 'Submitting...' : 'Apply'}
                 </button>
@@ -361,10 +361,10 @@ export default function ProfilePage() {
 
           {/* Venue Owner upgrade */}
           <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               List Your Venue
             </h2>
-            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               Rent out your space and manage bookings.
             </p>
 
@@ -374,7 +374,7 @@ export default function ProfilePage() {
               <button
                 onClick={applyVenueOwner}
                 disabled={applying === 'venue'}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
               >
                 {applying === 'venue' ? 'Submitting...' : 'Apply'}
               </button>

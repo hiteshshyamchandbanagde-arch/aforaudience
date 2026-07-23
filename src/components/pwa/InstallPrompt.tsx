@@ -114,8 +114,8 @@ export default function InstallPrompt() {
         right: 16,
         bottom: 16,
         zIndex: 50,
-        background: '#0E0C0A',
-        color: '#F7F3EE',
+        background: 'var(--afa-ink)',
+        color: 'var(--afa-cream)',
         borderRadius: 16,
         boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
         padding: 16,
@@ -139,7 +139,7 @@ export default function InstallPrompt() {
         aria-label="Dismiss install prompt"
         style={{
           background: 'transparent',
-          color: '#F7F3EE',
+          color: 'var(--afa-cream)',
           border: 'none',
           padding: '8px 12px',
           fontSize: 14,
@@ -152,7 +152,7 @@ export default function InstallPrompt() {
       <button
         onClick={onInstall}
         style={{
-          background: '#C8441A',
+          background: 'var(--afa-terracotta)',
           color: 'white',
           border: 'none',
           borderRadius: 999,

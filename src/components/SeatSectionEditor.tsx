@@ -62,16 +62,16 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     padding: "10px 12px",
     borderRadius: "6px",
     border: "1px solid rgba(14,12,10,0.15)",
-    background: "#fff",
+    background: "var(--afa-white)",
     fontSize: "14px",
-    color: "#0E0C0A",
+    color: "var(--afa-ink)",
   }
 
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {sections.length === 0 && (
-          <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5, fontStyle: "italic" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, fontStyle: "italic" }}>
             No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
           </p>
         )}
@@ -85,7 +85,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               gap: "10px",
               alignItems: "center",
               padding: "12px",
-              background: "#F7F3EE",
+              background: "var(--afa-cream)",
               borderRadius: "8px",
               border: "1px solid rgba(14,12,10,0.08)",
             }}
@@ -108,7 +108,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               style={inputStyle}
             />
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#0E0C0A", opacity: 0.5, fontSize: "14px" }}>₹</span>
+              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
               <input
                 type="number"
                 placeholder="Price"
@@ -127,7 +127,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               style={{
                 background: "none",
                 border: "none",
-                color: "#C8441A",
+                color: "var(--afa-terracotta)",
                 cursor: "pointer",
                 fontSize: "14px",
                 fontWeight: 600,
@@ -151,7 +151,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           padding: "10px 18px",
           fontSize: "14px",
           fontWeight: 600,
-          color: "#0E0C0A",
+          color: "var(--afa-ink)",
           cursor: "pointer",
           width: "100%",
         }}
@@ -166,7 +166,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             display: "flex",
             gap: "24px",
             fontSize: "14px",
-            color: "#0E0C0A",
+            color: "var(--afa-ink)",
             padding: "12px 16px",
             background: "rgba(200,68,26,0.06)",
             borderRadius: "8px",

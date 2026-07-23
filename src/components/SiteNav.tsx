@@ -100,16 +100,16 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}
-          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "#0E0C0A", textDecoration: "none" }}
+          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}
         >
-          <span style={{ color: "#C8441A" }}>A</span>forAudience
+          <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
           <EnvBadge />
         </Link>
 
         {/* Desktop: full row, unchanged from before */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "wrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "#C8441A" : "#0E0C0A", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
@@ -118,27 +118,27 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
           {status === "loading" ? null : user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7 }}>
+              <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7 }}>
                 Hi, {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
               {accountLinks.map((l) => (
-                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "#C8441A" : "#0E0C0A", textDecoration: "none" }}>
+                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none" }}>
                   {l.label}
                 </Link>
               ))}
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", background: "#0E0C0A", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
+                style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
               >
                 Sign out
               </button>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "#0E0C0A", textDecoration: "none", opacity: 0.7 }}>
+              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-ink)", textDecoration: "none", opacity: 0.7 }}>
                 Sign in
               </Link>
-              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", background: "#0E0C0A", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
+              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", background: "var(--afa-ink)", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
                 Sign up
               </Link>
             </div>
@@ -153,9 +153,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           aria-expanded={mobileOpen}
           style={{ alignItems: "center", justifyContent: "center", width: "36px", height: "36px", border: "none", background: "transparent", cursor: "pointer", flexDirection: "column", gap: "4px" }}
         >
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "#0E0C0A", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
         </button>
       </div>
 
@@ -166,7 +166,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             key={l.key}
             href={l.href}
             onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "#C8441A" : "#0E0C0A", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
+            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
           >
             {l.label}
           </Link>
@@ -180,7 +180,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
         {status === "loading" ? null : user ? (
           <>
-            <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6, padding: "12px 0 4px" }}>
+            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, padding: "12px 0 4px" }}>
               Signed in as {user.displayName || user.name || user.email}
             </div>
             {accountLinks.map((l) => (
@@ -188,14 +188,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "#C8441A" : "#0E0C0A", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
               >
                 {l.label}
               </Link>
             ))}
             <button
               onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
-              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "#F7F3EE", background: "#0E0C0A", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
+              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
             >
               Sign out
             </button>
@@ -205,14 +205,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "#0E0C0A", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
+              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
             >
               Sign in
             </Link>
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "#F7F3EE", textDecoration: "none", textAlign: "center", background: "#0E0C0A", padding: "12px 20px", borderRadius: "8px" }}
+              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", textAlign: "center", background: "var(--afa-ink)", padding: "12px 20px", borderRadius: "8px" }}
             >
               Sign up
             </Link>

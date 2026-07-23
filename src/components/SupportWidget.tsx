@@ -46,7 +46,7 @@ type Panel = 'closed' | 'chat' | 'feedback';
 function MicIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="9" r="9" fill="#C8441A" opacity="0.18">
+      <circle cx="12" cy="9" r="9" fill="var(--afa-terracotta)" opacity="0.18">
         {pulse && (
           <>
             <animate attributeName="opacity" values="0.18;0.32;0.18" dur="2.6s" repeatCount="indefinite" />
@@ -328,8 +328,8 @@ export default function SupportWidget() {
           width: 56,
           height: 56,
           borderRadius: '50%',
-          background: '#0E0C0A',
-          color: '#F7F3EE',
+          background: 'var(--afa-ink)',
+          color: 'var(--afa-cream)',
           border: 'none',
           boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
           fontSize: 24,
@@ -355,7 +355,7 @@ export default function SupportWidget() {
             maxWidth: 'calc(100vw - 40px)',
             height: 460,
             maxHeight: 'calc(100vh - 140px)',
-            background: '#F7F3EE',
+            background: 'var(--afa-cream)',
             borderRadius: 16,
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             display: 'flex',
@@ -370,8 +370,8 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'chat' ? '#0E0C0A' : 'transparent',
-                color: panel === 'chat' ? '#F7F3EE' : '#0E0C0A',
+                background: panel === 'chat' ? 'var(--afa-ink)' : 'transparent',
+                color: panel === 'chat' ? 'var(--afa-cream)' : 'var(--afa-ink)',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: 14,
@@ -388,8 +388,8 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'feedback' ? '#0E0C0A' : 'transparent',
-                color: panel === 'feedback' ? '#F7F3EE' : '#0E0C0A',
+                background: panel === 'feedback' ? 'var(--afa-ink)' : 'transparent',
+                color: panel === 'feedback' ? 'var(--afa-cream)' : 'var(--afa-ink)',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: 14,
@@ -404,19 +404,19 @@ export default function SupportWidget() {
             <>
               {!chatEnabled ? (
                 <div style={{ flex: 1, padding: 20, textAlign: 'center' }}>
-                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: '#0E0C0A' }}>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: 'var(--afa-ink)' }}>
                     <MicIcon size={36} />
                   </div>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     Chat is temporarily unavailable.
                   </div>
-                  <div style={{ fontSize: 13, color: '#6B655F', marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: 'var(--afa-gray-warm)', marginBottom: 16 }}>
                     Please use the feedback form instead — the team reads these personally.
                   </div>
                   <button
                     onClick={() => setPanel('feedback')}
                     style={{
-                      background: '#C8441A',
+                      background: 'var(--afa-terracotta)',
                       color: 'white',
                       border: 'none',
                       borderRadius: 999,
@@ -433,7 +433,7 @@ export default function SupportWidget() {
                 <>
                   <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
                     {chatMessages.length === 0 && (
-                      <div style={{ color: '#6B655F', fontSize: 13, padding: 8 }}>
+                      <div style={{ color: 'var(--afa-gray-warm)', fontSize: 13, padding: 8 }}>
                         Ask anything about booking, becoming an Artist/Organiser, fees, or
                         how AforAudience works.
                       </div>
@@ -448,8 +448,8 @@ export default function SupportWidget() {
                             borderRadius: 12,
                             fontSize: 14,
                             lineHeight: 1.4,
-                            background: m.role === 'user' ? '#C8441A' : '#EDE4D6',
-                            color: m.role === 'user' ? 'white' : '#0E0C0A',
+                            background: m.role === 'user' ? 'var(--afa-terracotta)' : 'var(--afa-tan)',
+                            color: m.role === 'user' ? 'white' : 'var(--afa-ink)',
                             float: m.role === 'user' ? 'right' : 'left',
                             clear: 'both',
                           }}
@@ -464,9 +464,9 @@ export default function SupportWidget() {
                               }
                               style={{
                                 fontSize: 12,
-                                color: '#C8441A',
+                                color: 'var(--afa-terracotta)',
                                 background: 'transparent',
-                                border: '1px solid #C8441A',
+                                border: '1px solid var(--afa-terracotta)',
                                 borderRadius: 999,
                                 padding: '4px 10px',
                                 cursor: 'pointer',
@@ -479,14 +479,14 @@ export default function SupportWidget() {
                       </div>
                     ))}
                     {chatLoading && (
-                      <div style={{ color: '#6B655F', fontSize: 13, padding: 8 }}>
+                      <div style={{ color: 'var(--afa-gray-warm)', fontSize: 13, padding: 8 }}>
                         Thinking…
                       </div>
                     )}
                     {capReached && (
                       <div
                         style={{
-                          background: '#FFF3E6',
+                          background: 'var(--afa-orange-tint)',
                           border: '1px solid #F0D9BF',
                           borderRadius: 8,
                           padding: 10,
@@ -499,7 +499,7 @@ export default function SupportWidget() {
                         <button
                           onClick={() => setPanel('feedback')}
                           style={{
-                            color: '#C8441A',
+                            color: 'var(--afa-terracotta)',
                             background: 'transparent',
                             border: 'none',
                             fontWeight: 600,
@@ -539,7 +539,7 @@ export default function SupportWidget() {
                       disabled={chatLoading || !chatInput.trim() || capReached}
                       style={{
                         marginLeft: 8,
-                        background: '#C8441A',
+                        background: 'var(--afa-terracotta)',
                         color: 'white',
                         border: 'none',
                         borderRadius: 999,
@@ -564,7 +564,7 @@ export default function SupportWidget() {
                 <div style={{ textAlign: 'center', padding: '40px 12px' }}>
                   <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>Thanks — got it.</div>
-                  <div style={{ fontSize: 13, color: '#6B655F' }}>
+                  <div style={{ fontSize: 13, color: 'var(--afa-gray-warm)' }}>
                     The team reviews these personally.
                   </div>
                 </div>
@@ -631,7 +631,7 @@ export default function SupportWidget() {
                         onClick={clearAttachment}
                         style={{
                           fontSize: 12,
-                          color: '#C8441A',
+                          color: 'var(--afa-terracotta)',
                           background: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
@@ -654,7 +654,7 @@ export default function SupportWidget() {
                     </div>
                   )}
                   {fbAttachmentError && (
-                    <div style={{ fontSize: 12, color: '#B3261E', marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, color: 'var(--afa-error)', marginBottom: 12 }}>
                       {fbAttachmentError}
                     </div>
                   )}
@@ -664,7 +664,7 @@ export default function SupportWidget() {
                     disabled={fbSubmitting || !fbMessage.trim()}
                     style={{
                       width: '100%',
-                      background: '#C8441A',
+                      background: 'var(--afa-terracotta)',
                       color: 'white',
                       border: 'none',
                       borderRadius: 999,

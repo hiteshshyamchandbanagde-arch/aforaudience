@@ -10,7 +10,7 @@ const HERO_STATS = [{ num: "2,400+", label: "Artists" }, { num: "840+", label: "
 
 export default function Home() {
   return (
-    <main className="min-h-screen" style={{ background: "#F7F3EE", color: "#0E0C0A", fontFamily: "Georgia, serif" }}>
+    <main className="min-h-screen" style={{ background: "var(--afa-cream)", color: "var(--afa-ink)", fontFamily: "Georgia, serif" }}>
 
       <SiteNav variant="home" />
 
@@ -18,21 +18,21 @@ export default function Home() {
       <section style={{ padding: "96px 48px 80px" }}>
         <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", gap: "48px", flexWrap: "wrap" }}>
         <div style={{ maxWidth: "560px", flex: "1 1 480px" }}>
-          <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "#C8441A", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ display: "inline-block", width: "32px", height: "1px", background: "#C8441A" }}></span>
+          <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-terracotta)", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ display: "inline-block", width: "32px", height: "1px", background: "var(--afa-terracotta)" }}></span>
             Live Art. Real Moments.
           </div>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(44px, 5vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-1.5px", color: "#0E0C0A", marginBottom: "28px" }}>
-            Where <em style={{ fontStyle: "italic", color: "#C8441A" }}>Art</em><br />finds its<br />Crowd
+          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(44px, 5vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-1.5px", color: "var(--afa-ink)", marginBottom: "28px" }}>
+            Where <em style={{ fontStyle: "italic", color: "var(--afa-terracotta)" }}>Art</em><br />finds its<br />Crowd
           </h1>
-          <p style={{ fontSize: "18px", fontWeight: 300, color: "#0E0C0A", opacity: 0.65, maxWidth: "440px", lineHeight: 1.7, marginBottom: "44px", fontFamily: "system-ui, sans-serif" }}>
+          <p style={{ fontSize: "18px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.65, maxWidth: "440px", lineHeight: 1.7, marginBottom: "44px", fontFamily: "system-ui, sans-serif" }}>
             The world&apos;s first live art universe — connecting comedians, poets, open mic artists, organisers, and venues in one living ecosystem.
           </p>
           <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
-            <Link href="/events" style={{ background: "#C8441A", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 600, textDecoration: "none" }}>
+            <Link href="/events" style={{ background: "var(--afa-terracotta)", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 600, textDecoration: "none" }}>
               Explore Events
             </Link>
-            <Link href="/profile" style={{ background: "transparent", color: "#0E0C0A", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
+            <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
               I&apos;m an Artist →
             </Link>
           </div>
@@ -41,8 +41,8 @@ export default function Home() {
           <div className="hero-stats-inline" style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)", flexWrap: "wrap" }}>
             {HERO_STATS.map((s) => (
               <div key={s.label}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1, marginBottom: "4px" }}>{s.num}</div>
-                <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#0E0C0A", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1, marginBottom: "4px" }}>{s.num}</div>
+                <div style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -52,8 +52,8 @@ export default function Home() {
         <div className="hero-stats-gap" style={{ flex: "0 0 auto", display: "none", flexDirection: "column", justifyContent: "center", gap: "36px", padding: "0 4px" }}>
           {HERO_STATS.map((s) => (
             <div key={s.label}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: 700, color: "#0E0C0A", lineHeight: 1, marginBottom: "4px", whiteSpace: "nowrap" }}>{s.num}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#0E0C0A", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{s.label}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1, marginBottom: "4px", whiteSpace: "nowrap" }}>{s.num}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -65,11 +65,11 @@ export default function Home() {
       </section>
 
       {/* TICKER */}
-      <div style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "14px 0", overflow: "hidden", borderTop: "2px solid #C8441A" }}>
+      <div style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "14px 0", overflow: "hidden", borderTop: "2px solid var(--afa-terracotta)" }}>
         <div style={{ display: "flex", gap: "0", whiteSpace: "nowrap", animation: "ticker 28s linear infinite", willChange: "transform", backfaceVisibility: "hidden" }}>
           {tickerItems.map((item, i) => (
             <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "16px", padding: "0 32px", fontFamily: "monospace", fontSize: "13px" }}>
-              <span style={{ color: "#C8441A" }}>◆</span> {item}
+              <span style={{ color: "var(--afa-terracotta)" }}>◆</span> {item}
             </span>
           ))}
         </div>
@@ -77,12 +77,12 @@ export default function Home() {
 
       {/* HOW IT WORKS */}
       <section style={{ padding: "100px 48px", background: "white" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#C8441A", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "#C8441A", display: "inline-block" }}></span>
+        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
           How it works
         </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "#0E0C0A", marginBottom: "56px" }}>
-          Four steps to your<br /><em style={{ color: "#C8441A" }}>perfect night out</em>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "56px" }}>
+          Four steps to your<br /><em style={{ color: "var(--afa-terracotta)" }}>perfect night out</em>
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "2px" }}>
           {[
@@ -91,26 +91,26 @@ export default function Home() {
             { num: "03", icon: "📲", title: "Get Ticket", desc: "Receive your PDF ticket + SMS confirmation instantly. Show up, scan and walk in." },
             { num: "04", icon: "⭐", title: "Rate & Tip", desc: "After the show, rate each performer and send a digital tip directly to the artist." },
           ].map((step) => (
-            <div key={step.num} style={{ background: "#F7F3EE", padding: "40px 32px" }}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "72px", fontWeight: 900, color: "#C8441A", opacity: 0.12, lineHeight: 1, marginBottom: "20px", letterSpacing: "-3px" }}>{step.num}</div>
+            <div key={step.num} style={{ background: "var(--afa-cream)", padding: "40px 32px" }}>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "72px", fontWeight: 900, color: "var(--afa-terracotta)", opacity: 0.12, lineHeight: 1, marginBottom: "20px", letterSpacing: "-3px" }}>{step.num}</div>
               <div style={{ fontSize: "36px", marginBottom: "16px" }}>{step.icon}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "#0E0C0A", marginBottom: "10px" }}>{step.title}</div>
-              <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "#0E0C0A", opacity: 0.6, lineHeight: 1.6 }}>{step.desc}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{step.title}</div>
+              <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6 }}>{step.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ROLES */}
-      <section style={{ padding: "100px 48px", background: "#F7F3EE" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#C8441A", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "#C8441A", display: "inline-block" }}></span>
+      <section style={{ padding: "100px 48px", background: "var(--afa-cream)" }}>
+        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
           Who&apos;s it for
         </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "#0E0C0A", marginBottom: "16px" }}>
-          One platform.<br /><em style={{ color: "#C8441A" }}>Every role.</em>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
+          One platform.<br /><em style={{ color: "var(--afa-terracotta)" }}>Every role.</em>
         </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "#0E0C0A", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
+        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
           Whether you perform, organise, own a space or simply love live art — AforAudience is built for you.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
@@ -142,17 +142,17 @@ export default function Home() {
           ].map((role) => (
             <div key={role.name} style={{ border: "1.5px solid rgba(14,12,10,0.1)", borderRadius: "12px", padding: "32px 28px", display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: "36px", marginBottom: "16px" }}>{role.icon}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>{role.name}</div>
-              <span style={{ fontFamily: "monospace", fontSize: "10px", padding: "3px 9px", borderRadius: "4px", background: "#E8E2D9", color: "#0E0C0A", opacity: 0.7, alignSelf: "flex-start", marginBottom: "16px" }}>{role.tag}</span>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", fontStyle: "italic", color: "#C8441A", lineHeight: 1.5, marginBottom: "18px" }}>{role.pitch}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>{role.name}</div>
+              <span style={{ fontFamily: "monospace", fontSize: "10px", padding: "3px 9px", borderRadius: "4px", background: "var(--afa-mist)", color: "var(--afa-ink)", opacity: 0.7, alignSelf: "flex-start", marginBottom: "16px" }}>{role.tag}</span>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "15px", fontStyle: "italic", color: "var(--afa-terracotta)", lineHeight: 1.5, marginBottom: "18px" }}>{role.pitch}</div>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
                 {role.benefits.map((b) => (
-                  <li key={b} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "#0E0C0A", opacity: 0.65, lineHeight: 1.5, display: "flex", gap: "8px" }}>
-                    <span style={{ color: "#C8441A", flexShrink: 0 }}>✓</span>{b}
+                  <li key={b} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65, lineHeight: 1.5, display: "flex", gap: "8px" }}>
+                    <span style={{ color: "var(--afa-terracotta)", flexShrink: 0 }}>✓</span>{b}
                   </li>
                 ))}
               </ul>
-              <Link href={role.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", fontWeight: 600, color: "#C8441A", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <Link href={role.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
                 {role.cta} →
               </Link>
             </div>
@@ -163,11 +163,11 @@ export default function Home() {
       <MoodThemeSection />
 
       {/* FOOTER */}
-      <footer style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "64px 48px 32px" }}>
+      <footer style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "64px 48px 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
           <div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#F7F3EE", marginBottom: "12px" }}>
-              <span style={{ color: "#C8441A" }}>A</span>forAudience
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "12px" }}>
+              <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
             </div>
             <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
               The world&apos;s first live art universe — where every comedian, poet, musician, organiser, venue and fan is connected.
@@ -203,7 +203,7 @@ export default function Home() {
             },
           ].map((col) => (
             <div key={col.title}>
-              <div style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C9973A", marginBottom: "20px" }}>{col.title}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "20px" }}>{col.title}</div>
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col.links.map((link) => (
                   <li key={link.label}><Link href={link.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>

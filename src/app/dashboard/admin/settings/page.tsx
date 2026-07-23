@@ -138,7 +138,7 @@ export default function AdminSettingsPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: '#0E0C0A' }}>
+        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-ink)' }}>
           Loading settings…
         </div>
       </>
@@ -156,7 +156,7 @@ export default function AdminSettingsPage() {
           <p style={{ opacity: 0.7 }}>
             This page is only visible to platform admins.
           </p>
-          <Link href="/" style={{ color: '#C8441A', fontWeight: 600 }}>
+          <Link href="/" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
             ← Home
           </Link>
         </main>
@@ -173,11 +173,11 @@ export default function AdminSettingsPage() {
           maxWidth: 640,
           margin: '0 auto',
           fontFamily: 'system-ui, sans-serif',
-          color: '#0E0C0A',
+          color: 'var(--afa-ink)',
         }}
       >
-        <div style={{ fontSize: 12, color: '#8a827a', marginBottom: 6, letterSpacing: '0.04em' }}>
-          <Link href="/dashboard/admin" style={{ color: '#8a827a', textDecoration: 'none' }}>
+        <div style={{ fontSize: 12, color: 'var(--afa-taupe)', marginBottom: 6, letterSpacing: '0.04em' }}>
+          <Link href="/dashboard/admin" style={{ color: 'var(--afa-taupe)', textDecoration: 'none' }}>
             ← Admin
           </Link>{' '}
           / Settings
@@ -194,10 +194,10 @@ export default function AdminSettingsPage() {
           <div
             style={{
               padding: '12px 14px',
-              background: '#FDECEA',
-              border: '1px solid #F5C2C0',
+              background: 'var(--afa-error-bg)',
+              border: '1px solid var(--afa-error-border)',
               borderRadius: 8,
-              color: '#B3261E',
+              color: 'var(--afa-error)',
               fontSize: 13,
               marginBottom: 20,
             }}
@@ -217,7 +217,7 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Audience booking fee
           </h2>
-          <p style={{ fontSize: 13, color: '#8a827a', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
             A small flat fee added to each paid ticket at checkout — the platform's only revenue at MVP. Shown to audiences as a separate line item with a short "supports the artist ecosystem" note. Set to ₹0 to disable entirely; free events are never charged a fee regardless.
           </p>
 
@@ -226,7 +226,7 @@ export default function AdminSettingsPage() {
               display: 'block',
               fontSize: 12,
               fontWeight: 700,
-              color: '#C8441A',
+              color: 'var(--afa-terracotta)',
               letterSpacing: '0.06em',
               marginBottom: 6,
             }}
@@ -252,7 +252,7 @@ export default function AdminSettingsPage() {
               }}
             />
           </div>
-          <p style={{ fontSize: 11, color: '#8a827a', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
             Maximum: ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
           </p>
 
@@ -260,7 +260,7 @@ export default function AdminSettingsPage() {
             onClick={save}
             disabled={saving || !isDirty || !isValid}
             style={{
-              background: '#C8441A',
+              background: 'var(--afa-terracotta)',
               color: 'white',
               padding: '10px 20px',
               border: 'none',
@@ -287,7 +287,7 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Support chat message cap
           </h2>
-          <p style={{ fontSize: 13, color: '#8a827a', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
             The support chatbot is free to use for everyone — guests and paying audience alike — no gate, no login required. This cap only bounds how many messages a single visitor can send per browser session, as a cost/abuse guard. Once reached, the chat tab points them to the feedback form instead. Set to 0 to disable chat entirely (emergency killswitch) without a deploy.
           </p>
 
@@ -296,7 +296,7 @@ export default function AdminSettingsPage() {
               display: 'block',
               fontSize: 12,
               fontWeight: 700,
-              color: '#C8441A',
+              color: 'var(--afa-terracotta)',
               letterSpacing: '0.06em',
               marginBottom: 6,
             }}
@@ -321,7 +321,7 @@ export default function AdminSettingsPage() {
               }}
             />
           </div>
-          <p style={{ fontSize: 11, color: '#8a827a', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
             Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
           </p>
 
@@ -329,7 +329,7 @@ export default function AdminSettingsPage() {
             onClick={saveChatCap}
             disabled={chatSaving || !isChatCapDirty || !isChatCapValid}
             style={{
-              background: '#C8441A',
+              background: 'var(--afa-terracotta)',
               color: 'white',
               padding: '10px 20px',
               border: 'none',
@@ -344,8 +344,8 @@ export default function AdminSettingsPage() {
           </button>
         </div>
 
-        <div style={{ marginTop: 32, fontSize: 12, color: '#8a827a', lineHeight: 1.6 }}>
-          <strong style={{ color: '#0E0C0A', fontWeight: 700 }}>Current behavior:</strong>{' '}
+        <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-taupe)', lineHeight: 1.6 }}>
+          <strong style={{ color: 'var(--afa-ink)', fontWeight: 700 }}>Current behavior:</strong>{' '}
           {initialPaise === 0
             ? "No booking fee is being charged. Checkout, ticket PDFs, and email receipts show only the ticket price."
             : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is added to every paid booking, shown as a separate line item on the checkout page.`}

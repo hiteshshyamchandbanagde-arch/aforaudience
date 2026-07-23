@@ -201,16 +201,16 @@ const inputStyle = {
   padding: '8px 10px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
   fontSize: '13px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
-const TIER_COLORS = ['#C8441A', '#4A6741', '#2E5C8A', '#8a6a1f', '#7A4A8A', '#0E0C0A']
+const TIER_COLORS = ['var(--afa-terracotta)', 'var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-ink)']
 
 function colorForTier(tierLabel: string, tierOrder: string[]) {
   const idx = tierOrder.indexOf(tierLabel)
-  return TIER_COLORS[idx % TIER_COLORS.length] || '#0E0C0A'
+  return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-ink)'
 }
 
 // A generated (or manually placed) layout can be wider/taller than the
@@ -665,17 +665,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
 
   return (
     <>
       <SiteNav />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-        <Link href={`/dashboard/venue/${id}/edit`} style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
+        <Link href={`/dashboard/venue/${id}/edit`} style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
           ← Back to venue
         </Link>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: '#0E0C0A' }}>Seat Map Builder</h1>
-        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.65, marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: 'var(--afa-ink)' }}>Seat Map Builder</h1>
+        <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.65, marginBottom: '20px' }}>
           General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
         </p>
 
@@ -685,8 +685,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             style={{
               padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
               border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)',
-              background: seatingMode === 'GENERAL_ADMISSION' ? '#0E0C0A' : '#fff',
-              color: seatingMode === 'GENERAL_ADMISSION' ? '#F7F3EE' : '#0E0C0A',
+              background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-ink)' : 'var(--afa-white)',
+              color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-cream)' : 'var(--afa-ink)',
             }}
           >
             General Admission
@@ -696,8 +696,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             style={{
               padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
               border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)',
-              background: seatingMode === 'NUMBERED' ? '#0E0C0A' : '#fff',
-              color: seatingMode === 'NUMBERED' ? '#F7F3EE' : '#0E0C0A',
+              background: seatingMode === 'NUMBERED' ? 'var(--afa-ink)' : 'var(--afa-white)',
+              color: seatingMode === 'NUMBERED' ? 'var(--afa-cream)' : 'var(--afa-ink)',
             }}
           >
             Numbered Seating
@@ -705,7 +705,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         </div>
 
         {seatingMode === 'GENERAL_ADMISSION' && (
-          <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, fontStyle: 'italic' }}>
+          <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, fontStyle: 'italic' }}>
             This venue uses General Admission (section + quantity). Section names, seat counts, and pricing are managed from the venue's Edit page, not here. Switch to Numbered Seating above to build a real seat layout.
           </p>
         )}
@@ -713,12 +713,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && (
           <div style={{ marginBottom: '20px' }}>
             {levels.length === 1 ? (
-              <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+              <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                 + This venue has more than one level (e.g. Balcony, 1st Floor)
               </button>
             ) : (
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0E0C0A', opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Level</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Level</div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {levels.map((lvl) => (
                     <div key={lvl} style={{ display: 'flex', alignItems: 'center' }}>
@@ -727,8 +727,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         style={{
                           padding: '7px 14px', borderRadius: '8px 0 0 8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                           border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                          background: activeLevel === lvl ? '#0E0C0A' : '#fff',
-                          color: activeLevel === lvl ? '#fff' : '#0E0C0A',
+                          background: activeLevel === lvl ? 'var(--afa-ink)' : 'var(--afa-white)',
+                          color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-ink)',
                         }}
                       >
                         {levelLabel(lvl)}
@@ -739,19 +739,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         style={{
                           padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
                           border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)', borderLeft: 'none',
-                          background: activeLevel === lvl ? '#0E0C0A' : '#fff',
-                          color: activeLevel === lvl ? '#fff' : '#B3261E',
+                          background: activeLevel === lvl ? 'var(--afa-ink)' : 'var(--afa-white)',
+                          color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-error)',
                         }}
                       >
                         ×
                       </button>
                     </div>
                   ))}
-                  <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+                  <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
                     + Add level
                   </button>
                 </div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
                   Each level has its own independent seat layout - build them one at a time using Guided Setup or Draw It Myself below.
                 </p>
               </div>
@@ -765,12 +765,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startWizard}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '2px solid #0E0C0A', background: '#fff',
+                borderRadius: '12px', border: '2px solid var(--afa-ink)', background: 'var(--afa-white)',
               }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C8441A', marginBottom: '6px' }}>Recommended</div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>Guided Setup</div>
-              <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, lineHeight: 1.5 }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-terracotta)', marginBottom: '6px' }}>Recommended</div>
+              <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>Guided Setup</div>
+              <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, lineHeight: 1.5 }}>
                 Answer a few simple questions — rows, seats per row, walkways — and we'll lay out the seats for you. Best if your seating is straight rows facing the stage.
               </div>
             </button>
@@ -778,12 +778,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startDrawMyself}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff',
+                borderRadius: '12px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)',
               }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0E0C0A', opacity: 0.5, marginBottom: '6px' }}>For hands-on control</div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>Draw It Myself</div>
-              <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, lineHeight: 1.5 }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '6px' }}>For hands-on control</div>
+              <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>Draw It Myself</div>
+              <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, lineHeight: 1.5 }}>
                 Place and drag every seat by hand on a canvas shaped like your real venue. Good for curved rows, round tables, or any layout that isn't straight rows.
               </div>
             </button>
@@ -792,7 +792,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
         {seatingMode === 'NUMBERED' && effectivePath === 'wizard' && (
           <div style={{ maxWidth: '560px' }}>
-            <button onClick={backToChoice} style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
+            <button onClick={backToChoice} style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
               ← Change approach
             </button>
 
@@ -800,19 +800,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>What's your seating shape?</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Straight rows facing the stage
                   </button>
-                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Curved rows, round tables, or a U-shape
                   </button>
                 </div>
                 {wizardShape === 'other' && (
-                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: '#FBF8F3', fontSize: '13px', color: '#0E0C0A' }}>
+                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'var(--afa-cream-tint-1)', fontSize: '13px', color: 'var(--afa-ink)' }}>
                     Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. You can either draw that shape by hand, or start from straight rows here and adjust later.
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                      <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: '#0E0C0A', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
-                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
+                      <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
+                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
                     </div>
                   </div>
                 )}
@@ -822,14 +822,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             {wizardStep === 1 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do you want different pricing zones by row depth?</h3>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
                   e.g. "Front" costs more than "Back". Each zone is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === false ? '#0E0C0A' : '#fff', color: wizardMultiZone === false ? '#fff' : '#0E0C0A' }}>
+                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === false ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardMultiZone === false ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
                     No, one zone for everything
                   </button>
-                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === true ? '#0E0C0A' : '#fff', color: wizardMultiZone === true ? '#fff' : '#0E0C0A' }}>
+                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === true ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardMultiZone === true ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
                     Yes, multiple zones
                   </button>
                 </div>
@@ -863,7 +863,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
                 {wizardMultiZone === true && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>Add a zone for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
+                    <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>Add a zone for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
                     {gridConfig.rowGroups.map((rg, i) => (
                       <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Zone {i + 1}:</span>
@@ -875,21 +875,21 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
                         <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
-                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
-                    <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                    <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                       + Add another zone
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button
                     onClick={wizardNext}
                     disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())}
-                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())) ? 0.5 : 1 }}
+                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())) ? 0.5 : 1 }}
                   >
                     Next
                   </button>
@@ -900,18 +900,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             {wizardStep === 2 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows, like left/right?</h3>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
                   This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step. This sets the same walkway for every zone to start; if different zones need different splits, fine-tune each one separately afterward in the advanced Generate Grid panel.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === false ? '#fff' : '#0E0C0A' }}>
+                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardHasVerticalAisle === false ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
                     No, one solid block
                   </button>
-                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === true ? '#0E0C0A' : '#fff', color: wizardHasVerticalAisle === true ? '#fff' : '#0E0C0A' }}>
+                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === true ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardHasVerticalAisle === true ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
                     Yes, a center walkway
                   </button>
                 </div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '16px' }}>
                   Need more than one walkway, or a different split per zone? Finish here, then use the advanced Generate Grid panel afterward — it supports any number, independently per zone.
                 </p>
 
@@ -923,7 +923,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <button
                           key={opt.label}
                           onClick={() => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((rg) => ({ ...rg, verticalAisles: rg.verticalAisles.map((a, i) => (i === 0 ? { ...a, gapPx: opt.px } : a)) })) }))}
-                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? '#0E0C0A' : '#fff', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? '#fff' : '#0E0C0A' }}
+                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-ink)' : 'var(--afa-white)', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-white)' : 'var(--afa-ink)' }}
                         >
                           {opt.label}
                         </button>
@@ -933,8 +933,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
                 </div>
               </div>
             )}
@@ -942,7 +942,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             {wizardStep === 3 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>How should rows of different widths line up?</h3>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
                   Only matters if your zones have different seats-per-row (tapering rows). Referenced to the stage, not the audience.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
@@ -950,20 +950,20 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <button
                       key={opt}
                       onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
-                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowAlignment === opt ? '#0E0C0A' : '#fff', color: gridConfig.rowAlignment === opt ? '#fff' : '#0E0C0A' }}
+                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-ink)' : 'var(--afa-white)', color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-ink)' }}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '16px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '16px' }}>
                   {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides — every zone shares one central aisle, like a real fan-style hall.'}
                   {gridConfig.rowAlignment === 'left' && 'Every row starts at the stage-left edge — wider rows only grow toward stage-right. Use this if stage-left is against a wall.'}
                   {gridConfig.rowAlignment === 'right' && 'Every row ends at the stage-right edge — wider rows only grow toward stage-left.'}
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
                 </div>
               </div>
             )}
@@ -971,12 +971,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             {wizardStep === 4 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any gangways between rows (front-to-back walkways)?</h3>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
                   e.g. a walking gap after row 10, so rows 11+ have extra space in front of them. You can add more than one - answering Yes adds a row-number field below for each gangway.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === true ? '#0E0C0A' : '#fff', color: wizardHasAisle === true ? '#fff' : '#0E0C0A' }}>Yes</button>
-                  <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === false ? '#0E0C0A' : '#fff', color: wizardHasAisle === false ? '#fff' : '#0E0C0A' }}>No</button>
+                  <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === true ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardHasAisle === true ? 'var(--afa-white)' : 'var(--afa-ink)' }}>Yes</button>
+                  <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === false ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardHasAisle === false ? 'var(--afa-white)' : 'var(--afa-ink)' }}>No</button>
                 </div>
 
                 {wizardHasAisle === true && (
@@ -986,18 +986,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Gangway {i + 1}:</span>
                         <label style={{ fontSize: '13px', fontWeight: 600 }}>After row #</label>
                         <input type="number" style={{ ...inputStyle, width: '70px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
-                        {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                        {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
-                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                       + Add another gangway
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardHasAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#C8441A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasAisle === null ? 0.5 : 1 }}>Next: Preview</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardNext} disabled={wizardHasAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasAisle === null ? 0.5 : 1 }}>Next: Preview</button>
                 </div>
               </div>
             )}
@@ -1005,29 +1005,29 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             {wizardStep === 5 && (
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Preview</h3>
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '12px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '12px' }}>
                   This is exactly what your audience will see. {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows.
                 </p>
                 <div
                   style={{
                     maxWidth: '100%', maxHeight: '420px', overflow: 'auto', display: 'flex', justifyContent: 'center',
-                    background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px', padding: '10px 0',
+                    background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px', padding: '10px 0',
                   }}
                 >
                   <div style={{ position: 'relative', flexShrink: 0, width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
-                    <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px', background: '#0E0C0A', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       Stage
                     </div>
                     {wizardPreviewSeats.map((s, i) => (
-                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel)))), opacity: 0.85, color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel)))), opacity: 0.85, color: 'var(--afa-white)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {s.row}{s.number}
                       </div>
                     ))}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={finishWizard} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#0E0C0A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Looks good — continue to fine-tune</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={finishWizard} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Looks good — continue to fine-tune</button>
                 </div>
               </div>
             )}
@@ -1037,8 +1037,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && effectivePath === 'canvas' && (
           <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div>
-              <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginBottom: '10px', fontStyle: 'italic' }}>
-                <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: '#0E0C0A', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
+              <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '10px', fontStyle: 'italic' }}>
+                <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
                   ← Back to setup options
                 </button>
                 Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
@@ -1047,13 +1047,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <button
                   onClick={() => setShowGenerator((v) => !v)}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: '#C8441A', color: '#fff' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)' }}
                 >
                   {showGenerator ? 'Close Grid Generator' : '+ Generate Grid'}
                 </button>
                 <button
                   onClick={resetLayout}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid #B3261E', background: '#fff', color: '#B3261E' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
                 >
                   Reset Layout
                 </button>
@@ -1063,21 +1063,21 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   style={{
                     padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                     border: manualPlacement ? 'none' : '1px solid rgba(14,12,10,0.2)',
-                    background: manualPlacement ? '#0E0C0A' : '#fff',
-                    color: manualPlacement ? '#fff' : '#0E0C0A',
+                    background: manualPlacement ? 'var(--afa-ink)' : 'var(--afa-white)',
+                    color: manualPlacement ? 'var(--afa-white)' : 'var(--afa-ink)',
                   }}
                 >
                   {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
                 </button>
               </div>
-              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '-6px', marginBottom: '12px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '-6px', marginBottom: '12px' }}>
                 {manualPlacement
                   ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
                   : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
               </p>
 
               {showGenerator && (
-                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: '#FBF8F3', border: '1px solid rgba(14,12,10,0.1)' }}>
+                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin (px):</label>
                     <input type="number" style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} onChange={(e) => setGridConfig((g) => ({ ...g, sideMarginPx: Math.max(0, Number(e.target.value) || 0) }))} />
@@ -1097,15 +1097,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         style={{
                           padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
                           border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                          background: gridConfig.rowAlignment === opt ? '#0E0C0A' : '#fff',
-                          color: gridConfig.rowAlignment === opt ? '#fff' : '#0E0C0A',
+                          background: gridConfig.rowAlignment === opt ? 'var(--afa-ink)' : 'var(--afa-white)',
+                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-ink)',
                         }}
                       >
                         {opt}
                       </button>
                     ))}
                   </div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
                     {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides, so every row shares one central aisle — the shape of a real fan-style hall.'}
                     {gridConfig.rowAlignment === 'left' && 'Every row starts at the same left edge — wider rows only grow to the right. Use this if one side of your venue is against a wall.'}
                     {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
@@ -1124,9 +1124,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
                         <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
-                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#0E0C0A', opacity: 0.55, marginBottom: '4px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
                         Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat
                       </div>
                       {rg.verticalAisles.map((a) => (
@@ -1142,15 +1142,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           />
                           <label style={{ fontSize: '12px' }}>Gap (px):</label>
                           <input type="number" style={{ ...inputStyle, width: '55px' }} value={a.gapPx} onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', Number(e.target.value) || 0)} />
-                          <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                          <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         </div>
                       ))}
-                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
+                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
                         + Add vertical aisle to this zone
                       </button>
                     </div>
                   ))}
-                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
+                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
                     + Add row group / zone
                   </button>
 
@@ -1161,14 +1161,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
                       <label style={{ fontSize: '12px' }}>Gap (px):</label>
                       <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.gapPx} onChange={(e) => updateAisle(a.id, 'gapPx', Number(e.target.value) || 0)} />
-                      <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: '#B3261E', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                      <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                     </div>
                   ))}
-                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
+                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
                     + Add horizontal aisle
                   </button>
 
-                  <button onClick={generateGrid} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: '#0E0C0A', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                  <button onClick={generateGrid} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                     Generate Seats
                   </button>
                 </div>
@@ -1191,11 +1191,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   value={nextNumber}
                   onChange={(e) => setNextNumber(Math.max(1, Number(e.target.value) || 1))}
                 />
-                <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
+                <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
 
               {canvasBounds.overflowsDefault && (
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>
                   This layout is larger than the default view — scroll inside the box below to see and place seats across the whole thing.
                 </p>
               )}
@@ -1208,7 +1208,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     position: 'relative',
                     width: `${canvasBounds.width}px`,
                     height: `${canvasBounds.height}px`,
-                    background: '#FBF8F3',
+                    background: 'var(--afa-cream-tint-1)',
                     cursor: manualPlacement ? 'crosshair' : 'default',
                   }}
                 >
@@ -1216,7 +1216,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     style={{
                       position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
                       width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px',
-                      background: '#0E0C0A', color: '#fff', fontSize: '11px', fontWeight: 700,
+                      background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '11px', fontWeight: 700,
                       letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
                     }}
                   >
@@ -1236,9 +1236,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         borderRadius: '5px',
                         background: colorForTier(s.tierLabel, tierOrder),
                         opacity: selectedId === s.clientId ? 1 : 0.85,
-                        outline: selectedId === s.clientId ? '2px solid #0E0C0A' : 'none',
+                        outline: selectedId === s.clientId ? '2px solid var(--afa-ink)' : 'none',
                         outlineOffset: '2px',
-                        color: '#fff',
+                        color: 'var(--afa-white)',
                         fontSize: '9px',
                         display: 'flex',
                         alignItems: 'center',
@@ -1251,7 +1251,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     </div>
                   ))}
                   {seats.length === 0 && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0E0C0A', opacity: 0.35, fontSize: '14px', textAlign: 'center', padding: '0 20px' }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-ink)', opacity: 0.35, fontSize: '14px', textAlign: 'center', padding: '0 20px' }}>
                       {manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats'}
                     </div>
                   )}
@@ -1272,7 +1272,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <input style={inputStyle} value={selected.number} onChange={(e) => updateSelected('number', e.target.value.slice(0, 10))} />
                   <button
                     onClick={deleteSelected}
-                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid #B3261E', color: '#B3261E', background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Delete seat
                   </button>
@@ -1297,7 +1297,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             disabled={saving}
             style={{
               marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
-              background: '#C8441A', color: '#fff', fontSize: '14px', fontWeight: 700,
+              background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '14px', fontWeight: 700,
               cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
             }}
           >

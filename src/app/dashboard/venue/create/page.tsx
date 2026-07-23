@@ -13,9 +13,9 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
   fontSize: '14px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const labelStyle = {
@@ -23,7 +23,7 @@ const labelStyle = {
   fontSize: '13px',
   fontWeight: 600,
   marginBottom: '6px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 function makeId() {
@@ -245,29 +245,29 @@ export default function CreateVenuePage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Venues
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Register Your Venue
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Add your space, design its seating layout, and set your prices per section.
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '24px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
               {error}
             </div>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Basic details */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Basic Details
               </h2>
 
@@ -301,18 +301,18 @@ export default function CreateVenuePage() {
               <div>
                 <label style={labelStyle}>Google Maps Link <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '6px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
                   Paste a share link from Google Maps for an exact pin. If left blank, we'll use your address to build directions.
                 </p>
               </div>
             </section>
 
             {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Rental Rate
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                 What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
               </p>
 
@@ -324,9 +324,9 @@ export default function CreateVenuePage() {
                     onClick={() => setRateType(t)}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: rateType === t ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
-                      background: rateType === t ? 'rgba(200,68,26,0.08)' : '#fff',
-                      color: rateType === t ? '#C8441A' : '#0E0C0A',
+                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
+                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                      color: rateType === t ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
                     }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
@@ -355,28 +355,28 @@ export default function CreateVenuePage() {
               )}
 
               {rateType === 'FLEXIBLE' && (
-                <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                   No fixed rate published. Organisers will send you a duration and date, and you'll respond with a quote before it's confirmed.
                 </p>
               )}
 
               {rateType !== 'FLEXIBLE' && (
                 <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#0E0C0A', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--afa-ink)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
                   </label>
 
                   {useDayOverrides && (
                     <div>
-                      <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '10px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
                         <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(14,12,10,0.05)' }}>
-                          <span style={{ fontSize: '13px', color: '#0E0C0A' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
+                          <span style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>₹</span>
+                            <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>₹</span>
                             <input
                               type="number"
                               value={dayRates[day]}
@@ -395,25 +395,25 @@ export default function CreateVenuePage() {
             </section>
 
             {/* Seating & pricing */}
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>
                 How is this venue's seating arranged?
               </p>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '18px' }}>
                 <button
                   type="button"
                   onClick={() => setSeatingChoice('GENERAL_ADMISSION')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'GENERAL_ADMISSION' ? '#0E0C0A' : '#fff', color: seatingChoice === 'GENERAL_ADMISSION' ? '#F7F3EE' : '#0E0C0A' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-ink)' : 'var(--afa-white)', color: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-cream)' : 'var(--afa-ink)' }}
                 >
                   Section-based (General Admission)
                 </button>
                 <button
                   type="button"
                   onClick={() => setSeatingChoice('NUMBERED')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'NUMBERED' ? '#0E0C0A' : '#fff', color: seatingChoice === 'NUMBERED' ? '#F7F3EE' : '#0E0C0A' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'NUMBERED' ? 'var(--afa-ink)' : 'var(--afa-white)', color: seatingChoice === 'NUMBERED' ? 'var(--afa-cream)' : 'var(--afa-ink)' }}
                 >
                   Numbered seats — I'll build this after
                 </button>
@@ -421,7 +421,7 @@ export default function CreateVenuePage() {
 
               {seatingChoice === 'GENERAL_ADMISSION' && (
                 <>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                     Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
@@ -430,7 +430,7 @@ export default function CreateVenuePage() {
 
               {seatingChoice === 'NUMBERED' && (
                 <div>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>
                     You'll place real, numbered seats on a canvas shaped like your venue from the Seat Map Builder once this venue is created. For now, just give an approximate total capacity — used for listings until your real layout is saved.
                   </p>
                   <label style={labelStyle}>Approximate total capacity</label>
@@ -454,7 +454,7 @@ export default function CreateVenuePage() {
                   disabled={saving}
                   onClick={() => submit(true)}
                   style={{
-                    fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A',
+                    fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)',
                     border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
                   }}
                 >
@@ -466,17 +466,17 @@ export default function CreateVenuePage() {
                 disabled={saving}
                 onClick={() => submit(false)}
                 style={{
-                  fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent',
+                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent',
                   border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
                 }}
               >
                 Save as Draft
               </button>
-              <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
+              <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
                 Cancel
               </Link>
             </div>
-            <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '14px' }}>
+            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>
               {seatingChoice === 'GENERAL_ADMISSION'
                 ? 'Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.'
                 : "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real zones to price against, so publishing happens after the map is real."}
