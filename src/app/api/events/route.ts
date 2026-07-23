@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { notifyFollowersOfNewEvent } from '@/lib/follow'
 
 export async function GET() {
   try {
@@ -244,6 +245,15 @@ export async function POST(req: Request) {
           'venue-booking-request'
         )
       }
+    }
+
+    // A brand-new event only ever reaches APPROVED at creation time when
+    // it has no venue attached (see the status ternary above) - venue
+    // events always start PENDING_APPROVAL. Guarding on event.status here
+    // rather than assuming keeps this correct if that ternary ever changes.
+    if (event.status === 'APPROVED') {
+      notifyFollowersOfNewEvent('ORGANISER', organiser.id, event)
+      if (venueId) notifyFollowersOfNewEvent('VENUE', venueId, event)
     }
 
     return NextResponse.json(event, { status: 201 })

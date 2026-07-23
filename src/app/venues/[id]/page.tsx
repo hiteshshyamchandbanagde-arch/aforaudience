@@ -1,6 +1,7 @@
 import React from 'react'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
+import VenueFollowButton from './VenueFollowButton'
 
 // See src/app/venues/page.tsx for why this is needed.
 export const dynamic = 'force-dynamic'
@@ -46,6 +47,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>
           {venue.address}, {venue.city}
         </p>
+        <VenueFollowButton venueId={venue.id} /><br />
         <a
           href={
             venue.mapsUrl

@@ -42,6 +42,7 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   const { status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
+  const [notifyEnabled, setNotifyEnabledState] = useState(true)
   const [followerCount, setFollowerCount] = useState(artist?._count.followers ?? 0)
   const [followBusy, setFollowBusy] = useState(false)
   const [showAuthSheet, setShowAuthSheet] = useState(false)
@@ -50,7 +51,10 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
     if (!artist) return
     fetch(`/api/artists/${artist.id}/follow`)
       .then((res) => res.json())
-      .then((data) => setFollowing(data.following))
+      .then((data) => {
+        setFollowing(data.following)
+        setNotifyEnabledState(data.notifyEnabled)
+      })
       .catch(() => {})
   }, [artist])
 
@@ -65,7 +69,25 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
       const res = await fetch(`/api/artists/${artist.id}/follow`, { method: "POST" })
       const data = await res.json()
       setFollowing(data.following)
+      setNotifyEnabledState(data.notifyEnabled)
       setFollowerCount((prev) => prev + (data.following ? 1 : -1))
+    } finally {
+      setFollowBusy(false)
+    }
+  }
+
+  const toggleNotify = async () => {
+    if (!artist || followBusy) return
+    setFollowBusy(true)
+    try {
+      const next = !notifyEnabled
+      const res = await fetch(`/api/artists/${artist.id}/follow`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notifyEnabled: next }),
+      })
+      const data = await res.json()
+      setNotifyEnabledState(data.notifyEnabled)
     } finally {
       setFollowBusy(false)
     }
@@ -111,19 +133,38 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
             <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px" }}>
               {artist.user.name}
             </h1>
-            <button
-              onClick={toggleFollow}
-              disabled={followBusy}
-              style={{
-                fontSize: "13px", fontWeight: 700, padding: "8px 20px", borderRadius: "6px", cursor: "pointer", marginBottom: "12px",
-                border: following ? "1.5px solid rgba(255,255,255,0.4)" : "none",
-                background: following ? "transparent" : "#C8441A",
-                color: "white",
-                opacity: followBusy ? 0.6 : 1,
-              }}
-            >
-              {following ? "✓ Following" : "+ Follow"}
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+              <button
+                onClick={toggleFollow}
+                disabled={followBusy}
+                style={{
+                  fontSize: "13px", fontWeight: 700, padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
+                  border: following ? "1.5px solid rgba(255,255,255,0.4)" : "none",
+                  background: following ? "transparent" : "#C8441A",
+                  color: "white",
+                  opacity: followBusy ? 0.6 : 1,
+                }}
+              >
+                {following ? "✓ Following" : "+ Follow"}
+              </button>
+              {following && (
+                <button
+                  onClick={toggleNotify}
+                  disabled={followBusy}
+                  aria-label={notifyEnabled ? "Mute new event notifications" : "Get notified of new events"}
+                  title={notifyEnabled ? "Notifications on - tap to mute" : "Notifications off - tap to enable"}
+                  style={{
+                    width: "34px", height: "34px", borderRadius: "50%",
+                    border: "1.5px solid rgba(255,255,255,0.4)",
+                    background: notifyEnabled ? "rgba(200,68,26,0.3)" : "transparent",
+                    fontSize: "15px", cursor: followBusy ? "default" : "pointer",
+                    opacity: followBusy ? 0.6 : 1,
+                  }}
+                >
+                  {notifyEnabled ? "🔔" : "🔕"}
+                </button>
+              )}
+            </div>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               {artist.styleTag.map((tag) => (
                 <span key={tag} style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)", fontSize: "12px", padding: "4px 12px", borderRadius: "99px", border: "1px solid rgba(255,255,255,0.15)" }}>{tag}</span>

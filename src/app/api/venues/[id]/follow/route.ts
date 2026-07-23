@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   const session = await getServerSession(authOptions)
   const userId = session?.user ? (session.user as any).id : null
-  const result = await getFollowStatus(userId, 'ARTIST', id)
+  const result = await getFollowStatus(userId, 'VENUE', id)
   return NextResponse.json(result)
 }
 
@@ -20,12 +20,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const artist = await prisma.artist.findUnique({ where: { id } })
-  if (!artist) {
-    return NextResponse.json({ error: 'Artist not found' }, { status: 404 })
+  const venue = await prisma.venue.findUnique({ where: { id } })
+  if (!venue) {
+    return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
   }
 
-  const result = await toggleFollow((session.user as any).id, 'ARTIST', id)
+  const result = await toggleFollow((session.user as any).id, 'VENUE', id)
   return NextResponse.json(result)
 }
 
@@ -40,9 +40,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const body = await req.json()
   const notifyEnabled = Boolean(body.notifyEnabled)
 
-  const result = await setNotifyEnabled((session.user as any).id, 'ARTIST', id, notifyEnabled)
+  const result = await setNotifyEnabled((session.user as any).id, 'VENUE', id, notifyEnabled)
   if (!result) {
-    return NextResponse.json({ error: 'Not following this artist' }, { status: 404 })
+    return NextResponse.json({ error: 'Not following this venue' }, { status: 404 })
   }
   return NextResponse.json(result)
 }

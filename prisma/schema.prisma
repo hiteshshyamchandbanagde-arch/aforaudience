@@ -304,21 +304,31 @@ model Artist {
 
   applications  Application[]
   performances  Performance[]
-  followers     Follow[]
 }
 
-// Follows an Artist. userId is the follower (any role can follow, though
-// realistically Audience) - artistId is the Artist being followed, not a
-// User id, since following is specifically an Artist-facing feature.
-model Follow {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  artistId  String
-  artist    Artist   @relation(fields: [artistId], references: [id])
-  createdAt DateTime @default(now())
+enum FollowTargetType {
+  ARTIST
+  VENUE
+  ORGANISER
+}
 
-  @@unique([userId, artistId])
+// Follows an Artist, Venue, or Organiser. userId is the follower (any role
+// can follow, though realistically Audience) - targetType/targetId identify
+// what's being followed, without a direct FK (deliberately polymorphic - one
+// table instead of three near-identical ones). notifyEnabled is the
+// YouTube-style bell: following alone doesn't push anything, the bell is a
+// separate opt-out toggle (defaults on, since notifications are the entire
+// point of following here, unlike a feed-only follow elsewhere).
+model Follow {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  targetType    FollowTargetType
+  targetId      String
+  notifyEnabled Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+
+  @@unique([userId, targetType, targetId])
 }
 
 model Organiser {
