@@ -28,7 +28,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
 
   if (!venue || !venue.isApproved) {
     return (
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <SiteNav backHref="/venues" backLabel="← Back to Venues" />
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>Venue not found.</div>
       </main>
@@ -38,13 +38,13 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   const sections = (venue.seatMap as { sections?: SeatSection[] } | null)?.sections || []
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav backHref="/venues" backLabel="← Back to Venues" />
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
           {venue.name}
         </h1>
-        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, marginBottom: '8px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>
           {venue.address}, {venue.city}
         </p>
         <VenueFollowButton venueId={venue.id} /><br />
@@ -58,31 +58,31 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           }
           target="_blank"
           rel="noopener noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#C8441A', textDecoration: 'none', marginBottom: '28px' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none', marginBottom: '28px' }}
         >
           📍 Get Directions
         </a>
 
-        <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
+        <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
             <div>
-              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
-              <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.capacity} seats</p>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
+              <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.capacity} seats</p>
             </div>
             {venue.acousticRating != null && (
               <div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.acousticRating}/5</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.acousticRating}/5</p>
               </div>
             )}
           </div>
 
           {venue.facilities && venue.facilities.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Facilities</h2>
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>Facilities</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {venue.facilities.map((facility) => (
-                  <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: '#F7F3EE', borderRadius: '999px', color: '#0E0C0A' }}>
+                  <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: 'var(--afa-cream)', borderRadius: '999px', color: 'var(--afa-ink)' }}>
                     {facility}
                   </span>
                 ))}
@@ -91,19 +91,19 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           )}
 
           <div>
-            <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Seating & Pricing</h2>
+            <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>Seating & Pricing</h2>
             {sections.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>Seating details coming soon.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>Seating details coming soon.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {sections.map((s) => (
                   <div
                     key={s.id}
-                    style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: '#F7F3EE', borderRadius: '8px', fontSize: '14px' }}
+                    style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--afa-cream)', borderRadius: '8px', fontSize: '14px' }}
                   >
-                    <span style={{ fontWeight: 600, color: '#0E0C0A' }}>{s.name}</span>
-                    <span style={{ color: '#0E0C0A', opacity: 0.7 }}>{s.seats} seats</span>
-                    <span style={{ fontWeight: 700, color: '#C8441A' }}>₹{s.price}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</span>
+                    <span style={{ color: 'var(--afa-ink)', opacity: 0.7 }}>{s.seats} seats</span>
+                    <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>₹{s.price}</span>
                   </div>
                 ))}
               </div>

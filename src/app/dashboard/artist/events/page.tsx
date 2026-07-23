@@ -26,12 +26,12 @@ interface EventItem {
 
 function compensationBadge(event: EventItem): { label: string; bg: string; color: string } {
   if (event.defaultCompensationType === 'PAID') {
-    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(74,103,65,0.12)', color: '#4A6741' }
+    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' }
   }
   if (event.defaultCompensationType === 'BUY_IN') {
-    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(179,38,30,0.1)', color: '#B3261E' }
+    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' }
   }
-  return { label: 'Free / Exposure slot', bg: 'rgba(14,12,10,0.06)', color: '#0E0C0A' }
+  return { label: 'Free / Exposure slot', bg: 'rgba(14,12,10,0.06)', color: 'var(--afa-ink)' }
 }
 
 // Full lineups no longer hard-block applying - they queue as WAITLISTED
@@ -43,10 +43,10 @@ function isEventFull(event: EventItem): boolean {
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  PENDING: { label: '✓ Applied - pending review', color: '#4A6741' },
-  APPROVED: { label: "✓ You're in the lineup!", color: '#4A6741' },
-  WAITLISTED: { label: '⏳ Waitlisted', color: '#8a6a1f' },
-  REJECTED: { label: 'Not selected this time', color: '#0E0C0A' },
+  PENDING: { label: '✓ Applied - pending review', color: 'var(--afa-sage)' },
+  APPROVED: { label: "✓ You're in the lineup!", color: 'var(--afa-sage)' },
+  WAITLISTED: { label: '⏳ Waitlisted', color: 'var(--afa-gold)' },
+  REJECTED: { label: 'Not selected this time', color: 'var(--afa-ink)' },
 }
 
 export default function BrowseEventsToApplyPage() {
@@ -122,22 +122,22 @@ export default function BrowseEventsToApplyPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/artist" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/artist" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Dashboard
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Browse Events
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Apply to perform at published events.
           </p>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: '#fff', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6 }}>No published events yet. Check back soon!</p>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -146,15 +146,15 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div key={event.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: '#0E0C0A' }}>{event.title}</h3>
-                        <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginTop: '2px' }}>
+                        <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)' }}>{event.title}</h3>
+                        <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '2px' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>
                       </div>
-                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>
+                      <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>
                         Audience pays: {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}
                       </span>
                     </div>
@@ -164,16 +164,16 @@ export default function BrowseEventsToApplyPage() {
                         {comp.label}
                       </div>
                       {full && !existingStatus && (
-                        <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: 'rgba(14,12,10,0.06)', color: '#0E0C0A' }}>
+                        <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: 'rgba(14,12,10,0.06)', color: 'var(--afa-ink)' }}>
                           Lineup full - waitlist only
                         </div>
                       )}
                     </div>
 
-                    <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
+                    <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
                     {existingStatus ? (
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || '#0E0C0A' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-ink)' }}>
                         {STATUS_LABEL[existingStatus]?.label || existingStatus}
                       </span>
                     ) : (
@@ -189,8 +189,8 @@ export default function BrowseEventsToApplyPage() {
                           onClick={() => apply(event.id)}
                           disabled={applying === event.id}
                           style={{
-                            fontSize: '13px', fontWeight: 600, color: full ? '#0E0C0A' : '#F7F3EE',
-                            background: full ? 'transparent' : '#C8441A',
+                            fontSize: '13px', fontWeight: 600, color: full ? 'var(--afa-ink)' : 'var(--afa-cream)',
+                            background: full ? 'transparent' : 'var(--afa-terracotta)',
                             border: full ? '1.5px solid rgba(14,12,10,0.2)' : 'none',
                             borderRadius: '6px', padding: '8px 20px', cursor: 'pointer', opacity: applying === event.id ? 0.6 : 1,
                           }}

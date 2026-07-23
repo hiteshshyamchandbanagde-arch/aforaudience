@@ -13,10 +13,10 @@ export const metadata: Metadata = {
 // introducing new fonts/colors. Consistency with the rest of the app matters
 // more than novelty on a slow-read editorial page.
 // ---------------------------------------------------------------------------
-const INK = "#0E0C0A"
-const PAPER = "#F7F3EE"
-const EMBER = "#C8441A"
-const MIST = "#E8E2D9"
+const INK = "var(--afa-ink)"
+const PAPER = "var(--afa-cream)"
+const EMBER = "var(--afa-terracotta)"
+const MIST = "var(--afa-mist)"
 const SERIF = "Georgia, 'Playfair Display', serif"
 const SANS = "system-ui, -apple-system, sans-serif"
 const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"

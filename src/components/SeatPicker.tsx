@@ -80,12 +80,12 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   }
 
   if (loading) return <p style={{ fontSize: '13px', opacity: 0.6 }}>Loading seat map...</p>
-  if (error) return <p style={{ fontSize: '13px', color: '#B3261E' }}>{error}</p>
+  if (error) return <p style={{ fontSize: '13px', color: 'var(--afa-error)' }}>{error}</p>
   if (seats.length === 0) return <p style={{ fontSize: '13px', opacity: 0.6 }}>No seat map has been set up for this venue yet.</p>
 
   return (
     <div>
-      <div style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '8px' }}>
+      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>
         Tap a seat to select it. Max {maxSeatsPerBooking} per booking.
       </div>
       <div
@@ -94,7 +94,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           width: '100%',
           maxWidth: `${CANVAS_WIDTH}px`,
           aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`,
-          background: '#FBF8F3',
+          background: 'var(--afa-cream-tint-1)',
           border: '1px solid rgba(14,12,10,0.15)',
           borderRadius: '10px',
           overflow: 'hidden',
@@ -105,7 +105,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
             width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px',
-            background: '#0E0C0A', color: '#fff', fontSize: '10px', fontWeight: 700,
+            background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '10px', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
           }}
         >
@@ -114,7 +114,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         {seats.map((s) => {
           const isSelected = selected.includes(s.id)
           const bg =
-            s.status === 'taken' ? '#0E0C0A22' : isSelected ? '#C8441A' : s.status === 'priceUnset' ? '#0E0C0A15' : '#4A6741'
+            s.status === 'taken' ? 'var(--afa-ink-a13)' : isSelected ? 'var(--afa-terracotta)' : s.status === 'priceUnset' ? 'var(--afa-ink-a8)' : 'var(--afa-sage)'
           return (
             <div
               key={s.id}
@@ -142,7 +142,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 marginTop: `-${SEAT_WIDTH_PCT / 2}%`,
                 borderRadius: '5px',
                 background: bg,
-                color: s.status === 'taken' || s.status === 'priceUnset' ? '#0E0C0A66' : '#fff',
+                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-white)',
                 fontSize: 'clamp(5px, 1.3cqw, 9px)',
                 display: 'flex',
                 alignItems: 'center',
@@ -156,10 +156,10 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           )
         })}
       </div>
-      <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: '#0E0C0A', opacity: 0.7 }}>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: '#4A6741', marginRight: '4px' }} />Available</span>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: '#C8441A', marginRight: '4px' }} />Selected</span>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: '#0E0C0A22', marginRight: '4px' }} />Taken</span>
+      <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7 }}>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-sage)', marginRight: '4px' }} />Available</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-terracotta)', marginRight: '4px' }} />Selected</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-ink-a13)', marginRight: '4px' }} />Taken</span>
       </div>
     </div>
   )

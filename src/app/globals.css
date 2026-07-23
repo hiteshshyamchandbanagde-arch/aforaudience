@@ -49,6 +49,64 @@
 }
 
 :root {
+  /* --- AforAudience brand colors (Theme Phase 0) ---
+     Extracted 1:1 from prior hardcoded hex values - no color changed,
+     only referenced by variable now. See docs/design.md for the phase plan. */
+  --afa-amber: #C9973A;
+  --afa-amber-tint: #FFF8E1;
+  --afa-blue: #4A6FA5;
+  --afa-blue-dark: #2E5C8A;
+  --afa-brown-black: #1A1000;
+  --afa-brown-dark: #4A2E1A;
+  --afa-brown-gold: #8A5A1E;
+  --afa-cream: #F7F3EE;
+  --afa-cream-tint-1: #FBF8F3;
+  --afa-cream-tint-2: #FDF3E8;
+  --afa-cream-tint-3: #FBF3E4;
+  --afa-error: #B3261E;
+  --afa-error-bg: #FDECEA;
+  --afa-error-border: #F5C2C0;
+  --afa-forest: #2F4A28;
+  --afa-gold: #8A6A1F;
+  --afa-gold-bright: #E8A800;
+  --afa-gray-taupe: #8A877E;
+  --afa-gray-warm: #6B655F;
+  --afa-green-black: #001A10;
+  --afa-green-bright: #2F7D4A;
+  --afa-green-dark: #276749;
+  --afa-green-deep: #166534;
+  --afa-green-forest: #1E4620;
+  --afa-green-mid: #2D6A4F;
+  --afa-indigo-black: #0A001A;
+  --afa-indigo-gray: #4A4A6A;
+  --afa-ink: #0E0C0A;
+  --afa-ink-a13: #0E0C0A22;
+  --afa-ink-a40: #0E0C0A66;
+  --afa-ink-a8: #0E0C0A15;
+  --afa-maroon: #7A281F;
+  --afa-maroon-black: #1A0500;
+  --afa-mint-tint: #EAF3E7;
+  --afa-mint-tint-2: #E7F4EC;
+  --afa-mist: #E8E2D9;
+  --afa-olive: #5A6B3A;
+  --afa-orange-dark: #C2410C;
+  --afa-orange-tint: #FFF3E6;
+  --afa-peach: #F5A26E;
+  --afa-pink-dark: #C2185B;
+  --afa-plum: #7A4A8A;
+  --afa-plum-black: #1A0A1A;
+  --afa-purple: #7B4FA0;
+  --afa-red-alt: #EF4444;
+  --afa-sage: #4A6741;
+  --afa-social-blue: #1D9BF0;
+  --afa-success-bg: #F0FFF4;
+  --afa-tan: #EDE4D6;
+  --afa-taupe: #8A827A;
+  --afa-teal: #3F8A72;
+  --afa-terracotta: #C8441A;
+  --afa-terracotta-tint: #FFF5F2;
+  --afa-white: #FFF;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

@@ -49,11 +49,11 @@ type Status =
   | { kind: "cancelled" }
 
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js"
-const INK = "#0E0C0A"
-const PAPER = "#F7F3EE"
-const EMBER = "#C8441A"
-const MIST = "#E8E2D9"
-const SAGE = "#4A6741"
+const INK = "var(--afa-ink)"
+const PAPER = "var(--afa-cream)"
+const EMBER = "var(--afa-terracotta)"
+const MIST = "var(--afa-mist)"
+const SAGE = "var(--afa-sage)"
 const SERIF = "Georgia, serif"
 const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"
 

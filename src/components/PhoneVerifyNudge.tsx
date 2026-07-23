@@ -54,9 +54,9 @@ export default function PhoneVerifyNudge() {
       role="status"
       aria-label="Verify your phone"
       style={{
-        background: '#FDECEA',
-        color: '#7A281F',
-        borderBottom: '1px solid #F5C2C0',
+        background: 'var(--afa-error-bg)',
+        color: 'var(--afa-maroon)',
+        borderBottom: '1px solid var(--afa-error-border)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -74,7 +74,7 @@ export default function PhoneVerifyNudge() {
       <Link
         href={`/verify-phone?next=${encodeURIComponent(pathname || '/')}`}
         style={{
-          background: '#C8441A',
+          background: 'var(--afa-terracotta)',
           color: 'white',
           padding: '6px 14px',
           borderRadius: 999,

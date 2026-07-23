@@ -25,7 +25,7 @@ export function getAvailabilityStatus(totalSeats: number, availableSeats: number
 }
 
 export const AVAILABILITY_BADGE: Record<AvailabilityStatus, { label: string; bg: string; color: string }> = {
-  'sold-out': { label: 'Sold Out', bg: '#0E0C0A', color: '#fff' },
-  'filling-fast': { label: 'Filling Fast', bg: '#ef4444', color: '#fff' },
-  available: { label: 'Spots Available', bg: 'rgba(74,103,65,0.12)', color: '#4A6741' },
+  'sold-out': { label: 'Sold Out', bg: 'var(--afa-ink)', color: 'var(--afa-white)' },
+  'filling-fast': { label: 'Filling Fast', bg: 'var(--afa-red-alt)', color: 'var(--afa-white)' },
+  available: { label: 'Spots Available', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
 }

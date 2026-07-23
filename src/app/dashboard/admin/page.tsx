@@ -22,13 +22,13 @@ interface PendingItem {
 // arrow read as separate actions instead.
 const adminNavPillStyle: React.CSSProperties = {
   fontSize: '13px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
   fontWeight: 600,
   textDecoration: 'none',
   padding: '8px 14px',
   borderRadius: '999px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
 }
 
 export default function AdminDashboard() {
@@ -94,25 +94,25 @@ export default function AdminDashboard() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>Admin access only</h1>
-            <p style={{ color: '#0E0C0A', opacity: 0.6 }}>This page is restricted to platform administrators.</p>
+            <p style={{ color: 'var(--afa-ink)', opacity: 0.6 }}>This page is restricted to platform administrators.</p>
           </div>
         </main>
       </>
     )
   }
 
-  const cardStyle = { background: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '12px' }
+  const cardStyle = { background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '12px' }
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', margin: 0 }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', margin: 0 }}>
               Pending Approvals
             </h1>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -127,18 +127,18 @@ export default function AdminDashboard() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginBottom: '12px' }}>
             Organisers ({organisers.length})
           </h2>
-          {organisers.length === 0 && <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5, marginBottom: '24px' }}>Nothing pending.</p>}
+          {organisers.length === 0 && <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '24px' }}>Nothing pending.</p>}
           {organisers.map((o) => (
             <div key={o.id} style={cardStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <div>
                   <div style={{ fontSize: '15px', fontWeight: 600 }}>{o.orgName}</div>
-                  <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
-                  {o.bio && <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
+                  <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
+                  {o.bio && <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
-                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
+                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
+                  <button disabled={actioningId === o.id} onClick={() => act('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
                 </div>
               </div>
             </div>
@@ -147,17 +147,17 @@ export default function AdminDashboard() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, marginTop: '32px', marginBottom: '12px' }}>
             Venue Owners ({venueOwners.length})
           </h2>
-          {venueOwners.length === 0 && <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>Nothing pending.</p>}
+          {venueOwners.length === 0 && <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
           {venueOwners.map((v) => (
             <div key={v.id} style={cardStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                 <div>
                   <div style={{ fontSize: '15px', fontWeight: 600 }}>{v.user.name}</div>
-                  <div style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>{v.user.email}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>{v.user.email}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: '#fff', background: '#4A6741', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
-                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid #F5C2C0', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
+                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
+                  <button disabled={actioningId === v.id} onClick={() => act('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer' }}>Reject</button>
                 </div>
               </div>
             </div>

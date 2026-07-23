@@ -63,11 +63,11 @@ interface EventData {
 }
 
 const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
-  OPEN_MIC: { emoji: "🎤", color: "#001a10", label: "Open Mic" },
-  STAND_UP: { emoji: "😂", color: "#1a0500", label: "Stand Up" },
-  POETRY: { emoji: "📜", color: "#0a001a", label: "Poetry" },
-  THEATER: { emoji: "🎩", color: "#1a0a1a", label: "Theater" },
-  LINEUP: { emoji: "🌟", color: "#1a1000", label: "Lineup" },
+  OPEN_MIC: { emoji: "🎤", color: "var(--afa-green-black)", label: "Open Mic" },
+  STAND_UP: { emoji: "😂", color: "var(--afa-maroon-black)", label: "Stand Up" },
+  POETRY: { emoji: "📜", color: "var(--afa-indigo-black)", label: "Poetry" },
+  THEATER: { emoji: "🎩", color: "var(--afa-plum-black)", label: "Theater" },
+  LINEUP: { emoji: "🌟", color: "var(--afa-brown-black)", label: "Lineup" },
 }
 
 export default function EventDetailPage({ event, canReview }: { event: EventData | null; canReview: boolean }) {
@@ -228,7 +228,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
   if (!event) {
     return (
-      <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav backHref="/events" backLabel="← Back to Events" />
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px" }}>Event not found.</div>
       </main>
@@ -238,7 +238,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const meta = TYPE_META[event.type] || TYPE_META.OPEN_MIC
 
   return (
-    <main style={{ minHeight: "100vh", background: "#F7F3EE", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav backHref="/events" backLabel="← Back to Events" />
 
       {/* HERO */}
@@ -246,10 +246,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         <div style={{ position: "absolute", right: "48px", top: "50%", transform: "translateY(-50%)", fontSize: "160px", opacity: 0.15 }}>{meta.emoji}</div>
         <div style={{ maxWidth: "800px", position: "relative" }}>
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <span style={{ background: "#C8441A", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px", letterSpacing: "0.08em" }}>{meta.label.toUpperCase()}</span>
+            <span style={{ background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px", letterSpacing: "0.08em" }}>{meta.label.toUpperCase()}</span>
             {event.vibe && <span style={{ background: "rgba(255,255,255,0.15)", color: "white", fontSize: "11px", padding: "4px 12px", borderRadius: "4px" }}>⚡ {event.vibe}</span>}
             {event.isFree ? (
-              <span style={{ background: "#2D6A4F", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>FREE</span>
+              <span style={{ background: "var(--afa-green-mid)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>FREE</span>
             ) : (
               <span style={{ background: "rgba(201,151,58,0.9)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>
                 {event.ticketPrice ? `₹${event.ticketPrice} per seat` : "—"}
@@ -287,7 +287,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "#C8441A" : "#0E0C0A", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "#C8441A" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
+                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "var(--afa-terracotta)" : "var(--afa-ink)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-terracotta)" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
               >
                 {tab}
               </button>
@@ -296,12 +296,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "overview" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "12px" }}>About this event</h2>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "#0E0C0A", opacity: 0.75, marginBottom: "16px" }}>{event.description}</p>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>About this event</h2>
+              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "var(--afa-ink)", opacity: 0.75, marginBottom: "16px" }}>{event.description}</p>
               {event.organiser && (
-                <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6, marginBottom: "32px" }}>
+                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "32px" }}>
                   Organised by{" "}
-                  <Link href={`/organisers/${event.organiser.id}`} style={{ color: "#C8441A", fontWeight: 600, textDecoration: "none" }}>
+                  <Link href={`/organisers/${event.organiser.id}`} style={{ color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none" }}>
                     {event.organiser.orgName}
                   </Link>
                 </p>
@@ -315,8 +315,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 ].filter((i) => i.value).map((item) => (
                   <div key={item.label} style={{ background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)" }}>
                     <div style={{ fontSize: "20px", marginBottom: "6px" }}>{item.icon}</div>
-                    <div style={{ fontSize: "11px", color: "#0E0C0A", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>{item.label}</div>
-                    <div style={{ fontSize: "14px", fontWeight: 600, color: "#0E0C0A" }}>{item.value}</div>
+                    <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>{item.label}</div>
+                    <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{item.value}</div>
                   </div>
                 ))}
               </div>
@@ -325,9 +325,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "lineup" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "20px" }}>Lineup</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>Lineup</h2>
               {event.lineup.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5 }}>Lineup hasn't been confirmed yet — check back closer to the date.</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>Lineup hasn't been confirmed yet — check back closer to the date.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {event.lineup.map((p) => (
@@ -336,23 +336,23 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         {p.artist.user.name.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: "16px", color: "#0E0C0A", marginBottom: "4px" }}>{p.artist.user.name}</div>
+                        <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)", marginBottom: "4px" }}>{p.artist.user.name}</div>
                         {p.artist.genre.length > 0 && (
-                          <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
                         )}
                         <div style={{ display: "flex", gap: "16px" }}>
-                          <span style={{ fontSize: "13px", color: "#0E0C0A" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
-                          <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-ink)" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
                         </div>
 
                         {event.plusOnesRequired > 0 && plusOneStatus[p.id] && (
                           <div style={{ marginTop: "10px" }}>
                             {plusOneStatus[p.id].alreadyConfirmed ? (
-                              <span style={{ fontSize: "12px", fontWeight: 600, color: "#2F7D4A", background: "#F0FFF4", padding: "5px 12px", borderRadius: "999px" }}>
+                              <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-green-bright)", background: "var(--afa-success-bg)", padding: "5px 12px", borderRadius: "999px" }}>
                                 ✓ You're confirmed as {p.artist.user.name.split(" ")[0]}'s +1
                               </span>
                             ) : plusOneStatus[p.id].fulfilled ? (
-                              <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.5 }}>
+                              <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
                                 ✓ Fully supported ({plusOneStatus[p.id].confirmedCount}/{plusOneStatus[p.id].required})
                               </span>
                             ) : (
@@ -361,7 +361,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 disabled={plusOneBusy === p.id}
                                 style={{
                                   fontSize: "12px", fontWeight: 600, padding: "6px 14px", borderRadius: "999px",
-                                  border: "1.5px solid #C8441A", background: "transparent", color: "#C8441A",
+                                  border: "1.5px solid var(--afa-terracotta)", background: "transparent", color: "var(--afa-terracotta)",
                                   cursor: plusOneBusy === p.id ? "default" : "pointer",
                                   opacity: plusOneBusy === p.id ? 0.6 : 1,
                                 }}
@@ -378,19 +378,19 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         {(p.reviews.length > 0 || submittedReviews[p.id]) && (
                           <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
                             {submittedReviews[p.id] && !p.reviews.find((r) => r.id === submittedReviews[p.id].id) && (
-                              <div style={{ fontSize: "13px", color: "#0E0C0A" }}>
+                              <div style={{ fontSize: "13px", color: "var(--afa-ink)" }}>
                                 {"⭐".repeat(submittedReviews[p.id].rating)} <span style={{ opacity: 0.6 }}>— you</span>
                                 {submittedReviews[p.id].comment && <span style={{ opacity: 0.7 }}> · {submittedReviews[p.id].comment}</span>}
                               </div>
                             )}
                             {p.reviews.slice(0, 3).map((r) => (
                               <div key={r.id}>
-                                <div style={{ fontSize: "13px", color: "#0E0C0A" }}>
+                                <div style={{ fontSize: "13px", color: "var(--afa-ink)" }}>
                                   {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.name}</span>
                                   {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                                 </div>
                                 {r.reply && (
-                                  <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.75, marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(200,68,26,0.3)" }}>
+                                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.75, marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(200,68,26,0.3)" }}>
                                     <strong>{r.reply.author.displayName || r.reply.author.name}</strong> replied: {r.reply.text}
                                   </div>
                                 )}
@@ -420,7 +420,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 <button
                                   onClick={() => submitReview(p.id)}
                                   disabled={reviewSubmitting === p.id}
-                                  style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "#F7F3EE", background: "#C8441A", border: "none", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                  style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-terracotta)", border: "none", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
                                 >
                                   {reviewSubmitting === p.id ? "Submitting..." : "Rate"}
                                 </button>
@@ -435,7 +435,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 style={{ width: "100%", padding: "6px 10px", borderRadius: "6px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "13px", boxSizing: "border-box" }}
                               />
                             )}
-                            {reviewError && <p style={{ fontSize: "12px", color: "#B3261E", marginTop: "6px" }}>{reviewError}</p>}
+                            {reviewError && <p style={{ fontSize: "12px", color: "var(--afa-error)", marginTop: "6px" }}>{reviewError}</p>}
                           </div>
                         )}
                       </div>
@@ -448,21 +448,21 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "venue" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "20px" }}>Venue Details</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>Venue Details</h2>
               {event.venue ? (
                 <div style={{ background: "white", borderRadius: "12px", padding: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px" }}>{event.venue.name}</div>
-                  <div style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.6, marginBottom: "16px" }}>📍 {event.venue.address}, {event.venue.city}</div>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>{event.venue.name}</div>
+                  <div style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "16px" }}>📍 {event.venue.address}, {event.venue.city}</div>
                   {event.venue.facilities.length > 0 && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "12px" }}>
                       {event.venue.facilities.map((f) => (
-                        <div key={f} style={{ background: "#F7F3EE", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "#0E0C0A" }}>✅ {f}</div>
+                        <div key={f} style={{ background: "var(--afa-cream)", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-ink)" }}>✅ {f}</div>
                       ))}
                     </div>
                   )}
                 </div>
               ) : (
-                <p style={{ fontSize: "14px", color: "#0E0C0A", opacity: 0.5 }}>Venue not confirmed yet.</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>Venue not confirmed yet.</p>
               )}
             </div>
           )}
@@ -474,17 +474,17 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             {reservedMessage ? (
               <div>
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "8px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
                   Seats reserved
                 </div>
-                <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7, lineHeight: 1.6 }}>{reservedMessage}</p>
+                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, lineHeight: 1.6 }}>{reservedMessage}</p>
               </div>
             ) : (
               <>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "4px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>
                   {event.isFree ? "Free Entry" : event.ticketTiers.length > 0 ? "Choose your section" : event.ticketPrice ? `₹${event.ticketPrice} / seat` : "Price TBD"}
                 </div>
-                <div style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.5, marginBottom: "10px" }}>
+                <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "10px" }}>
                   {event.availableSeats} of {event.totalSeats} seats total · max {event.maxSeatsPerBooking} per booking
                 </div>
                 {(() => {
@@ -520,23 +520,23 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       event.ticketTiers.map((t) => (
                         <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}>
                           <div>
-                            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>{t.sectionName}</div>
-                            <div style={{ fontSize: "11px", color: "#0E0C0A", opacity: 0.5 }}>₹{t.price}</div>
+                            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>{t.sectionName}</div>
+                            <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5 }}>₹{t.price}</div>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                            <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
                             <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats[t.sectionName] || 0}</span>
-                            <button onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                            <button onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>+</button>
                           </div>
                         </div>
                       ))
                     ) : (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>General Admission</div>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>General Admission</div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                          <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
                           <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
-                          <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                          <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>+</button>
                         </div>
                       </div>
                     )}
@@ -545,28 +545,28 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
                 {event.isFree && (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "#0E0C0A" }}>Seats</div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>Seats</div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>−</button>
+                      <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
                       <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
-                      <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "#fff", cursor: "pointer" }}>+</button>
+                      <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>+</button>
                     </div>
                   </div>
                 )}
 
                 {bookingError && (
-                  <div style={{ fontSize: "12px", color: "#B3261E", marginBottom: "12px" }}>{bookingError}</div>
+                  <div style={{ fontSize: "12px", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
                 )}
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
-                  <span style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
-                  <span style={{ fontSize: "18px", fontWeight: 700, color: "#0E0C0A" }}>{totalAmount > 0 ? `₹${totalAmount.toLocaleString("en-IN")}` : "Free"}</span>
+                  <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
+                  <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{totalAmount > 0 ? `₹${totalAmount.toLocaleString("en-IN")}` : "Free"}</span>
                 </div>
 
                 <button
                   onClick={handleBookClick}
                   disabled={reserving || status === "loading"}
-                  style={{ display: "block", width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving || status === "loading" ? "default" : "pointer", opacity: reserving || status === "loading" ? 0.7 : 1 }}
+                  style={{ display: "block", width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, textAlign: "center", boxSizing: "border-box", marginBottom: "12px", cursor: reserving || status === "loading" ? "default" : "pointer", opacity: reserving || status === "loading" ? 0.7 : 1 }}
                 >
                   {reserving
                     ? "Reserving..."
@@ -577,7 +577,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     : "Continue to Checkout"}
                 </button>
 
-                <div style={{ fontSize: "12px", color: "#0E0C0A", opacity: 0.45, textAlign: "center" }}>
+                <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textAlign: "center" }}>
                   {event.isFree
                     ? "Free entry — we'll confirm your seat instantly."
                     : "Secure payment by Razorpay · UPI, card, netbanking"}

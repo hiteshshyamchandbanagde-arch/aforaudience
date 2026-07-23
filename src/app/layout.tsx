@@ -48,7 +48,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Match the manifest's theme_color so the browser chrome (Android
   // address bar, iOS status bar in standalone) tints correctly.
-  themeColor: "#C8441A",
+  themeColor: "var(--afa-terracotta)",
 };
 
 export default function RootLayout({
@@ -124,7 +124,7 @@ export default function RootLayout({
         <div
           dangerouslySetInnerHTML={{
             __html: `
-              <div id="intro-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:#0E0C0A;display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
+              <div id="intro-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:var(--afa-ink);display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
                 <style>
                   @keyframes intro-bar-in { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
                   @keyframes intro-icon-shrink { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3); } }
@@ -138,15 +138,15 @@ export default function RootLayout({
                     height: clamp(240px, 68vw, 440px);
                     animation: intro-icon-shrink 350ms ease 750ms both;
                   }
-                  #intro-wordmark { font-family: Georgia, serif; font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: #F7F3EE; }
+                  #intro-wordmark { font-family: Georgia, serif; font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-cream); }
                   .intro-letter { opacity: 0; display: inline-block; }
-                  #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: #F7F3EE; opacity: 0; }
-                  #intro-tagline { font-family: Georgia, serif; font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: #C9973A; opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
+                  #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: var(--afa-cream); opacity: 0; }
+                  #intro-tagline { font-family: Georgia, serif; font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
                 </style>
                 <svg viewBox="0 0 64 64">
-                  <rect x="18" y="42" width="14" height="8" fill="#F7F3EE" style="animation:intro-bar-in 260ms ease-out 0ms both"></rect>
-                  <rect x="18" y="30" width="20" height="8" fill="#C9973A" style="animation:intro-bar-in 260ms ease-out 150ms both"></rect>
-                  <rect x="18" y="18" width="28" height="8" fill="#C8441A" style="animation:intro-bar-in 260ms ease-out 300ms both"></rect>
+                  <rect x="18" y="42" width="14" height="8" fill="var(--afa-cream)" style="animation:intro-bar-in 260ms ease-out 0ms both"></rect>
+                  <rect x="18" y="30" width="20" height="8" fill="var(--afa-amber)" style="animation:intro-bar-in 260ms ease-out 150ms both"></rect>
+                  <rect x="18" y="18" width="28" height="8" fill="var(--afa-terracotta)" style="animation:intro-bar-in 260ms ease-out 300ms both"></rect>
                 </svg>
                 <div id="intro-wordmark">
                   <span id="intro-letters"></span>
@@ -180,7 +180,7 @@ export default function RootLayout({
                       var span = document.createElement('span');
                       span.className = 'intro-letter';
                       span.textContent = word[i];
-                      if (i === 0) span.style.color = '#C8441A';
+                      if (i === 0) span.style.color = 'var(--afa-terracotta)';
                       span.style.animation = 'intro-fade-in ' + DUR + 'ms linear ' + (TYPE_START + i * STAGGER) + 'ms both';
                       lettersEl.appendChild(span);
                     }

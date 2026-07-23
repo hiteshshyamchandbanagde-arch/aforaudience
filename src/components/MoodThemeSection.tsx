@@ -10,15 +10,15 @@ interface Rasa {
 }
 
 const RASAS: Rasa[] = [
-  { emoji: "❤️", name: "Shringara", sanskrit: "Love", accent: "#C2185B" },
-  { emoji: "😂", name: "Hasya", sanskrit: "Laughter", accent: "#E8A800" },
-  { emoji: "😢", name: "Karuna", sanskrit: "Sorrow", accent: "#4A6FA5" },
-  { emoji: "⚡", name: "Raudra", sanskrit: "Fury", accent: "#B3261E" },
-  { emoji: "🦁", name: "Vira", sanskrit: "Courage", accent: "#C8441A" },
-  { emoji: "😨", name: "Bhayanaka", sanskrit: "Fear", accent: "#4A4A6A" },
-  { emoji: "🤢", name: "Bibhatsa", sanskrit: "Disgust", accent: "#5A6B3A" },
-  { emoji: "🤩", name: "Adbhuta", sanskrit: "Wonder", accent: "#7B4FA0" },
-  { emoji: "🕊️", name: "Shanta", sanskrit: "Peace", accent: "#3F8A72" },
+  { emoji: "❤️", name: "Shringara", sanskrit: "Love", accent: "var(--afa-pink-dark)" },
+  { emoji: "😂", name: "Hasya", sanskrit: "Laughter", accent: "var(--afa-gold-bright)" },
+  { emoji: "😢", name: "Karuna", sanskrit: "Sorrow", accent: "var(--afa-blue)" },
+  { emoji: "⚡", name: "Raudra", sanskrit: "Fury", accent: "var(--afa-error)" },
+  { emoji: "🦁", name: "Vira", sanskrit: "Courage", accent: "var(--afa-terracotta)" },
+  { emoji: "😨", name: "Bhayanaka", sanskrit: "Fear", accent: "var(--afa-indigo-gray)" },
+  { emoji: "🤢", name: "Bibhatsa", sanskrit: "Disgust", accent: "var(--afa-olive)" },
+  { emoji: "🤩", name: "Adbhuta", sanskrit: "Wonder", accent: "var(--afa-purple)" },
+  { emoji: "🕊️", name: "Shanta", sanskrit: "Peace", accent: "var(--afa-teal)" },
 ]
 
 const STORAGE_KEY = "afa-mood-theme"
@@ -49,23 +49,23 @@ export default function MoodThemeSection() {
     localStorage.setItem(STORAGE_KEY, rasa.name)
   }
 
-  const accent = selected?.accent || "#C8441A"
+  const accent = selected?.accent || "var(--afa-terracotta)"
 
   return (
     <>
       {/* NAVARASA */}
       <section style={{ padding: "100px 48px", background: "white", textAlign: "center" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#C8441A", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "#C8441A", display: "inline-block" }}></span>
+        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+          <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
           Ancient Indian Wisdom
         </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "#0E0C0A", marginBottom: "16px" }}>
-          Find art by <em style={{ color: "#C8441A" }}>Navarasa</em>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
+          Find art by <em style={{ color: "var(--afa-terracotta)" }}>Navarasa</em>
         </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "#0E0C0A", opacity: 0.6, maxWidth: "560px", margin: "0 auto 16px", lineHeight: 1.7 }}>
+        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", margin: "0 auto 16px", lineHeight: 1.7 }}>
           The 9 emotions of Indian classical art. Search events by the feeling you want to experience tonight.
         </p>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "#0E0C0A", opacity: 0.45, marginBottom: "40px" }}>
+        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45, marginBottom: "40px" }}>
           Tap a mood to set your vibe for this visit.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
@@ -81,8 +81,8 @@ export default function MoodThemeSection() {
               }}
             >
               <div style={{ fontSize: "32px" }}>{rasa.emoji}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "12px", fontWeight: 700, color: "#0E0C0A" }}>{rasa.name}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.65 }}>{rasa.sanskrit}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "12px", fontWeight: 700, color: "var(--afa-ink)" }}>{rasa.name}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.65 }}>{rasa.sanskrit}</div>
             </div>
           ))}
         </div>

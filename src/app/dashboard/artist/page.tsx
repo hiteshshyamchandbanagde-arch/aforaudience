@@ -68,9 +68,9 @@ interface ArtistProfile {
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f' },
-  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741' },
-  REJECTED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E' },
+  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
+  REJECTED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
 }
 
 export default function ArtistDashboard() {
@@ -161,7 +161,7 @@ export default function ArtistDashboard() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!profile) return (<><SiteNav /><div style={{ padding: '32px' }}>Profile not found</div></>)
 
   const upcoming = profile.performances
@@ -204,27 +204,27 @@ export default function ArtistDashboard() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 {profile.name}
               </h1>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                 Hype Score: {profile.hypScore.toFixed(1)} · {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <Link
                 href="/dashboard/artist/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
               >
                 Edit Profile
               </Link>
               <Link
                 href="/dashboard/artist/events"
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
               >
                 Browse Events to Apply
               </Link>
@@ -232,34 +232,34 @@ export default function ArtistDashboard() {
           </div>
 
           {completionPercent < 100 && (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.2)' }}>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.2)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0E0C0A' }}>Profile {completionPercent}% complete</span>
-                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: '#C8441A', textDecoration: 'none' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)' }}>Profile {completionPercent}% complete</span>
+                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
                   Complete your profile →
                 </Link>
               </div>
               <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(14,12,10,0.08)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${completionPercent}%`, background: '#C8441A', borderRadius: '999px' }} />
+                <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-terracotta)', borderRadius: '999px' }} />
               </div>
-              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '8px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '8px' }}>
                 A complete profile - bio, genre, style, and a social link - helps Organisers say yes faster.
               </p>
             </div>
           )}
 
           {/* Profile summary */}
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: profile.bio ? 0.8 : 0.4, marginBottom: '16px', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
+          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: profile.bio ? 0.8 : 0.4, marginBottom: '16px', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
               {profile.bio || 'No bio yet — add one from Edit Profile.'}
             </p>
             {(profile.genre.length > 0 || profile.styleTag.length > 0) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {profile.genre.map((g) => (
-                  <span key={g} style={{ fontSize: '12px', padding: '5px 12px', background: '#F7F3EE', borderRadius: '999px', color: '#0E0C0A' }}>{g}</span>
+                  <span key={g} style={{ fontSize: '12px', padding: '5px 12px', background: 'var(--afa-cream)', borderRadius: '999px', color: 'var(--afa-ink)' }}>{g}</span>
                 ))}
                 {profile.styleTag.map((s) => (
-                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: 'rgba(200,68,26,0.08)', borderRadius: '999px', color: '#C8441A' }}>{s}</span>
+                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: 'rgba(200,68,26,0.08)', borderRadius: '999px', color: 'var(--afa-terracotta)' }}>{s}</span>
                 ))}
               </div>
             )}
@@ -270,25 +270,25 @@ export default function ArtistDashboard() {
               to show, so a brand-new artist with zero performances doesn't
               see an empty ₹0/₹0/₹0 block. */}
           {(totalCompensation > 0 || totalSpend > 0) && (
-            <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Recorded Earnings
               </h2>
-              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '18px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '18px' }}>
                 Compensation and spend agreed with Organisers - not processed or confirmed by the platform. Tips will show separately once available.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
                 <div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Recorded Compensation</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Recorded Compensation</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-ink)' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Recorded Spend</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Recorded Spend</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-ink)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Net</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: netFigure >= 0 ? '#2F7D4A' : '#B3261E' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Net</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error)' }}>
                     {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
                   </p>
                 </div>
@@ -299,17 +299,17 @@ export default function ArtistDashboard() {
           {/* Reviews */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '14px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)' }}>
                 Reviews
               </h2>
               {avgRating !== null && (
-                <span style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                   {'⭐'.repeat(Math.round(avgRating))} {avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}
                 </span>
               )}
             </div>
             {allReviews.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
                 No reviews yet. Audiences can rate you after checking in at a show.
               </p>
             ) : (
@@ -317,21 +317,21 @@ export default function ArtistDashboard() {
                 {allReviews.map((r) => {
                   const reply = r.reply || localReplies[r.id]
                   return (
-                    <div key={r.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                    <div key={r.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                         <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
-                        <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>{r.eventTitle}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{r.eventTitle}</span>
                       </div>
                       {r.comment && (
-                        <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
+                        <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
                       )}
-                      <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
                         {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
                       </p>
 
                       {reply ? (
                         <div style={{ marginTop: '4px', paddingTop: '10px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
-                          <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.85, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.85, lineHeight: 1.5 }}>
                             <strong>Your reply:</strong> {reply.text}
                           </p>
                         </div>
@@ -350,7 +350,7 @@ export default function ArtistDashboard() {
                             disabled={replySubmitting === r.id || !(replyDrafts[r.id] || '').trim()}
                             style={{
                               fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none',
-                              background: '#C8441A', color: 'white', cursor: replySubmitting === r.id ? 'default' : 'pointer',
+                              background: 'var(--afa-terracotta)', color: 'white', cursor: replySubmitting === r.id ? 'default' : 'pointer',
                               opacity: replySubmitting === r.id || !(replyDrafts[r.id] || '').trim() ? 0.6 : 1,
                             }}
                           >
@@ -367,11 +367,11 @@ export default function ArtistDashboard() {
 
           {/* Followers */}
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>
               Followers
             </h2>
             {profile.followers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
                 No followers yet. They&apos;ll show up here as people find your profile.
               </p>
             ) : (
@@ -379,15 +379,15 @@ export default function ArtistDashboard() {
                 {profile.followers.map((f) => {
                   const label = f.user.displayName || f.user.name
                   return (
-                    <div key={f.id} style={{ background: '#fff', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div key={f.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
-                        width: '32px', height: '32px', borderRadius: '50%', background: '#0E0C0A', color: '#F7F3EE',
+                        width: '32px', height: '32px', borderRadius: '50%', background: 'var(--afa-ink)', color: 'var(--afa-cream)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, flexShrink: 0,
                       }}>
                         {label.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontSize: '14px', color: '#0E0C0A', fontWeight: 500 }}>{label}</span>
-                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.4, marginLeft: 'auto' }}>
+                      <span style={{ fontSize: '14px', color: 'var(--afa-ink)', fontWeight: 500 }}>{label}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.4, marginLeft: 'auto' }}>
                         since {new Date(f.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -399,33 +399,33 @@ export default function ArtistDashboard() {
 
           {/* Upcoming performances */}
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>
               Upcoming Performances
             </h2>
             {upcoming.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>No upcoming performances yet. Apply to events to get booked.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>No upcoming performances yet. Apply to events to get booked.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {upcoming.map((p) => (
-                  <div key={p.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div key={p.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                     <div>
-                      <p style={{ fontWeight: 600, fontSize: '15px', color: '#0E0C0A' }}>{p.event.title}</p>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                      <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-ink)' }}>{p.event.title}</p>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                         {new Date(p.event.date).toLocaleDateString()} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#C8441A' }}>Slot #{p.slot} · {p.duration} min</span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-terracotta)' }}>Slot #{p.slot} · {p.duration} min</span>
                       {canCancel(p) ? (
                         <button
                           onClick={() => cancelPerformance(p.id)}
                           disabled={cancelling === p.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: '#B3261E', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
+                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
                         >
                           {cancelling === p.id ? 'Cancelling...' : 'Cancel'}
                         </button>
                       ) : (
-                        <span style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
+                        <span style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
                           Too close to cancel
                         </span>
                       )}
@@ -438,26 +438,26 @@ export default function ArtistDashboard() {
 
           {/* Applications */}
           <div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>
               My Applications
             </h2>
             {profile.applications.length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
-                No applications yet. <Link href="/dashboard/artist/events" style={{ color: '#C8441A', fontWeight: 600 }}>Browse events</Link> to apply.
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+                No applications yet. <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Browse events</Link> to apply.
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {profile.applications.map((app) => {
                   const appStyle = APPLICATION_STYLE[app.status] || APPLICATION_STYLE.PENDING
                   return (
-                    <div key={app.id} style={{ background: '#fff', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                    <div key={app.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                        <p style={{ fontWeight: 600, fontSize: '15px', color: '#0E0C0A' }}>{app.event.title}</p>
+                        <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-ink)' }}>{app.event.title}</p>
                         <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: appStyle.bg, color: appStyle.color }}>
                           {app.status.toLowerCase()}
                         </span>
                       </div>
-                      <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6 }}>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                         {new Date(app.event.date).toLocaleDateString()} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
                       </p>
                     </div>

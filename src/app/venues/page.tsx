@@ -35,18 +35,18 @@ export default async function VenuesPage() {
   const venues = await getVenues()
 
   return (
-    <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav active="venues" />
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '8px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
           Venues
         </h1>
-        <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+        <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
           Spaces hosting live art near you.
         </p>
 
         {venues.length === 0 ? (
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6 }}>No venues found yet. Check back soon!</p>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6 }}>No venues found yet. Check back soon!</p>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {venues.map((v) => {
@@ -55,15 +55,15 @@ export default async function VenuesPage() {
                 <Link
                   key={v.id}
                   href={`/venues/${v.id}`}
-                  style={{ display: 'block', background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
+                  style={{ display: 'block', background: 'var(--afa-white)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
                 >
-                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: '#0E0C0A', marginBottom: '4px' }}>
+                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
                     {v.name}
                   </h2>
-                  <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '14px' }}>{v.city}</p>
-                  <div style={{ display: 'flex', gap: '18px', fontSize: '13px', color: '#0E0C0A' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>{v.city}</p>
+                  <div style={{ display: 'flex', gap: '18px', fontSize: '13px', color: 'var(--afa-ink)' }}>
                     <span><strong>{v.capacity}</strong> seats</span>
-                    {range && <span style={{ color: '#C8441A', fontWeight: 700 }}>{range}</span>}
+                    {range && <span style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>{range}</span>}
                   </div>
                 </Link>
               )

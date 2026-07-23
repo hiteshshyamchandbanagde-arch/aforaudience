@@ -99,49 +99,49 @@ function LoginForm() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="font-serif text-[28px] font-bold text-[#0E0C0A] no-underline">
-          <span className="text-[#C8441A]">A</span>forAudience
+        <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-ink)] no-underline">
+          <span className="text-[var(--afa-terracotta)]">A</span>forAudience
           <EnvBadge />
         </Link>
-        <p className="text-[14px] text-[#0E0C0A] opacity-50 mt-2">
+        <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
           Welcome back to the art world
         </p>
       </div>
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "#0E0C0A", marginBottom: "24px" }}>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "24px" }}>
           Sign in
         </h2>
 
         {registered && (
-          <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
+          <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
             ✅ Account created! Please sign in.
           </div>
         )}
         {justReset && (
-          <div style={{ background: "#F0FFF4", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#276749" }}>
+          <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
             ✅ Password updated. Please sign in.
           </div>
         )}
         {wasSuspended && (
-          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
             Your account has been suspended. Contact support if you believe this is a mistake.
           </div>
         )}
         {error && (
-          <div style={{ background: "#FFF5F2", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "#C8441A" }}>
+          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
             {error}
           </div>
         )}
         {devOtp && mode === "otp-verify" && (
-          <div style={{ background: "#FFF8E1", border: "1px solid #C8441A", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "#0E0C0A" }}>
+          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
             QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
           </div>
         )}
 
         {mode !== "otp-verify" && (
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
               Email / Phone / Username / Code
             </label>
             <input
@@ -149,7 +149,7 @@ function LoginForm() {
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="you@example.com, phone, username, or AFA code"
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
-              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
             />
           </div>
         )}
@@ -157,7 +157,7 @@ function LoginForm() {
         {mode === "password" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 Password
               </label>
               <div style={{ position: "relative" }}>
@@ -167,7 +167,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
                 <button
                   type="button"
@@ -182,13 +182,13 @@ function LoginForm() {
             <button
               onClick={handleLogin}
               disabled={loading || !identifier || !password}
-              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
             <button
               onClick={() => { setMode("otp-request"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               Use OTP instead
             </button>
@@ -200,13 +200,13 @@ function LoginForm() {
             <button
               onClick={handleRequestOtp}
               disabled={loading || !identifier}
-              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? "Sending..." : "Send code"}
             </button>
             <button
               onClick={() => { setMode("password"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               Use password instead
             </button>
@@ -216,7 +216,7 @@ function LoginForm() {
         {mode === "otp-verify" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 Enter 6-digit code
               </label>
               <input
@@ -224,20 +224,20 @@ function LoginForm() {
                 onChange={(e) => setOtpCode(e.target.value)}
                 maxLength={6}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "#0E0C0A", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
             <button
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "#C8441A", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? "Verifying..." : "Verify & Sign In"}
             </button>
             <button
               onClick={handleRequestOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "#C8441A", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               Resend code
             </button>
@@ -245,15 +245,15 @@ function LoginForm() {
         )}
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>
-          <Link href="/forgot-password" style={{ fontSize: "13px", color: "#C8441A", textDecoration: "none" }}>
+          <Link href="/forgot-password" style={{ fontSize: "13px", color: "var(--afa-terracotta)", textDecoration: "none" }}>
             Forgot password?
           </Link>
         </div>
       </div>
 
-      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "#0E0C0A", opacity: 0.6 }}>
+      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
         Don&apos;t have an account?{" "}
-        <Link href="/register" style={{ color: "#C8441A", textDecoration: "none", fontWeight: 500 }}>
+        <Link href="/register" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>
           Create one free
         </Link>
       </p>
@@ -263,7 +263,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#F7F3EE] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+    <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
       <Suspense fallback={<div>Loading...</div>}>
         <LoginForm />
       </Suspense>

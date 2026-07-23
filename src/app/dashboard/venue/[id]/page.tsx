@@ -96,7 +96,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   const sections = venue.seatMap?.sections || []
@@ -130,18 +130,18 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Venues
           </Link>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '16px', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
             <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 {venue.name}
               </h1>
-              <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>
                 {venue.address}, {venue.city}
               </p>
             </div>
@@ -154,7 +154,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 padding: '6px 14px',
                 borderRadius: '999px',
                 background: venue.isApproved ? 'rgba(74,103,65,0.12)' : 'rgba(201,151,58,0.15)',
-                color: venue.isApproved ? '#4A6741' : '#8a6a1f',
+                color: venue.isApproved ? 'var(--afa-sage)' : 'var(--afa-gold)',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -163,37 +163,37 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: '#FDECEA', border: '1px solid #F5C2C0', borderRadius: '8px', color: '#B3261E', fontSize: '14px', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
               {error}
             </div>
           )}
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
               <div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.capacity} seats</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.capacity} seats</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>
                   {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
                 </p>
               </div>
               {venue.acousticRating != null && (
                 <div>
-                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
-                  <p style={{ fontSize: '24px', fontWeight: 700, color: '#0E0C0A' }}>{venue.acousticRating}/5</p>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
+                  <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.acousticRating}/5</p>
                 </div>
               )}
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Facilities</h2>
+                <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>Facilities</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: '#F7F3EE', borderRadius: '999px', color: '#0E0C0A' }}>
+                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: 'var(--afa-cream)', borderRadius: '999px', color: 'var(--afa-ink)' }}>
                       {facility}
                     </span>
                   ))}
@@ -202,10 +202,10 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             )}
 
             <div>
-              <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '10px' }}>Seating Sections</h2>
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>Seating Sections</h2>
               {venue.seatingMode === 'NUMBERED' ? (
                 numberedZones.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>
+                  <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
                     No seat map built yet — use Seat Map Builder to add zones and seats.
                   </p>
                 ) : (
@@ -217,16 +217,16 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           display: 'flex',
                           justifyContent: 'space-between',
                           padding: '12px 16px',
-                          background: '#F7F3EE',
+                          background: 'var(--afa-cream)',
                           borderRadius: '8px',
                           fontSize: '14px',
                         }}
                       >
-                        <span style={{ fontWeight: 600, color: '#0E0C0A' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>
                           {z.zoneName}{z.level ? ` · ${z.level}` : ''}
                         </span>
-                        <span style={{ color: '#0E0C0A', opacity: 0.7 }}>{z.count} seats</span>
-                        <span style={{ fontWeight: 700, color: '#C8441A' }}>
+                        <span style={{ color: 'var(--afa-ink)', opacity: 0.7 }}>{z.count} seats</span>
+                        <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>
                           {z.price ? `₹${z.price}` : '—'}
                         </span>
                       </div>
@@ -234,7 +234,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )
               ) : sections.length === 0 ? (
-                <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.5 }}>No seating sections defined yet.</p>
+                <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>No seating sections defined yet.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {sections.map((s) => (
@@ -244,14 +244,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         display: 'flex',
                         justifyContent: 'space-between',
                         padding: '12px 16px',
-                        background: '#F7F3EE',
+                        background: 'var(--afa-cream)',
                         borderRadius: '8px',
                         fontSize: '14px',
                       }}
                     >
-                      <span style={{ fontWeight: 600, color: '#0E0C0A' }}>{s.name}</span>
-                      <span style={{ color: '#0E0C0A', opacity: 0.7 }}>{s.seats} seats</span>
-                      <span style={{ fontWeight: 700, color: '#C8441A' }}>₹{s.price}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</span>
+                      <span style={{ color: 'var(--afa-ink)', opacity: 0.7 }}>{s.seats} seats</span>
+                      <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>₹{s.price}</span>
                     </div>
                   ))}
                 </div>
@@ -262,13 +262,13 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
-              style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#0E0C0A', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-ink)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               Edit Venue
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               📊 Revenue
             </Link>
@@ -278,8 +278,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
               style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                color: venue.isApproved ? '#0E0C0A' : '#F7F3EE',
-                background: venue.isApproved ? 'transparent' : '#C8441A',
+                color: venue.isApproved ? 'var(--afa-ink)' : 'var(--afa-cream)',
+                background: venue.isApproved ? 'transparent' : 'var(--afa-terracotta)',
                 border: venue.isApproved ? '1px solid rgba(14,12,10,0.2)' : 'none',
                 padding: '12px 24px',
                 borderRadius: '8px',

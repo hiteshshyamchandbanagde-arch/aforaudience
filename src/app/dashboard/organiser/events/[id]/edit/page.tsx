@@ -42,9 +42,9 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: '#fff',
+  background: 'var(--afa-white)',
   fontSize: '14px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const labelStyle = {
@@ -52,7 +52,7 @@ const labelStyle = {
   fontSize: '13px',
   fontWeight: 600,
   marginBottom: '6px',
-  color: '#0E0C0A',
+  color: 'var(--afa-ink)',
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
@@ -216,28 +216,28 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>Event not found</div></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: '#F7F3EE', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#C8441A', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
             ← Back to Event
           </Link>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: '#0E0C0A', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Edit Event
           </h1>
-          <p style={{ fontSize: '15px', color: '#0E0C0A', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
             Update your event details, seats, pricing, and venue.
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Event Details
               </h2>
 
@@ -288,14 +288,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: '#0E0C0A' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
                 Seats & Ticket Price
               </h2>
 
@@ -307,16 +307,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" style={{ ...inputStyle, maxWidth: '120px' }} />
-                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
+                <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px' }}>
                   Each artist in the lineup must have this many audience members confirm support - included in their spot fee. Set to 0 if not required.
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: '20px', marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                   <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#0E0C0A' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                   <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
                 </label>
               </div>
@@ -329,11 +329,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Artist Payment Terms
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                 Shown to Artists before they apply. You can still negotiate a different amount with a specific artist when approving their application.
               </p>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
@@ -348,9 +348,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     onClick={() => setDefaultCompensationType(opt.value)}
                     style={{
                       padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: defaultCompensationType === opt.value ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
-                      background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : '#fff',
-                      color: defaultCompensationType === opt.value ? '#C8441A' : '#0E0C0A',
+                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
+                      background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                      color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
                     }}
                   >
                     {opt.label}
@@ -365,11 +365,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
                 Venue
               </h2>
-              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
                 Changing the venue sends a new booking request.
               </p>
 
@@ -396,7 +396,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 type="button"
                 disabled={saving}
                 onClick={() => save(event.status === 'APPROVED' ? true : undefined)}
-                style={{ fontSize: '14px', fontWeight: 600, color: '#F7F3EE', background: '#C8441A', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Saving...' : event.status === 'APPROVED' ? 'Save Changes' : 'Save & Publish'}
               </button>
@@ -405,12 +405,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </button>
               )}
-              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6, textDecoration: 'none' }}>
+              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel
               </Link>
             </div>
