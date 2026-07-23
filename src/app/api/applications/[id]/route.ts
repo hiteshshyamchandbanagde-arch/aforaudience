@@ -39,7 +39,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     if (status === 'APPROVED' && application.event.maxPerformers !== null) {
-      const filledSlots = await prisma.performance.count({ where: { eventId: application.eventId } })
+      // cancelledAt: null - same reasoning as POST /api/applications: a
+      // cancelled slot must not count against capacity, or the lineup
+      // reads as permanently full after the first cancellation even
+      // once the waitlist has already backfilled the real open spot.
+      const filledSlots = await prisma.performance.count({ where: { eventId: application.eventId, cancelledAt: null } })
       if (filledSlots >= application.event.maxPerformers) {
         return NextResponse.json({ error: 'This event\'s lineup is already full' }, { status: 409 })
       }
@@ -53,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         where: { eventId: application.eventId, artistId: application.artistId },
       })
       if (!existingPerformance) {
-        const lineupCount = await prisma.performance.count({ where: { eventId: application.eventId } })
+        const lineupCount = await prisma.performance.count({ where: { eventId: application.eventId, cancelledAt: null } })
         // Fall back to the event's own declared default terms (set at
         // creation, shown to the Artist before they applied) rather than
         // silently defaulting to FREE when the Organiser doesn't pass an

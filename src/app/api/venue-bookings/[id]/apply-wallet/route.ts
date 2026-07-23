@@ -42,16 +42,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const applied = Math.min(remainingFee, booking.organiser.walletBalance)
 
-  const [updatedBooking] = await prisma.$transaction([
-    prisma.venueBooking.update({
-      where: { id },
-      data: { platformFeeAmount: remainingFee - applied },
-    }),
-    prisma.organiser.update({
-      where: { id: booking.organiserId },
-      data: { walletBalance: { decrement: applied } },
-    }),
-  ])
+  // walletBalance: { gte: applied } guards against a concurrent duplicate
+  // request (double-click, two tabs) both reading the same starting
+  // balance before either commits - only one can actually spend it, the
+  // other's updateMany affects 0 rows instead of decrementing twice.
+  const orgUpdate = await prisma.organiser.updateMany({
+    where: { id: booking.organiserId, walletBalance: { gte: applied } },
+    data: { walletBalance: { decrement: applied } },
+  })
+  if (orgUpdate.count === 0) {
+    return NextResponse.json({ error: 'Wallet balance changed - please try again.' }, { status: 409 })
+  }
+
+  const updatedBooking = await prisma.venueBooking.update({
+    where: { id },
+    data: { platformFeeAmount: remainingFee - applied },
+  })
 
   return NextResponse.json({ applied, platformFeeAmount: updatedBooking.platformFeeAmount })
 }
