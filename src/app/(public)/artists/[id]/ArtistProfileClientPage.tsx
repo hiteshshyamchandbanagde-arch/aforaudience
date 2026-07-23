@@ -38,7 +38,7 @@ const SOCIAL_ICON: Record<string, string> = {
   twitter: "🐦",
 }
 
-export default function ArtistProfilePage({ artist }: { artist: ArtistData | null }) {
+export default function ArtistProfilePage({ artist, isVerified }: { artist: ArtistData | null; isVerified?: boolean }) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   const { status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
@@ -130,8 +130,16 @@ export default function ArtistProfilePage({ artist }: { artist: ArtistData | nul
               ))}
               <span style={{ background: "rgba(201,151,58,0.9)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>🔥 Hype {artist.hypScore.toFixed(1)}</span>
             </div>
-            <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px" }}>
+            <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               {artist.user.name}
+              {isVerified && (
+                <span
+                  title="Verified: complete profile with an established track record"
+                  style={{ fontSize: "0.45em", background: "#1D9BF0", color: "white", width: "1.1em", height: "1.1em", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                >
+                  ✓
+                </span>
+              )}
             </h1>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
               <button
