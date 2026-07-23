@@ -57,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const body = await req.json()
     const {
       title, description, type, date, startTime, endTime,
-      isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish,
+      isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
     } = body
 
     // §4.5 suggestion #1: same rule as event creation - an event with a
@@ -97,6 +97,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(dresscode !== undefined && { dresscode }),
         ...(vibe !== undefined && { vibe }),
         ...(surpriseAct !== undefined && { surpriseAct: Boolean(surpriseAct) }),
+        ...(plusOnesRequired !== undefined && Number(plusOnesRequired) >= 0 && Number(plusOnesRequired) <= 20 && {
+          plusOnesRequired: parseInt(plusOnesRequired),
+        }),
         ...(resolvedStatus && { status: resolvedStatus }),
       },
     })
