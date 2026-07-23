@@ -141,6 +141,26 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* --- Theme Phase 1: "Indigo" - one opt-in second theme ---
+   Overrides only the brand ACCENT colors (terracotta/gold family),
+   deliberately NOT the ink/cream pair. Audited before building: ink and
+   cream are both used in dual roles across the app (ink as body text on
+   a cream page, but also as a solid button/badge FILL with white or
+   cream text on top) - inverting their values directly would flip solid
+   buttons into a light fill with illegible light-on-light text in many
+   spots. Swapping only the accent keeps every existing text/background
+   contrast pair intact and just changes the brand mood - deep indigo +
+   gold, a classic festive/regal Indian-performance pairing - which is
+   also a safer, more honest scope for a first opt-in theme than a
+   half-correct light/dark inversion. Toggled via a small control in
+   SiteNav, persisted to localStorage('afa-theme'), applied instantly
+   pre-paint by the inline script in layout.tsx <head>. */
+[data-theme="indigo"] {
+  --afa-terracotta: #4B3F72;
+  --afa-terracotta-tint: #ECE9F5;
+  --afa-maroon-black: #180F2E;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

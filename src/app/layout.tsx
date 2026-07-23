@@ -60,6 +60,28 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/*
+          Theme Phase 1 - reads the saved theme preference and sets it on
+          <html> BEFORE first paint, so there's no flash of the default
+          theme then a flip to the saved one. Deliberately raw inline
+          script in <head>, not a client component - a client component's
+          effect only runs after hydration, which is exactly the flash
+          this exists to prevent. Fails silently (try/catch) since
+          localStorage can throw in some private-browsing/embedded
+          contexts, and a missing/invalid value is intentionally a no-op
+          - the CSS default (no data-theme attribute) is the standard
+          light look, so worst case here is just "shows the default".
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('afa-theme');
+                if (t === 'indigo') document.documentElement.setAttribute('data-theme', 'indigo');
+              } catch (e) {}
+            `,
+          }}
+        />
+        {/*
           Inline service worker registration.
 
           Deliberately placed in the raw HTML head (not a React component)

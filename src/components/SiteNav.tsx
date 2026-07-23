@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
@@ -59,6 +59,26 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
   const [mobileOpen, setMobileOpen] = useState(false)
+  // Theme Phase 1 - mirrors what layout.tsx's pre-paint script already
+  // applied to <html>, so this just needs to read it back for the
+  // button's own label/state (never causes a flash - the attribute is
+  // already set by the time this component hydrates).
+  const [theme, setTheme] = useState<'default' | 'indigo'>('default')
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'indigo') {
+      setTheme('indigo')
+    }
+  }, [])
+  const toggleTheme = () => {
+    const next = theme === 'indigo' ? 'default' : 'indigo'
+    setTheme(next)
+    if (next === 'indigo') {
+      document.documentElement.setAttribute('data-theme', 'indigo')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+    try { localStorage.setItem('afa-theme', next) } catch (e) {}
+  }
 
   const primaryLinks = backHref
     ? [{ key: "back", href: backHref, label: backLabel ?? "← Back", isActive: false }]
@@ -116,6 +136,15 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
           {!backHref && <SearchBox />}
 
+          <button
+            onClick={toggleTheme}
+            title={theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
+            aria-label={theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '15px', padding: 0 }}
+          >
+            {theme === 'indigo' ? '🪔' : '🌙'}
+          </button>
+
           {status === "loading" ? null : user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7 }}>
@@ -161,6 +190,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
       {/* Mobile dropdown panel */}
       <div className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`} style={{ flexDirection: "column", padding: "8px 24px 20px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+        <button
+          onClick={toggleTheme}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }}
+        >
+          <span>{theme === 'indigo' ? '🪔' : '🌙'}</span>
+          {theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
+        </button>
         {primaryLinks.map((l) => (
           <Link
             key={l.key}
