@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       include: {
         venue: true,
         applications: { include: { artist: { include: { user: true } } } },
-        lineup: true,
+        lineup: { include: { artist: { include: { user: { select: { name: true, displayName: true } } } } } },
         ticketTiers: true,
       },
     })

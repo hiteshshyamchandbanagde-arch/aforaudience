@@ -33,7 +33,7 @@ export default function OrganiserDashboard() {
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null } | null>(null)
+  const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null; walletBalance?: number } | null>(null)
   const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
 
   useEffect(() => {
@@ -132,6 +132,11 @@ export default function OrganiserDashboard() {
                 Your Events
               </h1>
               <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
+              {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
+                <p style={{ fontSize: '13px', color: '#8a6a1f', fontWeight: 600, marginTop: '6px' }}>
+                  💰 Wallet balance: ₹{orgStatus.walletBalance.toLocaleString('en-IN')} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
+                </p>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <Link

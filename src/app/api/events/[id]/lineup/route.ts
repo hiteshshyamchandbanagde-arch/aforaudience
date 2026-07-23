@@ -37,7 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const performances = await prisma.performance.findMany({
-      where: { eventId },
+      where: { eventId, cancelledAt: null },
       include: { artist: { include: { user: { select: { name: true, displayName: true } } } } },
       orderBy: { slot: 'asc' },
     })
@@ -91,7 +91,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     // Ownership check on every performanceId — never trust the client to
     // only send IDs that actually belong to this event.
-    const existing = await prisma.performance.findMany({ where: { eventId }, select: { id: true } })
+    const existing = await prisma.performance.findMany({ where: { eventId, cancelledAt: null }, select: { id: true } })
     const validIds = new Set(existing.map((p) => p.id))
     for (const item of order) {
       if (!item?.performanceId || !validIds.has(item.performanceId)) {
@@ -115,7 +115,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     )
 
     const performances = await prisma.performance.findMany({
-      where: { eventId },
+      where: { eventId, cancelledAt: null },
       include: { artist: { include: { user: { select: { name: true, displayName: true } } } } },
       orderBy: { slot: 'asc' },
     })

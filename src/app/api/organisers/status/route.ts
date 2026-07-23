@@ -32,5 +32,6 @@ export async function GET() {
     isApproved: organiser?.isApproved ?? false,
     isActive: user.role === 'ORGANISER',
     orgName: organiser?.orgName ?? null,
+    walletBalance: organiser?.walletBalance ?? 0,
   })
 }
