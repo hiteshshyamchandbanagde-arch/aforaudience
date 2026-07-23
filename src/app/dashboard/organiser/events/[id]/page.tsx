@@ -58,6 +58,12 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   PENDING: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f' },
   APPROVED: { bg: 'rgba(74,103,65,0.12)', color: '#4A6741' },
   REJECTED: { bg: 'rgba(179,38,30,0.1)', color: '#B3261E' },
+  // Applied when the lineup was full at application time (Hitesh's own
+  // admin note, 22 Jul) - a real FCFS queue instead of a hard rejection.
+  // No auto-promotion on cancellation exists yet (separate gap), so an
+  // Organiser promotes manually the same way as any pending applicant -
+  // the Approve/Reject UI below is enabled for WAITLISTED too.
+  WAITLISTED: { bg: 'rgba(201,151,58,0.15)', color: '#8a6a1f' },
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -288,7 +294,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         </span>
                       </div>
                       {app.message && <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7, marginBottom: '10px' }}>{app.message}</p>}
-                      {app.status === 'PENDING' && (
+                      {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div>
                           <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                             {(['FREE', 'PAID', 'BUY_IN'] as const).map((t) => {
