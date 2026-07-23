@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
+import SearchBox from "@/components/SearchBox"
 
 type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
@@ -113,6 +114,8 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             </Link>
           ))}
 
+          {!backHref && <SearchBox />}
+
           {status === "loading" ? null : user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <span style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.7 }}>
@@ -168,6 +171,12 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             {l.label}
           </Link>
         ))}
+
+        {!backHref && (
+          <div style={{ padding: "14px 0" }}>
+            <SearchBox />
+          </div>
+        )}
 
         {status === "loading" ? null : user ? (
           <>
