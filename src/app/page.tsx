@@ -1,6 +1,7 @@
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import HeroRotator from "@/components/HeroRotator";
+import MoodThemeSection from "@/components/MoodThemeSection";
 
 const TICKER_UNIQUE_ITEMS = ["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata"];
 const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS];
@@ -159,60 +160,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NAVARASA */}
-      <section style={{ padding: "100px 48px", background: "white", textAlign: "center" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#C8441A", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "#C8441A", display: "inline-block" }}></span>
-          Ancient Indian Wisdom
-        </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "#0E0C0A", marginBottom: "16px" }}>
-          Find art by <em style={{ color: "#C8441A" }}>Navarasa</em>
-        </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "#0E0C0A", opacity: 0.6, maxWidth: "560px", margin: "0 auto 56px", lineHeight: 1.7 }}>
-          The 9 emotions of Indian classical art. Search events by the feeling you want to experience tonight.
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
-          {[
-            { emoji: "❤️", name: "Shringara", sanskrit: "Love" },
-            { emoji: "😂", name: "Hasya", sanskrit: "Laughter" },
-            { emoji: "😢", name: "Karuna", sanskrit: "Sorrow" },
-            { emoji: "⚡", name: "Raudra", sanskrit: "Fury" },
-            { emoji: "🦁", name: "Vira", sanskrit: "Courage" },
-            { emoji: "😨", name: "Bhayanaka", sanskrit: "Fear" },
-            { emoji: "🤢", name: "Bibhatsa", sanskrit: "Disgust" },
-            { emoji: "🤩", name: "Adbhuta", sanskrit: "Wonder" },
-            { emoji: "🕊️", name: "Shanta", sanskrit: "Peace" },
-          ].map((rasa) => (
-            <div key={rasa.name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "20px 8px", borderRadius: "10px", cursor: "pointer" }}>
-              <div style={{ fontSize: "32px" }}>{rasa.emoji}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "12px", fontWeight: 700, color: "#0E0C0A" }}>{rasa.name}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.65 }}>{rasa.sanskrit}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section style={{ background: "#C8441A", textAlign: "center", padding: "100px 48px" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "rgba(255,255,255,0.5)", display: "inline-block" }}></span>
-          Join AforAudience
-        </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "white", marginBottom: "16px" }}>
-          The stage is set.<br />Are you ready?
-        </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "18px", color: "rgba(255,255,255,0.75)", maxWidth: "540px", margin: "0 auto 44px", lineHeight: 1.7 }}>
-          Join thousands of artists, organisers, venue owners and art lovers already on the platform.
-        </p>
-        <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/events" style={{ background: "white", color: "#C8441A", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 700, textDecoration: "none" }}>
-            Find an Event Tonight
-          </Link>
-          <Link href="/profile" style={{ background: "transparent", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "2px solid rgba(255,255,255,0.4)" }}>
-            Join as Artist
-          </Link>
-        </div>
-      </section>
+      <MoodThemeSection />
 
       {/* FOOTER */}
       <footer style={{ background: "#0E0C0A", color: "#F7F3EE", padding: "64px 48px 32px" }}>

@@ -27,6 +27,12 @@ interface ArtistData {
   hypScore: number
   socialLinks: Record<string, string> | null
   videoReel: string[]
+  tagline: string | null
+  fullBiography: string | null
+  journey: string | null
+  influences: string | null
+  acknowledgments: string | null
+  goals: string | null
   user: { name: string; avatar: string | null }
   performances: Performance[]
   _count: { performances: number; followers: number }
@@ -119,8 +125,8 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
       {/* HERO */}
       <div style={{ background: "#1a0a1a", padding: "64px 48px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "32px", alignItems: "flex-end", flexWrap: "wrap" }}>
-          <div style={{ width: "140px", height: "140px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "4px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "56px", fontWeight: 700, color: "white" }}>
-            {artist.user.name.charAt(0).toUpperCase()}
+          <div style={{ width: "140px", height: "140px", borderRadius: "50%", background: artist.user.avatar ? `url(${artist.user.avatar}) center/cover` : "rgba(255,255,255,0.1)", border: "4px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "56px", fontWeight: 700, color: "white", flexShrink: 0 }}>
+            {!artist.user.avatar && artist.user.name.charAt(0).toUpperCase()}
           </div>
 
           <div>
@@ -141,6 +147,11 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
                 </span>
               )}
             </h1>
+            {artist.tagline && (
+              <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.75)", fontStyle: "italic", marginBottom: "12px", maxWidth: "500px" }}>
+                &quot;{artist.tagline}&quot;
+              </p>
+            )}
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
               <button
                 onClick={toggleFollow}
@@ -226,6 +237,23 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
               <p style={{ fontSize: "15px", lineHeight: 1.8, color: "#0E0C0A", opacity: artist.bio ? 0.75 : 0.4, marginBottom: "32px", fontStyle: artist.bio ? "normal" : "italic" }}>
                 {artist.bio || "This artist hasn't added a bio yet."}
               </p>
+
+              {[
+                { label: "Full Biography", value: artist.fullBiography },
+                { label: "Journey", value: artist.journey },
+                { label: "Influences", value: artist.influences },
+                { label: "Thanks", value: artist.acknowledgments },
+                { label: "Goals & Ambitions", value: artist.goals },
+              ].filter((section) => section.value).map((section) => (
+                <div key={section.label} style={{ marginBottom: "28px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "#0E0C0A", marginBottom: "10px" }}>
+                    {section.label}
+                  </h3>
+                  <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#0E0C0A", opacity: 0.75, whiteSpace: "pre-wrap" }}>
+                    {section.value}
+                  </p>
+                </div>
+              ))}
 
               {artist.videoReel.length > 0 && (
                 <>

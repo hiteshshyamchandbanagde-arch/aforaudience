@@ -23,6 +23,7 @@ export async function GET() {
       phone: true,
       code: true,
       isVerified: true,
+      avatar: true,
     },
   })
   if (!user) {
@@ -59,7 +60,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const updates: { displayName?: string | null } = {}
+    const updates: { displayName?: string | null; avatar?: string | null } = {}
 
     // Only touch displayName if it appears in the body. Undefined means
     // "not touched"; null/empty string means "clear". A trimmed non-empty
@@ -79,6 +80,26 @@ export async function PATCH(req: Request) {
       }
     }
 
+    // Profile picture - URL paste, not a real file upload (no storage
+    // provider is wired up in this app yet). Same "trust a pasted link"
+    // pattern already used for social links and venue Maps URLs
+    // elsewhere - validated as a real URL, not just any string.
+    if (Object.prototype.hasOwnProperty.call(body, 'avatar')) {
+      const raw = body.avatar
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.avatar = null
+      } else if (typeof raw === 'string') {
+        try {
+          new URL(raw.trim())
+          updates.avatar = raw.trim().slice(0, 500)
+        } catch {
+          return NextResponse.json({ error: 'Avatar must be a valid URL' }, { status: 400 })
+        }
+      } else {
+        return NextResponse.json({ error: 'avatar must be a string or null' }, { status: 400 })
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No editable fields provided' }, { status: 400 })
     }
@@ -91,6 +112,7 @@ export async function PATCH(req: Request) {
         name: true,
         displayName: true,
         email: true,
+        avatar: true,
       },
     })
 
