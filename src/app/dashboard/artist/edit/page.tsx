@@ -36,6 +36,13 @@ export default function EditArtistProfilePage() {
   const [styleTagInput, setStyleTagInput] = useState('')
   const [instagram, setInstagram] = useState('')
   const [youtube, setYoutube] = useState('')
+  const [avatar, setAvatar] = useState('')
+  const [tagline, setTagline] = useState('')
+  const [fullBiography, setFullBiography] = useState('')
+  const [journey, setJourney] = useState('')
+  const [influences, setInfluences] = useState('')
+  const [acknowledgments, setAcknowledgments] = useState('')
+  const [goals, setGoals] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -46,15 +53,29 @@ export default function EditArtistProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/artists/me')
-        if (!res.ok) throw new Error('Failed to fetch profile')
-        const data = await res.json()
+        const [artistRes, userRes] = await Promise.all([
+          fetch('/api/artists/me'),
+          fetch('/api/users/me'),
+        ])
+        if (!artistRes.ok) throw new Error('Failed to fetch profile')
+        const data = await artistRes.json()
         setBio(data.bio || '')
         setGenreInput((data.genre || []).join(', '))
         setStyleTagInput((data.styleTag || []).join(', '))
         const links = data.socialLinks || {}
         setInstagram(links.instagram || '')
         setYoutube(links.youtube || '')
+        setTagline(data.tagline || '')
+        setFullBiography(data.fullBiography || '')
+        setJourney(data.journey || '')
+        setInfluences(data.influences || '')
+        setAcknowledgments(data.acknowledgments || '')
+        setGoals(data.goals || '')
+
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          setAvatar(userData.user?.avatar || '')
+        }
       } catch (err: any) {
         showToast(err.message || 'Failed to load profile', 'error')
       } finally {
@@ -70,17 +91,34 @@ export default function EditArtistProfilePage() {
   const save = async () => {
     setSaving(true)
     try {
-      const res = await fetch('/api/artists/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bio,
-          genre: genreInput.split(',').map((g) => g.trim()).filter(Boolean),
-          styleTag: styleTagInput.split(',').map((s) => s.trim()).filter(Boolean),
-          socialLinks: { instagram, youtube },
+      const [artistRes, userRes] = await Promise.all([
+        fetch('/api/artists/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bio,
+            genre: genreInput.split(',').map((g) => g.trim()).filter(Boolean),
+            styleTag: styleTagInput.split(',').map((s) => s.trim()).filter(Boolean),
+            socialLinks: { instagram, youtube },
+            tagline,
+            fullBiography,
+            journey,
+            influences,
+            acknowledgments,
+            goals,
+          }),
         }),
-      })
-      if (!res.ok) throw new Error('Failed to save profile')
+        fetch('/api/users/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar: avatar.trim() || null }),
+        }),
+      ])
+      if (!artistRes.ok) throw new Error('Failed to save profile')
+      if (!userRes.ok) {
+        const data = await userRes.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to save profile picture')
+      }
       showToast('Profile saved.', 'success')
       router.push('/dashboard/artist')
     } catch (err: any) {
@@ -111,6 +149,14 @@ export default function EditArtistProfilePage() {
 
           <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Profile Picture <span style={{ fontWeight: 400, opacity: 0.6 }}>(image URL)</span></label>
+              <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={inputStyle} />
+              <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
+                Paste a link to your photo (e.g. from a cloud drive or image host) - direct file upload isn&apos;t available yet.
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Bio</label>
               <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell organisers about your act" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
@@ -134,6 +180,47 @@ export default function EditArtistProfilePage() {
                 <label style={labelStyle}>YouTube</label>
                 <input type="text" value={youtube} onChange={(e) => setYoutube(e.target.value)} placeholder="https://youtube.com/..." style={inputStyle} />
               </div>
+            </div>
+          </div>
+
+          {/* Artist Background - a richer, entirely optional storytelling
+              section beyond the short bio above. Nothing here is required. */}
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+              Your Background
+            </h2>
+            <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+              All optional - share as much or as little of your story as you want.
+            </p>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Tagline <span style={{ fontWeight: 400, opacity: 0.6 }}>(one line, shown prominently)</span></label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} maxLength={200} placeholder="e.g., Turning everyday chaos into comedy" style={inputStyle} />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Full Biography <span style={{ fontWeight: 400, opacity: 0.6 }}>(as long as you&apos;d like)</span></label>
+              <textarea value={fullBiography} onChange={(e) => setFullBiography(e.target.value)} rows={5} placeholder="The complete story, beyond the short bio above" style={{ ...inputStyle, resize: 'vertical' as const }} />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Your Journey</label>
+              <textarea value={journey} onChange={(e) => setJourney(e.target.value)} rows={5} placeholder="How you got started, key moments along the way" style={{ ...inputStyle, resize: 'vertical' as const }} />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Influences <span style={{ fontWeight: 400, opacity: 0.6 }}>(who inspired you)</span></label>
+              <textarea value={influences} onChange={(e) => setInfluences(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={labelStyle}>Thanks <span style={{ fontWeight: 400, opacity: 0.6 }}>(anyone you&apos;d like to acknowledge)</span></label>
+              <textarea value={acknowledgments} onChange={(e) => setAcknowledgments(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Goals &amp; Ambitions</label>
+              <textarea value={goals} onChange={(e) => setGoals(e.target.value)} rows={3} placeholder="Where you want this to go" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
           </div>
 
