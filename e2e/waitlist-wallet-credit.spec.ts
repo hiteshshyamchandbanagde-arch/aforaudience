@@ -70,6 +70,14 @@ test("artist cancellation promotes the waitlist and the freed Buy-in amount beco
         .locator("div")
         .filter({ hasText: FIXTURE_EVENT_TITLE })
         .last();
+      // The compensation badge (compensationBadge() in
+      // dashboard/artist/events/page.tsx) must be visible BEFORE the
+      // Apply click - this is the actual product requirement (Hitesh,
+      // 23 Jul): an artist must know what they'd owe/earn before
+      // applying, not just after. Fixture event is Buy-in/₹300.
+      await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible({
+        timeout: 15_000,
+      });
       await card.getByRole("button", { name: /apply to perform|join waitlist/i }).click();
       await expect(card.getByText(/pending/i)).toBeVisible({ timeout: 15_000 });
     });
@@ -96,6 +104,13 @@ test("artist cancellation promotes the waitlist and the freed Buy-in amount beco
         .locator("div")
         .filter({ hasText: FIXTURE_EVENT_TITLE })
         .last();
+      // Same badge check as Artist A - B applies while the lineup is
+      // already full, so this also confirms the badge (and thus the
+      // payment terms) is shown even on a "waitlist only" card, not
+      // just the normal-capacity case.
+      await expect(card.getByText(/buy-in required: ₹300/i)).toBeVisible({
+        timeout: 15_000,
+      });
       await card.getByRole("button", { name: /join waitlist|apply to perform/i }).click();
       await expect(card.getByText(/waitlist/i)).toBeVisible({ timeout: 15_000 });
     });
