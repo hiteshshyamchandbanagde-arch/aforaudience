@@ -21,6 +21,11 @@ interface Performance {
   slot: number
   duration: number
   artistId: string
+  compensationType: 'PAID' | 'FREE' | 'BUY_IN'
+  buyInAmount: number | null
+  cancelledAt: string | null
+  buyInRefundStatus: 'REFUNDED' | 'WALLET_CREDITED' | null
+  artist: { stageName?: string | null; user: { name: string; displayName: string | null } }
 }
 
 interface EventDetail {
@@ -169,6 +174,26 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
     }
   }
 
+  // Organiser-only override: keeps a cancelled Buy-in artist's amount as
+  // wallet credit instead of the default refund. Never the reverse, never
+  // the artist's call - see the API route's own comment for the reasoning.
+  const convertToWalletCredit = async (performanceId: string) => {
+    setActingOn(performanceId)
+    try {
+      const res = await fetch(`/api/performances/${performanceId}/refund-status`, { method: 'PATCH' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to update')
+      }
+      await fetchEvent()
+      showToast('Kept as wallet credit instead of a refund.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update', 'error')
+    } finally {
+      setActingOn(null)
+    }
+  }
+
   if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
   if (!session) return <SiteNav />
   if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: '#B3261E' }}>{error}</div></>)
@@ -271,6 +296,44 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               </p>
             )}
           </div>
+
+          {event.lineup.some((p) => p.cancelledAt) && (
+            <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0E0C0A', marginBottom: '14px' }}>
+                Cancelled Performances
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {event.lineup.filter((p) => p.cancelledAt).map((p) => (
+                  <div key={p.id} style={{ padding: '14px 16px', background: '#F7F3EE', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '14px', color: '#0E0C0A' }}>
+                        {p.artist.stageName || p.artist.user.displayName || p.artist.user.name}
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>
+                        Cancelled {new Date(p.cancelledAt as string).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {p.compensationType === 'BUY_IN' && p.buyInAmount && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.7 }}>
+                          Buy-in ₹{p.buyInAmount.toLocaleString('en-IN')} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
+                        </span>
+                        {p.buyInRefundStatus === 'REFUNDED' && (
+                          <button
+                            onClick={() => convertToWalletCredit(p.id)}
+                            disabled={actingOn === p.id}
+                            style={{ fontSize: '12px', fontWeight: 600, color: '#0E0C0A', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
+                          >
+                            {actingOn === p.id ? 'Updating...' : 'Keep as wallet credit instead'}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Applications */}
           <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
