@@ -13,7 +13,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       lineup: {
         include: {
           artist: { include: { user: true } },
-          reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: 'desc' } },
+          reviews: {
+            include: {
+              user: { select: { name: true } },
+              reply: { include: { author: { select: { name: true, displayName: true } } } },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
         orderBy: { slot: 'asc' },
       },
