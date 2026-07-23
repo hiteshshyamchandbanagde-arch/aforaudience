@@ -129,6 +129,9 @@ export default function CreateEventPage() {
   }
   const [platformFee, setPlatformFee] = useState<number | null>(null)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
+  const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
+  const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
+  const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   // Same clamp-on-change discipline as maxSeatsPerBooking/maxPerformers
   // above - unbounded numeric inputs have crashed prisma.event.create()
   // before (PR #100-103), server-side cap exists too, this is just the UX
@@ -329,6 +332,9 @@ export default function CreateEventPage() {
           applicationApprovalMode,
           maxSeatsPerBooking: seatsCap,
           plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
+          defaultCompensationType,
+          defaultFeeAmount: defaultCompensationType === 'PAID' ? defaultFeeAmount : null,
+          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? defaultBuyInAmount : null,
           publish,
         }),
       })
@@ -577,6 +583,40 @@ export default function CreateEventPage() {
                 <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginTop: '4px' }}>
                   Each artist in the lineup must have this many audience members confirm they're coming to support them - included in the artist&apos;s spot fee, no extra charge. Set to 0 if not required.
                 </p>
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Artist Payment Terms</label>
+                <p style={{ fontSize: '11px', color: '#0E0C0A', opacity: 0.5, marginBottom: '8px' }}>
+                  Shown to Artists before they apply, so it's clear upfront - you can still negotiate a different amount with a specific artist when approving their application.
+                </p>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                  {([
+                    { value: 'FREE', label: 'Free / Exposure' },
+                    { value: 'PAID', label: 'Paid' },
+                    { value: 'BUY_IN', label: 'Buy-in (pay to play)' },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setDefaultCompensationType(opt.value)}
+                      style={{
+                        padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: defaultCompensationType === opt.value ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : '#fff',
+                        color: defaultCompensationType === opt.value ? '#C8441A' : '#0E0C0A',
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {defaultCompensationType === 'PAID' && (
+                  <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                )}
+                {defaultCompensationType === 'BUY_IN' && (
+                  <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder="Buy-in amount (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                )}
               </div>
 
               <div>
