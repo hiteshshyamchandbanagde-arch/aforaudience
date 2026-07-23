@@ -616,6 +616,19 @@ model Event {
   // was previously an off-platform WhatsApp/friend-network scramble.
   plusOnesRequired Int @default(0)
 
+  // Default artist compensation terms, declared publicly at event
+  // creation so an Artist can see payment terms BEFORE applying, rather
+  // than finding out only after being approved (real gap - Performance's
+  // own compensationType/feeAmount/buyInAmount were only ever set at
+  // approval time, per-artist, invisible to the applicant). Organiser can
+  // still override per-artist at approval time for real exceptions (e.g.
+  // negotiating a different fee with a headliner) - this is the
+  // published default, not a hard lock. Mirrors Performance's own
+  // CompensationType/feeAmount/buyInAmount shape exactly.
+  defaultCompensationType CompensationType @default(FREE)
+  defaultFeeAmount        Float?
+  defaultBuyInAmount      Float?
+
   lineup        Performance[]
   applications  Application[]
   bookings      Booking[]

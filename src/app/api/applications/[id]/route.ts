@@ -54,7 +54,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       })
       if (!existingPerformance) {
         const lineupCount = await prisma.performance.count({ where: { eventId: application.eventId } })
-        const validCompType = ['PAID', 'FREE', 'BUY_IN'].includes(compensationType) ? compensationType : 'FREE'
+        // Fall back to the event's own declared default terms (set at
+        // creation, shown to the Artist before they applied) rather than
+        // silently defaulting to FREE when the Organiser doesn't pass an
+        // explicit override here - previously an Organiser who declared
+        // "Paid ₹500" but forgot to fill in the per-artist override at
+        // approval time would have silently downgraded the artist to FREE.
+        const validCompType = ['PAID', 'FREE', 'BUY_IN'].includes(compensationType)
+          ? compensationType
+          : application.event.defaultCompensationType
+        const resolvedFeeAmount = compensationType
+          ? (validCompType === 'PAID' && feeAmount ? parseFloat(feeAmount) : null)
+          : application.event.defaultFeeAmount
+        const resolvedBuyInAmount = compensationType
+          ? (validCompType === 'BUY_IN' && buyInAmount ? parseFloat(buyInAmount) : null)
+          : application.event.defaultBuyInAmount
         await prisma.performance.create({
           data: {
             eventId: application.eventId,
@@ -62,13 +76,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             slot: lineupCount + 1,
             duration: 10,
             compensationType: validCompType,
-            feeAmount: validCompType === 'PAID' && feeAmount ? parseFloat(feeAmount) : null,
+            feeAmount: resolvedFeeAmount,
             // §4.5 suggestion #6 - Buy-in charges at approval, which is
             // exactly this moment, not at application time. The actual
             // charge/collection isn't wired up yet (needs a payment
             // integration, EPIC C) - this records the agreed amount so
             // that's ready to plug in without a schema change later.
-            buyInAmount: validCompType === 'BUY_IN' && buyInAmount ? parseFloat(buyInAmount) : null,
+            buyInAmount: resolvedBuyInAmount,
           },
         })
       }

@@ -30,6 +30,9 @@ interface EventDetail {
   vibe?: string | null
   surpriseAct: boolean
   plusOnesRequired: number
+  defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
+  defaultFeeAmount: number | null
+  defaultBuyInAmount: number | null
   venue: { id: string } | null
   venueBooking: { amount: number; fromDate: string; toDate: string } | null
 }
@@ -77,6 +80,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
+  const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
+  const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
+  const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
 
@@ -114,6 +120,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : '')
         setSurpriseAct(data.surpriseAct)
         setPlusOnesRequired(String(data.plusOnesRequired ?? 0))
+        setDefaultCompensationType(data.defaultCompensationType || 'FREE')
+        setDefaultFeeAmount(data.defaultFeeAmount != null ? String(data.defaultFeeAmount) : '')
+        setDefaultBuyInAmount(data.defaultBuyInAmount != null ? String(data.defaultBuyInAmount) : '')
         setVenueId(data.venue?.id || '')
         setBookingAmount(data.venueBooking?.amount != null ? String(data.venueBooking.amount) : '')
 
@@ -164,6 +173,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           ticketPrice: isFree ? null : ticketPrice,
           surpriseAct,
           plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
+          defaultCompensationType,
+          defaultFeeAmount: defaultCompensationType === 'PAID' ? defaultFeeAmount : null,
+          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? defaultBuyInAmount : null,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -314,6 +326,42 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   <label style={labelStyle}>Ticket Price (₹)</label>
                   <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" style={inputStyle} />
                 </div>
+              )}
+            </section>
+
+            <section style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+                Artist Payment Terms
+              </h2>
+              <p style={{ fontSize: '13px', color: '#0E0C0A', opacity: 0.6, marginBottom: '18px' }}>
+                Shown to Artists before they apply. You can still negotiate a different amount with a specific artist when approving their application.
+              </p>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                {([
+                  { value: 'FREE', label: 'Free / Exposure' },
+                  { value: 'PAID', label: 'Paid' },
+                  { value: 'BUY_IN', label: 'Buy-in (pay to play)' },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setDefaultCompensationType(opt.value)}
+                    style={{
+                      padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      border: defaultCompensationType === opt.value ? '2px solid #C8441A' : '1px solid rgba(14,12,10,0.15)',
+                      background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : '#fff',
+                      color: defaultCompensationType === opt.value ? '#C8441A' : '#0E0C0A',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {defaultCompensationType === 'PAID' && (
+                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+              )}
+              {defaultCompensationType === 'BUY_IN' && (
+                <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder="Buy-in amount (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
               )}
             </section>
 

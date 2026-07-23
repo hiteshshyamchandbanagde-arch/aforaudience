@@ -16,7 +16,20 @@ interface EventItem {
   startTime: string
   isFree: boolean
   ticketPrice: number | null
+  defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
+  defaultFeeAmount: number | null
+  defaultBuyInAmount: number | null
   venue: { name: string; city: string } | null
+}
+
+function compensationBadge(event: EventItem): { label: string; bg: string; color: string } {
+  if (event.defaultCompensationType === 'PAID') {
+    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(74,103,65,0.12)', color: '#4A6741' }
+  }
+  if (event.defaultCompensationType === 'BUY_IN') {
+    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(179,38,30,0.1)', color: '#B3261E' }
+  }
+  return { label: 'Free / Exposure slot', bg: 'rgba(14,12,10,0.06)', color: '#0E0C0A' }
 }
 
 export default function BrowseEventsToApplyPage() {
@@ -110,6 +123,7 @@ export default function BrowseEventsToApplyPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {events.map((event) => {
                 const alreadyApplied = appliedIds.has(event.id) || justApplied.has(event.id)
+                const comp = compensationBadge(event)
                 return (
                   <div key={event.id} style={{ background: '#fff', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
@@ -119,10 +133,15 @@ export default function BrowseEventsToApplyPage() {
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>
                       </div>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#C8441A' }}>
-                        {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : ''}
+                      <span style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5 }}>
+                        Audience pays: {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}
                       </span>
                     </div>
+
+                    <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', marginBottom: '12px', background: comp.bg, color: comp.color }}>
+                      {comp.label}
+                    </div>
+
                     <p style={{ fontSize: '14px', color: '#0E0C0A', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
                     {alreadyApplied ? (

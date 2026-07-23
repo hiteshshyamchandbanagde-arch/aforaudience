@@ -58,6 +58,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
+      defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
     } = body
 
     // §4.5 suggestion #1: same rule as event creation - an event with a
@@ -99,6 +100,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(surpriseAct !== undefined && { surpriseAct: Boolean(surpriseAct) }),
         ...(plusOnesRequired !== undefined && Number(plusOnesRequired) >= 0 && Number(plusOnesRequired) <= 20 && {
           plusOnesRequired: parseInt(plusOnesRequired),
+        }),
+        ...(defaultCompensationType !== undefined && ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType) && {
+          defaultCompensationType,
+          defaultFeeAmount: defaultCompensationType === 'PAID' && defaultFeeAmount ? parseFloat(defaultFeeAmount) : null,
+          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' && defaultBuyInAmount ? parseFloat(defaultBuyInAmount) : null,
         }),
         ...(resolvedStatus && { status: resolvedStatus }),
       },
