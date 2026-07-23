@@ -33,6 +33,9 @@ interface Performance {
   id: string
   slot: number
   duration: number
+  compensationType: 'PAID' | 'FREE' | 'BUY_IN'
+  feeAmount: number | null
+  buyInAmount: number | null
   event: {
     id: string
     title: string
@@ -140,6 +143,19 @@ export default function ArtistDashboard() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const avgRating = allReviews.length > 0 ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length : null
 
+  // Recorded compensation/spend - these are off-platform promises between
+  // Organiser and Artist (§4.5 "never tax the scene" model), NOT real
+  // platform-processed money. Deliberately kept separate from Tips (once
+  // tipping ships) rather than blended into one trust-implying total -
+  // the platform never confirms this money actually changed hands.
+  const totalCompensation = profile.performances
+    .filter((p) => p.compensationType === 'PAID')
+    .reduce((sum, p) => sum + (p.feeAmount || 0), 0)
+  const totalSpend = profile.performances
+    .filter((p) => p.compensationType === 'BUY_IN')
+    .reduce((sum, p) => sum + (p.buyInAmount || 0), 0)
+  const netFigure = totalCompensation - totalSpend
+
   return (
     <>
       <SiteNav />
@@ -186,6 +202,37 @@ export default function ArtistDashboard() {
               </div>
             )}
           </div>
+
+          {/* Recorded Earnings - off-platform promises (§4.5), not real
+              platform-processed money. Only shown once there's something
+              to show, so a brand-new artist with zero performances doesn't
+              see an empty ₹0/₹0/₹0 block. */}
+          {(totalCompensation > 0 || totalSpend > 0) && (
+            <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#0E0C0A', marginBottom: '6px' }}>
+                Recorded Earnings
+              </h2>
+              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '18px' }}>
+                Compensation and spend agreed with Organisers - not processed or confirmed by the platform. Tips will show separately once available.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
+                <div>
+                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Recorded Compensation</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Recorded Spend</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginBottom: '4px' }}>Net</p>
+                  <p style={{ fontSize: '22px', fontWeight: 700, color: netFigure >= 0 ? '#2F7D4A' : '#B3261E' }}>
+                    {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Reviews */}
           <div style={{ marginBottom: '24px' }}>
