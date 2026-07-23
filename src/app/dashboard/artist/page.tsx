@@ -58,6 +58,7 @@ interface ArtistProfile {
   bio: string
   genre: string[]
   styleTag: string[]
+  socialLinks: Record<string, string> | null
   hypScore: number
   name: string
   applications: Application[]
@@ -166,6 +167,21 @@ export default function ArtistDashboard() {
     .filter((p) => !p.cancelledAt && new Date(p.event.date) >= new Date(new Date().toDateString()))
     .sort((a, b) => new Date(a.event.date).getTime() - new Date(b.event.date).getTime())
 
+  // Profile completion - from live feedback (18 Jul): "notify user profile
+  // completion percentage... recommend for early completion for better
+  // result." Four equally-weighted checks, matching exactly what the
+  // feedback named. A more complete profile is a real, low-effort
+  // engagement lever - Organisers reviewing applications see bio/genre/
+  // style directly, so an artist who fills these out has a materially
+  // better shot at approval.
+  const completionChecks = [
+    !!profile.bio?.trim(),
+    profile.genre.length > 0,
+    profile.styleTag.length > 0,
+    !!profile.socialLinks && Object.values(profile.socialLinks).some((v) => !!v),
+  ]
+  const completionPercent = Math.round((completionChecks.filter(Boolean).length / completionChecks.length) * 100)
+
   const allReviews = profile.performances
     .flatMap((p) => p.reviews.map((r) => ({ ...r, eventTitle: p.event.title })))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -213,6 +229,23 @@ export default function ArtistDashboard() {
               </Link>
             </div>
           </div>
+
+          {completionPercent < 100 && (
+            <div style={{ background: '#fff', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0E0C0A' }}>Profile {completionPercent}% complete</span>
+                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: '#C8441A', textDecoration: 'none' }}>
+                  Complete your profile →
+                </Link>
+              </div>
+              <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(14,12,10,0.08)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${completionPercent}%`, background: '#C8441A', borderRadius: '999px' }} />
+              </div>
+              <p style={{ fontSize: '12px', color: '#0E0C0A', opacity: 0.5, marginTop: '8px' }}>
+                A complete profile - bio, genre, style, and a social link - helps Organisers say yes faster.
+              </p>
+            </div>
+          )}
 
           {/* Profile summary */}
           <div style={{ background: '#fff', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
