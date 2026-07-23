@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
@@ -56,6 +57,7 @@ interface EventData {
   surpriseAct: boolean
   plusOnesRequired: number
   venue: { name: string; address: string; city: string; facilities: string[]; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
+  organiser: { id: string; orgName: string } | null
   lineup: Performer[]
   ticketTiers: TicketTier[]
 }
@@ -295,7 +297,15 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           {activeTab === "overview" && (
             <div>
               <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "#0E0C0A", marginBottom: "12px" }}>About this event</h2>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "#0E0C0A", opacity: 0.75, marginBottom: "32px" }}>{event.description}</p>
+              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "#0E0C0A", opacity: 0.75, marginBottom: "16px" }}>{event.description}</p>
+              {event.organiser && (
+                <p style={{ fontSize: "13px", color: "#0E0C0A", opacity: 0.6, marginBottom: "32px" }}>
+                  Organised by{" "}
+                  <Link href={`/organisers/${event.organiser.id}`} style={{ color: "#C8441A", fontWeight: 600, textDecoration: "none" }}>
+                    {event.organiser.orgName}
+                  </Link>
+                </p>
+              )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
                 {[
                   { label: "Dress Code", value: event.dresscode, icon: "👔" },
