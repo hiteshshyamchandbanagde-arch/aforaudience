@@ -57,8 +57,15 @@ test("audience member can register, log in, select seats, and reach checkout wit
   await expect(seat).toBeVisible({ timeout: 10_000 });
   await seat.click();
 
+  // The button reads "Loading..." (and is disabled) until NextAuth's
+  // useSession() resolves past "loading" - on a cold Vercel function this
+  // can outlast the default 5s expect timeout, so give it the same
+  // cold-start headroom as the rest of this file. This wait is also what
+  // was previously missing: a fast click here used to land while the
+  // session hook still reported "loading", getting misrouted to the sign-in
+  // sheet (fixed in EventDetailClientPage.tsx alongside this test change).
   const continueButton = page.getByRole("button", { name: /continue to checkout/i });
-  await expect(continueButton).toBeEnabled();
+  await expect(continueButton).toBeEnabled({ timeout: 15_000 });
   await continueButton.click();
 
   await expect(page).toHaveURL(/checkout/, { timeout: 10_000 });
