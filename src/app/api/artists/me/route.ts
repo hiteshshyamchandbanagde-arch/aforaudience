@@ -26,7 +26,10 @@ export async function GET() {
           include: {
             event: { include: { venue: true } },
             reviews: {
-              include: { user: { select: { name: true, displayName: true } } },
+              include: {
+                user: { select: { name: true, displayName: true } },
+                reply: { include: { author: { select: { name: true, displayName: true } } } },
+              },
               orderBy: { createdAt: 'desc' },
             },
           },

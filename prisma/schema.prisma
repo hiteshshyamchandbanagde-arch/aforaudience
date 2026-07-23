@@ -185,6 +185,7 @@ model User {
   feedback               Feedback[]
   pushSubscriptions      PushSubscription[]
   plusOnes               PlusOne[]
+  reviewReplies          ReviewReply[]
 }
 
 model PushSubscription {
@@ -775,5 +776,24 @@ model Review {
   rating        Int
   comment       String?
   createdAt     DateTime     @default(now())
+
+  reply ReviewReply?
+}
+
+// Owner-only reply to a Review, one level deep (no threaded discussion).
+// "Owner" mirrors the existing review-notification logic in
+// POST /api/reviews: a performance-specific review's owner is that
+// Artist; a general event review's owner is the event's Organiser. No
+// direct Review->Venue link exists in the schema, so Venue Owners can't
+// reply yet - same limitation the notification logic already has.
+// reviewId is @unique specifically to enforce "one reply per review".
+model ReviewReply {
+  id        String   @id @default(cuid())
+  reviewId  String   @unique
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
 }
 
