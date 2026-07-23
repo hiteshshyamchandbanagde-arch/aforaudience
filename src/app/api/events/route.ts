@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct,
       venueId, bookingAmount, publish, ticketTiers,
-      maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
+      maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
     } = body
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
@@ -155,6 +155,11 @@ export async function POST(req: Request) {
         maxSeatsPerBooking: maxSeatsPerBooking && Number(maxSeatsPerBooking) >= 1 && Number(maxSeatsPerBooking) <= 10
           ? parseInt(maxSeatsPerBooking)
           : 4,
+        // Server-side is the only real enforcement point (client clamp is
+        // decorative) - same 0-20 bound as the create form's input.
+        plusOnesRequired: plusOnesRequired && Number(plusOnesRequired) >= 0 && Number(plusOnesRequired) <= 20
+          ? parseInt(plusOnesRequired)
+          : 0,
         // §4.5 suggestion #1, previously unenforced: an event with a venue
         // attached can't go fully live (APPROVED) until that venue's
         // booking is actually confirmed by the Venue Owner - the booking
