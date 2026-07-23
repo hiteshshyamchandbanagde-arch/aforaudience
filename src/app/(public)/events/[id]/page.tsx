@@ -10,6 +10,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       venue: true,
+      organiser: true,
       lineup: {
         include: {
           artist: { include: { user: true } },
