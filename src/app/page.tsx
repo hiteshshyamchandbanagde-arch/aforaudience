@@ -186,7 +186,7 @@ export default function Home() {
             <div key={rasa.name} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "20px 8px", borderRadius: "10px", cursor: "pointer" }}>
               <div style={{ fontSize: "32px" }}>{rasa.emoji}</div>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "12px", fontWeight: 700, color: "#0E0C0A" }}>{rasa.name}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "10px", color: "#0E0C0A", opacity: 0.4 }}>{rasa.sanskrit}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 500, color: "#0E0C0A", opacity: 0.65 }}>{rasa.sanskrit}</div>
             </div>
           ))}
         </div>
@@ -255,7 +255,7 @@ export default function Home() {
             },
           ].map((col) => (
             <div key={col.title}>
-              <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9973A", marginBottom: "20px" }}>{col.title}</div>
+              <div style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C9973A", marginBottom: "20px" }}>{col.title}</div>
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                 {col.links.map((link) => (
                   <li key={link.label}><Link href={link.href} style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
