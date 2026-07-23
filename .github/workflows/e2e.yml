@@ -1,0 +1,65 @@
+name: E2E Tests (Playwright)
+
+# Runs the existing e2e/*.spec.ts suite against the live QA deployment
+# (same default baseURL as playwright.config.ts) with no extra setup needed.
+#
+# Triggers:
+#   - push to qa: catches regressions from every merge, mirrors how Hitesh
+#     tests live on QA right after each deploy
+#   - nightly schedule: catches drift/regressions even on days with no merges
+#   - workflow_dispatch: manual "run it now" button from the Actions tab
+#
+# concurrency: QA is a single shared environment/DB (see playwright.config.ts
+# comments - fullyParallel:false, workers:1 for the same reason), so two CI
+# runs racing bookings against each other would be worse than one queued run
+# waiting. group-based concurrency without cancel-in-progress queues instead
+# of overlapping.
+on:
+  push:
+    branches: [qa]
+  schedule:
+    - cron: "0 2 * * *" # 02:00 UTC nightly = 7:30 AM IST
+  workflow_dispatch: {}
+
+concurrency:
+  group: e2e-qa
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser (chromium only - matches playwright.config.ts projects)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e suite against live QA
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Upload Playwright report (always, even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload traces/videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 14
