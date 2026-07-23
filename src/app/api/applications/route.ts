@@ -52,7 +52,12 @@ export async function POST(req: Request) {
     // waitlisted applicant the normal way if a slot frees up.
     let isWaitlisted = false
     if (event.maxPerformers !== null) {
-      const filledSlots = await prisma.performance.count({ where: { eventId } })
+      // cancelledAt: null - a cancelled slot no longer occupies a spot in
+      // the lineup, otherwise a cancellation would permanently inflate
+      // this count and every future applicant would be wrongly waitlisted
+      // even when a real slot is open (see POST /api/performances/[id]/cancel,
+      // which already excludes cancelled rows the same way).
+      const filledSlots = await prisma.performance.count({ where: { eventId, cancelledAt: null } })
       if (filledSlots >= event.maxPerformers) {
         isWaitlisted = true
       }
@@ -91,7 +96,7 @@ export async function POST(req: Request) {
         'application-waitlisted'
       )
     } else if (shouldAutoApprove) {
-      const lineupCount = await prisma.performance.count({ where: { eventId } })
+      const lineupCount = await prisma.performance.count({ where: { eventId, cancelledAt: null } })
       await prisma.performance.create({
         data: { eventId, artistId: artist.id, slot: lineupCount + 1, duration: 10, compensationType: 'FREE' },
       })

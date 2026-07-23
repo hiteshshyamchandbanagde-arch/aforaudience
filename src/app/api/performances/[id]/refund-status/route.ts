@@ -41,13 +41,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     )
   }
 
-  await prisma.$transaction([
-    prisma.performance.update({ where: { id }, data: { buyInRefundStatus: 'WALLET_CREDITED' } }),
-    prisma.organiser.update({
-      where: { id: performance.event.organiserId },
-      data: { walletBalance: { increment: performance.buyInAmount || 0 } },
-    }),
-  ])
+  // updateMany + count check makes this atomic against a concurrent
+  // duplicate request (e.g. a double-click) - only the request that
+  // actually flips REFUNDED -> WALLET_CREDITED credits the wallet, so
+  // two near-simultaneous calls can't double-credit the same amount.
+  const { count } = await prisma.performance.updateMany({
+    where: { id, buyInRefundStatus: 'REFUNDED' },
+    data: { buyInRefundStatus: 'WALLET_CREDITED' },
+  })
+  if (count === 0) {
+    return NextResponse.json(
+      { error: 'This is only available for a cancelled Buy-in slot currently marked as refunded.' },
+      { status: 400 }
+    )
+  }
+
+  await prisma.organiser.update({
+    where: { id: performance.event.organiserId },
+    data: { walletBalance: { increment: performance.buyInAmount || 0 } },
+  })
 
   return NextResponse.json({ buyInRefundStatus: 'WALLET_CREDITED' })
 }
