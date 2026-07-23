@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct,
       venueId, bookingAmount, publish, ticketTiers,
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
+      defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
     } = body
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
@@ -160,6 +161,18 @@ export async function POST(req: Request) {
         plusOnesRequired: plusOnesRequired && Number(plusOnesRequired) >= 0 && Number(plusOnesRequired) <= 20
           ? parseInt(plusOnesRequired)
           : 0,
+        // Default artist payment terms, shown to Artists before applying.
+        // Server-side validated same as the rest of this route - client
+        // clamp/UI is decorative.
+        defaultCompensationType: ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType)
+          ? defaultCompensationType
+          : 'FREE',
+        defaultFeeAmount: defaultCompensationType === 'PAID' && defaultFeeAmount
+          ? parseFloat(defaultFeeAmount)
+          : null,
+        defaultBuyInAmount: defaultCompensationType === 'BUY_IN' && defaultBuyInAmount
+          ? parseFloat(defaultBuyInAmount)
+          : null,
         // §4.5 suggestion #1, previously unenforced: an event with a venue
         // attached can't go fully live (APPROVED) until that venue's
         // booking is actually confirmed by the Venue Owner - the booking
