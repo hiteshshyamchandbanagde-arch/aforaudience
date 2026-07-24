@@ -122,7 +122,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           onClick={() => setMobileOpen(false)}
           style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}
         >
-          <span style={{ color: "var(--afa-terracotta)" }}>A</span>forAudience
+          <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
           <EnvBadge />
         </Link>
 
