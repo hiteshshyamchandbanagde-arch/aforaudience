@@ -482,6 +482,24 @@ The original release ordering:
 - Every gated-action story needs an explicit "guest attempts action → login prompt → resumes correctly" test case, since that's the whole point of this model.
 - Payment and booking stories need a concurrency test (two users booking the last seat simultaneously) given Supabase Realtime seat locking is core to correctness.
 
+### 8.6 Vercel Deployment Discipline (established this session, after PR #185 rate-limit block)
+
+**Root cause investigated and confirmed:** Vercel Hobby allows 100 deployments per rolling 24h; hitting it blocks *all* new deployments account-wide (not just the offending branch) until the window resets. This is what blocked PR #185. Checked live deployment history: ~20 deployments fired in a single ~9-hour session window, driven by push volume — not by the Playwright e2e workflow, which runs entirely on GitHub Actions infra and creates zero Vercel deployments.
+
+**What actually eats the quota:**
+- Every push to any branch (feature, PR, or `qa`) creates its own full Vercel deployment
+- Pushing each intermediate commit separately multiplies this — e.g. PR #187 alone generated 4 separate deployments across its 4 commits before merge
+- Doc-only commits to `qa` (e.g. handoff/design.md updates) also each burn a full deployment with zero code change
+
+**Dead end investigated — do not retry:** `ignoreCommand` / "Ignored Build Step" in `vercel.json` does **not** reduce deployment count. Vercel creates the deployment record and counts it toward the 100/day quota *before* the ignore command runs; a canceled build still counts as a full deployment. Confirmed via Vercel's own docs and community reports. Not worth implementing — it would only save build minutes, not quota.
+
+**Actual policy going forward (free, no infra change needed):**
+- **Squash/batch commits locally before pushing** feature branches — push once when a logical unit of work is ready for Vercel-verification, not after every small commit.
+- **Batch doc-only updates** into the same push as adjacent code changes where practical, rather than a standalone push purely for a handoff/design.md note, when a code push is already imminent.
+- This is a workflow discipline change, not a technical fix — no vercel.json changes made.
+
+**Vercel Pro (6,000 deployments/day, no queue) was quoted and explicitly declined by Hitesh this session** — not pursued further unless he raises it again.
+
 ---
 
 ## 9. Known Gaps & Backlog (Live Tracking)
