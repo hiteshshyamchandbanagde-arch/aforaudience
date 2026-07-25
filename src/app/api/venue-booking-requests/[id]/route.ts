@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { parseAmount } from '@/lib/money-validation'
 
 const MAX_OFFERS = 6 // §4.5 suggestion #7 - 3 rounds per side, 6 total
 const EXPIRY_HOURS = 48
@@ -154,8 +155,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     if (action === 'counter') {
-      if (!amount || Number(amount) <= 0) {
-        return NextResponse.json({ error: 'Enter a counter-offer amount' }, { status: 400 })
+      const parsed = parseAmount(amount, { label: 'Counter-offer amount', required: true })
+      if (!parsed.ok) {
+        return NextResponse.json({ error: parsed.error }, { status: 400 })
       }
       if (request.offers.length >= MAX_OFFERS) {
         return NextResponse.json({ error: 'Round limit reached - accept or decline instead' }, { status: 400 })
@@ -171,7 +173,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       const trimmedComment = typeof comment === 'string' ? comment.trim().slice(0, 300) : null
 
       await prisma.venueBookingOffer.create({
-        data: { requestId: id, proposedBy: callerSide, amount: parseFloat(amount), comment: trimmedComment || null },
+        data: { requestId: id, proposedBy: callerSide, amount: parsed.value as number, comment: trimmedComment || null },
       })
 
       notifyAfterResponse(

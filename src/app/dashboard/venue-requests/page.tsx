@@ -198,6 +198,8 @@ export default function VenueRequestsPage() {
                           placeholder={lastOffer ? `Counter ₹${lastOffer.amount}` : 'Propose an amount (₹)'}
                           value={counterInputs[r.id] || ''}
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                          min="1"
+                          max="10000000"
                           style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
                         />
                       </div>
