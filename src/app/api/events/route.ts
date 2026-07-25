@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 
 export async function GET() {
@@ -103,6 +104,33 @@ export async function POST(req: Request) {
       }
     }
 
+    // Validation-gap cluster fix (design.md §9.2, 26 Jul): Offer Amount and
+    // Paid-fee previously had no bound at all client- or server-side, and
+    // could be submitted blank at Publish - inverting the negotiation flow
+    // (venue owner names a price first) and defeating the payment-
+    // transparency feature. Required only at Publish, same pattern as
+    // requireVerifiedPhone above - a Draft is still a work in progress.
+    const bookingAmountCheck = parseAmount(bookingAmount, {
+      label: 'Offer Amount',
+      required: publish === true && !!venueId,
+      allowZero: true,
+    })
+    if (!bookingAmountCheck.ok) {
+      return NextResponse.json({ error: bookingAmountCheck.error }, { status: 400 })
+    }
+    const feeAmountCheck = parseAmount(defaultFeeAmount, {
+      label: 'Fee per artist',
+      required: publish === true && defaultCompensationType === 'PAID',
+      allowZero: true,
+    })
+    if (!feeAmountCheck.ok) {
+      return NextResponse.json({ error: feeAmountCheck.error }, { status: 400 })
+    }
+    const buyInAmountCheck = parseAmount(defaultBuyInAmount, { label: 'Buy-in amount', allowZero: true })
+    if (!buyInAmountCheck.ok) {
+      return NextResponse.json({ error: buyInAmountCheck.error }, { status: 400 })
+    }
+
     // Backdating check. Combine date + startTime into an actual instant and
     // compare to now - a bare `date` check alone would still let someone
     // pick today's date with a startTime that already passed. Client-side
@@ -167,12 +195,8 @@ export async function POST(req: Request) {
         defaultCompensationType: ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType)
           ? defaultCompensationType
           : 'FREE',
-        defaultFeeAmount: defaultCompensationType === 'PAID' && defaultFeeAmount
-          ? parseFloat(defaultFeeAmount)
-          : null,
-        defaultBuyInAmount: defaultCompensationType === 'BUY_IN' && defaultBuyInAmount
-          ? parseFloat(defaultBuyInAmount)
-          : null,
+        defaultFeeAmount: defaultCompensationType === 'PAID' ? feeAmountCheck.value : null,
+        defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? buyInAmountCheck.value : null,
         // §4.5 suggestion #1, previously unenforced: an event with a venue
         // attached can't go fully live (APPROVED) until that venue's
         // booking is actually confirmed by the Venue Owner - the booking
@@ -223,9 +247,9 @@ export async function POST(req: Request) {
             status: 'PENDING',
           },
         })
-        if (bookingAmount) {
+        if (bookingAmountCheck.value !== null) {
           await prisma.venueBookingOffer.create({
-            data: { requestId: request.id, proposedBy: 'ORGANISER', amount: parseFloat(bookingAmount) },
+            data: { requestId: request.id, proposedBy: 'ORGANISER', amount: bookingAmountCheck.value },
           })
         }
 
@@ -248,7 +272,7 @@ export async function POST(req: Request) {
             fromDate: new Date(date),
             toDate: new Date(date),
             status: 'PENDING',
-            amount: bookingAmount ? parseFloat(bookingAmount) : 0,
+            amount: bookingAmountCheck.value ?? 0,
             platformFeeAmount: platformSettings?.flatVenueBookingFee ?? 199,
           },
         })

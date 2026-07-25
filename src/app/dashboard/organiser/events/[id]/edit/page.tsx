@@ -161,6 +161,26 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   }
 
   const save = async (publishOverride?: boolean) => {
+    const publishing = publishOverride !== undefined ? publishOverride : event?.status !== 'DRAFT'
+    // Validation-gap cluster fix (26 Jul) - same as the create page: these
+    // previously had no client-side check, blank sailed through to Publish.
+    const MAX_INR_AMOUNT = 10_000_000
+    if (publishing && venueId && !bookingAmount) {
+      showToast('Please enter an Offer Amount before publishing, or remove the venue.', 'error')
+      return
+    }
+    if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
+      showToast(`Offer Amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      return
+    }
+    if (publishing && defaultCompensationType === 'PAID' && !defaultFeeAmount) {
+      showToast('Please enter a Fee per artist before publishing, or choose Free/Buy-in instead.', 'error')
+      return
+    }
+    if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
+      showToast(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      return
+    }
     setSaving(true)
 
     try {
@@ -358,7 +378,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 ))}
               </div>
               {defaultCompensationType === 'PAID' && (
-                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
               )}
               {defaultCompensationType === 'BUY_IN' && (
                 <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder="Buy-in amount (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
@@ -386,7 +406,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               {venueId && (
                 <div>
                   <label style={labelStyle}>Offer Amount (₹)</label>
-                  <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" style={inputStyle} />
+                  <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
                 </div>
               )}
             </section>

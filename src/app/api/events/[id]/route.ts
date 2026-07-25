@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
+import { parseAmount } from '@/lib/money-validation'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -81,6 +82,30 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
     }
 
+    // Validation-gap cluster fix (design.md §9.2, 26 Jul) - same as
+    // POST /api/events: Paid-fee had no bound and could be blank at
+    // Publish. `publish` here can be undefined (a non-publish-toggling
+    // edit) - only enforce "required" when this save is actually
+    // publishing, same rule as POST.
+    let feeAmountValue: number | null = null
+    let buyInAmountValue: number | null = null
+    if (defaultCompensationType !== undefined && ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType)) {
+      const feeCheck = parseAmount(defaultFeeAmount, {
+        label: 'Fee per artist',
+        required: publish === true && defaultCompensationType === 'PAID',
+        allowZero: true,
+      })
+      if (!feeCheck.ok) {
+        return NextResponse.json({ error: feeCheck.error }, { status: 400 })
+      }
+      feeAmountValue = feeCheck.value
+      const buyInCheck = parseAmount(defaultBuyInAmount, { label: 'Buy-in amount', allowZero: true })
+      if (!buyInCheck.ok) {
+        return NextResponse.json({ error: buyInCheck.error }, { status: 400 })
+      }
+      buyInAmountValue = buyInCheck.value
+    }
+
     const updated = await prisma.event.update({
       where: { id },
       data: {
@@ -103,8 +128,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }),
         ...(defaultCompensationType !== undefined && ['PAID', 'FREE', 'BUY_IN'].includes(defaultCompensationType) && {
           defaultCompensationType,
-          defaultFeeAmount: defaultCompensationType === 'PAID' && defaultFeeAmount ? parseFloat(defaultFeeAmount) : null,
-          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' && defaultBuyInAmount ? parseFloat(defaultBuyInAmount) : null,
+          defaultFeeAmount: defaultCompensationType === 'PAID' ? feeAmountValue : null,
+          defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? buyInAmountValue : null,
         }),
         ...(resolvedStatus && { status: resolvedStatus }),
       },

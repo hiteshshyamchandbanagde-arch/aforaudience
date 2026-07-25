@@ -315,6 +315,32 @@ export default function CreateEventPage() {
       return
     }
 
+    // Validation-gap cluster fix (26 Jul): these two previously had no
+    // client-side check at all - blank sailed straight through to Publish.
+    // Server-side (POST /api/events) is the real enforcement point; this
+    // is just so the person doesn't wait on a round-trip to find out.
+    const MAX_INR_AMOUNT = 10_000_000
+    if (publish && venueId && !bookingAmount) {
+      fail("Please enter an Offer Amount before publishing, or remove the venue.")
+      setSaving(false)
+      return
+    }
+    if (bookingAmount && Number(bookingAmount) > MAX_INR_AMOUNT) {
+      fail(`Offer Amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      setSaving(false)
+      return
+    }
+    if (publish && defaultCompensationType === 'PAID' && !defaultFeeAmount) {
+      fail('Please enter a Fee per artist before publishing, or choose Free/Buy-in instead.')
+      setSaving(false)
+      return
+    }
+    if (defaultFeeAmount && Number(defaultFeeAmount) > MAX_INR_AMOUNT) {
+      fail(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      setSaving(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -473,7 +499,7 @@ export default function CreateEventPage() {
                           : "This venue hasn't set a rental rate yet — propose an amount to offer."}
                       </p>
                       <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— what you'll pay the venue</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
+                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder="e.g., 5000" style={inputStyle} />
                     </>
                   ) : (
                     <>
@@ -487,7 +513,7 @@ export default function CreateEventPage() {
                         </div>
                       </div>
                       <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span></label>
-                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" placeholder="e.g., 5000" style={inputStyle} />
+                      <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder="e.g., 5000" style={inputStyle} />
                     </>
                   )}
                   {platformFee !== null && platformFee > 0 && (
@@ -612,7 +638,7 @@ export default function CreateEventPage() {
                   ))}
                 </div>
                 {defaultCompensationType === 'PAID' && (
-                  <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
+                  <input type="number" value={defaultFeeAmount} onChange={(e) => setDefaultFeeAmount(e.target.value)} min="0" max="10000000" placeholder="Fee per artist (₹)" style={{ ...inputStyle, maxWidth: "200px" }} />
                 )}
                 {defaultCompensationType === 'BUY_IN' && (
                   <input type="number" value={defaultBuyInAmount} onChange={(e) => setDefaultBuyInAmount(e.target.value)} min="0" placeholder="Buy-in amount (₹)" style={{ ...inputStyle, maxWidth: '200px' }} />
