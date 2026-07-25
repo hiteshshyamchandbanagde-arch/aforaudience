@@ -508,6 +508,24 @@ Replaces the design-phase "What's Next" notes with what's actually true after re
 
 ### 9.1 Next up
 
+**Advanced Admin Dashboard — full scope (25 Jul, organiser-role testing session, Hitesh's stated top priority).** Evolves the existing `/dashboard/admin/feedback` page (ninth amendment - lists feedback, filters by status, marks resolved) into a real feature/bug/idea tracker with trends, not a from-scratch build. Both trend charts and board/list/detail view are in v1 together (Hitesh's call, not phased); self-serve status/severity editing is in v1 too, scoped as below. Must work fully on mobile, not responsive-as-an-afterthought (Hitesh's explicit requirement).
+
+**Schema changes needed (currently missing from `Feedback`):**
+- `severity` enum (e.g. P0-P3, or Low/Medium/High/Critical - needs a quick decision, not yet made) - today "important" only lives in Claude's head and in `design.md` prose, not as queryable data.
+- `resolvedAt` timestamp - only `createdAt` exists today, so time-to-resolution trend metrics aren't computable without it.
+- `status` becomes a real enum (`FeedbackStatus`: NEW/REVIEWED/RESOLVED) instead of a free-text string - low-risk migration (only 3 values exist today), worth locking down before a dashboard starts depending on exact string matches.
+- `title` (short, separate from the full `message`) - needed for clean list/board rows; could be auto-generated from the first N chars of `message` at creation time rather than requiring manual entry, to keep the existing feedback-submission flow (chatbot widget, guest-accessible) untouched.
+- New `FeedbackChangeLog` model (or a simpler JSON audit trail column) - every self-serve status/severity change gets a timestamped record of who changed what, from what, to what. This is the one thing worth protecting: right now, every status change that goes through Claude gets a reasoned note in this doc explaining *why* - self-serve editing must not lose that trail. A simple changelog satisfies this without slowing Hitesh down.
+
+**Self-serve editing scope, deliberately narrow:** status and severity only, via inline dropdowns/controls. The original `message` (raw filed report) stays immutable - it's the evidence, not something to edit after the fact. Every change auto-logs to the changelog above.
+
+**Page structure:**
+- **Board/list view** - columns by status (New/Reviewed/Resolved) on desktop; a single filterable/sortable stacked list with a status-change dropdown per card on mobile (true drag-and-drop Kanban doesn't work well on touch - same reasoning already applied to other mobile-vs-desktop layout decisions in this codebase). Filterable by category, severity, page, keyword search.
+- **Detail panel** - full message, screenshot (if attached), page URL, timestamps, changelog history, status/severity controls.
+- **Trend charts** - opened vs. resolved per week (line), category breakdown (bar/pie), open-item age distribution. Needs `resolvedAt` and `severity` to be meaningful rather than decorative - this is why the schema changes above aren't optional even for a "just ship the charts" ask.
+
+**Not yet decided, needs Hitesh's input before building:** the exact severity scale/labels, and whether resolved items stay visible in the board (e.g. faded/collapsed column) or move to a separate archive view.
+
 **Shipped this session (session 26, 23 Jul) - from a broader brand/vision conversation with Hitesh, not code-driven feedback:**
 - **Chatbot idle pulse** ✅ Subtle breathing animation (SVG SMIL, opacity+radius) on the existing spotlight glow behind the mic icon, active only while the support widget is closed - stops once opened, where it'd be distracting. Confirmed in the same pass that `icon.svg` (favicon/app icons) already uses the exact same three-bar brand mark as the intro splash sequence - already consistent, nothing to fix there.
 - **BrandLoader component** ✅ Reusable animated loading indicator reusing the three-bar motif (cream/gold/ember from the icon), styled as a small looping "equalizer" rather than the splash's one-shot full-screen play - reads as a soundwave, fitting for a live-performance platform. Swapped in for the plain "Loading..." text on the five highest-traffic pages (all four role dashboards + `/profile`) - confirmed all five used the identical `<div>Loading...</div>` pattern before editing, so this was a safe, consistent swap. **~27 other lower-traffic "Loading..." spots elsewhere in the app were deliberately left alone** in this pass - a natural, low-risk follow-on whenever it's worth doing, not something to blind-swap across dozens of files with different contexts in one go.
