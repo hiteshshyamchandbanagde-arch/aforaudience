@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
@@ -64,10 +64,27 @@ export default function VenueRequestsPage() {
     }
   }
 
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   useEffect(() => {
-    if (session?.user) load()
+    // Previously keyed off the whole `session` object, which next-auth
+    // only replaces on its own unrelated schedule (window-focus revalidation,
+    // internal polling) - not a reliable "something changed" signal. That
+    // made this list mostly sit stale until one of those unrelated events
+    // happened to fire (P0 grep, third instance). Fixed the same way as the
+    // seat-map page: key off session?.user?.id (only changes on real
+    // login/logout) plus an explicit poll, since this page is a read-only
+    // list (no local edits to clobber) and genuinely benefits from refreshing
+    // on a real timer, same pattern as the Revenue page.
+    if (!session?.user) return
+    load()
+    if (pollRef.current) clearInterval(pollRef.current)
+    pollRef.current = setInterval(load, 20000)
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+  }, [(session?.user as any)?.id])
 
   const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
     setActingOn(reqId)
