@@ -540,9 +540,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // revalidation, internal polling) unrelated to anything real changing.
     // Depending on `session` re-ran this fetch mid-edit and silently
     // overwrote unsaved local seats/zone prices - the P0 data-loss bug.
-    // session?.user?.id only changes on an actual login/logout.
+    // session.user.id only changes on an actual login/logout. (Cast to any:
+    // this codebase's Session type has no next-auth.d.ts augmentation, so
+    // `id` isn't in the default typed shape - same pattern as the existing
+    // `(session?.user as any)?.role` cast elsewhere.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, id])
+  }, [(session?.user as any)?.id, id])
 
   const tierOrder = Array.from(new Set(seats.map((s) => s.tierLabel).concat(activeTier ? [activeTier] : [])))
   const canvasBounds = contentBounds(seats)

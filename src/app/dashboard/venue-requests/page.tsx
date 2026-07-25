@@ -84,7 +84,7 @@ export default function VenueRequestsPage() {
       if (pollRef.current) clearInterval(pollRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id])
+  }, [(session?.user as any)?.id])
 
   const act = async (reqId: string, action: 'accept' | 'decline' | 'counter') => {
     setActingOn(reqId)
