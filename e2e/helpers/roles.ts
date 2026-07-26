@@ -49,13 +49,33 @@ export async function registerTestArtist(page: Page) {
   return account;
 }
 
-/** Logs in the shared fixture Organiser account (see FIXTURE_ORGANISER above). */
-export async function loginFixtureOrganiser(page: Page) {
+/**
+ * Fixture Venue Owner + approved Numbered venue, seeded once directly via
+ * SQL (session 35, 26 Jul - same reasoning as FIXTURE_ORGANISER: building
+ * this through the UI would mean either creating/logging into an account
+ * with a real password entered in a live browser, or waiting on Admin
+ * approval, neither of which this suite can do). Venue starts with 2 real
+ * seats (row A, seats 1-2, zone "General") so the seat-map builder loads
+ * straight into the canvas view (`effectivePath` resolves to 'canvas'
+ * once `seats.length > 0`) instead of the Guided-Setup-vs-Draw-It-Myself
+ * choice screen. Reused across every run, never recreated per-test - do
+ * not delete (`E2E Fixture: Numbered Venue`, ids prefixed `e2efixturevo`).
+ * Every test in this suite interacts with the canvas client-side only and
+ * never clicks Save, so nothing here is ever mutated server-side.
+ */
+export const FIXTURE_VENUE_OWNER = {
+  identifier: "e2e.fixture.venueowner@example.com",
+  password: "E2eFixtureVO!2026",
+};
+export const FIXTURE_NUMBERED_VENUE_ID = "e2efixturevo0001ven";
+
+/** Logs in the shared fixture Venue Owner account (see FIXTURE_VENUE_OWNER above). */
+export async function loginFixtureVenueOwner(page: Page) {
   await page.goto("/login");
   await page
     .getByPlaceholder(/you@example\.com, phone, username, or AFA code/i)
-    .fill(FIXTURE_ORGANISER.identifier);
-  await page.getByPlaceholder(/your password/i).fill(FIXTURE_ORGANISER.password);
+    .fill(FIXTURE_VENUE_OWNER.identifier);
+  await page.getByPlaceholder(/your password/i).fill(FIXTURE_VENUE_OWNER.password);
   await page.getByRole("button", { name: /^sign in$/i }).click();
   await expect(page).toHaveURL(/\/(dashboard)?\/?($|\?)/, { timeout: 15_000 });
 }
