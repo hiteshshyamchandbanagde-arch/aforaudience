@@ -7,11 +7,33 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 
+interface SeatSection {
+  id?: string
+  name: string
+  seats: number
+  price: number
+}
+
+interface VenueDayRate {
+  dayOfWeek: string
+  hourlyRate: number | null
+  dailyRate: number | null
+}
+
 interface VenueOption {
   id: string
   name: string
   city: string
   capacity: number
+  seatMap?: { sections?: SeatSection[] } | null
+  seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
+  seats?: { tierLabel: string }[]
+  zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
+  minDurationHours?: number | null
+  dayRates?: VenueDayRate[]
 }
 
 interface EventDetail {
@@ -35,6 +57,7 @@ interface EventDetail {
   defaultBuyInAmount: number | null
   venue: { id: string } | null
   venueBooking: { amount: number; fromDate: string; toDate: string } | null
+  ticketTiers?: { sectionName: string; price: number; totalSeats: number }[]
 }
 
 const inputStyle = {
@@ -85,6 +108,98 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
+  const [platformFee, setPlatformFee] = useState<number | null>(null)
+
+  // §9.2 (26 Jul) - Edit Event was on an older/diverged pricing form that
+  // never derived per-zone pricing for Numbered venues at all (only a
+  // flat ticketPrice field existed here) - same derivation as the Create
+  // page below, so Numbered-venue events can actually be repriced after
+  // creation instead of silently falling back to a field that doesn't
+  // apply to them.
+  const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
+  // Existing per-section prices already saved on this event, keyed by
+  // sectionName - takes priority over the venue's own suggested default
+  // when first populating tierPrices, since re-opening Edit shouldn't
+  // silently reset an organiser's already-set prices back to the venue
+  // owner's mere starting suggestion.
+  const [existingTierPrices, setExistingTierPrices] = useState<Record<string, string>>({})
+  const originalVenueId = event?.venue?.id || ''
+
+  const selectedVenue = venues.find((v) => v.id === venueId)
+  const numberedZoneSections: SeatSection[] =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? Object.entries(
+          (selectedVenue.seats || []).reduce<Record<string, number>>((acc, s) => {
+            acc[s.tierLabel] = (acc[s.tierLabel] || 0) + 1
+            return acc
+          }, {})
+        ).map(([zoneName, seatCount]) => ({
+          name: zoneName,
+          seats: seatCount,
+          price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName)?.suggestedPrice || 0,
+        }))
+      : []
+  const venueSections =
+    selectedVenue?.seatingMode === 'NUMBERED'
+      ? numberedZoneSections
+      : selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
+  const usingTierPricing = venueSections.length > 0
+
+  const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
+  const eventDayOfWeek = formData.date ? DAY_NAMES[new Date(formData.date + 'T00:00:00').getDay()] : null
+  const dayOverride = selectedVenue?.dayRates?.find((d) => d.dayOfWeek === eventDayOfWeek)
+
+  const durationHours = (() => {
+    if (!formData.startTime || !formData.endTime) return null
+    const [sh, sm] = formData.startTime.split(':').map(Number)
+    const [eh, em] = formData.endTime.split(':').map(Number)
+    let mins = (eh * 60 + em) - (sh * 60 + sm)
+    if (mins <= 0) mins += 24 * 60
+    return mins / 60
+  })()
+
+  let suggestedAmount: number | null = null
+  let suggestedAmountNote = ''
+  if (selectedVenue?.rateType === 'HOURLY') {
+    const rate = dayOverride?.hourlyRate || selectedVenue.hourlyRate
+    if (rate && durationHours) {
+      const billedHours = Math.max(durationHours, selectedVenue.minDurationHours || 0)
+      suggestedAmount = Math.round(rate * billedHours)
+      suggestedAmountNote = `₹${rate}/hr × ${billedHours} hr${selectedVenue.minDurationHours && billedHours > durationHours ? ` (min ${selectedVenue.minDurationHours}hr)` : ''}${dayOverride?.hourlyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()} rate` : ''}`
+    }
+  } else if (selectedVenue?.rateType === 'DAILY') {
+    const rate = dayOverride?.dailyRate || selectedVenue.dailyRate
+    if (rate) {
+      suggestedAmount = rate
+      suggestedAmountNote = `Day rate${dayOverride?.dailyRate ? ` — ${eventDayOfWeek?.charAt(0)}${eventDayOfWeek?.slice(1).toLowerCase()}` : ''}`
+    }
+  }
+
+  // Unlike Create (nothing to preserve), Edit must not silently overwrite
+  // an already-negotiated Offer Amount just because the suggested-rate
+  // calculation re-runs (e.g. the organiser tweaks the event time). Only
+  // auto-fills when the venue itself is being changed away from what was
+  // originally attached - a genuinely new pick has no saved amount yet,
+  // same as Create's fresh-pick behavior.
+  useEffect(() => {
+    if (venueId && venueId !== originalVenueId && suggestedAmount !== null) {
+      setBookingAmount(String(suggestedAmount))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestedAmount, venueId, originalVenueId])
+
+  useEffect(() => {
+    if (venueSections.length > 0) {
+      const initial: Record<string, string> = {}
+      venueSections.forEach((s) => {
+        initial[s.name] = existingTierPrices[s.name] ?? (s.price ? String(s.price) : '')
+      })
+      setTierPrices(initial)
+    } else {
+      setTierPrices({})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [venueId, venues.length])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -125,6 +240,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setDefaultBuyInAmount(data.defaultBuyInAmount != null ? String(data.defaultBuyInAmount) : '')
         setVenueId(data.venue?.id || '')
         setBookingAmount(data.venueBooking?.amount != null ? String(data.venueBooking.amount) : '')
+        const existingMap: Record<string, string> = {}
+        for (const t of data.ticketTiers || []) {
+          existingMap[t.sectionName] = String(t.price)
+        }
+        setExistingTierPrices(existingMap)
 
         if (venuesRes.ok) {
           setVenues(await venuesRes.json())
@@ -141,6 +261,18 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, id])
+
+  useEffect(() => {
+    const fetchPlatformFee = async () => {
+      try {
+        const res = await fetch('/api/platform-settings')
+        if (res.ok) setPlatformFee((await res.json()).flatVenueBookingFee)
+      } catch {
+        // Non-critical - the fee just won't show.
+      }
+    }
+    fetchPlatformFee()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -181,6 +313,29 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       showToast(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
       return
     }
+    if (usingTierPricing && !isFree) {
+      const missingPrice = venueSections.some((s) => !tierPrices[s.name] || Number(tierPrices[s.name]) <= 0)
+      if (missingPrice) {
+        showToast('Please set a price for every section.', 'error')
+        return
+      }
+    }
+    const totalSeatsValue = usingTierPricing
+      ? String(venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0))
+      : formData.totalSeats
+    const ticketTiers = usingTierPricing && !isFree
+      ? venueSections.map((s) => ({
+          sectionName: s.name,
+          price: Number(tierPrices[s.name]),
+          totalSeats: Number(s.seats),
+        }))
+      : usingTierPricing
+        // Free entry on a tiered venue still needs `ticketTiers` sent (even
+        // at ₹0) so PATCH's full-replace persists the current section/seat
+        // breakdown rather than leaving stale priced tiers from a previous
+        // Paid save in place.
+        ? venueSections.map((s) => ({ sectionName: s.name, price: 0, totalSeats: Number(s.seats) }))
+        : []
     setSaving(true)
 
     try {
@@ -189,8 +344,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          totalSeats: totalSeatsValue,
           isFree,
-          ticketPrice: isFree ? null : ticketPrice,
+          ticketPrice: isFree || usingTierPricing ? null : ticketPrice,
+          ticketTiers,
           surpriseAct,
           plusOnesRequired: plusOnesRequired ? Number(plusOnesRequired) : 0,
           defaultCompensationType,
@@ -319,10 +476,41 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 Seats & Ticket Price
               </h2>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={labelStyle}>Total Seats *</label>
-                <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
-              </div>
+              {usingTierPricing ? (
+                <div style={{ marginBottom: '18px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>
+                    Sections and seat counts come from {selectedVenue?.name}'s seat map - you only set the price per section for this event.
+                  </p>
+                  {venueSections.map((s) => (
+                    <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
+                      </div>
+                      {!isFree ? (
+                        <input
+                          type="number"
+                          value={tierPrices[s.name] || ''}
+                          onChange={(e) => setTierPrices((prev) => ({ ...prev, [s.name]: e.target.value }))}
+                          min="0"
+                          placeholder="₹ price"
+                          style={{ ...inputStyle, width: '120px' }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
+                      )}
+                    </div>
+                  ))}
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>
+                    Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
+                  </p>
+                </div>
+              ) : (
+                <div style={{ marginBottom: '18px' }}>
+                  <label style={labelStyle}>Total Seats *</label>
+                  <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" style={inputStyle} required />
+                </div>
+              )}
 
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
@@ -341,7 +529,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </label>
               </div>
 
-              {!isFree && (
+              {!isFree && !usingTierPricing && (
                 <div>
                   <label style={labelStyle}>Ticket Price (₹)</label>
                   <input type="number" value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} min="0" style={inputStyle} />
@@ -405,8 +593,24 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
               {venueId && (
                 <div>
-                  <label style={labelStyle}>Offer Amount (₹)</label>
+                  {venueId !== originalVenueId && (selectedVenue?.rateType === 'HOURLY' || selectedVenue?.rateType === 'DAILY') && (
+                    <div style={{ background: 'var(--afa-cream)', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '2px' }}>
+                        {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
+                        {suggestedAmountNote && ` · ${suggestedAmountNote}`}
+                      </div>
+                      <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)' }}>
+                        {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
+                      </div>
+                    </div>
+                  )}
+                  <label style={labelStyle}>Offer Amount (₹) {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span>}</label>
                   <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
+                  {platformFee !== null && platformFee > 0 && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '10px' }}>
+                      + ₹{platformFee.toLocaleString('en-IN')} platform booking fee, charged on top of the rental amount when this booking is confirmed.
+                    </p>
+                  )}
                 </div>
               )}
             </section>

@@ -59,8 +59,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const {
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
-      defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
+      defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
     } = body
+
+    // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
+    // all, meaning a Numbered-venue event's per-section pricing could only
+    // ever be set once, at creation - editing it fell back to a plain
+    // ticketPrice field that doesn't apply to tiered venues. Same bounds
+    // as POST /api/events.
+    const MAX_EVENT_SEATS_EDIT = 100_000
+    const MAX_TICKET_PRICE_EDIT = 10_000_000
+    if (Array.isArray(ticketTiers)) {
+      for (const t of ticketTiers) {
+        if (!t?.sectionName) continue
+        const tierSeats = Number(t.totalSeats)
+        const tierPrice = Number(t.price)
+        if (Number.isFinite(tierSeats) && (!Number.isInteger(tierSeats) || tierSeats > MAX_EVENT_SEATS_EDIT)) {
+          return NextResponse.json({ error: `Each section's seat count must be a whole number up to ${MAX_EVENT_SEATS_EDIT.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+        if (Number.isFinite(tierPrice) && tierPrice > MAX_TICKET_PRICE_EDIT) {
+          return NextResponse.json({ error: `Price per seat must be at most ₹${MAX_TICKET_PRICE_EDIT.toLocaleString('en-IN')}.` }, { status: 400 })
+        }
+      }
+    }
+    const validTiers = Array.isArray(ticketTiers)
+      ? ticketTiers.filter((t: any) => t?.sectionName && Number(t.price) >= 0 && Number(t.totalSeats) > 0)
+      : []
 
     // §4.5 suggestion #1: same rule as event creation - an event with a
     // venue can't go fully live until that venue's booking is actually
@@ -117,7 +141,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(endTime && { endTime }),
         ...(isFree !== undefined && { isFree: Boolean(isFree) }),
         ...(ticketPrice !== undefined && {
-          ticketPrice: isFree ? null : ticketPrice ? parseFloat(ticketPrice) : null,
+          // Kept for backward compat with anything still reading the flat
+          // price directly - null once per-section tiers are in play,
+          // same convention as POST /api/events (no single price to show).
+          ticketPrice: isFree || validTiers.length > 0 ? null : ticketPrice ? parseFloat(ticketPrice) : null,
         }),
         ...(totalSeats && { totalSeats: parseInt(totalSeats) }),
         ...(dresscode !== undefined && { dresscode }),
@@ -132,6 +159,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? buyInAmountValue : null,
         }),
         ...(resolvedStatus && { status: resolvedStatus }),
+        // Full-replace, same semantics as the seat-map builder's PUT and
+        // Venue's zone-price save - the client always sends the complete
+        // set of currently-priced sections, not a diff. Only touched when
+        // the field is actually present in the body (distinguishes "this
+        // PATCH doesn't concern pricing at all" from "clear all tiers").
+        // Safe to delete+recreate: bookings resolve a tier by sectionName
+        // string match at read time (POST /api/bookings), never by
+        // TicketTier.id, so existing bookings are unaffected by new ids.
+        ...(ticketTiers !== undefined && {
+          ticketTiers: {
+            deleteMany: {},
+            create: validTiers.map((t: any) => ({
+              sectionName: String(t.sectionName),
+              price: parseFloat(t.price),
+              totalSeats: parseInt(t.totalSeats),
+            })),
+          },
+        }),
       },
     })
 
