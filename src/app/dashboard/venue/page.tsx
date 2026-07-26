@@ -163,7 +163,7 @@ export default function VenueDashboard() {
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/venue/sales"
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
@@ -219,7 +219,7 @@ export default function VenueDashboard() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: '20px' }}>
               {venues.map((venue) => (
                 <div key={venue.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
