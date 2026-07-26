@@ -9,6 +9,7 @@ import { useToast } from '@/components/Toast'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import BrandLoader from '@/components/BrandLoader'
+import CityAutocomplete from '@/components/CityAutocomplete'
 
 const inputStyle = {
   width: '100%',
@@ -46,6 +47,8 @@ export default function CreateVenuePage() {
     name: '',
     address: '',
     city: '',
+    state: '',
+    country: '',
     acousticRating: '',
     mapsUrl: '',
   })
@@ -293,7 +296,20 @@ export default function CreateVenuePage() {
                 </div>
                 <div>
                   <label style={labelStyle}>City *</label>
-                  <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="e.g., Mumbai" style={inputStyle} required />
+                  <CityAutocomplete
+                    value={formData.city}
+                    onChange={(city) => setFormData((prev) => ({ ...prev, city, state: '', country: '' }))}
+                    onResolved={(loc) =>
+                      setFormData((prev) => ({ ...prev, city: loc.city || prev.city, state: loc.state ?? '', country: loc.country ?? '' }))
+                    }
+                    inputStyle={inputStyle}
+                    placeholder="e.g., Mumbai"
+                  />
+                  {(formData.state || formData.country) && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '4px' }}>
+                      {[formData.state, formData.country].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                 </div>
               </div>
 

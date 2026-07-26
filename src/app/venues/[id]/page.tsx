@@ -45,7 +45,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           {venue.name}
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>
-          {venue.address}, {venue.city}
+          {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ''}
         </p>
         <VenueFollowButton venueId={venue.id} /><br />
         <a

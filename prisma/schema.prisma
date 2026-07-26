@@ -494,6 +494,14 @@ model Venue {
   name          String
   address       String
   city          String
+  // Structured location data from Places API (New) autocomplete
+  // (session 36, 26 Jul - Feedback f7bd07eb, §9.5 budget approved 25 Jul).
+  // Both nullable/optional - existing venues have neither and aren't
+  // backfilled; city stays the required field it always was, these are
+  // additive enrichment only, populated going forward as venues are
+  // created/edited through the new autocomplete flow.
+  state         String?
+  country       String?
   lat           Float?
   lng           Float?
   mapsUrl       String?

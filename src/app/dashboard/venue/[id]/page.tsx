@@ -20,6 +20,8 @@ interface Venue {
   name: string
   address: string
   city: string
+  state?: string | null
+  country?: string | null
   capacity: number
   acousticRating?: number
   facilities: string[]
@@ -150,7 +152,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 {venue.name}
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>
-                {venue.address}, {venue.city}
+                {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ''}
               </p>
             </div>
             <span
