@@ -6,6 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 
 interface SeatSection {
   id?: string
@@ -79,6 +80,8 @@ const labelStyle = {
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
+const DRESSCODE_PRESETS = ['Casual', 'Smart Casual', 'Formal', 'Costume / Theme']
+const VIBE_PRESETS = ['High Energy', 'Intimate', 'Chill', 'Curated', 'Family-Friendly']
 
 function toDateInputValue(dateStr: string) {
   return new Date(dateStr).toISOString().slice(0, 10)
@@ -457,11 +460,23 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
                 <div>
                   <label style={labelStyle}>Dress Code</label>
-                  <input type="text" name="dresscode" value={formData.dresscode} onChange={handleChange} style={inputStyle} />
+                  <PresetSelectWithOther
+                    value={formData.dresscode}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, dresscode: val }))}
+                    presets={DRESSCODE_PRESETS}
+                    placeholder="e.g., Vintage cocktail attire"
+                    inputStyle={inputStyle}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Vibe</label>
-                  <input type="text" name="vibe" value={formData.vibe} onChange={handleChange} style={inputStyle} />
+                  <PresetSelectWithOther
+                    value={formData.vibe}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, vibe: val }))}
+                    presets={VIBE_PRESETS}
+                    placeholder="e.g., Underground, edgy"
+                    inputStyle={inputStyle}
+                  />
                 </div>
               </div>
 
