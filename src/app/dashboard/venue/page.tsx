@@ -22,11 +22,20 @@ interface Venue {
   capacity: number
   isApproved: boolean
   createdAt: string
+  seatingMode?: string
   seatMap?: { sections?: SeatSection[] } | null
+  zonePrices?: { suggestedPrice: number | null }[]
 }
 
+// Same field-mismatch bug family as PR #151/#156: a NUMBERED venue's real
+// pricing lives in VenueZonePrice (via the seat-map builder), not the GA
+// path's seatMap.sections - reading only the latter showed "—" for every
+// NUMBERED venue regardless of whether it was actually priced.
 function priceRange(venue: Venue) {
-  const prices = (venue.seatMap?.sections || []).map((s) => Number(s.price) || 0).filter((p) => p > 0)
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? (venue.zonePrices || []).map((z) => Number(z.suggestedPrice) || 0).filter((p) => p > 0)
+      : (venue.seatMap?.sections || []).map((s) => Number(s.price) || 0).filter((p) => p > 0)
   if (prices.length === 0) return '—'
   const min = Math.min(...prices)
   const max = Math.max(...prices)
