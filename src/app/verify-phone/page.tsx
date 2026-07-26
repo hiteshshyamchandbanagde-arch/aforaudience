@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
 
 const inputStyle = {
   width: '100%',
@@ -108,7 +109,7 @@ function VerifyPhoneInner() {
   }
 
   if (status === 'loading' || loading) {
-    return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+    return (<><SiteNav /><BrandLoader /></>)
   }
 
   return (
@@ -191,7 +192,7 @@ function VerifyPhoneInner() {
 
 export default function VerifyPhonePage() {
   return (
-    <Suspense fallback={<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>}>
+    <Suspense fallback={<><SiteNav /><BrandLoader /></>}>
       <VerifyPhoneInner />
     </Suspense>
   )

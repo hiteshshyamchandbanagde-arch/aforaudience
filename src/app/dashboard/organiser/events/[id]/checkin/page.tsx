@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, use, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
 
 type ScanResult = {
   ok: boolean
@@ -175,7 +176,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     }
   }, [cameraOn, submitCode])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (loadError) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{loadError}</div></>)
 

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -100,6 +101,15 @@ type HorizontalAisle = { id: string; afterRow: number; gapPx: number }
 // a 16-column zone split into 4 blocks, a 20-column zone split into 2).
 type VerticalAisle = { id: string; afterFraction: number; gapPx: number }
 type RowGroup = { id: string; rows: number; columns: number; zoneName: string; verticalAisles: VerticalAisle[] }
+
+// design.md \u00a79.5 "Zone naming defaults" - settled 25 Jul session 30 but
+// only the first 2 slots (Front/Back) were ever actually wired in; a 3rd+
+// zone always fell straight to generic "Zone N". Real cycle per the
+// decision: Front -> Middle -> Back -> Recliner, then "Zone 5", "Zone 6"...
+const ZONE_NAME_CYCLE = ['Front', 'Middle', 'Back', 'Recliner']
+function defaultZoneName(zeroBasedIndex: number): string {
+  return ZONE_NAME_CYCLE[zeroBasedIndex] ?? `Zone ${zeroBasedIndex + 1}`
+}
 
 type GridConfig = {
   sideMarginPx: number
@@ -470,8 +480,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       setGridConfig((g) => ({
         ...g,
         rowGroups: [
-          g.rowGroups[0] || { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Front', verticalAisles: [] },
-          { id: makeClientId(), rows: 5, columns: 10, zoneName: 'Back', verticalAisles: [] },
+          g.rowGroups[0] || { id: makeClientId(), rows: 5, columns: 10, zoneName: defaultZoneName(0), verticalAisles: [] },
+          { id: makeClientId(), rows: 5, columns: 10, zoneName: defaultZoneName(1), verticalAisles: [] },
         ],
       }))
     }
@@ -509,7 +519,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   }
 
   const addRowGroup = () =>
-    setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: `Zone ${g.rowGroups.length + 1}`, verticalAisles: [] }] }))
+    setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: defaultZoneName(g.rowGroups.length), verticalAisles: [] }] }))
   const removeRowGroup = (id: string) => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.filter((r) => r.id !== id) }))
   const updateRowGroup = (id: string, field: 'rows' | 'columns', value: number) =>
     setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, [field]: Math.max(1, value) } : r)) }))
@@ -837,7 +847,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
 

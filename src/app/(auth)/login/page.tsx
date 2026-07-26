@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
+import BrandLoader from '@/components/BrandLoader'
 
 type Mode = "password" | "otp-request" | "otp-verify"
 
@@ -270,7 +271,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<BrandLoader />}>
         <LoginForm />
       </Suspense>
     </main>

@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
+import BrandLoader from '@/components/BrandLoader'
 
 const inputStyle = {
   width: '100%',
@@ -248,7 +249,7 @@ export default function CreateVenuePage() {
     }
   }
 
-  if (status === 'loading') return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
   return (
