@@ -97,7 +97,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (!publish) {
         resolvedStatus = 'DRAFT'
       } else if (!event.venueId) {
-        resolvedStatus = 'APPROVED'
+        return NextResponse.json({ error: 'A venue must be attached before publishing. Save as a draft to continue without one.' }, { status: 400 })
       } else {
         const confirmedBooking = await prisma.venueBooking.findFirst({
           where: { eventId: event.id, venueId: event.venueId, status: 'CONFIRMED' },
