@@ -17,6 +17,14 @@ import prisma from '@/lib/prisma';
 // reliably capture the message, not to route/notify/triage it.
 // ---------------------------------------------------------------------------
 
+function deriveTitle(message: string): string {
+  const MAX = 60;
+  if (message.length <= MAX) return message;
+  const cut = message.slice(0, MAX);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim() + '…';
+}
+
 const VALID_CATEGORIES = ['BUG', 'FEATURE_IDEA', 'QUESTION', 'GENERAL', 'OTHER'] as const;
 const MAX_MESSAGE_LENGTH = 2000;
 // Base64 data URLs run ~33% larger than the underlying bytes, so a 1.4MB
@@ -87,6 +95,12 @@ export async function POST(req: Request) {
       userId,
       fromChatbot: Boolean(fromChatbot),
       attachmentData: attachmentData ?? null,
+      // Auto-derived for Admin Dashboard board/list rows (design.md §9.1) -
+      // first ~60 chars of the message, cut at the last whole word so it
+      // doesn't chop mid-word, with an ellipsis if truncated. Never
+      // requires the submitter to type a separate title - the widget form
+      // stays untouched.
+      title: deriveTitle(message.trim()),
     },
     select: { id: true },
   });
