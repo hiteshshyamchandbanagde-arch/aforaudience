@@ -280,6 +280,68 @@ function defaultGridConfig(): GridConfig {
   }
 }
 
+// §9.2 (26 Jul) - every numeric input in this builder (side margin, seat
+// spacing, rows, columns, gangway position, vertical-aisle gap) bound its
+// value directly to a number in gridConfig - clearing the field to type a
+// new value immediately re-rendered the old number (React has no concept
+// of "temporarily empty" for a controlled numeric value), forcing the
+// reported overtype-then-delete workaround (typing 3050 then deleting
+// the 3 to get from 30 to 50). Fix: buffer the field's own display text
+// locally so it can genuinely go blank while typing; only the last valid
+// number is ever committed up to gridConfig, and the real min/max bound
+// is enforced on blur, not on every keystroke (which would otherwise
+// re-introduce the same snapping the moment a value dips below the
+// minimum mid-type, e.g. typing "5" before "50" on a min-10 field).
+function ClampedNumberInput({
+  value, onCommit, min, max, style, placeholder,
+}: {
+  value: number
+  onCommit: (n: number) => void
+  min?: number
+  max?: number
+  style?: React.CSSProperties
+  placeholder?: string
+}) {
+  const [raw, setRaw] = useState(String(value))
+  const focusedRef = useRef(false)
+
+  useEffect(() => {
+    if (!focusedRef.current) setRaw(String(value))
+  }, [value])
+
+  const clamp = (n: number) => {
+    let c = n
+    if (min !== undefined) c = Math.max(min, c)
+    if (max !== undefined) c = Math.min(max, c)
+    return c
+  }
+
+  return (
+    <input
+      type="number"
+      style={style}
+      placeholder={placeholder}
+      value={raw}
+      onFocus={() => { focusedRef.current = true }}
+      onChange={(e) => {
+        const v = e.target.value
+        setRaw(v)
+        if (v === '' || v === '-') return
+        const n = Number(v)
+        if (!Number.isFinite(n)) return
+        onCommit(n)
+      }}
+      onBlur={() => {
+        focusedRef.current = false
+        const n = Number(raw)
+        const finalValue = raw === '' || !Number.isFinite(n) ? value : clamp(n)
+        onCommit(finalValue)
+        setRaw(String(finalValue))
+      }}
+    />
+  )
+}
+
 export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -655,6 +717,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       showToast('Set a section/tier name first.', 'error')
       return
     }
+    // §9.2 (26 Jul) - manually resetting Row/Next# (e.g. back to B/1 to
+    // patch in a missed seat) previously had no collision check against
+    // seats already placed on this level, silently creating a duplicate
+    // label - normal auto-incrementing during placement never hit this
+    // since it always counts up past what exists. Row+number is the
+    // physical seat label regardless of tier, so this checks across the
+    // whole level's seats, same scope as the duplicate check at Save.
+    if (seats.some((s) => s.row === nextRow && s.number === String(nextNumber))) {
+      showToast(`Row ${nextRow}, Seat ${nextNumber} already exists on this level - change Row/Next# first.`, 'error')
+      return
+    }
 
     const newSeat: SeatDraft = {
       clientId: makeClientId(),
@@ -939,11 +1012,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <div>
                       <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Total rows</label>
-                      <input type="number" style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.rows || 1} onChange={(e) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'rows', Number(e.target.value) || 1)} />
+                      <ClampedNumberInput style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.rows || 1} min={1} max={200} onCommit={(n) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'rows', n)} />
                     </div>
                     <div>
                       <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Seats per row</label>
-                      <input type="number" style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.columns || 1} onChange={(e) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'columns', Number(e.target.value) || 1)} />
+                      <ClampedNumberInput style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.columns || 1} min={1} max={200} onCommit={(n) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'columns', n)} />
                     </div>
                     <div>
                       <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Zone name</label>
@@ -969,9 +1042,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Zone {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
-                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
+                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
                         <label style={{ fontSize: '12px' }}>Seats:</label>
-                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
@@ -1086,7 +1159,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <div key={a.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Gangway {i + 1}:</span>
                         <label style={{ fontSize: '13px', fontWeight: 600 }}>After row #</label>
-                        <input type="number" style={{ ...inputStyle, width: '70px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
+                        <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
                         {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
@@ -1181,10 +1254,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin (px):</label>
-                    <input type="number" style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} onChange={(e) => setGridConfig((g) => ({ ...g, sideMarginPx: Math.max(0, Number(e.target.value) || 0) }))} />
+                    <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} min={0} max={500} onCommit={(n) => setGridConfig((g) => ({ ...g, sideMarginPx: n }))} />
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing X/Y (px):</label>
-                    <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingX: Math.max(10, Number(e.target.value) || 10) }))} />
-                    <input type="number" style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} onChange={(e) => setGridConfig((g) => ({ ...g, seatSpacingY: Math.max(10, Number(e.target.value) || 10) }))} />
+                    <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
+                    <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1218,9 +1291,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Zone {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
-                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.rows} onChange={(e) => updateRowGroup(rg.id, 'rows', Number(e.target.value) || 1)} />
+                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
                         <label style={{ fontSize: '12px' }}>Columns:</label>
-                        <input type="number" style={{ ...inputStyle, width: '55px' }} value={rg.columns} onChange={(e) => updateRowGroup(rg.id, 'columns', Number(e.target.value) || 1)} />
+                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
@@ -1233,16 +1306,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       {rg.verticalAisles.map((a) => (
                         <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '12px' }}>Position (% from left):</label>
-                          <input
-                            type="number"
+                          <ClampedNumberInput
                             min={0}
                             max={100}
                             style={{ ...inputStyle, width: '55px' }}
                             value={Math.round(a.afterFraction * 100)}
-                            onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', (Number(e.target.value) || 0) / 100)}
+                            onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', n / 100)}
                           />
                           <label style={{ fontSize: '12px' }}>Gap (px):</label>
-                          <input type="number" style={{ ...inputStyle, width: '55px' }} value={a.gapPx} onChange={(e) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', Number(e.target.value) || 0)} />
+                          <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={a.gapPx} min={0} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', n)} />
                           <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         </div>
                       ))}
@@ -1259,9 +1331,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {gridConfig.aisles.map((a) => (
                     <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
                       <label style={{ fontSize: '12px' }}>After row #:</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.afterRow} onChange={(e) => updateAisle(a.id, 'afterRow', Number(e.target.value) || 0)} />
+                      <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
                       <label style={{ fontSize: '12px' }}>Gap (px):</label>
-                      <input type="number" style={{ ...inputStyle, width: '60px' }} value={a.gapPx} onChange={(e) => updateAisle(a.id, 'gapPx', Number(e.target.value) || 0)} />
+                      <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.gapPx} min={0} onCommit={(n) => updateAisle(a.id, 'gapPx', n)} />
                       <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                     </div>
                   ))}
@@ -1286,11 +1358,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <label style={{ fontSize: '13px', fontWeight: 600 }}>Row:</label>
                 <input style={{ ...inputStyle, width: '60px' }} value={nextRow} onChange={(e) => setNextRow(e.target.value.slice(0, 10))} />
                 <label style={{ fontSize: '13px', fontWeight: 600 }}>Next #:</label>
-                <input
-                  type="number"
+                <ClampedNumberInput
                   style={{ ...inputStyle, width: '70px' }}
                   value={nextNumber}
-                  onChange={(e) => setNextNumber(Math.max(1, Number(e.target.value) || 1))}
+                  min={1}
+                  onCommit={setNextNumber}
                 />
                 <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
@@ -1327,6 +1399,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <div
                       key={s.clientId}
                       onMouseDown={(e) => startDrag(e, s.clientId)}
+                      // stopPropagation() in startDrag only stops the
+                      // mousedown event itself - the browser still fires a
+                      // separate click event afterward (mousedown+mouseup
+                      // on the same element with no movement), which then
+                      // bubbles up to the canvas's onClick={placeSeat} and
+                      // was creating a duplicate overlapping seat instead
+                      // of just selecting the existing one (§9.2, 26 Jul).
+                      // Stopping the click here, on the seat itself,
+                      // closes that gap regardless of drag state.
+                      onClick={(e) => e.stopPropagation()}
                       title={`${s.tierLabel} — Row ${s.row}, Seat ${s.number}`}
                       style={{
                         position: 'absolute',
