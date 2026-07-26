@@ -40,6 +40,33 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
+    // Feedback 0ed1ec74 - confirmed via code inspection there was no
+    // overlap enforcement anywhere (this route, the confirm-transition
+    // path, or creation) despite the schema supporting date ranges - two
+    // different Organisers could both get a CONFIRMED booking for
+    // overlapping dates at the same venue. Standard interval-overlap
+    // test: two ranges overlap iff each starts before the other ends.
+    // Only checked against OTHER already-CONFIRMED bookings - a pending
+    // negotiation isn't a real commitment yet, so it shouldn't block a
+    // different Organiser's confirm.
+    if (status === 'CONFIRMED' && booking.status !== 'CONFIRMED') {
+      const conflicting = await prisma.venueBooking.findFirst({
+        where: {
+          venueId: booking.venueId,
+          status: 'CONFIRMED',
+          id: { not: booking.id },
+          fromDate: { lt: booking.toDate },
+          toDate: { gt: booking.fromDate },
+        },
+      })
+      if (conflicting) {
+        return NextResponse.json(
+          { error: 'This venue already has a confirmed booking that overlaps these dates.' },
+          { status: 409 }
+        )
+      }
+    }
+
     // F6: on the PENDING -> CONFIRMED transition for HOURLY/DAILY venues,
     // snapshot the pricing context onto the booking so future edits to
     // Venue.hourlyRate / Venue.dailyRate can't retroactively change what
