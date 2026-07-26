@@ -51,17 +51,27 @@ export async function resolveIdentifierToUser(identifier: string) {
     return prisma.user.findUnique({ where: { email: value.toLowerCase() } })
   }
 
-  if (CODE_PATTERN.test(value)) {
-    const byUserCode = await prisma.user.findUnique({ where: { code: value } })
+  // §9.2 (26 Jul) - codes are always generated uppercase by the DB's
+  // generate_role_code() function, but login previously did an exact-
+  // case pattern test and lookup - a correct code typed in lowercase or
+  // mixed case (easy to do, since none of the other identifier types on
+  // this same field are case-sensitive for the user - email is
+  // lowercased above, username is matched case-insensitively below)
+  // failed with the same generic invalid-account error as a genuinely
+  // wrong code. Normalizing to uppercase here mirrors what email/
+  // username already do for their own casing quirks.
+  const upperValue = value.toUpperCase()
+  if (CODE_PATTERN.test(upperValue)) {
+    const byUserCode = await prisma.user.findUnique({ where: { code: upperValue } })
     if (byUserCode) return byUserCode
 
-    const artist = await prisma.artist.findUnique({ where: { code: value } })
+    const artist = await prisma.artist.findUnique({ where: { code: upperValue } })
     if (artist) return prisma.user.findUnique({ where: { id: artist.userId } })
 
-    const organiser = await prisma.organiser.findUnique({ where: { code: value } })
+    const organiser = await prisma.organiser.findUnique({ where: { code: upperValue } })
     if (organiser) return prisma.user.findUnique({ where: { id: organiser.userId } })
 
-    const venueOwner = await prisma.venueOwner.findUnique({ where: { code: value } })
+    const venueOwner = await prisma.venueOwner.findUnique({ where: { code: upperValue } })
     if (venueOwner) return prisma.user.findUnique({ where: { id: venueOwner.userId } })
 
     return null
