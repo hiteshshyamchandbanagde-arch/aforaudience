@@ -123,7 +123,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
       price: priceByZone.get(`${z.level}::${z.zoneName}`) ?? null,
     }))
   })()
-  const prices = sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
+  // Price Range stat box: same gap as the zone-list fix above missed -
+  // numberedZones already resolves real per-zone prices for NUMBERED
+  // venues, but this summary number was still reading GA-only `sections`
+  // only, showing "—" even when zones were fully priced.
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? numberedZones.map((z) => Number(z.price) || 0).filter((p) => p > 0)
+      : sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
   const minPrice = prices.length ? Math.min(...prices) : null
   const maxPrice = prices.length ? Math.max(...prices) : null
 

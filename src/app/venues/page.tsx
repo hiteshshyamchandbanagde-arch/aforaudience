@@ -14,6 +14,13 @@ async function getVenues() {
     const venues = await prisma.venue.findMany({
       where: { isApproved: true },
       orderBy: { createdAt: 'desc' },
+      include: {
+        // Same field-mismatch bug family as PR #151/#156: a NUMBERED
+        // venue's real pricing lives in VenueZonePrice, not the GA path's
+        // seatMap.sections - without this, every NUMBERED venue's card
+        // shows no price range regardless of whether it's actually priced.
+        zonePrices: { select: { suggestedPrice: true } },
+      },
     })
     return venues
   } catch (err) {
@@ -22,9 +29,13 @@ async function getVenues() {
   }
 }
 
-function priceRange(seatMap: unknown) {
-  const sections = (seatMap as { sections?: { price?: number }[] } | null)?.sections || []
-  const prices = sections.map((s) => Number(s.price) || 0).filter((p) => p > 0)
+function priceRange(venue: { seatingMode?: string; seatMap: unknown; zonePrices?: { suggestedPrice: number | null }[] }) {
+  const prices =
+    venue.seatingMode === 'NUMBERED'
+      ? (venue.zonePrices || []).map((z) => Number(z.suggestedPrice) || 0).filter((p) => p > 0)
+      : ((venue.seatMap as { sections?: { price?: number }[] } | null)?.sections || [])
+          .map((s) => Number(s.price) || 0)
+          .filter((p) => p > 0)
   if (prices.length === 0) return null
   const min = Math.min(...prices)
   const max = Math.max(...prices)
@@ -50,7 +61,7 @@ export default async function VenuesPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {venues.map((v) => {
-              const range = priceRange(v.seatMap)
+              const range = priceRange(v)
               return (
                 <Link
                   key={v.id}
