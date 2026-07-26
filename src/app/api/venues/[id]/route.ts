@@ -65,16 +65,57 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
 
-    // Publish gate: an organiser prices their event off whatever zones
-    // exist on a NUMBERED venue's real seat map, so a venue can't go
-    // live with nothing built yet - draft is fine, publish isn't, until
-    // there's at least one real saved seat. GA venues are unaffected
-    // (their own section requirement is enforced client-side as today).
+    // Publish gate for NUMBERED venues (design.md §9.1/§9.5 - Hitesh's
+    // settled call: strict, every zone priced, every level declared).
+    // Was seatCount > 0 only, which let a venue with real seats but zero
+    // zone pricing through - confirmed live (Feedback, 25 Jul): a venue
+    // published with 4 seats, no zones priced, and an incomplete level.
+    // An organiser prices events off VenueZonePrice.suggestedPrice as the
+    // prefill (design.md §9.4 PR #149/#151), so every distinct
+    // (level, zone) pair that actually has seats needs a real priced row -
+    // not just seats existing, and not just a VenueZonePrice row existing
+    // with a null price.
     if (publish === true && venue.seatingMode === 'NUMBERED') {
-      const seatCount = await prisma.seat.count({ where: { venueId: id } })
-      if (seatCount === 0) {
+      const seats = await prisma.seat.findMany({
+        where: { venueId: id },
+        select: { level: true, tierLabel: true },
+        distinct: ['level', 'tierLabel'],
+      })
+      if (seats.length === 0) {
         return NextResponse.json(
           { error: 'Build your seat map before publishing - organisers price events off it, so it needs to be real first. Save as draft, then publish once seats are saved.' },
+          { status: 400 }
+        )
+      }
+
+      const zonePrices = await prisma.venueZonePrice.findMany({
+        where: { venueId: id },
+        select: { level: true, zoneName: true, suggestedPrice: true },
+      })
+      const pricedKeys = new Set(
+        zonePrices
+          .filter((z: { suggestedPrice: number | null }) => typeof z.suggestedPrice === 'number' && z.suggestedPrice > 0)
+          .map((z: { level: string; zoneName: string }) => `${z.level}::${z.zoneName}`)
+      )
+      const missing = seats.filter((s: { level: string; tierLabel: string }) => !pricedKeys.has(`${s.level}::${s.tierLabel}`))
+
+      if (missing.length > 0) {
+        // Group by level so an owner with multiple levels can see at a
+        // glance whether the gap is "one zone on one level" or "an
+        // entire level never got priced."
+        const byLevel = new Map<string, string[]>()
+        for (const m of missing) {
+          const levelLabel = m.level ? m.level : 'Ground'
+          if (!byLevel.has(levelLabel)) byLevel.set(levelLabel, [])
+          byLevel.get(levelLabel)!.push(m.tierLabel)
+        }
+        const detail = Array.from(byLevel.entries())
+          .map(([level, zones]) => `${level}: ${zones.join(', ')}`)
+          .join(' · ')
+        return NextResponse.json(
+          {
+            error: `Every zone needs a price before publishing. Missing: ${detail}. Set prices in the seat map builder, then publish.`,
+          },
           { status: 400 }
         )
       }
