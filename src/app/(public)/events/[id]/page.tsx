@@ -32,6 +32,42 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     return <EventDetailClientPage event={null} canReview={false} />
   }
 
+  // `Event.totalSeats`/`Event.availableSeats` are only ever kept accurate
+  // on the flat/GA booking path (POST /api/bookings decrements/derives
+  // from that field there). For NUMBERED venues, occupancy is tracked
+  // per-seat via BookingSeat and was never wired back onto these Event
+  // columns — confirmed live (26 Jul, session 33) on "Jaipur Mic Gala
+  // 100": 3 CONFIRMED bookings holding 11 real seats, yet
+  // Event.availableSeats still read 341/341. The booking route itself
+  // is fine (it computes occupancy live inside its transaction) — this
+  // was purely a stale-display bug on the audience-facing seat count
+  // and Filling Fast/Sold Out badge. Compute the real numbers here for
+  // NUMBERED venues, same "held = CONFIRMED or unexpired PENDING" rule
+  // already proven correct in src/app/api/bookings/route.ts, instead of
+  // touching the shared getAvailabilityStatus()/badge component.
+  let displayTotalSeats = event.totalSeats
+  let displayAvailableSeats = event.availableSeats
+  if (event.venue?.seatingMode === 'NUMBERED') {
+    const now = new Date()
+    const [seatTotal, heldCount] = await Promise.all([
+      prisma.seat.count({ where: { venueId: event.venueId! } }),
+      prisma.bookingSeat.count({
+        where: {
+          booking: {
+            eventId: id,
+            OR: [
+              { status: 'CONFIRMED' },
+              { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+            ],
+          },
+        },
+      }),
+    ])
+    displayTotalSeats = seatTotal
+    displayAvailableSeats = Math.max(0, seatTotal - heldCount)
+  }
+  const eventForClient = { ...event, totalSeats: displayTotalSeats, availableSeats: displayAvailableSeats }
+
   // Client-side half of the review-eligibility gate (server-side half —
   // POST /api/reviews rejecting non-checked-in users — has been in place
   // since the nineteenth amendment). Computed here rather than fetched
@@ -54,7 +90,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     canReview = !!checkedInBooking
   }
 
-  return <EventDetailClientPage event={JSON.parse(JSON.stringify(event))} canReview={canReview} />
+  return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} />
 }
 
 // Same reasoning as venues/page.tsx - no dynamic API is used here otherwise,
