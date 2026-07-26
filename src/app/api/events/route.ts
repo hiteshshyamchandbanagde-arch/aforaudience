@@ -105,6 +105,9 @@ export async function POST(req: Request) {
     if (publish === true) {
       const verifyError = requireVerifiedPhone(user, 'publishing this event')
       if (verifyError) return verifyError
+      if (!venueId) {
+        return NextResponse.json({ error: 'A venue must be attached before publishing. Save as a draft to continue without one.' }, { status: 400 })
+      }
     }
 
     if (!title || !description || !type || !date || !startTime || !endTime || !totalSeats) {
@@ -249,6 +252,10 @@ export async function POST(req: Request) {
         // with a venue can never be APPROVED at creation time, regardless
         // of what the Organiser requested. PATCH /api/venue-bookings/[id]
         // auto-promotes it to APPROVED once the Venue Owner confirms.
+        // venueId is guaranteed present whenever publish===true (enforced
+        // above) - the 'no venue' fallback below is unreachable in practice
+        // now, kept only as a defensive default rather than assuming the
+        // invariant silently forever.
         status: !publish ? 'DRAFT' : venueId ? 'PENDING_APPROVAL' : 'APPROVED',
         ticketTiers: validTiers.length > 0
           ? {
