@@ -59,6 +59,7 @@ export default function SearchBox() {
         onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder="Search events, artists, venues..."
+        className="afa-search-input"
         style={{
           width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
           border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "13px",

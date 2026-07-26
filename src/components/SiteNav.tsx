@@ -114,12 +114,32 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           .sitenav-hamburger { display: flex; }
           .sitenav-mobile-panel.open { display: flex; }
         }
+        /* Header nav wrapped to a second line when logged in, homepage-
+           specific (confirmed live, 25 Jul - not a zoom issue, not
+           reproducing on other pages). Root cause: the "home" variant's
+           extra flourish (32px gaps, 22px logo, 18px padding, vs. 24px/
+           20px/16px on every other page) plus a full account row (Hi,
+           name + Dashboard + My Tickets + Profile + Sign out) demands
+           more width than a common laptop screen (~1280-1366px) has -
+           .sitenav-desktop's flexWrap: wrap then kicks in and wraps it
+           to a visibly broken second line instead of a clean single row.
+           Collapse home's spacing down to the same values every other
+           page already uses at exactly this width band - purely
+           additive, never applies above 1300px (full hero flourish
+           intact) or below 780px (mobile hamburger already takes over). */
+        @media (min-width: 781px) and (max-width: 1300px) {
+          .sitenav-row { padding: 16px 24px !important; }
+          .sitenav-logo { font-size: 20px !important; }
+          .sitenav-desktop { gap: 20px !important; }
+          .afa-search-input { max-width: 150px !important; }
+        }
       `}</style>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
+      <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}
+          className="sitenav-logo"
           style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}
         >
           <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
