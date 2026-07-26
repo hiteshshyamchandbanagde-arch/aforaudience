@@ -164,6 +164,8 @@ export default function VenueDashboard() {
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
             </div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <Link
+                href="/dashboard/venue/sales"
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 📊 Revenue Overview
