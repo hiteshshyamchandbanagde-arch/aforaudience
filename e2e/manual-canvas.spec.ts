@@ -20,6 +20,18 @@ import { loginFixtureVenueOwner, FIXTURE_NUMBERED_VENUE_ID } from "./helpers/rol
 
 const SEAT_MAP_URL = `/dashboard/venue/${FIXTURE_NUMBERED_VENUE_ID}/seat-map`;
 
+// TEMPORARY DIAGNOSTIC (session 35) - isolates login+navigation+session-gate
+// from any assumption about seat data or data-testid hooks, since every
+// test below failed identically both before and after the data-testid
+// PR (#200) merged. Remove once the real cause is confirmed.
+test("DIAGNOSTIC: fixture venue owner can log in and reach the seat-map builder", async ({ page }) => {
+  await loginFixtureVenueOwner(page);
+  await page.goto(SEAT_MAP_URL);
+  await expect(page.getByRole("heading", { name: "Seat Map Builder" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("seatmap-canvas")).toBeVisible({ timeout: 15_000 });
+  console.log("SEAT COUNT:", await page.getByTestId("seat").count());
+});
+
 test("clicking an existing seat selects it, does not create a duplicate", async ({ page }) => {
   await loginFixtureVenueOwner(page);
   await page.goto(SEAT_MAP_URL);
@@ -27,15 +39,7 @@ test("clicking an existing seat selects it, does not create a duplicate", async 
   const seats = page.getByTestId("seat");
   await expect(seats).toHaveCount(2);
 
-  // Click (not drag) the seeded seat "Row A, Seat 1" - before PR #198 this
-  // created a new overlapping seat instead of just selecting the existing
-  // one, because startDrag's stopPropagation() on mousedown doesn't stop
-  // the separate click event fired afterward.
   await page.locator('[title="General — Row A, Seat 1"]').click();
-
-  // Give any (incorrect) placeSeat call a moment to land before asserting -
-  // this is a synchronous state update, not a network request, so a short
-  // wait is enough rather than needing a network-idle wait.
   await page.waitForTimeout(300);
   await expect(seats).toHaveCount(2);
 });
@@ -50,14 +54,7 @@ test("resetting Row/Next# to an existing label blocks placement instead of dupli
   await page.getByRole("button", { name: /manual placement/i }).click();
   await expect(page.getByRole("button", { name: /manual placement on/i })).toBeVisible();
 
-  // Row already defaults to "A" from the seeded seats' own lettering: set
-  // Next# back to 1 (the first seeded seat's number) rather than wherever
-  // auto-increment left it.
   await page.locator('label:has-text("Next #:") + input').fill("1");
-
-  // Click an empty spot on the canvas - well away from either seeded seat
-  // (which sit at x=100/140, y=150) so this is unambiguously a "new seat"
-  // attempt, not a click on an existing one.
   await page.getByTestId("seatmap-canvas").click({ position: { x: 300, y: 300 } });
 
   await expect(page.getByRole("alert")).toContainText(/row a, seat 1 already exists/i);
@@ -74,15 +71,11 @@ test("numeric fields (side margin) can be cleared and retyped without overtype-t
   await expect(sideMargin).toBeVisible();
 
   await sideMargin.fill("");
-  // The whole point of the fix: the field can actually sit empty mid-edit,
-  // not silently snap back to the previous number.
   await expect(sideMargin).toHaveValue("");
 
   await sideMargin.fill("77");
   await expect(sideMargin).toHaveValue("77");
 
-  // Blur commits the clamped value (min 0, max 500 - 77 is within bounds,
-  // so it should round-trip unchanged).
   await sideMargin.blur();
   await expect(sideMargin).toHaveValue("77");
 });
@@ -95,17 +88,11 @@ test("an accidental refresh mid-edit offers to restore the in-progress layout", 
   await expect(seats).toHaveCount(2);
 
   await page.getByRole("button", { name: /manual placement/i }).click();
-  // Place one new seat well away from the two seeded ones and from the
-  // stage clearance band at the top.
   await page.getByTestId("seatmap-canvas").click({ position: { x: 400, y: 300 } });
   await expect(seats).toHaveCount(3);
 
-  // Reload simulates the accidental refresh the bug report described.
-  // The restore-draft prompt is a plain window.confirm() - accept it.
   page.once("dialog", (dialog) => dialog.accept());
   await page.reload();
 
-  // Server still only has the original 2 seats (Save was never clicked) -
-  // if the draft weren't restored, this would read 2, not 3.
   await expect(seats).toHaveCount(3, { timeout: 15_000 });
 });
