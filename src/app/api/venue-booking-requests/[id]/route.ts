@@ -117,6 +117,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
       const platformSettings = await prisma.platformSettings.findFirst()
 
+      // Same overlap enforcement as PATCH /api/venue-bookings/[id] - this
+      // path creates a CONFIRMED VenueBooking directly (Flexible-venue
+      // negotiation acceptance) and was bypassing that guard entirely.
+      const conflicting = await prisma.venueBooking.findFirst({
+        where: {
+          venueId: request.venueId,
+          status: 'CONFIRMED',
+          fromDate: { lte: request.requestedDate },
+          toDate: { gte: request.requestedDate },
+        },
+      })
+      if (conflicting) {
+        return NextResponse.json(
+          { error: 'This venue already has a confirmed booking on this date.' },
+          { status: 409 }
+        )
+      }
+
       await prisma.$transaction([
         prisma.venueBookingRequest.update({ where: { id }, data: { status: 'ACCEPTED' } }),
         prisma.venueBooking.create({

@@ -629,38 +629,51 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         // silently discarding it - the two could legitimately differ
         // (someone else edited the venue meanwhile, or the draft is
         // just stale from an earlier abandoned session).
-        try {
-          const raw = localStorage.getItem(draftKey(id))
-          if (raw) {
-            const draft: SeatMapDraft = JSON.parse(raw)
-            const draftSeatCount = Object.values(draft.seatsByLevel || {}).reduce((n, arr) => n + arr.length, 0)
-            if (draftSeatCount > 0) {
-              const minsAgo = Math.max(0, Math.round((Date.now() - draft.savedAt) / 60000))
-              const levelCount = Object.keys(draft.seatsByLevel).length
-              const restore = window.confirm(
-                `Found an unsaved local draft from ${minsAgo < 1 ? 'less than a minute' : `${minsAgo} minute${minsAgo === 1 ? '' : 's'}`} ago ` +
-                `(${draftSeatCount} seat${draftSeatCount === 1 ? '' : 's'} across ${levelCount} level${levelCount === 1 ? '' : 's'}) - ` +
-                `likely from an accidental refresh. Restore it?\n\nCancel discards the draft and keeps what's saved on the server.`
-              )
-              if (restore) {
-                setSeatingMode(draft.seatingMode)
-                setLevels(draft.levels)
-                setActiveLevel(draft.activeLevel)
-                setSeatsByLevel(draft.seatsByLevel)
-                setGridConfigByLevel(draft.gridConfigByLevel)
-                setZonePricesByLevel(draft.zonePricesByLevel)
-                setBuilderPathByLevel(draft.builderPathByLevel)
+        //
+        // Deferred via setTimeout(0) - Feedback 78cb970a ("seat-map view
+        // sometimes fails to render fully... resolves after... dismissing
+        // the confirmation dialog"). window.confirm() is synchronous and
+        // blocks the whole tab; firing it immediately after the several
+        // setState calls above gave React no chance to commit/paint the
+        // just-loaded seat data before the dialog froze everything, so
+        // the canvas could still be showing its pre-load state underneath
+        // when the dialog appeared. Deferring one tick lets the browser
+        // paint the loaded seats first; the dialog then appears on top of
+        // a fully-rendered canvas instead of a half-rendered one.
+        setTimeout(() => {
+          try {
+            const raw = localStorage.getItem(draftKey(id))
+            if (raw) {
+              const draft: SeatMapDraft = JSON.parse(raw)
+              const draftSeatCount = Object.values(draft.seatsByLevel || {}).reduce((n, arr) => n + arr.length, 0)
+              if (draftSeatCount > 0) {
+                const minsAgo = Math.max(0, Math.round((Date.now() - draft.savedAt) / 60000))
+                const levelCount = Object.keys(draft.seatsByLevel).length
+                const restore = window.confirm(
+                  `Found an unsaved local draft from ${minsAgo < 1 ? 'less than a minute' : `${minsAgo} minute${minsAgo === 1 ? '' : 's'}`} ago ` +
+                  `(${draftSeatCount} seat${draftSeatCount === 1 ? '' : 's'} across ${levelCount} level${levelCount === 1 ? '' : 's'}) - ` +
+                  `likely from an accidental refresh. Restore it?\n\nCancel discards the draft and keeps what's saved on the server.`
+                )
+                if (restore) {
+                  setSeatingMode(draft.seatingMode)
+                  setLevels(draft.levels)
+                  setActiveLevel(draft.activeLevel)
+                  setSeatsByLevel(draft.seatsByLevel)
+                  setGridConfigByLevel(draft.gridConfigByLevel)
+                  setZonePricesByLevel(draft.zonePricesByLevel)
+                  setBuilderPathByLevel(draft.builderPathByLevel)
+                } else {
+                  localStorage.removeItem(draftKey(id))
+                }
               } else {
                 localStorage.removeItem(draftKey(id))
               }
-            } else {
-              localStorage.removeItem(draftKey(id))
             }
+          } catch {
+            // Corrupt/unparseable draft - drop it rather than throw.
+            localStorage.removeItem(draftKey(id))
           }
-        } catch {
-          // Corrupt/unparseable draft - drop it rather than throw.
-          localStorage.removeItem(draftKey(id))
-        }
+        }, 0)
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -1357,17 +1370,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Section/Tier:</label>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <label style={{ fontSize: '13px', fontWeight: 600 }}>Zone name:</label>
                 <input
                   style={{ ...inputStyle, width: '160px' }}
                   value={activeTier}
                   onChange={(e) => setActiveTier(e.target.value.slice(0, 60))}
                   placeholder="e.g. VIP Front"
                 />
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Row:</label>
+                <label style={{ fontSize: '13px', fontWeight: 600 }}>Row letter:</label>
                 <input style={{ ...inputStyle, width: '60px' }} value={nextRow} onChange={(e) => setNextRow(e.target.value.slice(0, 10))} />
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Next #:</label>
+                <label style={{ fontSize: '13px', fontWeight: 600 }}>Next seat #:</label>
                 <ClampedNumberInput
                   style={{ ...inputStyle, width: '70px' }}
                   value={nextNumber}
@@ -1376,6 +1389,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 />
                 <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
+                Every seat you place next gets this zone name and row letter, then auto-increments the seat number. Zone name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General").
+              </p>
 
               {canvasBounds.overflowsDefault && (
                 <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>
@@ -1459,9 +1475,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               {!selected && <p style={{ fontSize: '13px', opacity: 0.6 }}>Click a seat on the canvas to edit or delete it.</p>}
               {selected && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Section/Tier</label>
+                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Zone name</label>
                   <input style={inputStyle} value={selected.tierLabel} onChange={(e) => updateSelected('tierLabel', e.target.value.slice(0, 60))} />
-                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Row</label>
+                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Row letter</label>
                   <input style={inputStyle} value={selected.row} onChange={(e) => updateSelected('row', e.target.value.slice(0, 10))} />
                   <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat Number</label>
                   <input style={inputStyle} value={selected.number} onChange={(e) => updateSelected('number', e.target.value.slice(0, 10))} />
