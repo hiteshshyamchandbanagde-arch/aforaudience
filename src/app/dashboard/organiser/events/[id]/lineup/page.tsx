@@ -23,6 +23,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import BrandLoader from '@/components/BrandLoader'
+import MessageButton from '@/components/MessageButton'
 
 interface LineupSlot {
   id: string
@@ -126,6 +127,8 @@ function SortableRow({
         />
         <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>min</span>
       </div>
+
+      <MessageButton contextType="PERFORMANCE" contextId={item.id} label="Message" />
     </div>
   )
 }
@@ -196,6 +199,33 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     setDirty(true)
   }
 
+  const [broadcastDraft, setBroadcastDraft] = useState('')
+  const [broadcasting, setBroadcasting] = useState(false)
+
+  const handleBroadcast = async () => {
+    const text = broadcastDraft.trim()
+    if (!text) return
+    setBroadcasting(true)
+    try {
+      const res = await fetch('/api/messages/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: id, body: text }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        showToast(`Sent to ${data.sentTo} artist${data.sentTo === 1 ? '' : 's'}.`, 'success')
+        setBroadcastDraft('')
+      } else {
+        showToast(data.error || 'Broadcast failed.', 'error')
+      }
+    } catch {
+      showToast('Broadcast failed.', 'error')
+    } finally {
+      setBroadcasting(false)
+    }
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -240,6 +270,39 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
           {error && (
             <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>
+          )}
+
+          {lineup.length > 0 && (
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.6)', marginBottom: '8px' }}>
+                Message the whole lineup — sent as a private message to each artist individually, replies stay private.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  value={broadcastDraft}
+                  onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
+                  placeholder="e.g. Load-in is now 6pm, not 6:30..."
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                />
+                <button
+                  onClick={handleBroadcast}
+                  disabled={broadcasting || !broadcastDraft.trim()}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'var(--afa-terracotta)',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: broadcasting || !broadcastDraft.trim() ? 'default' : 'pointer',
+                    opacity: broadcasting || !broadcastDraft.trim() ? 0.6 : 1,
+                  }}
+                >
+                  Send to all
+                </button>
+              </div>
+            </div>
           )}
 
           {lineup.length === 0 ? (
