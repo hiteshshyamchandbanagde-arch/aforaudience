@@ -320,6 +320,7 @@ export default function SupportWidget() {
       <button
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
+        title={panel === 'closed' ? 'Chat with us' : 'Close'}
         style={{
           position: 'fixed',
           right: 20,
@@ -337,7 +338,10 @@ export default function SupportWidget() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 26px rgba(0,0,0,0.32)' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)' }}
       >
         {panel === 'closed' ? <MicIcon size={26} pulse /> : <CloseIcon size={22} />}
       </button>

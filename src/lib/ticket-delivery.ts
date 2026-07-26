@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import { generateTicketPdf, TicketData } from "@/lib/ticket-pdf"
+import { formatSeatLabels } from "@/lib/seat-labels"
 import { sendTicketEmail } from "@/lib/email"
 import { sendPushToUser } from "@/lib/push"
 
@@ -73,6 +74,7 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       include: {
         user: true,
         event: { include: { venue: true, organiser: true } },
+        bookingSeats: { include: { seat: true } },
       },
     })
     if (!booking) {
@@ -109,6 +111,7 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       venueName: booking.event.venue?.name ?? null,
       venueCity: booking.event.venue?.city ?? null,
       seats: (booking.seats as Record<string, number>) ?? {},
+      seatLabels: formatSeatLabels(booking.bookingSeats.map((bs: { seat: { level: string; row: string; number: string } }) => bs.seat)),
       totalAmount: booking.totalAmount,
       subtotalAmount: booking.subtotalAmount,
       bookingFeeAmount: booking.bookingFeeAmount,

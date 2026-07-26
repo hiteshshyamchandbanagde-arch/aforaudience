@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { generateTicketPdf, type TicketData } from '@/lib/ticket-pdf'
+import { formatSeatLabels } from '@/lib/seat-labels'
 
 // GET /api/bookings/[id]/ticket
 //
@@ -41,6 +42,7 @@ export async function GET(
       include: {
         user: true,
         event: { include: { venue: true } },
+        bookingSeats: { include: { seat: true } },
       },
     })
     if (!booking) {
@@ -65,6 +67,7 @@ export async function GET(
       venueName: booking.event.venue?.name ?? null,
       venueCity: booking.event.venue?.city ?? null,
       seats: (booking.seats as Record<string, number>) ?? {},
+      seatLabels: formatSeatLabels(booking.bookingSeats.map((bs: { seat: { level: string; row: string; number: string } }) => bs.seat)),
       totalAmount: booking.totalAmount,
       subtotalAmount: booking.subtotalAmount,
       bookingFeeAmount: booking.bookingFeeAmount,
