@@ -236,7 +236,15 @@ model Feedback {
   userId      String?
   user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   fromChatbot Boolean          @default(false)
-  status      String           @default("NEW")
+  status      FeedbackStatus   @default(NEW)
+  // Admin Dashboard v1 (session 33, 26 Jul, design.md §9.1/§9.5). Both
+  // nullable, additive, no backfill required - existing rows read fine
+  // with severity unset and a client-derived title fallback (first N
+  // chars of `message`) until an admin actually triages them.
+  severity    FeedbackSeverity?
+  resolvedAt  DateTime?
+  title       String?
+  changeLog   FeedbackChangeLog[]
   // Optional screenshot, stored as a base64 data URL directly on the
   // row. Client resizes/recompresses to fit well under ~1MB before
   // encoding (see SupportWidget.tsx) so this stays cheap on Postgres.
@@ -247,6 +255,36 @@ model Feedback {
   createdAt   DateTime         @default(now())
 
   @@index([status, createdAt])
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWED
+  RESOLVED
+}
+
+enum FeedbackSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Self-serve status/severity editing (Admin Dashboard v1) must not lose
+// the reasoned trail that every Claude-driven status change used to get
+// as prose in design.md - this is that trail, structured. `message` on
+// Feedback itself stays immutable; this is the only place edits land.
+model FeedbackChangeLog {
+  id              String   @id @default(cuid())
+  feedbackId      String
+  feedback        Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  changedByUserId String?
+  field           String
+  fromValue       String?
+  toValue         String
+  createdAt       DateTime @default(now())
+
+  @@index([feedbackId])
 }
 
 enum FeedbackCategory {
