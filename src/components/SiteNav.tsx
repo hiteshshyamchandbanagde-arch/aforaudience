@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
@@ -59,6 +59,23 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
   const [mobileOpen, setMobileOpen] = useState(false)
+  // Swipe-up-to-close for the mobile dropdown panel (Feedback f1c26af4) -
+  // previously only the X/hamburger button dismissed it; a swipe on the
+  // panel just scrolled the page behind it instead. Simple vertical-delta
+  // threshold, no gesture library needed for a single-direction dismiss.
+  const touchStartY = useRef<number | null>(null)
+  const SWIPE_CLOSE_THRESHOLD_PX = 40
+  const handlePanelTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY
+  }
+  const handlePanelTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return
+    const deltaY = touchStartY.current - e.touches[0].clientY
+    if (deltaY > SWIPE_CLOSE_THRESHOLD_PX) {
+      setMobileOpen(false)
+      touchStartY.current = null
+    }
+  }
   // Theme Phase 1 - mirrors what layout.tsx's pre-paint script already
   // applied to <html>, so this just needs to read it back for the
   // button's own label/state (never causes a flash - the attribute is
@@ -209,7 +226,12 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       </div>
 
       {/* Mobile dropdown panel */}
-      <div className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`} style={{ flexDirection: "column", padding: "8px 24px 20px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+      <div
+        className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`}
+        style={{ flexDirection: "column", padding: "8px 24px 20px", borderTop: "1px solid rgba(14,12,10,0.08)" }}
+        onTouchStart={handlePanelTouchStart}
+        onTouchMove={handlePanelTouchMove}
+      >
         <button
           onClick={toggleTheme}
           style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }}

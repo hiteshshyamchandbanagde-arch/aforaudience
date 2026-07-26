@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { parseAmount } from '@/lib/money-validation'
+import { requireVerifiedPhone } from '@/lib/verification'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -94,6 +95,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // so this checks the real current booking state rather than assuming.
     let resolvedStatus: string | undefined
     if (publish !== undefined) {
+      if (publish) {
+        const verifyError = requireVerifiedPhone(user, 'publishing this event')
+        if (verifyError) return verifyError
+      }
       if (!publish) {
         resolvedStatus = 'DRAFT'
       } else if (!event.venueId) {

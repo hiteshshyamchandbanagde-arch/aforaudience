@@ -49,6 +49,7 @@ export type TicketData = {
   venueName: string | null
   venueCity: string | null
   seats: Record<string, number>
+  seatLabels?: string[]
   totalAmount: number
   subtotalAmount: number
   bookingFeeAmount: number
@@ -244,10 +245,12 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   }
   cursorY -= 54
 
-  const seatSummary = Object.entries(t.seats)
-    .filter(([, q]) => Number(q) > 0)
-    .map(([s, q]) => `${s} x ${q}`)
-    .join(", ")
+  const seatSummary = t.seatLabels && t.seatLabels.length > 0
+    ? t.seatLabels.join(", ")
+    : Object.entries(t.seats)
+        .filter(([, q]) => Number(q) > 0)
+        .map(([s, q]) => `${s} x ${q}`)
+        .join(", ")
   drawDetail(page, sansBold, sans, col1X, cursorY, "SEATS", seatSummary || "General")
   if (t.bookingFeeAmount > 0) {
     drawDetail(

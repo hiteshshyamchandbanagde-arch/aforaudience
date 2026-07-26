@@ -9,6 +9,7 @@ import SiteNav from '@/components/SiteNav'
 interface BookingItem {
   id: string
   seats: Record<string, number>
+  seatLabels?: string[]
   totalAmount: number
   status: string
   expiresAt: string | null
@@ -129,7 +130,11 @@ export default function MyTicketsPage() {
                     {b.event.venue && <> · {b.event.venue.name}, {b.event.venue.city}</>}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-ink)' }}>
-                    <span>{Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}</span>
+                    <span>
+                      {b.seatLabels && b.seatLabels.length > 0
+                        ? `Seats ${b.seatLabels.join(', ')}`
+                        : Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}
+                    </span>
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
                   </div>
                   {isLivePending && (

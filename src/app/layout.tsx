@@ -168,7 +168,7 @@ export default function RootLayout({
                 <svg viewBox="0 0 64 64">
                   <rect x="18" y="42" width="14" height="8" fill="var(--afa-cream)" style="animation:intro-bar-in 260ms ease-out 0ms both"></rect>
                   <rect x="18" y="30" width="20" height="8" fill="var(--afa-amber)" style="animation:intro-bar-in 260ms ease-out 150ms both"></rect>
-                  <rect x="18" y="18" width="28" height="8" fill="var(--afa-terracotta)" style="animation:intro-bar-in 260ms ease-out 300ms both"></rect>
+                  <rect x="18" y="18" width="28" height="8" fill="var(--afa-brand-mark)" style="animation:intro-bar-in 260ms ease-out 300ms both"></rect>
                 </svg>
                 <div id="intro-wordmark">
                   <span id="intro-letters"></span>
@@ -202,7 +202,7 @@ export default function RootLayout({
                       var span = document.createElement('span');
                       span.className = 'intro-letter';
                       span.textContent = word[i];
-                      if (i === 0) span.style.color = 'var(--afa-terracotta)';
+                      if (i === 0) span.style.color = 'var(--afa-brand-mark)';
                       span.style.animation = 'intro-fade-in ' + DUR + 'ms linear ' + (TYPE_START + i * STAGGER) + 'ms both';
                       lettersEl.appendChild(span);
                     }
