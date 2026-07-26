@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
     const body = await req.json()
     const {
-      name, address, city, state, country, capacity, acousticRating, facilities, seatMap, publish,
+      name, address, city, state, country, lat, lng, capacity, acousticRating, facilities, seatMap, publish,
       rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl, seatingMode,
     } = body
 
@@ -128,6 +128,16 @@ export async function POST(req: Request) {
     if (mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
       return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
     }
+    // Real coordinates from the Address autocomplete lookup - same
+    // "always validate server-side, never trust the client" discipline
+    // as every other numeric input in this app. Silently dropped (not a
+    // hard error) if out of range or non-numeric, since these are a
+    // nice-to-have (Get Directions link) rather than something the rest
+    // of registration should ever block on.
+    const parsedLat = lat !== undefined && lat !== null && lat !== '' ? Number(lat) : null
+    const parsedLng = lng !== undefined && lng !== null && lng !== '' ? Number(lng) : null
+    const validLat = parsedLat !== null && Number.isFinite(parsedLat) && parsedLat >= -90 && parsedLat <= 90 ? parsedLat : null
+    const validLng = parsedLng !== null && Number.isFinite(parsedLng) && parsedLng >= -180 && parsedLng <= 180 ? parsedLng : null
     const resolvedSeatingMode = seatingMode === 'NUMBERED' ? 'NUMBERED' : 'GENERAL_ADMISSION'
     // NUMBERED venues skip the mandatory section-editor at creation time -
     // the create form sends a plain capacity number instead of seatMap
@@ -167,6 +177,8 @@ export async function POST(req: Request) {
         // pre-existing venue.
         state: state && String(state).trim() ? String(state).trim() : null,
         country: country && String(country).trim() ? String(country).trim() : null,
+        lat: validLat,
+        lng: validLng,
         capacity: finalCapacity,
         acousticRating: acousticRating ? parseFloat(acousticRating) : null,
         mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null,

@@ -8,7 +8,8 @@ interface PlacePrediction {
   secondaryText: string
 }
 
-interface ResolvedLocation {
+interface ResolvedAddress {
+  formattedAddress: string | null
   city: string
   state: string | null
   country: string | null
@@ -16,26 +17,27 @@ interface ResolvedLocation {
   lng: number | null
 }
 
-interface CityAutocompleteProps {
+interface AddressAutocompleteProps {
   value: string
-  onChange: (city: string) => void
-  onResolved: (location: ResolvedLocation) => void
+  onChange: (address: string) => void
+  onResolved: (location: ResolvedAddress) => void
   inputStyle: React.CSSProperties
   placeholder?: string
 }
 
-// Replaces the plain free-text City input on venue create/edit with a
-// real Places (New) autocomplete - typing shows city suggestions,
-// picking one resolves State/Country automatically via a Place Details
-// call. Debounced the same way SearchBox.tsx already does (250ms) for
-// consistency with the rest of the app.
+// Address-level search (street addresses, premises, and named
+// establishments - so typing a venue's actual name can surface its
+// real indexed address). Deliberately built as ONE merged lookup that
+// also derives City/State/Country/lat-lng from the same Place Details
+// response, instead of running a second independent search - this is
+// what keeps API call volume/cost the same as the City-only feature
+// that shipped in PR #210, per the cost note in docs/design.md §9.4.
 //
-// Session token: generated once per "search episode" (first keystroke
-// after the field was empty/just resolved), reused across every
-// keystroke and the final Details call, then regenerated - this is
-// what makes Google bill the whole search-and-pick as one cheap
-// session instead of per-keystroke (see src/lib/places.ts).
-export default function CityAutocomplete({ value, onChange, onResolved, inputStyle, placeholder }: CityAutocompleteProps) {
+// Same graceful-degradation pattern as CityAutocomplete: typing an
+// address with no clean match still works and just saves as free
+// text, since many real venues here (homes, informal spaces) won't
+// have a clean Google-indexed listing.
+export default function AddressAutocomplete({ value, onChange, onResolved, inputStyle, placeholder }: AddressAutocompleteProps) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -61,7 +63,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
   }, [])
 
   useEffect(() => {
-    if (value.trim().length < 2) {
+    if (value.trim().length < 3) {
       setPredictions([])
       return
     }
@@ -70,7 +72,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
       fetch('/api/places/autocomplete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: value.trim(), sessionToken: getSessionToken(), mode: 'city' }),
+        body: JSON.stringify({ input: value.trim(), sessionToken: getSessionToken(), mode: 'address' }),
       })
         .then((res) => res.json())
         .then((data) => setPredictions(Array.isArray(data.predictions) ? data.predictions : []))
@@ -89,10 +91,11 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
       const res = await fetch('/api/places/details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ placeId: prediction.placeId, sessionToken: getSessionToken() }),
+        body: JSON.stringify({ placeId: prediction.placeId, sessionToken: getSessionToken(), includeAddress: true }),
       })
       if (res.ok) {
         const location = await res.json()
+        onChange(location.formattedAddress || prediction.mainText)
         onResolved(location)
       }
     } finally {
@@ -111,7 +114,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
         value={value}
         onChange={(e) => { onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
-        placeholder={placeholder ?? 'Start typing a city...'}
+        placeholder={placeholder ?? 'Start typing an address or venue name...'}
         style={inputStyle}
         autoComplete="off"
       />
@@ -163,16 +166,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
         </div>
       )}
       {loading && open && predictions.length === 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            fontSize: '12px',
-            opacity: 0.5,
-            padding: '4px 2px',
-          }}
-        >
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: '12px', opacity: 0.5, padding: '4px 2px' }}>
           Searching...
         </div>
       )}

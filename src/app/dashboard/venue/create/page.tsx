@@ -10,6 +10,7 @@ import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
+import AddressAutocomplete from '@/components/AddressAutocomplete'
 
 const inputStyle = {
   width: '100%',
@@ -49,6 +50,8 @@ export default function CreateVenuePage() {
     city: '',
     state: '',
     country: '',
+    lat: '',
+    lng: '',
     acousticRating: '',
     mapsUrl: '',
   })
@@ -292,7 +295,22 @@ export default function CreateVenuePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Address *</label>
-                  <input type="text" name="address" value={formData.address} onChange={handleChange} placeholder="e.g., 123 Main Street" style={inputStyle} required />
+                  <AddressAutocomplete
+                    value={formData.address}
+                    onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+                    onResolved={(loc) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        city: loc.city || prev.city,
+                        state: loc.state ?? prev.state,
+                        country: loc.country ?? prev.country,
+                        lat: loc.lat != null ? String(loc.lat) : prev.lat,
+                        lng: loc.lng != null ? String(loc.lng) : prev.lng,
+                      }))
+                    }
+                    inputStyle={inputStyle}
+                    placeholder="e.g., The Grand Theater, or 123 Main Street"
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>City *</label>

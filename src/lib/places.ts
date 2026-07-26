@@ -26,10 +26,23 @@ export interface PlacePrediction {
   secondaryText: string
 }
 
-// City-level autocomplete only - includedPrimaryTypes restricts results
-// to locality-shaped places (cities/towns), not businesses or streets,
-// since this is only ever used for the venue's City field.
-export async function autocompletePlaces(input: string, sessionToken: string): Promise<PlacePrediction[]> {
+export type PlaceSearchMode = 'city' | 'address'
+
+// Two search modes share one endpoint:
+//   'city'    - restricted to locality-shaped places (cities/towns) -
+//               used by the standalone City field's own search.
+//   'address' - broader (street addresses, premises, and named
+//               establishments/venues) - used by the Address field.
+//               Deliberately includes 'establishment' so typing a
+//               venue's actual name (e.g. "The Grand Theater") can
+//               surface its real indexed address directly, not just
+//               street-number searches.
+const PRIMARY_TYPES: Record<PlaceSearchMode, string[]> = {
+  city: ['locality', 'administrative_area_level_3'],
+  address: ['street_address', 'premise', 'subpremise', 'establishment'],
+}
+
+export async function autocompletePlaces(input: string, sessionToken: string, mode: PlaceSearchMode = 'city'): Promise<PlacePrediction[]> {
   const res = await fetch(`${PLACES_API_BASE}/places:autocomplete`, {
     method: 'POST',
     headers: {
@@ -39,7 +52,7 @@ export async function autocompletePlaces(input: string, sessionToken: string): P
     body: JSON.stringify({
       input,
       sessionToken,
-      includedPrimaryTypes: ['locality', 'administrative_area_level_3'],
+      includedPrimaryTypes: PRIMARY_TYPES[mode],
       // India-first, per this platform's current market - doesn't hard
       // exclude other countries, just biases ranking toward it.
       regionCode: 'IN',
@@ -68,13 +81,21 @@ export interface PlaceLocation {
   country: string | null
   lat: number | null
   lng: number | null
+  // Only meaningful for address-mode lookups - Google's own cleaned-up
+  // full address string. Null for city-mode lookups (not requested
+  // there, keeps that call's cost/shape unchanged from before this).
+  formattedAddress: string | null
 }
 
 // Terminates the Autocomplete session (billed as the cheap session
 // rate, not per-keystroke) and resolves the picked place into
 // structured city/state/country - what actually gets saved on Venue.
-export async function getPlaceDetails(placeId: string, sessionToken: string): Promise<PlaceLocation> {
-  const fieldMask = 'addressComponents,location'
+// `includeAddress` adds formattedAddress to the field mask - only set
+// this for the Address field's lookups, so the City field's own
+// independent search doesn't change shape/cost from what shipped in
+// PR #210.
+export async function getPlaceDetails(placeId: string, sessionToken: string, includeAddress = false): Promise<PlaceLocation> {
+  const fieldMask = includeAddress ? 'addressComponents,location,formattedAddress' : 'addressComponents,location'
   const res = await fetch(
     `${PLACES_API_BASE}/places/${encodeURIComponent(placeId)}?sessionToken=${encodeURIComponent(sessionToken)}`,
     {
@@ -107,5 +128,6 @@ export async function getPlaceDetails(placeId: string, sessionToken: string): Pr
     country: find('country'),
     lat: data.location?.latitude ?? null,
     lng: data.location?.longitude ?? null,
+    formattedAddress: includeAddress ? (data.formattedAddress ?? null) : null,
   }
 }
