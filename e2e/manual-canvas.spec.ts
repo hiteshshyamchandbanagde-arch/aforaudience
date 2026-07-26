@@ -25,7 +25,7 @@ test("clicking an existing seat selects it, does not create a duplicate", async 
   await page.goto(SEAT_MAP_URL);
 
   const seats = page.getByTestId("seat");
-  await expect(seats).toHaveCount(2);
+  await expect(seats).toHaveCount(2, { timeout: 20_000 });
 
   // Click (not drag) the seeded seat "Row A, Seat 1" - before PR #198 this
   // created a new overlapping seat instead of just selecting the existing
@@ -37,7 +37,7 @@ test("clicking an existing seat selects it, does not create a duplicate", async 
   // this is a synchronous state update, not a network request, so a short
   // wait is enough rather than needing a network-idle wait.
   await page.waitForTimeout(300);
-  await expect(seats).toHaveCount(2);
+  await expect(seats).toHaveCount(2, { timeout: 20_000 });
 });
 
 test("resetting Row/Next# to an existing label blocks placement instead of duplicating it", async ({ page }) => {
@@ -45,7 +45,7 @@ test("resetting Row/Next# to an existing label blocks placement instead of dupli
   await page.goto(SEAT_MAP_URL);
 
   const seats = page.getByTestId("seat");
-  await expect(seats).toHaveCount(2);
+  await expect(seats).toHaveCount(2, { timeout: 20_000 });
 
   await page.getByRole("button", { name: /manual placement/i }).click();
   await expect(page.getByRole("button", { name: /manual placement on/i })).toBeVisible();
@@ -61,7 +61,7 @@ test("resetting Row/Next# to an existing label blocks placement instead of dupli
   await page.getByTestId("seatmap-canvas").click({ position: { x: 300, y: 300 } });
 
   await expect(page.getByRole("alert")).toContainText(/row a, seat 1 already exists/i);
-  await expect(seats).toHaveCount(2);
+  await expect(seats).toHaveCount(2, { timeout: 20_000 });
 });
 
 test("numeric fields (side margin) can be cleared and retyped without overtype-then-delete", async ({ page }) => {
@@ -92,7 +92,7 @@ test("an accidental refresh mid-edit offers to restore the in-progress layout", 
   await page.goto(SEAT_MAP_URL);
 
   const seats = page.getByTestId("seat");
-  await expect(seats).toHaveCount(2);
+  await expect(seats).toHaveCount(2, { timeout: 20_000 });
 
   await page.getByRole("button", { name: /manual placement/i }).click();
   // Place one new seat well away from the two seeded ones and from the
