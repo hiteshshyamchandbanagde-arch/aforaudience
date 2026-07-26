@@ -13,6 +13,7 @@ function LoginForm() {
   const registered = searchParams.get("registered")
   const justReset = searchParams.get("reset")
   const wasSuspended = searchParams.get("suspended")
+  const wasIdle = searchParams.get("idle")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [identifier, setIdentifier] = useState("")
@@ -126,6 +127,11 @@ function LoginForm() {
         {wasSuspended && (
           <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
             Your account has been suspended. Contact support if you believe this is a mistake.
+          </div>
+        )}
+        {wasIdle && !wasSuspended && (
+          <div style={{ background: "var(--afa-cream)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
+            You were signed out after a period of inactivity. Please sign in again.
           </div>
         )}
         {error && (
