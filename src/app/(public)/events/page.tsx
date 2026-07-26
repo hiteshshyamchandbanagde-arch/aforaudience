@@ -193,11 +193,12 @@ export default function EventsPage() {
             {filtered.map((event) => {
               const meta = TYPE_META[event.type] || TYPE_META.OPEN_MIC
               return (
-                <div
+                <Link
                   key={event.id}
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)" }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none" }}
+                  href={`/events/${event.id}`}
+                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", transition: "transform 0.2s, box-shadow 0.2s", textDecoration: "none", color: "inherit", display: "block" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)" }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none" }}
                 >
                   {view === "grid" && (
                     <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
@@ -261,12 +262,12 @@ export default function EventsPage() {
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: view === "grid" ? "12px" : "0", flexShrink: 0 }}>
-                      <Link href={`/events/${event.id}`} style={{ background: "var(--afa-ink)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>
+                      <span style={{ background: "var(--afa-ink)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600 }}>
                         View Event
-                      </Link>
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>
