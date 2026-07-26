@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { input, sessionToken } = await req.json()
+    const { input, sessionToken, mode } = await req.json()
     const query = typeof input === 'string' ? input.trim() : ''
     if (!query || query.length < 2) {
       return NextResponse.json({ predictions: [] })
@@ -22,11 +22,14 @@ export async function POST(req: Request) {
     if (typeof sessionToken !== 'string' || !sessionToken) {
       return NextResponse.json({ error: 'sessionToken is required' }, { status: 400 })
     }
+    // Validate against a fixed allowlist server-side - never pass a
+    // client-supplied type list straight through to Google.
+    const resolvedMode = mode === 'address' ? 'address' : 'city'
 
-    const predictions = await autocompletePlaces(query, sessionToken)
+    const predictions = await autocompletePlaces(query, sessionToken, resolvedMode)
     return NextResponse.json({ predictions })
   } catch (err) {
     console.error('Error in places autocomplete:', err)
-    return NextResponse.json({ error: 'City search is temporarily unavailable' }, { status: 500 })
+    return NextResponse.json({ error: 'Search is temporarily unavailable' }, { status: 500 })
   }
 }

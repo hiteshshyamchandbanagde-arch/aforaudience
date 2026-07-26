@@ -10,6 +10,7 @@ import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
+import AddressAutocomplete from '@/components/AddressAutocomplete'
 
 interface Venue {
   id: string
@@ -18,6 +19,8 @@ interface Venue {
   city: string
   state?: string | null
   country?: string | null
+  lat?: number | null
+  lng?: number | null
   capacity: number
   facilities: string[]
   acousticRating?: number
@@ -58,7 +61,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [error, setError] = useState('')
   const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', acousticRating: '', mapsUrl: '' })
+  const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', lat: '', lng: '', acousticRating: '', mapsUrl: '' })
   const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([])
 
@@ -84,6 +87,8 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           city: data.city,
           state: data.state || '',
           country: data.country || '',
+          lat: data.lat != null ? String(data.lat) : '',
+          lng: data.lng != null ? String(data.lng) : '',
           acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
           mapsUrl: data.mapsUrl || '',
         })
@@ -205,7 +210,21 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Address *</label>
-                  <input type="text" name="address" value={formData.address} onChange={handleChange} style={inputStyle} required />
+                  <AddressAutocomplete
+                    value={formData.address}
+                    onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+                    onResolved={(loc) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        city: loc.city || prev.city,
+                        state: loc.state ?? prev.state,
+                        country: loc.country ?? prev.country,
+                        lat: loc.lat != null ? String(loc.lat) : prev.lat,
+                        lng: loc.lng != null ? String(loc.lng) : prev.lng,
+                      }))
+                    }
+                    inputStyle={inputStyle}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>City *</label>

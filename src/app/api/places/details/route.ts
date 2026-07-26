@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { placeId, sessionToken } = await req.json()
+    const { placeId, sessionToken, includeAddress } = await req.json()
     if (typeof placeId !== 'string' || !placeId) {
       return NextResponse.json({ error: 'placeId is required' }, { status: 400 })
     }
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'sessionToken is required' }, { status: 400 })
     }
 
-    const location = await getPlaceDetails(placeId, sessionToken)
+    const location = await getPlaceDetails(placeId, sessionToken, includeAddress === true)
     return NextResponse.json(location)
   } catch (err) {
     console.error('Error in places details:', err)
