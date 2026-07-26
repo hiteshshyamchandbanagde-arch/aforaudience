@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
+  "prebuild": "node scripts/stamp-sw-version.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
