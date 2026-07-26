@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
 
 interface PendingItem {
   id: string
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
   if (forbidden) {

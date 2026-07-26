@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import RangePicker from '@/components/RangePicker'
+import BrandLoader from '@/components/BrandLoader'
 
 interface EventRow {
   id: string
@@ -94,7 +95,7 @@ export default function OrganiserSalesOverviewPage() {
     }
   }, [status, range, fetchOverview])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)

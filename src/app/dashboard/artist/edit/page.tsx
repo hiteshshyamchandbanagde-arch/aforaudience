@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
 
 const inputStyle = {
   width: '100%',
@@ -128,7 +129,7 @@ export default function EditArtistProfilePage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
   return (

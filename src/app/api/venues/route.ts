@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { isValidMapsUrl } from '@/lib/maps-url'
 
 export async function GET() {
   try {
@@ -124,13 +125,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Acoustic rating must be between 0 and 5.' }, { status: 400 })
       }
     }
-    if (mapsUrl && mapsUrl.trim()) {
-      try {
-        const parsed = new URL(mapsUrl.trim())
-        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('bad protocol')
-      } catch {
-        return NextResponse.json({ error: 'Google Maps link must be a valid URL (starting with https://).' }, { status: 400 })
-      }
+    if (mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
+      return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
     }
     const resolvedSeatingMode = seatingMode === 'NUMBERED' ? 'NUMBERED' : 'GENERAL_ADMISSION'
     // NUMBERED venues skip the mandatory section-editor at creation time -

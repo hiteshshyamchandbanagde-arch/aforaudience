@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
+import BrandLoader from '@/components/BrandLoader'
 
 interface SeatSection {
   id?: string
@@ -394,7 +395,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>Event not found</div></>)

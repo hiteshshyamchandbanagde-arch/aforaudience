@@ -6,6 +6,7 @@ import { useEffect, useState, use, useCallback, useRef, ReactNode, Suspense } fr
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import RangePicker from '@/components/RangePicker'
+import BrandLoader from '@/components/BrandLoader'
 
 interface Tier {
   sectionName: string
@@ -108,7 +109,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [status, range, fetchSales])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
@@ -245,7 +246,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export default function EventSalesPage(props: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>}>
+    <Suspense fallback={<><SiteNav /><BrandLoader /></>}>
       <EventSalesPageInner {...props} />
     </Suspense>
   )

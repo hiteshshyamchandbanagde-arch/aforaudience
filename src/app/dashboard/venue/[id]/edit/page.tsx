@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
 
 interface Venue {
   id: string
@@ -164,7 +165,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !venue) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)

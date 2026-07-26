@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { isValidMapsUrl } from '@/lib/maps-url'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -59,6 +60,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const body = await req.json()
     const { name, address, city, capacity, acousticRating, facilities, seatMap, publish, mapsUrl } = body
+
+    if (mapsUrl !== undefined && mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
+      return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
+    }
 
     const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : undefined
     const seatMapCapacity = sections

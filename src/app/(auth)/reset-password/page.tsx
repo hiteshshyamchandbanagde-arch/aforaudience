@@ -4,6 +4,7 @@ import { useState, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
+import BrandLoader from '@/components/BrandLoader'
 
 function ResetPasswordForm() {
   const router = useRouter()
@@ -122,7 +123,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<BrandLoader />}>
         <ResetPasswordForm />
       </Suspense>
     </main>

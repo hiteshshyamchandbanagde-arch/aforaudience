@@ -22,6 +22,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import BrandLoader from '@/components/BrandLoader'
 
 interface LineupSlot {
   id: string
@@ -215,7 +216,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import BrandLoader from '@/components/BrandLoader'
 
 interface Offer {
   id: string
@@ -109,7 +110,7 @@ export default function VenueRequestsPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><div style={{ padding: '32px' }}>Loading...</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
 
   return (

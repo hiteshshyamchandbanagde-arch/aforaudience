@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import FeedbackTrends from '@/components/admin/FeedbackTrends'
 import FeedbackDetailPanel, { type FeedbackDetailItem } from '@/components/admin/FeedbackDetailPanel'
+import BrandLoader from '@/components/BrandLoader'
 
 // /dashboard/admin/feedback — Admin Dashboard v1 (design.md §9.1)
 //
@@ -223,7 +224,7 @@ export default function AdminFeedbackPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: '32px' }}>Loading...</div>
+        <BrandLoader />
       </>
     )
   if (!session) return <SiteNav />
