@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
@@ -75,6 +75,16 @@ export default function CreateEventPage() {
     setError(message)
     showToast(message, 'error')
   }
+  // Bug fix (Feedback 09c05b22, 25 Jul): the error banner previously only
+  // cleared at the top of the next submit() call, so a user who corrected
+  // every field the banner listed - but hadn't clicked Save/Publish again -
+  // saw the exact same stale "missing fields" text sitting on screen even
+  // though it was already fully resolved. The banner is meant to persist
+  // until real user action (not auto-vanish like a toast), but editing a
+  // flagged field IS that action, so it should clear immediately rather
+  // than waiting for a resubmit to notice. Skips the mount render so this
+  // doesn't fire before any error has ever been shown.
+  const isFirstRender = useRef(true)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -263,6 +273,20 @@ export default function CreateEventPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [venueId])
 
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    if (error) setError('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formData, isFree, ticketPrice, surpriseAct, venueId, bookingAmount,
+    maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
+    plusOnesRequired, defaultCompensationType, defaultFeeAmount,
+    defaultBuyInAmount, tierPrices,
+  ])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -320,6 +344,11 @@ export default function CreateEventPage() {
     // Server-side (POST /api/events) is the real enforcement point; this
     // is just so the person doesn't wait on a round-trip to find out.
     const MAX_INR_AMOUNT = 10_000_000
+    if (publish && !venueId) {
+      fail('Please attach a venue before publishing, or save as a draft instead.')
+      setSaving(false)
+      return
+    }
     if (publish && venueId && !bookingAmount) {
       fail("Please enter an Offer Amount before publishing, or remove the venue.")
       setSaving(false)
