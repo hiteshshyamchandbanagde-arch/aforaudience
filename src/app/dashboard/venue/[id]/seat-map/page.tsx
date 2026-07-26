@@ -1377,6 +1377,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <div
                   ref={canvasRef}
                   onClick={placeSeat}
+                  data-testid="seatmap-canvas"
                   style={{
                     position: 'relative',
                     width: `${canvasBounds.width}px`,
@@ -1398,6 +1399,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {seats.map((s) => (
                     <div
                       key={s.clientId}
+                      data-testid="seat"
                       onMouseDown={(e) => startDrag(e, s.clientId)}
                       // stopPropagation() in startDrag only stops the
                       // mousedown event itself - the browser still fires a
