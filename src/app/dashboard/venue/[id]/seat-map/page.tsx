@@ -30,6 +30,25 @@ type SeatDraft = {
   y: number
 }
 
+// Local-draft persistence (autosave) - a manual-canvas layout previously
+// lived only in React state, so an accidental scroll-triggered refresh
+// (or an away-tab losing state) wiped every placed seat with no way
+// back. Mirrors it into localStorage on every change; offered back on
+// next load rather than silently overwriting the server-loaded layout,
+// since the two could legitimately differ (e.g. someone else edited the
+// venue meanwhile, or the local draft is just stale).
+type SeatMapDraft = {
+  savedAt: number
+  seatingMode: 'GENERAL_ADMISSION' | 'NUMBERED'
+  levels: string[]
+  activeLevel: string
+  seatsByLevel: Record<string, SeatDraft[]>
+  gridConfigByLevel: Record<string, GridConfig>
+  zonePricesByLevel: Record<string, Record<string, string>>
+  builderPathByLevel: Record<string, 'choose' | 'wizard' | 'canvas' | null>
+}
+const draftKey = (venueId: string) => `afa-seatmap-draft:${venueId}`
+
 const CANVAS_WIDTH = 900
 const CANVAS_HEIGHT = 560
 const SEAT_SIZE = 22
@@ -494,6 +513,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   }
 
   const canvasRef = useRef<HTMLDivElement>(null)
+  // Gates the autosave effect below until the initial load (and any
+  // restore-a-draft decision) has fully settled - otherwise autosave's
+  // first run would fire against default/empty state and clobber a real
+  // unrestored draft before the load effect even gets a chance to offer it.
+  const hydratedRef = useRef(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -528,10 +552,48 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           priceByLevel[lvl][z.zoneName] = z.suggestedPrice != null ? String(z.suggestedPrice) : ''
         }
         setZonePricesByLevel(priceByLevel)
+
+        // Offer back a local draft rather than silently applying or
+        // silently discarding it - the two could legitimately differ
+        // (someone else edited the venue meanwhile, or the draft is
+        // just stale from an earlier abandoned session).
+        try {
+          const raw = localStorage.getItem(draftKey(id))
+          if (raw) {
+            const draft: SeatMapDraft = JSON.parse(raw)
+            const draftSeatCount = Object.values(draft.seatsByLevel || {}).reduce((n, arr) => n + arr.length, 0)
+            if (draftSeatCount > 0) {
+              const minsAgo = Math.max(0, Math.round((Date.now() - draft.savedAt) / 60000))
+              const levelCount = Object.keys(draft.seatsByLevel).length
+              const restore = window.confirm(
+                `Found an unsaved local draft from ${minsAgo < 1 ? 'less than a minute' : `${minsAgo} minute${minsAgo === 1 ? '' : 's'}`} ago ` +
+                `(${draftSeatCount} seat${draftSeatCount === 1 ? '' : 's'} across ${levelCount} level${levelCount === 1 ? '' : 's'}) - ` +
+                `likely from an accidental refresh. Restore it?\n\nCancel discards the draft and keeps what's saved on the server.`
+              )
+              if (restore) {
+                setSeatingMode(draft.seatingMode)
+                setLevels(draft.levels)
+                setActiveLevel(draft.activeLevel)
+                setSeatsByLevel(draft.seatsByLevel)
+                setGridConfigByLevel(draft.gridConfigByLevel)
+                setZonePricesByLevel(draft.zonePricesByLevel)
+                setBuilderPathByLevel(draft.builderPathByLevel)
+              } else {
+                localStorage.removeItem(draftKey(id))
+              }
+            } else {
+              localStorage.removeItem(draftKey(id))
+            }
+          }
+        } catch {
+          // Corrupt/unparseable draft - drop it rather than throw.
+          localStorage.removeItem(draftKey(id))
+        }
       } catch (err: any) {
         setError(err.message)
       } finally {
         setLoading(false)
+        hydratedRef.current = true
       }
     }
     if (session?.user) fetchSeatMap()
@@ -546,6 +608,32 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // `(session?.user as any)?.role` cast elsewhere.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(session?.user as any)?.id, id])
+
+  // Autosave - mirrors the in-progress layout into localStorage on every
+  // change, so an accidental refresh/tab-close has something to offer
+  // back on next load instead of wiping the canvas outright. Convenience
+  // only, never the source of truth: Save (below) still requires an
+  // explicit click, and a successful Save clears this draft since the
+  // server is now the up-to-date copy.
+  useEffect(() => {
+    if (!hydratedRef.current) return
+    try {
+      const draft: SeatMapDraft = {
+        savedAt: Date.now(),
+        seatingMode,
+        levels,
+        activeLevel,
+        seatsByLevel,
+        gridConfigByLevel,
+        zonePricesByLevel,
+        builderPathByLevel,
+      }
+      localStorage.setItem(draftKey(id), JSON.stringify(draft))
+    } catch {
+      // Storage full or unavailable (e.g. private browsing) - autosave
+      // is a convenience, fail silently rather than interrupt editing.
+    }
+  }, [id, seatingMode, levels, activeLevel, seatsByLevel, gridConfigByLevel, zonePricesByLevel, builderPathByLevel])
 
   const tierOrder = Array.from(new Set(seats.map((s) => s.tierLabel).concat(activeTier ? [activeTier] : [])))
   const canvasBounds = contentBounds(seats)
@@ -665,6 +753,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
+      // Server is now the up-to-date copy - the local draft would only
+      // cause confusion (or a stale-restore prompt) on a future reload.
+      try { localStorage.removeItem(draftKey(id)) } catch {}
       showToast(`Saved ${data.seatCount} seat${data.seatCount === 1 ? '' : 's'} across ${levels.length} level${levels.length === 1 ? '' : 's'}.`, 'success')
     } catch (err: any) {
       showToast(err.message, 'error')
