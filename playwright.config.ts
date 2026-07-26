@@ -19,6 +19,11 @@ const baseURL =
 
 export default defineConfig({
   testDir: "./e2e",
+  // TEMPORARY (session 35, diagnostic) - restrict to the 2 new specs to
+  // isolate whether the earlier failed run was caused by these or by one
+  // of the pre-existing specs (numbered-seat-booking/waitlist-wallet-
+  // credit have known flakiness per design.md). Revert before merging.
+  testMatch: /(login-code-case|manual-canvas)\.spec\.ts/,
   fullyParallel: false, // QA is a single shared environment/DB — avoid racing bookings against each other
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
