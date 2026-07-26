@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import MessageButton from '@/components/MessageButton'
 
 interface BookingItem {
   id: string
@@ -165,6 +166,7 @@ export default function MyTicketsPage() {
                       >
                         Download ticket (PDF)
                       </a>
+                      <MessageButton contextType="BOOKING" contextId={b.id} label="Message Organiser" />
                     </div>
                   )}
                 </div>

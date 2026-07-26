@@ -125,6 +125,66 @@ model VenueDayRate {
 }
 
 
+// In-app messaging (Hitesh request, 26 Jul session 36; design.md §9.4).
+// One generic shape for every confirmed-relationship thread instead of
+// three near-identical tables - contextType/contextId is a loose
+// reference (not an FK, since it points at a different table depending
+// on type), same "plain scalar, not a relation" pattern already used
+// for checkedInByUserId/suspendedByUserId elsewhere in this schema.
+//   PERFORMANCE   -> Artist <-> Organiser, one thread per lineup slot
+//   VENUE_BOOKING -> Organiser <-> Venue Owner, one thread per confirmed booking
+//   BOOKING       -> Audience <-> Organiser, one thread per ticket (per-booking
+//                    granularity, Hitesh's call 26 Jul - not shared per-event)
+// ConversationParticipant is a real join table (not a hardcoded 2-party
+// shape) deliberately, so a future group thread needs no schema change.
+enum ConversationContextType {
+  PERFORMANCE
+  VENUE_BOOKING
+  BOOKING
+}
+
+model Conversation {
+  id          String                  @id @default(cuid())
+  contextType ConversationContextType
+  contextId   String
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@unique([contextType, contextId])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Null until the participant opens the thread at least once. Compared
+  // against the newest Message.createdAt to compute an unread badge - no
+  // per-message read-receipt model (v1 explicitly defers read receipts,
+  // design.md §9.4).
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  body           String
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
 model User {
   id          String   @id @default(cuid())
   name        String   @unique // also doubles as the login "username"
@@ -192,6 +252,8 @@ model User {
   pushSubscriptions      PushSubscription[]
   plusOnes               PlusOne[]
   reviewReplies          ReviewReply[]
+  conversationParticipants ConversationParticipant[]
+  sentMessages           Message[]
 }
 
 model PushSubscription {

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import MessageButton from '@/components/MessageButton'
 
 interface BookingRequest {
   id: string
@@ -296,6 +297,9 @@ export default function VenueBookingsPage() {
                       <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: st.bg, color: st.color }}>
                         {b.status.toLowerCase()}
                       </span>
+                      {b.status === 'CONFIRMED' && (
+                        <MessageButton contextType="VENUE_BOOKING" contextId={b.id} label="Message Organiser" />
+                      )}
                     </div>
                   )
                 })}
