@@ -6,6 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
+import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 
 interface Venue {
@@ -54,7 +55,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '', mapsUrl: '' })
-  const [facilitiesInput, setFacilitiesInput] = useState('')
+  const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([])
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
           mapsUrl: data.mapsUrl || '',
         })
-        setFacilitiesInput((data.facilities || []).join(', '))
+        setFacilities(data.facilities || [])
         setSections(
           data.seatMap?.sections && data.seatMap.sections.length > 0
             ? data.seatMap.sections
@@ -113,7 +114,10 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
       return
     }
     const num = Number(value)
-    if (!Number.isFinite(num)) return
+    if (!Number.isFinite(num)) {
+      showToast('Acoustic rating must be a number between 0 and 5.', 'error')
+      return
+    }
     const clamped = Math.max(0, Math.min(num, 5))
     setFormData((prev) => ({ ...prev, acousticRating: String(clamped) }))
   }
@@ -140,7 +144,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
         body: JSON.stringify({
           ...formData,
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
-          facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
+          facilities,
           seatMap: venue?.seatingMode === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
@@ -203,15 +207,14 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
-                <div>
-                  <label style={labelStyle}>Facilities <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
-                  <input type="text" value={facilitiesInput} onChange={(e) => setFacilitiesInput(e.target.value)} style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                  <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} min="0" max="5" step="0.5" maxLength={3} style={inputStyle} />
-                </div>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Facilities</label>
+                <FacilitiesPicker value={facilities} onChange={setFacilities} />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
+                <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} min="0" max="5" step="0.5" maxLength={3} style={{ ...inputStyle, maxWidth: '200px' }} />
               </div>
 
               <div>

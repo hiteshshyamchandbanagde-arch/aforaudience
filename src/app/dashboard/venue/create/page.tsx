@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
+import FacilitiesPicker from '@/components/FacilitiesPicker'
 
 const inputStyle = {
   width: '100%',
@@ -47,7 +48,7 @@ export default function CreateVenuePage() {
     acousticRating: '',
     mapsUrl: '',
   })
-  const [facilitiesInput, setFacilitiesInput] = useState('')
+  const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([
     { id: makeId(), name: '', seats: '', price: '' },
   ])
@@ -93,7 +94,12 @@ export default function CreateVenuePage() {
       if (raw) {
         const draft = JSON.parse(raw)
         if (draft.formData) setFormData(draft.formData)
-        if (typeof draft.facilitiesInput === 'string') setFacilitiesInput(draft.facilitiesInput)
+        if (Array.isArray(draft.facilities)) setFacilities(draft.facilities)
+        else if (typeof draft.facilitiesInput === 'string') {
+          // Backward-compat: a draft saved before this component existed
+          // stored a comma-separated string, not an array.
+          setFacilities(draft.facilitiesInput.split(',').map((f: string) => f.trim()).filter(Boolean))
+        }
         if (Array.isArray(draft.sections)) setSections(draft.sections)
         if (draft.seatingChoice) setSeatingChoice(draft.seatingChoice)
         if (typeof draft.approxCapacity === 'string') setApproxCapacity(draft.approxCapacity)
@@ -117,13 +123,13 @@ export default function CreateVenuePage() {
     if (!draftRestored) return // don't overwrite a saved draft with pre-restore defaults
     try {
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
-        formData, facilitiesInput, sections, seatingChoice, approxCapacity,
+        formData, facilities, sections, seatingChoice, approxCapacity,
         rateType, hourlyRate, dailyRate, minDurationHours, useDayOverrides, dayRates,
       }))
     } catch {
       // Storage full/unavailable - not worth surfacing to the user mid-fill.
     }
-  }, [draftRestored, formData, facilitiesInput, sections, seatingChoice, approxCapacity, rateType, hourlyRate, dailyRate, minDurationHours, useDayOverrides, dayRates])
+  }, [draftRestored, formData, facilities, sections, seatingChoice, approxCapacity, rateType, hourlyRate, dailyRate, minDurationHours, useDayOverrides, dayRates])
 
   const clearDraft = () => {
     try { sessionStorage.removeItem(DRAFT_KEY) } catch { /* noop */ }
@@ -144,7 +150,10 @@ export default function CreateVenuePage() {
       return
     }
     const num = Number(value)
-    if (!Number.isFinite(num)) return
+    if (!Number.isFinite(num)) {
+      showToast('Acoustic rating must be a number between 0 and 5.', 'error')
+      return
+    }
     const clamped = Math.max(0, Math.min(num, 5))
     setFormData((prev) => ({ ...prev, acousticRating: String(clamped) }))
   }
@@ -207,7 +216,7 @@ export default function CreateVenuePage() {
         body: JSON.stringify({
           ...formData,
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
-          facilities: facilitiesInput.split(',').map((f) => f.trim()).filter(Boolean),
+          facilities,
           seatingMode: seatingChoice,
           seatMap: seatingChoice === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
           capacity: seatingChoice === 'NUMBERED' ? Number(approxCapacity) : undefined,
@@ -287,15 +296,14 @@ export default function CreateVenuePage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
-                <div>
-                  <label style={labelStyle}>Facilities <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
-                  <input type="text" value={facilitiesInput} onChange={(e) => setFacilitiesInput(e.target.value)} placeholder="e.g., Parking, Bar, AC" style={inputStyle} />
-                </div>
-                <div>
-                  <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                  <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} placeholder="e.g., 4.5" min="0" max="5" step="0.5" maxLength={3} style={inputStyle} />
-                </div>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Facilities</label>
+                <FacilitiesPicker value={facilities} onChange={setFacilities} />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
+                <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} placeholder="e.g., 4.5" min="0" max="5" step="0.5" maxLength={3} style={{ ...inputStyle, maxWidth: '200px' }} />
               </div>
 
               <div>
