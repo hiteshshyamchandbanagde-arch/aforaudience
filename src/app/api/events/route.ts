@@ -18,6 +18,51 @@ export async function GET() {
       include: { venue: true, lineup: true },
       orderBy: { date: 'asc' },
     })
+
+    // Event.totalSeats/availableSeats are only kept accurate on the flat/
+    // GA booking path - NUMBERED-venue occupancy lives in BookingSeat and
+    // was never wired back onto these columns (confirmed live 26 Jul,
+    // session 33: a NUMBERED event with 3 CONFIRMED bookings/11 held
+    // seats still read availableSeats=totalSeats). Same fix as the event
+    // detail page (EventDetailPage, session 33) applied here in batch so
+    // the listing cards' Filling Fast/Sold Out badges aren't stale too.
+    const numberedEvents = events.filter((e: any) => e.venue?.seatingMode === 'NUMBERED')
+    if (numberedEvents.length > 0) {
+      const now = new Date()
+      const venueIds = [...new Set(numberedEvents.map((e: any) => e.venueId as string))]
+      const eventIds = numberedEvents.map((e: any) => e.id as string)
+
+      const [seatCounts, heldRows] = await Promise.all([
+        prisma.seat.groupBy({ by: ['venueId'], where: { venueId: { in: venueIds } }, _count: { id: true } }),
+        prisma.bookingSeat.findMany({
+          where: {
+            booking: {
+              eventId: { in: eventIds },
+              OR: [
+                { status: 'CONFIRMED' },
+                { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+              ],
+            },
+          },
+          select: { booking: { select: { eventId: true } } },
+        }),
+      ])
+
+      const seatTotalByVenue: Record<string, number> = {}
+      for (const row of seatCounts) seatTotalByVenue[row.venueId] = row._count.id
+      const heldByEvent: Record<string, number> = {}
+      for (const row of heldRows) {
+        const eid = row.booking.eventId
+        heldByEvent[eid] = (heldByEvent[eid] || 0) + 1
+      }
+
+      for (const e of numberedEvents) {
+        const seatTotal = seatTotalByVenue[e.venueId as string] || 0
+        e.totalSeats = seatTotal
+        e.availableSeats = Math.max(0, seatTotal - (heldByEvent[e.id as string] || 0))
+      }
+    }
+
     return NextResponse.json(events)
   } catch (err) {
     console.error('Error fetching events:', err)
