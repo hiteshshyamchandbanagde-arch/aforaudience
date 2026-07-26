@@ -25,21 +25,22 @@ const SEAT_MAP_URL = `/dashboard/venue/${FIXTURE_NUMBERED_VENUE_ID}/seat-map`;
 // test below failed identically both before and after the data-testid
 // PR (#200) merged. Remove once the real cause is confirmed.
 test("DIAGNOSTIC: fixture venue owner can log in and reach the seat-map builder", async ({ page }) => {
-  await loginFixtureVenueOwner(page);
+  // Try the account's own code instead of email, to isolate whether the
+  // email lookup path specifically is the problem vs. something about
+  // this account/password as a whole.
+  await page.goto("/login");
+  await page
+    .getByPlaceholder(/you@example\.com, phone, username, or AFA code/i)
+    .fill("AFA2607000402");
+  await page.getByPlaceholder(/your password/i).fill("E2eFixtureVO!2026");
+  await page.getByRole("button", { name: /^sign in$/i }).click();
+  await page.waitForTimeout(3000);
   const urlAfterLogin = page.url();
-  expect(urlAfterLogin, `URL after login attempt: ${urlAfterLogin}`).not.toContain("/login");
-
-  await page.goto(SEAT_MAP_URL);
-  await page.waitForTimeout(2000);
-  const urlAfterNav = page.url();
-  const bodyText = (await page.locator("body").innerText()).slice(0, 400);
+  const errorText = await page.locator("body").innerText();
   expect(
-    urlAfterNav.includes("/seat-map"),
-    `URL after nav: ${urlAfterNav} | body starts: ${bodyText}`
-  ).toBe(true);
-
-  await expect(page.getByRole("heading", { name: "Seat Map Builder" })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId("seatmap-canvas")).toBeVisible({ timeout: 15_000 });
+    urlAfterLogin.includes("/login"),
+    `URL after code-login attempt: ${urlAfterLogin} | body: ${errorText.slice(0, 300)}`
+  ).toBe(false);
 });
 
 test.skip("clicking an existing seat selects it, does not create a duplicate", async ({ page }) => {
