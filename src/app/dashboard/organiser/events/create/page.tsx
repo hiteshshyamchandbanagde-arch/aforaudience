@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 
 interface SeatSection {
   id?: string
@@ -55,6 +56,17 @@ const labelStyle = {
 }
 
 const EVENT_TYPES = ['OPEN_MIC', 'STAND_UP', 'POETRY', 'THEATER', 'LINEUP']
+// design.md \u00a79.5 "Settled" mapping - auto-fills a sensible default per
+// EventType, pre-selected but always editable (not disabled/ghosted).
+const DRESSCODE_PRESETS = ['Casual', 'Smart Casual', 'Formal', 'Costume / Theme']
+const VIBE_PRESETS = ['High Energy', 'Intimate', 'Chill', 'Curated', 'Family-Friendly']
+const EVENT_TYPE_DEFAULTS: Record<string, { dresscode: string; vibe: string }> = {
+  OPEN_MIC: { dresscode: 'Casual', vibe: 'High Energy' },
+  STAND_UP: { dresscode: 'Casual', vibe: 'High Energy' },
+  LINEUP: { dresscode: 'Casual', vibe: 'High Energy' },
+  POETRY: { dresscode: 'Casual', vibe: 'Intimate' },
+  THEATER: { dresscode: 'Smart Casual', vibe: 'Curated' },
+}
 // Generous but real-world cap, same reasoning as MAX_EVENT_SEATS server-side
 // (src/app/api/events/route.ts) - no legitimate lineup approaches this,
 // it's here purely to stop a fat-fingered huge number from reaching the
@@ -94,9 +106,13 @@ export default function CreateEventPage() {
     startTime: '',
     endTime: '',
     totalSeats: '',
-    dresscode: '',
-    vibe: '',
+    dresscode: EVENT_TYPE_DEFAULTS.OPEN_MIC.dresscode,
+    vibe: EVENT_TYPE_DEFAULTS.OPEN_MIC.vibe,
   })
+  // Once the organiser directly edits Dress Code or Vibe, stop
+  // auto-overwriting them when Event Type changes - the whole point of
+  // "pre-selected but editable" is that a deliberate choice sticks.
+  const [dressVibeTouched, setDressVibeTouched] = useState(false)
   const [isFree, setIsFree] = useState(true)
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
@@ -289,7 +305,20 @@ export default function CreateEventPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
+    if (name === 'type' && !dressVibeTouched && EVENT_TYPE_DEFAULTS[value]) {
+      setFormData((prev) => ({ ...prev, type: value, ...EVENT_TYPE_DEFAULTS[value] }))
+      return
+    }
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleDresscodeChange = (val: string) => {
+    setDressVibeTouched(true)
+    setFormData((prev) => ({ ...prev, dresscode: val }))
+  }
+  const handleVibeChange = (val: string) => {
+    setDressVibeTouched(true)
+    setFormData((prev) => ({ ...prev, vibe: val }))
   }
 
   const submit = async (publish: boolean) => {
@@ -485,11 +514,23 @@ export default function CreateEventPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
                 <div>
                   <label style={labelStyle}>Dress Code</label>
-                  <input type="text" name="dresscode" value={formData.dresscode} onChange={handleChange} placeholder="e.g., Casual" style={inputStyle} />
+                  <PresetSelectWithOther
+                    value={formData.dresscode}
+                    onChange={handleDresscodeChange}
+                    presets={DRESSCODE_PRESETS}
+                    placeholder="e.g., Vintage cocktail attire"
+                    inputStyle={inputStyle}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Vibe</label>
-                  <input type="text" name="vibe" value={formData.vibe} onChange={handleChange} placeholder="e.g., Chill, intimate" style={inputStyle} />
+                  <PresetSelectWithOther
+                    value={formData.vibe}
+                    onChange={handleVibeChange}
+                    presets={VIBE_PRESETS}
+                    placeholder="e.g., Underground, edgy"
+                    inputStyle={inputStyle}
+                  />
                 </div>
               </div>
 
