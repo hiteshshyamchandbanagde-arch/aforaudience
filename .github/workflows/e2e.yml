@@ -48,6 +48,69 @@ jobs:
         env:
           CI: true
 
+      # GitHub's job-log and artifact download endpoints both redirect to
+      # Azure blob storage (blob.core.windows.net), which isn't on Claude's
+      # sandbox network allowlist - so a failure here was previously
+      # invisible to Claude beyond "exit code 1", even though the run
+      # itself succeeded or failed correctly. Posting a plain-text summary
+      # as a commit comment keeps the result entirely on api.github.com,
+      # which Claude can already read.
+      - name: Summarize results
+        if: always()
+        run: |
+          node -e '
+          const fs = require("fs");
+          let data;
+          try { data = JSON.parse(fs.readFileSync("results.json", "utf8")); }
+          catch (e) { fs.writeFileSync("summary.md", "Could not read results.json: " + e.message); process.exit(0); }
+
+          const rows = [];
+          function walk(suite) {
+            for (const s of suite.suites || []) walk(s);
+            for (const spec of suite.specs || []) {
+              for (const t of spec.tests || []) {
+                for (const r of t.results || []) {
+                  rows.push({
+                    file: spec.file,
+                    title: spec.title,
+                    project: t.projectName,
+                    status: r.status,
+                    error: r.error ? (r.error.message || "").split("\n")[0] : "",
+                  });
+                }
+              }
+            }
+          }
+          for (const s of data.suites || []) walk(s);
+
+          const passed = rows.filter(r => r.status === "passed").length;
+          const failed = rows.filter(r => r.status !== "passed");
+          let md = `### E2E run — ${passed}/${rows.length} passed\n\n`;
+          if (failed.length) {
+            md += "**Failures:**\n\n";
+            for (const r of failed) {
+              md += `- \`${r.file}\` — ${r.title} (${r.project}): **${r.status}**${r.error ? " — " + r.error : ""}\n`;
+            }
+          } else {
+            md += "All tests passed.\n";
+          }
+          md += "\n<details><summary>All results</summary>\n\n";
+          for (const r of rows) {
+            md += `- ${r.status === "passed" ? "✅" : "❌"} \`${r.file}\` — ${r.title} (${r.project})\n`;
+          }
+          md += "\n</details>\n";
+          fs.writeFileSync("summary.md", md);
+          console.log(md);
+          '
+
+      - name: Post results as a commit comment
+        if: always()
+        run: |
+          BODY=$(node -e 'console.log(JSON.stringify(require("fs").readFileSync("summary.md","utf8")))')
+          curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" \
+            -d "{\"body\": $BODY}"
+
       - name: Upload Playwright report (always, even on failure)
         if: always()
         uses: actions/upload-artifact@v4

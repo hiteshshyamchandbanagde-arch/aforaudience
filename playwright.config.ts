@@ -23,7 +23,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  reporter: [["html", { open: "never" }], ["list"]],
+  reporter: [["html", { open: "never" }], ["list"], ["json", { outputFile: "results.json" }]],
   timeout: 60_000, // generous: first request of a run can hit a cold Vercel function + Supabase pool wake-up
   use: {
     baseURL,
