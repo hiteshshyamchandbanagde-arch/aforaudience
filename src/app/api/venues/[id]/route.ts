@@ -59,7 +59,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = await req.json()
-    const { name, address, city, capacity, acousticRating, facilities, seatMap, publish, mapsUrl } = body
+    const { name, address, city, state, country, capacity, acousticRating, facilities, seatMap, publish, mapsUrl } = body
 
     if (mapsUrl !== undefined && mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
       return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
@@ -132,6 +132,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(name && { name }),
         ...(address && { address }),
         ...(city && { city }),
+        // Explicit null-clear when city is retyped without a new
+        // autocomplete pick (CityAutocomplete sends '' in that case,
+        // distinct from `undefined` meaning "field wasn't touched").
+        ...(state !== undefined && { state: state && String(state).trim() ? String(state).trim() : null }),
+        ...(country !== undefined && { country: country && String(country).trim() ? String(country).trim() : null }),
         ...(seatMapCapacity !== undefined ? { capacity: seatMapCapacity } : capacity ? { capacity } : {}),
         ...(acousticRating !== undefined && { acousticRating }),
         ...(mapsUrl !== undefined && { mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null }),

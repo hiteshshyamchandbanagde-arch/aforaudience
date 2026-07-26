@@ -9,12 +9,15 @@ import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import CityAutocomplete from '@/components/CityAutocomplete'
 
 interface Venue {
   id: string
   name: string
   address: string
   city: string
+  state?: string | null
+  country?: string | null
   capacity: number
   facilities: string[]
   acousticRating?: number
@@ -55,7 +58,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [error, setError] = useState('')
   const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({ name: '', address: '', city: '', acousticRating: '', mapsUrl: '' })
+  const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', acousticRating: '', mapsUrl: '' })
   const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([])
 
@@ -79,6 +82,8 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           name: data.name,
           address: data.address,
           city: data.city,
+          state: data.state || '',
+          country: data.country || '',
           acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
           mapsUrl: data.mapsUrl || '',
         })
@@ -204,7 +209,19 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 </div>
                 <div>
                   <label style={labelStyle}>City *</label>
-                  <input type="text" name="city" value={formData.city} onChange={handleChange} style={inputStyle} required />
+                  <CityAutocomplete
+                    value={formData.city}
+                    onChange={(city) => setFormData((prev) => ({ ...prev, city, state: '', country: '' }))}
+                    onResolved={(loc) =>
+                      setFormData((prev) => ({ ...prev, city: loc.city || prev.city, state: loc.state ?? '', country: loc.country ?? '' }))
+                    }
+                    inputStyle={inputStyle}
+                  />
+                  {(formData.state || formData.country) && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '4px' }}>
+                      {[formData.state, formData.country].filter(Boolean).join(', ')}
+                    </p>
+                  )}
                 </div>
               </div>
 

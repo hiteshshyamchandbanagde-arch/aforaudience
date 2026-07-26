@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
     const body = await req.json()
     const {
-      name, address, city, capacity, acousticRating, facilities, seatMap, publish,
+      name, address, city, state, country, capacity, acousticRating, facilities, seatMap, publish,
       rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl, seatingMode,
     } = body
 
@@ -161,6 +161,12 @@ export async function POST(req: Request) {
         name,
         address,
         city,
+        // Both optional/nullable - only populated when the owner picks a
+        // suggestion from the new Places autocomplete; a manually-typed
+        // city (no dropdown match) leaves these null, same as any
+        // pre-existing venue.
+        state: state && String(state).trim() ? String(state).trim() : null,
+        country: country && String(country).trim() ? String(country).trim() : null,
         capacity: finalCapacity,
         acousticRating: acousticRating ? parseFloat(acousticRating) : null,
         mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null,
