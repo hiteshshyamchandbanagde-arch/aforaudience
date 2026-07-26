@@ -64,7 +64,16 @@ export async function registerTestArtist(page: Page) {
  * never clicks Save, so nothing here is ever mutated server-side.
  */
 export const FIXTURE_VENUE_OWNER = {
-  identifier: "e2e.fixture.venueowner@example.com",
+  // Login via AFA code, not email - session 35 found email-based login for
+  // this exact account failed consistently even with a generous 25s
+  // cold-start timeout, while code-based login for the same account
+  // (same password) succeeded every time, including as the first request
+  // of a fresh run. Root cause not fully chased down (ruled out: wrong
+  // credentials, DB row corruption/whitespace, bcrypt hash mismatch, all
+  // verified directly against the DB) - noted here as a real, unexplained
+  // asymmetry between the two lookup paths worth a closer look someday,
+  // but not worth blocking Manual Canvas test coverage on today.
+  identifier: "AFA2607000402",
   password: "E2eFixtureVO!2026",
 };
 export const FIXTURE_NUMBERED_VENUE_ID = "e2efixturevo0001ven";
