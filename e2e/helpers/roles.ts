@@ -77,5 +77,12 @@ export async function loginFixtureVenueOwner(page: Page) {
     .fill(FIXTURE_VENUE_OWNER.identifier);
   await page.getByPlaceholder(/your password/i).fill(FIXTURE_VENUE_OWNER.password);
   await page.getByRole("button", { name: /^sign in$/i }).click();
-  await expect(page).toHaveURL(/\/(dashboard)?\/?($|\?)/, { timeout: 15_000 });
+  // 25s not 15s - matches registerTestAudience's dev-OTP wait elsewhere in
+  // this file: the first request of a whole run can hit a cold Vercel
+  // function + Supabase pool wake-up (documented there as a real property
+  // of this environment, not flakiness to paper over). Session 35: this
+  // exact login, as the first request of several fresh diagnostic runs,
+  // failed consistently at 15s and succeeded once warm - cold start, not
+  // a real credentials bug.
+  await expect(page).toHaveURL(/\/(dashboard)?\/?($|\?)/, { timeout: 25_000 });
 }
