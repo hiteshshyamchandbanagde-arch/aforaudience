@@ -3,8 +3,8 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 
 interface UserRow {
@@ -120,9 +120,7 @@ export default function AdminUsersPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/admin" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to dashboard
-          </Link>
+          <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '8px' }}>
             🚩 Accounts

@@ -3,8 +3,8 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, use } from 'react'
-import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 
@@ -868,9 +868,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     <>
       <SiteNav />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
-        <Link href={`/dashboard/venue/${id}/edit`} style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
-          ← Back to venue
-        </Link>
+        <BackLink href={`/dashboard/venue/${id}/edit`} label="Back to Venue" />
         <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: 'var(--afa-ink)' }}>Seat Map Builder</h1>
         <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.65, marginBottom: '20px' }}>
           General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.

@@ -3,8 +3,8 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, use, useCallback } from 'react'
-import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 
 type ScanResult = {
@@ -217,9 +217,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px 64px' }}>
-          <Link href={`/dashboard/organiser/events/${eventId}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Event
-          </Link>
+          <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '14px', marginBottom: '4px' }}>
             Check-In
