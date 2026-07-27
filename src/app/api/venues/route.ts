@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
     const body = await req.json()
     const {
-      name, address, city, state, country, lat, lng, capacity, acousticRating, facilities, seatMap, publish,
+      name, address, city, state, country, lat, lng, placeId, capacity, acousticRating, facilities, seatMap, publish,
       rateType, hourlyRate, dailyRate, minDurationHours, dayRates, mapsUrl, seatingMode,
     } = body
 
@@ -138,6 +138,10 @@ export async function POST(req: Request) {
     const parsedLng = lng !== undefined && lng !== null && lng !== '' ? Number(lng) : null
     const validLat = parsedLat !== null && Number.isFinite(parsedLat) && parsedLat >= -90 && parsedLat <= 90 ? parsedLat : null
     const validLng = parsedLng !== null && Number.isFinite(parsedLng) && parsedLng >= -180 && parsedLng <= 180 ? parsedLng : null
+    // placeId is only meaningful alongside real coordinates (PR #212) -
+    // if lat/lng didn't validate, don't persist a placeId that would
+    // then be the only surviving signal that autocomplete was used.
+    const validPlaceId = validLat !== null && validLng !== null && typeof placeId === 'string' && placeId.trim() ? placeId.trim() : null
     const resolvedSeatingMode = seatingMode === 'NUMBERED' ? 'NUMBERED' : 'GENERAL_ADMISSION'
     // NUMBERED venues skip the mandatory section-editor at creation time -
     // the create form sends a plain capacity number instead of seatMap
@@ -179,6 +183,7 @@ export async function POST(req: Request) {
         country: country && String(country).trim() ? String(country).trim() : null,
         lat: validLat,
         lng: validLng,
+        placeId: validPlaceId,
         capacity: finalCapacity,
         acousticRating: acousticRating ? parseFloat(acousticRating) : null,
         mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null,

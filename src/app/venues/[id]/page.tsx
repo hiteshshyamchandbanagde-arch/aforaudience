@@ -2,6 +2,7 @@ import React from 'react'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
 import VenueFollowButton from './VenueFollowButton'
+import { buildDirectionsUrl } from '@/lib/maps-url'
 
 // See src/app/venues/page.tsx for why this is needed.
 export const dynamic = 'force-dynamic'
@@ -49,13 +50,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         </p>
         <VenueFollowButton venueId={venue.id} /><br />
         <a
-          href={
-            venue.mapsUrl
-              ? venue.mapsUrl
-              : venue.lat != null && venue.lng != null
-              ? `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`
-              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.address}, ${venue.city}`)}`
-          }
+          href={buildDirectionsUrl(venue)}
           target="_blank"
           rel="noopener noreferrer"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none', marginBottom: '28px' }}

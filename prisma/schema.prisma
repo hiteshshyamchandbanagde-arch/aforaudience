@@ -504,6 +504,17 @@ model Venue {
   country       String?
   lat           Float?
   lng           Float?
+  // Google's stable Place ID from the Address autocomplete's Place
+  // Details response (session 38, 26 Jul - PR #212). Only set when
+  // Address was resolved via autocomplete (mirrors lat/lng - all three
+  // are set/cleared together). Lets Get Directions build an exact
+  // named pin (`.../maps/place/?q=place_id:...`) instead of a bare
+  // coordinate drop, and lets the Google Maps Link field become a
+  // read-only "Directions" label instead of asking the owner to
+  // separately go find and paste a link for an address we already
+  // resolved. Manually-typed addresses (no autocomplete match) leave
+  // this null and keep the existing free-text mapsUrl field editable.
+  placeId       String?
   mapsUrl       String?
   capacity      Int
   photos        String[]

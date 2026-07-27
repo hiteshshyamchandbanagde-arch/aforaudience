@@ -21,6 +21,7 @@ interface Venue {
   country?: string | null
   lat?: number | null
   lng?: number | null
+  placeId?: string | null
   capacity: number
   facilities: string[]
   acousticRating?: number
@@ -61,7 +62,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [error, setError] = useState('')
   const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
-  const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', lat: '', lng: '', acousticRating: '', mapsUrl: '' })
+  const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', lat: '', lng: '', placeId: '', acousticRating: '', mapsUrl: '' })
   const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([])
 
@@ -89,6 +90,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           country: data.country || '',
           lat: data.lat != null ? String(data.lat) : '',
           lng: data.lng != null ? String(data.lng) : '',
+          placeId: data.placeId || '',
           acousticRating: data.acousticRating != null ? String(data.acousticRating) : '',
           mapsUrl: data.mapsUrl || '',
         })
@@ -213,6 +215,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   <AddressAutocomplete
                     value={formData.address}
                     onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+                    onManualEdit={() => setFormData((prev) => ({ ...prev, lat: '', lng: '', placeId: '' }))}
                     onResolved={(loc) =>
                       setFormData((prev) => ({
                         ...prev,
@@ -221,6 +224,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                         country: loc.country ?? prev.country,
                         lat: loc.lat != null ? String(loc.lat) : prev.lat,
                         lng: loc.lng != null ? String(loc.lng) : prev.lng,
+                        placeId: loc.placeId ?? prev.placeId,
                       }))
                     }
                     inputStyle={inputStyle}
@@ -244,22 +248,46 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
+              {/* Moved directly after Address/City/State/Country (PR #212) -
+                  see venue create page for the full rationale. */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Google Maps Link</label>
+                {formData.lat && formData.lng ? (
+                  <>
+                    <a
+                      href={
+                        formData.placeId
+                          ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(formData.placeId)}`
+                          : `https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-terracotta)', fontWeight: 600 }}
+                    >
+                      📍 Directions
+                    </a>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
+                      Derived automatically from the address you picked above. Edit the address to change it.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
+                      Optional - improves accuracy. Get Directions still works from your address either way.
+                    </p>
+                  </>
+                )}
+              </div>
+
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Facilities</label>
                 <FacilitiesPicker value={facilities} onChange={setFacilities} />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div>
                 <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
                 <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} min="0" max="5" step="0.5" maxLength={3} style={{ ...inputStyle, maxWidth: '200px' }} />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Google Maps Link <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
-                <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
-                  Paste a share link from Google Maps for an exact pin. If left blank, we'll use your address to build directions.
-                </p>
               </div>
             </section>
 
