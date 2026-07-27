@@ -31,6 +31,14 @@ import BrandLoader from '@/components/BrandLoader'
 
 type FeedbackItem = FeedbackDetailItem
 
+interface PendingItem {
+  id: string
+  orgName?: string
+  bio?: string | null
+  createdAt: string
+  user: { name: string | null; email: string | null; createdAt: string }
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   BUG: 'Bug',
   FEATURE_IDEA: 'Feature idea',
@@ -88,6 +96,15 @@ export default function AdminFeedbackPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [trendsOpen, setTrendsOpen] = useState(true)
 
+  // Pending Approvals - merged in from the old separate /dashboard/admin
+  // page (session 39, Feedback f96a1262 unification). Same
+  // /api/admin/approvals GET/PATCH, just living alongside the feedback
+  // tracker as one admin surface instead of two separate pages.
+  const [organisers, setOrganisers] = useState<PendingItem[]>([])
+  const [venueOwners, setVenueOwners] = useState<PendingItem[]>([])
+  const [approvalsOpen, setApprovalsOpen] = useState(true)
+  const [actioningApprovalId, setActioningApprovalId] = useState<string | null>(null)
+
   const [showResolved, setShowResolved] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [severityFilter, setSeverityFilter] = useState('ALL')
@@ -103,9 +120,10 @@ export default function AdminFeedbackPage() {
     if (!session?.user) return
     ;(async () => {
       setLoading(true)
-      const [boardRes, trendsRes] = await Promise.all([
+      const [boardRes, trendsRes, approvalsRes] = await Promise.all([
         fetch('/api/admin/feedback'),
         fetch('/api/admin/feedback?status=ALL'),
+        fetch('/api/admin/approvals'),
       ])
       if (boardRes.status === 403) {
         setForbidden(true)
@@ -114,9 +132,41 @@ export default function AdminFeedbackPage() {
       }
       if (boardRes.ok) setItems((await boardRes.json()).items)
       if (trendsRes.ok) setTrendItems((await trendsRes.json()).items)
+      if (approvalsRes.ok) {
+        const approvalsData = await approvalsRes.json()
+        setOrganisers(approvalsData.organisers)
+        setVenueOwners(approvalsData.venueOwners)
+      }
       setLoading(false)
     })()
   }, [session])
+
+  const actOnApproval = async (type: 'organiser' | 'venueOwner', id: string, action: 'approve' | 'reject') => {
+    setActioningApprovalId(id)
+    try {
+      const res = await fetch('/api/admin/approvals', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, id, action }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(data.error || 'Failed to update — please try again.', 'error')
+        return
+      }
+      showToast(action === 'approve' ? 'Approved.' : 'Rejected.', 'success')
+      const refreshed = await fetch('/api/admin/approvals')
+      if (refreshed.ok) {
+        const data = await refreshed.json()
+        setOrganisers(data.organisers)
+        setVenueOwners(data.venueOwners)
+      }
+    } catch {
+      showToast('Failed to update — please try again.', 'error')
+    } finally {
+      setActioningApprovalId(null)
+    }
+  }
 
   const toggleShowResolved = async () => {
     const next = !showResolved
@@ -354,12 +404,73 @@ export default function AdminFeedbackPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', margin: 0 }}>
-              Feedback
+              Admin Dashboard
             </h1>
-            <a href="/dashboard/admin" style={{ fontSize: '13px', color: 'var(--afa-terracotta)', fontWeight: 700, textDecoration: 'none' }}>
-              ← Admin
-            </a>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Platform Settings</a>
+              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Revenue</a>
+              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Accounts</a>
+              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Bookings</a>
+            </div>
           </div>
+
+          {/* Pending Approvals - merged in from the old separate
+              /dashboard/admin page (session 39 unification, Feedback
+              f96a1262). Collapsible like Trends below, so an admin who
+              just wants the feedback board isn't forced to scroll past
+              it every time. */}
+          <button
+            onClick={() => setApprovalsOpen((v) => !v)}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+          >
+            {approvalsOpen ? '▾' : '▸'} Pending Approvals ({organisers.length + venueOwners.length})
+          </button>
+          {approvalsOpen && (
+            <div style={{ marginBottom: '28px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>
+                Organisers ({organisers.length})
+              </h2>
+              {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
+              {organisers.map((o) => (
+                <div key={o.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: '200px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{o.orgName}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
+                      {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginTop: '20px', marginBottom: '10px' }}>
+                Venue Owners ({venueOwners.length})
+              </h2>
+              {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {venueOwners.map((v) => (
+                <div key={v.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: '200px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{v.user.name}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{v.user.email}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+            Feedback
+          </h2>
           <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '20px' }}>
             Submitted via the support widget — both the manual form and questions the chatbot couldn&apos;t answer.
           </p>
