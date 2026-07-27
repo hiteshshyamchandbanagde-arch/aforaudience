@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, use, useCallback, useRef, ReactNode, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 
@@ -117,9 +118,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href={`/dashboard/venue/${id}`} style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
-              ← Back to venue
-            </Link>
+            <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
             <Link href="/dashboard/venue/sales" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
               All venues →
             </Link>
