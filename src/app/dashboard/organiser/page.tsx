@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 
 interface EventItem {
@@ -96,7 +97,7 @@ export default function OrganiserDashboard() {
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
             <p style={{ color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '24px' }}>Apply to become an Organiser from your profile to start creating events.</p>
-            <Link href="/" style={{ color: 'var(--afa-terracotta)', fontWeight: 600, textDecoration: 'none' }}>Back to Home</Link>
+            <BackLink href="/" label="Back to Home" />
           </div>
         </main>
       </>
