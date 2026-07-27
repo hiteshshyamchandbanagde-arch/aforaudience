@@ -40,6 +40,7 @@ export default function EditArtistProfilePage() {
   const [instagram, setInstagram] = useState('')
   const [youtube, setYoutube] = useState('')
   const [avatar, setAvatar] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [tagline, setTagline] = useState('')
   const [fullBiography, setFullBiography] = useState('')
   const [journey, setJourney] = useState('')
@@ -90,6 +91,30 @@ export default function EditArtistProfilePage() {
       fetchProfile()
     }
   }, [session])
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+
+    setUploadingAvatar(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Upload failed - please try again.', 'error')
+        return
+      }
+      setAvatar(data.url)
+      showToast('Photo uploaded. Save to keep it.', 'success')
+    } catch {
+      showToast('Upload failed - please try again.', 'error')
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -150,11 +175,21 @@ export default function EditArtistProfilePage() {
 
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
-              <label style={labelStyle}>Profile Picture <span style={{ fontWeight: 400, opacity: 0.6 }}>(image URL)</span></label>
-              <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={inputStyle} />
-              <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px' }}>
-                Paste a link to your photo (e.g. from a cloud drive or image host) - direct file upload isn&apos;t available yet.
-              </p>
+              <label style={labelStyle}>Profile Picture</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
+                {avatar && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
+                )}
+                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                  {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
+                </label>
+              </div>
+              <details>
+                <summary style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
+                <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: '8px' }} />
+              </details>
             </div>
 
             <div style={{ marginBottom: '18px' }}>
