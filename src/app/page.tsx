@@ -186,9 +186,9 @@ export default function Home() {
             {
               title: "Join As",
               links: [
-                { label: "Artist", href: "/register" },
-                { label: "Organiser", href: "/register" },
-                { label: "Venue Owner", href: "/register" },
+                { label: "Artist", href: "/register?role=artist" },
+                { label: "Organiser", href: "/register?role=organiser" },
+                { label: "Venue Owner", href: "/register?role=venue" },
                 { label: "Audience", href: "/register" },
               ],
             },

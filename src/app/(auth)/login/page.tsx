@@ -15,6 +15,12 @@ function LoginForm() {
   const justReset = searchParams.get("reset")
   const wasSuspended = searchParams.get("suspended")
   const wasIdle = searchParams.get("idle")
+  // Feedback cmrzsmlus - if this login follows a registration that
+  // started from a specific "Join As X" link, land the person on
+  // Profile (where the "Become an X" application cards live) instead of
+  // the generic homepage, which had no memory of why they signed up.
+  const intendedRole = searchParams.get("role")
+  const postLoginRedirect = () => router.push(intendedRole ? "/profile" : "/")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [identifier, setIdentifier] = useState("")
@@ -46,7 +52,7 @@ function LoginForm() {
         }
         setLoading(false); return
       }
-      router.push("/")
+      postLoginRedirect()
     } catch {
       setError("Something went wrong")
       setLoading(false)
@@ -91,7 +97,7 @@ function LoginForm() {
         }
         setLoading(false); return
       }
-      router.push("/")
+      postLoginRedirect()
     } catch {
       setError("Something went wrong")
       setLoading(false)

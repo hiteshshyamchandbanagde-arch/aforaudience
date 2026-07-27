@@ -1,8 +1,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
@@ -29,9 +29,21 @@ const cardStyle = {
   marginBottom: '16px',
 }
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { data: session, status, update: updateSession } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Feedback cmrzsmlus - if the person arrived here via the login
+  // redirect's ?role= carry-through (originating from a landing-page
+  // "Join As X" link), scroll straight to that application card instead
+  // of leaving them to find it among three on the page themselves.
+  useEffect(() => {
+    const role = searchParams.get('role')
+    if (!role) return
+    const el = document.getElementById(`apply-${role}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [searchParams])
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
@@ -299,10 +311,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
-          <div style={cardStyle}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              I&apos;m an Artist
-            </h2>
+          <div id="apply-artist" style={cardStyle}>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
             </p>
@@ -326,7 +335,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Organiser upgrade */}
-          <div style={cardStyle}>
+          <div id="apply-organiser" style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               Become an Organiser
             </h2>
@@ -357,7 +366,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Venue Owner upgrade */}
-          <div style={cardStyle}>
+          <div id="apply-venue" style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               List Your Venue
             </h2>
@@ -380,5 +389,13 @@ export default function ProfilePage() {
         </div>
       </main>
     </>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<BrandLoader />}>
+      <ProfileContent />
+    </Suspense>
   )
 }

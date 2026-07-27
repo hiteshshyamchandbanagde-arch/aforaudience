@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
 
 const inputStyle = (hasError?: boolean) => ({
@@ -21,6 +21,11 @@ const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)",
 
 export default function RegisterForm() {
   const router = useRouter()
+  // Feedback cmrzsmlus - landing page "Join As" links now pass ?role=X so
+  // the person's original intent survives past registration instead of
+  // dropping them on the generic homepage with no memory of why they came.
+  const searchParams = useSearchParams()
+  const intendedRole = searchParams.get("role")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string; username?: string }>({})
@@ -155,7 +160,7 @@ export default function RegisterForm() {
         setLoading(false)
         return
       }
-      router.push("/login?registered=true")
+      router.push(`/login?registered=true${intendedRole ? `&role=${intendedRole}` : ""}`)
     } catch {
       setError("Something went wrong")
       setLoading(false)
