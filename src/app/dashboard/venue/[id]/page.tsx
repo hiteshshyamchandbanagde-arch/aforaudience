@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 
@@ -142,9 +143,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/venue" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Venues
-          </Link>
+          <BackLink href="/dashboard/venue" label="Back to Venues" />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '16px', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
             <div>

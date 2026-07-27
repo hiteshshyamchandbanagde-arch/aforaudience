@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
@@ -452,9 +453,7 @@ export default function CreateEventPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
-            ← Back to Events
-          </Link>
+          <BackLink href="/dashboard/organiser" label="Back to Events" />
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Create an Event
