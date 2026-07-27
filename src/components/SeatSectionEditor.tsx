@@ -9,6 +9,22 @@ export type SeatSection = {
   price: number | ""
 }
 
+// Duplicate section-name detection (added 27 Jul, Hitesh's rule): a GA
+// venue has no level concept, so this is simply "no two sections share
+// a name" - live-observed 4 sections all named "general" slipping
+// straight through to Publish with zero validation. Exported so both
+// the create and edit pages can block submit with the same check the
+// server now also enforces.
+export function findDuplicateSectionNames(sections: SeatSection[]): string[] {
+  const counts = new Map<string, number>()
+  for (const s of sections) {
+    const key = s.name.trim().toLowerCase()
+    if (!key) continue
+    counts.set(key, (counts.get(key) || 0) + 1)
+  }
+  return Array.from(counts.entries()).filter(([, c]) => c > 1).map(([name]) => name)
+}
+
 type Props = {
   sections: SeatSection[]
   onChange: (sections: SeatSection[]) => void
@@ -67,6 +83,8 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     color: "var(--afa-ink)",
   }
 
+  const duplicateNames = new Set(findDuplicateSectionNames(sections))
+
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -76,7 +94,9 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           </p>
         )}
 
-        {sections.map((section, i) => (
+        {sections.map((section, i) => {
+          const isDuplicate = section.name.trim() !== '' && duplicateNames.has(section.name.trim().toLowerCase())
+          return (
           <div
             key={section.id}
             style={{
@@ -87,7 +107,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               padding: "12px",
               background: "var(--afa-cream)",
               borderRadius: "8px",
-              border: "1px solid rgba(14,12,10,0.08)",
+              border: isDuplicate ? "1px solid var(--afa-error)" : "1px solid rgba(14,12,10,0.08)",
             }}
           >
             <input
@@ -95,7 +115,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               placeholder={`Section name (e.g. Section ${i + 1})`}
               value={section.name}
               onChange={(e) => updateSection(section.id, "name", e.target.value)}
-              style={inputStyle}
+              style={{ ...inputStyle, ...(isDuplicate ? { border: "1px solid var(--afa-error)" } : {}) }}
             />
             <input
               type="number"
@@ -137,8 +157,15 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               ✕
             </button>
           </div>
-        ))}
+          )
+        })}
       </div>
+
+      {duplicateNames.size > 0 && (
+        <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-error)", fontWeight: 600 }}>
+          Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
+        </p>
+      )}
 
       <button
         type="button"

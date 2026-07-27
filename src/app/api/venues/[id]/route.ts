@@ -102,6 +102,27 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
 
+    // Duplicate section-name check (added 27 Jul) - same rule as
+    // POST /api/venues and the Numbered-venue Seat Map Builder: a GA
+    // venue has no level concept, so this is simply "no two sections
+    // share a name." Only runs when sections are actually part of this
+    // request (optional field on PATCH).
+    if (sections !== undefined) {
+      const sectionNameCounts = new Map<string, number>()
+      for (const s of sections) {
+        const key = String(s?.name ?? '').trim().toLowerCase()
+        if (!key) continue
+        sectionNameCounts.set(key, (sectionNameCounts.get(key) || 0) + 1)
+      }
+      const duplicateSectionNames = Array.from(sectionNameCounts.entries()).filter(([, c]) => c > 1).map(([n]) => n)
+      if (duplicateSectionNames.length > 0) {
+        return NextResponse.json(
+          { error: `Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.` },
+          { status: 400 }
+        )
+      }
+    }
+
     // Identity-lock guard (session 39) - Event.venueId/Venue.seatMap are
     // live mutable references with no snapshotting (Feedback 94071451,
     // still needs its own design pass on full scope: lock vs snapshot vs

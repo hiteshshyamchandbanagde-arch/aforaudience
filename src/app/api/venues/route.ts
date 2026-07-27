@@ -119,6 +119,27 @@ export async function POST(req: Request) {
         )
       }
     }
+    // Duplicate section-name check (added 27 Jul, Hitesh's rule - same
+    // one already enforced on the Numbered-venue Seat Map Builder):
+    // a GA venue has no concept of levels, so this is simply "no two
+    // sections share a name" - live-observed this slipping straight
+    // through to Publish with zero validation (4 sections all named
+    // "general"). Server-side is the real enforcement point per the
+    // client-form-bypasses-native-validation precedent elsewhere in
+    // this file.
+    const sectionNameCounts = new Map<string, number>()
+    for (const s of sections) {
+      const key = String(s?.name ?? '').trim().toLowerCase()
+      if (!key) continue
+      sectionNameCounts.set(key, (sectionNameCounts.get(key) || 0) + 1)
+    }
+    const duplicateSectionNames = Array.from(sectionNameCounts.entries()).filter(([, c]) => c > 1).map(([name]) => name)
+    if (duplicateSectionNames.length > 0) {
+      return NextResponse.json(
+        { error: `Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.` },
+        { status: 400 }
+      )
+    }
     if (acousticRating !== undefined && acousticRating !== null && acousticRating !== '') {
       const rating = Number(acousticRating)
       if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
