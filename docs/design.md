@@ -1034,4 +1034,7 @@ Both built with `next/og`'s `ImageResponse` (bundled with Next.js, no extra depe
 Not yet built, explicitly deferred: multi-theme selection UI - moot until there's a second theme to choose between. Feedback kept at `REVIEWED` (not `RESOLVED`) until Hitesh has tested generating and sharing a real poster end-to-end.
 
 
+**PR #236 — posters now show a QA badge, matching the site's own EnvBadge (squash 21cd8e2).** Hitesh's request after seeing a live poster (image 1 of the session): its link showed a Vercel preview domain alongside `qa.aforaudience.com` used everywhere else in testing, with nothing distinguishing a QA-generated poster from a prod one at a glance. Both poster routes now read `NEXT_PUBLIC_ENV_LABEL` and render the exact same badge treatment as `EnvBadge` (the header pill) - ember-red for any label containing "qa" (case-insensitive), muted grey otherwise, nothing if unset. Reused the site's existing visual language rather than inventing a new one-off style.
+
+
 *Confidential — Do not share*
