@@ -30,6 +30,11 @@ interface Venue {
   seatMap?: { sections?: SeatSection[] } | null
   isApproved: boolean
   seatingMode: 'GENERAL_ADMISSION' | 'NUMBERED'
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
+  minDurationHours?: number | null
+  dayRates?: { dayOfWeek: string; hourlyRate: number | null; dailyRate: number | null }[]
 }
 
 const inputStyle = {
@@ -66,6 +71,14 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', country: '', lat: '', lng: '', placeId: '', acousticRating: '', mapsUrl: '' })
   const [facilities, setFacilities] = useState<string[]>([])
   const [sections, setSections] = useState<SeatSection[]>([])
+  const [rateType, setRateType] = useState<'HOURLY' | 'DAILY' | 'FLEXIBLE'>('FLEXIBLE')
+  const [hourlyRate, setHourlyRate] = useState('')
+  const [dailyRate, setDailyRate] = useState('')
+  const [minDurationHours, setMinDurationHours] = useState('')
+  const [useDayOverrides, setUseDayOverrides] = useState(false)
+  const [dayRates, setDayRates] = useState<Record<string, string>>({
+    MONDAY: '', TUESDAY: '', WEDNESDAY: '', THURSDAY: '', FRIDAY: '', SATURDAY: '', SUNDAY: '',
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -101,6 +114,21 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
             ? data.seatMap.sections
             : [{ id: makeId(), name: '', seats: '', price: '' }]
         )
+        setRateType(data.rateType || 'FLEXIBLE')
+        setHourlyRate(data.hourlyRate != null ? String(data.hourlyRate) : '')
+        setDailyRate(data.dailyRate != null ? String(data.dailyRate) : '')
+        setMinDurationHours(data.minDurationHours != null ? String(data.minDurationHours) : '')
+        if (data.dayRates && data.dayRates.length > 0) {
+          setUseDayOverrides(true)
+          setDayRates((prev) => {
+            const next = { ...prev }
+            for (const d of data.dayRates!) {
+              const val = data.rateType === 'HOURLY' ? d.hourlyRate : d.dailyRate
+              if (val != null) next[d.dayOfWeek] = String(val)
+            }
+            return next
+          })
+        }
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -133,6 +161,26 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
       return
     }
 
+    if (rateType === 'HOURLY' && (!hourlyRate || Number(hourlyRate) <= 0)) {
+      showToast('Set an hourly rental rate.', 'error')
+      setSaving(false)
+      return
+    }
+    if (rateType === 'DAILY' && (!dailyRate || Number(dailyRate) <= 0)) {
+      showToast('Set a daily rental rate.', 'error')
+      setSaving(false)
+      return
+    }
+
+    const dayRatesPayload = useDayOverrides && rateType !== 'FLEXIBLE'
+      ? Object.entries(dayRates)
+          .filter(([, v]) => v && Number(v) > 0)
+          .map(([dayOfWeek, v]) => ({
+            dayOfWeek,
+            ...(rateType === 'HOURLY' ? { hourlyRate: Number(v) } : { dailyRate: Number(v) }),
+          }))
+      : []
+
     try {
       const res = await fetch(`/api/venues/${id}`, {
         method: 'PATCH',
@@ -142,6 +190,11 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities,
           seatMap: venue?.seatingMode === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
+          rateType,
+          hourlyRate: rateType === 'HOURLY' && hourlyRate ? Number(hourlyRate) : null,
+          dailyRate: rateType === 'DAILY' && dailyRate ? Number(dailyRate) : null,
+          minDurationHours: minDurationHours ? Number(minDurationHours) : null,
+          dayRates: dayRatesPayload,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -277,6 +330,96 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   Based on real feedback from Artists and Organisers who've performed/booked here - not self-reported.
                 </p>
               </div>
+            </section>
+
+            {/* Rental Rate - was entirely missing from this edit form until
+                now (session 39 finding, Hitesh) - an owner had no way to
+                update their rate, including day-wise overrides, after
+                venue creation. Mirrors venue create page's section exactly. */}
+            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+                Rental Rate
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
+                What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
+              </p>
+
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+                {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setRateType(t)}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
+                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                      color: rateType === t ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
+                    }}
+                  >
+                    {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
+                  </button>
+                ))}
+              </div>
+
+              {rateType === 'HOURLY' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', marginBottom: '8px' }}>
+                  <div>
+                    <label style={labelStyle}>Rate per hour (₹) *</label>
+                    <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" placeholder="e.g., 2500" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Minimum duration (hours)</label>
+                    <input type="number" value={minDurationHours} onChange={(e) => setMinDurationHours(e.target.value)} min="1" placeholder="e.g., 3" style={inputStyle} />
+                  </div>
+                </div>
+              )}
+
+              {rateType === 'DAILY' && (
+                <div style={{ marginBottom: '8px' }}>
+                  <label style={labelStyle}>Rate per day (₹) *</label>
+                  <input type="number" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} min="0" placeholder="e.g., 15000" style={{ ...inputStyle, maxWidth: '240px' }} />
+                </div>
+              )}
+
+              {rateType === 'FLEXIBLE' && (
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
+                  No fixed rate published. Organisers will send you a duration and date, and you'll respond with a quote before it's confirmed.
+                </p>
+              )}
+
+              {rateType !== 'FLEXIBLE' && (
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--afa-ink)', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                    <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
+                    Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
+                  </label>
+
+                  {useDayOverrides && (
+                    <div>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
+                        Leave a day blank to use your base rate above for that day.
+                      </p>
+                      {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(14,12,10,0.05)' }}>
+                          <span style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>₹</span>
+                            <input
+                              type="number"
+                              value={dayRates[day]}
+                              onChange={(e) => setDayRates((prev) => ({ ...prev, [day]: e.target.value }))}
+                              min="0"
+                              placeholder={rateType === 'HOURLY' ? hourlyRate || '—' : dailyRate || '—'}
+                              style={{ ...inputStyle, width: '110px' }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
 
             <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
