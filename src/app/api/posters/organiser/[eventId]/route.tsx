@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og'
 import prisma from '@/lib/prisma'
 import { publicEventUrl } from '@/lib/poster-url'
+import { loadPosterFonts } from '@/lib/poster-fonts'
 import QRCode from 'qrcode'
 
 export const runtime = 'nodejs'
@@ -21,6 +22,17 @@ export const runtime = 'nodejs'
 //     venue, lineup) can change after a poster's first been shared, and
 //     a stale cached image showing wrong info would be worse than none.
 //
+// Redesigned (same session, Hitesh: "Poster need improvement in
+// design") - the first pass looked flat: Satori (next/og's renderer)
+// silently can't use system fonts like Georgia at all, so the intended
+// serif branding never actually rendered, and the layout left a large
+// dead gap in the "lineup coming soon" state. Now uses a real bundled
+// serif (see lib/poster-fonts.ts) and a bold dark plum-black background
+// - the same #1A0A1A already used for the artist hero-card treatment
+// elsewhere in the app, not a new one-off color - with content sized
+// and spaced to fill the canvas in both the full-lineup and
+// coming-soon states.
+//
 // Single theme for v1 (Hitesh deferred the "how many themes" decision -
 // shipping the harder part, the generation mechanism + share flow, with
 // one well-built theme now; more themes are a cheap fast-follow once
@@ -37,7 +49,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
         where: { cancelledAt: null },
         include: { artist: { select: { user: { select: { displayName: true, name: true } } } } },
       },
-      bookingRequests: { select: { status: true } },
     },
   })
 
@@ -45,8 +56,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
     return new Response('Not found', { status: 404 })
   }
 
-  // Only meaningful once a venue booking is actually confirmed, per
-  // Hitesh's trigger decision - not gated on event.status/publish.
   const hasConfirmedVenueBooking = await prisma.venueBooking.findFirst({
     where: { eventId, status: 'CONFIRMED' },
     select: { id: true },
@@ -59,16 +68,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
   const names = event.lineup.map((p: { artist: { user: { displayName: string | null; name: string } } }) => p.artist.user.displayName || p.artist.user.name)
 
   const url = publicEventUrl(event.id)
-  const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 240, color: { dark: '#0E0C0A', light: '#F7F3EE' } })
+  const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: '#1A0A1A', light: '#F7F3EE' } })
+  const dateStr = new Date(event.date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  const dateStr = new Date(event.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
-
-  // Same env-detection as the site's own EnvBadge component (header
-  // pill) - Hitesh's request: make it obvious a poster came from QA,
-  // not production, since qa.aforaudience.com and the prod domain both
-  // point at deployments that could otherwise look identical here.
   const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
   const isQA = envLabel?.toLowerCase().includes('qa') ?? false
+  const fonts = await loadPosterFonts()
 
   return new ImageResponse(
     (
@@ -78,62 +83,83 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
           height: '1350px',
           display: 'flex',
           flexDirection: 'column',
-          background: '#F7F3EE',
-          fontFamily: 'Georgia, serif',
-          padding: '64px',
+          background: '#1A0A1A',
+          fontFamily: 'Poster Serif',
+          padding: '72px',
+          position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '48px' }}>
+        {/* Faint oversized watermark of the logo's three-bar motif, fills
+            the background so the coming-soon state never reads as empty */}
+        <div style={{ display: 'flex', position: 'absolute', right: '-60px', bottom: '160px', flexDirection: 'column', opacity: 0.06 }}>
+          <div style={{ display: 'flex', width: '460px', height: '90px', background: '#C8441A', marginBottom: '24px', borderRadius: '8px' }} />
+          <div style={{ display: 'flex', width: '340px', height: '90px', background: '#C9973A', marginBottom: '24px', borderRadius: '8px' }} />
+          <div style={{ display: 'flex', width: '230px', height: '90px', background: '#F7F3EE', borderRadius: '8px' }} />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '56px' }}>
           <div style={{ display: 'flex', width: '48px', height: '48px', borderRadius: '12px', background: '#0E0C0A', marginRight: '16px', flexDirection: 'column', padding: '8px' }}>
             <div style={{ display: 'flex', width: '32px', height: '8px', background: '#C8441A', marginBottom: '4px' }} />
             <div style={{ display: 'flex', width: '24px', height: '8px', background: '#C9973A', marginBottom: '4px' }} />
             <div style={{ display: 'flex', width: '16px', height: '8px', background: '#F7F3EE' }} />
           </div>
-          <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>AforAudience</div>
+          <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#F7F3EE' }}>AforAudience</div>
           {envLabel && (
-            <div style={{ display: 'flex', marginLeft: '10px', padding: '3px 10px', fontSize: '13px', fontWeight: 600, color: isQA ? '#F7F3EE' : '#0E0C0A', background: isQA ? '#C8441A' : '#E4DDD2', borderRadius: '999px' }}>
+            <div style={{ display: 'flex', marginLeft: '10px', padding: '3px 10px', fontSize: '13px', fontWeight: 700, color: isQA ? '#F7F3EE' : '#0E0C0A', background: isQA ? '#C8441A' : '#E4DDD2', borderRadius: '999px' }}>
               {envLabel}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', fontSize: '64px', fontWeight: 700, color: '#0E0C0A', lineHeight: 1.15, marginBottom: '24px' }}>
+        <div style={{ display: 'flex', fontSize: '30px', fontWeight: 700, color: '#C8441A', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '20px' }}>
+          Open Mic
+        </div>
+
+        <div style={{ display: 'flex', fontSize: '84px', fontWeight: 900, color: '#F7F3EE', lineHeight: 1.05, marginBottom: '40px', maxWidth: '900px' }}>
           {event.title}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#0E0C0A', opacity: 0.8, marginBottom: '48px' }}>
-          <div style={{ display: 'flex', marginBottom: '8px' }}>{dateStr} · {event.startTime}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', fontSize: '30px', fontWeight: 400, color: '#F7F3EE', opacity: 0.85, marginBottom: '56px' }}>
+          <div style={{ display: 'flex', marginBottom: '10px' }}>{dateStr} · {event.startTime}</div>
           {event.venue && <div style={{ display: 'flex' }}>{event.venue.name}, {event.venue.city}</div>}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-          <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#C8441A', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '2px' }}>
+          <div style={{ display: 'flex', fontSize: '24px', fontWeight: 700, color: '#C9973A', marginBottom: '28px', textTransform: 'uppercase', letterSpacing: '3px' }}>
             Lineup
           </div>
           {isFull ? (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {names.map((name: string, i: number) => (
-                <div key={i} style={{ display: 'flex', fontSize: '34px', color: '#0E0C0A', marginBottom: '14px' }}>{name}</div>
+                <div key={i} style={{ display: 'flex', fontSize: '42px', fontWeight: 700, color: '#F7F3EE', marginBottom: '20px' }}>{name}</div>
               ))}
             </div>
           ) : (
-            <div style={{ display: 'flex', fontSize: '30px', color: '#0E0C0A', opacity: 0.6 }}>Lineup coming soon</div>
+            <div style={{ display: 'flex', fontSize: '34px', fontWeight: 400, color: '#F7F3EE', opacity: 0.55 }}>Lineup coming soon</div>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '2px solid rgba(14,12,10,0.15)', paddingTop: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '2px solid rgba(247,243,238,0.2)', paddingTop: '36px' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', fontSize: '20px', color: '#0E0C0A', opacity: 0.6 }}>Book your spot</div>
-            <div style={{ display: 'flex', fontSize: '18px', color: '#0E0C0A', opacity: 0.45 }}>{url.replace(/^https?:\/\//, '')}</div>
+            <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#F7F3EE' }}>Book Your Spot</div>
+            <div style={{ display: 'flex', fontSize: '18px', fontWeight: 400, color: '#F7F3EE', opacity: 0.5 }}>{url.replace(/^https?:\/\//, '')}</div>
           </div>
-          { /* eslint-disable-next-line @next/next/no-img-element */ }
-          <img src={qrDataUrl} width={120} height={120} alt="" />
+          <div style={{ display: 'flex', padding: '14px', background: '#F7F3EE', borderRadius: '12px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrDataUrl} width={130} height={130} alt="" />
+          </div>
         </div>
       </div>
     ),
-    // ImageResponse defaults to a 1-year Cache-Control header - explicitly
-    // overridden since this is meant to be generated fresh every time
-    // (event details can change after a poster's first been shared).
-    { width: 1080, height: 1350, headers: { 'Cache-Control': 'no-store' } }
+    {
+      width: 1080,
+      height: 1350,
+      fonts: fonts.map((f) => ({ ...f, data: f.data as unknown as ArrayBuffer })),
+      // ImageResponse defaults to a 1-year Cache-Control header -
+      // explicitly overridden since this is meant to be generated fresh
+      // every time (event details can change after a poster's first
+      // been shared).
+      headers: { 'Cache-Control': 'no-store' },
+    }
   )
 }
