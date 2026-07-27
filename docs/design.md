@@ -943,4 +943,11 @@ No code was written or merged this session; this was a documentation/reconciliat
 - Field also moved up to sit directly after Address/City/State/Country, grouping all location-identity fields into one visual block ahead of Facilities/Acoustic Rating (Hitesh's call).
 - `tsc --noEmit` sweep: 59 pre-existing Prisma-client-not-locally-generated baseline errors, zero in any file this PR touched.
 
+**PR #213 — same-session fix, two real bugs from Hitesh's live click-test of #212 (squash abef096).**
+1. Directions link 404'd. `/maps/place/?q=place_id:ID` (used in #212) is an Embed API iframe src, not a real navigable deep link - confirmed on device via screenshot (Android Maps app treated the raw place_id as literal search text, "No results found"). Switched to the documented Google Maps URLs API format: `query=<lat,lng>&query_place_id=<placeId>`. Also collapsed both form pages' inline duplicate of this logic to import the shared `buildDirectionsUrl()` helper - both copies had carried the same bug, exactly the drift risk the helper was meant to prevent by existing in only one place.
+2. Address/City grid was fixed `1fr 1fr` with no mobile breakpoint - on real phone width this made the Address column narrow enough that long place names wrapped 4-5 lines, growing the autocomplete dropdown tall enough to visibly bleed over the Google Maps Link field below (confirmed via screenshot). Switched to `repeat(auto-fit, minmax(240px, 1fr))` - stacks to one column below ~500px container width, no media query needed.
+
+Related but out of scope this session: the `rateType === 'HOURLY'` rate-fields grid (create page) has the same fixed-`1fr 1fr` pattern but is plain number inputs, not autocomplete-dropdown-driven - lower urgency, folds into the existing backlog item "Manual Canvas mobile-responsiveness + UX polish" rather than a separate fix.
+
+
 *Confidential — Do not share*
