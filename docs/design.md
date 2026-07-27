@@ -982,4 +982,7 @@ Two new things surfaced, both logged to Feedback:
 **PR #221 — venue owner's dashboard card now shows Rental Rate (squash 2f25c87).** Session-31 suggestion (Feedback `47044f23`), undecided since 25 Jul: the card only ever showed the audience per-seat ticket price, which reads as a dead "—" for any venue without seat/zone pricing set yet. Added a `rateLabel()` helper showing "Hourly · ₹X/hr" / "Daily · ₹X/day" / "Flexible rate" alongside the existing seats/price info (not replacing it - both answer different questions). `GET /api/venues/my-venues` already returned the rate fields, just unused on the frontend Venue interface.
 
 
+**PR #222 — admin Pending Approvals cards now wrap on mobile (squash 5f57b5c).** Partial progress on the Advanced Admin Dashboard ask (`f96a1262`) - concretely fixed the "must work on mobile" gap: Organiser/Venue Owner card rows used `justifyContent:space-between` with no `flexWrap`, same non-wrapping pattern already fixed elsewhere this session (venue Address/City grid, PR #213). Added `flexWrap` + `minWidth` so name/details stack above Approve/Reject on narrow screens. Deliberately NOT attempted: the bigger "fold approvals into the feedback dashboard as one unified surface" - that's a real UI/IA decision needing Hitesh's design call, not something to guess at as a bug fix. Also noted: the original ask's "fold in genre-request approval" item is now moot entirely - genre was solved via preset+Other (PR #219/#220), so there's no admin-moderated queue to fold in.
+
+
 *Confidential — Do not share*
