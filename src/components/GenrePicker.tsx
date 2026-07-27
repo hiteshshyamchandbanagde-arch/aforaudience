@@ -1,5 +1,7 @@
 'use client'
 
+import { PRESET_GENRES } from '@/lib/genres'
+
 // Same fix pattern as FacilitiesPicker (Feedback 3213952d, session 36) and
 // Dress Code/Vibe (session 36) - replaces free-text "comma separated"
 // Genre input, which directly produced garbage public-facing filter chips
@@ -10,22 +12,12 @@
 // (capped length) - still outputs a plain string[] so no backend/schema
 // change is needed; Artist.genre's existing write path is untouched.
 //
-// Preset list grounded in real DB values at time of writing, not guessed -
-// covers the actual acts on this platform (open mic: comedy, poetry,
-// storytelling, music, spoken word) rather than a generic genre taxonomy.
-const PRESET_GENRES = [
-  'Stand-up Comedy',
-  'Poetry',
-  'Storytelling',
-  'Spoken Word',
-  'Music - Acoustic',
-  'Singing',
-  'Rap / Hip-Hop',
-  'Dance',
-  'Theatre / Drama',
-  'Improv',
-  'Magic',
-]
+// Session 39 addition (PR #224): an "Other" value entered here shows on
+// the submitting artist's own profile immediately (this component doesn't
+// block or gate anything client-side) - but the API layer (see
+// /api/artists/me and /api/artists/apply) separately logs it as a
+// GenreRequest, so it won't appear as a public filter-chip option on
+// /artists until an admin approves it there.
 
 const MAX_OTHER_LENGTH = 200
 

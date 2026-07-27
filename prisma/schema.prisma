@@ -395,6 +395,28 @@ model CodeCounter {
   @@id([prefix, yearMonth])
 }
 
+// Session 39 (Hitesh's design, PR #224) - when an artist types a new
+// genre into GenrePicker's "Other" field, it shows on THEIR OWN profile
+// immediately (no blocking, Artist.genre is untouched/unrestricted), but
+// does NOT become a public filter-chip option on /artists until an admin
+// approves it here. Protects the shared surface from garbage without
+// gating the individual's own page. Only genre needs this - Facility and
+// Vibe/Dress-Code free text is never used to build a public filter
+// anywhere, confirmed by search before building this.
+model GenreRequest {
+  id         String             @id @default(cuid())
+  value      String             @unique
+  status     GenreRequestStatus @default(PENDING)
+  createdAt  DateTime           @default(now())
+  reviewedAt DateTime?
+}
+
+enum GenreRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Artist {
   id           String   @id @default(cuid())
   userId       String   @unique

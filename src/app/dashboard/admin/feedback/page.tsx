@@ -39,6 +39,12 @@ interface PendingItem {
   user: { name: string | null; email: string | null; createdAt: string }
 }
 
+interface GenreRequestItem {
+  id: string
+  value: string
+  createdAt: string
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   BUG: 'Bug',
   FEATURE_IDEA: 'Feature idea',
@@ -105,6 +111,13 @@ export default function AdminFeedbackPage() {
   const [approvalsOpen, setApprovalsOpen] = useState(true)
   const [actioningApprovalId, setActioningApprovalId] = useState<string | null>(null)
 
+  // Pending Genre Requests (session 39, PR #224) - "Other" genre
+  // submissions awaiting approval before they become a public filter
+  // option on /artists. Same collapsible pattern as Approvals/Trends.
+  const [genreRequests, setGenreRequests] = useState<GenreRequestItem[]>([])
+  const [genreRequestsOpen, setGenreRequestsOpen] = useState(true)
+  const [actioningGenreId, setActioningGenreId] = useState<string | null>(null)
+
   const [showResolved, setShowResolved] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [severityFilter, setSeverityFilter] = useState('ALL')
@@ -120,10 +133,11 @@ export default function AdminFeedbackPage() {
     if (!session?.user) return
     ;(async () => {
       setLoading(true)
-      const [boardRes, trendsRes, approvalsRes] = await Promise.all([
+      const [boardRes, trendsRes, approvalsRes, genreRes] = await Promise.all([
         fetch('/api/admin/feedback'),
         fetch('/api/admin/feedback?status=ALL'),
         fetch('/api/admin/approvals'),
+        fetch('/api/admin/genre-requests'),
       ])
       if (boardRes.status === 403) {
         setForbidden(true)
@@ -137,9 +151,32 @@ export default function AdminFeedbackPage() {
         setOrganisers(approvalsData.organisers)
         setVenueOwners(approvalsData.venueOwners)
       }
+      if (genreRes.ok) setGenreRequests((await genreRes.json()).pending)
       setLoading(false)
     })()
   }, [session])
+
+  const actOnGenreRequest = async (id: string, action: 'approve' | 'reject') => {
+    setActioningGenreId(id)
+    try {
+      const res = await fetch('/api/admin/genre-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(data.error || 'Failed to update — please try again.', 'error')
+        return
+      }
+      showToast(action === 'approve' ? 'Approved - now visible as a filter option on /artists.' : 'Rejected.', 'success')
+      setGenreRequests((prev) => prev.filter((g) => g.id !== id))
+    } catch {
+      showToast('Failed to update — please try again.', 'error')
+    } finally {
+      setActioningGenreId(null)
+    }
+  }
 
   const actOnApproval = async (type: 'organiser' | 'venueOwner', id: string, action: 'approve' | 'reject') => {
     setActioningApprovalId(id)
@@ -461,6 +498,38 @@ export default function AdminFeedbackPage() {
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
                       <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Pending Genre Requests (session 39, PR #224) - approving one
+              adds it to /api/genres/approved's list, making it a public
+              filter-chip option on /artists. Rejecting keeps it out of
+              that shared list. The submitting artist's own profile
+              already shows their genre regardless - this only gates the
+              GLOBAL filter surface. */}
+          <button
+            onClick={() => setGenreRequestsOpen((v) => !v)}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+          >
+            {genreRequestsOpen ? '▾' : '▸'} Pending Genre Requests ({genreRequests.length})
+          </button>
+          {genreRequestsOpen && (
+            <div style={{ marginBottom: '28px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
+                New "Other" genre values artists have typed in - already visible on their own profile. Approving adds it as a public filter option on /artists; rejecting keeps it out of that shared list.
+              </p>
+              {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {genreRequests.map((g) => (
+                <div key={g.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{g.value}</div>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>

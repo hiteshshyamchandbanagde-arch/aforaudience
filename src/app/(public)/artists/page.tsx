@@ -15,6 +15,7 @@ interface ArtistItem {
 
 export default function ArtistsPage() {
   const [artists, setArtists] = useState<ArtistItem[]>([])
+  const [approvedGenres, setApprovedGenres] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -25,10 +26,14 @@ export default function ArtistsPage() {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const res = await fetch("/api/artists")
-        if (!res.ok) throw new Error("Failed to load artists")
-        const data = await res.json()
+        const [artistsRes, genresRes] = await Promise.all([
+          fetch("/api/artists"),
+          fetch("/api/genres/approved"),
+        ])
+        if (!artistsRes.ok) throw new Error("Failed to load artists")
+        const data = await artistsRes.json()
         setArtists(data)
+        if (genresRes.ok) setApprovedGenres((await genresRes.json()).genres)
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -38,7 +43,12 @@ export default function ArtistsPage() {
     fetchArtists()
   }, [])
 
-  const genres = Array.from(new Set(artists.flatMap((a) => a.genre)))
+  // Filter dropdown only ever shows admin-approved genres (presets +
+  // approved "Other" submissions) - NOT every raw value in artists' own
+  // genre arrays, which is what let unapproved garbage become a public
+  // filter option before this (session 39, PR #224). An artist's own
+  // card still displays their genre exactly as saved, untouched by this.
+  const genres = approvedGenres
 
   const filtered = artists
     .filter((a) => {
