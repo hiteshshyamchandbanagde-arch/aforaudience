@@ -950,4 +950,11 @@ No code was written or merged this session; this was a documentation/reconciliat
 Related but out of scope this session: the `rateType === 'HOURLY'` rate-fields grid (create page) has the same fixed-`1fr 1fr` pattern but is plain number inputs, not autocomplete-dropdown-driven - lower urgency, folds into the existing backlog item "Manual Canvas mobile-responsiveness + UX polish" rather than a separate fix.
 
 
+**Click-test confirmation, same session (TWA + PWA, side by side).** Hitesh tested venue registration on both install types. #213's fixes hold on both: Address/City stack to one column on mobile, dropdown no longer overlaps content. **Directions link confirmed end-to-end working** - tapping it opens a real Google Maps pin for the resolved address (rating, reviews, Directions/Start/Ask buttons), not the garbled place_id text from before.
+
+Two new things surfaced, both logged to Feedback, neither touched yet:
+1. Two more garbage-value venue records found in "Your Venues": `NIKI 5200 MIC DROP` (PUBLISHED, 52 seats) and `NIKI 5500 FIX MIC 2607` (DRAFT, 104 seats), both with address/city literally `GARBAGE VALUE, GARBAGE VALUE` - same corrupted-data class as the already-flagged `NIKI 4700`. Needs Hitesh's go-ahead before cleanup, same as that one.
+2. Splash screen shows truncated `AforAudien` (missing "ce", last letter different shade) on launch - seen identically on both TWA and PWA at the same exact cut-off point, suggesting a real rendering issue (splash animation or webfont FOUC) rather than a coincidental screenshot mid-animation. Low priority/cosmetic, not yet investigated.
+
+
 *Confidential — Do not share*
