@@ -1207,11 +1207,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </p>
                 <div
                   style={{
-                    maxWidth: '100%', maxHeight: '420px', overflow: 'auto', display: 'flex', justifyContent: 'center',
+                    maxWidth: '100%', maxHeight: '420px', overflow: 'auto', display: 'flex',
                     background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px', padding: '10px 0',
                   }}
                 >
-                  <div style={{ position: 'relative', flexShrink: 0, width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
+                  <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
                     <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                       Stage
                     </div>
