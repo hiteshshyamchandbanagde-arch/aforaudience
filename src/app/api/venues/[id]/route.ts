@@ -90,6 +90,33 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
 
+    // Identity-lock guard (session 39) - Event.venueId/Venue.seatMap are
+    // live mutable references with no snapshotting (Feedback 94071451,
+    // still needs its own design pass on full scope: lock vs snapshot vs
+    // warn). Until that's designed, this stops the immediate real risk -
+    // an owner silently changing name/address/seat map after audience
+    // tickets have already been sold against the current layout. Only
+    // blocks identity-critical fields; facilities, rate, acoustic rating,
+    // and publish toggle are unaffected. Only compares fields the request
+    // actually tries to change, so a no-op resubmission of the same
+    // values isn't blocked.
+    const nameChanging = name !== undefined && name !== venue.name
+    const addressChanging = address !== undefined && address !== venue.address
+    const cityChanging = city !== undefined && city !== venue.city
+    const seatMapChanging = sections !== undefined && JSON.stringify(sections) !== JSON.stringify((venue.seatMap as any)?.sections || [])
+    if (nameChanging || addressChanging || cityChanging || seatMapChanging) {
+      const hasLiveEvent = await prisma.event.findFirst({
+        where: { venueId: id, status: 'APPROVED' },
+        select: { id: true },
+      })
+      if (hasLiveEvent) {
+        return NextResponse.json(
+          { error: 'This venue has a published event with tickets on sale, so its name, address, and seat map are locked to protect ticket-holders. Facilities, rate, and other settings can still be updated. Contact support if the venue itself has genuinely changed.' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Computed once so placeId's validity can consistently depend on
     // lat/lng's validity (PR #212) - same "all three set/cleared
     // together" rule as create.
