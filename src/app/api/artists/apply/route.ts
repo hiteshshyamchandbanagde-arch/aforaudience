@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { logNewGenreRequests } from '@/lib/genre-requests'
 
 // Multi-role support - mirrors /api/organisers/apply's reasoning (only
 // ADMIN excluded; role only auto-flips for true first-timers). Artist
@@ -47,6 +48,8 @@ export async function POST(req: Request) {
     ...(isFirstRole ? [prisma.user.update({ where: { id: user.id }, data: { role: 'ARTIST' as const } })] : []),
     prisma.artist.create({ data: { userId: user.id, genre, styleTag: [], videoReel: [] } }),
   ])
+
+  if (genre.length > 0) await logNewGenreRequests(genre)
 
   return NextResponse.json({
     message: isFirstRole
