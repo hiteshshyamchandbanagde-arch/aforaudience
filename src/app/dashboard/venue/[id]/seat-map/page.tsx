@@ -276,6 +276,42 @@ function previewBounds(points: { x: number; y: number }[]) {
 // Fresh default config for a level that doesn't have one yet - a plain
 // factory (not React state) since each level in gridConfigByLevel needs
 // its own independent starting point.
+// Reconstructs a display-only RowGroup summary from already-saved seats
+// (added 27 Jul, fixes the "whole zone data gone" bug: reopening Edit
+// Venue -> Seat Map Builder previously left gridConfigByLevel empty for
+// every level, so the Zone/price fields silently fell back to
+// defaultGridConfig()'s single hardcoded "General" zone - completely
+// disconnected from the real saved zones and prices, even though the
+// actual seats and zonePrices themselves loaded correctly underneath).
+// Rows/columns here are a best-effort approximation (distinct row
+// letters, max seats seen in any one row for that zone) since the
+// original generator "recipe" - aisle positions, alignment, tapering -
+// is never stored on individual seats, only the resulting seat rows
+// are. Good enough to show the true zone names and let their real
+// prices resolve correctly via the existing zonePrices[zoneName]
+// lookup - NOT a promise that clicking Generate again reproduces the
+// exact original layout down to the pixel.
+function deriveRowGroupsFromSeats(seats: SeatDraft[]): RowGroup[] {
+  const byZone = new Map<string, SeatDraft[]>()
+  for (const s of seats) {
+    if (!byZone.has(s.tierLabel)) byZone.set(s.tierLabel, [])
+    byZone.get(s.tierLabel)!.push(s)
+  }
+  return Array.from(byZone.entries()).map(([zoneName, zoneSeats]) => {
+    const rowLetters = new Set(zoneSeats.map((s) => s.row))
+    const perRowCounts = new Map<string, number>()
+    for (const s of zoneSeats) perRowCounts.set(s.row, (perRowCounts.get(s.row) || 0) + 1)
+    const columns = Math.max(1, ...Array.from(perRowCounts.values()))
+    return {
+      id: makeClientId(),
+      rows: Math.max(1, rowLetters.size),
+      columns,
+      zoneName,
+      verticalAisles: [],
+    }
+  })
+}
+
 function defaultGridConfig(): GridConfig {
   return {
     sideMarginPx: 30,
@@ -288,6 +324,29 @@ function defaultGridConfig(): GridConfig {
     // row is the same width, so it's safe as a default either way.
     rowAlignment: 'center',
   }
+}
+
+// Zone-name uniqueness (added 27 Jul, Hitesh's rule): a zone name may
+// never repeat within the same level - two same-named zones on one
+// level would be genuinely indistinguishable to an audience member
+// booking a seat, and since Generate flattens row-groups into plain
+// Seat.tierLabel strings, a same-level collision becomes invisible
+// (silently merged) the moment seats are generated - so this must be
+// caught HERE, before generation, not after. The same name CAN repeat
+// across different levels (e.g. "General" on both Ground and Balcony),
+// but only with explicit consent at Save time (see save()) - it's easy
+// to type the same word out of habit without meaning to link two
+// unrelated levels' pricing together.
+function findDuplicateZoneNames(rowGroups: RowGroup[]): string[] {
+  const seen = new Map<string, number>()
+  for (const rg of rowGroups) {
+    const key = rg.zoneName.trim().toLowerCase()
+    if (!key) continue
+    seen.set(key, (seen.get(key) || 0) + 1)
+  }
+  return Array.from(seen.entries())
+    .filter(([, count]) => count > 1)
+    .map(([name]) => name)
 }
 
 // §9.2 (26 Jul) - every numeric input in this builder (side margin, seat
@@ -571,6 +630,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       showToast('Add at least one row group first.', 'error')
       return
     }
+    const dupes = findDuplicateZoneNames(gridConfig.rowGroups)
+    if (dupes.length > 0) {
+      showToast(
+        `Zone name${dupes.length === 1 ? '' : 's'} "${dupes.join('", "')}" ${dupes.length === 1 ? 'is' : 'are'} used more than once on ${levelLabel(activeLevel)}. Each zone on the same level needs a unique name - rename one before generating.`,
+        'error'
+      )
+      return
+    }
     const generated = computeGridSeats(gridConfig, 40, STAGE_CLEARANCE_Y)
     setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
     showToast(`Generated ${generated.length} seats.`, 'success')
@@ -624,6 +691,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           priceByLevel[lvl][z.zoneName] = z.suggestedPrice != null ? String(z.suggestedPrice) : ''
         }
         setZonePricesByLevel(priceByLevel)
+
+        // Fixes "whole zone data gone" on reopening the builder - without
+        // this, gridConfigByLevel stayed {} for every level, so the Zone
+        // name/price fields fell back to defaultGridConfig()'s single
+        // fake "General" row-group instead of reflecting what's really
+        // saved. See deriveRowGroupsFromSeats() for what this can and
+        // can't reconstruct.
+        const gridByLevel: Record<string, GridConfig> = {}
+        for (const lvl of foundLevels) {
+          gridByLevel[lvl] = { ...defaultGridConfig(), rowGroups: deriveRowGroupsFromSeats(byLevel[lvl]) }
+        }
+        setGridConfigByLevel(gridByLevel)
 
         // Offer back a local draft rather than silently applying or
         // silently discarding it - the two could legitimately differ
@@ -838,6 +917,54 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         return
       }
       seen.add(key)
+    }
+
+    // Zone pricing validation (moved here, added 27 Jul, Hitesh's rule):
+    // previously this only ran at Venue Publish, meaning an owner could
+    // Save an unpriced layout and only find out much later. Every real
+    // zone (distinct level+tierLabel actually present in the saved
+    // seats) needs a real positive price before Save succeeds, same
+    // check the publish-gate already runs server-side - just surfaced
+    // at the point where it's actually actionable.
+    const zoneKeysInUse = new Set<string>()
+    for (const s of allSeats) zoneKeysInUse.add(`${s.level}::${s.tierLabel}`)
+    const priceMap = new Map(allZonePrices.map((z) => [`${z.level}::${z.zoneName}`, z.suggestedPrice]))
+    const missingPricing: string[] = []
+    for (const key of zoneKeysInUse) {
+      const price = priceMap.get(key)
+      if (price == null || !Number.isFinite(price) || price <= 0) {
+        const [level, zoneName] = key.split('::')
+        missingPricing.push(`${levelLabel(level)}: ${zoneName}`)
+      }
+    }
+    if (missingPricing.length > 0) {
+      showToast(`Every zone needs a price before saving. Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
+      return
+    }
+
+    // Cross-level zone-name consent (added 27 Jul, Hitesh's rule): the
+    // same zone name is allowed to repeat across DIFFERENT levels (e.g.
+    // "General" on both Ground and Balcony), but only with explicit
+    // confirmation - it's easy to type the same word out of habit
+    // without meaning to signal "these are the same pricing identity."
+    // Same-level duplicates are already blocked earlier (generateGrid/
+    // wizardNext), before generation ever merges them into one
+    // indistinguishable tierLabel.
+    const levelsByZoneName = new Map<string, Set<string>>()
+    for (const key of zoneKeysInUse) {
+      const [level, zoneName] = key.split('::')
+      const nameKey = zoneName.trim().toLowerCase()
+      if (!levelsByZoneName.has(nameKey)) levelsByZoneName.set(nameKey, new Set())
+      levelsByZoneName.get(nameKey)!.add(level)
+    }
+    const crossLevelDupes = Array.from(levelsByZoneName.entries()).filter(([, lvls]) => lvls.size > 1)
+    if (crossLevelDupes.length > 0) {
+      const names = crossLevelDupes.map(([name]) => name).join(', ')
+      if (!window.confirm(
+        `Zone name "${names}" is used on more than one level. This is allowed, but audiences won't be able to tell the levels apart by zone name alone - only proceed if that's intentional.\n\nContinue saving?`
+      )) {
+        return
+      }
     }
 
     setSaving(true)
@@ -1076,6 +1203,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                       + Add another zone
                     </button>
+                    {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
+                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--afa-error)', fontWeight: 600 }}>
+                        Zone name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each zone on this level needs a unique name.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1083,8 +1215,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button
                     onClick={wizardNext}
-                    disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())}
-                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim())) ? 0.5 : 1 }}
+                    disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0}
+                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0) ? 0.5 : 1 }}
                   >
                     Next
                   </button>
