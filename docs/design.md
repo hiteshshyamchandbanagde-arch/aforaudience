@@ -1057,5 +1057,18 @@ Confirmed working, no action needed: seat click-to-select + delete in the seat-m
 
 All four logged as fresh Feedback rows (BUG/FEATURE_IDEA/QUESTION, status NEW) for session-start reconciliation.
 
+**Session 40 handoff (27 Jul) — for next session.**
+`qa` HEAD: `f5994b6`. PAT expired end of session, needs fresh one at start.
+
+Shipped: full QA data wipe (1,038 non-admin users, 33 venues, 20 events, all Venue/Event/Booking/Artist/Organiser/VenueOwner data - Admin/Feedback/GenreRequest preserved), PR #238 (seat-map builder: zone-name uniqueness, save-time price validation, gridConfigByLevel reload fix), PR #239 (same fix for the separate GA SeatSectionEditor, which #238 missed). All three merged to `qa`, Vercel-verified, documented above.
+
+**Not yet done - next session should start here:**
+1. **None of #238/#239's fixes have been click-tested live yet** - Vercel build passed but no real browser walkthrough since merge. Since QA data is now empty, this doubles as the first real test of a fresh Numbered venue + fresh GA venue build end-to-end. Test specifically: same-level duplicate zone name blocks at Generate Seats/wizard Next; cross-level duplicate name asks for confirm at Save; unpriced zone blocks at Save (not just Publish); reopening Edit Venue -> Seat Map Builder shows the real saved zones, not a fake "General" default; GA duplicate section names block at both Draft and Publish.
+2. **Session 39's 4 items are still untouched:** header nav 2-line wrap (suspected #226 regression), chatbot mic icon, Manual Canvas per-zone price input, grid-generator-vs-draw-it-myself question. None built this session - got diverted into the venue-creation walkthrough instead.
+3. **Note for reconciliation:** any Feedback row still referencing a specific venue/event name (NIKI 4700, Jaipur Mic Gala, etc.) is now a dead reference post-wipe - those venues no longer exist. Don't try to re-verify against them; the underlying code fixes are still valid, just the referenced test data is gone.
+4. **Known limitation, not a bug:** #238's reload fix approximates rows/columns from saved seats but does NOT reconstruct original aisle positions/alignment - only zone names and real prices are guaranteed correct on reopening the builder, not the exact original generator recipe.
+
+Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this session in-chat, not reproduced here - reachable via the standard Feedback-table query at session start.
+
 
 *Confidential — Do not share*
