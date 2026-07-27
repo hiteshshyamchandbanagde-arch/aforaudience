@@ -1001,4 +1001,7 @@ New `GenreRequest` model (migration applied to QA). `src/lib/genres.ts` holds `P
 **PR #226 — current active role badge added to nav header (squash c55a552).** Feedback `cmrxou0f6`: a multi-role user (e.g. Artist + Venue Owner) had no way to tell which role was currently active from the header alone. Added a small terracotta pill badge next to the greeting (desktop) and the "Signed in as..." line (mobile panel), showing the human-readable label for `session.user.role`. Shown for every logged-in user, not just multi-role accounts - simpler than conditionally hiding it.
 
 
+**PR #227 — shared BackLink component, rolled out to 9 pages (squash 030b3a2).** Feedback `5b3ba5cf` - confirmed real inconsistency before building: 27+ pages each had their own ad-hoc back-link, wording and style varying ("Back to Home" with no arrow, "← Back to Dashboard", "← Back to venue" with inconsistent casing). New `src/components/BackLink.tsx` - one consistent "← Label" format, Title Case, rolled out this pass to organiser/venue dashboards, artist/venue edit, venue detail/create/bookings, artist events, organiser event create (9 files). Fixed the "← Back to venue" casing along the way. ~18 more pages from the original grep still have their own back-link - left as a natural follow-on rather than touching all 27+ without individually verifying each file's exact back-target first.
+
+
 *Confidential — Do not share*
