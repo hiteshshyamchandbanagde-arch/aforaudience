@@ -6,6 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
+import PosterShareCard from '@/components/PosterShareCard'
 import { formatEventTimeRange } from '@/lib/eventTime'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
@@ -251,6 +252,14 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             >
               {statusStyle.label}
             </span>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <PosterShareCard
+              src={`/api/posters/organiser/${event.id}`}
+              filename={`${event.title}-poster.png`}
+              title={event.title}
+            />
           </div>
 
           {/* Overview */}
