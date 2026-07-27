@@ -30,6 +30,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         // even after a real seat map was saved (see design.md §9).
         seats: { select: { tierLabel: true } },
         zonePrices: { select: { level: true, zoneName: true, suggestedPrice: true } },
+        dayRates: { select: { dayOfWeek: true, hourlyRate: true, dailyRate: true } },
       },
     })
 

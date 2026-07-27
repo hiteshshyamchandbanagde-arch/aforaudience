@@ -59,11 +59,31 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = await req.json()
-    const { name, address, city, state, country, lat, lng, placeId, capacity, acousticRating, facilities, seatMap, publish, mapsUrl } = body
+    const { name, address, city, state, country, lat, lng, placeId, capacity, acousticRating, facilities, seatMap, publish, mapsUrl, rateType, hourlyRate, dailyRate, minDurationHours, dayRates } = body
 
     if (mapsUrl !== undefined && mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
       return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
     }
+
+    // Same rate-type validation as POST /api/venues (create) - the edit
+    // form was previously missing this whole section entirely, so a
+    // venue owner had no way to update their rental rate post-creation
+    // (session 39 finding).
+    if (rateType !== undefined && rateType !== null && !['HOURLY', 'DAILY', 'FLEXIBLE'].includes(rateType)) {
+      return NextResponse.json({ error: 'Invalid rate type' }, { status: 400 })
+    }
+    if (rateType === 'HOURLY' && !(Number(hourlyRate) > 0)) {
+      return NextResponse.json({ error: 'Set an hourly rate' }, { status: 400 })
+    }
+    if (rateType === 'DAILY' && !(Number(dailyRate) > 0)) {
+      return NextResponse.json({ error: 'Set a daily rate' }, { status: 400 })
+    }
+    const validDayRates = Array.isArray(dayRates)
+      ? dayRates.filter((d: any) =>
+          ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].includes(d?.dayOfWeek)
+          && (Number(d.hourlyRate) > 0 || Number(d.dailyRate) > 0)
+        )
+      : []
 
     const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : undefined
     const seatMapCapacity = sections
@@ -164,7 +184,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(mapsUrl !== undefined && { mapsUrl: mapsUrl && mapsUrl.trim() ? mapsUrl.trim() : null }),
         ...(facilities !== undefined && { facilities: Array.isArray(facilities) ? facilities : [] }),
         ...(sections !== undefined && { seatMap: { sections } }),
-        ...(publish !== undefined && { isApproved: Boolean(publish) })
+        ...(publish !== undefined && { isApproved: Boolean(publish) }),
+        ...(rateType !== undefined && {
+          rateType: rateType || null,
+          hourlyRate: rateType === 'HOURLY' && hourlyRate ? parseFloat(hourlyRate) : null,
+          dailyRate: rateType === 'DAILY' && dailyRate ? parseFloat(dailyRate) : null,
+          minDurationHours: minDurationHours ? parseInt(minDurationHours) : null,
+          dayRates: {
+            deleteMany: {},
+            ...(validDayRates.length > 0 && {
+              create: validDayRates.map((d: any) => ({
+                dayOfWeek: d.dayOfWeek,
+                hourlyRate: d.hourlyRate ? parseFloat(d.hourlyRate) : null,
+                dailyRate: d.dailyRate ? parseFloat(d.dailyRate) : null,
+              })),
+            }),
+          },
+        }),
       }
     })
 
