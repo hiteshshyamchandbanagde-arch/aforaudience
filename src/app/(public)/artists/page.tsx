@@ -151,8 +151,13 @@ export default function ArtistsPage() {
                   onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none" }}
                 >
                   <div style={{ height: "120px", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", padding: "24px", gap: "16px" }}>
-                    <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0 }}>
-                      {artist.user.name.charAt(0).toUpperCase()}
+                    <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
+                      {artist.user.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={artist.user.avatar} alt={artist.user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        artist.user.name.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{artist.user.name}</div>
