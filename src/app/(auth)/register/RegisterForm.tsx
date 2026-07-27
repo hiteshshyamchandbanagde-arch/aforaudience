@@ -26,7 +26,6 @@ export default function RegisterForm() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string; username?: string }>({})
   const [form, setForm] = useState({ fullName: "", username: "", email: "", phoneNumber: "", password: "", confirm: "" })
 
-  const [usernameTouched, setUsernameTouched] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle")
   const [usernameSuggestion, setUsernameSuggestion] = useState<string | null>(null)
 
@@ -36,16 +35,15 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // Auto-suggest username from Full Name, until the user edits it themselves.
-  // Full Name itself IS also sent to the server (as displayName) and shows
-  // up on tickets/emails; only the username gets sliced/lowercased here.
-  useEffect(() => {
-    if (!usernameTouched && form.fullName) {
-      const suggested = form.fullName.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 20)
-      setForm((f) => ({ ...f, username: suggested }))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.fullName, usernameTouched])
+  // Previously auto-suggested a username derived from Full Name
+  // ("Will Smith" -> "willsmith") until the user edited it themselves.
+  // Removed (Feedback cmrxoaeun, session 39) - silently baking someone's
+  // real name into a system identifier, even one that's never shown
+  // publicly (displayName/artist.id already keep public surfaces clean -
+  // see User.name's schema comment), is still a real privacy concern for
+  // a performer who may not want any part of the platform tying their
+  // legal name to an identifier at all. The username field now starts
+  // blank - the person picks their own from scratch.
 
   // Live uniqueness check, debounced.
   useEffect(() => {
@@ -81,7 +79,6 @@ export default function RegisterForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    if (name === "username") setUsernameTouched(true)
     setForm({ ...form, [name]: value })
     setFieldErrors({ ...fieldErrors, [name]: undefined })
   }
@@ -281,7 +278,7 @@ export default function RegisterForm() {
               <input
                 name="username"
                 type="text"
-                placeholder="Auto-suggested from your name — edit if you like"
+                placeholder="Choose a username - not shown publicly, separate from your name"
                 value={form.username}
                 onChange={handleChange}
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
@@ -298,7 +295,7 @@ export default function RegisterForm() {
                   {usernameSuggestion && (
                     <button
                       type="button"
-                      onClick={() => { setUsernameTouched(true); setForm((f) => ({ ...f, username: usernameSuggestion })) }}
+                      onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
                       style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
                     >
                       Use &quot;{usernameSuggestion}&quot; instead
