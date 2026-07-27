@@ -42,6 +42,27 @@ function getDashboardLink(role?: string) {
   }
 }
 
+// Feedback cmrxou0f6 (23 Jul): a user with more than one role (e.g.
+// Artist + Venue Owner) wasn't sure which one was currently active just
+// from the header - had to check the dashboard content itself. Small
+// badge next to the greeting makes it explicit at a glance.
+function getRoleLabel(role?: string) {
+  switch (role) {
+    case "VENUE_OWNER":
+      return "Venue Owner"
+    case "ARTIST":
+      return "Artist"
+    case "ORGANISER":
+      return "Organiser"
+    case "ADMIN":
+      return "Admin"
+    case "AUDIENCE":
+      return "Audience"
+    default:
+      return null
+  }
+}
+
 /**
  * Small env-label pill shown next to the logo.
  * Reads NEXT_PUBLIC_ENV_LABEL:
@@ -187,6 +208,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7 }}>
                 Hi, {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
+              {getRoleLabel(user.role) && (
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
+                  {getRoleLabel(user.role)}
+                </span>
+              )}
               {accountLinks.map((l) => (
                 <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none" }}>
                   {l.label}
@@ -258,8 +284,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
         {status === "loading" ? null : user ? (
           <>
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, padding: "12px 0 4px" }}>
-              Signed in as {user.displayName || user.name || user.email}
+            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <span>Signed in as {user.displayName || user.name || user.email}</span>
+              {getRoleLabel(user.role) && (
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
+                  {getRoleLabel(user.role)}
+                </span>
+              )}
             </div>
             {accountLinks.map((l) => (
               <Link
