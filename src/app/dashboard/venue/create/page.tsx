@@ -10,6 +10,7 @@ import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
+import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 
 const inputStyle = {
@@ -293,7 +294,7 @@ export default function CreateVenuePage() {
                 <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g., The Grand Theater" style={inputStyle} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Address *</label>
                   <AddressAutocomplete
@@ -348,11 +349,13 @@ export default function CreateVenuePage() {
                 {formData.lat && formData.lng ? (
                   <>
                     <a
-                      href={
-                        formData.placeId
-                          ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(formData.placeId)}`
-                          : `https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`
-                      }
+                      href={buildDirectionsUrl({
+                        placeId: formData.placeId,
+                        lat: formData.lat ? Number(formData.lat) : null,
+                        lng: formData.lng ? Number(formData.lng) : null,
+                        address: formData.address,
+                        city: formData.city,
+                      })}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-terracotta)', fontWeight: 600 }}
