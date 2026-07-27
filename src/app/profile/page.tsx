@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import GenrePicker from '@/components/GenrePicker'
 
 type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
 
@@ -36,7 +37,7 @@ export default function ProfilePage() {
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
   const [artistStatus, setArtistStatus] = useState<RoleStatus | null>(null)
   const [orgName, setOrgName] = useState('')
-  const [genre, setGenre] = useState('')
+  const [genre, setGenre] = useState<string[]>([])
   const [applying, setApplying] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [switching, setSwitching] = useState<'organiser' | 'venue' | 'artist' | null>(null)
   const [message, setMessage] = useState('')
@@ -310,13 +311,9 @@ export default function ProfilePage() {
               renderRoleStatus(artistStatus, 'artist', 'Artist')
             ) : (
               <>
-                <input
-                  type="text"
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  placeholder="Genres, comma separated (optional) — e.g. Stand-up, Poetry"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
-                />
+                <div style={{ marginBottom: '12px' }}>
+                  <GenrePicker value={genre} onChange={setGenre} />
+                </div>
                 <button
                   onClick={applyArtist}
                   disabled={applying === 'artist'}

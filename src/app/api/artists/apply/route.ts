@@ -32,7 +32,12 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => ({}))
-  const genre = typeof body?.genre === 'string'
+  // GenrePicker (session 39, PR #219/#220) sends a real string[] now -
+  // kept the comma-string fallback for backward compatibility with any
+  // other caller still sending the old shape.
+  const genre = Array.isArray(body?.genre)
+    ? body.genre.filter((g: unknown): g is string => typeof g === 'string' && g.trim().length > 0).map((g: string) => g.trim())
+    : typeof body?.genre === 'string'
     ? body.genre.split(',').map((g: string) => g.trim()).filter(Boolean)
     : []
 
