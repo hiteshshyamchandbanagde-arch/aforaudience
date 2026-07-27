@@ -63,6 +63,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
 
   const dateStr = new Date(event.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
 
+  // Same env-detection as the site's own EnvBadge component (header
+  // pill) - Hitesh's request: make it obvious a poster came from QA,
+  // not production, since qa.aforaudience.com and the prod domain both
+  // point at deployments that could otherwise look identical here.
+  const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
+  const isQA = envLabel?.toLowerCase().includes('qa') ?? false
+
   return new ImageResponse(
     (
       <div
@@ -83,6 +90,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
             <div style={{ display: 'flex', width: '16px', height: '8px', background: '#F7F3EE' }} />
           </div>
           <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>AforAudience</div>
+          {envLabel && (
+            <div style={{ display: 'flex', marginLeft: '10px', padding: '3px 10px', fontSize: '13px', fontWeight: 600, color: isQA ? '#F7F3EE' : '#0E0C0A', background: isQA ? '#C8441A' : '#E4DDD2', borderRadius: '999px' }}>
+              {envLabel}
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', fontSize: '64px', fontWeight: 700, color: '#0E0C0A', lineHeight: 1.15, marginBottom: '24px' }}>

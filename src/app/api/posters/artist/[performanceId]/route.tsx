@@ -32,6 +32,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 220, color: { dark: '#0E0C0A', light: '#F7F3EE' } })
   const dateStr = new Date(performance.event.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
 
+  // Same env-detection as EnvBadge - see the organiser poster route for
+  // the full comment.
+  const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL
+  const isQA = envLabel?.toLowerCase().includes('qa') ?? false
+
   return new ImageResponse(
     (
       <div
@@ -52,6 +57,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ performa
             <div style={{ display: 'flex', width: '16px', height: '8px', background: '#F7F3EE' }} />
           </div>
           <div style={{ display: 'flex', fontSize: '22px', fontWeight: 700, color: '#0E0C0A' }}>AforAudience</div>
+          {envLabel && (
+            <div style={{ display: 'flex', marginLeft: '10px', padding: '3px 10px', fontSize: '13px', fontWeight: 600, color: isQA ? '#F7F3EE' : '#0E0C0A', background: isQA ? '#C8441A' : '#E4DDD2', borderRadius: '999px' }}>
+              {envLabel}
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', fontSize: '26px', color: '#C8441A', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px' }}>
