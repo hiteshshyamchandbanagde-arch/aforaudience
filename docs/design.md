@@ -957,4 +957,9 @@ Two new things surfaced, both logged to Feedback:
 2. ~~Splash screen truncation~~ - not a bug. Hitesh confirmed the `AforAudien` text was just the splash animation caught mid-reveal at the moment the screenshot was taken, not a real rendering issue. Closed.
 
 
+**PR #214 — seat map wizard preview scroll trap, same session (squash 93a1368).** A wide venue (279 seats/22 rows) cut off its left edge in the Preview step with no way to scroll to it. Root cause: `display:flex; justify-content:center` with `overflow:auto` is a known browser trap - only one side of an overflowing centered child stays scrollable, the other becomes permanently unreachable. Fixed by swapping to `margin:'0 auto'` on the child, keeping the same centering when content fits but preserving full bidirectional scroll once it overflows.
+
+**PR #215 — Acoustic Rating: owner self-report removed, read-only label everywhere (squash 270e5a3).** Ships the session-37 redesign, pulled into scope this session. Create/edit forms: editable input gone, static "Not Rated Yet" label + note that real ratings come from Artist/Organiser feedback. Public venue page + owner dashboard card: previously hid the block entirely when null - now always shown. **Deliberate display decision, flagged not silently decided:** any already-published venue with an old self-reported number in `acousticRating` shows "Not Rated Yet" too, not the old number - self-reported numbers were the whole problem, so displaying them would undercut the fix. DB values untouched (no cleanup). Still genuinely open: the real Artist/Organiser feedback collection + aggregation system - needs its own design pass (which model it rides on, aggregation method, conflict-of-interest exclusion when Organiser is also the venue owner) before that half gets built.
+
+
 *Confidential — Do not share*
