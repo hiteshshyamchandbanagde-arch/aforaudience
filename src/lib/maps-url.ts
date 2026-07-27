@@ -26,8 +26,19 @@ export function isValidMapsUrl(raw: string): boolean {
 // links for the same venue. Four tiers, most-precise first:
 //   1. mapsUrl      - owner explicitly pasted a share link; they know
 //                     best (e.g. a specific gate/entrance), always wins.
-//   2. placeId       - Address was resolved via autocomplete; an exact
-//                     named pin, not just a coordinate drop.
+//   2. placeId       - Address was resolved via autocomplete; paired
+//                     with lat/lng via `query`+`query_place_id` (the
+//                     documented Google Maps URLs API format - see
+//                     https://developers.google.com/maps/documentation/urls/get-started).
+//                     NOTE: an earlier version of this used
+//                     `/maps/place/?q=place_id:ID`, which is NOT a
+//                     supported deep-link format - real-device testing
+//                     (26 Jul, session 39) showed Android's Maps app
+//                     treating the raw place_id as literal search text
+//                     ("No results found"), not resolving the place at
+//                     all. `query` is required by the real API; `lat,lng`
+//                     is what Google's own docs recommend pairing with
+//                     query_place_id when both are available.
 //   3. lat/lng       - legacy safety net, in case placeId is ever
 //                     missing while coordinates exist.
 //   4. address text  - always available (Address is a required field),
@@ -42,7 +53,9 @@ export function buildDirectionsUrl(venue: {
   city?: string | null
 }): string {
   if (venue.mapsUrl) return venue.mapsUrl
-  if (venue.placeId) return `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(venue.placeId)}`
+  if (venue.placeId && venue.lat != null && venue.lng != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}&query_place_id=${encodeURIComponent(venue.placeId)}`
+  }
   if (venue.lat != null && venue.lng != null) {
     return `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`
   }
