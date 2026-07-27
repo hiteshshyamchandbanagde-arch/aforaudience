@@ -1,28 +1,27 @@
-// Branded loading indicator - reuses the same three-bar motif as the
-// intro splash and app icon (cream/gold/ember stacking up), but as a
-// small, continuously-looping "equalizer" animation suited to an inline
-// loading state rather than the splash's one-shot full-screen play.
-// Fitting for a live-performance platform - reads like a soundwave
-// as much as a spinner. Swapped in for plain "Loading..." text on the
-// highest-traffic pages (the four role dashboards + profile); the
-// remaining ~27 lower-traffic "Loading..." spots elsewhere in the app
-// are a natural follow-on, not done blind in this pass.
+// Branded loading indicator - previously used an unrelated "equalizer"
+// motif (vertical bars of varying height). Rebuilt (session 39, per
+// Hitesh's direct request) to be a pixel-accurate match of the actual
+// app icon/logo mark (src/app/icon.svg): three HORIZONTAL bars,
+// decreasing in width top-to-bottom (terracotta -> amber -> cream), on
+// a dark rounded-square background - not vertical bars, not the same
+// colors-per-bar arrangement as before. Same coordinates/proportions as
+// icon.svg's 64x64 viewBox, just scaled up. Animated as a staggered
+// opacity pulse cascading top to bottom, so it reads as "the logo
+// loading in" repeatedly rather than a generic spinner shape.
 export default function BrandLoader({ label = 'Loading...' }: { label?: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '64px 32px' }}>
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="22" width="8" height="14" rx="2" fill="var(--afa-ink)" opacity="0.85">
-          <animate attributeName="height" values="14;28;14" dur="1s" begin="0s" repeatCount="indefinite" />
-          <animate attributeName="y" values="22;8;22" dur="1s" begin="0s" repeatCount="indefinite" />
-        </rect>
-        <rect x="16" y="14" width="8" height="22" rx="2" fill="var(--afa-amber)">
-          <animate attributeName="height" values="22;34;22" dur="1s" begin="0.15s" repeatCount="indefinite" />
-          <animate attributeName="y" values="14;2;14" dur="1s" begin="0.15s" repeatCount="indefinite" />
-        </rect>
-        <rect x="28" y="6" width="8" height="30" rx="2" fill="var(--afa-terracotta)">
-          <animate attributeName="height" values="30;18;30" dur="1s" begin="0.3s" repeatCount="indefinite" />
-          <animate attributeName="y" values="6;18;6" dur="1s" begin="0.3s" repeatCount="indefinite" />
-        </rect>
+      <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="64" height="64" rx="16" fill="#0E0C0A" />
+        <path d="M18 18h28v8H18z" fill="#C8441A">
+          <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0s" repeatCount="indefinite" />
+        </path>
+        <path d="M18 30h20v8H18z" fill="#C9973A">
+          <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0.2s" repeatCount="indefinite" />
+        </path>
+        <path d="M18 42h14v8H18z" fill="#F7F3EE">
+          <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0.4s" repeatCount="indefinite" />
+        </path>
       </svg>
       {label && (
         <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>
