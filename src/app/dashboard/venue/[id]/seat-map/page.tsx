@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -148,7 +149,12 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
     const sortedVAisles = [...g.verticalAisles].sort((a, b) => a.afterFraction - b.afterFraction)
     for (let i = 0; i < g.rows; i++) {
       columnsForRow.push(g.columns)
-      zoneForRow.push(g.zoneName || 'General')
+      // Collapse internal whitespace here - this is the single point
+      // where a row-group's zoneName becomes a seat's persisted
+      // tierLabel, so it's the last chance to stop "General    2"
+      // (extra internal spaces) from being saved as a real, distinct
+      // zone identity.
+      zoneForRow.push(normalizeWhitespace(g.zoneName) || 'General')
       vAislesForRow.push(sortedVAisles)
     }
   }
@@ -340,7 +346,11 @@ function defaultGridConfig(): GridConfig {
 function findDuplicateZoneNames(rowGroups: RowGroup[]): string[] {
   const seen = new Map<string, number>()
   for (const rg of rowGroups) {
-    const key = rg.zoneName.trim().toLowerCase()
+    // normalizeForCompare (not bare trim+lowercase) - "General 2" vs
+    // "General    2" trim to two different strings otherwise, and both
+    // pass as "unique." Same class of bug found live on the GA path
+    // (SeatSectionEditor) and fixed here for consistency.
+    const key = normalizeForCompare(rg.zoneName)
     if (!key) continue
     seen.set(key, (seen.get(key) || 0) + 1)
   }
@@ -463,7 +473,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const addLevel = () => {
     const name = window.prompt('Name this level (e.g. "Ground Floor", "Balcony", "1st Floor")')
     if (name === null) return
-    const trimmed = name.trim().slice(0, 60)
+    const trimmed = normalizeWhitespace(name).slice(0, 60)
     if (!trimmed) { showToast('Level name cannot be empty.', 'error'); return }
     if (levels.includes(trimmed)) { showToast('A level with that name already exists.', 'error'); return }
     setLevels((prev) => [...prev, trimmed])
@@ -953,7 +963,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const levelsByZoneName = new Map<string, Set<string>>()
     for (const key of zoneKeysInUse) {
       const [level, zoneName] = key.split('::')
-      const nameKey = zoneName.trim().toLowerCase()
+      const nameKey = normalizeForCompare(zoneName)
       if (!levelsByZoneName.has(nameKey)) levelsByZoneName.set(nameKey, new Set())
       levelsByZoneName.get(nameKey)!.add(level)
     }

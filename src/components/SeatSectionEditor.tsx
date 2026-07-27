@@ -1,6 +1,7 @@
 "use client"
 
 import type { CSSProperties } from "react"
+import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
 
 export type SeatSection = {
   id: string
@@ -15,10 +16,15 @@ export type SeatSection = {
 // straight through to Publish with zero validation. Exported so both
 // the create and edit pages can block submit with the same check the
 // server now also enforces.
+//
+// Uses normalizeForCompare (trim + collapse internal whitespace +
+// lowercase), not a bare `.trim().toLowerCase()` - live-observed 27 Jul:
+// "general 2" and "general    2" (extra internal spaces) trimmed to two
+// different strings and both passed as "unique."
 export function findDuplicateSectionNames(sections: SeatSection[]): string[] {
   const counts = new Map<string, number>()
   for (const s of sections) {
-    const key = s.name.trim().toLowerCase()
+    const key = normalizeForCompare(s.name)
     if (!key) continue
     counts.set(key, (counts.get(key) || 0) + 1)
   }
@@ -95,7 +101,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         )}
 
         {sections.map((section, i) => {
-          const isDuplicate = section.name.trim() !== '' && duplicateNames.has(section.name.trim().toLowerCase())
+          const isDuplicate = section.name.trim() !== '' && duplicateNames.has(normalizeForCompare(section.name))
           return (
           <div
             key={section.id}
@@ -115,6 +121,15 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               placeholder={`Section name (e.g. Section ${i + 1})`}
               value={section.name}
               onChange={(e) => updateSection(section.id, "name", e.target.value)}
+              onBlur={(e) => {
+                // Collapse internal whitespace once typing is done, so a
+                // name like "general    2" doesn't persist as a visually
+                // distinct "duplicate" of "general 2" - see
+                // normalizeForCompare's note on why comparison alone
+                // isn't enough.
+                const normalized = normalizeWhitespace(e.target.value)
+                if (normalized !== e.target.value) updateSection(section.id, "name", normalized)
+              }}
               style={{ ...inputStyle, ...(isDuplicate ? { border: "1px solid var(--afa-error)" } : {}) }}
             />
             <input

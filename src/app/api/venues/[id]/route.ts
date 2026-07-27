@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { isValidMapsUrl } from '@/lib/maps-url'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -97,7 +98,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         )
       : []
 
-    const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : undefined
+    // Name normalized here (trim + collapse internal whitespace) at the
+    // single point sections enter the request - this form's custom
+    // onChange handlers bypass native validation entirely (same
+    // precedent as the seat-count/price bounds checks below), so this is
+    // the real enforcement point, not just the dup-check that follows.
+    // Live-observed 27 Jul: "general 2" (one space) and "general    2"
+    // (multiple internal spaces) both saved as "unique" sections under
+    // the old `.trim().toLowerCase()` check, which doesn't collapse
+    // internal whitespace.
+    const sections = Array.isArray(seatMap?.sections)
+      ? seatMap.sections.map((s: any) => ({ ...s, name: normalizeWhitespace(String(s?.name ?? '')) }))
+      : undefined
     const seatMapCapacity = sections
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
@@ -106,11 +118,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // POST /api/venues and the Numbered-venue Seat Map Builder: a GA
     // venue has no level concept, so this is simply "no two sections
     // share a name." Only runs when sections are actually part of this
-    // request (optional field on PATCH).
+    // request (optional field on PATCH). Names are already whitespace-
+    // normalized above, so only case remains to fold here.
     if (sections !== undefined) {
       const sectionNameCounts = new Map<string, number>()
       for (const s of sections) {
-        const key = String(s?.name ?? '').trim().toLowerCase()
+        const key = normalizeForCompare(s.name)
         if (!key) continue
         sectionNameCounts.set(key, (sectionNameCounts.get(key) || 0) + 1)
       }
@@ -270,3 +283,4 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Failed to update venue' }, { status: 500 })
   }
 }
+
