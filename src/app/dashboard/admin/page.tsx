@@ -131,8 +131,8 @@ export default function AdminDashboard() {
           {organisers.length === 0 && <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '24px' }}>Nothing pending.</p>}
           {organisers.map((o) => (
             <div key={o.id} style={cardStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: '200px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 600 }}>{o.orgName}</div>
                   <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
                   {o.bio && <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
@@ -151,8 +151,8 @@ export default function AdminDashboard() {
           {venueOwners.length === 0 && <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
           {venueOwners.map((v) => (
             <div key={v.id} style={cardStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: '200px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 600 }}>{v.user.name}</div>
                   <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>{v.user.email}</div>
                 </div>
