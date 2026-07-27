@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { isValidMapsUrl } from '@/lib/maps-url'
+import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
 
 export async function GET() {
   try {
@@ -102,7 +103,14 @@ export async function POST(req: Request) {
     // are generous on purpose - real venues, not a hard business rule.
     const MAX_SEATS_PER_SECTION = 100_000
     const MAX_PRICE_PER_SEAT = 10_000_000 // ₹1 crore
-    const sections = Array.isArray(seatMap?.sections) ? seatMap.sections : []
+    // Name normalized here (trim + collapse internal whitespace), same
+    // fix as PATCH /api/venues/[id] - live-observed 27 Jul: "general 2"
+    // (one space) and "general    2" (multiple internal spaces) both
+    // saved as "unique" under the old `.trim().toLowerCase()` check,
+    // which doesn't collapse internal whitespace.
+    const sections = Array.isArray(seatMap?.sections)
+      ? seatMap.sections.map((s: any) => ({ ...s, name: normalizeWhitespace(String(s?.name ?? '')) }))
+      : []
     for (const s of sections) {
       const seatCount = Number(s?.seats)
       const price = s?.price !== undefined && s?.price !== null && s?.price !== '' ? Number(s.price) : 0
@@ -126,10 +134,11 @@ export async function POST(req: Request) {
     // through to Publish with zero validation (4 sections all named
     // "general"). Server-side is the real enforcement point per the
     // client-form-bypasses-native-validation precedent elsewhere in
-    // this file.
+    // this file. Names are already whitespace-normalized above, so only
+    // case remains to fold here.
     const sectionNameCounts = new Map<string, number>()
     for (const s of sections) {
-      const key = String(s?.name ?? '').trim().toLowerCase()
+      const key = normalizeForCompare(s.name)
       if (!key) continue
       sectionNameCounts.set(key, (sectionNameCounts.get(key) || 0) + 1)
     }
