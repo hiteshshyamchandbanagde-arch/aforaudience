@@ -79,6 +79,20 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   const { data: session, status } = useSession()
   const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
   const dashboardLink = user ? getDashboardLink(user.role) : null
+
+  // Feedback cms1ibqtf - Venue Owner/Organiser dashboards already show
+  // per-page pending-request badges, but only once you're already on that
+  // page. This surfaces the same count from anywhere via the nav.
+  const [pendingCount, setPendingCount] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
+    let cancelled = false
+    fetch('/api/notifications/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
   const [mobileOpen, setMobileOpen] = useState(false)
   // Swipe-up-to-close for the mobile dropdown panel (Feedback f1c26af4) -
   // previously only the X/hamburger button dismissed it; a swipe on the
@@ -214,8 +228,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </span>
               )}
               {accountLinks.map((l) => (
-                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none" }}>
+                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "5px" }}>
                   {l.label}
+                  {l.label === "Dashboard" && pendingCount > 0 && (
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 6px", minWidth: "16px", textAlign: "center" }}>
+                      {pendingCount}
+                    </span>
+                  )}
                 </Link>
               ))}
               <button
@@ -297,9 +316,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
+                {l.label === "Dashboard" && pendingCount > 0 && (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                    {pendingCount}
+                  </span>
+                )}
               </Link>
             ))}
             <button
