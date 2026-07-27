@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import GenrePicker from '@/components/GenrePicker'
 
 const inputStyle = {
   width: '100%',
@@ -33,7 +34,7 @@ export default function EditArtistProfilePage() {
   const { showToast } = useToast()
   const [saving, setSaving] = useState(false)
   const [bio, setBio] = useState('')
-  const [genreInput, setGenreInput] = useState('')
+  const [genre, setGenre] = useState<string[]>([])
   const [styleTagInput, setStyleTagInput] = useState('')
   const [instagram, setInstagram] = useState('')
   const [youtube, setYoutube] = useState('')
@@ -61,7 +62,7 @@ export default function EditArtistProfilePage() {
         if (!artistRes.ok) throw new Error('Failed to fetch profile')
         const data = await artistRes.json()
         setBio(data.bio || '')
-        setGenreInput((data.genre || []).join(', '))
+        setGenre(data.genre || [])
         setStyleTagInput((data.styleTag || []).join(', '))
         const links = data.socialLinks || {}
         setInstagram(links.instagram || '')
@@ -98,7 +99,7 @@ export default function EditArtistProfilePage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             bio,
-            genre: genreInput.split(',').map((g) => g.trim()).filter(Boolean),
+            genre,
             styleTag: styleTagInput.split(',').map((s) => s.trim()).filter(Boolean),
             socialLinks: { instagram, youtube },
             tagline,
@@ -163,8 +164,8 @@ export default function EditArtistProfilePage() {
             </div>
 
             <div style={{ marginBottom: '18px' }}>
-              <label style={labelStyle}>Genres <span style={{ fontWeight: 400, opacity: 0.6 }}>(comma separated)</span></label>
-              <input type="text" value={genreInput} onChange={(e) => setGenreInput(e.target.value)} placeholder="e.g., Stand-up, Improv" style={inputStyle} />
+              <label style={labelStyle}>Genres</label>
+              <GenrePicker value={genre} onChange={setGenre} />
             </div>
 
             <div style={{ marginBottom: '18px' }}>
