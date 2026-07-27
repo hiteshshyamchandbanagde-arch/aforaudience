@@ -190,12 +190,10 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                   {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
                 </p>
               </div>
-              {venue.acousticRating != null && (
-                <div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
-                  <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.acousticRating}/5</p>
-                </div>
-              )}
+              <div>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>Not Rated Yet</p>
+              </div>
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
