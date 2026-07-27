@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
+import PosterShareCard from '@/components/PosterShareCard'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 
@@ -55,6 +56,10 @@ export default function BrowseEventsToApplyPage() {
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
   const [applicationStatus, setApplicationStatus] = useState<Record<string, string>>({})
+  // Session 39 (Feedback ec6e4adf) - maps eventId -> this artist's own
+  // Performance id, so the poster share card can be shown for their
+  // active confirmed slot independent of the rest of the lineup filling.
+  const [performanceIdByEvent, setPerformanceIdByEvent] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
   const [message, setMessage] = useState<Record<string, string>>({})
@@ -84,6 +89,12 @@ export default function BrowseEventsToApplyPage() {
             statusMap[a.event.id] = a.status
           }
           setApplicationStatus(statusMap)
+
+          const perfMap: Record<string, string> = {}
+          for (const p of profile.performances || []) {
+            if (!p.cancelledAt) perfMap[p.event.id] = p.id
+          }
+          setPerformanceIdByEvent(perfMap)
         }
       } catch (err: any) {
         showToast(err.message || 'Failed to load events', 'error')
@@ -172,9 +183,20 @@ export default function BrowseEventsToApplyPage() {
                     <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
                     {existingStatus ? (
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-ink)' }}>
-                        {STATUS_LABEL[existingStatus]?.label || existingStatus}
-                      </span>
+                      <>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-ink)' }}>
+                          {STATUS_LABEL[existingStatus]?.label || existingStatus}
+                        </span>
+                        {performanceIdByEvent[event.id] && (
+                          <div style={{ marginTop: '14px' }}>
+                            <PosterShareCard
+                              src={`/api/posters/artist/${performanceIdByEvent[event.id]}`}
+                              filename={`${event.title}-my-poster.png`}
+                              title={`I'm performing at ${event.title}`}
+                            />
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div>
                         <textarea
