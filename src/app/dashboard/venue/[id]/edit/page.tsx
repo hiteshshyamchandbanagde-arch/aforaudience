@@ -6,7 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
-import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
+import SeatSectionEditor, { SeatSection, findDuplicateSectionNames } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
@@ -159,6 +159,12 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
     // section validation regardless of seatingMode.
     if (venue?.seatingMode === 'GENERAL_ADMISSION' && validSections.length === 0) {
       showToast('Add at least one seating section with a name and seat count.', 'error')
+      setSaving(false)
+      return
+    }
+    const duplicateSectionNames = findDuplicateSectionNames(validSections)
+    if (venue?.seatingMode === 'GENERAL_ADMISSION' && duplicateSectionNames.length > 0) {
+      showToast(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`, 'error')
       setSaving(false)
       return
     }

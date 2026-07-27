@@ -7,7 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
-import SeatSectionEditor, { SeatSection } from '@/components/SeatSectionEditor'
+import SeatSectionEditor, { SeatSection, findDuplicateSectionNames } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
@@ -174,6 +174,12 @@ export default function CreateVenuePage() {
 
     if (seatingChoice === 'GENERAL_ADMISSION' && validSections.length === 0) {
       fail('Add at least one seating section with a name and seat count.')
+      setSaving(false)
+      return
+    }
+    const duplicateSectionNames = findDuplicateSectionNames(validSections)
+    if (seatingChoice === 'GENERAL_ADMISSION' && duplicateSectionNames.length > 0) {
+      fail(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`)
       setSaving(false)
       return
     }
