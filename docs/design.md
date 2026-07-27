@@ -1040,4 +1040,15 @@ Not yet built, explicitly deferred: multi-theme selection UI - moot until there'
 **PR #237 — real serif font + dark editorial redesign for posters (squash b13ef12).** Hitesh: "Poster need improvement in design." Diagnosed two concrete problems rather than guessing at vague "make it nicer": (1) the title was coded as `fontFamily: 'Georgia, serif'` but never actually rendered as serif - `next/og`'s `ImageResponse` (Satori under the hood) can't access system/OS fonts at all, silently falling back to generic sans-serif, so the poster never carried the site's real editorial branding; (2) the "lineup coming soon" state left a large dead gap in the canvas with nothing filling it. Fixed both: new `src/lib/poster-fonts.ts` loads real Playfair Display `.woff` files (900/700/400 weights) from `public/fonts/` at request time - extracted once from the `@fontsource/playfair-display` npm package (installed temporarily just to pull the 3 static font files, then uninstalled, not kept as a runtime dependency for files that never change). Both poster routes rebuilt on a dark plum-black `#1A0A1A` background - the exact same color already used for the artist hero-card treatment elsewhere in the app, not a new one-off - with a proper visual hierarchy (eyebrow label, weight-900 serif title, terracotta/amber accent colors from the real brand palette) and a faint oversized watermark of the logo's three-bar motif in the background so the coming-soon state fills the canvas instead of leaving dead space.
 
 
+**Session 39 handoff (26-27 Jul) — four new items for next session, none yet investigated/built.**
+1. **Header nav wraps to 2 lines at 100% zoom** - likely regression from PR #226's role badge. Reproduce at normal desktop zoom/width first before assuming the fix.
+2. **Manual Canvas zone plotting has no per-zone price input** - real functional gap, probably belongs in the frozen seat-map redesign conversation rather than a standalone patch.
+3. **Question: why does a "grid generator" exist alongside "Draw It Myself"** - Hitesh flagged this as confusing/possibly redundant. Needs discussion in the next seat-map design session.
+4. **Chatbot widget icon looks like a microphone** - needs a proper chat/help icon instead. Component/asset location not yet identified.
+
+Confirmed working, no action needed: seat click-to-select + delete in the seat-map builder.
+
+All four logged as fresh Feedback rows (BUG/FEATURE_IDEA/QUESTION, status NEW) for session-start reconciliation.
+
+
 *Confidential — Do not share*
