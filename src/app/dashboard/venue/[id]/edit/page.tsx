@@ -11,6 +11,7 @@ import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
+import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 
@@ -343,6 +344,10 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
               </p>
 
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center' }}>
+                Rate Type
+                <HelpIcon text={'Hourly and Daily publish a fixed rate. Flexible means no fixed rate - Organisers send you a date and duration, and you respond with a quote before it\'s confirmed.'} />
+              </label>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
                   <button
