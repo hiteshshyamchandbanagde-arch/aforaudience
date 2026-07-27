@@ -52,6 +52,7 @@ export default function CreateVenuePage() {
     country: '',
     lat: '',
     lng: '',
+    placeId: '',
     acousticRating: '',
     mapsUrl: '',
   })
@@ -298,6 +299,7 @@ export default function CreateVenuePage() {
                   <AddressAutocomplete
                     value={formData.address}
                     onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+                    onManualEdit={() => setFormData((prev) => ({ ...prev, lat: '', lng: '', placeId: '' }))}
                     onResolved={(loc) =>
                       setFormData((prev) => ({
                         ...prev,
@@ -306,6 +308,7 @@ export default function CreateVenuePage() {
                         country: loc.country ?? prev.country,
                         lat: loc.lat != null ? String(loc.lat) : prev.lat,
                         lng: loc.lng != null ? String(loc.lng) : prev.lng,
+                        placeId: loc.placeId ?? prev.placeId,
                       }))
                     }
                     inputStyle={inputStyle}
@@ -331,22 +334,53 @@ export default function CreateVenuePage() {
                 </div>
               </div>
 
+              {/* Directly after Address/City/State/Country - keeps every
+                  location-identity field grouped as one visual block,
+                  before Facilities/Acoustic Rating which are a different
+                  category (session 38, PR #212, Hitesh's call). Two
+                  render states: read-only auto-derived link once Address
+                  autocomplete has resolved (lat/lng present), or the
+                  original editable paste-a-link input for manually-typed
+                  addresses - Get Directions works either way, this field
+                  is purely an accuracy upgrade in the manual case. */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={labelStyle}>Google Maps Link</label>
+                {formData.lat && formData.lng ? (
+                  <>
+                    <a
+                      href={
+                        formData.placeId
+                          ? `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(formData.placeId)}`
+                          : `https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-terracotta)', fontWeight: 600 }}
+                    >
+                      📍 Directions
+                    </a>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
+                      Derived automatically from the address you picked above. Edit the address to change it.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
+                      Optional - improves accuracy. Get Directions still works from your address either way.
+                    </p>
+                  </>
+                )}
+              </div>
+
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Facilities</label>
                 <FacilitiesPicker value={facilities} onChange={setFacilities} />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div>
                 <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
                 <input type="number" name="acousticRating" value={formData.acousticRating} onChange={handleAcousticRatingChange} placeholder="e.g., 4.5" min="0" max="5" step="0.5" maxLength={3} style={{ ...inputStyle, maxWidth: '200px' }} />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Google Maps Link <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
-                <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '6px' }}>
-                  Paste a share link from Google Maps for an exact pin. If left blank, we'll use your address to build directions.
-                </p>
               </div>
             </section>
 

@@ -15,12 +15,20 @@ interface ResolvedAddress {
   country: string | null
   lat: number | null
   lng: number | null
+  placeId: string | null
 }
 
 interface AddressAutocompleteProps {
   value: string
   onChange: (address: string) => void
   onResolved: (location: ResolvedAddress) => void
+  // Fired only when the person types into the field directly - NOT when
+  // this component sets the text itself after a selection. Lets the
+  // parent form know "the address is no longer what autocomplete last
+  // resolved" so it can clear lat/lng/placeId and revert the Google Maps
+  // Link field from its read-only auto-derived state back to a plain
+  // editable input (see venue create/edit pages, PR #212).
+  onManualEdit?: () => void
   inputStyle: React.CSSProperties
   placeholder?: string
 }
@@ -37,7 +45,7 @@ interface AddressAutocompleteProps {
 // address with no clean match still works and just saves as free
 // text, since many real venues here (homes, informal spaces) won't
 // have a clean Google-indexed listing.
-export default function AddressAutocomplete({ value, onChange, onResolved, inputStyle, placeholder }: AddressAutocompleteProps) {
+export default function AddressAutocomplete({ value, onChange, onResolved, onManualEdit, inputStyle, placeholder }: AddressAutocompleteProps) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -96,7 +104,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, input
       if (res.ok) {
         const location = await res.json()
         onChange(location.formattedAddress || prediction.mainText)
-        onResolved(location)
+        onResolved({ ...location, placeId: prediction.placeId })
       }
     } finally {
       // Session is over (terminated by the Details call above) -
@@ -112,7 +120,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, input
       <input
         type="text"
         value={value}
-        onChange={(e) => { onChange(e.target.value); setOpen(true) }}
+        onChange={(e) => { onManualEdit?.(); onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder ?? 'Start typing an address or venue name...'}
         style={inputStyle}
