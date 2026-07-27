@@ -25,6 +25,9 @@ interface Venue {
   seatingMode?: string
   seatMap?: { sections?: SeatSection[] } | null
   zonePrices?: { suggestedPrice: number | null }[]
+  rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
+  hourlyRate?: number | null
+  dailyRate?: number | null
 }
 
 // Same field-mismatch bug family as PR #151/#156: a NUMBERED venue's real
@@ -40,6 +43,12 @@ function priceRange(venue: Venue) {
   const min = Math.min(...prices)
   const max = Math.max(...prices)
   return min === max ? `₹${min}` : `₹${min}–₹${max}`
+}
+
+function rateLabel(venue: Venue) {
+  if (venue.rateType === 'HOURLY' && venue.hourlyRate) return `Hourly · ₹${venue.hourlyRate.toLocaleString('en-IN')}/hr`
+  if (venue.rateType === 'DAILY' && venue.dailyRate) return `Daily · ₹${venue.dailyRate.toLocaleString('en-IN')}/day`
+  return 'Flexible rate'
 }
 
 export default function VenueDashboard() {
@@ -244,9 +253,10 @@ export default function VenueDashboard() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  <div style={{ display: 'flex', gap: '20px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-ink)', flexWrap: 'wrap' }}>
                     <span><strong>{venue.capacity}</strong> seats</span>
                     <span><strong>{priceRange(venue)}</strong> per seat</span>
+                    <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{rateLabel(venue)}</span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px' }}>
