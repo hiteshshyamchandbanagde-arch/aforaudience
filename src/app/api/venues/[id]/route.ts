@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { isValidMapsUrl } from '@/lib/maps-url'
+import { requireVerifiedPhone } from '@/lib/verification'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -60,6 +61,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const body = await req.json()
     const { name, address, city, state, country, lat, lng, placeId, capacity, acousticRating, facilities, seatMap, publish, mapsUrl, rateType, hourlyRate, dailyRate, minDurationHours, dayRates } = body
+
+    // Verify-gate at Publish - was entirely missing from this route (only
+    // POST /api/venues, i.e. create, had it). This meant an unverified
+    // owner could bypass verification by saving a venue as Draft first,
+    // then publishing it later via Edit instead of at creation - the
+    // exact gap Feedback flagged ("Venue publish without verify mobile
+    // number"). Same guard, same condition, as create.
+    if (publish === true) {
+      const verifyError = requireVerifiedPhone(user, 'publishing this venue - organisers plan real bookings around it')
+      if (verifyError) return verifyError
+    }
 
     if (mapsUrl !== undefined && mapsUrl && mapsUrl.trim() && !isValidMapsUrl(mapsUrl)) {
       return NextResponse.json({ error: 'Please paste a real Google Maps link (e.g. from the Share button on Google Maps).' }, { status: 400 })
