@@ -623,8 +623,44 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const removeRowGroup = (id: string) => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.filter((r) => r.id !== id) }))
   const updateRowGroup = (id: string, field: 'rows' | 'columns', value: number) =>
     setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, [field]: Math.max(1, value) } : r)) }))
-  const updateRowGroupZone = (id: string, zoneName: string) =>
-    setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, zoneName: zoneName.slice(0, 60) } : r)) }))
+  const updateRowGroupZone = (id: string, zoneName: string) => {
+    const trimmed = zoneName.slice(0, 60)
+    const rg = gridConfig.rowGroups.find((r) => r.id === id)
+    const oldName = rg?.zoneName ?? ''
+    // Live-caught 28 Jul (Hitesh): renamed a zone's Name field to match
+    // another zone's name AFTER Generate Seats had already run, and
+    // Save went through with no warning - "Section name same still
+    // saving." Root cause: this field only ever updated gridConfig (a
+    // "next generation" setting) - already-placed seats keep whatever
+    // tierLabel they were generated with forever, and Save's duplicate
+    // check only covered row/number collisions, never zone names. So
+    // the form could show two zones with the identical name while the
+    // real per-seat data quietly stayed different (or, going forward,
+    // genuinely collide) with nothing catching either case.
+    // Fix: block the rename outright if it would collide with a
+    // DIFFERENT zone's name already in use by seats already placed on
+    // this level (same rule every other duplicate-name check in this
+    // app already enforces) - and otherwise propagate a valid rename
+    // onto those placed seats and their saved suggested price, so the
+    // form and the real data can no longer drift apart.
+    const otherZoneNames = new Set(seats.filter((s) => s.tierLabel !== oldName).map((s) => s.tierLabel))
+    if (trimmed && otherZoneNames.has(trimmed)) {
+      showToast(`"${trimmed}" is already used by another section on ${levelLabel(activeLevel)} - each section needs a unique name.`, 'error')
+      return
+    }
+    setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((r) => (r.id === id ? { ...r, zoneName: trimmed } : r)) }))
+    if (oldName && oldName !== trimmed) {
+      setSeats((prev) => prev.map((s) => (s.tierLabel === oldName ? { ...s, tierLabel: trimmed } : s)))
+      setZonePricesByLevel((prev) => {
+        const levelPrices = { ...(prev[activeLevel] || {}) }
+        if (oldName in levelPrices) {
+          levelPrices[trimmed] = levelPrices[oldName]
+          delete levelPrices[oldName]
+        }
+        return { ...prev, [activeLevel]: levelPrices }
+      })
+    }
+  }
 
   const addAisle = () => setGridConfig((g) => ({ ...g, aisles: [...g.aisles, { id: makeClientId(), afterRow: g.rowGroups.reduce((s, r) => s + r.rows, 0), gapPx: 30 }] }))
   const removeAisle = (id: string) => setGridConfig((g) => ({ ...g, aisles: g.aisles.filter((a) => a.id !== id) }))
