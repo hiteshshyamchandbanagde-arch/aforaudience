@@ -90,6 +90,20 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     )
   }
 
+  // Free toggle (Hitesh, 28 Jul): live-tested the FREE badge floating
+  // inside the price textbox and it looked cluttered. Replaced with an
+  // explicit checkbox beside the field instead of a badge inside it -
+  // checking it sets price to an explicit 0 (still the same "isFree"
+  // signal isIncompleteSection/isFree already rely on, so no schema or
+  // validation change needed), unchecking clears price back to '' so
+  // the owner must explicitly re-enter an amount rather than a stale 0
+  // lingering unnoticed.
+  const setSectionFree = (id: string, free: boolean) => {
+    onChange(
+      sections.map((s) => (s.id === id ? { ...s, price: free ? 0 : "" } : s))
+    )
+  }
+
   const removeSection = (id: string) => {
     onChange(sections.filter((s) => s.id !== id))
   }
@@ -175,41 +189,35 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
               style={{ ...inputStyle, ...(isPartial && !(Number(section.seats) > 0) ? { border: `1px solid ${borderColor}` } : {}) }}
             />
-            <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
-              <input
-                type="number"
-                placeholder="Price (0 = free)"
-                min={0}
-                max={10000000}
-                maxLength={8}
-                value={section.price}
-                onChange={(e) => updateSection(section.id, "price", e.target.value)}
-                style={{ ...inputStyle, paddingLeft: "26px", ...(isFree ? { paddingRight: "48px" } : {}), ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}) }}
-              />
-              {isFree && (
-                // Rule (Hitesh, 27 Jul): ₹0/blank must never pass through
-                // silently - make it visible so an accidental blank price
-                // gets corrected before publish, rather than blocking the
-                // save outright (a genuinely free section is valid).
-                <span
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
+                <input
+                  type="number"
+                  placeholder="Price"
+                  min={0}
+                  max={10000000}
+                  maxLength={8}
+                  value={section.price}
+                  disabled={isFree}
+                  onChange={(e) => updateSection(section.id, "price", e.target.value)}
                   style={{
-                    position: "absolute",
-                    right: "8px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: "var(--afa-amber)",
-                    background: "var(--afa-amber-tint)",
-                    padding: "2px 7px",
-                    borderRadius: "4px",
-                    letterSpacing: "0.02em",
+                    ...inputStyle,
+                    paddingLeft: "26px",
+                    ...(isFree ? { opacity: 0.5, background: "rgba(14,12,10,0.04)" } : {}),
+                    ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}),
                   }}
-                >
-                  FREE
-                </span>
-              )}
+                />
+              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
+                <input
+                  type="checkbox"
+                  checked={isFree}
+                  onChange={(e) => setSectionFree(section.id, e.target.checked)}
+                  style={{ margin: 0 }}
+                />
+                Free
+              </label>
             </div>
             <button
               type="button"
@@ -245,7 +253,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         }).length
         return partialCount > 0 ? (
           <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-amber)", fontWeight: 600 }}>
-            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (enter 0 for free) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
+            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
           </p>
         ) : null
       })()}
