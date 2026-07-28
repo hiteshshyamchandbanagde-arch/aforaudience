@@ -30,20 +30,20 @@ import { usePathname } from 'next/navigation';
 
 type Panel = 'closed' | 'chat' | 'feedback';
 
-/** On-brand mic icon (replaces a generic speech-bubble emoji) — a warm
- * spotlight glow behind a simple stage mic, matching the "live performance"
- * theme rather than a generic chatbot look. Uses currentColor for the mic
- * so it inherits the button/text color it's placed in. */
-/** On-brand mic icon (replaces a generic speech-bubble emoji) — a warm
- * spotlight glow behind a simple stage mic, matching the "live performance"
- * theme rather than a generic chatbot look. Uses currentColor for the mic
- * so it inherits the button/text color it's placed in.
+/** On-brand chat icon — a warm spotlight glow (kept from the previous
+ * mic design, matches the "live performance" theme) behind a simple
+ * speech-bubble glyph. Replaces the earlier stage-mic icon: user testing
+ * (Hitesh, session 44) showed it reads as a literal microphone/voice-input
+ * control on mobile, not as "open chat" — a plain speech bubble is
+ * unambiguous while still sitting on the same terracotta glow so the
+ * button doesn't lose its identity. Uses currentColor so it inherits the
+ * button/text color it's placed in.
  *
  * `pulse` adds a subtle breathing animation to the spotlight glow - used
  * only on the closed floating button (an idle "waiting for someone to
  * step up" cue), not once the panel is open, where it'd just be
  * distracting. Pure SVG SMIL animation, no separate stylesheet needed. */
-function MicIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
+function ChatIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="9" r="9" fill="var(--afa-terracotta)" opacity="0.18">
@@ -54,10 +54,16 @@ function MicIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean 
           </>
         )}
       </circle>
-      <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
-      <path d="M5.5 10.5a6.5 6.5 0 0 0 13 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      <line x1="12" y1="17" x2="12" y2="20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="8.5" y1="20.5" x2="15.5" y2="20.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M4.5 9.5a6.5 6 0 0 1 6.5-6h2a6.5 6 0 0 1 6.5 6c0 3.31-3.13 6-7 6-.86 0-1.68-.13-2.43-.38L6 17l.9-3.3A6.02 6.02 0 0 1 4.5 9.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <circle cx="8.7" cy="9.3" r="1" fill="currentColor" />
+      <circle cx="12" cy="9.3" r="1" fill="currentColor" />
+      <circle cx="15.3" cy="9.3" r="1" fill="currentColor" />
     </svg>
   );
 }
@@ -343,7 +349,7 @@ export default function SupportWidget() {
         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 26px rgba(0,0,0,0.32)' }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)' }}
       >
-        {panel === 'closed' ? <MicIcon size={26} pulse /> : <CloseIcon size={22} />}
+        {panel === 'closed' ? <ChatIcon size={26} pulse /> : <CloseIcon size={22} />}
       </button>
 
       {panel !== 'closed' && (
@@ -409,7 +415,7 @@ export default function SupportWidget() {
               {!chatEnabled ? (
                 <div style={{ flex: 1, padding: 20, textAlign: 'center' }}>
                   <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: 'var(--afa-ink)' }}>
-                    <MicIcon size={36} />
+                    <ChatIcon size={36} />
                   </div>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     Chat is temporarily unavailable.
