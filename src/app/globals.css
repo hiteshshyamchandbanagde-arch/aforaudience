@@ -228,3 +228,18 @@
     min-height: 0;
   }
 }
+
+/* Real CSS :hover, not JS onMouseEnter/onMouseLeave (28 Jul). Elements
+   with JS mouse-hover handlers attached directly to a clickable link
+   need a "phantom" first tap on touchscreens just to trigger the hover
+   state - the actual navigation only fires on a second tap. Live-caught
+   on /events and /artists card links ("need to click View Event
+   multiple times"). CSS :hover has no such quirk - a single tap
+   activates :active/click directly. */
+.hover-lift-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.hover-lift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}

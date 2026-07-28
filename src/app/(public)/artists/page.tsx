@@ -146,9 +146,8 @@ export default function ArtistsPage() {
             {filtered.map((artist) => (
               <Link key={artist.id} href={`/artists/${artist.id}`} style={{ textDecoration: "none" }}>
                 <div
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", transition: "transform 0.2s, box-shadow 0.2s", cursor: "pointer" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)" }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none" }}
+                  className="hover-lift-card"
+                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", cursor: "pointer" }}
                 >
                   <div style={{ height: "120px", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", padding: "24px", gap: "16px" }}>
                     <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
