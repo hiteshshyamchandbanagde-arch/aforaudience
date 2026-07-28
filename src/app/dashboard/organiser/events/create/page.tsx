@@ -161,7 +161,6 @@ export default function CreateEventPage() {
     if (!Number.isFinite(num)) return
     setMaxPerformers(String(Math.max(1, Math.min(num, MAX_PERFORMERS))))
   }
-  const [platformFee, setPlatformFee] = useState<number | null>(null)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
   const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
@@ -282,16 +281,6 @@ export default function CreateEventPage() {
       }
     }
     fetchVenues()
-
-    const fetchPlatformFee = async () => {
-      try {
-        const res = await fetch('/api/platform-settings')
-        if (res.ok) setPlatformFee((await res.json()).flatVenueBookingFee)
-      } catch {
-        // Non-critical - the fee just won't show, booking still works.
-      }
-    }
-    fetchPlatformFee()
   }, [])
 
   useEffect(() => {
@@ -602,11 +591,6 @@ export default function CreateEventPage() {
                       <label style={labelStyle}>Offer Amount (₹) <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span></label>
                       <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" placeholder="e.g., 5000" style={inputStyle} />
                     </>
-                  )}
-                  {platformFee !== null && platformFee > 0 && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '10px' }}>
-                      + ₹{platformFee.toLocaleString('en-IN')} platform booking fee, charged on top of the rental amount when this booking is confirmed.
-                    </p>
                   )}
                 </div>
               )}
