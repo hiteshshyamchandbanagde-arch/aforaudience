@@ -680,6 +680,25 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       return
     }
     const generated = computeGridSeats(gridConfig, 40, STAGE_CLEARANCE_Y)
+    // Live-caught (28 Jul, Hitesh screenshot): re-running Generate Grid
+    // used to blindly APPEND onto whatever was already on the canvas.
+    // Row letters always restart from 'A' based on the row-group config
+    // alone, not on how many seats already exist - so re-generating
+    // (e.g. after tweaking a setting, without hitting Reset Layout
+    // first) silently produced an exact duplicate of every seat, only
+    // caught much later at Save with an unhelpful "Duplicate seat
+    // label: Row A, Seat 1" toast and no clue what caused it. Catch the
+    // real collision here instead, at the point it's actually created,
+    // with a message that points at the fix (Reset Layout).
+    const existingKeys = new Set(seats.map((s) => `${s.row}::${s.number}`))
+    const collides = generated.some((s) => existingKeys.has(`${s.row}::${s.number}`))
+    if (collides) {
+      showToast(
+        `This would duplicate seats already on ${levelLabel(activeLevel)}'s canvas (Generate Grid always starts at Row A - it doesn't know what's already placed). Click "Reset Layout" first, then Generate Grid again.`,
+        'error'
+      )
+      return
+    }
     setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
     showToast(`Generated ${generated.length} seats.`, 'success')
     setShowGenerator(false)
