@@ -162,7 +162,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
       }
       const incomplete = findIncompleteSections(sections)
       if (incomplete.length > 0) {
-        showToast(`${incomplete.length} section${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a name, seat count, or price (enter 0 for free) - fill ${incomplete.length === 1 ? 'it' : 'them'} in or remove ${incomplete.length === 1 ? 'it' : 'them'} with the ✕ button before saving.`, 'error')
+        showToast(`${incomplete.length} section${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) - fill ${incomplete.length === 1 ? 'it' : 'them'} in or remove ${incomplete.length === 1 ? 'it' : 'them'} with the ✕ button before saving.`, 'error')
         setSaving(false)
         return
       }

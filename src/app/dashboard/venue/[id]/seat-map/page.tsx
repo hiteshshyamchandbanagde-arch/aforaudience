@@ -421,31 +421,19 @@ function ClampedNumberInput({
   )
 }
 
-// Same visual as SeatSectionEditor's FREE badge (Hitesh, 27 Jul) - kept
-// as a small standalone component here since this file has 3 separate
-// zone-price input sites (wizard single-zone, wizard multi-zone, manual
-// canvas) that all need it, and duplicating the inline styles 3x would
-// drift out of sync with the GA version over time.
-function FreeTag() {
+// Free toggle (Hitesh, 28 Jul): the inline FREE badge floating inside
+// the price textbox looked cluttered on live click-test. Replaced with
+// an explicit checkbox that sits beside the field rather than inside
+// it - matches SeatSectionEditor.tsx's GA-side fix, same rationale.
+// Kept as a small standalone component here since this file has 3
+// separate zone-price input sites (wizard single-zone, wizard
+// multi-zone, manual canvas) that all need it.
+function FreeToggle({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
   return (
-    <span
-      style={{
-        position: 'absolute',
-        right: '8px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        fontSize: '10px',
-        fontWeight: 700,
-        color: 'var(--afa-amber)',
-        background: 'var(--afa-amber-tint)',
-        padding: '2px 6px',
-        borderRadius: '4px',
-        letterSpacing: '0.02em',
-        pointerEvents: 'none',
-      }}
-    >
-      FREE
-    </span>
+    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.75, cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ margin: 0 }} />
+      Free
+    </label>
   )
 }
 
@@ -502,6 +490,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const raw = zonePrices[zoneName]
     return raw !== undefined && raw.trim() !== '' && Number(raw) === 0
   }
+  // Sets/clears Free the same way SeatSectionEditor's setSectionFree
+  // does: checking writes an explicit '0' (the only thing zoneIsFree
+  // treats as Free), unchecking clears back to '' so a stale 0 can't
+  // linger unnoticed - owner must explicitly re-enter a real price.
+  const setZoneFree = (zoneName: string, free: boolean) => setZonePrice(zoneName, free ? '0' : '')
 
   const [builderPathByLevel, setBuilderPathByLevel] = useState<Record<string, 'choose' | 'wizard' | 'canvas' | null>>({})
   const builderPath = builderPathByLevel[activeLevel] ?? null
@@ -991,7 +984,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       }
     }
     if (missingPricing.length > 0) {
-      showToast(`Every section needs a price before saving (enter 0 for a free section). Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
+      showToast(`Every section needs a price before saving (check "Free" for a free section). Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
       return
     }
 
@@ -1224,16 +1217,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
                     </div>
                     <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Price (0 = free)</label>
-                      <div style={{ position: 'relative' }}>
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Price</label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <input
                           type="number"
-                          style={{ ...inputStyle, width: '120px' }}
+                          style={{ ...inputStyle, width: '120px', ...(gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
                           placeholder="₹"
+                          disabled={!!gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName)}
                           value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
                           onChange={(e) => gridConfig.rowGroups[0] && setZonePrice(gridConfig.rowGroups[0].zoneName, e.target.value)}
                         />
-                        {gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) && <FreeTag />}
+                        {gridConfig.rowGroups[0] && (
+                          <FreeToggle checked={zoneIsFree(gridConfig.rowGroups[0].zoneName)} onChange={(free) => gridConfig.rowGroups[0] && setZoneFree(gridConfig.rowGroups[0].zoneName, free)} />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1252,10 +1248,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Section ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
-                        <div style={{ position: 'relative' }}>
-                          <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ (0=free)" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
-                          {zoneIsFree(rg.zoneName) && <FreeTag />}
-                        </div>
+                        <input
+                          type="number"
+                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                          placeholder="₹"
+                          disabled={zoneIsFree(rg.zoneName)}
+                          value={zonePrices[rg.zoneName] || ''}
+                          onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
+                        />
+                        <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
@@ -1509,10 +1510,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
-                        <div style={{ position: 'relative' }}>
-                          <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ (0=free)" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
-                          {zoneIsFree(rg.zoneName) && <FreeTag />}
-                        </div>
+                        <input
+                          type="number"
+                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                          placeholder="₹"
+                          disabled={zoneIsFree(rg.zoneName)}
+                          value={zonePrices[rg.zoneName] || ''}
+                          onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
+                        />
+                        <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
