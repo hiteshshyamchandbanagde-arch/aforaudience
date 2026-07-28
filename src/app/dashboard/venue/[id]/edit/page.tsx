@@ -476,7 +476,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)' }}>This venue uses Numbered Seating</div>
                     <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>
-                      Seats, rows, and zones are managed entirely in the Seat Map Builder — nothing to fill in here. Capacity ({venue.capacity} seats) reflects your saved seat map.
+                      Seats, rows, and sections are managed entirely in the Seat Map Builder — nothing to fill in here. Capacity ({venue.capacity} seats) reflects your saved seat map.
                     </div>
                   </div>
                   <Link

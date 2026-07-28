@@ -566,7 +566,7 @@ export default function CreateVenuePage() {
             <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>
               {seatingChoice === 'GENERAL_ADMISSION'
                 ? 'Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.'
-                : "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real zones to price against, so publishing happens after the map is real."}
+                : "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real sections to price against, so publishing happens after the map is real."}
             </p>
           </form>
         </div>

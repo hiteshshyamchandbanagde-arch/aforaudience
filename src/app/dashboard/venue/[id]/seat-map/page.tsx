@@ -109,7 +109,7 @@ type RowGroup = { id: string; rows: number; columns: number; zoneName: string; v
 // decision: Front -> Middle -> Back -> Recliner, then "Zone 5", "Zone 6"...
 const ZONE_NAME_CYCLE = ['Front', 'Middle', 'Back', 'Recliner']
 function defaultZoneName(zeroBasedIndex: number): string {
-  return ZONE_NAME_CYCLE[zeroBasedIndex] ?? `Zone ${zeroBasedIndex + 1}`
+  return ZONE_NAME_CYCLE[zeroBasedIndex] ?? `Section ${zeroBasedIndex + 1}`
 }
 
 type GridConfig = {
@@ -681,7 +681,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     const dupes = findDuplicateZoneNames(gridConfig.rowGroups)
     if (dupes.length > 0) {
       showToast(
-        `Zone name${dupes.length === 1 ? '' : 's'} "${dupes.join('", "')}" ${dupes.length === 1 ? 'is' : 'are'} used more than once on ${levelLabel(activeLevel)}. Each zone on the same level needs a unique name - rename one before generating.`,
+        `Section name${dupes.length === 1 ? '' : 's'} "${dupes.join('", "')}" ${dupes.length === 1 ? 'is' : 'are'} used more than once on ${levelLabel(activeLevel)}. Each section on the same level needs a unique name - rename one before generating.`,
         'error'
       )
       return
@@ -991,7 +991,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       }
     }
     if (missingPricing.length > 0) {
-      showToast(`Every zone needs a price before saving (enter 0 for a free zone). Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
+      showToast(`Every section needs a price before saving (enter 0 for a free section). Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
       return
     }
 
@@ -1014,7 +1014,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     if (crossLevelDupes.length > 0) {
       const names = crossLevelDupes.map(([name]) => name).join(', ')
       if (!window.confirm(
-        `Zone name "${names}" is used on more than one level. This is allowed, but audiences won't be able to tell the levels apart by zone name alone - only proceed if that's intentional.\n\nContinue saving?`
+        `Section name "${names}" is used on more than one level. This is allowed, but audiences won't be able to tell the levels apart by section name alone - only proceed if that's intentional.\n\nContinue saving?`
       )) {
         return
       }
@@ -1196,16 +1196,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
             {wizardStep === 1 && (
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do you want different pricing zones by row depth?</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do you want different pricing sections by row depth?</h3>
                 <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
-                  e.g. "Front" costs more than "Back". Each zone is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
+                  e.g. "Front" costs more than "Back". Each section is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                   <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === false ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardMultiZone === false ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
-                    No, one zone for everything
+                    No, one section for everything
                   </button>
                   <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === true ? 'var(--afa-ink)' : 'var(--afa-white)', color: wizardMultiZone === true ? 'var(--afa-white)' : 'var(--afa-ink)' }}>
-                    Yes, multiple zones
+                    Yes, multiple sections
                   </button>
                 </div>
 
@@ -1220,7 +1220,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <ClampedNumberInput style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.columns || 1} min={1} max={200} onCommit={(n) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'columns', n)} />
                     </div>
                     <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Zone name</label>
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Section name</label>
                       <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
                     </div>
                     <div>
@@ -1241,16 +1241,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
                 {wizardMultiZone === true && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>Add a zone for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
+                    <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>Add a section for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
                     {gridConfig.rowGroups.map((rg, i) => (
                       <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Zone {i + 1}:</span>
+                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Section {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
                         <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
                         <label style={{ fontSize: '12px' }}>Seats:</label>
                         <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
                         <label style={{ fontSize: '12px' }}>Name:</label>
-                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
+                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Section ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
                         <div style={{ position: 'relative' }}>
                           <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ (0=free)" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
@@ -1264,7 +1264,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     </button>
                     {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
                       <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--afa-error)', fontWeight: 600 }}>
-                        Zone name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each zone on this level needs a unique name.
+                        Section name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each section on this level needs a unique name.
                       </div>
                     )}
                   </div>
@@ -1497,11 +1497,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
                   </p>
 
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Zones / row groups (rows can taper — different column counts per range, counted across the whole row)</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Sections / row groups (rows can taper — different column counts per range, counted across the whole row)</div>
                   {gridConfig.rowGroups.map((rg, i) => (
                     <div key={rg.id} style={{ border: '1px solid rgba(14,12,10,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Zone {i + 1}:</span>
+                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Section {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
                         <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
                         <label style={{ fontSize: '12px' }}>Columns:</label>
@@ -1563,7 +1563,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               )}
 
               <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Zone name:</label>
+                <label style={{ fontSize: '13px', fontWeight: 600 }}>Section name:</label>
                 <input
                   style={{ ...inputStyle, width: '160px' }}
                   value={activeTier}
@@ -1582,7 +1582,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
-                Every seat you place next gets this zone name and row letter, then auto-increments the seat number. Zone name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General").
+                Every seat you place next gets this section name and row letter, then auto-increments the seat number. Section name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General").
               </p>
 
               {canvasBounds.overflowsDefault && (
@@ -1667,7 +1667,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               {!selected && <p style={{ fontSize: '13px', opacity: 0.6 }}>Click a seat on the canvas to edit or delete it.</p>}
               {selected && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Zone name</label>
+                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Section name</label>
                   <input style={inputStyle} value={selected.tierLabel} onChange={(e) => updateSelected('tierLabel', e.target.value.slice(0, 60))} />
                   <label style={{ fontSize: '12px', fontWeight: 600 }}>Row letter</label>
                   <input style={inputStyle} value={selected.row} onChange={(e) => updateSelected('row', e.target.value.slice(0, 10))} />

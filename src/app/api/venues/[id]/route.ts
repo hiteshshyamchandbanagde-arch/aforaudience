@@ -271,7 +271,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           .join(' · ')
         return NextResponse.json(
           {
-            error: `Every zone needs a price before publishing. Missing: ${detail}. Set prices in the seat map builder, then publish.`,
+            error: `Every section needs a price before publishing (enter 0 for a free section). Missing: ${detail}. Set prices in the seat map builder, then publish.`,
           },
           { status: 400 }
         )
