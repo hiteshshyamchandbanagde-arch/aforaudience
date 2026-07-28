@@ -16,8 +16,14 @@ export async function GET() {
         // NUMBERED venues have no seatMap.sections (that field is GA-only
         // dead weight for them) - the event-creation page derives its
         // pricing sections from real Seat/VenueZonePrice data instead.
-        // tierLabel-only select keeps this cheap even for large layouts.
-        seats: { select: { tierLabel: true } },
+        // level/row/number/x/y added (28 Jul) to power a read-only layout
+        // preview on the event-creation pricing screen - still a select,
+        // not a full include, so this stays index-covered and cheap. Payload
+        // grows with total seats across every approved venue on the
+        // platform (this is the all-venues list endpoint, not per-venue) -
+        // fine at current scale, worth revisiting if venue count/seat
+        // counts grow large enough to matter.
+        seats: { select: { tierLabel: true, level: true, row: true, number: true, x: true, y: true } },
         zonePrices: { select: { level: true, zoneName: true, suggestedPrice: true } },
       },
     })
