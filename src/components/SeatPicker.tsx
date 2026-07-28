@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { colorForZone } from '@/components/SeatLayoutPreview'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
 // x/y layout the Venue Owner builder saved, read-only except for click-
@@ -93,14 +94,34 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   if (error) return <p style={{ fontSize: '13px', color: 'var(--afa-error)' }}>{error}</p>
   if (seats.length === 0) return <p style={{ fontSize: '13px', opacity: 0.6 }}>No seat map has been set up for this venue yet.</p>
 
-  const levels = Array.from(new Set(seats.map((s) => s.level || '')))
-  const levelSeats = seats.filter((s) => (s.level || '') === activeLevel)
+  const levels = Array.from(new Set<string>(seats.map((s: SeatInfo) => s.level || '')))
+  const levelSeats = seats.filter((s: SeatInfo) => (s.level || '') === activeLevel)
+
+  // Zone order/price, scoped to the active level - same zone name can
+  // have a different price on another level, so this must not be
+  // computed across all seats at once. Used both for the legend and for
+  // color-coding available seats by zone below.
+  const zoneOrder: string[] = Array.from(new Set<string>(levelSeats.map((s: SeatInfo) => s.tierLabel)))
+  const zonePrices = zoneOrder.map((zone: string) => ({
+    zone,
+    price: levelSeats.find((s: SeatInfo) => s.tierLabel === zone)?.price ?? null,
+  }))
 
   return (
     <div>
       <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>
         Tap a seat to select it. Max {maxSeatsPerBooking} per booking.
       </div>
+      {zonePrices.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+          {zonePrices.map(({ zone, price }) => (
+            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: '12px', color: 'var(--afa-ink)', background: 'var(--afa-cream-tint-1)', padding: '4px 10px', borderRadius: '999px' }}>
+              <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: '6px' }} />
+              {zone} — {price ? `₹${price}` : 'not on sale'}
+            </span>
+          ))}
+        </div>
+      )}
       {levels.length > 1 && (
         <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
           {levels.map((lvl) => (
@@ -143,10 +164,16 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         >
           Stage
         </div>
-        {levelSeats.map((s) => {
+        {levelSeats.map((s: SeatInfo) => {
           const isSelected = selected.includes(s.id)
           const bg =
-            s.status === 'taken' ? 'var(--afa-ink-a13)' : isSelected ? 'var(--afa-terracotta)' : s.status === 'priceUnset' ? 'var(--afa-ink-a8)' : 'var(--afa-sage)'
+            s.status === 'taken'
+              ? 'var(--afa-ink-a13)'
+              : isSelected
+              ? 'var(--afa-terracotta)'
+              : s.status === 'priceUnset'
+              ? 'var(--afa-ink-a8)'
+              : colorForZone(s.tierLabel, zoneOrder)
           return (
             <div
               key={s.id}
@@ -189,7 +216,6 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         })}
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7 }}>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-sage)', marginRight: '4px' }} />Available</span>
         <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-terracotta)', marginRight: '4px' }} />Selected</span>
         <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-ink-a13)', marginRight: '4px' }} />Taken</span>
       </div>
