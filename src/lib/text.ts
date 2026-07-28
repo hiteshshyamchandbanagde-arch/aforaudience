@@ -11,6 +11,14 @@ export function normalizeWhitespace(s: string): string {
 }
 
 // Case- and whitespace-insensitive key for duplicate-name comparisons.
+// Strips ALL whitespace, not just collapses runs of it - collapsing
+// alone still leaves "General 2" (one space) and "General2" (zero
+// spaces) as two different keys, and live-tested 27 Jul that's exactly
+// the pair that got through: an audience member sees no meaningful
+// difference between "General 2" and "General2." Whitespace-count is
+// not a meaningful naming distinction here, so it's removed entirely
+// for comparison (the stored/displayed name itself is untouched -
+// see normalizeWhitespace above for that).
 export function normalizeForCompare(s: string): string {
-  return normalizeWhitespace(s).toLowerCase()
+  return s.replace(/\s+/g, '').toLowerCase()
 }
