@@ -10,14 +10,20 @@ export type SeatSection = {
   price: number | ""
 }
 
-// A row is "complete" once it has a name and a positive seat count.
-// Rule (Hitesh, 27 Jul): a row that exists must be filled in or removed
-// - it must never be silently dropped at save time, since that's data
-// loss the owner has no way of noticing. Price is intentionally NOT
-// required here - a ₹0/blank price is a valid "Free" section (see the
-// Free-tag rendering below), not an incomplete one.
+// A row is "complete" once it has a name, a positive seat count, AND an
+// explicitly-entered price. Rule (Hitesh, 27 Jul): a row that exists
+// must be filled in or removed - it must never be silently dropped OR
+// silently default to a value the owner never chose. Price was
+// originally left out of this check on the theory that a blank price
+// is a valid "Free" section - but that meant a brand-new, completely
+// untouched row (price defaults to '') showed the FREE badge instantly,
+// before the owner had typed anything at all. Live-caught 28 Jul: the
+// badge looked hardcoded because it effectively was - it was declaring
+// a state nobody chose. Price now follows the same rule as name/seats:
+// the owner must explicitly type an amount, or explicitly type 0 for
+// Free. Only an explicit 0 shows the FREE badge (see isFree below).
 export function isIncompleteSection(s: SeatSection): boolean {
-  return s.name.trim() === '' || !(Number(s.seats) > 0)
+  return s.name.trim() === '' || !(Number(s.seats) > 0) || s.price === ''
 }
 
 export function findIncompleteSections(sections: SeatSection[]): SeatSection[] {
@@ -121,9 +127,13 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           // blocks Save if left that way (see the parent page's submit
           // check), but nagging the instant "+ Add Seating Section" is
           // clicked would be premature.
-          const hasSomeContent = section.name.trim() !== '' || Number(section.seats) > 0
+          const hasSomeContent = section.name.trim() !== '' || Number(section.seats) > 0 || section.price !== ''
           const isPartial = !isDuplicate && hasSomeContent && isIncompleteSection(section)
-          const isFree = section.price === '' || Number(section.price) === 0
+          // FREE only reflects an EXPLICIT 0 - a blank price is
+          // "incomplete" (amber, see isPartial), not "Free" (amber
+          // badge). Conflating the two is what caused the badge to show
+          // on untouched rows - see isIncompleteSection's note above.
+          const isFree = section.price !== '' && Number(section.price) === 0
           const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'rgba(14,12,10,0.08)'
           return (
           <div
@@ -169,13 +179,13 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
               <input
                 type="number"
-                placeholder="Price"
+                placeholder="Price (0 = free)"
                 min={0}
                 max={10000000}
                 maxLength={8}
                 value={section.price}
                 onChange={(e) => updateSection(section.id, "price", e.target.value)}
-                style={{ ...inputStyle, paddingLeft: "26px", ...(isFree ? { paddingRight: "48px" } : {}) }}
+                style={{ ...inputStyle, paddingLeft: "26px", ...(isFree ? { paddingRight: "48px" } : {}), ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}) }}
               />
               {isFree && (
                 // Rule (Hitesh, 27 Jul): ₹0/blank must never pass through
@@ -230,12 +240,12 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
 
       {(() => {
         const partialCount = sections.filter((s) => {
-          const hasSomeContent = s.name.trim() !== '' || Number(s.seats) > 0
+          const hasSomeContent = s.name.trim() !== '' || Number(s.seats) > 0 || s.price !== ''
           return hasSomeContent && isIncompleteSection(s)
         }).length
         return partialCount > 0 ? (
           <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-amber)", fontWeight: 600 }}>
-            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name or seat count — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
+            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (enter 0 for free) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
           </p>
         ) : null
       })()}
