@@ -30,14 +30,16 @@ import { usePathname } from 'next/navigation';
 
 type Panel = 'closed' | 'chat' | 'feedback';
 
-/** On-brand chat icon — a warm spotlight glow (kept from the previous
- * mic design, matches the "live performance" theme) behind a simple
- * speech-bubble glyph. Replaces the earlier stage-mic icon: user testing
- * (Hitesh, session 44) showed it reads as a literal microphone/voice-input
- * control on mobile, not as "open chat" — a plain speech bubble is
- * unambiguous while still sitting on the same terracotta glow so the
- * button doesn't lose its identity. Uses currentColor so it inherits the
- * button/text color it's placed in.
+/** On-brand chatbot icon — a warm spotlight glow (kept from earlier
+ * iterations, matches the "live performance" theme) behind a friendly
+ * headset-robot face: rounded head, small headset ear cups, dot eyes,
+ * a curved smile, and a small antenna. Iterated from a mood-board
+ * Hitesh shared (28 Jul) showing a smiling robot-with-headset as the
+ * clearest "this is a support chatbot" signal - warmer than a plain
+ * speech bubble, still unambiguous (unlike the earlier stage-mic icon,
+ * which read as literal voice input). Uses currentColor for the face
+ * so it inherits the button/text color it's placed in; the antenna tip
+ * stays terracotta as a small brand accent.
  *
  * `pulse` adds a subtle breathing animation to the spotlight glow - used
  * only on the closed floating button (an idle "waiting for someone to
@@ -54,16 +56,32 @@ function ChatIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean
           </>
         )}
       </circle>
+
+      {/* antenna */}
+      <line x1="12" y1="2.6" x2="12" y2="4.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="12" cy="2.2" r="1" fill="var(--afa-terracotta)" />
+
+      {/* headset band over the top of the head */}
       <path
-        d="M4.5 9.5a6.5 6 0 0 1 6.5-6h2a6.5 6 0 0 1 6.5 6c0 3.31-3.13 6-7 6-.86 0-1.68-.13-2.43-.38L6 17l.9-3.3A6.02 6.02 0 0 1 4.5 9.5Z"
+        d="M5.6 8.8a6.4 6.4 0 0 1 12.8 0"
         stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
+        strokeWidth="1.6"
+        strokeLinecap="round"
         fill="none"
       />
-      <circle cx="8.7" cy="9.3" r="1" fill="currentColor" />
-      <circle cx="12" cy="9.3" r="1" fill="currentColor" />
-      <circle cx="15.3" cy="9.3" r="1" fill="currentColor" />
+      {/* headset ear cups */}
+      <rect x="4.3" y="8.2" width="2.6" height="4.6" rx="1.3" fill="currentColor" />
+      <rect x="17.1" y="8.2" width="2.6" height="4.6" rx="1.3" fill="currentColor" />
+
+      {/* rounded bot face */}
+      <rect x="6.6" y="6.4" width="10.8" height="9.6" rx="4.2" stroke="currentColor" strokeWidth="1.6" fill="none" />
+
+      {/* eyes */}
+      <circle cx="9.7" cy="10.6" r="1.05" fill="currentColor" />
+      <circle cx="14.3" cy="10.6" r="1.05" fill="currentColor" />
+
+      {/* smile */}
+      <path d="M9.3 13.1c.8.85 3.6.85 5.4 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
