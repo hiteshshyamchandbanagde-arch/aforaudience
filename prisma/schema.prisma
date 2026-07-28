@@ -491,6 +491,17 @@ model Organiser {
   // "spend it on X" mechanism is actually needed.
   walletBalance Float @default(0)
 
+  // Route linked account for direct organiser payouts (K2). Nullable -
+  // most Organisers won't have one until they complete the (currently
+  // Dashboard-driven, test-mode) onboarding step. Status is refreshed
+  // from Razorpay on save/lookup rather than trusted as a local cache -
+  // see razorpay-account route. Only "activated" accounts are used as a
+  // transfer destination in POST /api/bookings; "created" (not yet bank-
+  // verified) accounts are stored but not split to, since an unverified
+  // account can't actually receive settlements yet.
+  razorpayAccountId     String?
+  razorpayAccountStatus String?
+
   events        Event[]
   venueBookings VenueBooking[]
   bookingRequests VenueBookingRequest[]

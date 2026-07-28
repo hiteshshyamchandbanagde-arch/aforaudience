@@ -117,13 +117,26 @@ export async function POST(req: Request) {
     // timeout risk if this ever grows to an external call.
     const feeSettings = await getPlatformSettings()
 
+    // K2 — Route split. Captured here (read-only, outside the return
+    // value) rather than re-queried after the transaction, so the split
+    // decision is made from the exact same event/organiser row the
+    // transaction validated against. Only an "activated" linked account is
+    // used as a transfer destination - "created" (not yet bank-verified)
+    // accounts can't actually receive a settlement yet, so bookings
+    // against those organisers fall back to the pre-K2 behavior (full
+    // amount stays on the platform account) rather than failing.
+    let payoutAccountId: string | null = null
+
     const booking = await prisma.$transaction(async (tx: any) => {
       const event = await tx.event.findUnique({
         where: { id: eventId },
-        include: { ticketTiers: true, venue: true },
+        include: { ticketTiers: true, venue: true, organiser: true },
       })
       if (!event || event.status !== 'APPROVED') {
         throw new Error('Event not found or not open for booking')
+      }
+      if (event.organiser?.razorpayAccountId && event.organiser.razorpayAccountStatus === 'activated') {
+        payoutAccountId = event.organiser.razorpayAccountId
       }
 
       if (totalRequested > event.maxSeatsPerBooking) {
@@ -321,6 +334,10 @@ export async function POST(req: Request) {
     // as a float (existing schema convention on Booking), so multiply by
     // 100 and round to be safe against float representation quirks.
     const amountPaise = Math.round(booking.totalAmount * 100)
+    // Ticket subtotal only - NOT totalAmount. The booking fee (the
+    // difference between the two) is what stays with the platform; it
+    // must never be part of the organiser's transfer.
+    const organiserSharePaise = Math.round(booking.subtotalAmount * 100)
 
     try {
       const order = await createRazorpayOrder({
@@ -332,6 +349,10 @@ export async function POST(req: Request) {
           userId: user.id.slice(0, 40),
           eventId: eventId.slice(0, 40),
         },
+        transfers:
+          payoutAccountId && organiserSharePaise > 0
+            ? [{ account: payoutAccountId, amount: organiserSharePaise, currency: 'INR' }]
+            : undefined,
       })
 
       await prisma.payment.create({

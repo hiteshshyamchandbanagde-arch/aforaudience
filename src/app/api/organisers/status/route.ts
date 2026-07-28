@@ -33,5 +33,7 @@ export async function GET() {
     isActive: user.role === 'ORGANISER',
     orgName: organiser?.orgName ?? null,
     walletBalance: organiser?.walletBalance ?? 0,
+    payoutAccountLinked: !!organiser?.razorpayAccountId,
+    payoutAccountStatus: organiser?.razorpayAccountStatus ?? null,
   })
 }

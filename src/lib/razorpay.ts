@@ -82,6 +82,49 @@ export function getWebhookSecret(): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Route (K2 — organiser direct payout) helpers.
+//
+// Linked accounts themselves are created via the Razorpay Dashboard in
+// test mode for now (Route > Accounts > Add Account) rather than through
+// the /v2/accounts create API — that endpoint's real shape (Account +
+// Stakeholder + product configuration, each a separate call, stakeholder
+// KYC fields required even in test mode) is a meaningfully bigger and
+// harder-to-verify build than a single POST, and this sandbox can't reach
+// api.razorpay.com to iterate against it directly. Fetching an existing
+// account (below) uses the same simple Basic Auth as everything else in
+// this file, so that half is safe to build and ship now.
+// ---------------------------------------------------------------------------
+
+export type LinkedAccountInfo = {
+  id: string
+  status: string
+  live: boolean
+}
+
+/**
+ * Fetches a Route linked account by ID and confirms it actually exists on
+ * this Razorpay account. Used both when an Organiser first links their
+ * account_id (reject garbage/typos immediately) and to refresh status
+ * before deciding whether to split a transfer to it — local status is
+ * never trusted as current without this check, since KYC/activation
+ * happens entirely on Razorpay's side, outside this app.
+ *
+ * Throws (does not return null) on any failure — callers should show a
+ * clear "couldn't verify this account" error rather than silently
+ * treating a lookup failure as "not activated."
+ */
+export async function fetchLinkedAccount(accountId: string): Promise<LinkedAccountInfo> {
+  const client = getRazorpay()
+  if (!client) throw new Error('Razorpay is not configured')
+  const account = await (client as any).accounts.fetch(accountId)
+  return {
+    id: account.id,
+    status: account.status,
+    live: Boolean(account.live),
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Higher-level helpers used by /api/bookings, /api/bookings/[id]/confirm,
 // and /api/payments/webhook. Extracted from the Checkpoint 1 endpoints so
 // the same code path is used everywhere — no HMAC or order-creation logic
@@ -114,6 +157,16 @@ export async function createRazorpayOrder(params: {
   currency?: string
   notes?: Record<string, string>
   receiptPrefix?: string
+  // Route split (K2) - transfer the organiser's share to their linked
+  // account at capture time. Deliberately NOT included for the platform's
+  // own booking-fee slice - whatever isn't listed here simply stays on
+  // the platform's own account, which is exactly the "audience fee to
+  // platform, remainder to organiser" split the design calls for.
+  // Omit entirely (not just empty array) when there's no linked account
+  // to split to, so a normal, unsplit order is created - this is what
+  // keeps every existing booking (no organiser payout account yet)
+  // completely unaffected by this change.
+  transfers?: { account: string; amount: number; currency?: string; on_hold?: boolean }[]
 }): Promise<CreateOrderResult> {
   const client = getRazorpay()
   const keyId = getPublicKeyId()
@@ -132,7 +185,17 @@ export async function createRazorpayOrder(params: {
     currency: params.currency ?? "INR",
     receipt,
     notes: params.notes ?? {},
-  })
+    ...(params.transfers && params.transfers.length > 0
+      ? {
+          transfers: params.transfers.map((t) => ({
+            account: t.account,
+            amount: t.amount,
+            currency: t.currency ?? params.currency ?? "INR",
+            on_hold: t.on_hold ?? false,
+          })),
+        }
+      : {}),
+  } as any)
 
   return {
     orderId: order.id,
