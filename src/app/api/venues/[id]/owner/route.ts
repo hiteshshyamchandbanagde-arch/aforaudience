@@ -28,7 +28,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         // these, this page had no way to show a Numbered venue's actual
         // zones and always fell back to "No seating sections defined yet"
         // even after a real seat map was saved (see design.md §9).
-        seats: { select: { tierLabel: true } },
+        seats: { select: { tierLabel: true, level: true } },
         zonePrices: { select: { level: true, zoneName: true, suggestedPrice: true } },
         dayRates: { select: { dayOfWeek: true, hourlyRate: true, dailyRate: true } },
       },

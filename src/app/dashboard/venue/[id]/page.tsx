@@ -28,7 +28,7 @@ interface Venue {
   facilities: string[]
   seatMap?: { sections?: SeatSection[] } | null
   seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
-  seats?: { tierLabel: string }[]
+  seats?: { tierLabel: string; level: string }[]
   zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
   isApproved: boolean
   createdAt: string
@@ -107,25 +107,29 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
   // NUMBERED venues have no seatMap.sections - their zones live in real
   // Seat/VenueZonePrice rows instead (same data event-creation pricing
-  // reads). Grouping by level+zoneName so same-named zones on different
-  // levels stay distinct, consistent with the design.md §9 zone model.
+  // reads). Grouping by level+zoneName (not zoneName alone) so same-named
+  // zones on different levels stay distinct rows with their own price -
+  // found live (28 Jul) that this was previously merging them into one
+  // row and always showing the level='' (Main) price for every level.
   const numberedZones = (() => {
     if (venue.seatingMode !== 'NUMBERED' || !venue.seats) return []
     const counts = new Map<string, { level: string; zoneName: string; count: number }>()
     for (const seat of venue.seats) {
-      const key = seat.tierLabel
+      const key = `${seat.level}::${seat.tierLabel}`
       const existing = counts.get(key)
       if (existing) existing.count += 1
-      else counts.set(key, { level: '', zoneName: seat.tierLabel, count: 1 })
+      else counts.set(key, { level: seat.level, zoneName: seat.tierLabel, count: 1 })
     }
     const priceByZone = new Map<string, number | null>()
     for (const zp of venue.zonePrices || []) {
       priceByZone.set(`${zp.level}::${zp.zoneName}`, zp.suggestedPrice)
     }
-    return Array.from(counts.values()).map((z) => ({
-      ...z,
-      price: priceByZone.get(`${z.level}::${z.zoneName}`) ?? null,
-    }))
+    return Array.from(counts.values())
+      .sort((a, b) => a.level.localeCompare(b.level) || a.zoneName.localeCompare(b.zoneName))
+      .map((z) => ({
+        ...z,
+        price: priceByZone.get(`${z.level}::${z.zoneName}`) ?? null,
+      }))
   })()
   // Price Range stat box: same gap as the zone-list fix above missed -
   // numberedZones already resolves real per-zone prices for NUMBERED
