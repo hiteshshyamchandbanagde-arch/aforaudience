@@ -234,7 +234,29 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         </span>
                         <span style={{ color: 'var(--afa-ink)', opacity: 0.7 }}>{z.count} seats</span>
                         <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>
-                          {z.price ? `₹${z.price}` : '—'}
+                          {z.price === null ? (
+                            '—'
+                          ) : z.price > 0 ? (
+                            `₹${z.price}`
+                          ) : (
+                            // Rule (Hitesh, 27 Jul): ₹0 is a valid,
+                            // explicit "Free" zone now - must read as
+                            // intentional, not as "—" (which means
+                            // "never priced" here) or a broken price.
+                            <span
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                color: 'var(--afa-amber)',
+                                background: 'var(--afa-amber-tint)',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                letterSpacing: '0.02em',
+                              }}
+                            >
+                              FREE
+                            </span>
+                          )}
                         </span>
                       </div>
                     ))}

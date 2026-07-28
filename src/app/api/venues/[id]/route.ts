@@ -246,9 +246,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         where: { venueId: id },
         select: { level: true, zoneName: true, suggestedPrice: true },
       })
+      // ₹0 counts as priced (Hitesh, 27 Jul): a Numbered venue can have
+      // a genuine free/RSVP zone, same as GA sections already allow -
+      // only a NULL suggestedPrice (row never set) fails this gate now.
       const pricedKeys = new Set(
         zonePrices
-          .filter((z: { suggestedPrice: number | null }) => typeof z.suggestedPrice === 'number' && z.suggestedPrice > 0)
+          .filter((z: { suggestedPrice: number | null }) => typeof z.suggestedPrice === 'number' && z.suggestedPrice >= 0)
           .map((z: { level: string; zoneName: string }) => `${z.level}::${z.zoneName}`)
       )
       const missing = seats.filter((s: { level: string; tierLabel: string }) => !pricedKeys.has(`${s.level}::${s.tierLabel}`))

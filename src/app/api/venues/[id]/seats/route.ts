@@ -106,6 +106,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       seenKeys.add(key)
     }
 
+    if (Array.isArray(zonePrices)) {
+      for (const z of zonePrices) {
+        if (typeof z?.suggestedPrice === 'number' && Number.isFinite(z.suggestedPrice) && z.suggestedPrice < 0) {
+          return NextResponse.json({ error: `Zone price can't be negative${z.zoneName ? ` (${z.zoneName})` : ''}. Use 0 for a free zone.` }, { status: 400 })
+        }
+      }
+    }
+
     // §9.2-pattern gap check: same numeric-overflow family as PR #100/#112.
     const clamp = (n: number) => Math.max(-100000, Math.min(100000, n))
 
