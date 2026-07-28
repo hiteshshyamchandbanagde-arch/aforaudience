@@ -1640,10 +1640,20 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   min={1}
                   onCommit={setNextNumber}
                 />
+                <label style={{ fontSize: '13px', fontWeight: 600 }}>Price:</label>
+                <input
+                  type="number"
+                  style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                  placeholder="₹"
+                  disabled={zoneIsFree(activeTier)}
+                  value={zonePrices[activeTier] || ''}
+                  onChange={(e) => setZonePrice(activeTier, e.target.value)}
+                />
+                <FreeToggle checked={zoneIsFree(activeTier)} onChange={(free) => setZoneFree(activeTier, free)} />
                 <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
-                Every seat you place next gets this section name and row letter, then auto-increments the seat number. Section name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General").
+                Every seat you place next gets this section name and row letter, then auto-increments the seat number. Section name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General") — the price here is shared with any other section box using the same name.
               </p>
 
               {canvasBounds.overflowsDefault && (
@@ -1745,12 +1755,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
               <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '20px 0 10px' }}>Summary</h3>
               <p style={{ fontSize: '13px' }}>Total seats: <strong>{seats.length}</strong></p>
-              {tierOrder.filter((t) => seats.some((s) => s.tierLabel === t)).map((t) => (
-                <p key={t} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: colorForTier(t, tierOrder), display: 'inline-block' }} />
-                  {t}: {seats.filter((s) => s.tierLabel === t).length}
-                </p>
-              ))}
+              {tierOrder.filter((t) => seats.some((s) => s.tierLabel === t)).map((t) => {
+                const raw = zonePrices[t]
+                const priceLabel = zoneIsFree(t) ? 'Free' : raw && raw.trim() !== '' ? `₹${raw}` : 'No price set'
+                return (
+                  <p key={t} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: colorForTier(t, tierOrder), display: 'inline-block' }} />
+                    {t}: {seats.filter((s) => s.tierLabel === t).length}
+                    <span style={{ opacity: priceLabel === 'No price set' ? 1 : 0.6, color: priceLabel === 'No price set' ? 'var(--afa-error)' : 'inherit', fontWeight: priceLabel === 'No price set' ? 600 : 400 }}>
+                      · {priceLabel}
+                    </span>
+                  </p>
+                )
+              })}
             </div>
           </div>
         )}
