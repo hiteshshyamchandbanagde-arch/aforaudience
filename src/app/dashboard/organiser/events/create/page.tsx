@@ -9,6 +9,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
+import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 
 interface SeatSection {
   id?: string
@@ -30,7 +31,7 @@ interface VenueOption {
   capacity: number
   seatMap?: { sections?: SeatSection[] } | null
   seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED'
-  seats?: { tierLabel: string }[]
+  seats?: PreviewSeat[]
   zonePrices?: { level: string; zoneName: string; suggestedPrice: number | null }[]
   rateType?: 'HOURLY' | 'DAILY' | 'FLEXIBLE' | null
   hourlyRate?: number | null
@@ -615,10 +616,18 @@ export default function CreateEventPage() {
                   <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>
                     Sections and seat counts come from {selectedVenue?.name}'s seat map — you only set the price per section for this event.
                   </p>
+                  {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
+                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={venueSections.map((s) => s.name)} />
+                  )}
                   {venueSections.map((s) => (
                     <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {selectedVenue?.seatingMode === 'NUMBERED' && (
+                            <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, venueSections.map((v) => v.name)), display: 'inline-block', flexShrink: 0 }} />
+                          )}
+                          {s.name}
+                        </div>
                         <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
                       </div>
                       {!isFree ? (
