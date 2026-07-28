@@ -1754,18 +1754,32 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               )}
 
               <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '20px 0 10px' }}>Summary</h3>
-              <p style={{ fontSize: '13px' }}>Total seats: <strong>{seats.length}</strong></p>
+              <p style={{ fontSize: '13px', marginBottom: '10px' }}>Total seats: <strong>{seats.length}</strong></p>
+              {/* Price/Free editable directly here, per already-placed zone - avoids
+                  having to retype a zone's exact name back into the placement
+                  toolbar just to price it (live-found 28 Jul: retyping is
+                  case/spacing-sensitive and a mistype silently creates an
+                  orphaned zonePrices entry with no effect on real seats). The
+                  toolbar's Section name field is now only ever "what new seats
+                  get named next" - this list is "price what's already placed". */}
               {tierOrder.filter((t) => seats.some((s) => s.tierLabel === t)).map((t) => {
                 const raw = zonePrices[t]
-                const priceLabel = zoneIsFree(t) ? 'Free' : raw && raw.trim() !== '' ? `₹${raw}` : 'No price set'
+                const noPriceSet = !zoneIsFree(t) && (!raw || raw.trim() === '')
                 return (
-                  <p key={t} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: colorForTier(t, tierOrder), display: 'inline-block' }} />
-                    {t}: {seats.filter((s) => s.tierLabel === t).length}
-                    <span style={{ opacity: priceLabel === 'No price set' ? 1 : 0.6, color: priceLabel === 'No price set' ? 'var(--afa-error)' : 'inherit', fontWeight: priceLabel === 'No price set' ? 600 : 400 }}>
-                      · {priceLabel}
-                    </span>
-                  </p>
+                  <div key={t} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: colorForTier(t, tierOrder), display: 'inline-block', flexShrink: 0 }} />
+                    <span style={{ fontSize: '13px' }}>{t}: {seats.filter((s) => s.tierLabel === t).length}</span>
+                    <input
+                      type="number"
+                      style={{ ...inputStyle, width: '80px', ...(zoneIsFree(t) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                      placeholder="₹"
+                      disabled={zoneIsFree(t)}
+                      value={raw || ''}
+                      onChange={(e) => setZonePrice(t, e.target.value)}
+                    />
+                    <FreeToggle checked={zoneIsFree(t)} onChange={(free) => setZoneFree(t, free)} />
+                    {noPriceSet && <span style={{ fontSize: '12px', color: 'var(--afa-error)', fontWeight: 600 }}>No price set</span>}
+                  </div>
                 )
               })}
             </div>
