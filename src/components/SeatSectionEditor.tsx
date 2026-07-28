@@ -10,6 +10,20 @@ export type SeatSection = {
   price: number | ""
 }
 
+// A row is "complete" once it has a name and a positive seat count.
+// Rule (Hitesh, 27 Jul): a row that exists must be filled in or removed
+// - it must never be silently dropped at save time, since that's data
+// loss the owner has no way of noticing. Price is intentionally NOT
+// required here - a ₹0/blank price is a valid "Free" section (see the
+// Free-tag rendering below), not an incomplete one.
+export function isIncompleteSection(s: SeatSection): boolean {
+  return s.name.trim() === '' || !(Number(s.seats) > 0)
+}
+
+export function findIncompleteSections(sections: SeatSection[]): SeatSection[] {
+  return sections.filter(isIncompleteSection)
+}
+
 // Duplicate section-name detection (added 27 Jul, Hitesh's rule): a GA
 // venue has no level concept, so this is simply "no two sections share
 // a name" - live-observed 4 sections all named "general" slipping
@@ -102,6 +116,15 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
 
         {sections.map((section, i) => {
           const isDuplicate = section.name.trim() !== '' && duplicateNames.has(normalizeForCompare(section.name))
+          // Only warn live once the row has SOME content - a freshly
+          // added blank row isn't "incomplete," it's just new. It still
+          // blocks Save if left that way (see the parent page's submit
+          // check), but nagging the instant "+ Add Seating Section" is
+          // clicked would be premature.
+          const hasSomeContent = section.name.trim() !== '' || Number(section.seats) > 0
+          const isPartial = !isDuplicate && hasSomeContent && isIncompleteSection(section)
+          const isFree = section.price === '' || Number(section.price) === 0
+          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'rgba(14,12,10,0.08)'
           return (
           <div
             key={section.id}
@@ -113,7 +136,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               padding: "12px",
               background: "var(--afa-cream)",
               borderRadius: "8px",
-              border: isDuplicate ? "1px solid var(--afa-error)" : "1px solid rgba(14,12,10,0.08)",
+              border: `1px solid ${borderColor}`,
             }}
           >
             <input
@@ -130,7 +153,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 const normalized = normalizeWhitespace(e.target.value)
                 if (normalized !== e.target.value) updateSection(section.id, "name", normalized)
               }}
-              style={{ ...inputStyle, ...(isDuplicate ? { border: "1px solid var(--afa-error)" } : {}) }}
+              style={{ ...inputStyle, ...(borderColor !== 'rgba(14,12,10,0.08)' ? { border: `1px solid ${borderColor}` } : {}) }}
             />
             <input
               type="number"
@@ -140,7 +163,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               maxLength={6}
               value={section.seats}
               onChange={(e) => updateSection(section.id, "seats", e.target.value)}
-              style={inputStyle}
+              style={{ ...inputStyle, ...(isPartial && !(Number(section.seats) > 0) ? { border: `1px solid ${borderColor}` } : {}) }}
             />
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
@@ -152,8 +175,31 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 maxLength={8}
                 value={section.price}
                 onChange={(e) => updateSection(section.id, "price", e.target.value)}
-                style={{ ...inputStyle, paddingLeft: "26px" }}
+                style={{ ...inputStyle, paddingLeft: "26px", ...(isFree ? { paddingRight: "48px" } : {}) }}
               />
+              {isFree && (
+                // Rule (Hitesh, 27 Jul): ₹0/blank must never pass through
+                // silently - make it visible so an accidental blank price
+                // gets corrected before publish, rather than blocking the
+                // save outright (a genuinely free section is valid).
+                <span
+                  style={{
+                    position: "absolute",
+                    right: "8px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "var(--afa-amber)",
+                    background: "var(--afa-amber-tint)",
+                    padding: "2px 7px",
+                    borderRadius: "4px",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  FREE
+                </span>
+              )}
             </div>
             <button
               type="button"
@@ -181,6 +227,18 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
         </p>
       )}
+
+      {(() => {
+        const partialCount = sections.filter((s) => {
+          const hasSomeContent = s.name.trim() !== '' || Number(s.seats) > 0
+          return hasSomeContent && isIncompleteSection(s)
+        }).length
+        return partialCount > 0 ? (
+          <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-amber)", fontWeight: 600 }}>
+            {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name or seat count — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
+          </p>
+        ) : null
+      })()}
 
       <button
         type="button"

@@ -114,6 +114,16 @@ export async function POST(req: Request) {
     for (const s of sections) {
       const seatCount = Number(s?.seats)
       const price = s?.price !== undefined && s?.price !== null && s?.price !== '' ? Number(s.price) : 0
+      // Server-side name-required check: the seat-count/price bounds
+      // checks below don't catch a blank name paired with an otherwise
+      // valid seat count and price, and duplicate-detection skips empty
+      // keys entirely (two blank-named sections aren't "duplicates" of
+      // each other, they're each independently incomplete) - so without
+      // this, an empty-named section could reach the DB via a direct
+      // API call even though the UI now blocks it client-side.
+      if (!s.name) {
+        return NextResponse.json({ error: 'Every seating section needs a name.' }, { status: 400 })
+      }
       if (!Number.isFinite(seatCount) || !Number.isInteger(seatCount) || seatCount < 1 || seatCount > MAX_SEATS_PER_SECTION) {
         return NextResponse.json(
           { error: `Each section's seat count must be a whole number between 1 and ${MAX_SEATS_PER_SECTION.toLocaleString('en-IN')}.` },

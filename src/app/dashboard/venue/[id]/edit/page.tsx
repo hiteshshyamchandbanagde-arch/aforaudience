@@ -6,7 +6,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
-import SeatSectionEditor, { SeatSection, findDuplicateSectionNames } from '@/components/SeatSectionEditor'
+import SeatSectionEditor, { SeatSection, findDuplicateSectionNames, findIncompleteSections } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
@@ -151,18 +151,28 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
   const save = async (publishOverride?: boolean) => {
     setSaving(true)
 
-    const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
+    // Rule (Hitesh, 27 Jul): same as venue creation - a section row that
+    // exists must be filled in or removed by the owner, never silently
+    // dropped at save time.
+    if (venue?.seatingMode === 'GENERAL_ADMISSION') {
+      if (sections.length === 0) {
+        showToast('Add at least one seating section with a name and seat count.', 'error')
+        setSaving(false)
+        return
+      }
+      const incomplete = findIncompleteSections(sections)
+      if (incomplete.length > 0) {
+        showToast(`${incomplete.length} section${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a name or seat count - fill ${incomplete.length === 1 ? 'it' : 'them'} in or remove ${incomplete.length === 1 ? 'it' : 'them'} with the ✕ button before saving.`, 'error')
+        setSaving(false)
+        return
+      }
+    }
     // Same decoupling as venue creation (PR #146) - a NUMBERED venue's
     // real seat structure lives in Seat Map Builder, not this GA section
     // editor. This form was never updated for that when #146 shipped,
     // so editing a NUMBERED venue was incorrectly forced through GA
     // section validation regardless of seatingMode.
-    if (venue?.seatingMode === 'GENERAL_ADMISSION' && validSections.length === 0) {
-      showToast('Add at least one seating section with a name and seat count.', 'error')
-      setSaving(false)
-      return
-    }
-    const duplicateSectionNames = findDuplicateSectionNames(validSections)
+    const duplicateSectionNames = findDuplicateSectionNames(sections)
     if (venue?.seatingMode === 'GENERAL_ADMISSION' && duplicateSectionNames.length > 0) {
       showToast(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`, 'error')
       setSaving(false)
@@ -197,7 +207,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           ...formData,
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities,
-          seatMap: venue?.seatingMode === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
+          seatMap: venue?.seatingMode === 'GENERAL_ADMISSION' ? { sections } : undefined,
           rateType,
           hourlyRate: rateType === 'HOURLY' && hourlyRate ? Number(hourlyRate) : null,
           dailyRate: rateType === 'DAILY' && dailyRate ? Number(dailyRate) : null,
