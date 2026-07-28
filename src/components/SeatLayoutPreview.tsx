@@ -24,7 +24,16 @@ export type PreviewSeat = {
 // purpose - this is a small, self-contained read-only view and doesn't
 // justify a shared-module dependency between the Venue Owner builder and
 // the Organiser pricing screen for a 2-line lookup table.
-export const TIER_COLORS = ['var(--afa-terracotta)', 'var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-ink)']
+//
+// Terracotta is deliberately excluded - it's the app-wide "selected /
+// primary action" color (SeatPicker's selected-seat highlight, buttons
+// throughout). Reported live (28 Jul): whichever zone landed first in
+// rotation got terracotta, which then looked visually identical to a
+// selected seat in that same zone on the audience-facing picker. Kept
+// out of the zone rotation everywhere these two duplicate palettes are
+// used, not just patched in the picker, so this can't recur in the
+// builder's own canvas either.
+export const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-ink)']
 
 export function colorForZone(zoneName: string, zoneOrder: string[]) {
   const idx = zoneOrder.indexOf(zoneName)

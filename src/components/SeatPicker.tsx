@@ -201,8 +201,18 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 marginTop: `-${SEAT_WIDTH_PCT / 2}%`,
                 borderRadius: '5px',
                 background: bg,
+                // Selected seats get their own visual weight (scale + white
+                // ring + larger, bold text) rather than relying on the same
+                // tiny clamped font every other seat uses - reported live
+                // (28 Jul) that the seat number wasn't legible once picked.
+                // z-index lift keeps the ring from being clipped by a
+                // neighboring seat drawn after it in DOM order.
+                transform: isSelected ? 'scale(1.5)' : undefined,
+                zIndex: isSelected ? 2 : undefined,
+                boxShadow: isSelected ? '0 0 0 2px var(--afa-white)' : undefined,
                 color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-white)',
-                fontSize: 'clamp(5px, 1.3cqw, 9px)',
+                fontSize: isSelected ? '10px' : 'clamp(5px, 1.3cqw, 9px)',
+                fontWeight: isSelected ? 700 : 400,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

@@ -241,7 +241,9 @@ const inputStyle = {
   color: 'var(--afa-ink)',
 }
 
-const TIER_COLORS = ['var(--afa-terracotta)', 'var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-ink)']
+// Terracotta deliberately excluded - reserved app-wide for "selected /
+// primary action" (see SeatLayoutPreview.tsx TIER_COLORS for why).
+const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-ink)']
 
 function colorForTier(tierLabel: string, tierOrder: string[]) {
   const idx = tierOrder.indexOf(tierLabel)
