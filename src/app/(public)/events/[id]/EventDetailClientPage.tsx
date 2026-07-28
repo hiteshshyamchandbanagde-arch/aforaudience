@@ -91,6 +91,20 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const [plusOneBusy, setPlusOneBusy] = useState<string | null>(null)
   const [plusOneAuthTarget, setPlusOneAuthTarget] = useState<string | null>(null)
 
+  // Live-caught (28 Jul): browser back/forward navigation always serves
+  // the Router Cache's snapshot of this page regardless of staleTimes
+  // config - confirmed showing "212 of 212 seats" after 6 real seats had
+  // already been CONFIRMED-booked against this exact event, only fixed
+  // by a hard refresh. The seat picker below self-heals (it fetches
+  // fresh from GET /api/events/[id]/seats on its own mount), but the
+  // server-computed availableSeats/totalSeats header does not. A single
+  // router.refresh() on mount busts the cache and re-renders the server
+  // component with live data on every visit, however the user arrived.
+  useEffect(() => {
+    router.refresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => {
     if (!event || event.plusOnesRequired === 0) return
     event.lineup.forEach((p) => {
