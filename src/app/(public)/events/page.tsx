@@ -1,6 +1,6 @@
 "use client"
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 
@@ -31,6 +31,25 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 const TYPE_OPTIONS = ["All", ...Object.keys(TYPE_META)]
 
 export default function EventsPage() {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
+
+  const goToEvent = (id: string) => {
+    // Guard against rapid repeat clicks: without this, a click that
+    // doesn't render anything right away (slow cold-start render, etc.)
+    // reads as "nothing happened" and the person clicks again - each
+    // extra click was firing a brand new, un-deduped navigation request
+    // (confirmed via Vercel runtime logs: 10+ duplicate GETs for the same
+    // event id within seconds). This makes the first click visibly
+    // "claim" the card and ignores further clicks until it resolves.
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/events/${id}`)
+    })
+  }
+
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -192,13 +211,60 @@ export default function EventsPage() {
           <div style={{ display: "grid", gridTemplateColumns: view === "grid" ? "repeat(auto-fill, minmax(340px, 1fr))" : "1fr", gap: "20px" }}>
             {filtered.map((event) => {
               const meta = TYPE_META[event.type] || TYPE_META.OPEN_MIC
+              const isNavigatingThis = navigatingId === event.id
               return (
-                <Link
+                <div
                   key={event.id}
-                  href={`/events/${event.id}`}
+                  role="link"
+                  tabIndex={0}
+                  aria-busy={isNavigatingThis}
+                  onClick={() => goToEvent(event.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      goToEvent(event.id)
+                    }
+                  }}
                   className="hover-lift-card"
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", textDecoration: "none", color: "inherit", display: "block" }}
+                  style={{
+                    background: "white",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    border: "1px solid rgba(14,12,10,0.08)",
+                    textDecoration: "none",
+                    color: "inherit",
+                    display: "block",
+                    position: "relative",
+                    cursor: navigatingId ? "default" : "pointer",
+                    opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
+                    transition: "opacity 0.15s ease",
+                  }}
                 >
+                  {isNavigatingThis && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        zIndex: 2,
+                        background: "rgba(255,255,255,0.7)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          border: "3px solid rgba(14,12,10,0.15)",
+                          borderTopColor: "var(--afa-terracotta)",
+                          animation: "afa-spin 0.7s linear infinite",
+                        }}
+                      />
+                      <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                  )}
                   {view === "grid" && (
                     <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
                       {meta.emoji}
@@ -266,7 +332,7 @@ export default function EventsPage() {
                       </span>
                     </div>
                   </div>
-                </Link>
+                </div>
               )
             })}
           </div>
