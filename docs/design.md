@@ -212,7 +212,7 @@ The audience booking fee is captured onto Booking at reservation time. If admin 
 
 The audience booking fee (Phase A) requires the ticket-processing pipeline to be live. **Test-mode keys unblocked the entire build** — Checkpoints 2–4 all shipped against them. When the company clears KYC and live keys are swapped in on production, the audience booking fee begins collecting real money immediately.
 
-Split-payment mechanics (audience booking fee to platform, remainder to Organiser) can be handled through Razorpay Route on the platform's own account. This is a marketplace pattern Razorpay explicitly supports and keeps the platform out of Payment Aggregator license territory — the platform is the merchant of record only for the booking-fee slice, and Organisers are the merchants of record for their ticket revenue. **K2 (Razorpay Route split) is deferred until real Organiser onboarding lands as a real feature** — until Organisers have Razorpay-linked accounts of their own, all Checkpoint 4 revenue currently settles into the platform's Razorpay account, with the "remainder to Organiser" mechanic pending.
+Split-payment mechanics (audience booking fee to platform, remainder to Organiser) can be handled through Razorpay Route on the platform's own account. This is a marketplace pattern Razorpay explicitly supports and keeps the platform out of Payment Aggregator license territory — the platform is the merchant of record only for the booking-fee slice, and Organisers are the merchants of record for their ticket revenue. ~~**K2 (Razorpay Route split) is deferred until real Organiser onboarding lands as a real feature**~~ **First slice shipped (28 Jul, PR #256), test mode.** Organiser links an existing Razorpay Route linked account (`account_id`) via `/dashboard/organiser/payouts` — the account itself is still created manually on the Razorpay Dashboard (Route > Accounts > Add Account, dummy data, no KYC in test mode), not through the app. Once Razorpay reports the account `activated`, `POST /api/bookings` automatically splits the order: ticket subtotal transfers to the organiser's linked account, audience booking fee stays with the platform. `Organiser.razorpayAccountId`/`razorpayAccountStatus` (nullable, additive). **Deliberately not built:** creating linked accounts via the `/v2/accounts` API — that's Account + Stakeholder + product-configuration, a meaningfully bigger and harder-to-verify build than a single POST, and this sandbox has no network path to `api.razorpay.com` to iterate against it directly; fetching/verifying an existing account uses the same Basic Auth as everything else in `razorpay.ts`, so that half is real. **Not yet click-tested live** — needs a real organiser with a Dashboard-created test-mode linked account, a real booking, and confirmation in the Razorpay test dashboard that the transfer landed for the subtotal only, not the full total.
 
 ---
 
@@ -360,7 +360,7 @@ Web Push (not SMS/email) is now the primary channel. VAPID-based, works on any i
 | ID | Story | Pts | Status |
 |---|---|---|---|
 | K1 | As audience, when I check out for a ticket, I see a small booking fee as a separate line item on the order, framed as "supports the artist ecosystem." | 3 | ✅ Shipped (Checkpoint 4 / sixth amendment) |
-| K2 | As the platform, at Razorpay settlement time, the audience booking fee is captured by the platform's own merchant account and the remainder is passed through to the Organiser — via Razorpay Route split. | 5 | ⚠️ Partial — fee captured to platform's Razorpay account; Route split deferred until real Organiser onboarding lands (Organisers need their own Razorpay-linked accounts first) |
+| K2 | As the platform, at Razorpay settlement time, the audience booking fee is captured by the platform's own merchant account and the remainder is passed through to the Organiser — via Razorpay Route split. | 5 | ⚠️ Partial (test mode, first slice) — split logic shipped in `POST /api/bookings` (PR #256, 28 Jul); Organiser links a Route linked account created manually on the Razorpay Dashboard, app doesn't yet create the account itself. Real gap remaining: automated account creation via `/v2/accounts`, and eventual live-mode KYC per Organiser once the company is registered. |
 | K3 | As audience, at checkout I optionally see a small "support the platform" widget with preset tip amounts — zero pressure, easy to skip. | 3 | ⬜ Not started |
 | K4 | As Admin, I can view total booking fees collected, per day / month, from a simple revenue dashboard. | 3 | ⬜ Not started (though `/dashboard/admin/settings` exists for the config surface) |
 | K5 | *(Phase B)* Venue Pro subscription. | 8 | ⬜ Not started — deliberately Phase B |
@@ -455,7 +455,7 @@ Since this is one person collaborating with Claude as architect/dev/QA rather th
 - Checkpoint 5 (refunds) — needs business decisions before build (§9.5)
 - E3 (lineup drag-and-drop) — not started, standalone
 - E5 (real-time ticket sales dashboard) — not started
-- K2 completion (Route split) — deferred to post-Organiser-onboarding
+- K2 completion (Route split) — first slice shipped 28 Jul (PR #256, test mode, manual Dashboard account creation); automated `/v2/accounts` creation + live-mode activation still open
 - SMS via MSG91 — blocked on DLT template registration
 
 The original release ordering:
@@ -565,7 +565,7 @@ Canonical, human-readable copy of Claude's standing behavioral rules - the actua
 
 **External blockers:**
 - Razorpay webhook secret setup (2-min dashboard task, no code needed)
-- Razorpay Route activation (K2 completion) — deferred until real Organiser onboarding is a real feature
+- Razorpay Route activation (K2 completion) — first slice shipped 28 Jul, test mode; automated linked-account creation + live-mode still open
 - MSG91 DLT registration (SMS via EPIC J)
 - Google/Apple OAuth app registration (B4)
 - Refund policy decisions (unblocks Checkpoint 5 / C5 refund half)
