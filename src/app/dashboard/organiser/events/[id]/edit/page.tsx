@@ -115,7 +115,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [defaultBuyInAmount, setDefaultBuyInAmount] = useState('')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
-  const [platformFee, setPlatformFee] = useState<number | null>(null)
+
 
   // §9.2 (26 Jul) - Edit Event was on an older/diverged pricing form that
   // never derived per-zone pricing for Numbered venues at all (only a
@@ -280,18 +280,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, id])
-
-  useEffect(() => {
-    const fetchPlatformFee = async () => {
-      try {
-        const res = await fetch('/api/platform-settings')
-        if (res.ok) setPlatformFee((await res.json()).flatVenueBookingFee)
-      } catch {
-        // Non-critical - the fee just won't show.
-      }
-    }
-    fetchPlatformFee()
-  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -653,11 +641,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   )}
                   <label style={labelStyle}>Offer Amount (₹) {venueId !== originalVenueId && <span style={{ fontWeight: 400, opacity: 0.6 }}>— pre-filled from the venue's rate, editable</span>}</label>
                   <input type="number" value={bookingAmount} onChange={(e) => setBookingAmount(e.target.value)} min="0" max="10000000" style={inputStyle} />
-                  {platformFee !== null && platformFee > 0 && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '10px' }}>
-                      + ₹{platformFee.toLocaleString('en-IN')} platform booking fee, charged on top of the rental amount when this booking is confirmed.
-                    </p>
-                  )}
                 </div>
               )}
             </section>
