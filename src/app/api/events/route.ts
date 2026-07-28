@@ -261,6 +261,7 @@ export async function POST(req: Request) {
           ? {
               create: validTiers.map((t: any) => ({
                 sectionName: String(t.sectionName),
+                level: String(t.level || ''),
                 price: parseFloat(t.price),
                 totalSeats: parseInt(t.totalSeats),
               })),

@@ -170,8 +170,14 @@ export async function POST(req: Request) {
 
         let subtotalAmount = 0
         for (const s of requestedSeats) {
-          const tier = event.ticketTiers.find((t: any) => t.sectionName === s.tierLabel)
-          if (!tier) throw new Error(`No pricing configured for section: ${s.tierLabel}`)
+          // Level-aware match (28 Jul) - a same-named zone can legitimately
+          // exist on two different venue levels with two different prices
+          // (e.g. "General" on Ground vs Balcony). Matching by sectionName
+          // alone previously meant .find() returned whichever tier row
+          // happened to be first, silently charging the wrong price for
+          // one of the two levels once level-scoped pricing existed.
+          const tier = event.ticketTiers.find((t: any) => t.sectionName === s.tierLabel && (t.level || '') === (s.level || ''))
+          if (!tier) throw new Error(`No pricing configured for section: ${s.tierLabel}${s.level ? ` (${s.level})` : ''}`)
           subtotalAmount += tier.price
         }
 

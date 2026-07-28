@@ -45,23 +45,30 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     })
     const heldSeatIds = new Set(heldSeatRows.map((r) => r.seatId))
 
-    // Price resolved by matching Seat.tierLabel to TicketTier.sectionName
-    // (deliberately not a hard FK - see Seat model comment in schema).
-    // A seat whose tierLabel has no matching tier has no price set for
+    // Price resolved by matching (level, Seat.tierLabel) to
+    // (TicketTier.level, TicketTier.sectionName) - deliberately not a hard
+    // FK - see Seat model comment in schema. Level-aware (28 Jul): a
+    // same-named zone can exist on two different venue levels with two
+    // different prices, so tierLabel alone is not a unique key. A seat
+    // whose (level, tierLabel) has no matching tier has no price set for
     // this event yet - surfaced as priceUnset so the picker can grey it
     // out with an explanation instead of silently charging ₹0.
-    const priceByTier = new Map(event.ticketTiers.map((t) => [t.sectionName, t.price]))
+    const priceByTier = new Map(event.ticketTiers.map((t) => [`${t.level || ''}::${t.sectionName}`, t.price]))
 
-    const seats = event.venue.seats.map((s) => ({
-      id: s.id,
-      tierLabel: s.tierLabel,
-      row: s.row,
-      number: s.number,
-      x: s.x,
-      y: s.y,
-      price: priceByTier.get(s.tierLabel) ?? null,
-      status: heldSeatIds.has(s.id) ? 'taken' : priceByTier.has(s.tierLabel) ? 'available' : 'priceUnset',
-    }))
+    const seats = event.venue.seats.map((s) => {
+      const key = `${s.level || ''}::${s.tierLabel}`
+      return {
+        id: s.id,
+        tierLabel: s.tierLabel,
+        level: s.level,
+        row: s.row,
+        number: s.number,
+        x: s.x,
+        y: s.y,
+        price: priceByTier.get(key) ?? null,
+        status: heldSeatIds.has(s.id) ? 'taken' : priceByTier.has(key) ? 'available' : 'priceUnset',
+      }
+    })
 
     return NextResponse.json({
       seatingMode: 'NUMBERED',
