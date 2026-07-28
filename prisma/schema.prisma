@@ -640,6 +640,12 @@ model TicketTier {
   eventId     String
   event       Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   sectionName String
+  // NUMBERED-venue zones can legitimately share a name across different
+  // venue levels (e.g. "General" on Ground and Balcony) - level scopes
+  // the price to the right one. Empty string is the implicit single
+  // level, same convention as Seat.level - GA tiers and pre-existing
+  // single-level NUMBERED tiers need no backfill.
+  level       String @default("")
   price       Float
   totalSeats  Int
 }

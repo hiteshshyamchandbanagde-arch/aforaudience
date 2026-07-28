@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 type SeatInfo = {
   id: string
   tierLabel: string
+  level: string
   row: string
   number: string
   x: number
@@ -45,6 +46,13 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   const [seats, setSeats] = useState<SeatInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // Level-aware (28 Jul) - this previously rendered every level's seats on
+  // one flat canvas, which overlapped/garbled for any real multi-level
+  // venue since each level's x/y coordinates are independently generated
+  // by the builder starting near the same origin. Filtering to one level
+  // at a time, same pattern as the builder and the event-creation
+  // pricing preview.
+  const [activeLevel, setActiveLevel] = useState('')
 
   useEffect(() => {
     const fetchSeats = async () => {
@@ -52,7 +60,9 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         const res = await fetch(`/api/events/${eventId}/seats`)
         if (!res.ok) throw new Error('Failed to load seat map')
         const data = await res.json()
-        setSeats(data.seats || [])
+        const loaded: SeatInfo[] = data.seats || []
+        setSeats(loaded)
+        setActiveLevel((prev) => prev || loaded[0]?.level || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -83,11 +93,33 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   if (error) return <p style={{ fontSize: '13px', color: 'var(--afa-error)' }}>{error}</p>
   if (seats.length === 0) return <p style={{ fontSize: '13px', opacity: 0.6 }}>No seat map has been set up for this venue yet.</p>
 
+  const levels = Array.from(new Set(seats.map((s) => s.level || '')))
+  const levelSeats = seats.filter((s) => (s.level || '') === activeLevel)
+
   return (
     <div>
       <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>
         Tap a seat to select it. Max {maxSeatsPerBooking} per booking.
       </div>
+      {levels.length > 1 && (
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+          {levels.map((lvl) => (
+            <button
+              key={lvl}
+              type="button"
+              onClick={() => setActiveLevel(lvl)}
+              style={{
+                fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
+                border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.2)',
+                background: activeLevel === lvl ? 'var(--afa-ink)' : 'var(--afa-white)',
+                color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-ink)',
+              }}
+            >
+              {lvl || 'Main'}
+            </button>
+          ))}
+        </div>
+      )}
       <div
         style={{
           position: 'relative',
@@ -111,7 +143,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         >
           Stage
         </div>
-        {seats.map((s) => {
+        {levelSeats.map((s) => {
           const isSelected = selected.includes(s.id)
           const bg =
             s.status === 'taken' ? 'var(--afa-ink-a13)' : isSelected ? 'var(--afa-terracotta)' : s.status === 'priceUnset' ? 'var(--afa-ink-a8)' : 'var(--afa-sage)'

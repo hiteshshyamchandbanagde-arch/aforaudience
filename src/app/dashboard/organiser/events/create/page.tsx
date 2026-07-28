@@ -16,6 +16,11 @@ interface SeatSection {
   name: string
   seats: number
   price: number
+  // NUMBERED venues only - empty/undefined for GA sections, which have no
+  // levels concept. Lets a same-named zone on two different levels (e.g.
+  // "General" on Ground and Balcony) be priced independently instead of
+  // merging into one shared tier.
+  level?: string
 }
 
 interface VenueDayRate {
@@ -176,10 +181,13 @@ export default function CreateEventPage() {
     if (!Number.isFinite(num)) return
     setPlusOnesRequired(String(Math.max(0, Math.min(num, 20))))
   }
-  // §4.5 - per-section ticket pricing. Keyed by section name, since the
-  // Organiser only ever edits price here - section names/capacities stay
-  // owned by the Venue Owner's own seat map.
+  // §4.5 - per-section ticket pricing. Keyed by `${level}::${name}` (see
+  // tierKey below), not name alone - a same-named zone on two different
+  // venue levels needs two independent prices. Organiser only ever edits
+  // price here - section names/capacities/levels stay owned by the Venue
+  // Owner's own seat map.
   const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
+  const tierKey = (s: { name: string; level?: string }) => `${s.level || ''}::${s.name}`
 
   const selectedVenue = venues.find((v) => v.id === venueId)
   // GA: unchanged, reads the Venue Owner's own seatMap.sections. NUMBERED:
@@ -187,27 +195,34 @@ export default function CreateEventPage() {
   // seat-map builder) - real pricing sections come from Seat.tierLabel
   // (the zone) grouped into counts, with VenueZonePrice as a starting
   // suggested price the organiser can still override below, same as GA.
-  // Known simplification: zones are aggregated by name across ALL levels
-  // - a same-named zone on two different levels merges into one priced
-  // tier here. Level-aware event pricing is a separate follow-up.
+  // Level-aware (28 Jul): grouped by (level, zoneName) so a same-named
+  // zone on two different levels prices independently instead of merging.
   const numberedZoneSections: SeatSection[] =
     selectedVenue?.seatingMode === 'NUMBERED'
       ? Object.entries(
           (selectedVenue.seats || []).reduce<Record<string, number>>((acc, s) => {
-            acc[s.tierLabel] = (acc[s.tierLabel] || 0) + 1
+            const key = `${s.level || ''}::${s.tierLabel}`
+            acc[key] = (acc[key] || 0) + 1
             return acc
           }, {})
-        ).map(([zoneName, seatCount]) => ({
-          name: zoneName,
-          seats: seatCount,
-          price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName)?.suggestedPrice || 0,
-        }))
+        ).map(([key, seatCount]) => {
+          const sepIdx = key.indexOf('::')
+          const level = key.slice(0, sepIdx)
+          const zoneName = key.slice(sepIdx + 2)
+          return {
+            name: zoneName,
+            level,
+            seats: seatCount,
+            price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName && (z.level || '') === level)?.suggestedPrice || 0,
+          }
+        })
       : []
   const venueSections =
     selectedVenue?.seatingMode === 'NUMBERED'
       ? numberedZoneSections
       : selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
   const usingTierPricing = venueSections.length > 0
+  const venueLevels = Array.from(new Set(venueSections.map((s) => s.level || '')))
 
   // §4.5 - suggested rental amount, computed from the venue's own published
   // rate rather than asking the Organiser to guess a number blind. Only
@@ -283,7 +298,7 @@ export default function CreateEventPage() {
     if (venueSections.length > 0) {
       const initial: Record<string, string> = {}
       venueSections.forEach((s) => {
-        initial[s.name] = s.price ? String(s.price) : ''
+        initial[tierKey(s)] = s.price ? String(s.price) : ''
       })
       setTierPrices(initial)
     } else {
@@ -348,7 +363,7 @@ export default function CreateEventPage() {
     }
 
     if (usingTierPricing && !isFree) {
-      const missingPrice = venueSections.some((s) => !tierPrices[s.name] || Number(tierPrices[s.name]) <= 0)
+      const missingPrice = venueSections.some((s) => !tierPrices[tierKey(s)] || Number(tierPrices[tierKey(s)]) <= 0)
       if (missingPrice) {
         fail('Please set a price for every section.')
         setSaving(false)
@@ -359,7 +374,8 @@ export default function CreateEventPage() {
     const ticketTiers = usingTierPricing && !isFree
       ? venueSections.map((s) => ({
           sectionName: s.name,
-          price: Number(tierPrices[s.name]),
+          level: s.level || '',
+          price: Number(tierPrices[tierKey(s)]),
           totalSeats: Number(s.seats),
         }))
       : undefined
@@ -617,31 +633,40 @@ export default function CreateEventPage() {
                     Sections and seat counts come from {selectedVenue?.name}'s seat map — you only set the price per section for this event.
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
-                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={venueSections.map((s) => s.name)} />
+                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} />
                   )}
-                  {venueSections.map((s) => (
-                    <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
-                      <div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {selectedVenue?.seatingMode === 'NUMBERED' && (
-                            <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, venueSections.map((v) => v.name)), display: 'inline-block', flexShrink: 0 }} />
-                          )}
-                          {s.name}
+                  {venueLevels.map((lvl) => (
+                    <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? '10px' : 0 }}>
+                      {venueLevels.length > 1 && (
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '10px', marginBottom: '4px' }}>
+                          {lvl || 'Main'}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
-                      </div>
-                      {!isFree ? (
-                        <input
-                          type="number"
-                          value={tierPrices[s.name] || ''}
-                          onChange={(e) => setTierPrices((prev) => ({ ...prev, [s.name]: e.target.value }))}
-                          min="0"
-                          placeholder="₹ price"
-                          style={{ ...inputStyle, width: '120px' }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
                       )}
+                      {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {selectedVenue?.seatingMode === 'NUMBERED' && (
+                                <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
+                              )}
+                              {s.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
+                          </div>
+                          {!isFree ? (
+                            <input
+                              type="number"
+                              value={tierPrices[tierKey(s)] || ''}
+                              onChange={(e) => setTierPrices((prev) => ({ ...prev, [tierKey(s)]: e.target.value }))}
+                              min="0"
+                              placeholder="₹ price"
+                              style={{ ...inputStyle, width: '120px' }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   ))}
                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>

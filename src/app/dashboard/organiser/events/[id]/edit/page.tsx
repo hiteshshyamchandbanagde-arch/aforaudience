@@ -16,6 +16,7 @@ interface SeatSection {
   name: string
   seats: number
   price: number
+  level?: string
 }
 
 interface VenueDayRate {
@@ -61,7 +62,7 @@ interface EventDetail {
   defaultBuyInAmount: number | null
   venue: { id: string } | null
   venueBooking: { amount: number; fromDate: string; toDate: string } | null
-  ticketTiers?: { sectionName: string; price: number; totalSeats: number }[]
+  ticketTiers?: { sectionName: string; level?: string; price: number; totalSeats: number }[]
 }
 
 const inputStyle = {
@@ -123,8 +124,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   // creation instead of silently falling back to a field that doesn't
   // apply to them.
   const [tierPrices, setTierPrices] = useState<Record<string, string>>({})
+  const tierKey = (s: { name: string; level?: string }) => `${s.level || ''}::${s.name}`
   // Existing per-section prices already saved on this event, keyed by
-  // sectionName - takes priority over the venue's own suggested default
+  // `${level}::${sectionName}` (level-aware, 28 Jul - was sectionName
+  // alone) - takes priority over the venue's own suggested default
   // when first populating tierPrices, since re-opening Edit shouldn't
   // silently reset an organiser's already-set prices back to the venue
   // owner's mere starting suggestion.
@@ -132,24 +135,34 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const originalVenueId = event?.venue?.id || ''
 
   const selectedVenue = venues.find((v) => v.id === venueId)
+  // Level-aware (28 Jul): grouped by (level, zoneName) so a same-named
+  // zone on two different levels prices independently instead of merging.
   const numberedZoneSections: SeatSection[] =
     selectedVenue?.seatingMode === 'NUMBERED'
       ? Object.entries(
           (selectedVenue.seats || []).reduce<Record<string, number>>((acc, s) => {
-            acc[s.tierLabel] = (acc[s.tierLabel] || 0) + 1
+            const key = `${s.level || ''}::${s.tierLabel}`
+            acc[key] = (acc[key] || 0) + 1
             return acc
           }, {})
-        ).map(([zoneName, seatCount]) => ({
-          name: zoneName,
-          seats: seatCount,
-          price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName)?.suggestedPrice || 0,
-        }))
+        ).map(([key, seatCount]) => {
+          const sepIdx = key.indexOf('::')
+          const level = key.slice(0, sepIdx)
+          const zoneName = key.slice(sepIdx + 2)
+          return {
+            name: zoneName,
+            level,
+            seats: seatCount,
+            price: selectedVenue.zonePrices?.find((z) => z.zoneName === zoneName && (z.level || '') === level)?.suggestedPrice || 0,
+          }
+        })
       : []
   const venueSections =
     selectedVenue?.seatingMode === 'NUMBERED'
       ? numberedZoneSections
       : selectedVenue?.seatMap?.sections?.filter((s) => s.name && s.seats) || []
   const usingTierPricing = venueSections.length > 0
+  const venueLevels = Array.from(new Set(venueSections.map((s) => s.level || '')))
 
   const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
   const eventDayOfWeek = formData.date ? DAY_NAMES[new Date(formData.date + 'T00:00:00').getDay()] : null
@@ -198,7 +211,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     if (venueSections.length > 0) {
       const initial: Record<string, string> = {}
       venueSections.forEach((s) => {
-        initial[s.name] = existingTierPrices[s.name] ?? (s.price ? String(s.price) : '')
+        initial[tierKey(s)] = existingTierPrices[tierKey(s)] ?? (s.price ? String(s.price) : '')
       })
       setTierPrices(initial)
     } else {
@@ -248,7 +261,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setBookingAmount(data.venueBooking?.amount != null ? String(data.venueBooking.amount) : '')
         const existingMap: Record<string, string> = {}
         for (const t of data.ticketTiers || []) {
-          existingMap[t.sectionName] = String(t.price)
+          existingMap[`${t.level || ''}::${t.sectionName}`] = String(t.price)
         }
         setExistingTierPrices(existingMap)
 
@@ -320,7 +333,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       return
     }
     if (usingTierPricing && !isFree) {
-      const missingPrice = venueSections.some((s) => !tierPrices[s.name] || Number(tierPrices[s.name]) <= 0)
+      const missingPrice = venueSections.some((s) => !tierPrices[tierKey(s)] || Number(tierPrices[tierKey(s)]) <= 0)
       if (missingPrice) {
         showToast('Please set a price for every section.', 'error')
         return
@@ -332,7 +345,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     const ticketTiers = usingTierPricing && !isFree
       ? venueSections.map((s) => ({
           sectionName: s.name,
-          price: Number(tierPrices[s.name]),
+          level: s.level || '',
+          price: Number(tierPrices[tierKey(s)]),
           totalSeats: Number(s.seats),
         }))
       : usingTierPricing
@@ -340,7 +354,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         // at ₹0) so PATCH's full-replace persists the current section/seat
         // breakdown rather than leaving stale priced tiers from a previous
         // Paid save in place.
-        ? venueSections.map((s) => ({ sectionName: s.name, price: 0, totalSeats: Number(s.seats) }))
+        ? venueSections.map((s) => ({ sectionName: s.name, level: s.level || '', price: 0, totalSeats: Number(s.seats) }))
         : []
     setSaving(true)
 
@@ -498,31 +512,40 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     Sections and seat counts come from {selectedVenue?.name}'s seat map - you only set the price per section for this event.
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
-                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={venueSections.map((s) => s.name)} />
+                    <SeatLayoutPreview seats={selectedVenue.seats} zoneOrder={Array.from(new Set(venueSections.map((s) => s.name)))} />
                   )}
-                  {venueSections.map((s) => (
-                    <div key={s.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
-                      <div>
-                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {selectedVenue?.seatingMode === 'NUMBERED' && (
-                            <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, venueSections.map((v) => v.name)), display: 'inline-block', flexShrink: 0 }} />
-                          )}
-                          {s.name}
+                  {venueLevels.map((lvl) => (
+                    <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? '10px' : 0 }}>
+                      {venueLevels.length > 1 && (
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '10px', marginBottom: '4px' }}>
+                          {lvl || 'Main'}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
-                      </div>
-                      {!isFree ? (
-                        <input
-                          type="number"
-                          value={tierPrices[s.name] || ''}
-                          onChange={(e) => setTierPrices((prev) => ({ ...prev, [s.name]: e.target.value }))}
-                          min="0"
-                          placeholder="₹ price"
-                          style={{ ...inputStyle, width: '120px' }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
                       )}
+                      {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {selectedVenue?.seatingMode === 'NUMBERED' && (
+                                <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
+                              )}
+                              {s.name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>{s.seats} seats</div>
+                          </div>
+                          {!isFree ? (
+                            <input
+                              type="number"
+                              value={tierPrices[tierKey(s)] || ''}
+                              onChange={(e) => setTierPrices((prev) => ({ ...prev, [tierKey(s)]: e.target.value }))}
+                              min="0"
+                              placeholder="₹ price"
+                              style={{ ...inputStyle, width: '120px' }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Free</span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   ))}
                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '14px' }}>

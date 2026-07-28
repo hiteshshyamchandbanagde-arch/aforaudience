@@ -177,6 +177,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             deleteMany: {},
             create: validTiers.map((t: any) => ({
               sectionName: String(t.sectionName),
+              level: String(t.level || ''),
               price: parseFloat(t.price),
               totalSeats: parseInt(t.totalSeats),
             })),
