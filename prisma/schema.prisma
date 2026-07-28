@@ -502,9 +502,41 @@ model Organiser {
   razorpayAccountId     String?
   razorpayAccountStatus String?
 
+  // Manual-transfer payout compliance fields (added 28 Jul, after
+  // confirming Razorpay Route is unavailable on this account - RBI's
+  // 2025 PA Directions restrict split-settlement to merchants above a
+  // turnover threshold this business doesn't clear yet - see design
+  // doc §4.5 correction). Not used by any tax-withholding logic yet;
+  // added now so the fields exist before real payout rows do, rather
+  // than retrofitting a migration once money is already moving.
+  //
+  // entityType matters specifically for Section 194-O TDS: the ₹5
+  // lakh/year exemption threshold only protects INDIVIDUAL/HUF -
+  // every other entity type has TDS apply from the first rupee, no
+  // threshold at all.
+  entityType    OrganiserEntityType @default(UNKNOWN)
+  panNumber     String?
+  gstRegistered Boolean             @default(false)
+  gstin         String?
+
   events        Event[]
   venueBookings VenueBooking[]
   bookingRequests VenueBookingRequest[]
+  payoutLedgerEntries OrganiserPayoutLedger[]
+}
+
+// Not yet consulted with a CA - entity type matters for Section 194-O
+// TDS applicability (see Organiser.entityType comment above). UNKNOWN
+// is the default so existing/new Organisers aren't silently assumed
+// into a category that changes their tax treatment.
+enum OrganiserEntityType {
+  UNKNOWN
+  INDIVIDUAL
+  HUF
+  COMPANY
+  LLP
+  PARTNERSHIP
+  OTHER
 }
 
 model VenueOwner {
@@ -941,8 +973,46 @@ model Booking {
   payment     Payment?
   bookingSeats BookingSeat[]
   plusOnes    PlusOne[]
+  payoutLedgerEntry OrganiserPayoutLedger?
 
   @@index([status, expiresAt])
+}
+
+// Manual-transfer payout ledger (added 28 Jul, replacing the Route
+// auto-split premise from PR #256 - see design doc §4.5 correction).
+// One row per confirmed Booking. amountOwed is a snapshot of
+// booking.subtotalAmount taken at creation time, not a live read -
+// if the booking amount were ever corrected later, historical payout
+// obligations shouldn't silently shift underneath an already-reviewed
+// ledger. financialYear is denormalized (computed at write time, Indian
+// FY = April-March, e.g. "2026-27") purely so the Section 194-O
+// cumulative-paid-per-organiser-per-year threshold check is a fast
+// indexed query instead of a date-range scan over every ledger row.
+//
+// Nothing writes to this table yet - schema exists ahead of the
+// feature per the standing principle of not retrofitting compliance
+// fields after real money rows already exist.
+model OrganiserPayoutLedger {
+  id           String              @id @default(cuid())
+  organiserId  String
+  organiser    Organiser           @relation(fields: [organiserId], references: [id])
+  bookingId    String              @unique
+  booking      Booking             @relation(fields: [bookingId], references: [id])
+  eventId      String
+  amountOwed   Float
+  financialYear String
+  status       OrganiserPayoutStatus @default(OWED)
+  paidAt       DateTime?
+  payoutReference String?
+  createdAt    DateTime            @default(now())
+
+  @@index([organiserId, financialYear])
+  @@index([status])
+}
+
+enum OrganiserPayoutStatus {
+  OWED
+  PAID
 }
 
 // Checkpoint 2 — one Payment per Booking. Kept as a separate table (not
