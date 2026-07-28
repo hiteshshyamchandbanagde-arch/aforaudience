@@ -60,14 +60,27 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       booking.expiresAt !== null &&
       booking.expiresAt < now
 
-    // Same price-resolution rule as GET /api/events/[id]/seats - Seat.tierLabel
-    // isn't a hard FK to TicketTier, matched by name instead.
-    const priceByTier = new Map(booking.event.ticketTiers.map((t) => [t.sectionName, t.price]))
-    const numberedSeats = booking.bookingSeats.map((bs) => ({
+    // Price resolved by matching (level, Seat.tierLabel) to
+    // (TicketTier.level, TicketTier.sectionName) - same rule as
+    // GET /api/events/[id]/seats and POST /api/bookings' NUMBERED price
+    // resolution (both fixed for this in PR #252). This route was missed
+    // in that pass despite its own comment claiming otherwise - found
+    // live (28 Jul) testing a venue with same-named zones on two levels
+    // at very different prices: the actual charge (booking.subtotalAmount,
+    // computed at order-creation time) was correct, but this checkout
+    // page showed the WRONG per-seat price for one of the two levels
+    // (whichever level's TicketTier row happened to overwrite the other
+    // in a name-only Map), and the line items didn't even sum to the
+    // page's own Total.
+    const priceByTier = new Map(
+      booking.event.ticketTiers.map((t: { level: string; sectionName: string; price: number }) => [`${t.level || ''}::${t.sectionName}`, t.price])
+    )
+    const numberedSeats = booking.bookingSeats.map((bs: { seat: { tierLabel: string; level: string; row: string; number: string } }) => ({
       tierLabel: bs.seat.tierLabel,
+      level: bs.seat.level,
       row: bs.seat.row,
       number: bs.seat.number,
-      price: priceByTier.get(bs.seat.tierLabel) ?? null,
+      price: priceByTier.get(`${bs.seat.level || ''}::${bs.seat.tierLabel}`) ?? null,
     }))
 
     return NextResponse.json({

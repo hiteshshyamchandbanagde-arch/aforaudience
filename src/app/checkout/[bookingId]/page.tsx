@@ -37,7 +37,7 @@ type BookingState = {
     id: string
     status: string
     seats: Record<string, number>
-    numberedSeats: { tierLabel: string; row: string; number: string; price: number | null }[]
+    numberedSeats: { tierLabel: string; level: string; row: string; number: string; price: number | null }[]
     totalAmount: number
     subtotalAmount: number
     bookingFeeAmount: number
@@ -205,18 +205,35 @@ export default function CheckoutPage() {
   const gaSeatEntries = Object.entries(state.booking.seats).filter(
     ([, q]) => Number(q) > 0
   ) as [string, number][]
-  const numberedGroups = Object.values(
-    state.booking.numberedSeats.reduce((acc, s) => {
-      const key = s.tierLabel
-      if (!acc[key]) acc[key] = { tierLabel: key, count: 0, price: s.price, seatLabels: [] as string[] }
-      acc[key].count += 1
-      acc[key].seatLabels.push(`${s.row}${s.number}`)
-      return acc
-    }, {} as Record<string, { tierLabel: string; count: number; price: number | null; seatLabels: string[] }>)
+  const numberedGroups: { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }[] = Object.values(
+    state.booking.numberedSeats.reduce(
+      (
+        acc: Record<string, { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }>,
+        s: { tierLabel: string; level: string; row: string; number: string; price: number | null }
+      ) => {
+        // Group by (level, tierLabel), not tierLabel alone - a same-named
+        // zone on two different levels (as in this booking) can have two
+        // different real prices. Grouping by name only previously merged
+        // them into one line using whichever seat's price happened to be
+        // first, which both mis-priced the line AND meant the line items
+        // didn't even sum to the page's own Total - found live (28 Jul)
+        // testing a multi-level venue with same-named, differently-priced
+        // zones. Backend now returns the correct per-seat price (see
+        // GET /api/bookings/[id]), so this only needs to stop merging.
+        const key = `${s.level || ''}::${s.tierLabel}`
+        if (!acc[key]) {
+          acc[key] = { tierLabel: s.tierLabel, level: s.level, count: 0, price: s.price, seatLabels: [] }
+        }
+        acc[key].count += 1
+        acc[key].seatLabels.push(`${s.row}${s.number}`)
+        return acc
+      },
+      {} as Record<string, { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }>
+    )
   )
   const seatsSummaryText =
     numberedGroups.length > 0
-      ? numberedGroups.map((g) => `${g.tierLabel} (${g.seatLabels.join(', ')})`).join(', ')
+      ? numberedGroups.map((g) => `${g.tierLabel}${g.level ? ` (${g.level})` : ''} (${g.seatLabels.join(', ')})`).join(', ')
       : gaSeatEntries.map(([s, q]) => `${s} × ${q}`).join(', ')
 
   // --- Confirmed state
@@ -461,7 +478,7 @@ export default function CheckoutPage() {
             {numberedGroups.length > 0
               ? numberedGroups.map((g) => (
                   <div
-                    key={g.tierLabel}
+                    key={`${g.level}::${g.tierLabel}`}
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -470,7 +487,7 @@ export default function CheckoutPage() {
                     }}
                   >
                     <span>
-                      {g.tierLabel} × {g.count}
+                      {g.tierLabel}{g.level ? ` · ${g.level}` : ''} × {g.count}
                       <span style={{ fontSize: 11, opacity: 0.6, display: 'block', marginTop: 2 }}>
                         Seat{g.count === 1 ? '' : 's'} {g.seatLabels.join(', ')}
                       </span>
