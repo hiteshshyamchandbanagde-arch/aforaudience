@@ -35,7 +35,7 @@ export default function OrganiserDashboard() {
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null; walletBalance?: number } | null>(null)
+  const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null; walletBalance?: number; payoutAccountLinked?: boolean; payoutAccountStatus?: string | null } | null>(null)
   const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
 
   useEffect(() => {
@@ -137,6 +137,19 @@ export default function OrganiserDashboard() {
               {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
                 <p style={{ fontSize: '13px', color: 'var(--afa-gold)', fontWeight: 600, marginTop: '6px' }}>
                   💰 Wallet balance: ₹{orgStatus.walletBalance.toLocaleString('en-IN')} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
+                </p>
+              )}
+              {!orgStatus?.payoutAccountLinked ? (
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '6px' }}>
+                  <Link href="/dashboard/organiser/payouts" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Set up direct payouts →</Link>
+                </p>
+              ) : orgStatus.payoutAccountStatus !== 'activated' ? (
+                <p style={{ fontSize: '13px', color: 'var(--afa-gold)', fontWeight: 600, marginTop: '6px' }}>
+                  ⏳ Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
+                </p>
+              ) : (
+                <p style={{ fontSize: '13px', color: 'var(--afa-sage)', fontWeight: 600, marginTop: '6px' }}>
+                  ✓ Direct payouts active
                 </p>
               )}
             </div>
