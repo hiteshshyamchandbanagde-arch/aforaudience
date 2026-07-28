@@ -11,14 +11,29 @@ export function normalizeWhitespace(s: string): string {
 }
 
 // Case- and whitespace-insensitive key for duplicate-name comparisons.
-// Strips ALL whitespace, not just collapses runs of it - collapsing
-// alone still leaves "General 2" (one space) and "General2" (zero
-// spaces) as two different keys, and live-tested 27 Jul that's exactly
-// the pair that got through: an audience member sees no meaningful
-// difference between "General 2" and "General2." Whitespace-count is
-// not a meaningful naming distinction here, so it's removed entirely
-// for comparison (the stored/displayed name itself is untouched -
-// see normalizeWhitespace above for that).
+// Three layers, in order:
+//   1. NFKC Unicode normalization - folds compatibility-equivalent forms
+//      (e.g. full-width "２" used by some IME/keyboard input methods)
+//      into their canonical ASCII equivalents. AforAudience is
+//      international, not India-only, so this can't assume ASCII input.
+//   2. Strip invisible characters - zero-width space/joiners (U+200B-
+//      U+200D) and BOM (U+FEFF) render as nothing but are distinct code
+//      points, so "General\u200B2" would look identical to "General2"
+//      on screen while comparing as a different string without this.
+//   3. Strip ALL whitespace (not just collapse it) and lowercase - see
+//      history below for why collapsing alone isn't enough.
+//
+// Two real bugs found live testing this: "General 2" vs "General    2"
+// (extra internal spaces), and "General 2" vs "General2" (space present
+// vs absent entirely) - both visually near-identical, both slipped past
+// a naive `.trim().toLowerCase()`. Two names that read as "the same
+// zone" to a human must not both save - the commercial risk is real:
+// an organiser prices off the wrong "General 2" and audience seating
+// gets misassigned.
 export function normalizeForCompare(s: string): string {
-  return s.replace(/\s+/g, '').toLowerCase()
+  return s
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase()
 }

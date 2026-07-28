@@ -7,7 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
-import SeatSectionEditor, { SeatSection, findDuplicateSectionNames } from '@/components/SeatSectionEditor'
+import SeatSectionEditor, { SeatSection, findDuplicateSectionNames, findIncompleteSections } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
 import BrandLoader from '@/components/BrandLoader'
 import CityAutocomplete from '@/components/CityAutocomplete'
@@ -170,18 +170,29 @@ export default function CreateVenuePage() {
       return
     }
 
-    const validSections = sections.filter((s) => s.name.trim() && Number(s.seats) > 0)
-
-    if (seatingChoice === 'GENERAL_ADMISSION' && validSections.length === 0) {
-      fail('Add at least one seating section with a name and seat count.')
-      setSaving(false)
-      return
-    }
-    const duplicateSectionNames = findDuplicateSectionNames(validSections)
-    if (seatingChoice === 'GENERAL_ADMISSION' && duplicateSectionNames.length > 0) {
-      fail(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`)
-      setSaving(false)
-      return
+    // Rule (Hitesh, 27 Jul): a section row that exists must be filled in
+    // or removed by the owner - it must never be silently dropped at
+    // save time, since that's data loss with zero feedback (owner adds
+    // 5 sections, one has a typo'd blank name, it vanishes with no
+    // warning). Validate the FULL list, not a filtered subset.
+    if (seatingChoice === 'GENERAL_ADMISSION') {
+      if (sections.length === 0) {
+        fail('Add at least one seating section with a name and seat count.')
+        setSaving(false)
+        return
+      }
+      const incomplete = findIncompleteSections(sections)
+      if (incomplete.length > 0) {
+        fail(`${incomplete.length} section${incomplete.length === 1 ? '' : 's'} ${incomplete.length === 1 ? 'is' : 'are'} missing a name or seat count - fill ${incomplete.length === 1 ? 'it' : 'them'} in or remove ${incomplete.length === 1 ? 'it' : 'them'} with the ✕ button before saving.`)
+        setSaving(false)
+        return
+      }
+      const duplicateSectionNames = findDuplicateSectionNames(sections)
+      if (duplicateSectionNames.length > 0) {
+        fail(`Section name${duplicateSectionNames.length === 1 ? '' : 's'} "${duplicateSectionNames.join('", "')}" ${duplicateSectionNames.length === 1 ? 'is' : 'are'} used more than once - each section needs a unique name.`)
+        setSaving(false)
+        return
+      }
     }
     if (seatingChoice === 'NUMBERED' && !(Number(approxCapacity) > 0)) {
       fail('Enter an approximate seating capacity (you\'ll build the real seat-by-seat layout after creating this venue).')
@@ -218,7 +229,7 @@ export default function CreateVenuePage() {
           acousticRating: formData.acousticRating ? parseFloat(formData.acousticRating) : null,
           facilities,
           seatingMode: seatingChoice,
-          seatMap: seatingChoice === 'GENERAL_ADMISSION' ? { sections: validSections } : undefined,
+          seatMap: seatingChoice === 'GENERAL_ADMISSION' ? { sections } : undefined,
           capacity: seatingChoice === 'NUMBERED' ? Number(approxCapacity) : undefined,
           rateType,
           hourlyRate: rateType === 'HOURLY' && hourlyRate ? Number(hourlyRate) : null,

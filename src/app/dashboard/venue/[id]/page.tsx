@@ -258,7 +258,30 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                     >
                       <span style={{ fontWeight: 600, color: 'var(--afa-ink)' }}>{s.name}</span>
                       <span style={{ color: 'var(--afa-ink)', opacity: 0.7 }}>{s.seats} seats</span>
-                      <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>₹{s.price}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>
+                        {Number(s.price) > 0 ? (
+                          `₹${s.price}`
+                        ) : (
+                          // Rule (Hitesh, 27 Jul): a ₹0 price must read as
+                          // an intentional "Free" section to anyone
+                          // viewing the venue, not as a blank/broken
+                          // price field - same fix as the owner-side
+                          // SeatSectionEditor.
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: 'var(--afa-amber)',
+                              background: 'var(--afa-amber-tint)',
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              letterSpacing: '0.02em',
+                            }}
+                          >
+                            FREE
+                          </span>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>

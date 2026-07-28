@@ -110,6 +110,43 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const sections = Array.isArray(seatMap?.sections)
       ? seatMap.sections.map((s: any) => ({ ...s, name: normalizeWhitespace(String(s?.name ?? '')) }))
       : undefined
+
+    // Bounds check - this route was missing the seat-count/price bounds
+    // validation that POST /api/venues already has (found in the same
+    // quality pass as the name-required check below). Without it, a
+    // PATCH could push an unbounded seat count or a negative/absurd
+    // price straight to the DB, since this form's custom onChange
+    // handlers bypass native HTML validation same as everywhere else in
+    // this file. Only runs when sections are actually part of the
+    // request.
+    const MAX_SEATS_PER_SECTION = 100_000
+    const MAX_PRICE_PER_SEAT = 10_000_000 // ₹1 crore
+    if (sections !== undefined) {
+      for (const s of sections) {
+        const seatCount = Number(s?.seats)
+        const price = s?.price !== undefined && s?.price !== null && s?.price !== '' ? Number(s.price) : 0
+        // Name-required: seat-count/price bounds alone don't catch a
+        // blank name paired with an otherwise-valid seat count, and
+        // duplicate-detection below skips empty keys entirely (two
+        // blank-named sections aren't "duplicates" of each other).
+        if (!s.name) {
+          return NextResponse.json({ error: 'Every seating section needs a name.' }, { status: 400 })
+        }
+        if (!Number.isFinite(seatCount) || !Number.isInteger(seatCount) || seatCount < 1 || seatCount > MAX_SEATS_PER_SECTION) {
+          return NextResponse.json(
+            { error: `Each section's seat count must be a whole number between 1 and ${MAX_SEATS_PER_SECTION.toLocaleString('en-IN')}.` },
+            { status: 400 }
+          )
+        }
+        if (!Number.isFinite(price) || price < 0 || price > MAX_PRICE_PER_SEAT) {
+          return NextResponse.json(
+            { error: `Price per seat must be between ₹0 and ₹${MAX_PRICE_PER_SEAT.toLocaleString('en-IN')}.` },
+            { status: 400 }
+          )
+        }
+      }
+    }
+
     const seatMapCapacity = sections
       ? sections.reduce((sum: number, s: any) => sum + (Number(s.seats) || 0), 0)
       : undefined
