@@ -91,6 +91,27 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const [plusOneBusy, setPlusOneBusy] = useState<string | null>(null)
   const [plusOneAuthTarget, setPlusOneAuthTarget] = useState<string | null>(null)
 
+  // Audience-adjustable booking fee (28 Jul). Defaults to the platform's
+  // configured fee (fetched once, since it rarely changes) but the person
+  // can lower it - down to ₹0 - or raise it before booking. null while
+  // loading; feeInput tracks the actual editable value once the default
+  // arrives. Server re-validates whatever gets sent (see POST /api/bookings) -
+  // this is UX responsiveness, not the enforcement boundary.
+  const [defaultBookingFee, setDefaultBookingFee] = useState<number | null>(null)
+  const [feeInput, setFeeInput] = useState<number>(0)
+  useEffect(() => {
+    fetch("/api/platform-settings/audience-fee")
+      .then((res) => res.json())
+      .then((data) => {
+        setDefaultBookingFee(data.audienceBookingFeeRupees)
+        setFeeInput(data.audienceBookingFeeRupees)
+      })
+      .catch(() => {
+        setDefaultBookingFee(0)
+        setFeeInput(0)
+      })
+  }, [])
+
   // Live-caught (28 Jul): browser back/forward navigation always serves
   // the Router Cache's snapshot of this page regardless of staleTimes
   // config - confirmed showing "212 of 212 seats" after 6 real seats had
@@ -164,7 +185,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          isNumbered ? { eventId: event.id, seatIds: selectedSeatIds } : { eventId: event.id, seats: selectedSeats }
+          isNumbered
+            ? { eventId: event.id, seatIds: selectedSeatIds, bookingFeeOverride: feeInput }
+            : { eventId: event.id, seats: selectedSeats, bookingFeeOverride: feeInput }
         ),
       })
       const data = await res.json()
@@ -572,10 +595,46 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   <div style={{ fontSize: "12px", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
                 )}
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
-                  <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
-                  <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{totalAmount > 0 ? `₹${totalAmount.toLocaleString("en-IN")}` : "Free"}</span>
-                </div>
+                {totalAmount > 0 ? (
+                  <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                      <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
+                      <span style={{ fontSize: "14px", color: "var(--afa-ink)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "12px" }}>
+                      <div>
+                        <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>Booking fee</div>
+                        <div style={{ fontSize: "10px", color: "var(--afa-ink)", opacity: 0.45, maxWidth: "160px" }}>Supports the artist ecosystem — optional, adjust it however you like</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                        <span style={{ fontSize: "14px", color: "var(--afa-ink)" }}>₹</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={500}
+                          step={1}
+                          value={feeInput}
+                          disabled={defaultBookingFee === null}
+                          onChange={(e) => {
+                            const n = Number(e.target.value)
+                            if (!Number.isFinite(n)) return
+                            setFeeInput(Math.max(0, Math.min(Math.round(n), 500)))
+                          }}
+                          style={{ width: "64px", padding: "6px 8px", borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", fontSize: "14px", textAlign: "right" }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>Total</span>
+                      <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
+                    <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} seat{totalSelected === 1 ? "" : "s"}</span>
+                    <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>Free</span>
+                  </div>
+                )}
 
                 <button
                   onClick={handleBookClick}
@@ -606,7 +665,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         open={showAuthSheet}
         onClose={() => setShowAuthSheet(false)}
         title="Sign in to reserve your seats"
-        subtitle={`${totalSelected} seat${totalSelected === 1 ? "" : "s"}${totalAmount > 0 ? ` · ₹${totalAmount.toLocaleString("en-IN")}` : ""}`}
+        subtitle={`${totalSelected} seat${totalSelected === 1 ? "" : "s"}${totalAmount > 0 ? ` · ₹${(totalAmount + feeInput).toLocaleString("en-IN")}` : ""}`}
         onSuccess={() => {
           setShowAuthSheet(false)
           reserveSeats()
