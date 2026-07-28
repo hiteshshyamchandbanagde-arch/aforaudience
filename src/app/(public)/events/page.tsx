@@ -196,9 +196,8 @@ export default function EventsPage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.id}`}
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", transition: "transform 0.2s, box-shadow 0.2s", textDecoration: "none", color: "inherit", display: "block" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)" }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none" }}
+                  className="hover-lift-card"
+                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", textDecoration: "none", color: "inherit", display: "block" }}
                 >
                   {view === "grid" && (
                     <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
