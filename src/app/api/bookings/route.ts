@@ -6,7 +6,7 @@ import {
   createRazorpayOrder,
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
-import { getPlatformSettings } from '@/lib/platform-settings'
+import { getPlatformSettings, MAX_BOOKING_FEE_PAISE } from '@/lib/platform-settings'
 import { deliverTicket } from '@/lib/ticket-delivery'
 
 // PENDING bookings expire after this window if payment doesn't complete.
@@ -62,9 +62,31 @@ export async function POST(req: Request) {
       )
     }
 
-    const { eventId, seats, seatIds } = await req.json()
+    const { eventId, seats, seatIds, bookingFeeOverride } = await req.json()
     if (!eventId) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
+    }
+
+    // Audience-adjustable booking fee (28 Jul). The checkout-adjacent seat
+    // picker pre-fills the platform's default fee but lets the person
+    // reduce it (down to ₹0) or raise it before booking - "the fee is
+    // optional" needs to be true and provable, not just a UI claim, so
+    // this is validated server-side like any other money-bearing input
+    // (client-side clamping alone is decorative, see prisma-account-style
+    // learnings elsewhere in this codebase). Bad values are rejected, not
+    // silently clamped - a silent clamp would mean the person sees one
+    // number in the picker and gets charged a different one.
+    const MAX_BOOKING_FEE_OVERRIDE_RUPEES = MAX_BOOKING_FEE_PAISE / 100 // single source of truth, shared with the admin-side ceiling guard
+    let bookingFeeOverrideRupees: number | null = null
+    if (bookingFeeOverride !== undefined && bookingFeeOverride !== null) {
+      const n = Number(bookingFeeOverride)
+      if (!Number.isFinite(n) || n < 0 || n > MAX_BOOKING_FEE_OVERRIDE_RUPEES) {
+        return NextResponse.json(
+          { error: `Booking fee must be between ₹0 and ₹${MAX_BOOKING_FEE_OVERRIDE_RUPEES}` },
+          { status: 400 }
+        )
+      }
+      bookingFeeOverrideRupees = n
     }
 
     // §9.4 twenty-fourth amendment - NUMBERED-mode bookings send seatIds
@@ -194,7 +216,10 @@ export async function POST(req: Request) {
           subtotalAmount += tier.price
         }
 
-        const bookingFeeRupees = subtotalAmount > 0 ? feeSettings.audienceBookingFee / 100 : 0
+        const bookingFeeRupees =
+          subtotalAmount > 0
+            ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
+            : 0
         const totalAmount = subtotalAmount + bookingFeeRupees
 
         return tx.booking.create({
@@ -271,9 +296,13 @@ export async function POST(req: Request) {
       // page's "we don't tax the scene" promise applied at the extreme:
       // if the ticket costs nothing, the platform takes nothing.
       // Fee stored in paise on PlatformSettings; convert to rupees here
-      // to keep Booking's Float columns consistent.
+      // to keep Booking's Float columns consistent. Person-chosen
+      // override (validated above) takes priority over the platform
+      // default when present — see comment at the top of this handler.
       const bookingFeeRupees =
-        subtotalAmount > 0 ? feeSettings.audienceBookingFee / 100 : 0
+        subtotalAmount > 0
+          ? (bookingFeeOverrideRupees !== null ? bookingFeeOverrideRupees : feeSettings.audienceBookingFee / 100)
+          : 0
       const totalAmount = subtotalAmount + bookingFeeRupees
 
       return tx.booking.create({
