@@ -421,6 +421,34 @@ function ClampedNumberInput({
   )
 }
 
+// Same visual as SeatSectionEditor's FREE badge (Hitesh, 27 Jul) - kept
+// as a small standalone component here since this file has 3 separate
+// zone-price input sites (wizard single-zone, wizard multi-zone, manual
+// canvas) that all need it, and duplicating the inline styles 3x would
+// drift out of sync with the GA version over time.
+function FreeTag() {
+  return (
+    <span
+      style={{
+        position: 'absolute',
+        right: '8px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        fontSize: '10px',
+        fontWeight: 700,
+        color: 'var(--afa-amber)',
+        background: 'var(--afa-amber-tint)',
+        padding: '2px 6px',
+        borderRadius: '4px',
+        letterSpacing: '0.02em',
+        pointerEvents: 'none',
+      }}
+    >
+      FREE
+    </span>
+  )
+}
+
 export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -464,6 +492,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const zonePrices = zonePricesByLevel[activeLevel] || {}
   const setZonePrice = (zoneName: string, price: string) =>
     setZonePricesByLevel((prev) => ({ ...prev, [activeLevel]: { ...(prev[activeLevel] || {}), [zoneName]: price } }))
+  // Rule (Hitesh, 27 Jul): Numbered zones now allow ₹0 as a valid,
+  // explicit "Free" price (previously any zone <= 0 hard-blocked Save -
+  // see the missingPricing check below). Distinct from a genuinely
+  // blank/never-entered price, which still blocks Save - only an
+  // explicit "0" counts as Free, so the FREE tag can't appear on a zone
+  // the owner simply hasn't priced yet.
+  const zoneIsFree = (zoneName: string) => {
+    const raw = zonePrices[zoneName]
+    return raw !== undefined && raw.trim() !== '' && Number(raw) === 0
+  }
 
   const [builderPathByLevel, setBuilderPathByLevel] = useState<Record<string, 'choose' | 'wizard' | 'canvas' | null>>({})
   const builderPath = builderPathByLevel[activeLevel] ?? null
@@ -933,22 +971,27 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // previously this only ran at Venue Publish, meaning an owner could
     // Save an unpriced layout and only find out much later. Every real
     // zone (distinct level+tierLabel actually present in the saved
-    // seats) needs a real positive price before Save succeeds, same
-    // check the publish-gate already runs server-side - just surfaced
-    // at the point where it's actually actionable.
+    // seats) needs a real price before Save succeeds, same check the
+    // publish-gate already runs server-side - just surfaced at the
+    // point where it's actually actionable.
+    //
+    // ₹0 is now a valid price (Hitesh, 27 Jul, follow-up rule): a
+    // Numbered venue can have a genuinely free/RSVP zone, same as GA
+    // sections already allow - only a MISSING price (owner never typed
+    // anything) blocks Save now, not an explicit "0".
     const zoneKeysInUse = new Set<string>()
     for (const s of allSeats) zoneKeysInUse.add(`${s.level}::${s.tierLabel}`)
     const priceMap = new Map(allZonePrices.map((z) => [`${z.level}::${z.zoneName}`, z.suggestedPrice]))
     const missingPricing: string[] = []
     for (const key of zoneKeysInUse) {
       const price = priceMap.get(key)
-      if (price == null || !Number.isFinite(price) || price <= 0) {
+      if (price == null || !Number.isFinite(price) || price < 0) {
         const [level, zoneName] = key.split('::')
         missingPricing.push(`${levelLabel(level)}: ${zoneName}`)
       }
     }
     if (missingPricing.length > 0) {
-      showToast(`Every zone needs a price before saving. Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
+      showToast(`Every zone needs a price before saving (enter 0 for a free zone). Missing: ${missingPricing.join(', ')}. Set prices, then save again.`, 'error')
       return
     }
 
@@ -1181,14 +1224,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
                     </div>
                     <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Suggested price (optional)</label>
-                      <input
-                        type="number"
-                        style={{ ...inputStyle, width: '120px' }}
-                        placeholder="₹"
-                        value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
-                        onChange={(e) => gridConfig.rowGroups[0] && setZonePrice(gridConfig.rowGroups[0].zoneName, e.target.value)}
-                      />
+                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Price (0 = free)</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="number"
+                          style={{ ...inputStyle, width: '120px' }}
+                          placeholder="₹"
+                          value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
+                          onChange={(e) => gridConfig.rowGroups[0] && setZonePrice(gridConfig.rowGroups[0].zoneName, e.target.value)}
+                        />
+                        {gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) && <FreeTag />}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1206,7 +1252,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Zone ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
-                        <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
+                        <div style={{ position: 'relative' }}>
+                          <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ (0=free)" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
+                          {zoneIsFree(rg.zoneName) && <FreeTag />}
+                        </div>
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
@@ -1460,7 +1509,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Name:</label>
                         <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
                         <label style={{ fontSize: '12px' }}>Price:</label>
-                        <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ optional" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
+                        <div style={{ position: 'relative' }}>
+                          <input type="number" style={{ ...inputStyle, width: '80px' }} placeholder="₹ (0=free)" value={zonePrices[rg.zoneName] || ''} onChange={(e) => setZonePrice(rg.zoneName, e.target.value)} />
+                          {zoneIsFree(rg.zoneName) && <FreeTag />}
+                        </div>
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
