@@ -271,7 +271,7 @@ export default function AdminCommandCenter() {
   return (
     <>
       <SiteNav />
-      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
+      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px', overflowX: 'hidden' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
           Command Center
         </h1>
@@ -370,29 +370,31 @@ export default function AdminCommandCenter() {
           <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '16px' }}>
             Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
           </div>
-          <div style={{ position: 'relative', height: '130px' }}>
-            {/* subtle gridlines */}
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} style={{ borderTop: '1px solid var(--afa-ink-a8)' }} />
-              ))}
-            </div>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '6px', height: '100%' }}>
-              {(data?.dailyTrend || []).map((d) => (
-                <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                  <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: '108px' }}>
-                    <div
-                      title={`Opened: ${d.opened}`}
-                      style={{ width: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }}
-                    />
-                    <div
-                      title={`Resolved: ${d.resolved}`}
-                      style={{ width: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-sage)', borderRadius: '3px 3px 0 0' }}
-                    />
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginLeft: '-2px', paddingLeft: '2px' }}>
+            <div style={{ position: 'relative', height: '130px', minWidth: '420px' }}>
+              {/* subtle gridlines */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} style={{ borderTop: '1px solid var(--afa-ink-a8)' }} />
+                ))}
+              </div>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '6px', height: '100%' }}>
+                {(data?.dailyTrend || []).map((d) => (
+                  <div key={d.day} style={{ flex: '1 0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: '108px' }}>
+                      <div
+                        title={`Opened: ${d.opened}`}
+                        style={{ width: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }}
+                      />
+                      <div
+                        title={`Resolved: ${d.resolved}`}
+                        style={{ width: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-sage)', borderRadius: '3px 3px 0 0' }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '9.5px', color: 'var(--afa-taupe)', marginTop: '6px' }}>{dayLabel(d.day)}</span>
                   </div>
-                  <span style={{ fontSize: '9.5px', color: 'var(--afa-taupe)', marginTop: '6px' }}>{dayLabel(d.day)}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: '11.5px' }}>
