@@ -94,7 +94,6 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const { showToast } = useToast()
   const [toggling, setToggling] = useState(false)
   const [actingOn, setActingOn] = useState<string | null>(null)
-  const [compensation, setCompensation] = useState<Record<string, { type: 'PAID' | 'FREE' | 'BUY_IN'; amount: string }>>({})
   const [walletBalance, setWalletBalance] = useState(0)
   const [applyingWallet, setApplyingWallet] = useState(false)
 
@@ -187,21 +186,15 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const reviewApplication = async (applicationId: string, newStatus: 'APPROVED' | 'REJECTED') => {
     setActingOn(applicationId)
     try {
-      // Only send an explicit compensation override if the organiser actually
-      // touched the toggle for this application. If they left it untouched,
-      // omit these fields entirely so the API falls back to the event's own
-      // declared default (see /api/applications/[id]/route.ts) rather than
-      // us silently sending a hardcoded FREE and defeating that fallback.
-      const comp = compensation[applicationId]
+      // Approval no longer carries a per-artist compensation override — the
+      // terms an artist applied under (event's declared default) are final
+      // once approved. The API falls back to the event's own declared
+      // default whenever these fields are omitted (see
+      // /api/applications/[id]/route.ts).
       const res = await fetch(`/api/applications/${applicationId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: newStatus,
-          compensationType: comp?.type,
-          feeAmount: comp?.type === 'PAID' ? comp.amount : undefined,
-          buyInAmount: comp?.type === 'BUY_IN' ? comp.amount : undefined,
-        }),
+        body: JSON.stringify({ status: newStatus }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -425,7 +418,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             </h2>
             {event.applications.length > 0 && (
               <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '14px' }}>
-                This event's default artist compensation is <strong>{describeDefaultCompensation(event)}</strong>. Approving an application uses this by default — override below only if you're agreeing different terms with this artist.
+                Artists apply under this event's declared compensation terms — <strong>{describeDefaultCompensation(event)}</strong>. Approving locks this in for the artist; it's final.
               </p>
             )}
             {event.applications.length === 0 ? (
@@ -446,55 +439,21 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       </div>
                       {app.message && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '10px' }}>{app.message}</p>}
                       {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
-                        <div>
-                          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                            Compensation for this artist {(!compensation[app.id] || compensation[app.id]?.type === event.defaultCompensationType) && '(event default)'}
-                          </p>
-                          <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-                            {(['FREE', 'PAID', 'BUY_IN'] as const).map((t) => {
-                              const current = compensation[app.id]?.type || event.defaultCompensationType || 'FREE'
-                              return (
-                                <button
-                                  key={t}
-                                  type="button"
-                                  onClick={() => setCompensation((prev) => ({ ...prev, [app.id]: { type: t, amount: prev[app.id]?.amount || '' } }))}
-                                  style={{
-                                    padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: 'pointer',
-                                    border: current === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                                    background: current === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
-                                    color: current === t ? 'var(--afa-terracotta)' : 'var(--afa-ink)',
-                                  }}
-                                >
-                                  {t === 'FREE' ? 'Free' : t === 'PAID' ? 'Paid' : 'Buy-in'}
-                                </button>
-                              )
-                            })}
-                            {(compensation[app.id]?.type === 'PAID' || compensation[app.id]?.type === 'BUY_IN') && (
-                              <input
-                                type="number"
-                                placeholder="₹ amount"
-                                value={compensation[app.id]?.amount || ''}
-                                onChange={(e) => setCompensation((prev) => ({ ...prev, [app.id]: { type: prev[app.id]?.type || 'PAID', amount: e.target.value } }))}
-                                style={{ width: '100px', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '12px' }}
-                              />
-                            )}
-                          </div>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button
-                              onClick={() => reviewApplication(app.id, 'APPROVED')}
-                              disabled={actingOn === app.id}
-                              style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => reviewApplication(app.id, 'REJECTED')}
-                              disabled={actingOn === app.id}
-                              style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
-                            >
-                              Reject
-                            </button>
-                          </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => reviewApplication(app.id, 'APPROVED')}
+                            disabled={actingOn === app.id}
+                            style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => reviewApplication(app.id, 'REJECTED')}
+                            disabled={actingOn === app.id}
+                            style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                          >
+                            Reject
+                          </button>
                         </div>
                       )}
                     </div>
