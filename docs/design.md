@@ -1119,38 +1119,44 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 *Refund policy - COMPLETE four-actor framework, finalized this session (29 Jul). This SUPERSEDES the "no tiers" / "no cutoff" wording from earlier in this same session for Venue and Organiser cancellation, and supersedes the old 48h audience-cancellation threshold. Read this block as the current source of truth, not the paragraphs above it in this same session's log.*
 
 **Cancellation-window model (applies across all four actors below):**
-- The **7-day threshold is a configurable value**, not hardcoded - model it as a `CancellationPolicy` record (or equivalent) per actor-type (Venue/Organiser/Artist/Audience), each with its own configurable day-threshold.
-- **Every Booking/Event snapshots/links to the specific policy version active at its own creation time.** Changing the global threshold later (e.g. 7 -> 10 days) must NEVER retroactively change the terms of already-existing bookings - old bookings stay bound to whatever policy version they were created under; only new bookings pick up a changed threshold. This is a hard requirement, not a nice-to-have.
+- Thresholds are **per-actor configurable values**, not one global hardcoded number - model each as a `CancellationPolicy` record per actor-type (Venue/Organiser/Artist/Audience), each with its own configurable day-threshold(s).
+- **Confirmed this session: Venue and Organiser use a longer 14-day window; Artist (buy-in) and Audience keep the shorter 7-day-anchored windows already specified below.** Rationale (Hitesh-approved): venue/organiser cancellations carry real downstream cost - remarketing a slot, reshuffling artists, renotifying audience - that a 7-day window doesn't give enough lead time for.
+- **Every Booking/Event snapshots/links to the specific policy version active at its own creation time.** Changing a threshold later must NEVER retroactively change the terms of already-existing bookings - old bookings stay bound to whatever policy version they were created under; only new bookings pick up a changed threshold. This is a hard requirement, not a nice-to-have.
+- **[NEW, confirmed] Partial cancellations - apply the same day-tier rule per unit, not per whole order.** An audience member cancelling 2 of 5 tickets in one order, or an organiser dropping one price tier/zone without cancelling the whole event: each ticket/seat/tier is evaluated independently against the same rules below. No separate whole-order logic needed.
+- **[NEW, confirmed] Repeat-offender escalation - applies to Venue and Organiser.** After **2 admin-flagged within-window cancellations in a rolling 6-month period**, escalate beyond the standard account-flag: e.g. mandatory refundable security deposit required on all future bookings, or a suspension pending manual admin review before their next listing/booking can go live. Not yet built - name/log this rule now so it isn't lost, decide exact escalation mechanic at build time.
 
-**1. Venue-initiated cancellation:**
+**1. Venue-initiated cancellation (14-day window):**
 - Refund to Organiser + Audience is **always 100%**, before or within the window - this does not change with timing.
 - What changes with timing is the *approval/consequence path*, layered on top of the existing sold/unsold gate (see Venue Owner section above):
-  - **Before 7 days:** approval gating unchanged - Admin required only if tickets/spots are already sold/booked, otherwise Organiser approval alone.
-  - **Within 7 days:** Admin approval is **mandatory regardless of sold/unsold status**, PLUS the venue's account is **flagged for mandatory admin review** (non-monetary penalty - no fine/deposit forfeiture, per Hitesh's explicit call).
+  - **Before 14 days:** approval gating unchanged - Admin required only if tickets/spots are already sold/booked, otherwise Organiser approval alone.
+  - **Within 14 days:** Admin approval is **mandatory regardless of sold/unsold status**, PLUS the venue's account is **flagged for mandatory admin review** (non-monetary penalty - no fine/deposit forfeiture, per Hitesh's explicit call). See repeat-offender escalation above for what happens after repeated flags.
 
-**2. Organiser-initiated cancellation:**
+**2. Organiser-initiated cancellation (14-day window):**
 - Refund to Artist + Audience is **always 100%**, before or within the window - unchanged with timing, and there is still no hard cutoff blocking the cancellation itself.
 - Timing changes the *consequence*, same shape as Venue above:
-  - **Before 7 days:** organiser can self-serve the cancellation as already specified (no extra approval step).
-  - **Within 7 days:** cancellation now requires **mandatory Admin approval**, PLUS the organiser's account is **flagged for mandatory admin review** (non-monetary deterrent - no fine on top of the money mechanics below).
-- **Venue-payment money flow, within-7-days cancellation (confirmed this session, distinct from the account-flag deterrent above):**
+  - **Before 14 days:** organiser can self-serve the cancellation as already specified (no extra approval step).
+  - **Within 14 days:** cancellation now requires **mandatory Admin approval**, PLUS the organiser's account is **flagged for mandatory admin review** (non-monetary deterrent - no fine on top of the money mechanics below). See repeat-offender escalation above.
+- **Venue-payment money flow, within-window cancellation (confirmed this session, distinct from the account-flag deterrent above):**
   - Organiser's venue booking payment moves into a **held/escrow state** - not returned to the organiser, not yet released to the venue.
   - Audience + Artist refunds are funded from the ticket/spot money already collected on the event, which is guaranteed to still be on-platform and undisbursed at cancellation time - **payout cadence confirmed this session as 7 days AFTER the event date** (not T+2 - that was a stale reference from the old, now-superseded Razorpay Route design, see §4.5/EPIC K2 corrections) - applies uniformly to Organiser, Artist, and Venue payouts via the manual-transfer `OrganiserPayoutLedger` model. Since payout only happens post-event and all cancellations in this policy happen pre-event, there is no clawback scenario to handle - money is simply never disbursed before a cancellation can occur, no platform float or organiser out-of-pocket payment is needed.
   - **If the exact cancelled slot (same venue, same date) is rebooked by another organiser before the original show date:** the held venue payment is returned to the original cancelling organiser, and the venue is paid fresh from the new booking instead.
   - **If the slot is never rebooked by the original show date:** the held payment is released to the venue as compensation, and the original organiser does not get it back.
   - **Venue is made whole either way** - either from the original held payment (unrebooked case) or the new organiser's payment (rebooked case). No venue-side loss in either branch.
 
-**3. Artist spot-booking cancellation:**
-- *Free spot (₹100 refundable deposit):* unchanged from earlier this session - deposit refunded if cancelled >=7 days before show, **forfeited to the Organiser** if cancelled <7 days or on no-show. Attendance/deposit-return is separately gated on gate check-in.
-- *Buy-in spot, artist actually cancelling (not gifting):* **new carve-out** on top of the default non-refundable term, now with a graduated middle tier (confirmed this session): cancel >=7 days before show -> **full refund**. Cancel 3-7 days before show -> **50% refund**. Cancel <3 days before show -> **no refund** (falls back to the default non-refundable term).
+**3. Artist spot-booking cancellation (7-day-anchored window, unchanged from earlier this session):**
+- *Free spot (₹100 refundable deposit):* deposit refunded if cancelled >=7 days before show, **forfeited to the Organiser** if cancelled <7 days or on no-show. Attendance/deposit-return is separately gated on gate check-in.
+- *Buy-in spot, artist actually cancelling (not gifting):* **new carve-out** on top of the default non-refundable term, with a graduated middle tier: cancel >=7 days before show -> **full refund**. Cancel 3-7 days before show -> **50% refund**. Cancel <3 days before show -> **no refund** (falls back to the default non-refundable term).
 - *Buy-in spot, gifting/transfer:* unchanged - no day-window applies here, it's a slot transfer not a cancellation. Incoming artist pays nothing, original artist's money is not refunded or carried over, any off-platform money between the two artists is out of AFA's scope.
 - *Venue-cancellation override:* unchanged - if the Venue cancels the event, artist buy-in fee is refunded regardless of timing, overriding all of the above.
 
-**4. Audience ticket cancellation - REPLACES the earlier 48h rule with the same 7-day configurable window:**
-- **Before 7 days:** refund = full amount **minus platform fee and applicable taxes**.
-- **Within 7 days: no refund.**
+**4. Audience ticket cancellation - [NEW, confirmed] graduated tiers, replaces the earlier binary 7-day rule and the old 48h rule:**
+| Window before show | Refund |
+|---|---|
+| ≥14 days | Full amount minus platform fee and applicable taxes |
+| 7-14 days | 50% |
+| <7 days | No refund |
 - **Do NOT hardcode the tax-deduction figure** - same GST/TDS/Section 194-O caveat as before, behind the §9.0 CA-consultation gate. Build the *mechanism* (fee/tax line as a configurable placeholder), fill in the real number post-CA.
 
-**None of the above governance policy has any schema, migration, or code written yet.** It exists only as this design.md entry and the chat transcript it came from. All four cancellation scenarios are now fully resolved with explicit day-tiers, penalty types, and the configurable/versioned-policy-linking requirement - next session can move straight to scoping/building against this section.
+**None of the above governance policy has any schema, migration, or code written yet.** It exists only as this design.md entry and the chat transcript it came from. All four cancellation scenarios, the 14-day venue/organiser windows, the audience graduated tiers, the repeat-offender escalation rule, and the per-unit partial-cancellation rule are now fully resolved - next session can move straight to scoping/building against this section.
 
 *Confidential — Do not share*
