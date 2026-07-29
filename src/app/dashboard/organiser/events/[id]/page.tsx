@@ -48,6 +48,9 @@ interface EventDetail {
   dresscode?: string | null
   vibe?: string | null
   surpriseAct: boolean
+  defaultCompensationType?: 'PAID' | 'FREE' | 'BUY_IN'
+  defaultFeeAmount?: number | null
+  defaultBuyInAmount?: number | null
   venue: { id: string; name: string; city: string; address: string } | null
   applications: Application[]
   lineup: Performance[]
@@ -72,6 +75,13 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
   // Organiser promotes manually the same way as any pending applicant -
   // the Approve/Reject UI below is enabled for WAITLISTED too.
   WAITLISTED: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+}
+
+function describeDefaultCompensation(event: EventDetail): string {
+  const t = event.defaultCompensationType || 'FREE'
+  if (t === 'FREE') return 'Free (no money either way)'
+  if (t === 'PAID') return `Paid${event.defaultFeeAmount ? ` — ₹${event.defaultFeeAmount}` : ''}`
+  return `Buy-in${event.defaultBuyInAmount ? ` — ₹${event.defaultBuyInAmount}` : ''}`
 }
 
 export default function OrganiserEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -177,15 +187,20 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
   const reviewApplication = async (applicationId: string, newStatus: 'APPROVED' | 'REJECTED') => {
     setActingOn(applicationId)
     try {
-      const comp = compensation[applicationId] || { type: 'FREE', amount: '' }
+      // Only send an explicit compensation override if the organiser actually
+      // touched the toggle for this application. If they left it untouched,
+      // omit these fields entirely so the API falls back to the event's own
+      // declared default (see /api/applications/[id]/route.ts) rather than
+      // us silently sending a hardcoded FREE and defeating that fallback.
+      const comp = compensation[applicationId]
       const res = await fetch(`/api/applications/${applicationId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: newStatus,
-          compensationType: comp.type,
-          feeAmount: comp.type === 'PAID' ? comp.amount : undefined,
-          buyInAmount: comp.type === 'BUY_IN' ? comp.amount : undefined,
+          compensationType: comp?.type,
+          feeAmount: comp?.type === 'PAID' ? comp.amount : undefined,
+          buyInAmount: comp?.type === 'BUY_IN' ? comp.amount : undefined,
         }),
       })
       if (!res.ok) {
@@ -405,9 +420,14 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           {/* Applications */}
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
               Artist Applications {event.applications.length > 0 && `(${event.applications.length})`}
             </h2>
+            {event.applications.length > 0 && (
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '14px' }}>
+                This event's default artist compensation is <strong>{describeDefaultCompensation(event)}</strong>. Approving an application uses this by default — override below only if you're agreeing different terms with this artist.
+              </p>
+            )}
             {event.applications.length === 0 ? (
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>No applications yet.</p>
             ) : (
@@ -427,9 +447,12 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       {app.message && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '10px' }}>{app.message}</p>}
                       {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div>
+                          <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                            Compensation for this artist {(!compensation[app.id] || compensation[app.id]?.type === event.defaultCompensationType) && '(event default)'}
+                          </p>
                           <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                             {(['FREE', 'PAID', 'BUY_IN'] as const).map((t) => {
-                              const current = compensation[app.id]?.type || 'FREE'
+                              const current = compensation[app.id]?.type || event.defaultCompensationType || 'FREE'
                               return (
                                 <button
                                   key={t}
