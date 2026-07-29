@@ -81,7 +81,7 @@ function getRoleLabel(role?: string) {
 // The mobile dropdown panel keeps full text labels unchanged - hover
 // doesn't exist on touch, and that panel has the full width to spare.
 function NavIcon({ label }: { label: string }) {
-  const common = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
   switch (label) {
     case 'Dashboard':
       return (
@@ -326,7 +326,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   href={l.href}
                   aria-label={l.label}
                   className="sitenav-icon-link"
-                  style={{ color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px" }}
+                  style={{ color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
                 >
                   <NavIcon label={l.label} />
                   {l.label === "Dashboard" && pendingCount > 0 && (
