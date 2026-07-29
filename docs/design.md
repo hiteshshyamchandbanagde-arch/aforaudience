@@ -1130,7 +1130,13 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 - Refund to Artist + Audience is **always 100%**, before or within the window - unchanged with timing, and there is still no hard cutoff blocking the cancellation itself.
 - Timing changes the *consequence*, same shape as Venue above:
   - **Before 7 days:** organiser can self-serve the cancellation as already specified (no extra approval step).
-  - **Within 7 days:** cancellation now requires **mandatory Admin approval**, PLUS the organiser's account is **flagged for mandatory admin review** (non-monetary - no fine).
+  - **Within 7 days:** cancellation now requires **mandatory Admin approval**, PLUS the organiser's account is **flagged for mandatory admin review** (non-monetary deterrent - no fine on top of the money mechanics below).
+- **Venue-payment money flow, within-7-days cancellation (confirmed this session, distinct from the account-flag deterrent above):**
+  - Organiser's venue booking payment moves into a **held/escrow state** - not returned to the organiser, not yet released to the venue.
+  - Audience + Artist refunds are funded from the ticket/spot money already collected on the event (not yet disbursed to the organiser under the T+2 payout model) - no platform float or organiser out-of-pocket payment is needed to cover these refunds.
+  - **If the exact cancelled slot (same venue, same date) is rebooked by another organiser before the original show date:** the held venue payment is returned to the original cancelling organiser, and the venue is paid fresh from the new booking instead.
+  - **If the slot is never rebooked by the original show date:** the held payment is released to the venue as compensation, and the original organiser does not get it back.
+  - **Venue is made whole either way** - either from the original held payment (unrebooked case) or the new organiser's payment (rebooked case). No venue-side loss in either branch.
 
 **3. Artist spot-booking cancellation:**
 - *Free spot (₹100 refundable deposit):* unchanged from earlier this session - deposit refunded if cancelled >=7 days before show, **forfeited to the Organiser** if cancelled <7 days or on no-show. Attendance/deposit-return is separately gated on gate check-in.
