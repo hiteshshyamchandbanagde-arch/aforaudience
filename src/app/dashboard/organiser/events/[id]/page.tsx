@@ -255,11 +255,28 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <PosterShareCard
-              src={`/api/posters/organiser/${event.id}`}
-              filename={`${event.title}-poster.png`}
-              title={event.title}
-            />
+            {event.venueBooking?.status === 'CONFIRMED' ? (
+              <PosterShareCard
+                src={`/api/posters/organiser/${event.id}`}
+                filename={`${event.title}-poster.png`}
+                title={event.title}
+              />
+            ) : (
+              // Poster generation 404s until the venue booking is
+              // CONFIRMED (see /api/posters/organiser/[eventId] - by
+              // design, Session 39: date/venue/lineup can still change
+              // while pending). Before this fix the card rendered
+              // anyway, showing a broken image and a Share button that
+              // would always fail. Found via live device test 29 Jul.
+              <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+                  Share Poster
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
+                  Available once {event.venue ? 'the venue owner confirms your booking' : "you've booked a venue and it's confirmed"}.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Overview */}
