@@ -154,7 +154,7 @@ export default function SupportWidget() {
 
   const capReached = maxMessages !== null && sessionCount >= maxMessages;
 
-  const EXCLUDED_PREFIXES = ['/auth', '/checkout', '/api', '/admin'];
+  const EXCLUDED_PREFIXES = ['/auth', '/checkout', '/api', '/admin', '/dashboard/messages'];
   if (pathname && EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p))) {
     return null;
   }
