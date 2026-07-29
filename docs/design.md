@@ -1099,7 +1099,7 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 - On venue creation, set an availability date range (from-to). Organisers browsing/requesting a venue can only request within that window.
 - Owner can add blackout ("special off") dates within the range - **cannot** blackout a date that already has a confirmed booking on it (validation needed).
 - Once published: address is locked forever (**already shipped**, PR #217 - no new work needed here). Only the *future* portion of the availability end-date and *future* blackout dates remain editable post-publish.
-- Cancelling one specific confirmed booking = Organiser written consent -> then Admin approval. Scoped per-booking, not venue-wide.
+- Cancelling one specific confirmed booking, approval gating **resolved this session (see Refund policy below for the money side)**: if tickets/spots are already sold or booked on that event, Venue needs Organiser consent **+ Admin approval**. If the event is published but nothing has sold/booked yet, Organiser consent alone is sufficient - Admin is not required in that case. Scoped per-booking, not venue-wide.
 - **The old "venue relocation" workflow (session 30, seat-remap + ticket-regeneration + audience notification) is explicitly RETIRED** - confirmed by Hitesh this session. A Venue Owner moving to a new address now just means: cancel existing bookings via the consent+admin flow above, and list the new address as a brand-new Venue record. Do not build the old relocation flow; it was designed but never implemented, and is now superseded by this simpler model.
 
 *Organiser:*
@@ -1114,12 +1114,27 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 - Organiser can cancel a published event any time, full refund to audience + artist, **no cutoff** (confirmed by Hitesh despite collaborator flagging the risk of refund-clawback after a show has already happened - built as specified, risk accepted).
 - **Event cancellation initiated *after* the show's start time additionally requires Admin approval** (on top of/beyond the organiser-side cancellation itself) - this is the mitigation for the no-cutoff risk above.
 
-*Refund policy - discussed this session, one open tension NOT resolved, do not build until answered:*
-- Venue cancels a confirmed booking >=7 days before the show: Organiser gets full refund. **Open: what happens if Venue cancels <7 days out - reduced/no refund, or does the existing cancellation-consent Admin approval decide case-by-case? Ask Hitesh before building any refund percentage logic for this branch.**
-- Artist spot-booking cancellation: refund if cancelled >=48h before show AND a waiting list exists. Waiting-list artist must pay to confirm their spot within 1 hour of it opening, else it passes to the next person in the waiting list.
-- **CRITICAL OPEN QUESTION, asked but not yet answered - do not build until resolved:** artist spot-booking appears to require the artist to pay something to hold/confirm a slot. This is the first instance anywhere in this platform's design of money flowing *from* an artist *to* the platform, which directly conflicts with the standing "never tax the scene" principle (zero commission/fee on artists, revenue = audience booking fee only, drilled into every session's memory). Get explicit clarification: is this a **refundable security deposit** (fully returned in the normal case, not really a "tax") or an **actual fee**? This must be resolved before writing any artist-payment code, since it may require walking back "no artist fees" as a stated principle, or reframing this specific flow as a deposit rather than a charge.
-- Audience ticket cancellation: allowed >=48h before show, platform fee + taxes deducted from refund. **Do NOT hardcode a specific tax-deduction percentage/logic** - this touches the same GST/TDS/Section 194-O area already sitting behind the hard pre-launch CA-consultation gate in §9.0. Build the refund *mechanism* now with a placeholder/configurable tax line, fill in the real number only after CA input lands.
+*Refund policy - both previously-open questions RESOLVED this session (29 Jul), full detail below:*
 
-**None of the above governance policy has any schema, migration, or code written yet.** It exists only as this design.md entry and the chat transcript it came from. Next session should NOT assume any of it is built - reconcile fresh, and resolve the two explicitly-open questions (Venue <7-day refund tier, artist deposit-vs-fee) before writing any code against this section.
+**Venue-initiated cancellation:**
+- No refund tiers based on days-out. Instead the *gate* is whether tickets/spots have been sold/booked (see approval gating above): if sold/booked, cancellation requires Organiser + Admin approval; if not yet sold/booked, Organiser approval alone. Either way, once a venue cancellation goes through: **full refund** to Organiser and Audience, no percentage/partial schedule.
+- **Venue-initiated cancellation is an override that beats every other non-refundable term in this policy** - see the artist buy-in override below.
+
+**Artist spot-booking - free spot:**
+- Artist pays a **₹100 refundable security deposit** to hold a free spot (not a fee - this satisfies "never tax the artist").
+- Deposit is returned when the artist checks in at the gate on time (attendance-gated, not just show-up-eventually).
+- Artist cancels the spot >=7 days before show start: deposit refunded in full.
+- Artist cancels <7 days before show, or simply doesn't show up (no-show): deposit is **forfeited to the Organiser**, not returned.
+
+**Artist spot-booking - buy-in spot:**
+- Non-refundable by default (this is the artist buying into the lineup, not the platform taxing them - Hitesh's explicit framing).
+- **Transferable ("gifting") to another artist, with Organiser approval:** the incoming artist pays nothing - the slot moves for free, the original artist's paid amount is not carried over or refunded to them, it simply stays spent. Any money changing hands between the two artists off-platform is explicitly out of scope / their private arrangement - AFA does not track, mediate, or ledger it.
+- **Override: if the Venue cancels the event (per venue-initiated cancellation above), the artist's buy-in fee IS refunded** despite being normally non-refundable. Venue-caused cancellation is the one circumstance that overrides the non-refundable term for artists, organisers, and audience alike - full refund across the board in that case.
+- Waiting-list mechanic (carried from earlier design, still applies where relevant): waiting-list artist must pay to confirm their spot within 1 hour of it opening, else it passes to the next person in the waiting list.
+
+**Audience ticket cancellation:**
+- Allowed >=48h before show, platform fee + taxes deducted from refund. **Do NOT hardcode a specific tax-deduction percentage/logic** - this touches the same GST/TDS/Section 194-O area already sitting behind the hard pre-launch CA-consultation gate in §9.0. Build the refund *mechanism* now with a placeholder/configurable tax line, fill in the real number only after CA input lands.
+
+**None of the above governance policy has any schema, migration, or code written yet.** It exists only as this design.md entry and the chat transcript it came from. Both previously-open questions are now resolved (see above) - next session can move straight to scoping/building against this section. Reconcile fresh regardless; do not assume partial implementation exists.
 
 *Confidential — Do not share*
