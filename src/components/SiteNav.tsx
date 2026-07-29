@@ -93,6 +93,22 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       .catch(() => {})
     return () => { cancelled = true }
   }, [user?.role])
+  // Feedback 45ac402a (29 Jul) - Messages had no nav entry point for
+  // ANY role (confirmed via code - SiteNav's accountLinks never included
+  // it, not an organiser-specific gap as first reported). Unlike
+  // pendingCount above, this runs for every logged-in user since
+  // conversations span Audience<->Organiser, Artist<->Organiser, and
+  // Organiser<->Venue Owner - not role-restricted.
+  const [unreadCount, setUnreadCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/conversations/unread-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setUnreadCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
   const [mobileOpen, setMobileOpen] = useState(false)
   // Swipe-up-to-close for the mobile dropdown panel (Feedback f1c26af4) -
   // previously only the X/hamburger button dismissed it; a swipe on the
@@ -139,6 +155,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   const accountLinks = user
     ? [
         ...(dashboardLink ? [{ href: dashboardLink, label: "Dashboard", accent: true }] : []),
+        { href: "/dashboard/messages", label: "Messages", accent: false },
         { href: "/tickets", label: "My Tickets", accent: false },
         { href: "/profile", label: "Profile", accent: false },
       ]
@@ -235,6 +252,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       {pendingCount}
                     </span>
                   )}
+                  {l.label === "Messages" && unreadCount > 0 && (
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 6px", minWidth: "16px", textAlign: "center" }}>
+                      {unreadCount}
+                    </span>
+                  )}
                 </Link>
               ))}
               <button
@@ -322,6 +344,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 {l.label === "Dashboard" && pendingCount > 0 && (
                   <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCount}
+                  </span>
+                )}
+                {l.label === "Messages" && unreadCount > 0 && (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                    {unreadCount}
                   </span>
                 )}
               </Link>
