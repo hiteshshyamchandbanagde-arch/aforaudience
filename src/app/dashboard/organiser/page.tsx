@@ -203,7 +203,11 @@ export default function OrganiserDashboard() {
                 const pendingApplications = event.applications.filter((a) => a.status === 'PENDING').length
                 const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div
+                    key={event.id}
+                    onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
+                    style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                       <div>
                         <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)' }}>{event.title}</h3>
@@ -232,12 +236,14 @@ export default function OrganiserDashboard() {
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
+                        onClick={(e) => e.stopPropagation()}
                         style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                       >
                         View
                       </Link>
                       <Link
                         href={`/dashboard/organiser/events/${event.id}/edit`}
+                        onClick={(e) => e.stopPropagation()}
                         style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-ink)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                       >
                         Edit
