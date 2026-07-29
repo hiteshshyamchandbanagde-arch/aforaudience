@@ -25,8 +25,12 @@ export default function AdminSettingsPage() {
   const router = useRouter()
 
   const [feeRupees, setFeeRupees] = useState<string>('')
+  const [minFeeRupees, setMinFeeRupees] = useState<string>('')
+  const [maxFeeRupees, setMaxFeeRupees] = useState<string>('')
   const [initialPaise, setInitialPaise] = useState<number>(0)
-  const [maxPaise, setMaxPaise] = useState<number>(50000)
+  const [initialMinPaise, setInitialMinPaise] = useState<number>(0)
+  const [initialMaxPaise, setInitialMaxPaise] = useState<number>(50000)
+  const [maxPaise, setMaxPaise] = useState<number>(50000) // absolute code ceiling, not the admin-set max
   const [chatCap, setChatCap] = useState<string>('')
   const [initialChatCap, setInitialChatCap] = useState<number>(15)
   const [maxChatCap, setMaxChatCap] = useState<number>(200)
@@ -57,6 +61,13 @@ export default function AdminSettingsPage() {
         setFeeRupees((paise / 100).toString())
         setMaxPaise(data.limits.maxBookingFeePaise)
 
+        const minPaise = data.settings.minAudienceBookingFee
+        const maxBandPaise = data.settings.maxAudienceBookingFee
+        setInitialMinPaise(minPaise)
+        setInitialMaxPaise(maxBandPaise)
+        setMinFeeRupees((minPaise / 100).toString())
+        setMaxFeeRupees((maxBandPaise / 100).toString())
+
         const cap = data.settings.chatMaxMessagesPerSession
         setInitialChatCap(cap)
         setChatCap(String(cap))
@@ -72,23 +83,33 @@ export default function AdminSettingsPage() {
   const save = async () => {
     setSaving(true)
     try {
+      const minRupees = Number(minFeeRupees)
       const rupees = Number(feeRupees)
-      if (!Number.isFinite(rupees) || rupees < 0) {
-        throw new Error('Booking fee must be zero or positive')
+      const maxRupees = Number(maxFeeRupees)
+      if (![minRupees, rupees, maxRupees].every((n) => Number.isFinite(n) && n >= 0)) {
+        throw new Error('Min, standard, and max fee must all be zero or positive')
       }
-      const paise = Math.round(rupees * 100)
+      if (!(minRupees <= rupees && rupees <= maxRupees)) {
+        throw new Error('Min must be ≤ standard, and standard must be ≤ max')
+      }
       const res = await fetch('/api/admin/platform-settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audienceBookingFee: paise }),
+        body: JSON.stringify({
+          minAudienceBookingFee: Math.round(minRupees * 100),
+          audienceBookingFee: Math.round(rupees * 100),
+          maxAudienceBookingFee: Math.round(maxRupees * 100),
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
       setInitialPaise(data.settings.audienceBookingFee)
+      setInitialMinPaise(data.settings.minAudienceBookingFee)
+      setInitialMaxPaise(data.settings.maxAudienceBookingFee)
       showToast(
         data.settings.audienceBookingFee === 0
-          ? 'Saved. No booking fee will be charged.'
-          : `Saved. New bookings will be charged ₹${(data.settings.audienceBookingFee / 100).toLocaleString('en-IN')} per booking.`,
+          ? 'Saved. No booking fee will be charged by default.'
+          : `Saved. New bookings default to ₹${(data.settings.audienceBookingFee / 100).toLocaleString('en-IN')}, adjustable between ₹${(data.settings.minAudienceBookingFee / 100).toLocaleString('en-IN')} and ₹${(data.settings.maxAudienceBookingFee / 100).toLocaleString('en-IN')}.`,
         'success'
       )
     } catch (err: any) {
@@ -99,8 +120,14 @@ export default function AdminSettingsPage() {
   }
 
   const currentPaise = Math.round(Number(feeRupees || 0) * 100)
-  const isDirty = currentPaise !== initialPaise
-  const isValid = Number.isFinite(Number(feeRupees)) && Number(feeRupees) >= 0
+  const currentMinPaise = Math.round(Number(minFeeRupees || 0) * 100)
+  const currentMaxPaise = Math.round(Number(maxFeeRupees || 0) * 100)
+  const isDirty =
+    currentPaise !== initialPaise || currentMinPaise !== initialMinPaise || currentMaxPaise !== initialMaxPaise
+  const isValid =
+    [minFeeRupees, feeRupees, maxFeeRupees].every((v) => Number.isFinite(Number(v)) && Number(v) >= 0) &&
+    Number(minFeeRupees) <= Number(feeRupees) &&
+    Number(feeRupees) <= Number(maxFeeRupees)
 
   const saveChatCap = async () => {
     setChatSaving(true)
@@ -218,42 +245,55 @@ export default function AdminSettingsPage() {
             Audience booking fee
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
-            A small flat fee added to each paid ticket at checkout — the platform's only revenue at MVP. Shown to audiences as a separate line item with a short "supports the artist ecosystem" note. Set to ₹0 to disable entirely; free events are never charged a fee regardless.
+            A small flat fee added to each paid ticket at checkout — the platform's only revenue at MVP. Audiences can adjust it within the band below; "standard" is what's pre-filled for them. Shown as a separate line item with a short "supports the artist ecosystem" note. Set standard and min to ₹0 to make the fee fully optional; free events are never charged a fee regardless.
           </p>
 
-          <label
-            style={{
-              display: 'block',
-              fontSize: 12,
-              fontWeight: 700,
-              color: 'var(--afa-terracotta)',
-              letterSpacing: '0.06em',
-              marginBottom: 6,
-            }}
-          >
-            FEE (₹)
-          </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 18, opacity: 0.5 }}>₹</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="1"
-              value={feeRupees}
-              onChange={(e) => setFeeRupees(e.target.value)}
-              placeholder="0"
-              style={{
-                flex: 1,
-                padding: '10px 12px',
-                borderRadius: 6,
-                border: '1px solid rgba(14,12,10,0.15)',
-                fontSize: 15,
-              }}
-            />
-          </div>
+          {([
+            { label: 'MINIMUM (₹)', value: minFeeRupees, set: setMinFeeRupees, placeholder: '0' },
+            { label: 'STANDARD (₹)', value: feeRupees, set: setFeeRupees, placeholder: '0' },
+            { label: 'MAXIMUM (₹)', value: maxFeeRupees, set: setMaxFeeRupees, placeholder: '0' },
+          ] as const).map((f) => (
+            <div key={f.label}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: 'var(--afa-terracotta)',
+                  letterSpacing: '0.06em',
+                  marginBottom: 6,
+                }}
+              >
+                {f.label}
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 18, opacity: 0.5 }}>₹</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="1"
+                  value={f.value}
+                  onChange={(e) => f.set(e.target.value)}
+                  placeholder={f.placeholder}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(14,12,10,0.15)',
+                    fontSize: 15,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+          {Number(minFeeRupees) > Number(feeRupees) || Number(feeRupees) > Number(maxFeeRupees) ? (
+            <p style={{ fontSize: 11, color: 'var(--afa-error, #b3261e)', marginBottom: 8 }}>
+              Min must be ≤ standard, and standard must be ≤ max.
+            </p>
+          ) : null}
           <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
-            Maximum: ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
+            Absolute ceiling (code-level, requires a deploy to change): ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
           </p>
 
           <button
@@ -346,9 +386,9 @@ export default function AdminSettingsPage() {
 
         <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-taupe)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--afa-ink)', fontWeight: 700 }}>Current behavior:</strong>{' '}
-          {initialPaise === 0
-            ? "No booking fee is being charged. Checkout, ticket PDFs, and email receipts show only the ticket price."
-            : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is added to every paid booking, shown as a separate line item on the checkout page.`}
+          {initialPaise === 0 && initialMinPaise === 0
+            ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'
+            : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is pre-filled on every paid booking, adjustable by the audience between ₹${(initialMinPaise / 100).toLocaleString('en-IN')} and ₹${(initialMaxPaise / 100).toLocaleString('en-IN')}, shown as a separate line item on the checkout page.`}
         </div>
       </main>
     </>

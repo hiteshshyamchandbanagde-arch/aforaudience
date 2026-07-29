@@ -12,5 +12,7 @@ export async function GET() {
   const settings = await getPlatformSettings()
   return NextResponse.json({
     audienceBookingFeeRupees: settings.audienceBookingFee / 100,
+    minAudienceBookingFeeRupees: settings.minAudienceBookingFee / 100,
+    maxAudienceBookingFeeRupees: settings.maxAudienceBookingFee / 100,
   })
 }
