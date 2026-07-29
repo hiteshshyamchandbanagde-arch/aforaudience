@@ -178,29 +178,36 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         .sitenav-desktop { display: flex; }
         .sitenav-hamburger { display: none; }
         .sitenav-mobile-panel { display: none; }
-        @media (max-width: 780px) {
+        @media (max-width: 900px) {
           .sitenav-desktop { display: none; }
           .sitenav-hamburger { display: flex; }
           .sitenav-mobile-panel.open { display: flex; }
         }
-        /* Header nav wrapped to a second line when logged in, homepage-
-           specific (confirmed live, 25 Jul - not a zoom issue, not
-           reproducing on other pages). Root cause: the "home" variant's
-           extra flourish (32px gaps, 22px logo, 18px padding, vs. 24px/
-           20px/16px on every other page) plus a full account row (Hi,
-           name + Dashboard + My Tickets + Profile + Sign out) demands
-           more width than a common laptop screen (~1280-1366px) has -
-           .sitenav-desktop's flexWrap: wrap then kicks in and wraps it
-           to a visibly broken second line instead of a clean single row.
-           Collapse home's spacing down to the same values every other
-           page already uses at exactly this width band - purely
-           additive, never applies above 1300px (full hero flourish
-           intact) or below 780px (mobile hamburger already takes over). */
-        @media (min-width: 781px) and (max-width: 1300px) {
-          .sitenav-row { padding: 16px 24px !important; }
+        /* Header nav wrapped to a second line when logged in. Root cause
+           (confirmed 29 Jul): the account row (Hi, name + role badge +
+           Dashboard + Messages + My Tickets + Profile + Sign out) plus the
+           public nav links + search all share one flex row with no
+           priority ordering - adding the Messages link (same session,
+           Feedback 45ac402a) pushed total content width past what a
+           common laptop window has at 100% zoom, even for the "page"
+           variant that wasn't affected before. Two-part fix instead of
+           another spacing-only patch:
+             1. Hamburger cutover raised 780px -> 900px, so the whole
+                heavy row falls back to the already-solid mobile panel
+                well before it would be forced to wrap.
+             2. Inside the still-desktop 901-1500px band, tighten every
+                gap/width further (this replaces the old 781-1300 patch).
+           Belt-and-braces on top of both: .sitenav-desktop is nowrap (was
+           wrap) and the greeting name is hard max-width + ellipsis - so a
+           long display name or in-between zoom level can never reintroduce
+           a second line; worst case is a tighter row, never a wrap. */
+        @media (min-width: 901px) and (max-width: 1500px) {
+          .sitenav-row { padding: 16px 20px !important; }
           .sitenav-logo { font-size: 20px !important; }
-          .sitenav-desktop { gap: 20px !important; }
-          .afa-search-input { max-width: 150px !important; }
+          .sitenav-desktop { gap: 14px !important; }
+          .sitenav-account-row { gap: 8px !important; }
+          .afa-search-input { max-width: 110px !important; }
+          .sitenav-greeting { max-width: 70px !important; }
         }
       `}</style>
 
@@ -216,7 +223,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         </Link>
 
         {/* Desktop: full row, unchanged from before */}
-        <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "wrap" }}>
+        <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
             <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
@@ -235,8 +242,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           </button>
 
           {status === "loading" ? null : user ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7 }}>
+            <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <span
+                className="sitenav-greeting"
+                style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
+              >
                 Hi, {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
               {getRoleLabel(user.role) && (
