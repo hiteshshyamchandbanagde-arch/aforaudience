@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import {
   getPlatformSettings,
-  setAudienceBookingFee,
+  setAudienceFeeSettings,
   setChatMaxMessagesPerSession,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
@@ -60,11 +60,14 @@ export async function PATCH(req: Request) {
   }
 
   const hasBookingFee = Object.prototype.hasOwnProperty.call(body, 'audienceBookingFee')
+  const hasMinFee = Object.prototype.hasOwnProperty.call(body, 'minAudienceBookingFee')
+  const hasMaxFee = Object.prototype.hasOwnProperty.call(body, 'maxAudienceBookingFee')
+  const hasFeeBand = hasBookingFee || hasMinFee || hasMaxFee
   const hasChatCap = Object.prototype.hasOwnProperty.call(body, 'chatMaxMessagesPerSession')
 
-  if (!hasBookingFee && !hasChatCap) {
+  if (!hasFeeBand && !hasChatCap) {
     return NextResponse.json(
-      { error: 'audienceBookingFee or chatMaxMessagesPerSession is required' },
+      { error: 'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, or chatMaxMessagesPerSession is required' },
       { status: 400 }
     )
   }
@@ -72,18 +75,22 @@ export async function PATCH(req: Request) {
   try {
     let updated = await getPlatformSettings()
 
-    // audienceBookingFee accepted as PAISE (integer). The UI converts
-    // from rupees on submit so the wire format stays consistent with
-    // Payment.amount and the rest of the money-handling code.
-    if (hasBookingFee) {
-      const paise = body.audienceBookingFee
-      if (typeof paise !== 'number' || !Number.isFinite(paise)) {
-        return NextResponse.json(
-          { error: 'audienceBookingFee must be a number (paise)' },
-          { status: 400 }
-        )
+    // Fee band (min/standard/max) is saved as a unit — see
+    // setAudienceFeeSettings. Any field the caller omits falls back to
+    // its current value so a single-field PATCH (e.g. just the standard
+    // fee) doesn't accidentally reset min/max. All accepted as PAISE
+    // (integer); the UI converts from rupees on submit.
+    if (hasFeeBand) {
+      const toPaise = (label: string, v: unknown): number => {
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          throw new Error(`${label} must be a number (paise)`)
+        }
+        return Math.round(v)
       }
-      updated = await setAudienceBookingFee(Math.round(paise))
+      const minPaise = hasMinFee ? toPaise('minAudienceBookingFee', body.minAudienceBookingFee) : updated.minAudienceBookingFee
+      const standardPaise = hasBookingFee ? toPaise('audienceBookingFee', body.audienceBookingFee) : updated.audienceBookingFee
+      const maxPaise = hasMaxFee ? toPaise('maxAudienceBookingFee', body.maxAudienceBookingFee) : updated.maxAudienceBookingFee
+      updated = await setAudienceFeeSettings({ minPaise, standardPaise, maxPaise })
     }
 
     if (hasChatCap) {

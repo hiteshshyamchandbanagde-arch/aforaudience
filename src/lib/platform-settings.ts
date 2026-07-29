@@ -16,53 +16,89 @@ import prisma from "@/lib/prisma"
 // ---------------------------------------------------------------------------
 
 export type PlatformSettings = {
-  audienceBookingFee: number // paise
+  audienceBookingFee: number // paise — the "standard" default, prefilled at checkout
+  minAudienceBookingFee: number // paise — floor an audience member can drop the fee to
+  maxAudienceBookingFee: number // paise — per-transaction ceiling (standard fee + overrides both bounded by this)
   chatMaxMessagesPerSession: number
 }
 
 const SINGLETON_ID = "singleton"
+
+const SETTINGS_SELECT = {
+  audienceBookingFee: true,
+  minAudienceBookingFee: true,
+  maxAudienceBookingFee: true,
+  chatMaxMessagesPerSession: true,
+} as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
   const row = await prisma.platformSettings.upsert({
     where: { id: SINGLETON_ID },
     update: {},
     create: { id: SINGLETON_ID, audienceBookingFee: 0 },
-    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
+    select: SETTINGS_SELECT,
   })
-  return {
-    audienceBookingFee: row.audienceBookingFee,
-    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
-  }
+  return row
 }
 
 /**
- * Admin-only setter. Validates the input as a non-negative integer
- * (paise) and caps at a sanity ceiling (₹500 = 50000 paise) so a
- * fat-fingered save doesn't silently start charging every audience
- * member ₹5000. The cap is soft — if we ever want to charge more,
- * we bump this constant and ship a new deploy on purpose.
+ * Absolute code-level ceiling (₹500 = 50000 paise), deploy-gated. No
+ * admin-set value — min, standard, or max — may ever exceed this,
+ * regardless of what's typed into the settings page. This is the
+ * sanity backstop; the admin-configurable band below it is what
+ * actually governs checkout day to day. Bump deliberately, on purpose,
+ * with a new deploy, if that ever needs to change.
  */
 export const MAX_BOOKING_FEE_PAISE = 50000
 
-export async function setAudienceBookingFee(paise: number): Promise<PlatformSettings> {
-  if (!Number.isInteger(paise) || paise < 0) {
-    throw new Error("audienceBookingFee must be a non-negative integer (paise)")
+/**
+ * Admin-only setter for the full fee band (29 Jul — min/standard/max
+ * replace the old single-value fee). All three are validated together
+ * as one unit because they only make sense as a triple: min ≤ standard
+ * ≤ max ≤ MAX_BOOKING_FEE_PAISE. Rejecting an inconsistent triple
+ * outright (rather than clamping) keeps this in line with the same
+ * "reject bad money inputs, don't silently reinterpret them" rule the
+ * audience-side override already follows.
+ */
+export async function setAudienceFeeSettings(input: {
+  minPaise: number
+  standardPaise: number
+  maxPaise: number
+}): Promise<PlatformSettings> {
+  const { minPaise, standardPaise, maxPaise } = input
+  for (const [label, v] of [
+    ["minAudienceBookingFee", minPaise],
+    ["audienceBookingFee", standardPaise],
+    ["maxAudienceBookingFee", maxPaise],
+  ] as const) {
+    if (!Number.isInteger(v) || v < 0) {
+      throw new Error(`${label} must be a non-negative integer (paise)`)
+    }
+    if (v > MAX_BOOKING_FEE_PAISE) {
+      throw new Error(
+        `${label} cannot exceed ${MAX_BOOKING_FEE_PAISE} paise (₹${MAX_BOOKING_FEE_PAISE / 100})`
+      )
+    }
   }
-  if (paise > MAX_BOOKING_FEE_PAISE) {
-    throw new Error(
-      `audienceBookingFee cannot exceed ${MAX_BOOKING_FEE_PAISE} paise (₹${MAX_BOOKING_FEE_PAISE / 100})`
-    )
+  if (!(minPaise <= standardPaise && standardPaise <= maxPaise)) {
+    throw new Error("Fee band must satisfy min ≤ standard ≤ max")
   }
   const row = await prisma.platformSettings.upsert({
     where: { id: SINGLETON_ID },
-    update: { audienceBookingFee: paise },
-    create: { id: SINGLETON_ID, audienceBookingFee: paise },
-    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
+    update: {
+      minAudienceBookingFee: minPaise,
+      audienceBookingFee: standardPaise,
+      maxAudienceBookingFee: maxPaise,
+    },
+    create: {
+      id: SINGLETON_ID,
+      minAudienceBookingFee: minPaise,
+      audienceBookingFee: standardPaise,
+      maxAudienceBookingFee: maxPaise,
+    },
+    select: SETTINGS_SELECT,
   })
-  return {
-    audienceBookingFee: row.audienceBookingFee,
-    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
-  }
+  return row
 }
 
 /**
@@ -89,10 +125,7 @@ export async function setChatMaxMessagesPerSession(
     where: { id: SINGLETON_ID },
     update: { chatMaxMessagesPerSession: cap },
     create: { id: SINGLETON_ID, chatMaxMessagesPerSession: cap },
-    select: { audienceBookingFee: true, chatMaxMessagesPerSession: true },
+    select: SETTINGS_SELECT,
   })
-  return {
-    audienceBookingFee: row.audienceBookingFee,
-    chatMaxMessagesPerSession: row.chatMaxMessagesPerSession,
-  }
+  return row
 }

@@ -99,12 +99,21 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   // this is UX responsiveness, not the enforcement boundary.
   const [defaultBookingFee, setDefaultBookingFee] = useState<number | null>(null)
   const [feeInput, setFeeInput] = useState<number>(0)
+  // Admin-configurable band (29 Jul) the fee input is clamped to — was a
+  // hardcoded ₹0–₹500 range before this, now comes from the same
+  // endpoint as the default. Falls back to ₹0–₹500 while loading/on
+  // fetch failure so the input still has sane bounds; the real gate is
+  // still server-side in POST /api/bookings regardless of these values.
+  const [minBookingFee, setMinBookingFee] = useState<number>(0)
+  const [maxBookingFee, setMaxBookingFee] = useState<number>(500)
   useEffect(() => {
     fetch("/api/platform-settings/audience-fee")
       .then((res) => res.json())
       .then((data) => {
         setDefaultBookingFee(data.audienceBookingFeeRupees)
         setFeeInput(data.audienceBookingFeeRupees)
+        setMinBookingFee(data.minAudienceBookingFeeRupees)
+        setMaxBookingFee(data.maxAudienceBookingFeeRupees)
       })
       .catch(() => {
         setDefaultBookingFee(0)
@@ -610,15 +619,15 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         <span style={{ fontSize: "14px", color: "var(--afa-ink)" }}>₹</span>
                         <input
                           type="number"
-                          min={0}
-                          max={500}
+                          min={minBookingFee}
+                          max={maxBookingFee}
                           step={1}
                           value={feeInput}
                           disabled={defaultBookingFee === null}
                           onChange={(e) => {
                             const n = Number(e.target.value)
                             if (!Number.isFinite(n)) return
-                            setFeeInput(Math.max(0, Math.min(Math.round(n), 500)))
+                            setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
                           }}
                           style={{ width: "64px", padding: "6px 8px", borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", fontSize: "14px", textAlign: "right" }}
                         />

@@ -6,7 +6,7 @@ import {
   createRazorpayOrder,
   razorpayCredentialsPresent,
 } from '@/lib/razorpay'
-import { getPlatformSettings, MAX_BOOKING_FEE_PAISE } from '@/lib/platform-settings'
+import { getPlatformSettings } from '@/lib/platform-settings'
 import { deliverTicket } from '@/lib/ticket-delivery'
 
 // PENDING bookings expire after this window if payment doesn't complete.
@@ -67,22 +67,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
     }
 
-    // Audience-adjustable booking fee (28 Jul). The checkout-adjacent seat
-    // picker pre-fills the platform's default fee but lets the person
-    // reduce it (down to ₹0) or raise it before booking - "the fee is
-    // optional" needs to be true and provable, not just a UI claim, so
-    // this is validated server-side like any other money-bearing input
-    // (client-side clamping alone is decorative, see prisma-account-style
-    // learnings elsewhere in this codebase). Bad values are rejected, not
-    // silently clamped - a silent clamp would mean the person sees one
-    // number in the picker and gets charged a different one.
-    const MAX_BOOKING_FEE_OVERRIDE_RUPEES = MAX_BOOKING_FEE_PAISE / 100 // single source of truth, shared with the admin-side ceiling guard
+    // Load platform fee settings before validating the override below —
+    // needed here (not just later at line ~140) because the override's
+    // valid range now comes from the admin-configured band, not a
+    // hardcoded constant (29 Jul, admin-configurable min/standard/max fee).
+    const feeSettings = await getPlatformSettings()
+
+    // Audience-adjustable booking fee (28 Jul, band made admin-configurable
+    // 29 Jul). The checkout-adjacent seat picker pre-fills the platform's
+    // standard fee but lets the person move it within the admin's
+    // min/max band - "the fee is optional/adjustable" needs to be true
+    // and provable, not just a UI claim, so this is validated
+    // server-side like any other money-bearing input (client-side
+    // clamping alone is decorative, see prisma-account-style learnings
+    // elsewhere in this codebase). Bad values are rejected, not silently
+    // clamped - a silent clamp would mean the person sees one number in
+    // the picker and gets charged a different one.
+    const minFeeRupees = feeSettings.minAudienceBookingFee / 100
+    const maxFeeRupees = feeSettings.maxAudienceBookingFee / 100
     let bookingFeeOverrideRupees: number | null = null
     if (bookingFeeOverride !== undefined && bookingFeeOverride !== null) {
       const n = Number(bookingFeeOverride)
-      if (!Number.isFinite(n) || n < 0 || n > MAX_BOOKING_FEE_OVERRIDE_RUPEES) {
+      if (!Number.isFinite(n) || n < minFeeRupees || n > maxFeeRupees) {
         return NextResponse.json(
-          { error: `Booking fee must be between ₹0 and ₹${MAX_BOOKING_FEE_OVERRIDE_RUPEES}` },
+          { error: `Booking fee must be between ₹${minFeeRupees} and ₹${maxFeeRupees}` },
           { status: 400 }
         )
       }
@@ -133,11 +141,11 @@ export async function POST(req: Request) {
     const now = new Date()
     const razorpayReady = razorpayCredentialsPresent()
 
-    // Load audience booking fee before opening the transaction. Cheap
-    // Prisma query on a single-row table; doing it here rather than
-    // inside tx keeps the transaction pure DB work and avoids the 5s
-    // timeout risk if this ever grows to an external call.
-    const feeSettings = await getPlatformSettings()
+    // (feeSettings already loaded above, before the override validation —
+    // reused here rather than re-queried, per the original note: cheap
+    // single-row query, doing it before the transaction keeps the tx pure
+    // DB work and avoids the 5s timeout risk if this ever grows to an
+    // external call.)
 
     // K2 — Route split. Captured here (read-only, outside the return
     // value) rather than re-queried after the transaction, so the split

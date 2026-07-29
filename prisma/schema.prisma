@@ -736,6 +736,17 @@ model VenueBookingOffer {
 model PlatformSettings {
   id                           String   @id @default("singleton")
   audienceBookingFee           Int      @default(0)
+  // Admin-configurable band around audienceBookingFee (the "standard"
+  // value above). minAudienceBookingFee is the floor an audience member
+  // can drop the fee to at checkout (default 0 = fee remains fully
+  // optional unless admin raises the floor); maxAudienceBookingFee is the
+  // per-transaction ceiling both the standard fee and any audience
+  // override are validated against. Both are paise, both are bounded at
+  // save-time by the hardcoded MAX_BOOKING_FEE_PAISE absolute ceiling in
+  // platform-settings.ts (deploy-gated, admin can never exceed it) — see
+  // design.md §9 for the 29 Jul decision.
+  minAudienceBookingFee        Int      @default(0)
+  maxAudienceBookingFee        Int      @default(50000)
   // Support chatbot per-session message cap. Enforced client-side via
   // sessionStorage (see SupportWidget.tsx) — not hardened against a
   // determined user clearing storage, but that's a deliberate trade-off:
