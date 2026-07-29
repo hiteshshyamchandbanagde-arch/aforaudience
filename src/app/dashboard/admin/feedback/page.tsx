@@ -68,7 +68,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   CRITICAL: 'var(--afa-error)',
 }
 
-const STATUSES = ['NEW', 'REVIEWED', 'RESOLVED']
+const STATUSES = ['NEW', 'REVIEWED', 'TESTED', 'RESOLVED']
 const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 function labelize(v: string) {
@@ -300,7 +300,7 @@ export default function AdminFeedbackPage() {
   }, [allLoadedItems, categoryFilter, severityFilter, pageFilter, keyword, sortBy])
 
   const columns = useMemo(() => {
-    const cols: Record<string, FeedbackItem[]> = { NEW: [], REVIEWED: [], RESOLVED: [] }
+    const cols: Record<string, FeedbackItem[]> = { NEW: [], REVIEWED: [], TESTED: [], RESOLVED: [] }
     for (const it of filtered) cols[it.status]?.push(it)
     return cols
   }, [filtered])
@@ -607,7 +607,7 @@ export default function AdminFeedbackPage() {
           <div
             className="fb-board"
             style={{
-              gridTemplateColumns: showResolved ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+              gridTemplateColumns: showResolved ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)',
               gap: '16px',
               marginTop: '16px',
             }}

@@ -322,6 +322,7 @@ model Feedback {
 enum FeedbackStatus {
   NEW
   REVIEWED
+  TESTED
   RESOLVED
 }
 

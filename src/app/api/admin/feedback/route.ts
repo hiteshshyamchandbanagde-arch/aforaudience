@@ -11,11 +11,13 @@ import type { FeedbackStatus, FeedbackSeverity } from '@prisma/client'
 // and /api/admin/redeliver-ticket.
 //
 // GET takes one optional query param, `status`:
-//   (absent)  → NEW + REVIEWED only. This is the Admin Dashboard's default
-//               board/list query (design.md §9.1/§9.5) — RESOLVED items
-//               are deliberately excluded unless asked for, per Hitesh's
-//               settled call on a lazy "Show Resolved" toggle rather than
-//               always loading them or a separate archive page.
+//   (absent)  → NEW + REVIEWED + TESTED. This is the Admin Dashboard's
+//               default board/list query (design.md §9.1/§9.5) — RESOLVED
+//               items are deliberately excluded unless asked for, per
+//               Hitesh's settled call on a lazy "Show Resolved" toggle
+//               rather than always loading them or a separate archive
+//               page. TESTED added session 47 as a distinct pre-close
+//               state (reviewed → built → tested on device → resolved).
 //   RESOLVED  → resolved items only. Used by that toggle's lazy fetch.
 //   ALL       → everything, no status filter. Used once by the trend
 //               charts, which need the full picture (open + resolved)
@@ -36,7 +38,7 @@ async function requireAdmin() {
   return user
 }
 
-const VALID_STATUSES = ['NEW', 'REVIEWED', 'RESOLVED']
+const VALID_STATUSES = ['NEW', 'REVIEWED', 'TESTED', 'RESOLVED']
 const VALID_SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 export async function GET(req: Request) {
@@ -56,7 +58,7 @@ export async function GET(req: Request) {
   } else if (statusParam && VALID_STATUSES.includes(statusParam)) {
     where = { status: statusParam as FeedbackStatus }
   } else {
-    where = { status: { in: ['NEW', 'REVIEWED'] } }
+    where = { status: { in: ['NEW', 'REVIEWED', 'TESTED'] } }
   }
 
   const items = await prisma.feedback.findMany({
