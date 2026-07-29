@@ -1085,4 +1085,41 @@ Shipped: full QA data wipe (1,038 non-admin users, 33 venues, 20 events, all Ven
 Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this session in-chat, not reproduced here - reachable via the standard Feedback-table query at session start.
 
 
+**Session 47 (29 Jul) — live re-tests of #267/#269, PR #272, and a full venue/organiser governance policy settled in-chat (not yet built).**
+
+**Live device re-test results, both PASS, both logged to Feedback:**
+- **#267 (Razorpay mobile prefill)** - confirmed working. Both phone (+91 9890532000) and email pre-filled automatically in the Razorpay "Edit contact details" modal, no manual entry needed. Full booking completed end-to-end (₹1,567, seats A16 + level 1 A14, Confirmed in My Tickets).
+- **#269 (seats display fix, organiser route)** - confirmed working. "46 / 48 available" shown correctly on the organiser event page for "Dis dus dum mic" (48 total - 2 booked from the #267 test = 46), reflecting the *current* venue (Niks Venue 1212), not stale numbers.
+
+**PR #272 - organiser event tile now clickable, navigates to View (squash bd9b625).** Hitesh asked how a tap anywhere on the `/dashboard/organiser` event tile (outside the View/Edit buttons) should behave. Code-checked first (`src/app/dashboard/organiser/page.tsx`) - confirmed the tile was a plain `<div>` with no `onClick`, so taps outside the two pill buttons did nothing. Implemented: whole tile now calls `router.push` to the event's View/detail page on click; View/Edit `<Link>`s both `stopPropagation` so they still work as distinct actions without double-navigating. Product call, confirmed with Hitesh: tile-click goes to **View** (safe, read-only default), not Edit (kept as its own explicit, more consequential action).
+
+**New governance policy - settled in conversation this session, NOT YET built or written into schema/code. This replaces the "Settled but not Built" gap risk if not actioned soon - treat as design spec only until PRs ship.**
+
+*Venue Owner:*
+- On venue creation, set an availability date range (from-to). Organisers browsing/requesting a venue can only request within that window.
+- Owner can add blackout ("special off") dates within the range - **cannot** blackout a date that already has a confirmed booking on it (validation needed).
+- Once published: address is locked forever (**already shipped**, PR #217 - no new work needed here). Only the *future* portion of the availability end-date and *future* blackout dates remain editable post-publish.
+- Cancelling one specific confirmed booking = Organiser written consent -> then Admin approval. Scoped per-booking, not venue-wide.
+- **The old "venue relocation" workflow (session 30, seat-remap + ticket-regeneration + audience notification) is explicitly RETIRED** - confirmed by Hitesh this session. A Venue Owner moving to a new address now just means: cancel existing bookings via the consent+admin flow above, and list the new address as a brand-new Venue record. Do not build the old relocation flow; it was designed but never implemented, and is now superseded by this simpler model.
+
+*Organiser:*
+- No hard cap on artist count or venue-switch attempts. Validity is gated by a duration formula instead (see below).
+- **Duration formula:** `show_duration >= (artist_count * avg_performance_time_per_artist) + changeover_buffer`. `changeover_buffer` is Organiser-configurable but has a floor of **5 minutes per hour of show length** (e.g. a 3-hour show needs >=15 min total buffer, a 6-hour show needs >=30 min - confirm this "scales with show length" reading with Hitesh before coding if any doubt remains).
+- If the formula fails, **prompt to extend the show end time rather than hard-blocking** - and per collaborator suggestion (not yet explicitly confirmed/denied by Hitesh, low-risk default), offer both remedies in the same prompt: extend end time, OR reduce artist count/avg time.
+- End-time extension is only allowed **before the show starts**, and requires **Venue Owner approval** (ties into their availability calendar).
+- If extending would collide with another Organiser's booking on that venue, AFA auto-blocks with a conflict notice - no approval path exists for that case, it's a hard stop.
+- Any end-time change -> audience + artist notified (email + persistent badge, mirroring the retired relocation flow's notification pattern - this is the one piece of that old design worth reusing). **Zero cost/price impact** from a duration change, regardless of direction.
+- Venue switch (`Event.venueId` reassignment) is **blocked entirely once any confirmed booking exists** on the event - this directly closes the root cause of the orphaned-TicketTier bug found this session (see below). Same-venue edits remain allowed post-booking.
+- Old venue's now-unused TicketTier/zone rows after a (pre-booking) venue switch: **kept, hidden from UI, not deleted** - explicit Hitesh decision, don't build an auto-delete path.
+- Organiser can cancel a published event any time, full refund to audience + artist, **no cutoff** (confirmed by Hitesh despite collaborator flagging the risk of refund-clawback after a show has already happened - built as specified, risk accepted).
+- **Event cancellation initiated *after* the show's start time additionally requires Admin approval** (on top of/beyond the organiser-side cancellation itself) - this is the mitigation for the no-cutoff risk above.
+
+*Refund policy - discussed this session, one open tension NOT resolved, do not build until answered:*
+- Venue cancels a confirmed booking >=7 days before the show: Organiser gets full refund. **Open: what happens if Venue cancels <7 days out - reduced/no refund, or does the existing cancellation-consent Admin approval decide case-by-case? Ask Hitesh before building any refund percentage logic for this branch.**
+- Artist spot-booking cancellation: refund if cancelled >=48h before show AND a waiting list exists. Waiting-list artist must pay to confirm their spot within 1 hour of it opening, else it passes to the next person in the waiting list.
+- **CRITICAL OPEN QUESTION, asked but not yet answered - do not build until resolved:** artist spot-booking appears to require the artist to pay something to hold/confirm a slot. This is the first instance anywhere in this platform's design of money flowing *from* an artist *to* the platform, which directly conflicts with the standing "never tax the scene" principle (zero commission/fee on artists, revenue = audience booking fee only, drilled into every session's memory). Get explicit clarification: is this a **refundable security deposit** (fully returned in the normal case, not really a "tax") or an **actual fee**? This must be resolved before writing any artist-payment code, since it may require walking back "no artist fees" as a stated principle, or reframing this specific flow as a deposit rather than a charge.
+- Audience ticket cancellation: allowed >=48h before show, platform fee + taxes deducted from refund. **Do NOT hardcode a specific tax-deduction percentage/logic** - this touches the same GST/TDS/Section 194-O area already sitting behind the hard pre-launch CA-consultation gate in §9.0. Build the refund *mechanism* now with a placeholder/configurable tax line, fill in the real number only after CA input lands.
+
+**None of the above governance policy has any schema, migration, or code written yet.** It exists only as this design.md entry and the chat transcript it came from. Next session should NOT assume any of it is built - reconcile fresh, and resolve the two explicitly-open questions (Venue <7-day refund tier, artist deposit-vs-fee) before writing any code against this section.
+
 *Confidential — Do not share*
