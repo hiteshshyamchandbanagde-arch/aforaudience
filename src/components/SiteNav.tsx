@@ -74,6 +74,49 @@ function getRoleLabel(role?: string) {
  */
 
 
+// Small line icons for the desktop account row (18x18, one stroke weight,
+// no fill) - keeps the row visually light even with a label hidden.
+// Labels aren't lost: aria-label carries them for assistive tech, and a
+// custom hover tooltip (below) shows them on desktop pointer devices.
+// The mobile dropdown panel keeps full text labels unchanged - hover
+// doesn't exist on touch, and that panel has the full width to spare.
+function NavIcon({ label }: { label: string }) {
+  const common = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  switch (label) {
+    case 'Dashboard':
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="7" height="7" rx="1.5" />
+          <rect x="13" y="4" width="7" height="7" rx="1.5" />
+          <rect x="4" y="13" width="7" height="7" rx="1.5" />
+          <rect x="13" y="13" width="7" height="7" rx="1.5" />
+        </svg>
+      )
+    case 'Messages':
+      return (
+        <svg {...common}>
+          <path d="M4 5h16v11H9l-4 4V5z" />
+        </svg>
+      )
+    case 'My Tickets':
+      return (
+        <svg {...common}>
+          <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.2a2 2 0 0 0 0 3.6V15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.2a2 2 0 0 0 0-3.6V9z" />
+          <line x1="12.5" y1="7.5" x2="12.5" y2="16.5" strokeDasharray="2.2 2.2" />
+        </svg>
+      )
+    case 'Profile':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8.5" r="3.2" />
+          <path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
+
 export default function SiteNav({ active, variant = "page", backHref, backLabel }: SiteNavProps) {
   const isHome = variant === "home"
   const { data: session, status } = useSession()
@@ -209,6 +252,29 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           .afa-search-input { max-width: 110px !important; }
           .sitenav-greeting { max-width: 70px !important; }
         }
+        .sitenav-icon-link { position: relative; }
+        .sitenav-icon-link .sitenav-tooltip {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%) translateY(-4px);
+          background: var(--afa-ink);
+          color: var(--afa-cream);
+          font-size: 11px;
+          font-weight: 600;
+          white-space: nowrap;
+          padding: 4px 9px;
+          border-radius: 6px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.12s ease, transform 0.12s ease;
+          z-index: 10;
+        }
+        .sitenav-icon-link:hover .sitenav-tooltip,
+        .sitenav-icon-link:focus-visible .sitenav-tooltip {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
       `}</style>
 
       <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
@@ -255,18 +321,25 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </span>
               )}
               {accountLinks.map((l) => (
-                <Link key={l.href} href={l.href} style={{ fontSize: "14px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                  {l.label}
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-label={l.label}
+                  className="sitenav-icon-link"
+                  style={{ color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", borderRadius: "8px" }}
+                >
+                  <NavIcon label={l.label} />
                   {l.label === "Dashboard" && pendingCount > 0 && (
-                    <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 6px", minWidth: "16px", textAlign: "center" }}>
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {pendingCount}
                     </span>
                   )}
                   {l.label === "Messages" && unreadCount > 0 && (
-                    <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 6px", minWidth: "16px", textAlign: "center" }}>
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {unreadCount}
                     </span>
                   )}
+                  <span className="sitenav-tooltip">{l.label}</span>
                 </Link>
               ))}
               <button
