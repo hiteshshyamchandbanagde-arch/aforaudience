@@ -44,7 +44,38 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       ? await prisma.venueBooking.findFirst({ where: { eventId: event.id } })
       : null
 
-    return NextResponse.json({ ...event, venueBooking })
+    // Event.totalSeats/availableSeats are only ever kept accurate on the
+    // flat/GA booking path - for NUMBERED venues they go stale, and go
+    // especially wrong after a venue change (found live 29 Jul: an event
+    // switched from a 65-seat venue to a 48-seat venue showed
+    // "65 / 48 available" here - the old venue's leftover availableSeats
+    // next to the new venue's totalSeats, available > total). Same fix
+    // already applied on the public event page (26 Jul, session 33) -
+    // recompute live from Seat/BookingSeat for NUMBERED venues instead of
+    // trusting these columns.
+    let totalSeats = event.totalSeats
+    let availableSeats = event.availableSeats
+    if (event.venue?.seatingMode === 'NUMBERED' && event.venueId) {
+      const now = new Date()
+      const [seatTotal, heldCount] = await Promise.all([
+        prisma.seat.count({ where: { venueId: event.venueId } }),
+        prisma.bookingSeat.count({
+          where: {
+            booking: {
+              eventId: id,
+              OR: [
+                { status: 'CONFIRMED' },
+                { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+              ],
+            },
+          },
+        }),
+      ])
+      totalSeats = seatTotal
+      availableSeats = Math.max(0, seatTotal - heldCount)
+    }
+
+    return NextResponse.json({ ...event, totalSeats, availableSeats, venueBooking })
   } catch (err) {
     console.error('Error fetching event:', err)
     return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 })
