@@ -231,7 +231,11 @@ export default function VenueDashboard() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(320px, 100%), 1fr))', gap: '20px' }}>
               {venues.map((venue) => (
-                <div key={venue.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div
+                  key={venue.id}
+                  onClick={() => router.push(`/dashboard/venue/${venue.id}`)}
+                  style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>
                       <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.name}</h3>
@@ -260,7 +264,7 @@ export default function VenueDashboard() {
                     <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{rateLabel(venue)}</span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
                     <Link
                       href={`/dashboard/venue/${venue.id}`}
                       style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
