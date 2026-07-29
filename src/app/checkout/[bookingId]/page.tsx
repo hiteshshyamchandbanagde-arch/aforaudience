@@ -139,6 +139,7 @@ export default function CheckoutPage() {
         prefill: {
           name: (session?.user as any)?.name,
           email: (session?.user as any)?.email,
+          contact: (session?.user as any)?.phone,
         },
       })
 

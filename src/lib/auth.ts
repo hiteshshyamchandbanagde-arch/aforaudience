@@ -83,6 +83,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           tokenVersion: user.tokenVersion,
           code: user.code,
+          phone: user.phone,
         }
       }
     }),
@@ -130,6 +131,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           tokenVersion: user.tokenVersion,
           code: user.code,
+          phone: user.phone,
         }
       }
     })
@@ -142,6 +144,7 @@ export const authOptions: NextAuthOptions = {
         token.tokenVersion = (user as any).tokenVersion
         token.code = (user as any).code
         token.displayName = (user as any).displayName
+        token.phone = (user as any).phone
       }
       return token
     },
@@ -151,29 +154,34 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).code = token.code;
         (session.user as any).displayName = token.displayName
+        ;(session.user as any).phone = token.phone
 
         // B5 - if the password has been reset since this JWT was issued,
         // tokenVersion will have moved on. Flag the session as invalid
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, tokenVersion: true, displayName: true, isVerified: true, isSuspended: true },
+          select: { role: true, tokenVersion: true, displayName: true, isVerified: true, isSuspended: true, phone: true },
         })
 
-        // Refresh displayName, isVerified, and role on every session check -
-        // the first so a Profile edit shows up immediately, the second so
-        // completing phone verification (see /verify-phone) unblocks
-        // booking without requiring a re-login, and the third so a one-time
-        // Audience -> Organiser/Venue Owner/Artist elevation approved mid-
-        // session takes effect immediately instead of waiting out the JWT's
-        // life. Role only ever moves one-way from Audience, never laterally
-        // between the elevated roles, so this can't downgrade an already-
-        // elevated session - it only ever catches the session up to a
-        // legitimate approval that happened after login.
+        // Refresh displayName, isVerified, role, and phone on every session
+        // check - the first so a Profile edit shows up immediately, the
+        // second so completing phone verification (see /verify-phone)
+        // unblocks booking without requiring a re-login, the third so a
+        // one-time Audience -> Organiser/Venue Owner/Artist elevation
+        // approved mid-session takes effect immediately instead of
+        // waiting out the JWT's life, and the fourth (29 Jul - Razorpay
+        // prefill fix) so a changed phone number reaches checkout
+        // without a re-login too. Role only ever moves one-way from
+        // Audience, never laterally between the elevated roles, so this
+        // can't downgrade an already-elevated session - it only ever
+        // catches the session up to a legitimate approval that happened
+        // after login.
         if (currentUser) {
           (session.user as any).displayName = currentUser.displayName
           ;(session.user as any).isVerified = currentUser.isVerified
           ;(session.user as any).role = currentUser.role
+          ;(session.user as any).phone = currentUser.phone
         }
 
         // H3 - a suspension applied mid-session shouldn't wait out the
