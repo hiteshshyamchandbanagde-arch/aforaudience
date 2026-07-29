@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 // Admin Dashboard v1 trend charts (design.md §9.1).
 //
 // Deliberately hand-rolled inline SVG rather than pulling in a chart
@@ -72,6 +74,39 @@ function buildWeeklySeries(items: TrendFeedbackItem[], weeks = 8) {
   return buckets
 }
 
+function startOfDay(d: Date): Date {
+  const copy = new Date(d)
+  copy.setHours(0, 0, 0, 0)
+  return copy
+}
+
+function dayLabel(d: Date): string {
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+}
+
+function buildDailySeries(items: TrendFeedbackItem[], days = 14) {
+  const today = startOfDay(new Date())
+  const buckets: { dayStart: Date; opened: number; resolved: number }[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const ds = new Date(today)
+    ds.setDate(ds.getDate() - i)
+    buckets.push({ dayStart: ds, opened: 0, resolved: 0 })
+  }
+  const dayIndex = (date: Date) => {
+    const ds = startOfDay(date)
+    return buckets.findIndex((b) => b.dayStart.getTime() === ds.getTime())
+  }
+  for (const item of items) {
+    const openedIdx = dayIndex(new Date(item.createdAt))
+    if (openedIdx >= 0) buckets[openedIdx].opened += 1
+    if (item.resolvedAt) {
+      const resolvedIdx = dayIndex(new Date(item.resolvedAt))
+      if (resolvedIdx >= 0) buckets[resolvedIdx].resolved += 1
+    }
+  }
+  return buckets
+}
+
 function buildCategoryBreakdown(items: TrendFeedbackItem[]) {
   const counts: Record<string, number> = {}
   for (const item of items) {
@@ -101,6 +136,37 @@ function buildAgeDistribution(openItems: TrendFeedbackItem[]) {
   return buckets
 }
 
+function buildKPIs(items: TrendFeedbackItem[]) {
+  return {
+    total: items.length,
+    pending: items.filter((i) => i.status === 'NEW' || i.status === 'REVIEWED').length,
+    tested: items.filter((i) => i.status === 'TESTED').length,
+    resolved: items.filter((i) => i.status === 'RESOLVED').length,
+    featureIdeas: items.filter((i) => i.category === 'FEATURE_IDEA').length,
+  }
+}
+
+const kpiCard: React.CSSProperties = {
+  background: 'var(--afa-white)',
+  borderRadius: '12px',
+  border: '1px solid rgba(14,12,10,0.08)',
+  padding: '14px 16px',
+  flex: '1 1 120px',
+}
+
+const kpiValue: React.CSSProperties = {
+  fontFamily: 'Georgia, serif',
+  fontSize: '24px',
+  fontWeight: 700,
+  color: 'var(--afa-ink)',
+}
+
+const kpiLabel: React.CSSProperties = {
+  fontSize: '11px',
+  color: 'var(--afa-taupe)',
+  marginTop: '2px',
+}
+
 const chartCard: React.CSSProperties = {
   background: 'var(--afa-white)',
   borderRadius: '12px',
@@ -116,12 +182,18 @@ const chartTitle: React.CSSProperties = {
 }
 
 export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }) {
+  const [granularity, setGranularity] = useState<'daily' | 'weekly'>('weekly')
+  const kpis = buildKPIs(items)
   const weekly = buildWeeklySeries(items)
+  const daily = buildDailySeries(items)
+  const series = granularity === 'daily' ? daily : weekly
+  const labelFor = (b: { weekStart?: Date; dayStart?: Date }) =>
+    granularity === 'daily' ? dayLabel(b.dayStart as Date) : weekLabel(b.weekStart as Date)
   const categories = buildCategoryBreakdown(items)
   const openItems = items.filter((i) => i.status !== 'RESOLVED')
   const ageBuckets = buildAgeDistribution(openItems)
 
-  // --- Weekly line chart geometry ---
+  // --- Opened/resolved line chart geometry (weekly or daily) ---
   const W = 560
   const H = 160
   const padL = 28
@@ -129,11 +201,11 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
   const padT = 10
   const plotW = W - padL - 12
   const plotH = H - padB - padT
-  const maxVal = Math.max(1, ...weekly.map((w) => Math.max(w.opened, w.resolved)))
-  const xFor = (i: number) => padL + (i / Math.max(1, weekly.length - 1)) * plotW
+  const maxVal = Math.max(1, ...series.map((w) => Math.max(w.opened, w.resolved)))
+  const xFor = (i: number) => padL + (i / Math.max(1, series.length - 1)) * plotW
   const yFor = (v: number) => padT + plotH - (v / maxVal) * plotH
-  const openedPath = weekly.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.opened)}`).join(' ')
-  const resolvedPath = weekly.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.resolved)}`).join(' ')
+  const openedPath = series.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.opened)}`).join(' ')
+  const resolvedPath = series.map((w, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(w.resolved)}`).join(' ')
 
   // --- Category bar chart geometry ---
   const maxCatCount = Math.max(1, ...categories.map((c) => c.count))
@@ -142,40 +214,89 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
   const maxAgeCount = Math.max(1, ...ageBuckets.map((b) => b.count))
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '14px',
-        marginBottom: '24px',
-      }}
-    >
-      <div style={chartCard}>
-        <div style={chartTitle}>
-          Opened vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 8 weeks</span>
+    <>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.total}</div>
+          <div style={kpiLabel}>Total reported</div>
         </div>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
-          {/* baseline */}
-          <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} stroke="rgba(14,12,10,0.15)" strokeWidth={1} />
-          <path d={openedPath} fill="none" stroke="var(--afa-terracotta)" strokeWidth={2} />
-          <path d={resolvedPath} fill="none" stroke="var(--afa-sage)" strokeWidth={2} />
-          {weekly.map((w, i) => (
-            <g key={i}>
-              <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} fill="var(--afa-terracotta)" />
-              <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} fill="var(--afa-sage)" />
-              {(i === 0 || i === weekly.length - 1 || i === Math.floor(weekly.length / 2)) && (
-                <text x={xFor(i)} y={H - 4} fontSize={9} fill="var(--afa-taupe)" textAnchor="middle">
-                  {weekLabel(w.weekStart)}
-                </text>
-              )}
-            </g>
-          ))}
-        </svg>
-        <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '11px' }}>
-          <span style={{ color: 'var(--afa-terracotta)' }}>● Opened</span>
-          <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.pending}</div>
+          <div style={kpiLabel}>Pending (new/reviewed)</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.tested}</div>
+          <div style={kpiLabel}>Tested</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.resolved}</div>
+          <div style={kpiLabel}>Resolved</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.featureIdeas}</div>
+          <div style={kpiLabel}>Feature ideas</div>
         </div>
       </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '14px',
+          marginBottom: '24px',
+        }}
+      >
+        <div style={chartCard}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <div style={{ ...chartTitle, marginBottom: 0 }}>
+              Opened vs. resolved{' '}
+              <span style={{ opacity: 0.5, fontWeight: 400 }}>
+                · last {granularity === 'daily' ? '14 days' : '8 weeks'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {(['weekly', 'daily'] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setGranularity(g)}
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    padding: '4px 9px',
+                    borderRadius: '999px',
+                    border: granularity === g ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    background: granularity === g ? 'var(--afa-ink)' : 'transparent',
+                    color: granularity === g ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {g === 'weekly' ? 'Weekly' : 'Daily'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+            {/* baseline */}
+            <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} stroke="rgba(14,12,10,0.15)" strokeWidth={1} />
+            <path d={openedPath} fill="none" stroke="var(--afa-terracotta)" strokeWidth={2} />
+            <path d={resolvedPath} fill="none" stroke="var(--afa-sage)" strokeWidth={2} />
+            {series.map((w, i) => (
+              <g key={i}>
+                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} fill="var(--afa-terracotta)" />
+                <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} fill="var(--afa-sage)" />
+                {(i === 0 || i === series.length - 1 || i === Math.floor(series.length / 2)) && (
+                  <text x={xFor(i)} y={H - 4} fontSize={9} fill="var(--afa-taupe)" textAnchor="middle">
+                    {labelFor(w)}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+          <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '11px' }}>
+            <span style={{ color: 'var(--afa-terracotta)' }}>● Opened</span>
+            <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
+          </div>
+        </div>
 
       <div style={chartCard}>
         <div style={chartTitle}>Category breakdown</div>
@@ -225,6 +346,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

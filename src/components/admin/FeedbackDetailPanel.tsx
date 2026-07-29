@@ -34,7 +34,7 @@ export interface FeedbackDetailItem {
   changeLog: ChangeLogEntry[]
 }
 
-const STATUSES = ['NEW', 'REVIEWED', 'RESOLVED']
+const STATUSES = ['NEW', 'REVIEWED', 'TESTED', 'RESOLVED']
 const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 const SEVERITY_COLORS: Record<string, string> = {
