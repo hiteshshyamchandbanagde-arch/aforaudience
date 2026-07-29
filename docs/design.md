@@ -1146,7 +1146,8 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 **3. Artist spot-booking cancellation (7-day-anchored window, unchanged from earlier this session):**
 - *Free spot (₹100 refundable deposit):* deposit refunded if cancelled >=7 days before show, **forfeited to the Organiser** if cancelled <7 days or on no-show. Attendance/deposit-return is separately gated on gate check-in.
 - *Buy-in spot, artist actually cancelling (not gifting):* **new carve-out** on top of the default non-refundable term, with a graduated middle tier: cancel >=7 days before show -> **full refund**. Cancel 3-7 days before show -> **50% refund**. Cancel <3 days before show -> **no refund** (falls back to the default non-refundable term).
-- *Buy-in spot, gifting/transfer:* unchanged - no day-window applies here, it's a slot transfer not a cancellation. Incoming artist pays nothing, original artist's money is not refunded or carried over, any off-platform money between the two artists is out of AFA's scope.
+- *Free spot: NOT giftable/transferable* - confirmed this session. A free-spot artist who cannot attend can only cancel (see refund/forfeiture rule above), not gift the slot to another artist. Gifting is exclusive to buy-in spots (below).
+- *Buy-in spot, gifting/transfer:* unchanged - no day-window applies here, it's a slot transfer not a cancellation. **Requires Organiser approval** - the artist cannot transfer/gift a spot to another artist unilaterally. Incoming artist pays nothing, original artist's money is not refunded or carried over, any off-platform money between the two artists is out of AFA's scope.
 - *Venue-cancellation override:* unchanged - if the Venue cancels the event, artist buy-in fee is refunded regardless of timing, overriding all of the above.
 
 **4. Audience ticket cancellation - [NEW, confirmed] graduated tiers, replaces the earlier binary 7-day rule and the old 48h rule:**
