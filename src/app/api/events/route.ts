@@ -174,7 +174,11 @@ export async function POST(req: Request) {
     if (!feeAmountCheck.ok) {
       return NextResponse.json({ error: feeAmountCheck.error }, { status: 400 })
     }
-    const buyInAmountCheck = parseAmount(defaultBuyInAmount, { label: 'Buy-in amount', allowZero: true })
+    const buyInAmountCheck = parseAmount(defaultBuyInAmount, {
+      label: 'Buy-in amount',
+      required: publish === true && defaultCompensationType === 'BUY_IN',
+      allowZero: true,
+    })
     if (!buyInAmountCheck.ok) {
       return NextResponse.json({ error: buyInAmountCheck.error }, { status: 400 })
     }

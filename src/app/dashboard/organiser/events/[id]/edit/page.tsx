@@ -320,6 +320,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       showToast(`Fee per artist can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
       return
     }
+    if (publishing && defaultCompensationType === 'BUY_IN' && !defaultBuyInAmount) {
+      showToast('Please enter a Buy-in amount before publishing, or choose Free/Paid instead.', 'error')
+      return
+    }
+    if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
+      showToast(`Buy-in amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`, 'error')
+      return
+    }
     if (usingTierPricing && !isFree) {
       const missingPrice = venueSections.some((s) => !tierPrices[tierKey(s)] || Number(tierPrices[tierKey(s)]) <= 0)
       if (missingPrice) {

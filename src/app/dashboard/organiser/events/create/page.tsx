@@ -406,6 +406,16 @@ export default function CreateEventPage() {
       setSaving(false)
       return
     }
+    if (publish && defaultCompensationType === 'BUY_IN' && !defaultBuyInAmount) {
+      fail('Please enter a Buy-in amount before publishing, or choose Free/Paid instead.')
+      setSaving(false)
+      return
+    }
+    if (defaultBuyInAmount && Number(defaultBuyInAmount) > MAX_INR_AMOUNT) {
+      fail(`Buy-in amount can't exceed ₹${MAX_INR_AMOUNT.toLocaleString('en-IN')}.`)
+      setSaving(false)
+      return
+    }
 
     try {
       const res = await fetch('/api/events', {
