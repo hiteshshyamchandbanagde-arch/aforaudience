@@ -128,7 +128,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: feeCheck.error }, { status: 400 })
       }
       feeAmountValue = feeCheck.value
-      const buyInCheck = parseAmount(defaultBuyInAmount, { label: 'Buy-in amount', allowZero: true })
+      const buyInCheck = parseAmount(defaultBuyInAmount, {
+        label: 'Buy-in amount',
+        required: publish === true && defaultCompensationType === 'BUY_IN',
+        allowZero: true,
+      })
       if (!buyInCheck.ok) {
         return NextResponse.json({ error: buyInCheck.error }, { status: 400 })
       }
