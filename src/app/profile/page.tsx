@@ -63,22 +63,40 @@ function ProfileContent() {
   const [initialDisplayName, setInitialDisplayName] = useState('')
   const [savingName, setSavingName] = useState(false)
 
+  // Display-only currency preference (Option A). Same load/save shape as
+  // displayName above - separate state loaded from /api/users/me (not the
+  // session cache), its own PATCH, its own saving flag. Real settlement
+  // stays INR always; this only changes how amounts are *shown* to this
+  // user - see src/lib/money-display.ts.
+  const [currencies, setCurrencies] = useState<{ code: string; label: string; symbol: string }[]>([])
+  const [displayCurrency, setDisplayCurrency] = useState('INR')
+  const [initialDisplayCurrency, setInitialDisplayCurrency] = useState('INR')
+  const [savingCurrency, setSavingCurrency] = useState(false)
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
   const loadStatuses = async () => {
-    const [meRes, orgRes, venueRes, artistRes] = await Promise.all([
+    const [meRes, orgRes, venueRes, artistRes, currenciesRes] = await Promise.all([
       fetch('/api/users/me'),
       fetch('/api/organisers/status'),
       fetch('/api/venue-owners/status'),
       fetch('/api/artists/status'),
+      fetch('/api/display-currencies'),
     ])
     if (meRes.ok) {
       const d = await meRes.json()
       const current = d.user?.displayName ?? ''
       setDisplayName(current)
       setInitialDisplayName(current)
+      const currentCurrency = d.user?.displayCurrency ?? 'INR'
+      setDisplayCurrency(currentCurrency)
+      setInitialDisplayCurrency(currentCurrency)
+    }
+    if (currenciesRes.ok) {
+      const d = await currenciesRes.json()
+      setCurrencies(d.currencies ?? [])
     }
     if (orgRes.ok) {
       const d = await orgRes.json()
@@ -113,6 +131,29 @@ function ProfileContent() {
       setError(err.message || 'Failed to save')
     } finally {
       setSavingName(false)
+    }
+  }
+
+  const saveDisplayCurrency = async () => {
+    setSavingCurrency(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayCurrency }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      const saved = data.user?.displayCurrency ?? 'INR'
+      setDisplayCurrency(saved)
+      setInitialDisplayCurrency(saved)
+      setMessage('Display currency saved.')
+    } catch (err: any) {
+      setError(err.message || 'Failed to save')
+    } finally {
+      setSavingCurrency(false)
     }
   }
 
@@ -307,6 +348,46 @@ function ProfileContent() {
               }}
             >
               {savingName ? 'Saving…' : 'Save display name'}
+            </button>
+          </div>
+
+          {/* Display-only currency preference (Option A). Real settlement
+              stays INR always - this only changes how amounts are shown
+              to this user (event prices, checkout totals). */}
+          <div style={cardStyle}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+              Display currency
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+              Shows prices converted to this currency alongside the real ₹ amount. All payments are always charged and settled in Indian Rupees regardless of this setting.
+            </p>
+            <select
+              value={displayCurrency}
+              onChange={(e) => setDisplayCurrency(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'white' }}
+            >
+              {currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.symbol} {c.label} ({c.code})
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={saveDisplayCurrency}
+              disabled={savingCurrency || displayCurrency === initialDisplayCurrency}
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'white',
+                background: 'var(--afa-terracotta)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                cursor: savingCurrency || displayCurrency === initialDisplayCurrency ? 'default' : 'pointer',
+                opacity: savingCurrency || displayCurrency === initialDisplayCurrency ? 0.5 : 1,
+              }}
+            >
+              {savingCurrency ? 'Saving…' : 'Save currency'}
             </button>
           </div>
 

@@ -24,6 +24,7 @@ export async function GET() {
       code: true,
       isVerified: true,
       avatar: true,
+      displayCurrency: true,
     },
   })
   if (!user) {
@@ -60,7 +61,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const updates: { displayName?: string | null; avatar?: string | null } = {}
+    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null } = {}
 
     // Only touch displayName if it appears in the body. Undefined means
     // "not touched"; null/empty string means "clear". A trimmed non-empty
@@ -100,6 +101,27 @@ export async function PATCH(req: Request) {
       }
     }
 
+    // Display-only currency preference (Option A). null/empty = clear back
+    // to the India/₹ default. Validated against DisplayCurrencyRate's known
+    // codes, not a free string - a typo'd code would silently fall back to
+    // INR in the formatter, which is safe, but rejecting it here surfaces
+    // the mistake to the user instead of hiding it.
+    if (Object.prototype.hasOwnProperty.call(body, 'displayCurrency')) {
+      const raw = body.displayCurrency
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.displayCurrency = null
+      } else if (typeof raw === 'string') {
+        const code = raw.trim().toUpperCase()
+        const known = await prisma.displayCurrencyRate.findUnique({ where: { code } })
+        if (!known) {
+          return NextResponse.json({ error: `Unknown currency code: ${code}` }, { status: 400 })
+        }
+        updates.displayCurrency = code === 'INR' ? null : code
+      } else {
+        return NextResponse.json({ error: 'displayCurrency must be a string or null' }, { status: 400 })
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No editable fields provided' }, { status: 400 })
     }
@@ -113,6 +135,7 @@ export async function PATCH(req: Request) {
         displayName: true,
         email: true,
         avatar: true,
+        displayCurrency: true,
       },
     })
 
