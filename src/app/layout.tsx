@@ -4,7 +4,6 @@ import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
 import SupportWidget from "@/components/SupportWidget";
-import OfflineBanner from "@/components/OfflineBanner";
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
@@ -238,7 +237,6 @@ export default function RootLayout({
             `,
           }}
         />
-        <OfflineBanner />
         <Providers>
           <NudgeStack />
           {children}
