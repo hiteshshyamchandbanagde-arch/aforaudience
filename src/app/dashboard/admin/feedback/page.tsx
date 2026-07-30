@@ -232,12 +232,17 @@ export default function AdminFeedbackPage() {
         showToast(data.error || 'Update failed — please try again.', 'error')
         return
       }
-      const { item: updated } = await res.json()
+      const { item: updated, changeLog: newEntries } = await res.json()
+      const withChangeLog = (it: FeedbackItem) => ({
+        ...it,
+        ...updated,
+        changeLog: newEntries && newEntries.length > 0 ? [...newEntries, ...it.changeLog] : it.changeLog,
+      })
 
       if (body.status) {
         const current = [...items, ...resolvedItems].find((it) => it.id === id)
         if (current) {
-          const movedItem = { ...current, ...updated }
+          const movedItem = withChangeLog(current)
           if (body.status === 'RESOLVED') {
             setItems((prev) => prev.filter((it) => it.id !== id))
             setResolvedItems((prev) => {
@@ -253,7 +258,7 @@ export default function AdminFeedbackPage() {
           }
         }
       } else {
-        const merge = (list: FeedbackItem[]) => list.map((it) => (it.id === id ? { ...it, ...updated } : it))
+        const merge = (list: FeedbackItem[]) => list.map((it) => (it.id === id ? withChangeLog(it) : it))
         setItems(merge)
         setResolvedItems(merge)
       }

@@ -179,7 +179,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ item: unchanged })
     }
 
-    const [updated] = await prisma.$transaction([
+    const [updated, ...createdChangeLogEntries] = await prisma.$transaction([
       prisma.feedback.update({
         where: { id: body.id },
         data,
@@ -197,7 +197,7 @@ export async function PATCH(req: Request) {
         })
       ),
     ])
-    return NextResponse.json({ item: updated })
+    return NextResponse.json({ item: updated, changeLog: createdChangeLogEntries })
   } catch {
     return NextResponse.json({ error: 'Feedback item not found' }, { status: 404 })
   }
