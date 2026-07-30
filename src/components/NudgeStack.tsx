@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import OfflineBanner from './OfflineBanner';
 import PhoneVerifyNudge from './PhoneVerifyNudge';
 import DisplayNameNudge from './DisplayNameNudge';
 import NotificationOptIn from './NotificationOptIn';
@@ -45,6 +46,7 @@ export default function NudgeStack() {
 
   return (
     <div ref={ref} style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+      <OfflineBanner />
       <PhoneVerifyNudge />
       <DisplayNameNudge />
       <NotificationOptIn />

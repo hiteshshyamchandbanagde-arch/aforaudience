@@ -69,16 +69,17 @@ export default function OfflineBanner() {
 
   const offline = isOffline;
 
+  // Deliberately NOT position: fixed. This renders as a normal-flow child
+  // inside NudgeStack's sticky wrapper (see NudgeStack.tsx), which measures
+  // its own height and publishes --nudge-stack-height for SiteNav to read.
+  // A fixed overlay here would sit outside that system and get covered by -
+  // or itself cover - the sticky nav once scrolled, the same bug NudgeStack
+  // was built to fix for the phone-verify/display-name/notification nudges.
   return (
     <div
       role="status"
       aria-live="polite"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9998, // below intro-splash (9999), above everything else
         background: offline ? 'var(--afa-error)' : 'var(--afa-green-bright)',
         color: 'white',
         textAlign: 'center',
