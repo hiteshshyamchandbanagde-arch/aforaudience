@@ -35,6 +35,16 @@ export default function AdminSettingsPage() {
   const [initialChatCap, setInitialChatCap] = useState<number>(15)
   const [maxChatCap, setMaxChatCap] = useState<number>(200)
   const [chatSaving, setChatSaving] = useState(false)
+
+  // Display currency rates (Option A). One row per non-INR currency;
+  // rateInputs holds the live-edited value per code, savingCode tracks
+  // which row (if any) is mid-save, so each row's button state is
+  // independent - editing one currency doesn't disable the others.
+  const [currencyRates, setCurrencyRates] = useState<
+    { code: string; label: string; symbol: string; rateFromINR: number }[]
+  >([])
+  const [rateInputs, setRateInputs] = useState<Record<string, string>>({})
+  const [savingCode, setSavingCode] = useState<string | null>(null)
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -79,6 +89,51 @@ export default function AdminSettingsPage() {
       }
     })()
   }, [session])
+
+  // Independent of the platform-settings load above - a failure here
+  // shouldn't block the booking-fee/chat-cap sections from working.
+  useEffect(() => {
+    if (!session?.user) return
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/display-currencies')
+        if (!res.ok) return
+        const data = await res.json()
+        const rows = (data.currencies ?? []).filter((c: { code: string }) => c.code !== 'INR')
+        setCurrencyRates(rows)
+        const inputs: Record<string, string> = {}
+        for (const c of rows) inputs[c.code] = String(c.rateFromINR)
+        setRateInputs(inputs)
+      } catch {
+        // Non-fatal - the section just won't populate.
+      }
+    })()
+  }, [session])
+
+  const saveCurrencyRate = async (code: string) => {
+    setSavingCode(code)
+    try {
+      const rate = Number(rateInputs[code])
+      if (!Number.isFinite(rate) || rate <= 0) {
+        throw new Error('Rate must be a positive number')
+      }
+      const res = await fetch('/api/admin/display-currencies', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, rateFromINR: rate }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setCurrencyRates((prev) =>
+        prev.map((c) => (c.code === code ? { ...c, rateFromINR: data.currency.rateFromINR } : c))
+      )
+      showToast(`Saved. 1 INR = ${data.currency.rateFromINR} ${code} for display purposes.`, 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSavingCode(null)
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -382,6 +437,83 @@ export default function AdminSettingsPage() {
           >
             {chatSaving ? 'Saving…' : 'Save'}
           </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginTop: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Display currency rates
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Rates behind the display-only currency preference in profiles and checkout — a user who picks e.g. USD sees prices converted at this rate alongside the real ₹ amount. Manually set, not a live feed; update here whenever a rate drifts noticeably. Real charges and settlement are always in Indian Rupees regardless of these values.
+          </p>
+
+          {currencyRates.length === 0 ? (
+            <p style={{ fontSize: 13, color: 'var(--afa-taupe)' }}>No currencies configured yet.</p>
+          ) : (
+            currencyRates.map((c) => {
+              const inputValue = rateInputs[c.code] ?? String(c.rateFromINR)
+              const isDirtyRow = Number(inputValue) !== c.rateFromINR
+              const isValidRow = Number.isFinite(Number(inputValue)) && Number(inputValue) > 0
+              return (
+                <div
+                  key={c.code}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginBottom: 14,
+                    paddingBottom: 14,
+                    borderBottom: '1px solid rgba(14,12,10,0.06)',
+                  }}
+                >
+                  <div style={{ width: 92, fontSize: 14, flexShrink: 0 }}>
+                    {c.symbol} {c.code}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--afa-taupe)', flexShrink: 0 }}>1 ₹ =</div>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.0001"
+                    value={inputValue}
+                    onChange={(e) => setRateInputs((prev) => ({ ...prev, [c.code]: e.target.value }))}
+                    style={{
+                      width: 110,
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      border: '1px solid rgba(14,12,10,0.15)',
+                      fontSize: 14,
+                    }}
+                  />
+                  <button
+                    onClick={() => saveCurrencyRate(c.code)}
+                    disabled={savingCode === c.code || !isDirtyRow || !isValidRow}
+                    style={{
+                      background: 'var(--afa-terracotta)',
+                      color: 'white',
+                      padding: '8px 16px',
+                      border: 'none',
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: savingCode === c.code || !isDirtyRow || !isValidRow ? 'default' : 'pointer',
+                      opacity: savingCode === c.code || !isDirtyRow || !isValidRow ? 0.5 : 1,
+                    }}
+                  >
+                    {savingCode === c.code ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              )
+            })
+          )}
         </div>
 
         <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-taupe)', lineHeight: 1.6 }}>
