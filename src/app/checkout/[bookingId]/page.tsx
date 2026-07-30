@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { formatEventTimeRange } from '@/lib/eventTime'
+import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
 import {
   loadRazorpayCheckoutScript,
   openRazorpayCheckout,
@@ -76,6 +77,14 @@ export default function CheckoutPage() {
   const [confirmed, setConfirmed] = useState(false)
   const [scriptReady, setScriptReady] = useState(false)
 
+  // Display-only currency preference (Option A). Loaded once, alongside
+  // the booking - real charge/settlement is always INR regardless of
+  // this; it only changes how the totals below are *shown*. Falls back
+  // to plain ₹ formatting (via formatDisplayMoney's null-currency path)
+  // if either fetch fails, so checkout never breaks over a cosmetic
+  // feature.
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency | null>(null)
+
   // Redirect to login if not authenticated. Booking is per-user so an
   // anonymous user can't do anything useful on this page.
   useEffect(() => {
@@ -116,6 +125,35 @@ export default function CheckoutPage() {
       .then(() => setScriptReady(true))
       .catch(() => setScriptReady(false))
   }, [state, confirmed])
+
+  // Load the user's display-currency preference + its live rate, once
+  // authenticated. Independent of the booking fetch above - a failure
+  // here just leaves displayCurrency null, which formatDisplayMoney
+  // treats as "show plain ₹", so this can never block or break checkout.
+  useEffect(() => {
+    if (authStatus !== 'authenticated') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [meRes, ratesRes] = await Promise.all([
+          fetch('/api/users/me'),
+          fetch('/api/display-currencies'),
+        ])
+        if (cancelled || !meRes.ok || !ratesRes.ok) return
+        const me = await meRes.json()
+        const rates = await ratesRes.json()
+        const code = me.user?.displayCurrency
+        if (!code) return // null = India/₹ default, nothing to convert
+        const match = (rates.currencies ?? []).find((c: DisplayCurrency) => c.code === code)
+        if (match) setDisplayCurrency(match)
+      } catch {
+        // Cosmetic feature only - silently fall back to plain ₹.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [authStatus])
 
   const handlePay = async () => {
     if (!state?.payment || !state.payment.keyId) return
@@ -283,7 +321,7 @@ export default function CheckoutPage() {
             </div>
             <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Amount paid</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>
-              {state.booking.totalAmount > 0 ? `₹${state.booking.totalAmount.toLocaleString('en-IN')}` : 'Free'}
+              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : 'Free'}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -494,7 +532,7 @@ export default function CheckoutPage() {
                       </span>
                     </span>
                     <span style={{ opacity: 0.7 }}>
-                      {g.price !== null ? `₹${(g.price * g.count).toLocaleString('en-IN')}` : '—'}
+                      {g.price !== null ? formatDisplayMoney(g.price * g.count, displayCurrency) : '—'}
                     </span>
                   </div>
                 ))
@@ -512,7 +550,7 @@ export default function CheckoutPage() {
                       {section} × {qty}
                     </span>
                     <span style={{ opacity: 0.7 }}>
-                      ₹{state.booking.subtotalAmount.toLocaleString('en-IN')}
+                      {formatDisplayMoney(state.booking.subtotalAmount, displayCurrency)}
                     </span>
                   </div>
                 ))}
@@ -535,7 +573,7 @@ export default function CheckoutPage() {
                   </span>
                 </span>
                 <span>
-                  ₹{state.booking.bookingFeeAmount.toLocaleString('en-IN')}
+                  {formatDisplayMoney(state.booking.bookingFeeAmount, displayCurrency)}
                 </span>
               </div>
             )}
@@ -552,7 +590,7 @@ export default function CheckoutPage() {
           >
             <span style={{ fontSize: 14, opacity: 0.6 }}>Total</span>
             <span style={{ fontSize: 22, fontWeight: 700 }}>
-              {state.booking.totalAmount > 0 ? `₹${state.booking.totalAmount.toLocaleString('en-IN')}` : 'Free'}
+              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : 'Free'}
             </span>
           </div>
         </div>
@@ -593,7 +631,7 @@ export default function CheckoutPage() {
             : paying
               ? 'Opening payment…'
               : state.booking.totalAmount > 0
-                ? `Pay ₹${state.booking.totalAmount.toLocaleString('en-IN')}`
+                ? `Pay ${formatDisplayMoney(state.booking.totalAmount, displayCurrency)}`
                 : 'Confirm Free Booking'}
         </button>
 

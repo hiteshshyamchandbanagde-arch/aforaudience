@@ -206,6 +206,17 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Display-only currency preference (approved 25 Jul, built 30 Jul,
+  // session 47 - "Option A" from design.md §9). ISO 4217 code, e.g.
+  // "USD"/"EUR"/"GBP"/"AED". Null means India/₹ default - the vast
+  // majority of users, so this stays unset rather than every existing
+  // row needing a backfill. Purely cosmetic: real settlement is ALWAYS
+  // INR regardless of this value (Real multi-currency settlement,
+  // "Option B", is explicitly out of scope and blocked by the freeze -
+  // see design.md). Validated server-side against DisplayCurrencyRate's
+  // known codes, not a free string.
+  displayCurrency String?
+
   // H3 — moderation. suspendedByUserId is a plain scalar (not a relation),
   // same pattern as Booking.checkedInByUserId - who did it matters for the
   // admin's own record, doesn't need a join for anything the app does.
@@ -764,6 +775,24 @@ model PlatformSettings {
   /// @deprecated dead per fifth amendment — do not read
   performerSlotCommissionRate  Float    @default(0.08)
   updatedAt                    DateTime @updatedAt
+}
+
+// Display-only currency preference (Option A, session 47, 30 Jul). One row
+// per supported currency; admin edits rateFromINR from /dashboard/admin/
+// settings. This is a *display* conversion rate only, updated manually
+// (not a live FX feed) - deliberate v1 choice, same shape as the existing
+// admin-set audienceBookingFee pattern, avoiding a new external API
+// dependency this early. INR itself has a row (rate 1) so the formatter
+// can treat every currency uniformly rather than special-casing INR.
+// Real settlement is always INR regardless of what this table shows -
+// see User.displayCurrency and design.md §9 "Real multi-currency
+// settlement (Option B)" for why that stays explicitly out of scope.
+model DisplayCurrencyRate {
+  code        String   @id // ISO 4217, e.g. "INR", "USD", "EUR", "GBP", "AED"
+  label       String   // e.g. "US Dollar"
+  symbol      String   // e.g. "$"
+  rateFromINR Float    // 1 INR = this many units of `code`
+  updatedAt   DateTime @updatedAt
 }
 
 
