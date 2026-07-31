@@ -341,9 +341,20 @@ function ProfileContent() {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your full name, e.g. Hitesh Bangade"
+              placeholder={nameLoaded ? 'Your full name, e.g. Priya Sharma' : 'Loading…'}
+              disabled={!nameLoaded}
               maxLength={120}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                border: '1px solid rgba(14,12,10,0.15)',
+                fontSize: '14px',
+                marginBottom: '12px',
+                boxSizing: 'border-box' as const,
+                opacity: nameLoaded ? 1 : 0.5,
+                cursor: nameLoaded ? 'text' : 'default',
+              }}
             />
             <button
               onClick={saveDisplayName}
