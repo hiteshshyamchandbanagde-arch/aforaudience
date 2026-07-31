@@ -32,6 +32,25 @@ type SeatDraft = {
   y: number
 }
 
+// §9.4 seat-map cluster item #6 (session 48/49) - safety/reference markers.
+// Same local-draft/clientId pattern as SeatDraft - nothing hits the network
+// until Save. STAGE_DISTANCE_REF's distanceMeters is manually entered, not
+// measured - no real-world scale calibration exists for this canvas.
+type MarkerType = 'GATE' | 'FIRE_EXTINGUISHER' | 'STAGE_DISTANCE_REF'
+type MarkerDraft = {
+  clientId: string
+  type: MarkerType
+  x: number
+  y: number
+  label: string
+  distanceMeters: number | null
+}
+const MARKER_META: Record<MarkerType, { glyph: string; color: string; name: string }> = {
+  GATE: { glyph: 'G', color: 'var(--afa-blue-dark)', name: 'Gate' },
+  FIRE_EXTINGUISHER: { glyph: 'F', color: 'var(--afa-error, #b3261e)', name: 'Fire Extinguisher' },
+  STAGE_DISTANCE_REF: { glyph: 'S', color: 'var(--afa-ink)', name: 'Stage-Distance Reference' },
+}
+
 // Local-draft persistence (autosave) - a manual-canvas layout previously
 // lived only in React state, so an accidental scroll-triggered refresh
 // (or an away-tab losing state) wiped every placed seat with no way
@@ -48,6 +67,7 @@ type SeatMapDraft = {
   gridConfigByLevel: Record<string, GridConfig>
   zonePricesByLevel: Record<string, Record<string, string>>
   builderPathByLevel: Record<string, 'choose' | 'wizard' | 'canvas' | null>
+  markersByLevel: Record<string, MarkerDraft[]>
 }
 const draftKey = (venueId: string) => `afa-seatmap-draft:${venueId}`
 
@@ -515,6 +535,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const setSeats = (updater: (prev: SeatDraft[]) => SeatDraft[]) =>
     setSeatsByLevel((prev) => ({ ...prev, [activeLevel]: updater(prev[activeLevel] || []) }))
 
+  // §9.4 seat-map cluster item #6 - safety/reference markers, same
+  // per-level scoping as seats above.
+  const [markersByLevel, setMarkersByLevel] = useState<Record<string, MarkerDraft[]>>({})
+  const markers = markersByLevel[activeLevel] || []
+  const setMarkers = (updater: (prev: MarkerDraft[]) => MarkerDraft[]) =>
+    setMarkersByLevel((prev) => ({ ...prev, [activeLevel]: updater(prev[activeLevel] || []) }))
+
   const [gridConfigByLevel, setGridConfigByLevel] = useState<Record<string, GridConfig>>({})
   const gridConfig = gridConfigByLevel[activeLevel] || defaultGridConfig()
   const setGridConfig = (updater: (prev: GridConfig) => GridConfig) =>
@@ -569,6 +596,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setGridConfigByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
     setBuilderPathByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
     setZonePricesByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
+    setMarkersByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
     if (activeLevel === name) {
       const remaining = levels.filter((l) => l !== name)
       setActiveLevel(remaining[0] || '')
@@ -580,6 +608,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [nextNumber, setNextNumber] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
+  // §9.4 cluster item #6 - which marker type is "armed" for the next
+  // canvas click (null = off, canvas click places a seat as before).
+  // Separate from manualPlacement/activeTier - placing a marker doesn't
+  // need a section name and shouldn't consume the seat auto-increment.
+  const [markerMode, setMarkerMode] = useState<MarkerType | null>(null)
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null)
   // A click on the canvas used to always place a new seat - which meant
   // simply reviewing/scrolling a Guided-Setup-generated layout could
   // silently scatter stray seats wherever the owner clicked (live bug,
@@ -848,6 +882,21 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         setLevels(foundLevels.length > 0 ? foundLevels : [''])
         setActiveLevel(foundLevels[0] ?? '')
 
+        const markersLoaded: Record<string, MarkerDraft[]> = {}
+        for (const m of data.markers || []) {
+          const lvl = m.level || ''
+          if (!markersLoaded[lvl]) markersLoaded[lvl] = []
+          markersLoaded[lvl].push({
+            clientId: makeClientId(),
+            type: m.type,
+            x: m.x,
+            y: m.y,
+            label: m.label || '',
+            distanceMeters: m.distanceMeters ?? null,
+          })
+        }
+        setMarkersByLevel(markersLoaded)
+
         const priceByLevel: Record<string, Record<string, string>> = {}
         for (const z of data.zonePrices || []) {
           const lvl = z.level || ''
@@ -905,6 +954,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   setGridConfigByLevel(draft.gridConfigByLevel)
                   setZonePricesByLevel(draft.zonePricesByLevel)
                   setBuilderPathByLevel(draft.builderPathByLevel)
+                  setMarkersByLevel(draft.markersByLevel || {})
                 } else {
                   localStorage.removeItem(draftKey(id))
                 }
@@ -955,16 +1005,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         gridConfigByLevel,
         zonePricesByLevel,
         builderPathByLevel,
+        markersByLevel,
       }
       localStorage.setItem(draftKey(id), JSON.stringify(draft))
     } catch {
       // Storage full or unavailable (e.g. private browsing) - autosave
       // is a convenience, fail silently rather than interrupt editing.
     }
-  }, [id, seatingMode, levels, activeLevel, seatsByLevel, gridConfigByLevel, zonePricesByLevel, builderPathByLevel])
+  }, [id, seatingMode, levels, activeLevel, seatsByLevel, gridConfigByLevel, zonePricesByLevel, builderPathByLevel, markersByLevel])
 
   const tierOrder = Array.from(new Set(seats.map((s) => s.tierLabel).concat(activeTier ? [activeTier] : [])))
-  const canvasBounds = contentBounds(seats)
+  const canvasBounds = contentBounds([...seats, ...markers])
 
   const placeSeat = (e: React.MouseEvent<HTMLDivElement>) => {
     if (seatingMode !== 'NUMBERED') return
@@ -1009,8 +1060,42 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setNextNumber((n) => n + 1)
   }
 
+  // §9.4 cluster item #6 - places a marker at the click point instead of
+  // a seat when markerMode is armed. Deliberately no stage-clearance or
+  // activeTier gate here (unlike placeSeat) - a gate/extinguisher marker
+  // legitimately needs to sit right at the stage edge or anywhere else on
+  // the floor, and doesn't carry a section/tier identity at all.
+  const placeMarker = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!markerMode) return
+    if (seatingMode !== 'NUMBERED') return
+    if (isMobile || seatMapFrozen) return
+    if (dragId) return
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = Math.round(e.clientX - rect.left)
+    const y = Math.round(e.clientY - rect.top)
+    if (x < 0 || y < 0 || x > canvasBounds.width || y > canvasBounds.height) return
+    const newMarker: MarkerDraft = {
+      clientId: makeClientId(),
+      type: markerMode,
+      x,
+      y,
+      label: '',
+      distanceMeters: null,
+    }
+    setMarkers((prev) => [...prev, newMarker])
+    setSelectedId(null)
+    setSelectedMarkerId(newMarker.clientId)
+  }
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (markerMode) placeMarker(e)
+    else placeSeat(e)
+  }
+
   const startDrag = (e: React.MouseEvent, clientId: string) => {
     e.stopPropagation()
+    setSelectedMarkerId(null)
     if (isMobile || seatMapFrozen) { setSelectedId(clientId); return } // view-only: allow selecting to inspect, but not dragging
     setSelectedId(clientId)
     setDragId(clientId)
@@ -1047,6 +1132,39 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const selected = seats.find((s) => s.clientId === selectedId) || null
 
+  const selectMarker = (clientId: string) => {
+    setSelectedId(null)
+    setSelectedMarkerId(clientId)
+  }
+
+  const deleteSelectedMarker = () => {
+    if (!selectedMarkerId || seatMapFrozen) return
+    setMarkers((prev) => prev.filter((m) => m.clientId !== selectedMarkerId))
+    setSelectedMarkerId(null)
+  }
+
+  const updateSelectedMarker = (field: 'label' | 'distanceMeters', value: string) => {
+    if (!selectedMarkerId || seatMapFrozen) return
+    setMarkers((prev) =>
+      prev.map((m) => {
+        if (m.clientId !== selectedMarkerId) return m
+        if (field === 'label') return { ...m, label: value.slice(0, 120) }
+        // distanceMeters: allow clearing to null (empty field), clamp
+        // non-negative otherwise. Free-typing (not committing on every
+        // keystroke) matches the ClampedNumberInput lesson elsewhere in
+        // this builder, but this single field doesn't justify pulling in
+        // that shared component - clamp only rejects negative, doesn't
+        // force a floor mid-type.
+        const trimmed = value.trim()
+        if (trimmed === '') return { ...m, distanceMeters: null }
+        const n = parseFloat(trimmed)
+        return { ...m, distanceMeters: Number.isFinite(n) && n >= 0 ? n : m.distanceMeters }
+      })
+    )
+  }
+
+  const selectedMarker = markers.find((m) => m.clientId === selectedMarkerId) || null
+
   const save = async () => {
     if (seatMapFrozen) { showToast('This seat map is frozen. Unfreeze it first to save changes.', 'error'); return }
     // Mid-wizard with nothing generated yet used to silently save 0
@@ -1071,6 +1189,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       Object.entries(prices)
         .filter(([, price]) => price.trim() !== '')
         .map(([zoneName, price]) => ({ level, zoneName, suggestedPrice: parseFloat(price) }))
+    )
+    const allMarkers = Object.entries(markersByLevel).flatMap(([level, lvlMarkers]) =>
+      lvlMarkers.map((m) => ({ type: m.type, x: m.x, y: m.y, label: m.label, distanceMeters: m.distanceMeters, level }))
     )
 
     // Duplicate row/number check client-side first (level-scoped, since
@@ -1145,14 +1266,18 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       const res = await fetch(`/api/venues/${id}/seats`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seatingMode, seats: allSeats, zonePrices: allZonePrices }),
+        body: JSON.stringify({ seatingMode, seats: allSeats, zonePrices: allZonePrices, markers: allMarkers }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
       // Server is now the up-to-date copy - the local draft would only
       // cause confusion (or a stale-restore prompt) on a future reload.
       try { localStorage.removeItem(draftKey(id)) } catch {}
-      showToast(`Saved ${data.seatCount} seat${data.seatCount === 1 ? '' : 's'} across ${levels.length} level${levels.length === 1 ? '' : 's'}.`, 'success')
+      showToast(
+        `Saved ${data.seatCount} seat${data.seatCount === 1 ? '' : 's'} across ${levels.length} level${levels.length === 1 ? '' : 's'}` +
+        (data.markerCount ? ` and ${data.markerCount} safety marker${data.markerCount === 1 ? '' : 's'}` : '') + '.',
+        'success'
+      )
     } catch (err: any) {
       showToast(err.message, 'error')
     } finally {
@@ -1633,6 +1758,33 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
                       : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
                   </p>
+
+                  {/* §9.4 cluster item #6 (session 48/49) - safety/reference
+                      markers, scoped as potentially Fire-NOC-relevant.
+                      Arming a type here takes over the next canvas click
+                      (placeMarker), same one-click-away pattern as manual
+                      seat placement above. */}
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700 }}>Safety markers:</span>
+                    {(Object.keys(MARKER_META) as MarkerType[]).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setMarkerMode((v) => (v === t ? null : t))}
+                        title={`Click, then click the canvas to place a ${MARKER_META[t].name} marker.`}
+                        style={{
+                          padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                          border: markerMode === t ? 'none' : `1px solid ${MARKER_META[t].color}`,
+                          background: markerMode === t ? MARKER_META[t].color : 'var(--afa-white)',
+                          color: markerMode === t ? 'var(--afa-white)' : MARKER_META[t].color,
+                        }}
+                      >
+                        {markerMode === t ? `✓ Placing ${MARKER_META[t].name}` : `+ ${MARKER_META[t].name}`}
+                      </button>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
+                    For Fire-NOC documentation, not shown to audience members booking seats. Click a marker on the canvas to label it or (for a stage-distance point) record the measured distance.
+                  </p>
                 </>
               )}
 
@@ -1795,14 +1947,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
                 <div
                   ref={canvasRef}
-                  onClick={placeSeat}
+                  onClick={handleCanvasClick}
                   data-testid="seatmap-canvas"
                   style={{
                     position: 'relative',
                     width: `${canvasBounds.width}px`,
                     height: `${canvasBounds.height}px`,
                     background: 'var(--afa-cream-tint-1)',
-                    cursor: isMobile ? 'default' : (manualPlacement ? 'crosshair' : 'default'),
+                    cursor: isMobile ? 'default' : (manualPlacement || markerMode ? 'crosshair' : 'default'),
                   }}
                 >
                   <div
@@ -1859,6 +2011,40 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       {isMobile ? 'No seats placed yet - switch to a tablet or desktop to build this layout' : (manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats')}
                     </div>
                   )}
+                  {markers.map((m) => {
+                    const meta = MARKER_META[m.type]
+                    return (
+                      <div
+                        key={m.clientId}
+                        data-testid="safety-marker"
+                        onClick={(e) => { e.stopPropagation(); if (!isMobile) selectMarker(m.clientId) }}
+                        title={`${meta.name}${m.label ? ` — ${m.label}` : ''}${m.distanceMeters != null ? ` (${m.distanceMeters}m)` : ''}`}
+                        style={{
+                          position: 'absolute',
+                          left: m.x - 11,
+                          top: m.y - 11,
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          background: meta.color,
+                          opacity: selectedMarkerId === m.clientId ? 1 : 0.9,
+                          outline: selectedMarkerId === m.clientId ? '2px solid var(--afa-ink)' : '2px solid var(--afa-white)',
+                          outlineOffset: '1px',
+                          color: 'var(--afa-white)',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: isMobile ? 'default' : 'pointer',
+                          userSelect: 'none',
+                          zIndex: 2,
+                        }}
+                      >
+                        {meta.glyph}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -1885,6 +2071,52 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Delete seat
+                  </button>
+                </div>
+              )}
+
+              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '20px 0 10px' }}>Selected marker</h3>
+              {!selectedMarker && markers.length === 0 && (
+                <p style={{ fontSize: '13px', opacity: 0.6 }}>No safety markers placed yet.</p>
+              )}
+              {!selectedMarker && markers.length > 0 && (
+                <p style={{ fontSize: '13px', opacity: 0.6 }}>{isMobile ? 'Tap a marker on the canvas to view it.' : 'Click a marker on the canvas to label or delete it.'}</p>
+              )}
+              {selectedMarker && isMobile && (
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  {MARKER_META[selectedMarker.type].name}{selectedMarker.label ? ` — ${selectedMarker.label}` : ''}
+                  <br /><span style={{ fontSize: '12px', opacity: 0.6 }}>Switch to a tablet or desktop to edit or delete this marker.</span>
+                </p>
+              )}
+              {selectedMarker && !isMobile && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: MARKER_META[selectedMarker.type].color }}>{MARKER_META[selectedMarker.type].name}</span>
+                  <label style={{ fontSize: '12px', fontWeight: 600 }}>Label (optional)</label>
+                  <input
+                    style={inputStyle}
+                    placeholder={selectedMarker.type === 'GATE' ? 'e.g. Gate 2' : selectedMarker.type === 'FIRE_EXTINGUISHER' ? 'e.g. Extinguisher A' : 'e.g. Rear exit reference'}
+                    value={selectedMarker.label}
+                    onChange={(e) => updateSelectedMarker('label', e.target.value)}
+                  />
+                  {selectedMarker.type === 'STAGE_DISTANCE_REF' && (
+                    <>
+                      <label style={{ fontSize: '12px', fontWeight: 600 }}>Distance from stage (meters)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        style={inputStyle}
+                        placeholder="e.g. 12"
+                        value={selectedMarker.distanceMeters ?? ''}
+                        onChange={(e) => updateSelectedMarker('distanceMeters', e.target.value)}
+                      />
+                      <p style={{ fontSize: '11px', opacity: 0.5, margin: 0 }}>Manually measured/known distance - this canvas has no real-world scale to calculate it automatically.</p>
+                    </>
+                  )}
+                  <button
+                    onClick={deleteSelectedMarker}
+                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Delete marker
                   </button>
                 </div>
               )}

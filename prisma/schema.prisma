@@ -64,6 +64,18 @@ enum VenueSeatingMode {
   NUMBERED
 }
 
+// §9.4 seat-map cluster item #6 (batch decision, 31 Jul session 48) -
+// safety/reference markers, scoped as potentially Fire-NOC-relevant.
+// STAGE_DISTANCE_REF doesn't auto-measure (no real-world scale
+// calibration exists for the canvas) - it's a placed reference point
+// paired with a manually-entered distanceMeters figure, e.g. "12m to
+// rear exit", for the owner's own compliance documentation.
+enum VenueMarkerType {
+  GATE
+  FIRE_EXTINGUISHER
+  STAGE_DISTANCE_REF
+}
+
 enum CompensationType {
   PAID
   FREE
@@ -618,6 +630,7 @@ model Venue {
   seatingMode   VenueSeatingMode @default(GENERAL_ADMISSION)
   seats         Seat[]
   zonePrices    VenueZonePrice[]
+  markers       VenueMarker[]
 
   // §9.4 Freeze + method persistence (session 48, 31 Jul) - explicit
   // "this seat map is finalized" action. While true, PUT /api/venues/[id]/
@@ -679,6 +692,30 @@ model VenueZonePrice {
   suggestedPrice Float?
 
   @@unique([venueId, level, zoneName])
+}
+
+// §9.4 seat-map cluster item #6 (31 Jul session 48/49) - safety/reference
+// markers (gates, fire extinguishers, stage-distance reference points),
+// scoped as potentially Fire-NOC-relevant. Same coordinate system as Seat
+// (per-level, canvas x/y in the builder's own px space) so markers move
+// with the layout on the same canvas, not a separate overlay. Builder-only
+// + read-only preview for now (Organiser/Admin compliance visibility) -
+// deliberately not surfaced on the audience-facing SeatPicker, since this
+// is Venue Owner documentation, not booking UX.
+model VenueMarker {
+  id        String          @id @default(cuid())
+  venueId   String
+  venue     Venue           @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  type      VenueMarkerType
+  level     String          @default("")
+  x         Float
+  y         Float
+  label     String          @default("")
+  // Only meaningful for STAGE_DISTANCE_REF - manually entered, since there's
+  // no real-world scale calibration to auto-measure from the canvas.
+  distanceMeters Float?
+
+  @@index([venueId, level])
 }
 
 // §9.4 twenty-fourth amendment - join table for NUMBERED-mode bookings.

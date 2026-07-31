@@ -22,6 +22,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         zonePrices: {
           select: { level: true, zoneName: true, suggestedPrice: true },
         },
+        markers: {
+          select: { id: true, type: true, level: true, x: true, y: true, label: true, distanceMeters: true },
+        },
       },
     })
     if (!venue) return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
@@ -79,7 +82,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const body = await req.json()
-    const { seatingMode, seats, zonePrices } = body
+    const { seatingMode, seats, zonePrices, markers } = body
 
     if (seatingMode !== 'GENERAL_ADMISSION' && seatingMode !== 'NUMBERED') {
       return NextResponse.json({ error: 'Invalid seatingMode' }, { status: 400 })
@@ -90,8 +93,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (zonePrices !== undefined && !Array.isArray(zonePrices)) {
       return NextResponse.json({ error: 'zonePrices must be an array' }, { status: 400 })
     }
+    if (markers !== undefined && !Array.isArray(markers)) {
+      return NextResponse.json({ error: 'markers must be an array' }, { status: 400 })
+    }
     if (seats.length > 5000) {
       return NextResponse.json({ error: 'Too many seats (max 5000)' }, { status: 400 })
+    }
+    if (Array.isArray(markers) && markers.length > 200) {
+      return NextResponse.json({ error: 'Too many markers (max 200)' }, { status: 400 })
     }
 
     // Validate + normalize each seat. Same "clamp at the point of state
@@ -122,6 +131,25 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       for (const z of zonePrices) {
         if (typeof z?.suggestedPrice === 'number' && Number.isFinite(z.suggestedPrice) && z.suggestedPrice < 0) {
           return NextResponse.json({ error: `Zone price can't be negative${z.zoneName ? ` (${z.zoneName})` : ''}. Use 0 for a free zone.` }, { status: 400 })
+        }
+      }
+    }
+
+    const validMarkerTypes = new Set(['GATE', 'FIRE_EXTINGUISHER', 'STAGE_DISTANCE_REF'])
+    if (Array.isArray(markers)) {
+      for (const m of markers) {
+        if (
+          typeof m?.type !== 'string' || !validMarkerTypes.has(m.type) ||
+          typeof m.x !== 'number' || !Number.isFinite(m.x) ||
+          typeof m.y !== 'number' || !Number.isFinite(m.y) ||
+          (m.level !== undefined && typeof m.level !== 'string') ||
+          (m.label !== undefined && typeof m.label !== 'string') ||
+          (m.distanceMeters !== undefined && m.distanceMeters !== null && (typeof m.distanceMeters !== 'number' || !Number.isFinite(m.distanceMeters)))
+        ) {
+          return NextResponse.json({ error: 'Malformed marker entry' }, { status: 400 })
+        }
+        if (typeof m.distanceMeters === 'number' && m.distanceMeters < 0) {
+          return NextResponse.json({ error: 'Marker distance cannot be negative' }, { status: 400 })
         }
       }
     }
@@ -166,6 +194,25 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             })),
         })
       }
+      // Same full-replace pattern - markers are few per venue (low tens),
+      // no FK dependents (unlike Seat/BookingSeat), so a plain delete+
+      // recreate is safe here with no RESTRICT concerns.
+      await tx.venueMarker.deleteMany({ where: { venueId: id } })
+      if (Array.isArray(markers) && markers.length > 0) {
+        await tx.venueMarker.createMany({
+          data: markers.map((m: any) => ({
+            venueId: id,
+            type: m.type,
+            level: (m.level || '').trim().slice(0, 60),
+            x: clamp(m.x),
+            y: clamp(m.y),
+            label: (m.label || '').trim().slice(0, 120),
+            distanceMeters:
+              typeof m.distanceMeters === 'number' && Number.isFinite(m.distanceMeters) ? Math.min(100000, m.distanceMeters) : null,
+          })),
+        })
+      }
+
       await tx.venue.update({
         where: { id },
         data: {
@@ -179,7 +226,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       })
     })
 
-    return NextResponse.json({ ok: true, seatCount: seats.length, seatingMode })
+    return NextResponse.json({ ok: true, seatCount: seats.length, markerCount: Array.isArray(markers) ? markers.length : 0, seatingMode })
   } catch (err: any) {
     // Foreign key violation from the RESTRICT constraint above surfaces
     // here as a Prisma P2003/P2014-family error - give a real message
