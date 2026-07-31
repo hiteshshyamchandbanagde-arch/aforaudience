@@ -1491,9 +1491,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <button
                   onClick={() => setShowGenerator((v) => !v)}
+                  title="Drops a starting grid of seats onto the canvas - you can then freely move, add, or delete any of them by hand."
                   style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)' }}
                 >
-                  {showGenerator ? 'Close Grid Generator' : '+ Generate Grid'}
+                  {showGenerator ? 'Close Quick Layout' : '+ Quick Layout (start from a grid)'}
                 </button>
                 <button
                   onClick={resetLayout}
@@ -1522,13 +1523,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
               {showGenerator && (
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin (px):</label>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
+                    This is a starting point, not a final layout. Set the shape below and it drops seats onto the canvas above - then hand-edit anything (move, add, delete) just like a manually placed seat.
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin:</label>
                     <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} min={0} max={500} onCommit={(n) => setGridConfig((g) => ({ ...g, sideMarginPx: n }))} />
-                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing X/Y (px):</label>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing, side-to-side / front-to-back:</label>
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
                   </div>
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
+                    These are canvas units, not a real-world measurement - bigger number means more empty space. Adjust and watch the preview above; there's no need to know exactly what "px" means.
+                  </p>
 
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>
@@ -1579,11 +1586,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
-                        Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat
+                        Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat. The scale already runs the full width, so a position near the right edge just means a number close to 100 - there's no separate "from the right" field needed.
                       </div>
                       {rg.verticalAisles.map((a) => (
                         <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
-                          <label style={{ fontSize: '12px' }}>Position (% from left):</label>
+                          <label style={{ fontSize: '12px' }}>Position (%):</label>
                           <ClampedNumberInput
                             min={0}
                             max={100}
@@ -1591,7 +1598,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                             value={Math.round(a.afterFraction * 100)}
                             onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', n / 100)}
                           />
-                          <label style={{ fontSize: '12px' }}>Gap (px):</label>
+                          <label style={{ fontSize: '12px' }}>Aisle width:</label>
                           <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={a.gapPx} min={0} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', n)} />
                           <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         </div>
@@ -1610,7 +1617,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
                       <label style={{ fontSize: '12px' }}>After row #:</label>
                       <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
-                      <label style={{ fontSize: '12px' }}>Gap (px):</label>
+                      <label style={{ fontSize: '12px' }}>Aisle width:</label>
                       <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.gapPx} min={0} onCommit={(n) => updateAisle(a.id, 'gapPx', n)} />
                       <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                     </div>
