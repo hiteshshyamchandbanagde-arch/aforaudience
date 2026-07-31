@@ -30,6 +30,16 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
 
 const TYPE_OPTIONS = ["All", ...Object.keys(TYPE_META)]
 
+// Same date+startTime instant-comparison pattern as the booking guard
+// (POST /api/bookings) and cancellation routes - kept consistent so
+// "past" means the same thing everywhere in the app.
+function isPastEvent(e: { date: string; startTime: string }): boolean {
+  const [h, m] = e.startTime.split(':').map(Number)
+  const eventStart = new Date(e.date)
+  eventStart.setHours(h, m, 0, 0)
+  return eventStart.getTime() <= Date.now()
+}
+
 export default function EventsPage() {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -59,6 +69,7 @@ export default function EventsPage() {
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
   const [view, setView] = useState<"grid" | "list">("grid")
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -86,8 +97,15 @@ export default function EventsPage() {
     const matchCity = selectedCity === "All Cities" || e.venue?.city === selectedCity
     const matchPrice =
       priceFilter === "All" || (priceFilter === "Free" && e.isFree) || (priceFilter === "Paid" && !e.isFree)
-    return matchSearch && matchType && matchCity && matchPrice
+    const matchTab = tab === "upcoming" ? !isPastEvent(e) : isPastEvent(e)
+    return matchSearch && matchType && matchCity && matchPrice && matchTab
   })
+  if (tab === "past") {
+    // API returns date ascending (soonest-first, right for Upcoming) -
+    // Past reads better newest-first, so reverse rather than re-sort
+    // from scratch.
+    filtered.reverse()
+  }
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
@@ -100,7 +118,7 @@ export default function EventsPage() {
             Find your next <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>live experience</em>
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading events..." : `${filtered.length} events happening near you`}
+            {loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
           </p>
           <div style={{ position: "relative" }}>
             <input
@@ -120,6 +138,33 @@ export default function EventsPage() {
             {error}
           </div>
         )}
+
+        {/* UPCOMING / PAST TAB - Hitesh (31 Jul): keep upcoming as the
+            default listing, but let people browse past events as a
+            separate reference section rather than mixing them together
+            or hiding them entirely. Deliberately one page with a tab,
+            not a separate route/URL - reuses the same filters/search
+            instead of a near-duplicate page. */}
+        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+          {(["upcoming", "past"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                padding: "9px 20px",
+                borderRadius: "8px",
+                border: `1.5px solid ${tab === t ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
+                background: tab === t ? "var(--afa-terracotta)" : "white",
+                color: tab === t ? "white" : "var(--afa-ink)",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {t === "upcoming" ? "Upcoming" : "Past"}
+            </button>
+          ))}
+        </div>
 
         {/* FILTERS */}
         <style>{`
@@ -201,10 +246,10 @@ export default function EventsPage() {
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-              {events.length === 0 ? "No events published yet" : "No events found"}
+              {tab === "past" ? "No past events yet" : events.length === 0 ? "No events published yet" : "No events found"}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {events.length === 0 ? "Check back soon — organisers are setting things up." : "Try adjusting your filters"}
+              {tab === "past" ? "Events move here automatically once they're over." : events.length === 0 ? "Check back soon — organisers are setting things up." : "Try adjusting your filters"}
             </p>
           </div>
         ) : (
@@ -274,7 +319,11 @@ export default function EventsPage() {
                       <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "var(--afa-green-mid)" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                         {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                       </span>
-                      {(() => {
+                      {tab === "past" ? (
+                        <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
+                          Ended
+                        </span>
+                      ) : (() => {
                         const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                         if (status === 'available') return null
                         const badge = AVAILABILITY_BADGE[status]
@@ -313,7 +362,9 @@ export default function EventsPage() {
                             {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                           </span>
                           <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{meta.label}</span>
-                          {(() => {
+                          {tab === "past" ? (
+                            <span style={{ fontSize: "12px", color: "var(--afa-ink)", fontWeight: 600, opacity: 0.6 }}>Ended</span>
+                          ) : (() => {
                             const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                             if (status === 'available') return null
                             const badge = AVAILABILITY_BADGE[status]

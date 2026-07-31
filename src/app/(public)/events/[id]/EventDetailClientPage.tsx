@@ -70,6 +70,15 @@ const TYPE_META: Record<string, { emoji: string; color: string; label: string }>
   LINEUP: { emoji: "🌟", color: "var(--afa-brown-black)", label: "Lineup" },
 }
 
+// Same date+startTime instant-comparison pattern used by the booking
+// guard (POST /api/bookings) and the events listing page's tab split.
+function isPastEvent(e: { date: string; startTime: string }): boolean {
+  const [h, m] = e.startTime.split(':').map(Number)
+  const eventStart = new Date(e.date)
+  eventStart.setHours(h, m, 0, 0)
+  return eventStart.getTime() <= Date.now()
+}
+
 export default function EventDetailPage({ event, canReview }: { event: EventData | null; canReview: boolean }) {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -269,10 +278,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
     // too (POST /api/bookings) - this is the client-side mirror so the
     // person gets a clear message instead of reaching a payment screen
     // for a show that's already over.
-    const [eventStartHour, eventStartMinute] = event.startTime.split(':').map(Number)
-    const eventStart = new Date(event.date)
-    eventStart.setHours(eventStartHour, eventStartMinute, 0, 0)
-    if (eventStart.getTime() <= Date.now()) {
+    if (isPastEvent(event)) {
       setBookingError("This event has already happened and can no longer be booked.")
       return
     }
@@ -531,7 +537,17 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         {/* RIGHT — INFO PANEL */}
         <div style={{ position: "sticky", top: "80px", height: "fit-content" }}>
           <div style={{ background: "white", borderRadius: "16px", padding: "24px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
-            {reservedMessage ? (
+            {isPastEvent(event) ? (
+              <div>
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🎭</div>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+                  This event has ended
+                </div>
+                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6 }}>
+                  Browse upcoming events instead.
+                </p>
+              </div>
+            ) : reservedMessage ? (
               <div>
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
