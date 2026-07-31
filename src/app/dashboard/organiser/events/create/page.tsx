@@ -97,6 +97,17 @@ function todayLocalDateString() {
   return `${yyyy}-${mm}-${dd}`
 }
 
+// Companion to todayLocalDateString (31 Jul follow-up) - Start Time's
+// picker should only floor at "right now" when the selected Date is
+// actually today; a future date has no such constraint. Also local time,
+// same UTC-offset reasoning as the date helper above.
+function nowLocalTimeString() {
+  const d = new Date()
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
 export default function CreateEventPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -554,7 +565,15 @@ export default function CreateEventPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Start Time *</label>
-                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} style={inputStyle} required />
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    min={formData.date === todayLocalDateString() ? nowLocalTimeString() : undefined}
+                    style={inputStyle}
+                    required
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>End Time *</label>
