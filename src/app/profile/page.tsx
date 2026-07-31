@@ -63,6 +63,15 @@ function ProfileContent() {
   const [initialDisplayName, setInitialDisplayName] = useState('')
   const [savingName, setSavingName] = useState(false)
 
+  // Feedback cms(profile name-flash) - the heading used to fall back to
+  // the login username (available instantly from the session) while
+  // /api/users/me was still in flight, then swap to the real display
+  // name once it landed - a visible flash on every page load. Not a
+  // cross-user leak (confirmed both values always belong to the same
+  // signed-in user), just a loading-order issue. This flag lets the
+  // heading render a neutral placeholder for that one gap instead.
+  const [nameLoaded, setNameLoaded] = useState(false)
+
   // Display-only currency preference (Option A). Same load/save shape as
   // displayName above - separate state loaded from /api/users/me (not the
   // session cache), its own PATCH, its own saving flag. Real settlement
@@ -94,6 +103,10 @@ function ProfileContent() {
       setDisplayCurrency(currentCurrency)
       setInitialDisplayCurrency(currentCurrency)
     }
+    // Set regardless of meRes.ok - if the fetch failed we still want to
+    // stop showing the placeholder and fall through to the username,
+    // rather than leaving the heading blank forever.
+    setNameLoaded(true)
     if (currenciesRes.ok) {
       const d = await currenciesRes.json()
       setCurrencies(d.currencies ?? [])
@@ -294,7 +307,7 @@ function ProfileContent() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-            {initialDisplayName || user?.name || 'Your Profile'}
+            {nameLoaded ? (initialDisplayName || user?.name || 'Your Profile') : '\u00A0'}
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
           {user?.code && (
