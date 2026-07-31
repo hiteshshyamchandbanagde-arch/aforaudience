@@ -96,6 +96,8 @@ export async function POST(req: Request) {
       venueId, bookingAmount, publish, ticketTiers,
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
+      isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+      celebrityAttendingName, panelists,
     } = body
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
@@ -211,6 +213,21 @@ export async function POST(req: Request) {
       ? ticketTiers.filter((t: any) => t?.sectionName && Number(t.price) >= 0 && Number(t.totalSeats) > 0)
       : []
 
+    // Competition show (31 Jul) - panelists only meaningful/stored when
+    // isCompetitionShow is true, mirroring how ticketTiers are only kept
+    // when actually provided. A panelist needs at least a name; bio/photo
+    // are optional (photo is added in a follow-up upload call once the
+    // event/panelist IDs exist, same pattern as venue underlays).
+    const validPanelists = isCompetitionShow === true && Array.isArray(panelists)
+      ? panelists
+          .filter((p: any) => typeof p?.name === 'string' && p.name.trim() !== '')
+          .map((p: any, i: number) => ({
+            name: String(p.name).trim().slice(0, 100),
+            bio: typeof p.bio === 'string' && p.bio.trim() !== '' ? p.bio.trim().slice(0, 500) : null,
+            order: i,
+          }))
+      : []
+
     const event = await prisma.event.create({
       data: {
         organiserId: organiser.id,
@@ -271,6 +288,16 @@ export async function POST(req: Request) {
               })),
             }
           : undefined,
+        // Competition show fields all stay at their false/null defaults
+        // unless isCompetitionShow is explicitly true - prize/celebrity
+        // text is meaningless (and hidden in the UI) otherwise, so don't
+        // persist stray values from a toggle a user flipped off again.
+        isCompetitionShow: Boolean(isCompetitionShow),
+        competitionPrizeFirst: isCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
+        competitionPrizeSecond: isCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
+        competitionPrizeThird: isCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
+        celebrityAttendingName: isCompetitionShow && celebrityAttendingName ? String(celebrityAttendingName).trim().slice(0, 100) : null,
+        panelists: validPanelists.length > 0 ? { create: validPanelists } : undefined,
       },
     })
 

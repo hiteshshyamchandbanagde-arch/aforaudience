@@ -124,6 +124,17 @@ export default function CreateEventPage() {
   const [isFree, setIsFree] = useState(true)
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
+  // Competition show (31 Jul feedback) - an optional layer on top of any
+  // event type, not a new type itself. Photos for panelists/celebrity can
+  // only be added after the event exists (upload routes are keyed by
+  // eventId/panelistId) - collected here as text only, photo upload lives
+  // on the Edit page.
+  const [isCompetitionShow, setIsCompetitionShow] = useState(false)
+  const [competitionPrizeFirst, setCompetitionPrizeFirst] = useState('')
+  const [competitionPrizeSecond, setCompetitionPrizeSecond] = useState('')
+  const [competitionPrizeThird, setCompetitionPrizeThird] = useState('')
+  const [celebrityAttendingName, setCelebrityAttendingName] = useState('')
+  const [panelists, setPanelists] = useState<{ name: string; bio: string }[]>([])
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
   // §4.5 - performer economics + booking cap, Event-level (E8/E9/E13)
@@ -308,6 +319,8 @@ export default function CreateEventPage() {
     maxPerformers, applicationApprovalMode, maxSeatsPerBooking,
     plusOnesRequired, defaultCompensationType, defaultFeeAmount,
     defaultBuyInAmount, tierPrices,
+    isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+    celebrityAttendingName, panelists,
   ])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -437,6 +450,12 @@ export default function CreateEventPage() {
           defaultCompensationType,
           defaultFeeAmount: defaultCompensationType === 'PAID' ? defaultFeeAmount : null,
           defaultBuyInAmount: defaultCompensationType === 'BUY_IN' ? defaultBuyInAmount : null,
+          isCompetitionShow,
+          competitionPrizeFirst: isCompetitionShow ? competitionPrizeFirst : null,
+          competitionPrizeSecond: isCompetitionShow ? competitionPrizeSecond : null,
+          competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
+          celebrityAttendingName: isCompetitionShow ? celebrityAttendingName : null,
+          panelists: isCompetitionShow ? panelists : [],
           publish,
         }),
       })
@@ -554,6 +573,72 @@ export default function CreateEventPage() {
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '14px', color: 'var(--afa-ink)' }}>
+                <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
+                This is a competition show (panelists, prizes, celebrity guest)
+              </label>
+
+              {isCompetitionShow && (
+                <div style={{ marginTop: '16px', padding: '20px', background: 'var(--afa-cream)', borderRadius: '10px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+                    Photos for panelists and the celebrity guest can be added once the event is saved, from Edit Event.
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <label style={labelStyle}>1st Prize</label>
+                      <input style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>2nd Prize</label>
+                      <input style={inputStyle} value={competitionPrizeSecond} onChange={(e) => setCompetitionPrizeSecond(e.target.value)} placeholder="Optional" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>3rd Prize</label>
+                      <input style={inputStyle} value={competitionPrizeThird} onChange={(e) => setCompetitionPrizeThird(e.target.value)} placeholder="Optional" />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={labelStyle}>Celebrity Attending (name)</label>
+                    <input style={inputStyle} value={celebrityAttendingName} onChange={(e) => setCelebrityAttendingName(e.target.value)} placeholder="Optional - shown prominently on the event page" />
+                  </div>
+
+                  <label style={labelStyle}>Panelists</label>
+                  {panelists.map((p, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'flex-start' }}>
+                      <input
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={p.name}
+                        onChange={(e) => setPanelists((prev) => prev.map((row, idx) => (idx === i ? { ...row, name: e.target.value } : row)))}
+                        placeholder="Panelist name"
+                      />
+                      <input
+                        style={{ ...inputStyle, flex: 2 }}
+                        value={p.bio}
+                        onChange={(e) => setPanelists((prev) => prev.map((row, idx) => (idx === i ? { ...row, bio: e.target.value } : row)))}
+                        placeholder="Short bio (optional)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPanelists((prev) => prev.filter((_, idx) => idx !== i))}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer', fontSize: '18px', padding: '8px' }}
+                        aria-label="Remove panelist"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setPanelists((prev) => [...prev, { name: '', bio: '' }])}
+                    style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1px dashed rgba(200,68,26,0.4)', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', marginTop: '4px' }}
+                  >
+                    + Add panelist
+                  </button>
+                </div>
+              )}
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}

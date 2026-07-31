@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params
     const event = await prisma.event.findUnique({
       where: { id },
-      include: { venue: true, organiser: { include: { user: { select: { isSuspended: true } } } } },
+      include: { venue: true, organiser: { include: { user: { select: { isSuspended: true } } } }, panelists: { orderBy: { order: 'asc' } } },
     })
 
     // H3 - same suspension gate as the public listing (GET /api/events),
@@ -61,7 +61,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       title, description, type, date, startTime, endTime,
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
+      isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+      celebrityAttendingName, celebrityPhotoUrl, panelists,
     } = body
+
+    // Competition show (31 Jul) - same shape as POST, panelists only kept
+    // when isCompetitionShow is (or remains) true. photoUrl is passed
+    // through as-sent by the client (it already holds whatever GET
+    // returned) rather than re-uploaded here - full-replace below gives
+    // panelists new ids each edit, same accepted tradeoff as ticketTiers
+    // (see comment below); nothing else references EventPanelist.id
+    // across saves, only the photo-upload route uses it transiently.
+    const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
+    const validPanelistsEdit = resolvedIsCompetitionShow && Array.isArray(panelists)
+      ? panelists
+          .filter((p: any) => typeof p?.name === 'string' && p.name.trim() !== '')
+          .map((p: any, i: number) => ({
+            name: String(p.name).trim().slice(0, 100),
+            bio: typeof p.bio === 'string' && p.bio.trim() !== '' ? p.bio.trim().slice(0, 500) : null,
+            photoUrl: typeof p.photoUrl === 'string' && p.photoUrl ? p.photoUrl : null,
+            order: i,
+          }))
+      : []
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
     // all, meaning a Numbered-venue event's per-section pricing could only
@@ -185,6 +206,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
               price: parseFloat(t.price),
               totalSeats: parseInt(t.totalSeats),
             })),
+          },
+        }),
+        ...(isCompetitionShow !== undefined && {
+          isCompetitionShow: resolvedIsCompetitionShow,
+          competitionPrizeFirst: resolvedIsCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
+          competitionPrizeSecond: resolvedIsCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
+          competitionPrizeThird: resolvedIsCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
+          celebrityAttendingName: resolvedIsCompetitionShow && celebrityAttendingName ? String(celebrityAttendingName).trim().slice(0, 100) : null,
+          celebrityPhotoUrl: resolvedIsCompetitionShow && celebrityPhotoUrl ? String(celebrityPhotoUrl) : null,
+        }),
+        ...(panelists !== undefined && {
+          panelists: {
+            deleteMany: {},
+            create: validPanelistsEdit,
           },
         }),
       },
