@@ -180,6 +180,20 @@ export default function BrowseEventsToApplyPage() {
                       )}
                     </div>
 
+                    {/* §9.4 low-risk fix identified 29 Jul, session 47 - the
+                        Buy-in badge above previously only carried this
+                        disclaimer on the artist's own dashboard (§4.5); a
+                        real user-facing expectation gap since this is the
+                        first place an artist actually sees the amount,
+                        before ever applying. Same wording used on the
+                        dashboard's "Recorded Earnings" section, for
+                        consistency. */}
+                    {event.defaultCompensationType === 'BUY_IN' && (
+                      <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '-6px', marginBottom: '12px' }}>
+                        Pay directly to the organiser - not yet processed or confirmed by the platform.
+                      </p>
+                    )}
+
                     <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
                     {existingStatus ? (

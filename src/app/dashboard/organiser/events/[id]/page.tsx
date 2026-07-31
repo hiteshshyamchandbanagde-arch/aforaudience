@@ -419,6 +419,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             {event.applications.length > 0 && (
               <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '14px' }}>
                 Artists apply under this event's declared compensation terms — <strong>{describeDefaultCompensation(event)}</strong>. Approving locks this in for the artist; it's final.
+                {event.defaultCompensationType === 'BUY_IN' && ' A Buy-in amount is paid directly to you by the artist - not yet processed or confirmed by the platform.'}
               </p>
             )}
             {event.applications.length === 0 ? (
