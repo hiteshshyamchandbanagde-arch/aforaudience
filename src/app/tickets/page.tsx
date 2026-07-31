@@ -33,11 +33,18 @@ interface BookingItem {
 // the request fires. Server is the actual source of truth; this must
 // stay in sync with it by hand since there's no shared module between
 // API routes and client components in this codebase's current setup.
+//
+// Feedback (31 Jul, Hitesh device test) - a past event's negative
+// daysBefore was silently falling into the "<7 days" bucket, so the
+// confirm dialog said "No refund - less than 7 days out" for a show
+// that had already happened, instead of explaining why cancellation
+// isn't possible at all. Server already blocked the actual cancel
+// correctly; this only fixes the preview's wording (and see isPastEvent
+// below, which now hides the button entirely for this case).
 function previewRefund(b: BookingItem): { amount: number; label: string } {
-  const [h, m] = b.event.startTime.split(':').map(Number)
-  const eventStart = new Date(b.event.date)
-  eventStart.setHours(h, m, 0, 0)
+  const eventStart = eventStartInstant(b)
   const daysBefore = (eventStart.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+  if (daysBefore <= 0) return { amount: 0, label: "This event has already happened" }
   if (b.totalAmount <= 0) return { amount: 0, label: 'Free ticket - nothing to refund' }
   if (daysBefore >= 14) {
     const amount = Math.max(0, b.totalAmount - b.bookingFeeAmount)
@@ -48,6 +55,20 @@ function previewRefund(b: BookingItem): { amount: number; label: string } {
     return { amount, label: `₹${amount.toLocaleString('en-IN')} refund - 50% (7-14 days out)` }
   }
   return { amount: 0, label: 'No refund - less than 7 days out' }
+}
+
+function eventStartInstant(b: BookingItem): Date {
+  const [h, m] = b.event.startTime.split(':').map(Number)
+  const eventStart = new Date(b.event.date)
+  eventStart.setHours(h, m, 0, 0)
+  return eventStart
+}
+
+// Same past-event check as the server's block in PATCH /api/bookings/[id]
+// - used to hide the Cancel button outright rather than show it and
+// reject on click.
+function isPastEvent(b: BookingItem): boolean {
+  return eventStartInstant(b).getTime() <= Date.now()
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
@@ -97,6 +118,10 @@ export default function MyTicketsPage() {
 
   const cancelBooking = async (b: BookingItem) => {
     if (b.status === 'CONFIRMED') {
+      if (isPastEvent(b)) {
+        setError("This event has already happened - it can't be cancelled.")
+        return
+      }
       const { label } = previewRefund(b)
       if (!window.confirm(`Cancel this ticket?\n\n${label}\n\nThis can't be undone.`)) return
     }
@@ -196,14 +221,16 @@ export default function MyTicketsPage() {
                         Download ticket (PDF)
                       </a>
                       <MessageButton contextType="BOOKING" contextId={b.id} label="Message Organiser" />
-                      <button
-                        onClick={() => cancelBooking(b)}
-                        disabled={cancelling === b.id}
-                        title={previewRefund(b).label}
-                        style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
-                      >
-                        {cancelling === b.id ? 'Cancelling...' : 'Cancel ticket'}
-                      </button>
+                      {!isPastEvent(b) && (
+                        <button
+                          onClick={() => cancelBooking(b)}
+                          disabled={cancelling === b.id}
+                          title={previewRefund(b).label}
+                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                        >
+                          {cancelling === b.id ? 'Cancelling...' : 'Cancel ticket'}
+                        </button>
+                      )}
                     </div>
                   )}
                   {(eff === 'CANCELLED' || eff === 'REFUNDED') && b.cancelledAt && (
