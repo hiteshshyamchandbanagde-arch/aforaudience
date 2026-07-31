@@ -110,6 +110,15 @@ function todayLocalDateString() {
   return `${yyyy}-${mm}-${dd}`
 }
 
+// Companion to todayLocalDateString (31 Jul follow-up) - see
+// create/page.tsx for the identical helper and reasoning.
+function nowLocalTimeString() {
+  const d = new Date()
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -562,7 +571,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
                 <div>
                   <label style={labelStyle}>Start Time *</label>
-                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} style={inputStyle} required />
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    min={formData.date === todayLocalDateString() ? nowLocalTimeString() : undefined}
+                    style={inputStyle}
+                    required
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>End Time *</label>
