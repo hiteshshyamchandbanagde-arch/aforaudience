@@ -449,6 +449,24 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // Seat-map cluster #3 (design.md §9.4, decided 31 Jul session 48) -
+  // Manual Canvas is a precision drag/place tool that doesn't translate
+  // to touch at this granularity (dragging in particular only ever had
+  // mouse listeners - touchmove/touchend were never wired up, so it was
+  // already silently broken on phones, not just cramped). Rather than
+  // chase full touch parity, the canvas becomes view-only + scrollable/
+  // pinch-zoomable below the breakpoint; actual placement stays desktop/
+  // tablet. 768px matches the existing mobile-nav breakpoint elsewhere
+  // in the app for consistency.
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
   const [seatingMode, setSeatingMode] = useState<'GENERAL_ADMISSION' | 'NUMBERED'>('GENERAL_ADMISSION')
 
   // §9.4 - venue Levels (Ground Floor, Balcony, 1st, 2nd...). Starts as a
@@ -902,6 +920,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const placeSeat = (e: React.MouseEvent<HTMLDivElement>) => {
     if (seatingMode !== 'NUMBERED') return
+    if (isMobile) return // view-only on mobile - see isMobile note above
     if (!manualPlacement) return
     if (dragId) return // don't place while finishing a drag
     const rect = canvasRef.current?.getBoundingClientRect()
@@ -943,6 +962,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const startDrag = (e: React.MouseEvent, clientId: string) => {
     e.stopPropagation()
+    if (isMobile) { setSelectedId(clientId); return } // view-only: allow selecting to inspect, but not dragging
     setSelectedId(clientId)
     setDragId(clientId)
   }
@@ -1488,40 +1508,53 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <button
-                  onClick={() => setShowGenerator((v) => !v)}
-                  title="Drops a starting grid of seats onto the canvas - you can then freely move, add, or delete any of them by hand."
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)' }}
-                >
-                  {showGenerator ? 'Close Quick Layout' : '+ Quick Layout (start from a grid)'}
-                </button>
-                <button
-                  onClick={resetLayout}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
-                >
-                  Reset Layout
-                </button>
-                <button
-                  onClick={() => setManualPlacement((v) => !v)}
-                  title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
-                  style={{
-                    padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                    border: manualPlacement ? 'none' : '1px solid rgba(14,12,10,0.2)',
-                    background: manualPlacement ? 'var(--afa-ink)' : 'var(--afa-white)',
-                    color: manualPlacement ? 'var(--afa-white)' : 'var(--afa-ink)',
-                  }}
-                >
-                  {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
-                </button>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '-6px', marginBottom: '12px' }}>
-                {manualPlacement
-                  ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
-                  : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
-              </p>
+              {isMobile ? (
+                <div style={{ padding: '14px 16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', margin: '0 0 4px' }}>
+                    Viewing only on this screen
+                  </p>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7, margin: 0 }}>
+                    Placing, moving, and generating seats needs more room than a phone gives you. Pinch or scroll below to check the current layout, and switch to a tablet or desktop to make changes.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button
+                      onClick={() => setShowGenerator((v) => !v)}
+                      title="Drops a starting grid of seats onto the canvas - you can then freely move, add, or delete any of them by hand."
+                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)' }}
+                    >
+                      {showGenerator ? 'Close Quick Layout' : '+ Quick Layout (start from a grid)'}
+                    </button>
+                    <button
+                      onClick={resetLayout}
+                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
+                    >
+                      Reset Layout
+                    </button>
+                    <button
+                      onClick={() => setManualPlacement((v) => !v)}
+                      title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
+                      style={{
+                        padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                        border: manualPlacement ? 'none' : '1px solid rgba(14,12,10,0.2)',
+                        background: manualPlacement ? 'var(--afa-ink)' : 'var(--afa-white)',
+                        color: manualPlacement ? 'var(--afa-white)' : 'var(--afa-ink)',
+                      }}
+                    >
+                      {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '-6px', marginBottom: '12px' }}>
+                    {manualPlacement
+                      ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
+                      : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
+                  </p>
+                </>
+              )}
 
-              {showGenerator && (
+              {showGenerator && !isMobile && (
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
                     This is a starting point, not a final layout. Set the shape below and it drops seats onto the canvas above - then hand-edit anything (move, add, delete) just like a manually placed seat.
@@ -1632,46 +1665,52 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Section name:</label>
-                <input
-                  style={{ ...inputStyle, width: '160px' }}
-                  value={activeTier}
-                  onChange={(e) => setActiveTier(e.target.value.slice(0, 60))}
-                  placeholder="e.g. VIP Front"
-                />
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Row letter:</label>
-                <input style={{ ...inputStyle, width: '60px' }} value={nextRow} onChange={(e) => setNextRow(e.target.value.slice(0, 10))} />
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Next seat #:</label>
-                <ClampedNumberInput
-                  style={{ ...inputStyle, width: '70px' }}
-                  value={nextNumber}
-                  min={1}
-                  onCommit={setNextNumber}
-                />
-                <label style={{ fontSize: '13px', fontWeight: 600 }}>Price:</label>
-                <input
-                  type="number"
-                  style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
-                  placeholder="₹"
-                  disabled={zoneIsFree(activeTier)}
-                  value={zonePrices[activeTier] || ''}
-                  onChange={(e) => setZonePrice(activeTier, e.target.value)}
-                />
-                <FreeToggle checked={zoneIsFree(activeTier)} onChange={(free) => setZoneFree(activeTier, free)} />
-                <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
-                Every seat you place next gets this section name and row letter, then auto-increments the seat number. Section name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General") — the price here is shared with any other section box using the same name.
-              </p>
+              {!isMobile && (
+                <>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <label style={{ fontSize: '13px', fontWeight: 600 }}>Section name:</label>
+                    <input
+                      style={{ ...inputStyle, width: '160px' }}
+                      value={activeTier}
+                      onChange={(e) => setActiveTier(e.target.value.slice(0, 60))}
+                      placeholder="e.g. VIP Front"
+                    />
+                    <label style={{ fontSize: '13px', fontWeight: 600 }}>Row letter:</label>
+                    <input style={{ ...inputStyle, width: '60px' }} value={nextRow} onChange={(e) => setNextRow(e.target.value.slice(0, 10))} />
+                    <label style={{ fontSize: '13px', fontWeight: 600 }}>Next seat #:</label>
+                    <ClampedNumberInput
+                      style={{ ...inputStyle, width: '70px' }}
+                      value={nextNumber}
+                      min={1}
+                      onCommit={setNextNumber}
+                    />
+                    <label style={{ fontSize: '13px', fontWeight: 600 }}>Price:</label>
+                    <input
+                      type="number"
+                      style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                      placeholder="₹"
+                      disabled={zoneIsFree(activeTier)}
+                      value={zonePrices[activeTier] || ''}
+                      onChange={(e) => setZonePrice(activeTier, e.target.value)}
+                    />
+                    <FreeToggle checked={zoneIsFree(activeTier)} onChange={(free) => setZoneFree(activeTier, free)} />
+                    <span style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>Click the canvas to place a seat manually</span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '12px' }}>
+                    Every seat you place next gets this section name and row letter, then auto-increments the seat number. Section name is what an organiser will price later, so keep it short and clear (e.g. "VIP", "General") — the price here is shared with any other section box using the same name.
+                  </p>
+                </>
+              )}
 
               {canvasBounds.overflowsDefault && (
                 <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '8px' }}>
-                  This layout is larger than the default view — scroll inside the box below to see and place seats across the whole thing.
+                  {isMobile
+                    ? 'This layout is larger than your screen — pinch to zoom or scroll inside the box below to see the whole thing.'
+                    : 'This layout is larger than the default view — scroll inside the box below to see and place seats across the whole thing.'}
                 </p>
               )}
 
-              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px' }}>
+              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
                 <div
                   ref={canvasRef}
                   onClick={placeSeat}
@@ -1681,7 +1720,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     width: `${canvasBounds.width}px`,
                     height: `${canvasBounds.height}px`,
                     background: 'var(--afa-cream-tint-1)',
-                    cursor: manualPlacement ? 'crosshair' : 'default',
+                    cursor: isMobile ? 'default' : (manualPlacement ? 'crosshair' : 'default'),
                   }}
                 >
                   <div
@@ -1726,7 +1765,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        cursor: 'grab',
+                        cursor: isMobile ? 'default' : 'grab',
                         userSelect: 'none',
                       }}
                     >
@@ -1735,7 +1774,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   ))}
                   {seats.length === 0 && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-ink)', opacity: 0.35, fontSize: '14px', textAlign: 'center', padding: '0 20px' }}>
-                      {manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats'}
+                      {isMobile ? 'No seats placed yet - switch to a tablet or desktop to build this layout' : (manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats')}
                     </div>
                   )}
                 </div>
@@ -1744,8 +1783,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
             <div style={{ minWidth: '220px' }}>
               <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '10px' }}>Selected seat</h3>
-              {!selected && <p style={{ fontSize: '13px', opacity: 0.6 }}>Click a seat on the canvas to edit or delete it.</p>}
-              {selected && (
+              {!selected && <p style={{ fontSize: '13px', opacity: 0.6 }}>{isMobile ? 'Tap a seat on the canvas to view it.' : 'Click a seat on the canvas to edit or delete it.'}</p>}
+              {selected && isMobile && (
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  {selected.tierLabel} — Row {selected.row}, Seat {selected.number}
+                  <br /><span style={{ fontSize: '12px', opacity: 0.6 }}>Switch to a tablet or desktop to edit or delete this seat.</span>
+                </p>
+              )}
+              {selected && !isMobile && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontSize: '12px', fontWeight: 600 }}>Section name</label>
                   <input style={inputStyle} value={selected.tierLabel} onChange={(e) => updateSelected('tierLabel', e.target.value.slice(0, 60))} />
