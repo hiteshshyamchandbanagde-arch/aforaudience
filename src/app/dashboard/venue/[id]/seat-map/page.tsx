@@ -1853,55 +1853,61 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
                     For Fire-NOC documentation, not shown to audience members booking seats. Click a marker on the canvas to label it or (for a stage-distance point) record the measured distance.
                   </p>
-
-                  {/* §9.4 cluster item #5 (session 49) - PDF/image reference
-                      underlay. Scoped as a fixed-fit background image per
-                      level (stretched to fit, opacity-adjustable) - no
-                      independent pan/zoom/rotation alignment in v1. */}
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700 }}>Reference image ({levelLabel(activeLevel)}):</span>
-                    <label
-                      style={{
-                        padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
-                        border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)',
-                        opacity: underlayUploading ? 0.6 : 1,
-                      }}
-                    >
-                      {underlayUploading ? 'Uploading…' : underlay ? 'Replace image' : '+ Upload floor plan / photo'}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        disabled={underlayUploading}
-                        style={{ display: 'none' }}
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadUnderlay(f); e.target.value = '' }}
-                      />
-                    </label>
-                    {underlay && (
-                      <>
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>Opacity</label>
-                        <input
-                          type="range"
-                          min={0.1}
-                          max={1}
-                          step={0.05}
-                          value={underlay.opacity}
-                          onChange={(e) => updateUnderlayOpacity(parseFloat(e.target.value))}
-                          style={{ width: '100px' }}
-                        />
-                        <button
-                          onClick={removeUnderlay}
-                          style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
-                        >
-                          Remove image
-                        </button>
-                      </>
-                    )}
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
-                    Upload a floor plan or venue photo to trace over - it stretches to fit behind the canvas and doesn't affect saved seats/markers. If you have a PDF floor plan, export or screenshot the page as an image first.
-                  </p>
                 </>
               )}
+
+              {/* §9.4 cluster item #5 (session 49) - PDF/image reference
+                  underlay. Deliberately NOT inside the !isMobile branch
+                  above (unlike Safety Markers/seat placement) - a file
+                  picker and an opacity slider are plain touch-friendly
+                  controls with no drag-precision problem, so a phone-only
+                  Venue Owner with no laptop/tablet access can still use
+                  this even though seat/marker placement stays desktop-
+                  only. Scoped as a fixed-fit background image per level
+                  (stretched to fit, opacity-adjustable) - no independent
+                  pan/zoom/rotation alignment in v1. */}
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700 }}>Reference image ({levelLabel(activeLevel)}):</span>
+                <label
+                  style={{
+                    padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
+                    border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)',
+                    opacity: underlayUploading ? 0.6 : 1,
+                  }}
+                >
+                  {underlayUploading ? 'Uploading…' : underlay ? 'Replace image' : '+ Upload floor plan / photo'}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={underlayUploading}
+                    style={{ display: 'none' }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadUnderlay(f); e.target.value = '' }}
+                  />
+                </label>
+                {underlay && (
+                  <>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Opacity</label>
+                    <input
+                      type="range"
+                      min={0.1}
+                      max={1}
+                      step={0.05}
+                      value={underlay.opacity}
+                      onChange={(e) => updateUnderlayOpacity(parseFloat(e.target.value))}
+                      style={{ width: '100px' }}
+                    />
+                    <button
+                      onClick={removeUnderlay}
+                      style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
+                    >
+                      Remove image
+                    </button>
+                  </>
+                )}
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
+                Upload a floor plan or venue photo to trace over - it stretches to fit behind the canvas and doesn't affect saved seats/markers. If you have a PDF floor plan, export or screenshot the page as an image first.
+              </p>
 
               {showGenerator && !isMobile && (
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
@@ -2149,7 +2155,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <div
                         key={m.clientId}
                         data-testid="safety-marker"
-                        onClick={(e) => { e.stopPropagation(); if (!isMobile) selectMarker(m.clientId) }}
+                        onClick={(e) => { e.stopPropagation(); selectMarker(m.clientId) }}
                         title={`${meta.name}${m.label ? ` — ${m.label}` : ''}${m.distanceMeters != null ? ` (${m.distanceMeters}m)` : ''}`}
                         style={{
                           position: 'absolute',
@@ -2168,7 +2174,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          cursor: isMobile ? 'default' : 'pointer',
+                          cursor: 'pointer',
                           userSelect: 'none',
                           zIndex: 2,
                         }}
