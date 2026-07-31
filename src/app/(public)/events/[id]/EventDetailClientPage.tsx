@@ -262,6 +262,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       setBookingError("Select at least one seat first")
       return
     }
+    if (!event) return
     // Feedback (31 Jul, Hitesh device test) - booking creation had no
     // check at all against the event's own date/time, so a past event
     // could be booked and paid for end-to-end. Server now rejects this
