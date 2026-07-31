@@ -165,6 +165,18 @@ export async function POST(req: Request) {
       if (!event || event.status !== 'APPROVED') {
         throw new Error('Event not found or not open for booking')
       }
+      // Feedback (31 Jul, Hitesh device test) - booking creation never
+      // checked the event's own date/time at all, so a past event could
+      // be booked and paid for end-to-end (seat select -> reserve ->
+      // real Razorpay checkout). Same date+startTime instant-comparison
+      // pattern already used in POST /api/bookings/[id]/cancel and
+      // POST /api/performances/[id]/cancel.
+      const [eventStartHour, eventStartMinute] = event.startTime.split(':').map(Number)
+      const eventStart = new Date(event.date)
+      eventStart.setHours(eventStartHour, eventStartMinute, 0, 0)
+      if (eventStart.getTime() <= Date.now()) {
+        throw new Error('This event has already happened and can no longer be booked')
+      }
       if (event.organiser?.razorpayAccountId && event.organiser.razorpayAccountStatus === 'activated') {
         payoutAccountId = event.organiser.razorpayAccountId
       }

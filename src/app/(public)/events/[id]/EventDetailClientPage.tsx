@@ -262,6 +262,19 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       setBookingError("Select at least one seat first")
       return
     }
+    // Feedback (31 Jul, Hitesh device test) - booking creation had no
+    // check at all against the event's own date/time, so a past event
+    // could be booked and paid for end-to-end. Server now rejects this
+    // too (POST /api/bookings) - this is the client-side mirror so the
+    // person gets a clear message instead of reaching a payment screen
+    // for a show that's already over.
+    const [eventStartHour, eventStartMinute] = event.startTime.split(':').map(Number)
+    const eventStart = new Date(event.date)
+    eventStart.setHours(eventStartHour, eventStartMinute, 0, 0)
+    if (eventStart.getTime() <= Date.now()) {
+      setBookingError("This event has already happened and can no longer be booked.")
+      return
+    }
     if (status === "loading") {
       return
     }
