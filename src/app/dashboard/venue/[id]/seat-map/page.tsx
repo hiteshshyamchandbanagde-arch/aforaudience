@@ -469,6 +469,36 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const [seatingMode, setSeatingMode] = useState<'GENERAL_ADMISSION' | 'NUMBERED'>('GENERAL_ADMISSION')
 
+  // §9.4 Freeze + method persistence (session 48) - explicit "this map
+  // is finalized" state, venue-wide. While frozen: Save, Add/Remove
+  // level, Quick Layout/Generate, the wizard, and canvas placement/drag
+  // are all disabled - same read-only treatment as the mobile view-only
+  // mode (#3) for visual consistency, distinct banner copy.
+  const [seatMapFrozen, setSeatMapFrozen] = useState(false)
+  const [freezing, setFreezing] = useState(false)
+  const toggleFreeze = async (next: boolean) => {
+    if (next && !window.confirm(
+      'Freeze this seat map? It becomes read-only everywhere in this builder until you Unfreeze it.\n\nThis does not affect any live event or booking - it just locks further edits here.'
+    )) return
+    if (!next && !window.confirm('Unfreeze this seat map so it can be edited again?')) return
+    setFreezing(true)
+    try {
+      const res = await fetch(`/api/venues/${id}/seats`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frozen: next }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update freeze state')
+      setSeatMapFrozen(next)
+      showToast(next ? 'Seat map frozen.' : 'Seat map unfrozen - you can edit it again.', 'success')
+    } catch (err: any) {
+      showToast(err.message, 'error')
+    } finally {
+      setFreezing(false)
+    }
+  }
+
   // §9.4 - venue Levels (Ground Floor, Balcony, 1st, 2nd...). Starts as a
   // single implicit level ('') that stays invisible in the UI unless the
   // owner adds a real one - confirmed with Hitesh this needs to live in
@@ -522,6 +552,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setBuilderPathByLevel((prev) => ({ ...prev, [activeLevel]: path }))
 
   const addLevel = () => {
+    if (seatMapFrozen) return
     const name = window.prompt('Name this level (e.g. "Ground Floor", "Balcony", "1st Floor")')
     if (name === null) return
     const trimmed = normalizeWhitespace(name).slice(0, 60)
@@ -531,7 +562,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     setActiveLevel(trimmed)
   }
   const removeLevel = (name: string) => {
-    if (levels.length <= 1) return
+    if (levels.length <= 1 || seatMapFrozen) return
     if (!window.confirm(`Remove level "${levelLabel(name)}"? This clears its local layout - nothing is deleted server-side until you Save.`)) return
     setLevels((prev) => prev.filter((l) => l !== name))
     setSeatsByLevel((prev) => { const next = { ...prev }; delete next[name]; return next })
@@ -579,9 +610,24 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const [wizardHasVerticalAisle, setWizardHasVerticalAisle] = useState<boolean | null>(null)
   const [wizardHasAisle, setWizardHasAisle] = useState<boolean | null>(null)
 
-  const startWizard = () => { setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardMultiZone(null); setWizardHasVerticalAisle(null); setWizardHasAisle(null) }
-  const startDrawMyself = () => { setBuilderPath('canvas'); setManualPlacement(true) }
-  const backToChoice = () => { setBuilderPath('choose'); setWizardStep(0) }
+  const startWizard = () => { if (seatMapFrozen) return; setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardMultiZone(null); setWizardHasVerticalAisle(null); setWizardHasAisle(null) }
+  const startDrawMyself = () => { if (seatMapFrozen) return; setBuilderPath('canvas'); setManualPlacement(true) }
+  // §9.4 (session 48) - "Back to setup options" used to be reachable
+  // with zero warning even when this level already had real seats.
+  // Guided Setup's Generate APPENDS seats on top of whatever exists
+  // (see generateGrid below) rather than replacing - so re-running it
+  // after Back doesn't delete anything, but it can silently create
+  // overlapping duplicate seats. A confirm-gated switch is the
+  // "separate deliberate action" Hitesh asked for. Empty levels have
+  // nothing to lose, so no prompt needed there.
+  const backToChoice = () => {
+    if (seats.length > 0 && !window.confirm(
+      `Go back and change the setup approach for ${levelLabel(activeLevel)}?\n\n` +
+      `This level already has ${seats.length} seat${seats.length === 1 ? '' : 's'}. Existing seats won't be deleted, but generating a new layout adds seats on top of them and can create overlapping duplicates - review the canvas afterward if you continue.`
+    )) return
+    setBuilderPath('choose')
+    setWizardStep(0)
+  }
   const wizardNext = () => setWizardStep((s) => s + 1)
   const wizardBack = () => setWizardStep((s) => Math.max(0, s - 1))
 
@@ -722,6 +768,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     }))
 
   const generateGrid = () => {
+    if (seatMapFrozen) return
     const totalRows = gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)
     if (totalRows === 0) {
       showToast('Add at least one row group first.', 'error')
@@ -785,6 +832,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         if (!res.ok) throw new Error('Venue not found')
         const data = await res.json()
         setSeatingMode(data.seatingMode || 'GENERAL_ADMISSION')
+        setSeatMapFrozen(Boolean(data.seatMapFrozen))
 
         // Group loaded seats by level - each distinct level value found
         // becomes a tab. Existing single-level venues have every seat at
@@ -921,6 +969,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const placeSeat = (e: React.MouseEvent<HTMLDivElement>) => {
     if (seatingMode !== 'NUMBERED') return
     if (isMobile) return // view-only on mobile - see isMobile note above
+    if (seatMapFrozen) return // view-only while frozen - see toggleFreeze above
     if (!manualPlacement) return
     if (dragId) return // don't place while finishing a drag
     const rect = canvasRef.current?.getBoundingClientRect()
@@ -962,7 +1011,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   const startDrag = (e: React.MouseEvent, clientId: string) => {
     e.stopPropagation()
-    if (isMobile) { setSelectedId(clientId); return } // view-only: allow selecting to inspect, but not dragging
+    if (isMobile || seatMapFrozen) { setSelectedId(clientId); return } // view-only: allow selecting to inspect, but not dragging
     setSelectedId(clientId)
     setDragId(clientId)
   }
@@ -986,19 +1035,20 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   }, [dragId])
 
   const deleteSelected = () => {
-    if (!selectedId) return
+    if (!selectedId || seatMapFrozen) return
     setSeats((prev) => prev.filter((s) => s.clientId !== selectedId))
     setSelectedId(null)
   }
 
   const updateSelected = (field: 'tierLabel' | 'row' | 'number', value: string) => {
-    if (!selectedId) return
+    if (!selectedId || seatMapFrozen) return
     setSeats((prev) => prev.map((s) => (s.clientId === selectedId ? { ...s, [field]: value } : s)))
   }
 
   const selected = seats.find((s) => s.clientId === selectedId) || null
 
   const save = async () => {
+    if (seatMapFrozen) { showToast('This seat map is frozen. Unfreeze it first to save changes.', 'error'); return }
     // Mid-wizard with nothing generated yet used to silently save 0
     // seats and show a false green "Saved 0 seats" success toast - the
     // button was reachable at every wizard step. Now it warns instead of
@@ -1149,6 +1199,38 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </button>
         </div>
 
+        {seatingMode === 'NUMBERED' && (
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
+              padding: '12px 16px', borderRadius: '10px', marginBottom: '18px',
+              background: seatMapFrozen ? 'var(--afa-cream-tint-1)' : 'var(--afa-white)',
+              border: seatMapFrozen ? '1px solid var(--afa-terracotta)' : '1px dashed rgba(14,12,10,0.2)',
+            }}
+          >
+            <div style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
+              {seatMapFrozen ? (
+                <><strong>🔒 Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
+              ) : (
+                'Once this layout is finished, freeze it to lock it against accidental edits.'
+              )}
+            </div>
+            <button
+              onClick={() => toggleFreeze(!seatMapFrozen)}
+              disabled={freezing}
+              style={{
+                padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: freezing ? 'default' : 'pointer',
+                border: 'none', opacity: freezing ? 0.6 : 1,
+                background: seatMapFrozen ? 'var(--afa-white)' : 'var(--afa-terracotta)',
+                color: seatMapFrozen ? 'var(--afa-ink)' : 'var(--afa-white)',
+                ...(seatMapFrozen ? { border: '1px solid rgba(14,12,10,0.2)' } : {}),
+              }}
+            >
+              {freezing ? 'Working…' : seatMapFrozen ? 'Unfreeze' : 'Freeze this seat map'}
+            </button>
+          </div>
+        )}
+
         {seatingMode === 'GENERAL_ADMISSION' && (
           <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, fontStyle: 'italic' }}>
             This venue uses General Admission (section + quantity). Section names, seat counts, and pricing are managed from the venue's Edit page, not here. Switch to Numbered Seating above to build a real seat layout.
@@ -1158,7 +1240,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && (
           <div style={{ marginBottom: '20px' }}>
             {levels.length === 1 ? (
-              <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+              <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
                 + This venue has more than one level (e.g. Balcony, 1st Floor)
               </button>
             ) : (
@@ -1192,7 +1274,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       </button>
                     </div>
                   ))}
-                  <button onClick={addLevel} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+                  <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
                     + Add level
                   </button>
                 </div>
@@ -1659,7 +1741,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     + Add horizontal aisle
                   </button>
 
-                  <button onClick={generateGrid} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                  <button onClick={generateGrid} disabled={seatMapFrozen} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: seatMapFrozen ? 'default' : 'pointer', opacity: seatMapFrozen ? 0.5 : 1 }}>
                     Generate Seats
                   </button>
                 </div>
@@ -1843,11 +1925,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {!(seatingMode === 'NUMBERED' && effectivePath === 'wizard') && (
           <button
             onClick={save}
-            disabled={saving}
+            disabled={saving || seatMapFrozen}
             style={{
               marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
               background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '14px', fontWeight: 700,
-              cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
+              cursor: (saving || seatMapFrozen) ? 'not-allowed' : 'pointer', opacity: (saving || seatMapFrozen) ? 0.6 : 1,
             }}
           >
             {saving ? 'Saving...' : 'Save Seat Map'}
