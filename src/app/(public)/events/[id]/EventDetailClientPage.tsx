@@ -60,6 +60,13 @@ interface EventData {
   organiser: { id: string; orgName: string } | null
   lineup: Performer[]
   ticketTiers: TicketTier[]
+  isCompetitionShow?: boolean
+  competitionPrizeFirst?: string | null
+  competitionPrizeSecond?: string | null
+  competitionPrizeThird?: string | null
+  celebrityAttendingName?: string | null
+  celebrityPhotoUrl?: string | null
+  panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null }[]
 }
 
 const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
@@ -386,6 +393,66 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   </div>
                 ))}
               </div>
+
+              {event.isCompetitionShow && (
+                <div style={{ marginBottom: "32px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>
+                    🏆 Competition Show
+                  </h3>
+
+                  {(event.competitionPrizeFirst || event.competitionPrizeSecond || event.competitionPrizeThird) && (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "20px" }}>
+                      {[
+                        { rank: "1st Prize", value: event.competitionPrizeFirst },
+                        { rank: "2nd Prize", value: event.competitionPrizeSecond },
+                        { rank: "3rd Prize", value: event.competitionPrizeThird },
+                      ].filter((p) => p.value).map((p) => (
+                        <div key={p.rank} style={{ background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(200,68,26,0.15)" }}>
+                          <div style={{ fontSize: "11px", color: "var(--afa-terracotta)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>{p.rank}</div>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{p.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {event.celebrityAttendingName && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)", marginBottom: "20px" }}>
+                      {event.celebrityPhotoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={event.celebrityPhotoUrl} alt={event.celebrityAttendingName} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
+                      )}
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Celebrity Attending</div>
+                        <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{event.celebrityAttendingName}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {event.panelists && event.panelists.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>Panelists</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                        {event.panelists.map((p) => (
+                          <div key={p.id} style={{ display: "flex", gap: "12px", background: "white", borderRadius: "10px", padding: "14px", border: "1px solid rgba(14,12,10,0.08)" }}>
+                            {p.photoUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={p.photoUrl} alt={p.name} style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                            ) : (
+                              <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "var(--afa-cream)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>🎙️</div>
+                            )}
+                            <div>
+                              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)" }}>{p.name}</div>
+                              {p.bio && <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6, marginTop: "2px" }}>{p.bio}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

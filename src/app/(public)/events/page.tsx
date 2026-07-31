@@ -18,6 +18,7 @@ interface EventItem {
   vibe?: string | null
   venue: { name: string; city: string } | null
   lineup: { id: string }[]
+  isCompetitionShow?: boolean
 }
 
 const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
@@ -319,6 +320,11 @@ export default function EventsPage() {
                       <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "var(--afa-green-mid)" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                         {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                       </span>
+                      {event.isCompetitionShow && (
+                        <span style={{ position: "absolute", bottom: "12px", left: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
+                          🏆 Competition
+                        </span>
+                      )}
                       {tab === "past" ? (
                         <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                           Ended

@@ -957,6 +957,47 @@ model Event {
   reviews       Review[]
   ticketTiers   TicketTier[]
   bookingRequests VenueBookingRequest[]
+
+  // Competition show (31 Jul feedback, "as a collaborator" question,
+  // Hitesh confirmed shape same session): an optional layer on top of any
+  // existing EventType, not a new EventType value itself - a STAND_UP or
+  // OPEN_MIC event can equally be a competition. isCompetitionShow gates
+  // whether the panelist/prize/celebrity fields below are shown/editable
+  // at all; they're meaningless (and hidden) when false. Prize captured
+  // by rank per Hitesh's choice - free-text per rank rather than a
+  // structured amount+item split, since prizes are often mixed (cash +
+  // trophy + feature slot) and forcing them into fields would fight the
+  // organiser rather than help them.
+  isCompetitionShow    Boolean @default(false)
+  competitionPrizeFirst  String?
+  competitionPrizeSecond String?
+  competitionPrizeThird  String?
+
+  // Celebrity attending - name + photo per Hitesh's choice, shown
+  // prominently on the public event page. Deliberately just a name/photo
+  // pair (no bio/structured record) - this is a marketing highlight, not
+  // a lineup entry; the celebrity isn't performing or being booked.
+  celebrityAttendingName String?
+  celebrityPhotoUrl      String?
+
+  panelists EventPanelist[]
+}
+
+// Structured panelist entries for competition shows (name + bio + photo
+// each, per Hitesh's choice) - a real one-to-many, not a Json blob, so
+// each panelist gets its own photo upload slot and can be reordered/
+// removed independently. `order` is organiser-controlled display order,
+// not creation order (photo uploads reuse the existing Vercel Blob store,
+// same pattern as venue underlays and avatars - no new infra).
+model EventPanelist {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  bio       String?
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 model Application {

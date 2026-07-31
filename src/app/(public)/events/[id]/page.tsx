@@ -25,6 +25,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         orderBy: { slot: 'asc' },
       },
       ticketTiers: true,
+      panelists: { orderBy: { order: 'asc' } },
     },
   })
 
