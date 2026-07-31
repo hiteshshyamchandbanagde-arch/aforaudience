@@ -205,6 +205,57 @@ export async function createRazorpayOrder(params: {
   }
 }
 
+export type RefundResult = {
+  refundId: string
+  amount: number
+  status: string
+}
+
+/**
+ * Issues a real Razorpay refund against an already-captured payment.
+ * Used by audience ticket cancellation (design.md "Refund policy",
+ * session 47) - deliberately a REAL API call, not bookkeeping-only,
+ * because unlike Buy-in (where no real charge was ever collected),
+ * audience ticket payments genuinely move through Razorpay. Marking
+ * a booking "Refunded" without this call would show the audience
+ * member a refund that never actually reaches them.
+ *
+ * The installed SDK (razorpay@2.9.6, checked directly - no idempotency-
+ * key parameter exists on payments.refund()) doesn't support a real
+ * idempotency header, so double-refund protection has to happen at the
+ * call site instead: guard the booking's status transition with a
+ * Prisma updateMany that only succeeds if status is still CONFIRMED
+ * (same pattern already used for the wallet race-condition fix, PR
+ * #183) BEFORE calling this function, not after - a retried/duplicate
+ * cancel request then fails on the DB guard and never reaches Razorpay
+ * a second time. `receipt` carries the booking ID for tracing in the
+ * Razorpay dashboard, not for idempotency.
+ */
+export async function refundPayment(params: {
+  razorpayPaymentId: string
+  amount: number
+  bookingId: string
+  notes?: Record<string, string>
+}): Promise<RefundResult> {
+  const client = getRazorpay()
+  if (!client) {
+    throw new Error("Razorpay is not configured")
+  }
+
+  const refund = await client.payments.refund(params.razorpayPaymentId, {
+    amount: params.amount,
+    speed: "normal",
+    notes: params.notes ?? {},
+    receipt: params.bookingId,
+  })
+
+  return {
+    refundId: refund.id,
+    amount: typeof refund.amount === "string" ? parseInt(refund.amount, 10) : (refund.amount as number),
+    status: refund.status,
+  }
+}
+
 /**
  * Verifies a Razorpay payment signature using timing-safe comparison.
  * Returns true if the signature is authentic (i.e. this really came

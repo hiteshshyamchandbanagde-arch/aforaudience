@@ -1011,6 +1011,19 @@ model Booking {
   checkedInAt       DateTime?
   checkedInByUserId String?
 
+  // Audience self-serve cancellation (design.md "Refund policy",
+  // session 47, 29 Jul - graduated tiers by days-before-event).
+  // cancelledAt is set for both CANCELLED (no refund, <7 days) and
+  // REFUNDED (>=7 days, real money moved) outcomes - status alone
+  // distinguishes which. refundAmount is the actual amount refunded
+  // (0 for CANCELLED, the computed tier amount for REFUNDED) -
+  // recorded even when 0 so the audience member's ticket history
+  // shows what was evaluated, not just what moved. razorpayRefundId
+  // is null unless a real Razorpay refund call succeeded.
+  cancelledAt      DateTime?
+  refundAmount     Float?
+  razorpayRefundId String?
+
   payment     Payment?
   bookingSeats BookingSeat[]
   plusOnes    PlusOne[]
