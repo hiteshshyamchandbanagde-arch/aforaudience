@@ -81,6 +81,22 @@ const EVENT_TYPE_DEFAULTS: Record<string, { dresscode: string; vibe: string }> =
 // DB unclamped.
 const MAX_PERFORMERS = 500
 
+// Past-date calendar fix (31 Jul feedback) - the date picker previously had
+// no `min`, so its native calendar UI let you pick a past date even though
+// the server already rejects one at Publish ("Event date and time must be
+// in the future"). Computed in LOCAL time deliberately, not
+// `toISOString().split('T')[0]` (UTC) - for IST users (UTC+5:30), a UTC-
+// based "today" would read as yesterday's date for roughly the first ~5.5
+// hours of every IST day, incorrectly blocking today itself from being
+// selectable during that window.
+function todayLocalDateString() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 export default function CreateEventPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -531,7 +547,7 @@ export default function CreateEventPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Date *</label>
-                  <input type="date" name="date" value={formData.date} onChange={handleChange} style={inputStyle} required />
+                  <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} style={inputStyle} required />
                 </div>
               </div>
 

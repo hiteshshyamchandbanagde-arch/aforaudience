@@ -98,6 +98,18 @@ function toDateInputValue(dateStr: string) {
   return new Date(dateStr).toISOString().slice(0, 10)
 }
 
+// Past-date calendar fix (31 Jul feedback) - same reasoning as
+// create/page.tsx's identical helper: computed in LOCAL time, not UTC, so
+// IST users don't get blocked from selecting today's own date during the
+// first ~5.5 hours of the local day.
+function todayLocalDateString() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -543,7 +555,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
                 <div>
                   <label style={labelStyle}>Date *</label>
-                  <input type="date" name="date" value={formData.date} onChange={handleChange} style={inputStyle} required />
+                  <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} style={inputStyle} required />
                 </div>
               </div>
 
