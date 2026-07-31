@@ -13,9 +13,12 @@ interface BookingItem {
   seats: Record<string, number>
   seatLabels?: string[]
   totalAmount: number
+  bookingFeeAmount: number
   status: string
   expiresAt: string | null
   createdAt: string
+  cancelledAt: string | null
+  refundAmount: number | null
   event: {
     id: string
     title: string
@@ -23,6 +26,28 @@ interface BookingItem {
     startTime: string
     venue: { name: string; city: string } | null
   }
+}
+
+// Mirrors computeRefund() in /api/bookings/[id]/route.ts - client-side
+// preview only, so the confirm dialog can show the real number before
+// the request fires. Server is the actual source of truth; this must
+// stay in sync with it by hand since there's no shared module between
+// API routes and client components in this codebase's current setup.
+function previewRefund(b: BookingItem): { amount: number; label: string } {
+  const [h, m] = b.event.startTime.split(':').map(Number)
+  const eventStart = new Date(b.event.date)
+  eventStart.setHours(h, m, 0, 0)
+  const daysBefore = (eventStart.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+  if (b.totalAmount <= 0) return { amount: 0, label: 'Free ticket - nothing to refund' }
+  if (daysBefore >= 14) {
+    const amount = Math.max(0, b.totalAmount - b.bookingFeeAmount)
+    return { amount, label: `₹${amount.toLocaleString('en-IN')} refund (14+ days out)` }
+  }
+  if (daysBefore >= 7) {
+    const amount = b.totalAmount * 0.5
+    return { amount, label: `₹${amount.toLocaleString('en-IN')} refund - 50% (7-14 days out)` }
+  }
+  return { amount: 0, label: 'No refund - less than 7 days out' }
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
@@ -70,11 +95,15 @@ export default function MyTicketsPage() {
     if (session?.user) load()
   }, [session])
 
-  const cancelBooking = async (id: string) => {
-    setCancelling(id)
+  const cancelBooking = async (b: BookingItem) => {
+    if (b.status === 'CONFIRMED') {
+      const { label } = previewRefund(b)
+      if (!window.confirm(`Cancel this ticket?\n\n${label}\n\nThis can't be undone.`)) return
+    }
+    setCancelling(b.id)
     setError('')
     try {
-      const res = await fetch(`/api/bookings/${id}`, { method: 'PATCH' })
+      const res = await fetch(`/api/bookings/${b.id}`, { method: 'PATCH' })
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error || 'Failed to cancel')
@@ -150,7 +179,7 @@ export default function MyTicketsPage() {
                         </Link>
                       )}
                       <button
-                        onClick={() => cancelBooking(b.id)}
+                        onClick={() => cancelBooking(b)}
                         disabled={cancelling === b.id}
                         style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
                       >
@@ -167,7 +196,22 @@ export default function MyTicketsPage() {
                         Download ticket (PDF)
                       </a>
                       <MessageButton contextType="BOOKING" contextId={b.id} label="Message Organiser" />
+                      <button
+                        onClick={() => cancelBooking(b)}
+                        disabled={cancelling === b.id}
+                        title={previewRefund(b).label}
+                        style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                      >
+                        {cancelling === b.id ? 'Cancelling...' : 'Cancel ticket'}
+                      </button>
                     </div>
+                  )}
+                  {(eff === 'CANCELLED' || eff === 'REFUNDED') && b.cancelledAt && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '10px' }}>
+                      {eff === 'REFUNDED'
+                        ? `₹${(b.refundAmount ?? 0).toLocaleString('en-IN')} refunded to your original payment method.`
+                        : 'Cancelled - no amount was refunded.'}
+                    </p>
                   )}
                 </div>
               )
