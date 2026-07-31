@@ -619,6 +619,15 @@ model Venue {
   seats         Seat[]
   zonePrices    VenueZonePrice[]
 
+  // §9.4 Freeze + method persistence (session 48, 31 Jul) - explicit
+  // "this seat map is finalized" action. While true, PUT /api/venues/[id]/
+  // seats rejects writes (409) - owner must Unfreeze first via the
+  // dedicated PATCH action. Venue-level, not per-level: multi-level
+  // venues freeze/unfreeze together, matching how Hitesh described this
+  // ("once a seat map is genuinely finalized"), not a case of partial
+  // per-level lock.
+  seatMapFrozen Boolean @default(false)
+
   availability  VenueAvailability[]
   bookings      VenueBooking[]
   events        Event[]

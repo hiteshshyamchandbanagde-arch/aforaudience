@@ -15,6 +15,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       select: {
         seatingMode: true,
+        seatMapFrozen: true,
         seats: {
           select: { id: true, tierLabel: true, level: true, row: true, number: true, x: true, y: true },
         },
@@ -64,6 +65,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       if (!venueOwner.isApproved) {
         return NextResponse.json({ error: 'Your Venue Owner account is still pending approval' }, { status: 403 })
       }
+    }
+
+    // §9.4 Freeze (session 48) - a frozen map is finalized; owner must
+    // explicitly Unfreeze (PATCH below) before any further seat/price
+    // write goes through. Checked before parsing seats so a stale/large
+    // payload can't slip through on a frozen venue.
+    if (venue.seatMapFrozen) {
+      return NextResponse.json(
+        { error: 'This seat map is frozen. Unfreeze it first to make changes.' },
+        { status: 409 }
+      )
     }
 
     const body = await req.json()
@@ -179,5 +191,53 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       )
     }
     return NextResponse.json({ error: 'Failed to save seat map' }, { status: 500 })
+  }
+}
+
+// §9.4 Freeze + method persistence (session 48) - dedicated toggle,
+// deliberately separate from PUT above. Freezing/unfreezing is an
+// explicit, self-contained action ("this map is finalized" / "let me
+// edit again"), not a side effect of saving a layout - keeping it out
+// of PUT means the freeze state can't be flipped accidentally as a
+// byproduct of some other seat-array payload.
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: (session.user as any).id } })
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+
+    const venue = await prisma.venue.findUnique({
+      where: { id },
+      select: { ownerId: true, seatingMode: true, seatMapFrozen: true, _count: { select: { seats: true } } },
+    })
+    if (!venue) return NextResponse.json({ error: 'Venue not found' }, { status: 404 })
+
+    if (user.role !== 'ADMIN') {
+      const venueOwner = await prisma.venueOwner.findUnique({ where: { id: venue.ownerId } })
+      if (!venueOwner || venueOwner.userId !== user.id) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+    }
+
+    const body = await req.json()
+    if (typeof body?.frozen !== 'boolean') {
+      return NextResponse.json({ error: '"frozen" must be a boolean' }, { status: 400 })
+    }
+
+    // Freezing an empty map isn't a real "finalized" state - nothing to
+    // finalize yet. Unfreezing has no such requirement.
+    if (body.frozen && venue.seatingMode === 'NUMBERED' && venue._count.seats === 0) {
+      return NextResponse.json({ error: 'Add at least one seat before freezing the map.' }, { status: 400 })
+    }
+
+    await prisma.venue.update({ where: { id }, data: { seatMapFrozen: body.frozen } })
+    return NextResponse.json({ ok: true, seatMapFrozen: body.frozen })
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to update freeze state' }, { status: 500 })
   }
 }
