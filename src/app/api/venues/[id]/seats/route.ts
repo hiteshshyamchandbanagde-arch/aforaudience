@@ -25,6 +25,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         markers: {
           select: { id: true, type: true, level: true, x: true, y: true, label: true, distanceMeters: true },
         },
+        underlays: {
+          select: { level: true, imageUrl: true, opacity: true },
+        },
       },
     })
     if (!venue) return NextResponse.json({ error: 'Venue not found' }, { status: 404 })

@@ -542,6 +542,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   const setMarkers = (updater: (prev: MarkerDraft[]) => MarkerDraft[]) =>
     setMarkersByLevel((prev) => ({ ...prev, [activeLevel]: updater(prev[activeLevel] || []) }))
 
+  // §9.4 seat-map cluster item #5 - PDF/image reference underlay, one per
+  // level. Server-authoritative (not part of the local-draft/Save-button
+  // model above) - upload/opacity-change/delete each hit the network
+  // directly via /api/venues/[id]/underlay, since it's a real file, not
+  // small JSON state worth batching into the seats PUT payload.
+  type UnderlayState = { imageUrl: string; opacity: number } | null
+  const [underlaysByLevel, setUnderlaysByLevel] = useState<Record<string, UnderlayState>>({})
+  const underlay = underlaysByLevel[activeLevel] || null
+  const [underlayUploading, setUnderlayUploading] = useState(false)
+
   const [gridConfigByLevel, setGridConfigByLevel] = useState<Record<string, GridConfig>>({})
   const gridConfig = gridConfigByLevel[activeLevel] || defaultGridConfig()
   const setGridConfig = (updater: (prev: GridConfig) => GridConfig) =>
@@ -897,6 +907,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         }
         setMarkersByLevel(markersLoaded)
 
+        const underlaysLoaded: Record<string, { imageUrl: string; opacity: number }> = {}
+        for (const u of data.underlays || []) {
+          underlaysLoaded[u.level || ''] = { imageUrl: u.imageUrl, opacity: u.opacity }
+        }
+        setUnderlaysByLevel(underlaysLoaded)
+
         const priceByLevel: Record<string, Record<string, string>> = {}
         for (const z of data.zonePrices || []) {
           const lvl = z.level || ''
@@ -1164,6 +1180,58 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   }
 
   const selectedMarker = markers.find((m) => m.clientId === selectedMarkerId) || null
+
+  // §9.4 cluster item #5 - underlay is server-authoritative (see the
+  // UnderlayState comment above), so these hit the network immediately
+  // rather than waiting for the main Save button.
+  const uploadUnderlay = async (file: File) => {
+    if (seatMapFrozen) { showToast('This seat map is frozen. Unfreeze it first to make changes.', 'error'); return }
+    setUnderlayUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('level', activeLevel)
+      const res = await fetch(`/api/venues/${id}/underlay`, { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      setUnderlaysByLevel((prev) => ({ ...prev, [activeLevel]: { imageUrl: data.imageUrl, opacity: data.opacity } }))
+      showToast('Reference image uploaded.', 'success')
+    } catch (err: any) {
+      showToast(err.message, 'error')
+    } finally {
+      setUnderlayUploading(false)
+    }
+  }
+
+  const updateUnderlayOpacity = async (opacity: number) => {
+    if (seatMapFrozen || !underlay) return
+    // Optimistic - a slider that visibly lags every drag tick would feel
+    // broken; a failed PATCH is rare and non-destructive to revert from.
+    setUnderlaysByLevel((prev) => ({ ...prev, [activeLevel]: { ...prev[activeLevel]!, opacity } }))
+    try {
+      const res = await fetch(`/api/venues/${id}/underlay`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: activeLevel, opacity }),
+      })
+      if (!res.ok) throw new Error('Failed to update opacity')
+    } catch {
+      // Silent - a stale opacity value isn't worth interrupting the
+      // owner's flow over; it'll resync correctly on next page load.
+    }
+  }
+
+  const removeUnderlay = async () => {
+    if (seatMapFrozen || !underlay) return
+    if (!window.confirm(`Remove the reference image for ${levelLabel(activeLevel)}?`)) return
+    try {
+      const res = await fetch(`/api/venues/${id}/underlay?level=${encodeURIComponent(activeLevel)}`, { method: 'DELETE' })
+      if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Failed to remove') }
+      setUnderlaysByLevel((prev) => { const next = { ...prev }; delete next[activeLevel]; return next })
+    } catch (err: any) {
+      showToast(err.message, 'error')
+    }
+  }
 
   const save = async () => {
     if (seatMapFrozen) { showToast('This seat map is frozen. Unfreeze it first to save changes.', 'error'); return }
@@ -1785,6 +1853,53 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
                     For Fire-NOC documentation, not shown to audience members booking seats. Click a marker on the canvas to label it or (for a stage-distance point) record the measured distance.
                   </p>
+
+                  {/* §9.4 cluster item #5 (session 49) - PDF/image reference
+                      underlay. Scoped as a fixed-fit background image per
+                      level (stretched to fit, opacity-adjustable) - no
+                      independent pan/zoom/rotation alignment in v1. */}
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700 }}>Reference image ({levelLabel(activeLevel)}):</span>
+                    <label
+                      style={{
+                        padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
+                        border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)',
+                        opacity: underlayUploading ? 0.6 : 1,
+                      }}
+                    >
+                      {underlayUploading ? 'Uploading…' : underlay ? 'Replace image' : '+ Upload floor plan / photo'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        disabled={underlayUploading}
+                        style={{ display: 'none' }}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadUnderlay(f); e.target.value = '' }}
+                      />
+                    </label>
+                    {underlay && (
+                      <>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>Opacity</label>
+                        <input
+                          type="range"
+                          min={0.1}
+                          max={1}
+                          step={0.05}
+                          value={underlay.opacity}
+                          onChange={(e) => updateUnderlayOpacity(parseFloat(e.target.value))}
+                          style={{ width: '100px' }}
+                        />
+                        <button
+                          onClick={removeUnderlay}
+                          style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
+                        >
+                          Remove image
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
+                    Upload a floor plan or venue photo to trace over - it stretches to fit behind the canvas and doesn't affect saved seats/markers. If you have a PDF floor plan, export or screenshot the page as an image first.
+                  </p>
                 </>
               )}
 
@@ -1957,6 +2072,23 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     cursor: isMobile ? 'default' : (manualPlacement || markerMode ? 'crosshair' : 'default'),
                   }}
                 >
+                  {underlay && (
+                    <img
+                      src={underlay.imageUrl}
+                      alt=""
+                      data-testid="seatmap-underlay"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        opacity: underlay.opacity,
+                        pointerEvents: 'none',
+                        zIndex: 0,
+                      }}
+                    />
+                  )}
                   <div
                     style={{
                       position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',

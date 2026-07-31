@@ -631,6 +631,7 @@ model Venue {
   seats         Seat[]
   zonePrices    VenueZonePrice[]
   markers       VenueMarker[]
+  underlays     VenueLevelUnderlay[]
 
   // §9.4 Freeze + method persistence (session 48, 31 Jul) - explicit
   // "this seat map is finalized" action. While true, PUT /api/venues/[id]/
@@ -716,6 +717,26 @@ model VenueMarker {
   distanceMeters Float?
 
   @@index([venueId, level])
+}
+
+// §9.4 seat-map cluster item #5 (session 49) - PDF/image reference
+// underlay. Scoped as a fixed-fit background image per level (stretched
+// to the canvas's content bounds, opacity-adjustable) - no independent
+// pan/zoom/rotation alignment in v1, same kind of deliberate scope cut
+// as curved rows being flagged-but-not-built elsewhere in this doc.
+// "PDF" in the design.md name is handled as an image (a floor-plan PDF
+// page exported/screenshotted as an image) - rendering a PDF page
+// natively as a canvas background is real added complexity with no
+// clear ask for it yet.
+model VenueLevelUnderlay {
+  id       String @id @default(cuid())
+  venueId  String
+  venue    Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  level    String @default("")
+  imageUrl String
+  opacity  Float  @default(0.4)
+
+  @@unique([venueId, level])
 }
 
 // §9.4 twenty-fourth amendment - join table for NUMBERED-mode bookings.
