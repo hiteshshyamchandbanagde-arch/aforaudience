@@ -231,6 +231,22 @@ export default function ArtistDashboard() {
             </div>
           </div>
 
+          {/* Growth messaging for brand-new artists (Hitesh, 31 Jul feedback): a fresh
+              profile with zero performances/followers/hype should read as "just the
+              beginning", not as a flat empty state. Gated strictly on real zero
+              numbers (not a low-but-nonzero score) so it never contradicts actual
+              stats once the artist has any real activity. */}
+          {profile.performances.length === 0 && profile.followers.length === 0 && profile.hypScore === 0 && (
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.15)' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+                Today is just the beginning 🎤
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.65, lineHeight: 1.5 }}>
+                Every hype score and follower count starts at zero. Complete your profile and apply to your first event to start building yours — this platform is here to grow with you.
+              </p>
+            </div>
+          )}
+
           {completionPercent < 100 && (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.2)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
