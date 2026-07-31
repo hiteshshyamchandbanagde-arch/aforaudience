@@ -160,7 +160,20 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
       })
       if (!res.ok) throw new Error('Failed to update publish status')
       const updated = await res.json()
-      setEvent(updated)
+      // PATCH /api/events/[id] intentionally returns a bare
+      // prisma.event.update() result with no relations - venue,
+      // applications, lineup, ticketTiers, panelists are all absent. This
+      // page renders several of those unconditionally (event.venue.name,
+      // event.lineup.some(...), event.applications.length) with no
+      // optional chaining, so setEvent(updated) here used to crash the
+      // page immediately after every single Publish/Unpublish click, for
+      // every event with a venue attached - confirmed 100% reproducible,
+      // unrelated to Competition Show or venue-approval status (found
+      // during PR #300 click-testing, 31 Jul). Refetch the same rich
+      // shape the page loaded with initially instead, matching the
+      // pattern applyWalletCredit already uses above after its own
+      // state-changing PATCH.
+      await fetchEvent()
       // The server re-checks the venue booking's confirmation status on
       // every call - clicking "publish" on an already-pending event isn't
       // a no-op, it's a legitimate recheck (useful if the venue owner
