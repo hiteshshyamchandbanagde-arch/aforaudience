@@ -20,10 +20,14 @@ type Attendee = {
   bookingId: string
   name: string
   seats: Record<string, number>
+  // Display-only, deterministic-not-real seat label for NUMBERED bookings
+  // (see attendees API comment) - null for GA bookings, which have no
+  // per-seat labels at all.
+  seatLabel: string | null
   checkedInAt: string | null
   // Companion Tagging Phase 2 (step 6) - ACCEPTED companions only,
   // each individually checkable at the door.
-  companions: { id: string; name: string; checkedInAt: string | null }[]
+  companions: { id: string; name: string; seatLabel: string | null; checkedInAt: string | null }[]
 }
 
 function seatsSummary(seats?: Record<string, number>) {
@@ -366,7 +370,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                               }}
                             >
                               <div>
-                                <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)' }}>{a.name}</p>
+                                <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)' }}>
+                                  {a.name}
+                                  {a.seatLabel && <span style={{ fontWeight: 400, opacity: 0.6 }}> · {a.seatLabel}</span>}
+                                </p>
                                 {seatsSummary(a.seats) && (
                                   <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
                                 )}
@@ -390,7 +397,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                       border: c.checkedInAt ? 'none' : '1px dashed rgba(14,12,10,0.15)',
                                     }}
                                   >
-                                    <span style={{ color: 'var(--afa-ink)' }}>👥 {c.name}</span>
+                                    <span style={{ color: 'var(--afa-ink)' }}>
+                                      👥 {c.name}
+                                      {c.seatLabel && <span style={{ opacity: 0.6 }}> · {c.seatLabel}</span>}
+                                    </span>
                                     {c.checkedInAt ? (
                                       <span style={{ fontWeight: 600, color: 'var(--afa-sage)' }}>✓ In</span>
                                     ) : (
