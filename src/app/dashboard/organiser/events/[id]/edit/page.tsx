@@ -438,7 +438,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to update event')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to update event')
+      }
 
       // Venue booking is a separate resource, so it's updated as its own request.
       if (venueId && (!event?.venue || event.venue.id !== venueId)) {

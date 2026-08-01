@@ -46,6 +46,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
+    // Past events are historical record, not a draft to keep tweaking -
+    // editing ticket price/seats/lineup after the fact risks drifting
+    // out of sync with bookings/payouts already settled against the old
+    // values. Hitesh's explicit call (session 60): COMPLETED events
+    // should be read-only. "Duplicate event" (not yet built - see
+    // Feedback s60-duplicate-event-feature) is the intended path for
+    // reusing a past event's setup instead.
+    if (event.status === 'COMPLETED') {
+      return NextResponse.json({ error: 'This event has ended and can no longer be edited.' }, { status: 403 })
+    }
+
     if (user.role !== 'ADMIN') {
       const organiser = await prisma.organiser.findUnique({ where: { id: event.organiserId } })
       if (!organiser || organiser.userId !== user.id) {
