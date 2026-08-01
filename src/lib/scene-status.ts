@@ -50,11 +50,19 @@ export async function getSceneStatus(artistId: string): Promise<SceneStatusTier>
 }
 
 /**
- * Batch version — one settings read, then per-artist queries done with
- * Promise.all rather than sequentially. Real batching (single groupBy
- * query across all artistIds) would be the next optimization if this ever
- * sits on a hot path with large lineups; not needed at current typical
- * lineup sizes (a handful of performers per event).
+ * Batch version — fixed number of DB round trips (settings, headliner
+ * flags, performances, reviews, bookings — five total) regardless of how
+ * many artistIds are passed, instead of doing N separate per-artist
+ * queries. Originally per-artist (see git history) on the assumption this
+ * would only ever run against small lineups (a handful of performers per
+ * event/poster) - that assumption broke the moment it got wired into the
+ * public /artists listing page (up to ~100 artists at once): with the
+ * Postgres pool capped to a single connection (src/lib/prisma.ts), N
+ * per-artist queries serialize into N sequential round trips rather than
+ * running in parallel despite Promise.all, which measured as a 10-30s
+ * page load live on QA. Rewritten to real batching - same tier logic and
+ * precedence, just computed from three bulk queries grouped in memory
+ * instead of one query per artist.
  */
 export async function getSceneStatusBatch(artistIds: string[]): Promise<Map<string, SceneStatusTier>> {
   const result = new Map<string, SceneStatusTier>()
@@ -68,60 +76,92 @@ export async function getSceneStatusBatch(artistIds: string[]): Promise<Map<stri
   })
   const headlinerById = new Map(artists.map((a: { id: string; isSceneStatusHeadliner: boolean }) => [a.id, a.isSceneStatusHeadliner]))
 
-  await Promise.all(
-    artistIds.map(async (artistId) => {
-      if (headlinerById.get(artistId)) {
-        result.set(artistId, "HEADLINER")
-        return
-      }
+  const nonHeadlinerIds = artistIds.filter((id) => !headlinerById.get(id))
+  for (const id of artistIds) {
+    if (headlinerById.get(id)) result.set(id, "HEADLINER")
+  }
+  if (nonHeadlinerIds.length === 0) return result
 
-      const performances = await prisma.performance.findMany({
-        where: { artistId, cancelledAt: null },
-        select: { id: true, eventId: true, isFeaturedVouch: true, event: { select: { organiserId: true } } },
+  // One query for every performance across every non-Headliner artist,
+  // instead of one query per artist.
+  const performances = await prisma.performance.findMany({
+    where: { artistId: { in: nonHeadlinerIds }, cancelledAt: null },
+    select: { id: true, artistId: true, eventId: true, isFeaturedVouch: true, event: { select: { organiserId: true } } },
+  })
+  type PerformanceRow = { id: string; artistId: string; eventId: string; isFeaturedVouch: boolean; event: { organiserId: string } }
+  const performancesByArtist = new Map<string, PerformanceRow[]>()
+  for (const p of performances as PerformanceRow[]) {
+    const list = performancesByArtist.get(p.artistId) ?? []
+    list.push(p)
+    performancesByArtist.set(p.artistId, list)
+  }
+
+  const allPerformanceIds = (performances as PerformanceRow[]).map((p) => p.id)
+  const allEventIds = [...new Set((performances as PerformanceRow[]).map((p) => p.eventId))]
+
+  // One query for every review row across every performance, instead of
+  // one aggregate query per artist. Averaged per-artist in memory below.
+  const reviews = allPerformanceIds.length
+    ? await prisma.review.findMany({
+        where: { performanceId: { in: allPerformanceIds } },
+        select: { performanceId: true, rating: true },
       })
+    : []
+  const performanceIdToArtistId = new Map((performances as PerformanceRow[]).map((p) => [p.id, p.artistId]))
+  const ratingsByArtist = new Map<string, number[]>()
+  for (const r of reviews as { performanceId: string | null; rating: number }[]) {
+    if (!r.performanceId) continue
+    const artistId = performanceIdToArtistId.get(r.performanceId)
+    if (!artistId) continue
+    const list = ratingsByArtist.get(artistId) ?? []
+    list.push(r.rating)
+    ratingsByArtist.set(artistId, list)
+  }
 
-      type PerformanceRow = { id: string; eventId: string; isFeaturedVouch: boolean; event: { organiserId: string } }
-      const featuredOrganiserIds = new Set(
-        (performances as PerformanceRow[]).filter((p) => p.isFeaturedVouch).map((p) => p.event.organiserId)
-      )
-      if (featuredOrganiserIds.size >= settings.sceneStatusFeaturedVouchThreshold) {
-        result.set(artistId, "FEATURED")
-        return
-      }
-
-      const gigCount = performances.length
-
-      const reviewAgg = await prisma.review.aggregate({
-        where: { performanceId: { in: (performances as PerformanceRow[]).map((p) => p.id) } },
-        _avg: { rating: true },
+  // One query for every checked-in booking across every event any of
+  // these artists performed at, instead of one query per artist. Same
+  // distinct-user logic as §3 (Verified Attendees), just computed once
+  // for the whole batch and sliced per-artist by their own eventIds.
+  const checkedInBookings = allEventIds.length
+    ? await prisma.booking.findMany({
+        where: { eventId: { in: allEventIds }, status: "CONFIRMED", checkedInAt: { not: null } },
+        select: { eventId: true, userId: true },
       })
-      const avgRating = reviewAgg._avg.rating
+    : []
+  const userIdsByEvent = new Map<string, Set<string>>()
+  for (const b of checkedInBookings as { eventId: string; userId: string }[]) {
+    const set = userIdsByEvent.get(b.eventId) ?? new Set<string>()
+    set.add(b.userId)
+    userIdsByEvent.set(b.eventId, set)
+  }
 
-      // Verified Attendees (§3) — distinct checked-in accounts across all
-      // events this artist performed at. Same logic as the artist profile
-      // page's own computation (kept in sync deliberately, not imported
-      // directly, since that page also needs repeatAttendees split out for
-      // display — this only needs the total count for the Rising check).
-      const eventIds = [...new Set((performances as PerformanceRow[]).map((p) => p.eventId))]
-      const verifiedAttendeeCount = eventIds.length
-        ? (
-            await prisma.booking.findMany({
-              where: { eventId: { in: eventIds }, status: "CONFIRMED", checkedInAt: { not: null } },
-              select: { userId: true },
-              distinct: ["userId"],
-            })
-          ).length
-        : 0
+  for (const artistId of nonHeadlinerIds) {
+    const artistPerformances = performancesByArtist.get(artistId) ?? []
 
-      const meetsRising =
-        gigCount >= settings.sceneStatusRisingMinGigs &&
-        avgRating !== null &&
-        avgRating >= settings.sceneStatusRisingMinAvgRating &&
-        verifiedAttendeeCount >= settings.sceneStatusRisingMinAttendees
+    const featuredOrganiserIds = new Set(artistPerformances.filter((p) => p.isFeaturedVouch).map((p) => p.event.organiserId))
+    if (featuredOrganiserIds.size >= settings.sceneStatusFeaturedVouchThreshold) {
+      result.set(artistId, "FEATURED")
+      continue
+    }
 
-      result.set(artistId, meetsRising ? "RISING" : "NEW_EMERGING")
-    })
-  )
+    const gigCount = artistPerformances.length
+    const ratings = ratingsByArtist.get(artistId) ?? []
+    const avgRating = ratings.length ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : null
+
+    const artistEventIds = [...new Set(artistPerformances.map((p) => p.eventId))]
+    const verifiedAttendeeIds = new Set<string>()
+    for (const eventId of artistEventIds) {
+      for (const userId of userIdsByEvent.get(eventId) ?? []) verifiedAttendeeIds.add(userId)
+    }
+
+    const meetsRising =
+      gigCount >= settings.sceneStatusRisingMinGigs &&
+      avgRating !== null &&
+      avgRating >= settings.sceneStatusRisingMinAvgRating &&
+      verifiedAttendeeIds.size >= settings.sceneStatusRisingMinAttendees
+
+    result.set(artistId, meetsRising ? "RISING" : "NEW_EMERGING")
+  }
 
   return result
 }
