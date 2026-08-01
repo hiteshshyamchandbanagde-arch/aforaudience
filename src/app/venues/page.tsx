@@ -1,7 +1,7 @@
 import React from 'react'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
-import VenuesGridClient from './VenuesGridClient'
+import VenuesViewToggle from './VenuesViewToggle'
 
 // Without this, Next.js has no dynamic API (cookies/headers/searchParams) to
 // signal that this page needs per-request data, so it can statically render
@@ -56,19 +56,15 @@ export default async function VenuesPage() {
           Spaces hosting live art near you.
         </p>
 
-        {venues.length === 0 ? (
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6 }}>No venues found yet. Check back soon!</p>
-        ) : (
-          <VenuesGridClient
-            venues={venues.map((v) => ({
-              id: v.id,
-              name: v.name,
-              city: v.city,
-              capacity: v.capacity,
-              priceRangeLabel: priceRange(v),
-            }))}
-          />
-        )}
+        <VenuesViewToggle
+          venues={venues.map((v) => ({
+            id: v.id,
+            name: v.name,
+            city: v.city,
+            capacity: v.capacity,
+            priceRangeLabel: priceRange(v),
+          }))}
+        />
       </div>
     </main>
   )

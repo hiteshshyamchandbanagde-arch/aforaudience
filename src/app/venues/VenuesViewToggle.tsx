@@ -1,0 +1,50 @@
+"use client"
+import { useState } from "react"
+import VenuesGridClient from "./VenuesGridClient"
+import VenueOwnersGridEmbed from "@/components/VenueOwnersGridEmbed"
+
+interface VenueItem {
+  id: string
+  name: string
+  city: string
+  capacity: number
+  priceRangeLabel: string | null
+}
+
+const tabStyle = (active: boolean) => ({
+  padding: "8px 18px",
+  borderRadius: "999px",
+  border: `1.5px solid ${active ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+  background: active ? "var(--afa-terracotta)" : "transparent",
+  color: active ? "white" : "var(--afa-ink)",
+  fontSize: "13px",
+  fontWeight: 600,
+  cursor: "pointer" as const,
+})
+
+// Toggle-based discovery entry point (session 62, design.md §9.5) -
+// deliberately not a new top-level nav route. Venues stay server-fetched
+// (unchanged default view); Owners is fetched client-side on demand only
+// when that tab is actually opened.
+export default function VenuesViewToggle({ venues }: { venues: VenueItem[] }) {
+  const [view, setView] = useState<"venues" | "owners">("venues")
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
+        <button style={tabStyle(view === "venues")} onClick={() => setView("venues")}>Venues</button>
+        <button style={tabStyle(view === "owners")} onClick={() => setView("owners")}>Owners</button>
+      </div>
+
+      {view === "venues" ? (
+        venues.length === 0 ? (
+          <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No venues found yet. Check back soon!</p>
+        ) : (
+          <VenuesGridClient venues={venues} />
+        )
+      ) : (
+        <VenueOwnersGridEmbed />
+      )}
+    </div>
+  )
+}

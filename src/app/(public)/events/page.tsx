@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 
 interface EventItem {
@@ -71,6 +72,10 @@ export default function EventsPage() {
   const [priceFilter, setPriceFilter] = useState("All")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
+  // Toggle-based discovery entry point for Organisers (session 62,
+  // design.md §9.5) - deliberately not a new top-level nav route.
+  // Independent of `view` above (grid/list is an events-only display mode).
+  const [contentMode, setContentMode] = useState<"events" | "organisers">("events")
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -116,11 +121,18 @@ export default function EventsPage() {
       <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Find your next <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>live experience</em>
+            {contentMode === "organisers" ? (
+              <>Meet the <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Organisers</em></>
+            ) : (
+              <>Find your next <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>live experience</em></>
+            )}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
+            {contentMode === "organisers"
+              ? "The people running the shows"
+              : loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
           </p>
+          {contentMode === "events" && (
           <div style={{ position: "relative" }}>
             <input
               value={search}
@@ -130,6 +142,7 @@ export default function EventsPage() {
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </div>
+          )}
         </div>
       </div>
 
@@ -140,6 +153,40 @@ export default function EventsPage() {
           </div>
         )}
 
+        {/* EVENTS / ORGANISERS TOGGLE - discovery entry point for the
+            public Organiser bio profiles (session 62, design.md §9.5),
+            deliberately not a new top-level nav route. */}
+        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+          <button
+            onClick={() => setContentMode("events")}
+            style={{
+              padding: "8px 18px", borderRadius: "999px",
+              border: `1.5px solid ${contentMode === "events" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+              background: contentMode === "events" ? "var(--afa-terracotta)" : "transparent",
+              color: contentMode === "events" ? "white" : "var(--afa-ink)",
+              fontSize: "13px", fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            Events
+          </button>
+          <button
+            onClick={() => setContentMode("organisers")}
+            style={{
+              padding: "8px 18px", borderRadius: "999px",
+              border: `1.5px solid ${contentMode === "organisers" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+              background: contentMode === "organisers" ? "var(--afa-terracotta)" : "transparent",
+              color: contentMode === "organisers" ? "white" : "var(--afa-ink)",
+              fontSize: "13px", fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            Organisers
+          </button>
+        </div>
+
+        {contentMode === "organisers" ? (
+          <OrganisersGridEmbed />
+        ) : (
+          <>
         {/* UPCOMING / PAST TAB - Hitesh (31 Jul): keep upcoming as the
             default listing, but let people browse past events as a
             separate reference section rather than mixing them together
@@ -393,6 +440,8 @@ export default function EventsPage() {
               )
             })}
           </div>
+        )}
+          </>
         )}
       </div>
     </main>
