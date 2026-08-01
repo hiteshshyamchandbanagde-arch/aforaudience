@@ -157,3 +157,21 @@ New idea — closes a real gap in what's already shipped: today (PR #300) an org
 7. Panelist & Celebrity Accept-to-Appear (§8) — must land **before** #8 below, since voting eligibility depends on it
 8. `CompetitionVote` schema + weighted Audience/Panelist/Celebrity voting flow (§6) — reuses the same post-show timing window as #2/#4
 9. Companion tagging Phase 2 — per-seat check-in (§7) — largest single change, own dedicated build once everything above is stable
+
+---
+
+## Amendment 1 (Session 55, 1 Aug 2026) — Scene Status tier mechanics finalized
+
+Written after this doc was committed to the repo as-is (see top of file). §1's "suggested tier ladder" left Featured and Celebrity/Headliner as vague manual placeholders with no mechanism. Both are now fully specified. Terminology note: "Reputation Tier" renamed to **"Scene Status"** (session 53, 1 Aug — see Feedback `30d90bfd`); "Rising," "New/Emerging," "Hype Score," "Verified Attendees," "Audience Choice" all kept as-is.
+
+**New/Emerging** — default, no badge. Unchanged from §1.
+
+**Rising** — automatic, configurable thresholds (not hardcoded — same reasoning as `PlatformSettings.audienceBookingFee`/`chatMaxMessagesPerSession`: live-computed on every view per session 53, so a config value can be tuned instantly as real data volume comes in, no deploy/migration needed to adjust). Default proposal, confirm/adjust once built: `sceneStatusRisingMinGigs` (3), `sceneStatusRisingMinAvgRating` (4.0), `sceneStatusRisingMinAttendees` (5, combined Verified+Repeat) — all ANDed.
+
+**Featured** — semi-automatic, earned through organiser trust, not a single manual toggle:
+- New `Performance.isFeaturedVouch` (Boolean, default false) — an organiser can mark any artist in their event's lineup as Featured, at lineup placement/management time (not tied to the post-show `OrganiserArtistRating` flow — separate moment, separate mechanism, no dependency on that model).
+- New `PlatformSettings.sceneStatusFeaturedVouchThreshold` (int, default 5, admin-configurable).
+- Featured tier = live-computed: count of **distinct organisers** (via `Event.organiserId`, not raw vouch count) who have set `isFeaturedVouch = true` on this artist across all their `Performance` rows, compared against the threshold. Distinct-organiser chosen deliberately over raw-count so one organiser working with an artist repeatedly can't single-handedly promote them — mirrors the same distinct-user reasoning already used for Verified Attendees in §3.
+- **Poster reflection:** once an artist crosses Featured, their name renders larger on the organiser event poster (`/api/posters/organiser/[eventId]/route.tsx`) than non-Featured lineup names — confirmed as a *live Scene Status* reflection (the artist's current tier, computed the same way everywhere), not a per-event/per-organiser-specific flag. So an artist Featured from past shows shows large on a poster even for an organiser who personally never vouched for them on this event. Artist's own solo share-card poster (`/api/posters/artist/[performanceId]/route.tsx`) shows no co-lineup, so no change needed there.
+
+**Celebrity/Headliner** — stays fully manual, admin-only, no formula, no config, no automation. Deliberately not earned via any numeric threshold — explicit design intent (Hitesh, session 55): "it is not a small thing to get... it's supposed to be earned." Admin weighs whatever signals they judge relevant (audience reaction, gig count, organiser rating, Hype Score, etc.) and makes the call directly, same as always. Future idea, **not in scope for this build**, logged to Feedback as `FEATURE_IDEA`: admin-run audience polls or a live event mechanism to *inform* (not automate) that decision.
