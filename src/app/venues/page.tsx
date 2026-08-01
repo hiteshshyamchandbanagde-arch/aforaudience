@@ -1,7 +1,7 @@
 import React from 'react'
-import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
+import VenuesGridClient from './VenuesGridClient'
 
 // Without this, Next.js has no dynamic API (cookies/headers/searchParams) to
 // signal that this page needs per-request data, so it can statically render
@@ -59,27 +59,15 @@ export default async function VenuesPage() {
         {venues.length === 0 ? (
           <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6 }}>No venues found yet. Check back soon!</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {venues.map((v) => {
-              const range = priceRange(v)
-              return (
-                <Link
-                  key={v.id}
-                  href={`/venues/${v.id}`}
-                  style={{ display: 'block', background: 'var(--afa-white)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
-                >
-                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-                    {v.name}
-                  </h2>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '14px' }}>{v.city}</p>
-                  <div style={{ display: 'flex', gap: '18px', fontSize: '13px', color: 'var(--afa-ink)' }}>
-                    <span><strong>{v.capacity}</strong> seats</span>
-                    {range && <span style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>{range}</span>}
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+          <VenuesGridClient
+            venues={venues.map((v) => ({
+              id: v.id,
+              name: v.name,
+              city: v.city,
+              capacity: v.capacity,
+              priceRangeLabel: priceRange(v),
+            }))}
+          />
         )}
       </div>
     </main>
