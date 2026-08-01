@@ -626,6 +626,23 @@ function ProfileContent() {
             )}
           </div>
         </div>
+
+        <Link
+          href="/my-feedback"
+          style={{
+            display: 'block',
+            ...cardStyle,
+            textDecoration: 'none',
+            color: 'inherit',
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+            My Feedback
+          </h2>
+          <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
+            See the bugs, ideas, and questions you&apos;ve reported, and their status →
+          </p>
+        </Link>
       </main>
     </>
   )
