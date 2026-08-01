@@ -10,7 +10,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const venueOwner = await prisma.venueOwner.findUnique({
       where: { id },
       include: {
-        user: { select: { name: true, avatar: true } },
+        // displayName included alongside name (session 62 follow-up fix)
+        // - see GET /api/venue-owners for why.
+        user: { select: { name: true, displayName: true, avatar: true } },
         venues: {
           where: { isApproved: true },
           select: { id: true, name: true, city: true, capacity: true, photos: true, seatingMode: true },

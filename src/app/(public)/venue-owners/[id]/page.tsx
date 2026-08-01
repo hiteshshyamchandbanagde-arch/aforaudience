@@ -7,7 +7,7 @@ import BrandLoader from "@/components/BrandLoader"
 interface VenueOwnerDetail {
   id: string
   bio: string | null
-  user: { name: string; avatar: string | null }
+  user: { name: string; displayName: string | null; avatar: string | null }
   venues: { id: string; name: string; city: string; capacity: number; photos: string[]; seatingMode: string }[]
 }
 
@@ -43,6 +43,8 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
     )
   }
 
+  const displayName = owner.user.displayName || owner.user.name
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
@@ -52,13 +54,13 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
           <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
             {owner.user.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={owner.user.avatar} alt={owner.user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              owner.user.name.charAt(0).toUpperCase()
+              displayName.charAt(0).toUpperCase()
             )}
           </div>
           <div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{owner.user.name}</div>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{displayName}</div>
             <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>
               {owner.venues.length} venue{owner.venues.length === 1 ? "" : "s"}
             </div>

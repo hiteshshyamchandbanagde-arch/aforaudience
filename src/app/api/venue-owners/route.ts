@@ -9,6 +9,12 @@ import prisma from '@/lib/prisma'
 // fields today, but matching the fix applied to /api/organisers (same
 // session, same root cause) so this route doesn't silently start leaking
 // data the moment a sensitive column is ever added to this model.
+//
+// user.displayName included alongside user.name (session 62 follow-up
+// fix): every other user-facing surface in this app reads
+// `displayName ?? name` - VenueOwner has no separate business-name field
+// like Organiser.orgName, so the raw login username was showing as the
+// card title. Caught via live verification, not a report.
 export async function GET() {
   try {
     const venueOwners = await prisma.venueOwner.findMany({
@@ -16,7 +22,7 @@ export async function GET() {
       select: {
         id: true,
         bio: true,
-        user: { select: { name: true, avatar: true } },
+        user: { select: { name: true, displayName: true, avatar: true } },
         _count: { select: { venues: { where: { isApproved: true } } } },
       },
     })

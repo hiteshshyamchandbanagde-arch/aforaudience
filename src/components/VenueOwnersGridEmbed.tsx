@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 interface VenueOwnerItem {
   id: string
   bio: string | null
-  user: { name: string; avatar: string | null }
+  user: { name: string; displayName: string | null; avatar: string | null }
   _count: { venues: number }
 }
 
@@ -48,6 +48,7 @@ export default function VenueOwnersGridEmbed() {
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
       {owners.map((owner) => {
         const isNavigatingThis = navigatingId === owner.id
+        const displayName = owner.user.displayName || owner.user.name
         return (
           <div
             key={owner.id}
@@ -82,12 +83,12 @@ export default function VenueOwnersGridEmbed() {
               <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
                 {owner.user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={owner.user.avatar} alt={owner.user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  owner.user.name.charAt(0).toUpperCase()
+                  displayName.charAt(0).toUpperCase()
                 )}
               </div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{owner.user.name}</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{displayName}</h2>
             </div>
             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
               {owner.bio || "No bio yet"}
