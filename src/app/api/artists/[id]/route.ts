@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const artist = await prisma.artist.findUnique({
       where: { id },
       include: {
-        user: { select: { name: true, avatar: true } },
+        user: { select: { name: true, displayName: true, avatar: true } },
         performances: {
           include: { event: { include: { venue: true } } },
         },

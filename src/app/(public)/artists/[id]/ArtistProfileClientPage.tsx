@@ -33,7 +33,7 @@ interface ArtistData {
   influences: string | null
   acknowledgments: string | null
   goals: string | null
-  user: { name: string; avatar: string | null }
+  user: { name: string; displayName: string | null; avatar: string | null }
   performances: Performance[]
   _count: { performances: number; followers: number }
   verifiedAttendees: number
@@ -127,6 +127,7 @@ export default function ArtistProfilePage({
     .sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
 
   const socialEntries = Object.entries(artist.socialLinks || {}).filter(([, v]) => v)
+  const displayName = artist.user.displayName || artist.user.name
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
@@ -136,7 +137,7 @@ export default function ArtistProfilePage({
       <div style={{ background: "var(--afa-plum-black)", padding: "64px 48px 40px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "32px", alignItems: "flex-end", flexWrap: "wrap" }}>
           <div style={{ width: "140px", height: "140px", borderRadius: "50%", background: artist.user.avatar ? `url(${artist.user.avatar}) center/cover` : "rgba(255,255,255,0.1)", border: "4px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "56px", fontWeight: 700, color: "white", flexShrink: 0 }}>
-            {!artist.user.avatar && artist.user.name.charAt(0).toUpperCase()}
+            {!artist.user.avatar && displayName.charAt(0).toUpperCase()}
           </div>
 
           <div>
@@ -146,7 +147,7 @@ export default function ArtistProfilePage({
               ))}
             </div>
             <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              {artist.user.name}
+              {displayName}
               {isVerified && (
                 <span
                   title="Verified: complete profile with an established track record"
@@ -375,7 +376,7 @@ export default function ArtistProfilePage({
 
           <div style={{ background: "var(--afa-ink)", borderRadius: "12px", padding: "20px" }}>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "8px" }}>🎤 Book for your event</div>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {artist.user.name} to apply for your event.</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {displayName} to apply for your event.</p>
             <Link href="/login" style={{ display: "block", background: "var(--afa-terracotta)", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
               Log In
             </Link>
@@ -386,7 +387,7 @@ export default function ArtistProfilePage({
       <AuthPromptSheet
         open={showAuthSheet}
         onClose={() => setShowAuthSheet(false)}
-        title={`Sign in to follow ${artist.user.name}`}
+        title={`Sign in to follow ${displayName}`}
         subtitle="Get notified when they book a new show"
         onSuccess={() => {
           setShowAuthSheet(false)
