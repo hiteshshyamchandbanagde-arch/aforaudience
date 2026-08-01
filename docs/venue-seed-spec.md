@@ -58,10 +58,22 @@ Two-step script:
   → 4 distinct cities per owner, 10 venues total, no type repeats within a city.
 
 - **City pool** (Pune-first, per product philosophy), cycled deterministically per
-  owner index so re-runs are reproducible: Pune, Mumbai, Bengaluru, Delhi, Hyderabad,
-  Chennai, Kolkata, Ahmedabad, Jaipur, Nagpur, Indore, Chandigarh. Cities **do**
-  repeat across different owners (that's fine/expected) — only "not twice for the
-  same owner" is the actual rule.
+  owner index so re-runs are reproducible. Expanded per Hitesh (session 62) for real
+  geographic spread across India, plus a light international set (AFA's stated
+  international ambitions):
+  - **India (30):** Pune, Mumbai, Bengaluru, Delhi, Hyderabad, Chennai, Kolkata,
+    Ahmedabad, Jaipur, Nagpur, Indore, Chandigarh, Lucknow, Bhopal, Patna, Surat,
+    Kochi, Coimbatore, Visakhapatnam, Guwahati, Bhubaneswar, Thiruvananthapuram,
+    Amritsar, Dehradun, Ranchi, Raipur, Panaji (Goa), Mysuru, Vadodara, Nashik —
+    deliberately spread across North/South/East/West/Central/Northeast rather than
+    metro-only.
+  - **International (7, lighter weight):** New York, London, Dubai, Singapore,
+    Sydney, Toronto, Tokyo.
+  - Cities **do** repeat across different owners (that's fine/expected) — only "not
+    twice for the same owner" is the actual rule. With ~37 cities in the pool and 4
+    needed per owner, cycle deterministically (e.g. by owner index × offset) so the
+    international set gets used but isn't the majority — India stays Pune-first in
+    practice for most owners given the pool weighting.
 - **Naming:** `{OwnerName} — {City} {Type} Venue` (e.g.
   `VenueOwner00000005 — Pune GA Venue`) — greppable/deterministic, matches the
   load-test naming philosophy.
@@ -71,12 +83,25 @@ Two-step script:
   helper/logic the real Guided Setup and Manual Canvas builders already use for shape
   generation, if one is exposed/importable — don't hand-roll a divergent algorithm the
   app doesn't otherwise produce.
-- **Not specified by Hitesh, my default (flag to override):** `rateType: HOURLY`,
-  `hourlyRate` scaled loosely to capacity (e.g. ₹500 + capacity × 2), `minDurationHours: 2`,
-  `isApproved: true`. Needed for the venue to be usable elsewhere in the app (booking
-  flow expects a rate); left unset otherwise the venues would be half-configured.
-  Address/state/country/lat/lng left null (no real Places API resolution needed for
-  seed data) — `city` alone populated.
+- **Rate type distribution (Hitesh, session 62):** across each owner's 10 venues —
+  **minimum 3 `HOURLY`, minimum 3 `DAILY`, minimum 3 `FLEXIBLE`.** That's 9 of the 10
+  fixed; the 10th can be any of the three (rotate deterministically per owner index —
+  e.g. owner index mod 3 decides which type gets the 4th venue — so the extra isn't
+  always the same type). This assignment is independent of the GA/Numbered/Canvas
+  seating-mode assignment above — cross the two freely (e.g. a GA venue can be
+  `HOURLY`, `DAILY`, or `FLEXIBLE`; no correlation implied).
+  - `HOURLY`: set `hourlyRate` (scaled loosely to capacity, e.g. ₹500 + capacity × 2),
+    `minDurationHours: 2`. `dailyRate` left null.
+  - `DAILY`: set `dailyRate` (e.g. ₹5000 + capacity × 10). `hourlyRate`/
+    `minDurationHours` left null.
+  - `FLEXIBLE`: **both `hourlyRate` and `dailyRate` left null**, per design.md §4.5/
+    third-amendment note — Flexible venues have no published rate, the amount is
+    negotiated per-booking via `VenueBookingRequest`, not a venue-level field. Don't
+    populate a placeholder number here.
+  - `isApproved: true` on every venue (not otherwise specified, needed so seed venues
+    actually appear as usable/live data rather than stuck pending admin approval).
+  - Address/state/country/lat/lng left null (no real Places API resolution needed for
+    seed data) — `city` alone populated.
 
 ## Guards (carry over from existing seed scripts)
 
