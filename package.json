@@ -17,7 +17,8 @@
     "test:e2e:report": "playwright show-report",
     "db:seed:qa": "tsx scripts/qa-seed.ts",
     "db:seed:load-test-users": "tsx scripts/qa-seed-load-test-users.ts",
-    "db:fix:user-display-names": "tsx scripts/qa-fix-user-display-names.ts"
+    "db:fix:user-display-names": "tsx scripts/qa-fix-user-display-names.ts",
+    "db:seed:venues": "tsx scripts/qa-seed-venues.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
