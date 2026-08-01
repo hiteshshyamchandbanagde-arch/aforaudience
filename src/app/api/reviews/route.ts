@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { ensureFollowing } from '@/lib/follow'
 
 // G2 - rate a performer post-show. Gated on the reviewer having an actual
 // CONFIRMED + checked-in booking for this event - EPIC N's check-in
@@ -74,6 +75,12 @@ export async function POST(req: Request) {
               url: '/dashboard/artist',
             }),
           'review-artist'
+        )
+        // Reputation epic §5 nudge - rating a performer earns automatic
+        // early access to their next event (Follow + notify, silent if
+        // already following).
+        ensureFollowing(user.id, 'ARTIST', performance.artistId).catch((err) =>
+          console.error('[reviews] ensureFollowing nudge failed', err)
         )
       }
     } else {

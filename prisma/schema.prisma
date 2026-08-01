@@ -1148,6 +1148,12 @@ model Booking {
   checkedInAt       DateTime?
   checkedInByUserId String?
 
+  // Post-show rating prompt (reputation epic §5). Set once the push has
+  // fired for this booking so the cron never double-sends - "one push
+  // per event" is a hard rule in the design (repeat pestering risks
+  // eroding trust in the push channel generally).
+  ratingPromptSentAt DateTime?
+
   // Audience self-serve cancellation (design.md "Refund policy",
   // session 47, 29 Jul - graduated tiers by days-before-event).
   // cancelledAt is set for both CANCELLED (no refund, <7 days) and
@@ -1167,6 +1173,7 @@ model Booking {
   payoutLedgerEntry OrganiserPayoutLedger?
 
   @@index([status, expiresAt])
+  @@index([checkedInAt, ratingPromptSentAt])
 }
 
 // Manual-transfer payout ledger (added 28 Jul, replacing the Route
