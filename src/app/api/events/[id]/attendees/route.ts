@@ -34,7 +34,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     const bookings = await prisma.booking.findMany({
       where: { eventId, status: 'CONFIRMED' },
-      include: { user: { select: { name: true, displayName: true } } },
+      include: {
+        user: { select: { name: true, displayName: true } },
+        // Companion Tagging Phase 2 (step 6) - only ACCEPTED tags surface
+        // at the door. PENDING/DECLINED were never confirmed by the
+        // tagged person, so there's nothing to check in.
+        companionTags: {
+          where: { status: 'ACCEPTED' },
+          include: { taggedUser: { select: { name: true, displayName: true } } },
+        },
+      },
       orderBy: [{ checkedInAt: 'asc' }, { createdAt: 'asc' }],
     })
 
@@ -43,6 +52,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       name: b.user.displayName || b.user.name,
       seats: b.seats,
       checkedInAt: b.checkedInAt,
+      companions: b.companionTags.map((t) => ({
+        id: t.id,
+        name: t.taggedUser.displayName || t.taggedUser.name,
+        checkedInAt: t.checkedInAt,
+      })),
     }))
 
     return NextResponse.json({

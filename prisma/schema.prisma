@@ -1214,6 +1214,21 @@ model CompanionTag {
   createdAt      DateTime           @default(now())
   respondedAt    DateTime?
 
+  // Phase 2 (per-seat/per-attendee check-in, step 6). Deliberately
+  // separate from Booking.checkedInAt - the booker's own scan checks in
+  // the booking as a whole (unchanged, EPIC N), while each ACCEPTED
+  // companion is checked in individually at the door. Only meaningful
+  // once status is ACCEPTED - enforced at the API level, not the schema.
+  //
+  // No physical seat-to-companion mapping exists (checkout never
+  // collects "which seat is X sitting in"), so this is genuinely
+  // per-attendee check-in, not per-physical-seat matching - flagging
+  // that distinction explicitly since the build-order item is titled
+  // "per-seat check-in" but the data model doesn't support literal
+  // seat assignment without a much larger checkout change.
+  checkedInAt       DateTime?
+  checkedInByUserId String?
+
   @@unique([bookingId, taggedUserId])
   @@index([taggedUserId, status])
 }

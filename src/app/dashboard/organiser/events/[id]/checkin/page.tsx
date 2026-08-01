@@ -21,6 +21,9 @@ type Attendee = {
   name: string
   seats: Record<string, number>
   checkedInAt: string | null
+  // Companion Tagging Phase 2 (step 6) - ACCEPTED companions only,
+  // each individually checkable at the door.
+  companions: { id: string; name: string; checkedInAt: string | null }[]
 }
 
 function seatsSummary(seats?: Record<string, number>) {
@@ -54,6 +57,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const [listOpen, setListOpen] = useState(false)
   const [attendees, setAttendees] = useState<Attendee[] | null>(null)
   const [listFilter, setListFilter] = useState<'all' | 'checked_in' | 'pending'>('all')
+  const [checkingInCompanion, setCheckingInCompanion] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -83,6 +87,21 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       // non-critical - list just won't refresh this round
     }
   }, [eventId])
+
+  const checkInCompanion = useCallback(async (companionTagId: string) => {
+    setCheckingInCompanion(companionTagId)
+    try {
+      const res = await fetch(`/api/events/${eventId}/checkin/companion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companionTagId }),
+      })
+      if (res.ok && typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(120)
+      await refreshAttendees()
+    } finally {
+      setCheckingInCompanion(null)
+    }
+  }, [eventId, refreshAttendees])
 
   useEffect(() => {
     const load = async () => {
@@ -338,23 +357,59 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filtered.map((a) => (
-                          <div
-                            key={a.bookingId}
-                            style={{
-                              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-                              padding: '10px 12px', borderRadius: '8px',
-                              background: a.checkedInAt ? 'var(--afa-mint-tint)' : 'var(--afa-cream)',
-                            }}
-                          >
-                            <div>
-                              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)' }}>{a.name}</p>
-                              {seatsSummary(a.seats) && (
-                                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
-                              )}
+                          <div key={a.bookingId}>
+                            <div
+                              style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                                padding: '10px 12px', borderRadius: '8px',
+                                background: a.checkedInAt ? 'var(--afa-mint-tint)' : 'var(--afa-cream)',
+                              }}
+                            >
+                              <div>
+                                <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)' }}>{a.name}</p>
+                                {seatsSummary(a.seats) && (
+                                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
+                                )}
+                              </div>
+                              <span style={{ fontSize: '12px', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-ink)', opacity: a.checkedInAt ? 1 : 0.4 }}>
+                                {a.checkedInAt ? '✓ In' : 'Pending'}
+                              </span>
                             </div>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-ink)', opacity: a.checkedInAt ? 1 : 0.4 }}>
-                              {a.checkedInAt ? '✓ In' : 'Pending'}
-                            </span>
+                            {/* Companion Tagging Phase 2 (step 6) - accepted
+                                companions get their own check-in row, indented
+                                under the booking they're tagged on. */}
+                            {a.companions.length > 0 && (
+                              <div style={{ marginLeft: '18px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {a.companions.map((c) => (
+                                  <div
+                                    key={c.id}
+                                    style={{
+                                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                      padding: '8px 12px', borderRadius: '8px', fontSize: '12.5px',
+                                      background: c.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
+                                      border: c.checkedInAt ? 'none' : '1px dashed rgba(14,12,10,0.15)',
+                                    }}
+                                  >
+                                    <span style={{ color: 'var(--afa-ink)' }}>👥 {c.name}</span>
+                                    {c.checkedInAt ? (
+                                      <span style={{ fontWeight: 600, color: 'var(--afa-sage)' }}>✓ In</span>
+                                    ) : (
+                                      <button
+                                        onClick={() => checkInCompanion(c.id)}
+                                        disabled={checkingInCompanion === c.id}
+                                        style={{
+                                          fontSize: '11px', fontWeight: 700, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)',
+                                          border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer',
+                                          opacity: checkingInCompanion === c.id ? 0.6 : 1,
+                                        }}
+                                      >
+                                        {checkingInCompanion === c.id ? 'Checking in…' : 'Check in'}
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
