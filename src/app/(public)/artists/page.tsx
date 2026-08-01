@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 
+type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
+
 interface ArtistItem {
   id: string
   bio: string
@@ -10,6 +12,25 @@ interface ArtistItem {
   styleTag: string[]
   user: { name: string; avatar: string | null }
   _count: { performances: number }
+  sceneStatus?: SceneStatusTier
+}
+
+// Card badge is deliberately restrained compared to the full profile-page
+// badge (see ArtistProfileClientPage.tsx) - on a dense grid, a pill on
+// every card gets loud fast. Only the two tiers people actually scan for
+// when deciding who to book/see get a card indicator; RISING is a softer
+// signal that reads fine as a badge on one artist's own profile but as
+// noise across a whole grid, so it's intentionally left off cards.
+const CARD_BADGE: Partial<Record<SceneStatusTier, { label: string; bg: string; color: string }>> = {
+  HEADLINER: { label: "★ Headliner", bg: "var(--afa-gold)", color: "var(--afa-plum-black)" },
+  FEATURED: { label: "Featured", bg: "rgba(255,255,255,0.14)", color: "var(--afa-gold)" },
+}
+
+const SCENE_STATUS_RANK: Record<SceneStatusTier, number> = {
+  HEADLINER: 3,
+  FEATURED: 2,
+  RISING: 1,
+  NEW_EMERGING: 0,
 }
 
 export default function ArtistsPage() {
@@ -58,9 +79,17 @@ export default function ArtistsPage() {
     })
     .sort((a, b) => b._count.performances - a._count.performances)
 
-  // Rising Star temporarily keys off gig count - real signal will be
-  // Scene Status (§1, reputation epic) once it ships.
-  const risingStar = artists.length > 0 ? [...artists].sort((a, b) => b._count.performances - a._count.performances)[0] : null
+  // Rising Star now keys off real Scene Status (Headliner > Featured >
+  // Rising > New/Emerging), gig count only as a tiebreaker within the
+  // same tier - the placeholder this used to be (raw gig count only) is
+  // gone now that Scene Status has shipped.
+  const risingStar =
+    artists.length > 0
+      ? [...artists].sort((a, b) => {
+          const rankDiff = SCENE_STATUS_RANK[b.sceneStatus ?? "NEW_EMERGING"] - SCENE_STATUS_RANK[a.sceneStatus ?? "NEW_EMERGING"]
+          return rankDiff !== 0 ? rankDiff : b._count.performances - a._count.performances
+        })[0]
+      : null
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
@@ -153,7 +182,26 @@ export default function ArtistsPage() {
                       )}
                     </div>
                     <div>
-                      <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{artist.user.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", flexWrap: "wrap" }}>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white" }}>{artist.user.name}</div>
+                        {artist.sceneStatus && CARD_BADGE[artist.sceneStatus] && (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "2px 8px",
+                              borderRadius: "99px",
+                              letterSpacing: "0.03em",
+                              textTransform: "uppercase",
+                              background: CARD_BADGE[artist.sceneStatus]!.bg,
+                              color: CARD_BADGE[artist.sceneStatus]!.color,
+                              border: artist.sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
+                            }}
+                          >
+                            {CARD_BADGE[artist.sceneStatus]!.label}
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>{artist.genre.join(", ") || "Genre not set"}</div>
                     </div>
                   </div>
