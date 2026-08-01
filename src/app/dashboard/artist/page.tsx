@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
@@ -75,6 +75,22 @@ const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
 export default function ArtistDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [, startTransition] = useTransition()
+  const [navigatingEventId, setNavigatingEventId] = useState<string | null>(null)
+
+  // Same click-guard pattern as /events, /artists, /venues (standing
+  // rule, 1 Aug: every tile must open in a single click). These
+  // Application cards were static with no navigation at all - found via
+  // s60-my-applications-card-not-clickable while click-testing the
+  // reputation epic.
+  const goToEvent = (id: string) => {
+    if (navigatingEventId) return
+    setNavigatingEventId(id)
+    startTransition(() => {
+      router.push(`/events/${id}`)
+    })
+  }
+
   const [profile, setProfile] = useState<ArtistProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -464,8 +480,57 @@ export default function ArtistDashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {profile.applications.map((app) => {
                   const appStyle = APPLICATION_STYLE[app.status] || APPLICATION_STYLE.PENDING
+                  const isNavigatingThis = navigatingEventId === app.event.id
                   return (
-                    <div key={app.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                    <div
+                      key={app.id}
+                      role="link"
+                      tabIndex={0}
+                      aria-busy={isNavigatingThis}
+                      onClick={() => goToEvent(app.event.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          goToEvent(app.event.id)
+                        }
+                      }}
+                      style={{
+                        position: 'relative',
+                        background: 'var(--afa-white)',
+                        borderRadius: '10px',
+                        padding: '16px 20px',
+                        border: '1px solid rgba(14,12,10,0.08)',
+                        cursor: navigatingEventId ? 'default' : 'pointer',
+                        opacity: navigatingEventId && !isNavigatingThis ? 0.5 : 1,
+                        transition: 'opacity 0.15s ease',
+                      }}
+                    >
+                      {isNavigatingThis && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            zIndex: 2,
+                            borderRadius: '10px',
+                            background: 'rgba(255,255,255,0.7)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '22px',
+                              height: '22px',
+                              borderRadius: '50%',
+                              border: '3px solid rgba(14,12,10,0.15)',
+                              borderTopColor: 'var(--afa-terracotta)',
+                              animation: 'afa-spin 0.7s linear infinite',
+                            }}
+                          />
+                          <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                        </div>
+                      )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                         <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-ink)' }}>{app.event.title}</p>
                         <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: appStyle.bg, color: appStyle.color }}>
