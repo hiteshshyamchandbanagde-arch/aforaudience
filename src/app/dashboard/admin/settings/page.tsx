@@ -36,6 +36,19 @@ export default function AdminSettingsPage() {
   const [maxChatCap, setMaxChatCap] = useState<number>(200)
   const [chatSaving, setChatSaving] = useState(false)
 
+  // Scene Status thresholds (reputation epic §1, amended session 55) —
+  // Rising and Featured only. Headliner is deliberately not here at all —
+  // fully manual/admin-toggle-only, no formula, no config.
+  const [risingMinGigs, setRisingMinGigs] = useState<string>('')
+  const [risingMinAvgRating, setRisingMinAvgRating] = useState<string>('')
+  const [risingMinAttendees, setRisingMinAttendees] = useState<string>('')
+  const [featuredVouchThreshold, setFeaturedVouchThreshold] = useState<string>('')
+  const [initialRisingMinGigs, setInitialRisingMinGigs] = useState<number>(3)
+  const [initialRisingMinAvgRating, setInitialRisingMinAvgRating] = useState<number>(4.0)
+  const [initialRisingMinAttendees, setInitialRisingMinAttendees] = useState<number>(5)
+  const [initialFeaturedVouchThreshold, setInitialFeaturedVouchThreshold] = useState<number>(5)
+  const [sceneStatusSaving, setSceneStatusSaving] = useState(false)
+
   // Display currency rates (Option A). One row per non-INR currency;
   // rateInputs holds the live-edited value per code, savingCode tracks
   // which row (if any) is mid-save, so each row's button state is
@@ -82,6 +95,19 @@ export default function AdminSettingsPage() {
         setInitialChatCap(cap)
         setChatCap(String(cap))
         setMaxChatCap(data.limits.maxChatMessagesCap)
+
+        const rGigs = data.settings.sceneStatusRisingMinGigs
+        const rRating = data.settings.sceneStatusRisingMinAvgRating
+        const rAttendees = data.settings.sceneStatusRisingMinAttendees
+        const fThreshold = data.settings.sceneStatusFeaturedVouchThreshold
+        setInitialRisingMinGigs(rGigs)
+        setInitialRisingMinAvgRating(rRating)
+        setInitialRisingMinAttendees(rAttendees)
+        setInitialFeaturedVouchThreshold(fThreshold)
+        setRisingMinGigs(String(rGigs))
+        setRisingMinAvgRating(String(rRating))
+        setRisingMinAttendees(String(rAttendees))
+        setFeaturedVouchThreshold(String(fThreshold))
       } catch (err: any) {
         setLoadError(err.message)
       } finally {
@@ -215,6 +241,58 @@ export default function AdminSettingsPage() {
   const currentChatCap = Math.round(Number(chatCap || 0))
   const isChatCapDirty = currentChatCap !== initialChatCap
   const isChatCapValid = Number.isInteger(Number(chatCap))
+
+  const saveSceneStatusThresholds = async () => {
+    setSceneStatusSaving(true)
+    try {
+      const gigs = Number(risingMinGigs)
+      const rating = Number(risingMinAvgRating)
+      const attendees = Number(risingMinAttendees)
+      const threshold = Number(featuredVouchThreshold)
+      if (!Number.isInteger(gigs) || gigs < 0) throw new Error('Min gigs must be a non-negative whole number')
+      if (!Number.isFinite(rating) || rating < 0 || rating > 5) throw new Error('Min avg rating must be between 0 and 5')
+      if (!Number.isInteger(attendees) || attendees < 0) throw new Error('Min attendees must be a non-negative whole number')
+      if (!Number.isInteger(threshold) || threshold < 1) throw new Error('Featured vouch threshold must be a positive whole number')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sceneStatusRisingMinGigs: gigs,
+          sceneStatusRisingMinAvgRating: rating,
+          sceneStatusRisingMinAttendees: attendees,
+          sceneStatusFeaturedVouchThreshold: threshold,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRisingMinGigs(data.settings.sceneStatusRisingMinGigs)
+      setInitialRisingMinAvgRating(data.settings.sceneStatusRisingMinAvgRating)
+      setInitialRisingMinAttendees(data.settings.sceneStatusRisingMinAttendees)
+      setInitialFeaturedVouchThreshold(data.settings.sceneStatusFeaturedVouchThreshold)
+      showToast('Saved. Scene Status thresholds are live-computed, so this takes effect immediately — no deploy needed.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSceneStatusSaving(false)
+    }
+  }
+
+  const isSceneStatusDirty =
+    Math.round(Number(risingMinGigs || 0)) !== initialRisingMinGigs ||
+    Number(risingMinAvgRating) !== initialRisingMinAvgRating ||
+    Math.round(Number(risingMinAttendees || 0)) !== initialRisingMinAttendees ||
+    Math.round(Number(featuredVouchThreshold || 0)) !== initialFeaturedVouchThreshold
+  const isSceneStatusValid =
+    Number.isInteger(Number(risingMinGigs)) &&
+    Number(risingMinGigs) >= 0 &&
+    Number.isFinite(Number(risingMinAvgRating)) &&
+    Number(risingMinAvgRating) >= 0 &&
+    Number(risingMinAvgRating) <= 5 &&
+    Number.isInteger(Number(risingMinAttendees)) &&
+    Number(risingMinAttendees) >= 0 &&
+    Number.isInteger(Number(featuredVouchThreshold)) &&
+    Number(featuredVouchThreshold) >= 1
 
   if (loading) {
     return (
@@ -436,6 +514,103 @@ export default function AdminSettingsPage() {
             }}
           >
             {chatSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Scene Status thresholds
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Rising and Featured are automatic, computed live on every profile/poster view — changes here take effect immediately, no deploy needed. Headliner isn't configurable here — it's a fully manual, admin-only tag (set per-artist), deliberately not earned via any formula.
+          </p>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN COMPLETED GIGS
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinGigs}
+            onChange={(e) => setRisingMinGigs(e.target.value)}
+            placeholder="3"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN AVERAGE REVIEW RATING (0–5)
+          </label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            max={5}
+            step="0.1"
+            value={risingMinAvgRating}
+            onChange={(e) => setRisingMinAvgRating(e.target.value)}
+            placeholder="4.0"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN VERIFIED ATTENDEES
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinAttendees}
+            onChange={(e) => setRisingMinAttendees(e.target.value)}
+            placeholder="5"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            FEATURED — MIN DISTINCT ORGANISERS WHO VOUCHED
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={featuredVouchThreshold}
+              onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
+              placeholder="5"
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }}
+            />
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
+          </p>
+
+          <button
+            onClick={saveSceneStatusThresholds}
+            disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}
+            style={{
+              background: 'var(--afa-terracotta)',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 'default' : 'pointer',
+              opacity: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 0.5 : 1,
+            }}
+          >
+            {sceneStatusSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
 

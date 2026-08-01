@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import ArtistProfileClientPage from './ArtistProfileClientPage'
+import { getSceneStatus } from '@/lib/scene-status'
 
 export default async function ArtistProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -49,6 +50,11 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const verifiedAttendees = attendeeEventsByUser.size
   const repeatAttendees = [...attendeeEventsByUser.values()].filter((events) => events.size >= 2).length
 
+  // Scene Status (reputation epic §1, amended session 55) - live-computed,
+  // same architectural choice as Verified/Repeat Attendees above. See
+  // src/lib/scene-status.ts.
+  const sceneStatus = artist ? await getSceneStatus(artist.id) : null
+
   const artistWithFollowers = artist
     ? { ...artist, _count: { ...artist._count, followers: followerCount }, verifiedAttendees, repeatAttendees }
     : null
@@ -72,6 +78,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     <ArtistProfileClientPage
       artist={artistWithFollowers ? JSON.parse(JSON.stringify(artistWithFollowers)) : null}
       isVerified={isVerified}
+      sceneStatus={sceneStatus}
     />
   )
 }

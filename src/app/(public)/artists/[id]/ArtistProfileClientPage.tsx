@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import type { SceneStatusTier } from "@/lib/scene-status"
 
 interface Performance {
   id: string
@@ -45,7 +46,15 @@ const SOCIAL_ICON: Record<string, string> = {
   twitter: "🐦",
 }
 
-export default function ArtistProfilePage({ artist, isVerified }: { artist: ArtistData | null; isVerified?: boolean }) {
+export default function ArtistProfilePage({
+  artist,
+  isVerified,
+  sceneStatus,
+}: {
+  artist: ArtistData | null
+  isVerified?: boolean
+  sceneStatus?: SceneStatusTier | null
+}) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   const { status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
@@ -144,6 +153,39 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
                   style={{ fontSize: "0.45em", background: "var(--afa-social-blue)", color: "white", width: "1.1em", height: "1.1em", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                 >
                   ✓
+                </span>
+              )}
+              {sceneStatus && sceneStatus !== "NEW_EMERGING" && (
+                <span
+                  title={
+                    sceneStatus === "HEADLINER"
+                      ? "Headliner — admin-recognized, earned through track record and reputation"
+                      : sceneStatus === "FEATURED"
+                      ? "Featured — vouched for by multiple organisers"
+                      : "Rising — building a strong track record"
+                  }
+                  style={{
+                    fontSize: "0.32em",
+                    fontWeight: 700,
+                    padding: "0.35em 0.7em",
+                    borderRadius: "999px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.3em",
+                    flexShrink: 0,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    background:
+                      sceneStatus === "HEADLINER"
+                        ? "var(--afa-gold)"
+                        : sceneStatus === "FEATURED"
+                        ? "rgba(201,151,58,0.2)"
+                        : "rgba(255,255,255,0.12)",
+                    color: sceneStatus === "HEADLINER" ? "var(--afa-plum-black)" : sceneStatus === "FEATURED" ? "var(--afa-gold)" : "rgba(255,255,255,0.85)",
+                    border: sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
+                  }}
+                >
+                  {sceneStatus === "HEADLINER" ? "★ Headliner" : sceneStatus === "FEATURED" ? "Featured" : "Rising"}
                 </span>
               )}
             </h1>

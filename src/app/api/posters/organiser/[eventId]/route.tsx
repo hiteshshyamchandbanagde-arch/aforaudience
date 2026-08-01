@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og'
 import prisma from '@/lib/prisma'
 import { publicEventUrl } from '@/lib/poster-url'
 import { loadPosterFonts } from '@/lib/poster-fonts'
+import { getSceneStatusBatch } from '@/lib/scene-status'
 import QRCode from 'qrcode'
 
 export const runtime = 'nodejs'
@@ -47,7 +48,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
       organiser: { select: { orgName: true } },
       lineup: {
         where: { cancelledAt: null },
-        include: { artist: { select: { user: { select: { displayName: true, name: true } } } } },
+        include: { artist: { select: { id: true, user: { select: { displayName: true, name: true } } } } },
       },
     },
   })
@@ -65,7 +66,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
   }
 
   const isFull = event.maxPerformers !== null && event.lineup.length >= event.maxPerformers
-  const names = event.lineup.map((p: { artist: { user: { displayName: string | null; name: string } } }) => p.artist.user.displayName || p.artist.user.name)
+
+  // Scene Status (reputation epic §1, amended session 55) - Featured and
+  // Headliner performers render larger on the poster, reflecting their
+  // live/current tier everywhere (not a per-event vouch state - an artist
+  // Featured from past shows shows large here even if this organiser
+  // personally never vouched for them on this event).
+  const sceneStatusByArtistId = await getSceneStatusBatch(event.lineup.map((p: { artist: { id: string } }) => p.artist.id))
+  const names = event.lineup.map((p: { artist: { id: string; user: { displayName: string | null; name: string } } }) => ({
+    name: p.artist.user.displayName || p.artist.user.name,
+    sceneStatus: sceneStatusByArtistId.get(p.artist.id) || 'NEW_EMERGING',
+  }))
 
   const url = publicEventUrl(event.id)
   const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: '#1A0A1A', light: '#F7F3EE' } })
@@ -130,9 +141,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
           </div>
           {isFull ? (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {names.map((name: string, i: number) => (
-                <div key={i} style={{ display: 'flex', fontSize: '42px', fontWeight: 700, color: '#F7F3EE', marginBottom: '20px' }}>{name}</div>
-              ))}
+              {names.map((entry: { name: string; sceneStatus: string }, i: number) => {
+                const isBig = entry.sceneStatus === 'FEATURED' || entry.sceneStatus === 'HEADLINER'
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      fontSize: isBig ? '54px' : '42px',
+                      fontWeight: 700,
+                      color: entry.sceneStatus === 'HEADLINER' ? '#C9973A' : '#F7F3EE',
+                      marginBottom: '20px',
+                    }}
+                  >
+                    {entry.name}
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div style={{ display: 'flex', fontSize: '34px', fontWeight: 400, color: '#F7F3EE', opacity: 0.55 }}>Lineup coming soon</div>

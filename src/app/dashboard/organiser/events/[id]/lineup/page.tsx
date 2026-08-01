@@ -36,6 +36,7 @@ interface LineupSlot {
   buyInAmount: number | null
   startLabel: string | null
   endLabel: string | null
+  isFeaturedVouch: boolean
 }
 
 interface EventInfo {
@@ -55,9 +56,11 @@ const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> =
 function SortableRow({
   item,
   onDurationChange,
+  onFeaturedToggle,
 }: {
   item: LineupSlot
   onDurationChange: (id: string, duration: number) => void
+  onFeaturedToggle: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const style = {
@@ -111,6 +114,31 @@ function SortableRow({
           <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
         )}
       </div>
+
+      <button
+        onClick={() => onFeaturedToggle(item.id)}
+        title={
+          item.isFeaturedVouch
+            ? 'Remove your Featured vouch for this artist'
+            : 'Vouch this artist as Featured — once 5+ (configurable) distinct organisers vouch, their Scene Status auto-promotes to Featured'
+        }
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '5px 10px',
+          borderRadius: '999px',
+          fontSize: '11px',
+          fontWeight: 700,
+          whiteSpace: 'nowrap',
+          cursor: 'pointer',
+          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(14,12,10,0.15)',
+          background: item.isFeaturedVouch ? 'rgba(201,151,58,0.15)' : 'transparent',
+          color: item.isFeaturedVouch ? 'var(--afa-gold)' : 'rgba(14,12,10,0.5)',
+        }}
+      >
+        {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
+      </button>
 
       <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: comp.bg, color: comp.color, whiteSpace: 'nowrap' }}>
         {comp.label}{compAmount ? ` · ₹${compAmount}` : ''}
@@ -199,6 +227,11 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
     setDirty(true)
   }
 
+  const handleFeaturedToggle = (itemId: string) => {
+    setLineup((items) => items.map((i) => (i.id === itemId ? { ...i, isFeaturedVouch: !i.isFeaturedVouch } : i)))
+    setDirty(true)
+  }
+
   const [broadcastDraft, setBroadcastDraft] = useState('')
   const [broadcasting, setBroadcasting] = useState(false)
 
@@ -232,7 +265,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
       const res = await fetch(`/api/events/${id}/lineup`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: lineup.map((i) => ({ performanceId: i.id, duration: i.duration })) }),
+        body: JSON.stringify({ order: lineup.map((i) => ({ performanceId: i.id, duration: i.duration, isFeaturedVouch: i.isFeaturedVouch })) }),
       })
       if (!res.ok) throw new Error('Could not save lineup')
       const json = await res.json()
@@ -314,7 +347,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
               <SortableContext items={lineup.map((i) => i.id)} strategy={verticalListSortingStrategy}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {lineup.map((item) => (
-                    <SortableRow key={item.id} item={item} onDurationChange={handleDurationChange} />
+                    <SortableRow key={item.id} item={item} onDurationChange={handleDurationChange} onFeaturedToggle={handleFeaturedToggle} />
                   ))}
                 </div>
               </SortableContext>

@@ -471,6 +471,14 @@ model Artist {
   applications  Application[]
   performances  Performance[]
   organiserRatings OrganiserArtistRating[]
+
+  // Scene Status (reputation epic §1, amended session 55) — Headliner tier
+  // is deliberately fully manual, admin-only, no formula/threshold. Admin
+  // weighs whatever signals matter (audience reaction, gig count, organiser
+  // rating, Hype Score) and sets this directly - "not a small thing to get,
+  // it's supposed to be earned." See docs/artist-reputation-system-design.md
+  // Amendment 1.
+  isSceneStatusHeadliner Boolean @default(false)
 }
 
 enum FollowTargetType {
@@ -871,6 +879,20 @@ model PlatformSettings {
   ticketCommissionRate         Float    @default(0.08)
   /// @deprecated dead per fifth amendment — do not read
   performerSlotCommissionRate  Float    @default(0.08)
+
+  // Scene Status tier thresholds (reputation epic §1, amended session 55).
+  // Configurable rather than hardcoded, deliberately - the design doc
+  // itself says the exact formula is "TBD once we see real data volume",
+  // and Scene Status is live-computed on every view (session 53), so a
+  // config value can be tuned instantly as real usage patterns emerge, no
+  // deploy/migration needed. Only Rising and Featured are automatic;
+  // Headliner stays fully manual/admin-only by design, no config here for
+  // it. See docs/artist-reputation-system-design.md Amendment 1.
+  sceneStatusRisingMinGigs           Int   @default(3)
+  sceneStatusRisingMinAvgRating      Float @default(4.0)
+  sceneStatusRisingMinAttendees      Int   @default(5)
+  sceneStatusFeaturedVouchThreshold  Int   @default(5)
+
   updatedAt                    DateTime @updatedAt
 }
 
@@ -1074,6 +1096,17 @@ model Performance {
   // chooses to keep it afterward, never the artist's call and never the
   // default.
   buyInRefundStatus BuyInRefundStatus?
+
+  // Scene Status Featured tier (reputation epic §1, amended session 55).
+  // Organiser marks an artist Featured at lineup placement/management time
+  // (this Performance row) - distinct from the post-show OrganiserArtistRating
+  // flow, no dependency on it. Featured tier itself is live-computed: count
+  // of DISTINCT organisers (via Event.organiserId) who've set this true for
+  // the artist, compared against PlatformSettings.sceneStatusFeaturedVouchThreshold.
+  // Distinct-organiser (not raw vouch count) deliberately prevents one
+  // organiser gaming it via repeat bookings of the same artist. See
+  // docs/artist-reputation-system-design.md Amendment 1.
+  isFeaturedVouch Boolean @default(false)
 }
 
 enum BuyInRefundStatus {

@@ -20,6 +20,13 @@ export type PlatformSettings = {
   minAudienceBookingFee: number // paise — floor an audience member can drop the fee to
   maxAudienceBookingFee: number // paise — per-transaction ceiling (standard fee + overrides both bounded by this)
   chatMaxMessagesPerSession: number
+  // Scene Status thresholds (reputation epic §1, amended session 55) — see
+  // src/lib/scene-status.ts for how these are consumed. Headliner has no
+  // config here deliberately - fully manual, no formula.
+  sceneStatusRisingMinGigs: number
+  sceneStatusRisingMinAvgRating: number
+  sceneStatusRisingMinAttendees: number
+  sceneStatusFeaturedVouchThreshold: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -29,6 +36,10 @@ const SETTINGS_SELECT = {
   minAudienceBookingFee: true,
   maxAudienceBookingFee: true,
   chatMaxMessagesPerSession: true,
+  sceneStatusRisingMinGigs: true,
+  sceneStatusRisingMinAvgRating: true,
+  sceneStatusRisingMinAttendees: true,
+  sceneStatusFeaturedVouchThreshold: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -125,6 +136,55 @@ export async function setChatMaxMessagesPerSession(
     where: { id: SINGLETON_ID },
     update: { chatMaxMessagesPerSession: cap },
     create: { id: SINGLETON_ID, chatMaxMessagesPerSession: cap },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for Scene Status's Rising and Featured thresholds
+ * (reputation epic §1, amended session 55). Headliner has no setter here —
+ * deliberately manual/admin-toggle-only, see Artist.isSceneStatusHeadliner.
+ * All fields optional per call so a single-field PATCH doesn't reset the
+ * others (same convention as setAudienceFeeSettings/setChatMaxMessagesPerSession).
+ */
+export async function setSceneStatusThresholds(input: {
+  risingMinGigs?: number
+  risingMinAvgRating?: number
+  risingMinAttendees?: number
+  featuredVouchThreshold?: number
+}): Promise<PlatformSettings> {
+  const data: Record<string, number> = {}
+
+  if (input.risingMinGigs !== undefined) {
+    if (!Number.isInteger(input.risingMinGigs) || input.risingMinGigs < 0) {
+      throw new Error("sceneStatusRisingMinGigs must be a non-negative integer")
+    }
+    data.sceneStatusRisingMinGigs = input.risingMinGigs
+  }
+  if (input.risingMinAvgRating !== undefined) {
+    if (!Number.isFinite(input.risingMinAvgRating) || input.risingMinAvgRating < 0 || input.risingMinAvgRating > 5) {
+      throw new Error("sceneStatusRisingMinAvgRating must be between 0 and 5")
+    }
+    data.sceneStatusRisingMinAvgRating = input.risingMinAvgRating
+  }
+  if (input.risingMinAttendees !== undefined) {
+    if (!Number.isInteger(input.risingMinAttendees) || input.risingMinAttendees < 0) {
+      throw new Error("sceneStatusRisingMinAttendees must be a non-negative integer")
+    }
+    data.sceneStatusRisingMinAttendees = input.risingMinAttendees
+  }
+  if (input.featuredVouchThreshold !== undefined) {
+    if (!Number.isInteger(input.featuredVouchThreshold) || input.featuredVouchThreshold < 1) {
+      throw new Error("sceneStatusFeaturedVouchThreshold must be a positive integer")
+    }
+    data.sceneStatusFeaturedVouchThreshold = input.featuredVouchThreshold
+  }
+
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: data,
+    create: { id: SINGLETON_ID, ...data },
     select: SETTINGS_SELECT,
   })
   return row
