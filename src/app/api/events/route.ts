@@ -14,7 +14,13 @@ export async function GET() {
       // listings immediately (no new tickets sold while suspended), but
       // this deliberately does NOT touch existing confirmed bookings for
       // events already sold - see User.isSuspended comment in schema.
-      where: { status: 'APPROVED', organiser: { user: { isSuspended: false } } },
+      // Same COMPLETED-status gap as the event detail page (PR #306) -
+      // this listing was APPROVED-only, so a completed event vanished
+      // from both Upcoming and Past (Past's own date-based split never
+      // got a chance to run on it, since it was filtered out before
+      // reaching the client). Widen to include COMPLETED; DRAFT/
+      // PENDING_APPROVAL/CANCELLED remain excluded.
+      where: { status: { in: ['APPROVED', 'COMPLETED'] }, organiser: { user: { isSuspended: false } } },
       include: { venue: true, lineup: true },
       orderBy: { date: 'asc' },
     })
