@@ -17,7 +17,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           artist: { include: { user: true } },
           reviews: {
             include: {
-              user: { select: { name: true } },
+              user: { select: { name: true, displayName: true } },
               reply: { include: { author: { select: { name: true, displayName: true } } } },
             },
             orderBy: { createdAt: 'desc' },

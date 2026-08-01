@@ -10,7 +10,7 @@ interface ArtistItem {
   bio: string
   genre: string[]
   styleTag: string[]
-  user: { name: string; avatar: string | null }
+  user: { name: string; displayName: string | null; avatar: string | null }
   _count: { performances: number }
   sceneStatus?: SceneStatusTier
 }
@@ -92,7 +92,7 @@ export default function ArtistsPage() {
   const filtered = artists
     .filter((a) => {
       const matchSearch =
-        a.user.name.toLowerCase().includes(search.toLowerCase()) ||
+        (a.user.displayName || a.user.name).toLowerCase().includes(search.toLowerCase()) ||
         a.genre.some((g) => g.toLowerCase().includes(search.toLowerCase()))
       const matchGenre = selectedGenre === "All" || a.genre.includes(selectedGenre)
       return matchSearch && matchGenre
@@ -164,7 +164,7 @@ export default function ArtistsPage() {
             <div style={{ fontSize: "56px" }}>🌟</div>
             <div style={{ flex: 1, minWidth: "200px" }}>
               <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>Top Artist Right Now</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.name}</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.displayName || risingStar.user.name}</div>
               <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} show{risingStar._count.performances === 1 ? "" : "s"}</div>
             </div>
             <button
@@ -194,6 +194,7 @@ export default function ArtistsPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
             {filtered.map((artist) => {
               const isNavigatingThis = navigatingId === artist.id
+              const displayName = artist.user.displayName || artist.user.name
               return (
                 <div
                   key={artist.id}
@@ -248,14 +249,14 @@ export default function ArtistsPage() {
                     <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
                       {artist.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={artist.user.avatar} alt={artist.user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={artist.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        artist.user.name.charAt(0).toUpperCase()
+                        displayName.charAt(0).toUpperCase()
                       )}
                     </div>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", flexWrap: "wrap" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white" }}>{artist.user.name}</div>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white" }}>{displayName}</div>
                         {artist.sceneStatus && CARD_BADGE[artist.sceneStatus] && (
                           <span
                             style={{

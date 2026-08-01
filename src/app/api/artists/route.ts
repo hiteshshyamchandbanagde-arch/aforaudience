@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const artists = await prisma.artist.findMany({
       include: {
-        user: { select: { name: true, avatar: true } },
+        user: { select: { name: true, displayName: true, avatar: true } },
         _count: { select: { performances: true } },
       },
       // hypScore (profile-level, always 0, never written) retired as part

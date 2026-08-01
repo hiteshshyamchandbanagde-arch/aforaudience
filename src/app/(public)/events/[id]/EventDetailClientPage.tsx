@@ -15,7 +15,7 @@ interface Review {
   rating: number
   comment: string | null
   createdAt: string
-  user: { name: string }
+  user: { name: string; displayName: string | null }
   reply: { text: string; author: { name: string; displayName: string | null } } | null
 }
 
@@ -27,7 +27,7 @@ interface Performer {
     bio?: string | null
     genre: string[]
     styleTag: string[]
-    user: { name: string }
+    user: { name: string; displayName: string | null }
   }
   reviews: Review[]
   // Reputation epic §4 - per-show Hype Score, live-computed server-side.
@@ -472,14 +472,16 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>Lineup hasn't been confirmed yet — check back closer to the date.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {event.lineup.map((p) => (
+                  {event.lineup.map((p) => {
+                    const performerName = p.artist.user.displayName || p.artist.user.name
+                    return (
                     <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", gap: "20px" }}>
                       <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "white", flexShrink: 0 }}>
-                        {p.artist.user.name.charAt(0).toUpperCase()}
+                        {performerName.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)" }}>{p.artist.user.name}</div>
+                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)" }}>{performerName}</div>
                           {p.hypeScore != null && (
                             <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.1)", padding: "2px 8px", borderRadius: "999px" }}>
                               🔥 {p.hypeScore.toFixed(1)}
@@ -497,7 +499,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                           <div style={{ marginTop: "10px" }}>
                             {plusOneStatus[p.id].alreadyConfirmed ? (
                               <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-green-bright)", background: "var(--afa-success-bg)", padding: "5px 12px", borderRadius: "999px" }}>
-                                ✓ You're confirmed as {p.artist.user.name.split(" ")[0]}'s +1
+                                ✓ You're confirmed as {performerName.split(" ")[0]}'s +1
                               </span>
                             ) : plusOneStatus[p.id].fulfilled ? (
                               <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
@@ -516,7 +518,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               >
                                 {plusOneBusy === p.id
                                   ? "Confirming..."
-                                  : `I'll be there for ${p.artist.user.name.split(" ")[0]} (${plusOneStatus[p.id].confirmedCount}/${plusOneStatus[p.id].required})`}
+                                  : `I'll be there for ${performerName.split(" ")[0]} (${plusOneStatus[p.id].confirmedCount}/${plusOneStatus[p.id].required})`}
                               </button>
                             )}
                           </div>
@@ -534,7 +536,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             {p.reviews.slice(0, 3).map((r) => (
                               <div key={r.id}>
                                 <div style={{ fontSize: "13px", color: "var(--afa-ink)" }}>
-                                  {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.name}</span>
+                                  {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.displayName || r.user.name}</span>
                                   {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                                 </div>
                                 {r.reply && (
@@ -588,7 +590,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         )}
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
