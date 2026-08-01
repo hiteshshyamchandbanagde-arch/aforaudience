@@ -56,6 +56,15 @@ export default function AdminSettingsPage() {
   const [initialRosterLookback, setInitialRosterLookback] = useState<number>(5)
   const [rosterLookbackSaving, setRosterLookbackSaving] = useState(false)
 
+  // Audience Choice voting default weights (§6, session 58)
+  const [audienceWeight, setAudienceWeight] = useState<string>('')
+  const [panelistWeight, setPanelistWeight] = useState<string>('')
+  const [celebrityWeight, setCelebrityWeight] = useState<string>('')
+  const [initialAudienceWeight, setInitialAudienceWeight] = useState<number>(80)
+  const [initialPanelistWeight, setInitialPanelistWeight] = useState<number>(10)
+  const [initialCelebrityWeight, setInitialCelebrityWeight] = useState<number>(10)
+  const [voteWeightsSaving, setVoteWeightsSaving] = useState(false)
+
   // Display currency rates (Option A). One row per non-INR currency;
   // rateInputs holds the live-edited value per code, savingCode tracks
   // which row (if any) is mid-save, so each row's button state is
@@ -119,6 +128,16 @@ export default function AdminSettingsPage() {
         const lookback = data.settings.artistRosterHypeScoreLookback
         setInitialRosterLookback(lookback)
         setRosterLookback(String(lookback))
+
+        const aw = data.settings.audienceVoteWeightDefault
+        const pw = data.settings.panelistVoteWeightDefault
+        const cw = data.settings.celebrityVoteWeightDefault
+        setInitialAudienceWeight(aw)
+        setInitialPanelistWeight(pw)
+        setInitialCelebrityWeight(cw)
+        setAudienceWeight(String(aw))
+        setPanelistWeight(String(pw))
+        setCelebrityWeight(String(cw))
       } catch (err: any) {
         setLoadError(err.message)
       } finally {
@@ -329,6 +348,48 @@ export default function AdminSettingsPage() {
   }
   const isRosterLookbackDirty = Math.round(Number(rosterLookback || 0)) !== initialRosterLookback
   const isRosterLookbackValid = Number.isInteger(Number(rosterLookback)) && Number(rosterLookback) >= 1
+
+  const saveVoteWeightDefaults = async () => {
+    setVoteWeightsSaving(true)
+    try {
+      const a = Number(audienceWeight)
+      const p = Number(panelistWeight)
+      const c = Number(celebrityWeight)
+      if (![a, p, c].every((n) => Number.isInteger(n) && n >= 0)) throw new Error('Weights must be non-negative whole numbers')
+      if (a + p + c !== 100) throw new Error('Weights must sum to 100')
+      if (a < 50) throw new Error('Audience weight must be at least 50 (Audience Choice floor)')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audienceVoteWeightDefault: a,
+          panelistVoteWeightDefault: p,
+          celebrityVoteWeightDefault: c,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialAudienceWeight(data.settings.audienceVoteWeightDefault)
+      setInitialPanelistWeight(data.settings.panelistVoteWeightDefault)
+      setInitialCelebrityWeight(data.settings.celebrityVoteWeightDefault)
+      showToast('Saved. Applies to any Competition Show event that hasn\'t set its own override.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setVoteWeightsSaving(false)
+    }
+  }
+  const isVoteWeightsDirty =
+    Math.round(Number(audienceWeight || 0)) !== initialAudienceWeight ||
+    Math.round(Number(panelistWeight || 0)) !== initialPanelistWeight ||
+    Math.round(Number(celebrityWeight || 0)) !== initialCelebrityWeight
+  const voteWeightsSum = Math.round(Number(audienceWeight || 0)) + Math.round(Number(panelistWeight || 0)) + Math.round(Number(celebrityWeight || 0))
+  const isVoteWeightsValid =
+    Number.isInteger(Number(audienceWeight)) && Number(audienceWeight) >= 50 &&
+    Number.isInteger(Number(panelistWeight)) && Number(panelistWeight) >= 0 &&
+    Number.isInteger(Number(celebrityWeight)) && Number(celebrityWeight) >= 0 &&
+    voteWeightsSum === 100
 
   if (loading) {
     return (
@@ -683,6 +744,59 @@ export default function AdminSettingsPage() {
             }}
           >
             {sceneStatusSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Audience Choice default weights
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Applies to any Competition Show event that hasn't set its own override on the Edit Event page. Must sum to 100, Audience must be at least 50 (the "Audience Choice" floor — otherwise it stops being genuinely audience-driven).
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 11, color: voteWeightsSum === 100 ? 'var(--afa-taupe)' : 'var(--afa-terracotta)', marginBottom: 16 }}>
+            Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
+          </p>
+
+          <button
+            onClick={saveVoteWeightDefaults}
+            disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}
+            style={{
+              background: 'var(--afa-terracotta)',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 'default' : 'pointer',
+              opacity: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 0.5 : 1,
+            }}
+          >
+            {voteWeightsSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
 

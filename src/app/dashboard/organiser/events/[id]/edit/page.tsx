@@ -69,6 +69,9 @@ interface EventDetail {
   competitionPrizeThird?: string | null
   celebrities?: { id: string; name: string; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
   panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
+  audienceVoteWeight?: number | null
+  panelistVoteWeight?: number | null
+  celebrityVoteWeight?: number | null
 }
 
 const inputStyle = {
@@ -151,6 +154,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [celebritySearch, setCelebritySearch] = useState('')
   const [celebritySearchResults, setCelebritySearchResults] = useState<{ id: string; name: string; displayName: string | null; avatar: string | null }[]>([])
   const [celebrityInviting, setCelebrityInviting] = useState(false)
+
+  // Audience Choice voting weight override (§6, session 58) - blank
+  // means "follow the platform default", same nullable-resolve pattern
+  // as PlatformSettings.artistRosterHypeScoreLookback elsewhere in this
+  // epic.
+  const [audienceVoteWeight, setAudienceVoteWeight] = useState('')
+  const [panelistVoteWeight, setPanelistVoteWeight] = useState('')
+  const [celebrityVoteWeight, setCelebrityVoteWeight] = useState('')
+  const [voteWeightSaving, setVoteWeightSaving] = useState(false)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
   const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
@@ -281,6 +293,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         }
         const data: EventDetail = await eventRes.json()
         setEvent(data)
+        setAudienceVoteWeight(data.audienceVoteWeight != null ? String(data.audienceVoteWeight) : '')
+        setPanelistVoteWeight(data.panelistVoteWeight != null ? String(data.panelistVoteWeight) : '')
+        setCelebrityVoteWeight(data.celebrityVoteWeight != null ? String(data.celebrityVoteWeight) : '')
         setFormData({
           title: data.title,
           description: data.description,
@@ -468,6 +483,37 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     const res = await fetch(`/api/events/${id}/owner`)
     if (res.ok) setEvent(await res.json())
   }, [id])
+
+  const saveVoteWeights = async (useDefault: boolean) => {
+    setVoteWeightSaving(true)
+    try {
+      const payload = useDefault
+        ? { audienceVoteWeight: null, panelistVoteWeight: null, celebrityVoteWeight: null }
+        : {
+            audienceVoteWeight: Number(audienceVoteWeight),
+            panelistVoteWeight: Number(panelistVoteWeight),
+            celebrityVoteWeight: Number(celebrityVoteWeight),
+          }
+      const res = await fetch(`/api/events/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      if (useDefault) {
+        setAudienceVoteWeight('')
+        setPanelistVoteWeight('')
+        setCelebrityVoteWeight('')
+      }
+      showToast('Saved.', 'success')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setVoteWeightSaving(false)
+    }
+  }
 
   const searchPanelistCandidates = async (q: string) => {
     setPanelistSearch(q)
@@ -781,6 +827,66 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           ))}
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(14,12,10,0.1)' }}>
+                    <label style={labelStyle}>Audience Choice vote weighting</label>
+                    <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '10px' }}>
+                      How much each voter category counts toward the Audience Choice result. Leave blank to follow the platform default (currently 80/10/10). Must sum to 100, Audience at least 50.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={audienceVoteWeight}
+                          onChange={(e) => setAudienceVoteWeight(e.target.value)}
+                          placeholder="80"
+                          min={50}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={panelistVoteWeight}
+                          onChange={(e) => setPanelistVoteWeight(e.target.value)}
+                          placeholder="10"
+                          min={0}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
+                        <input
+                          type="number"
+                          style={inputStyle}
+                          value={celebrityVoteWeight}
+                          onChange={(e) => setCelebrityVoteWeight(e.target.value)}
+                          placeholder="10"
+                          min={0}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => saveVoteWeights(false)}
+                        disabled={voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight}
+                        style={{ fontSize: '13px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: voteWeightSaving ? 'default' : 'pointer', opacity: voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight ? 0.5 : 1 }}
+                      >
+                        {voteWeightSaving ? 'Saving…' : 'Save override'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => saveVoteWeights(true)}
+                        disabled={voteWeightSaving}
+                        style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '8px', padding: '8px 16px', cursor: voteWeightSaving ? 'default' : 'pointer' }}
+                      >
+                        Use platform default
+                      </button>
                     </div>
                   </div>
                 </div>

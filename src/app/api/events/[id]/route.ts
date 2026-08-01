@@ -62,6 +62,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+      audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
     } = body
 
     // Competition show - prize fields only kept when isCompetitionShow is
@@ -69,6 +70,34 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // 57, Accept-to-Appear) are no longer handled by this route at all -
     // see the comment at the write site below.
     const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
+
+    // Audience Choice vote weights (§6, session 58) - organiser override,
+    // all three or none (avoids a partial write leaving weights that
+    // don't sum to 100). null clears back to following the platform
+    // default. Validated here, same guardrails as the platform-default
+    // setter (setAudienceChoiceWeightDefaults).
+    const hasVoteWeights = audienceVoteWeight !== undefined || panelistVoteWeight !== undefined || celebrityVoteWeight !== undefined
+    let voteWeightsUpdate: { audienceVoteWeight: number | null; panelistVoteWeight: number | null; celebrityVoteWeight: number | null } | undefined
+    if (hasVoteWeights) {
+      const allNull = audienceVoteWeight === null && panelistVoteWeight === null && celebrityVoteWeight === null
+      if (allNull) {
+        voteWeightsUpdate = { audienceVoteWeight: null, panelistVoteWeight: null, celebrityVoteWeight: null }
+      } else {
+        const a = Number(audienceVoteWeight)
+        const p = Number(panelistVoteWeight)
+        const c = Number(celebrityVoteWeight)
+        if (![a, p, c].every((n) => Number.isInteger(n) && n >= 0)) {
+          return NextResponse.json({ error: 'Vote weights must be non-negative integers' }, { status: 400 })
+        }
+        if (a + p + c !== 100) {
+          return NextResponse.json({ error: 'Vote weights must sum to 100' }, { status: 400 })
+        }
+        if (a < 50) {
+          return NextResponse.json({ error: 'Audience weight must be at least 50 (Audience Choice floor, per design)' }, { status: 400 })
+        }
+        voteWeightsUpdate = { audienceVoteWeight: a, panelistVoteWeight: p, celebrityVoteWeight: c }
+      }
+    }
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
     // all, meaning a Numbered-venue event's per-section pricing could only
@@ -200,6 +229,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           competitionPrizeSecond: resolvedIsCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
           competitionPrizeThird: resolvedIsCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
         }),
+        ...(voteWeightsUpdate && voteWeightsUpdate),
         // Panelists/celebrity (§8, session 57) are deliberately NEVER
         // touched by this general event PATCH anymore, even if a client
         // sent a `panelists` field - the old deleteMany+create full-replace

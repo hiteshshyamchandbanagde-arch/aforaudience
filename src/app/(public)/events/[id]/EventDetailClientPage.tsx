@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import AudienceChoiceVoting from "@/components/AudienceChoiceVoting"
 import SeatPicker from "@/components/SeatPicker"
 import { formatEventTimeRange } from "@/lib/eventTime"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
@@ -457,6 +458,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       </div>
                     </div>
                   )}
+
+                  <AudienceChoiceVoting eventId={event.id} isCompetitionShow={event.isCompetitionShow} />
                 </div>
               )}
             </div>

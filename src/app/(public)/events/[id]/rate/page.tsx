@@ -50,9 +50,10 @@ export default async function RatePromptPage({ params }: { params: Promise<{ id:
       }),
     ])
     canReview = !!checkedInBooking
-    const overall = myReviews.find((r) => r.performanceId === null)
+    type ReviewRow = { performanceId: string | null; rating: number; comment: string | null }
+    const overall = (myReviews as ReviewRow[]).find((r) => r.performanceId === null)
     existingOverallRating = overall ? { rating: overall.rating, comment: overall.comment } : null
-    ratedPerformanceIds = myReviews.filter((r) => r.performanceId).map((r) => r.performanceId as string)
+    ratedPerformanceIds = (myReviews as ReviewRow[]).filter((r) => r.performanceId).map((r) => r.performanceId as string)
   }
 
   return (

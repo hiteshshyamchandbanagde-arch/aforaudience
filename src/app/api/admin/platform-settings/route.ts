@@ -8,6 +8,7 @@ import {
   setChatMaxMessagesPerSession,
   setSceneStatusThresholds,
   setArtistRosterHypeScoreLookback,
+  setAudienceChoiceWeightDefaults,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -72,12 +73,16 @@ export async function PATCH(req: Request) {
   const hasFeaturedThreshold = Object.prototype.hasOwnProperty.call(body, 'sceneStatusFeaturedVouchThreshold')
   const hasSceneStatus = hasRisingMinGigs || hasRisingMinAvgRating || hasRisingMinAttendees || hasFeaturedThreshold
   const hasRosterLookback = Object.prototype.hasOwnProperty.call(body, 'artistRosterHypeScoreLookback')
+  const hasVoteWeightDefaults =
+    Object.prototype.hasOwnProperty.call(body, 'audienceVoteWeightDefault') &&
+    Object.prototype.hasOwnProperty.call(body, 'panelistVoteWeightDefault') &&
+    Object.prototype.hasOwnProperty.call(body, 'celebrityVoteWeightDefault')
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, or artistRosterHypeScoreLookback is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -130,6 +135,18 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: 'artistRosterHypeScoreLookback must be a positive integer' }, { status: 400 })
       }
       updated = await setArtistRosterHypeScoreLookback(lookback)
+    }
+
+    if (hasVoteWeightDefaults) {
+      try {
+        updated = await setAudienceChoiceWeightDefaults({
+          audience: Number(body.audienceVoteWeightDefault),
+          panelist: Number(body.panelistVoteWeightDefault),
+          celebrity: Number(body.celebrityVoteWeightDefault),
+        })
+      } catch (e: any) {
+        return NextResponse.json({ error: e.message || 'Invalid vote weights' }, { status: 400 })
+      }
     }
 
     return NextResponse.json({ settings: updated })

@@ -909,6 +909,15 @@ model PlatformSettings {
   // Score itself isn't part of the Rising formula.
   artistRosterHypeScoreLookback     Int   @default(5)
 
+  // Audience Choice voting default weights (§6, session 58) - organiser
+  // can override per event (Event.audienceVoteWeight etc, nullable,
+  // resolves here when unset). Confirmed default 80/10/10, must always
+  // sum to 100 and respect the doc's ~50% Audience floor - enforced at
+  // the setter/API layer, not a DB constraint.
+  audienceVoteWeightDefault  Int @default(80)
+  panelistVoteWeightDefault  Int @default(10)
+  celebrityVoteWeightDefault Int @default(10)
+
   updatedAt                    DateTime @updatedAt
 }
 
@@ -1056,6 +1065,17 @@ model Event {
 
   panelists   EventPanelist[]
   celebrities Celebrity[]
+
+  // Audience Choice voting (§6, session 58) - organiser-chosen weighting
+  // per event, nullable so an event that never touches this always
+  // follows the current PlatformSettings default rather than freezing at
+  // whatever the default happened to be when the event was created.
+  // Confirmed default (Hitesh, session 58): 80/10/10 - leaning harder
+  // into "Audience Choice" than the design doc's own 70/20/10 example.
+  audienceVoteWeight  Int?
+  panelistVoteWeight  Int?
+  celebrityVoteWeight Int?
+  votes               CompetitionVote[]
 }
 
 // Accept-to-Appear (reputation epic §8, session 57) - shared status enum
@@ -1121,6 +1141,39 @@ model Celebrity {
   respondedAt DateTime?
 }
 
+// Audience Choice voting (reputation epic §6, session 58) - three voter
+// categories, each ranking their own top 3 (Borda 3/2/1). voterId's
+// meaning is category-dependent: bookingId for AUDIENCE (one vote per
+// booking, not per attendee - the same per-booking check-in limitation
+// §3/§7 already document), userId for PANELIST/CELEBRITY (must have an
+// ACCEPTED invite for this specific event, §8). A person eligible in more
+// than one category (e.g. an accepted panelist who also bought a ticket)
+// gets a separate ballot per category they qualify for - these are role-
+// based ballots, not mutually exclusive identities.
+enum VoterCategory {
+  AUDIENCE
+  PANELIST
+  CELEBRITY
+}
+
+model CompetitionVote {
+  id            String        @id @default(cuid())
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category      VoterCategory
+  voterId       String
+  performanceId String
+  performance   Performance   @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  rank          Int
+  createdAt     DateTime      @default(now())
+
+  // One rank slot per voter per category (can't cast two different
+  // performances at rank 1, say), and one vote per performance per voter
+  // per category (can't rank the same performance at both 1st and 2nd).
+  @@unique([eventId, category, voterId, rank])
+  @@unique([eventId, category, voterId, performanceId])
+}
+
 model Application {
   id        String            @id @default(cuid())
   eventId   String
@@ -1151,6 +1204,7 @@ model Performance {
   reviews   Review[]
   plusOnes  PlusOne[]
   organiserRatings OrganiserArtistRating[]
+  votes     CompetitionVote[]
 
   // Artist self-cancellation (session 21, 23 Jul). cancelledAt null =
   // active slot. Cancelling within 24h of the event is blocked entirely

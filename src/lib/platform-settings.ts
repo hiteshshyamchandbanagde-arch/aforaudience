@@ -30,6 +30,10 @@ export type PlatformSettings = {
   // Admin artist roster (session 56) - how many of an artist's most recent
   // scored shows to average for the roster's Hype Score column.
   artistRosterHypeScoreLookback: number
+  // Audience Choice voting defaults (§6, session 58)
+  audienceVoteWeightDefault: number
+  panelistVoteWeightDefault: number
+  celebrityVoteWeightDefault: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -44,6 +48,9 @@ const SETTINGS_SELECT = {
   sceneStatusRisingMinAttendees: true,
   sceneStatusFeaturedVouchThreshold: true,
   artistRosterHypeScoreLookback: true,
+  audienceVoteWeightDefault: true,
+  panelistVoteWeightDefault: true,
+  celebrityVoteWeightDefault: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -208,6 +215,36 @@ export async function setArtistRosterHypeScoreLookback(lookback: number): Promis
     where: { id: SINGLETON_ID },
     update: { artistRosterHypeScoreLookback: lookback },
     create: { id: SINGLETON_ID, artistRosterHypeScoreLookback: lookback },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for the Audience Choice voting default weights (§6,
+ * session 58). Must sum to 100 and respect the design doc's ~50%
+ * Audience floor - enforced here, same validation an organiser's
+ * per-event override goes through (see events/[id]/route.ts).
+ */
+export async function setAudienceChoiceWeightDefaults(input: {
+  audience: number
+  panelist: number
+  celebrity: number
+}): Promise<PlatformSettings> {
+  const { audience, panelist, celebrity } = input
+  if (![audience, panelist, celebrity].every((n) => Number.isInteger(n) && n >= 0)) {
+    throw new Error("Weights must be non-negative integers")
+  }
+  if (audience + panelist + celebrity !== 100) {
+    throw new Error("Weights must sum to 100")
+  }
+  if (audience < 50) {
+    throw new Error("Audience weight must be at least 50 (Audience Choice floor, per design)")
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
+    create: { id: SINGLETON_ID, audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
     select: SETTINGS_SELECT,
   })
   return row
