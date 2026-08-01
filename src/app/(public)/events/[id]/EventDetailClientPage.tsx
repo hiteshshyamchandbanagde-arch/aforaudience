@@ -67,8 +67,7 @@ interface EventData {
   competitionPrizeFirst?: string | null
   competitionPrizeSecond?: string | null
   competitionPrizeThird?: string | null
-  celebrityAttendingName?: string | null
-  celebrityPhotoUrl?: string | null
+  celebrities?: { id: string; name: string; photoUrl: string | null }[]
   panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null }[]
 }
 
@@ -418,18 +417,22 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     </div>
                   )}
 
-                  {event.celebrityAttendingName && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)", marginBottom: "20px" }}>
-                      {event.celebrityPhotoUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={event.celebrityPhotoUrl} alt={event.celebrityAttendingName} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
-                      )}
-                      <div>
-                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Celebrity Attending</div>
-                        <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{event.celebrityAttendingName}</div>
-                      </div>
+                  {event.celebrities && event.celebrities.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+                      {event.celebrities.map((c) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "14px", background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)" }}>
+                          {c.photoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={c.photoUrl} alt={c.name} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
+                          ) : (
+                            <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
+                          )}
+                          <div>
+                            <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Celebrity Attending</div>
+                            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{c.name}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 

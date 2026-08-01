@@ -26,13 +26,45 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         orderBy: { slot: 'asc' },
       },
       ticketTiers: true,
-      panelists: { orderBy: { order: 'asc' } },
+      // Accept-to-Appear (§8, session 57) - only ACCEPTED entries are ever
+      // fetched for the public page at all; PENDING/DECLINED simply don't
+      // exist as far as this query is concerned. `user` joined so display
+      // reads the account's own current displayName/avatar, not whatever
+      // organiser-typed `name` sits on the row from invite time.
+      panelists: {
+        where: { status: 'ACCEPTED' },
+        orderBy: { order: 'asc' },
+        include: { user: { select: { name: true, displayName: true, avatar: true } } },
+      },
+      celebrities: {
+        where: { status: 'ACCEPTED' },
+        orderBy: { order: 'asc' },
+        include: { user: { select: { name: true, displayName: true, avatar: true } } },
+      },
     },
   })
 
   if (!event || event.status !== 'APPROVED') {
     return <EventDetailClientPage event={null} canReview={false} />
   }
+
+  // Accept-to-Appear (§8) - public display always reads the linked
+  // account's own name/photo, never the organiser-typed draft label from
+  // invite time (see docs/artist-reputation-system-design.md §8).
+  type PanelistRow = { id: string; name: string; bio: string | null; photoUrl: string | null; user: { name: string; displayName: string | null; avatar: string | null } | null }
+  type CelebrityRow = { id: string; name: string; photoUrl: string | null; user: { name: string; displayName: string | null; avatar: string | null } | null }
+
+  const panelistsForClient = (event.panelists as PanelistRow[]).map((p) => ({
+    id: p.id,
+    name: p.user?.displayName || p.user?.name || p.name,
+    bio: p.bio,
+    photoUrl: p.user?.avatar || p.photoUrl,
+  }))
+  const celebritiesForClient = (event.celebrities as CelebrityRow[]).map((c) => ({
+    id: c.id,
+    name: c.user?.displayName || c.user?.name || c.name,
+    photoUrl: c.user?.avatar || c.photoUrl,
+  }))
 
   // `Event.totalSeats`/`Event.availableSeats` are only ever kept accurate
   // on the flat/GA booking path (POST /api/bookings decrements/derives
@@ -74,7 +106,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   // now lives in src/lib/hype-score.ts (session 56) - also reused by the
   // admin artist roster.
   const lineupWithHype = event.lineup.map((p: { reviews: { rating: number | null }[] }) => ({ ...p, hypeScore: computeHypeScore(event, p.reviews) }))
-  const eventForClient = { ...event, lineup: lineupWithHype, totalSeats: displayTotalSeats, availableSeats: displayAvailableSeats }
+  const eventForClient = {
+    ...event,
+    lineup: lineupWithHype,
+    totalSeats: displayTotalSeats,
+    availableSeats: displayAvailableSeats,
+    panelists: panelistsForClient,
+    celebrities: celebritiesForClient,
+  }
 
   // Client-side half of the review-eligibility gate (server-side half —
   // POST /api/reviews rejecting non-checked-in users — has been in place

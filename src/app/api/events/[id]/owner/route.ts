@@ -25,6 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         lineup: { include: { artist: { include: { user: { select: { name: true, displayName: true } } } } } },
         ticketTiers: true,
         panelists: { orderBy: { order: 'asc' } },
+        celebrities: { orderBy: { order: 'asc' } },
       },
     })
 

@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
@@ -67,9 +67,8 @@ interface EventDetail {
   competitionPrizeFirst?: string | null
   competitionPrizeSecond?: string | null
   competitionPrizeThird?: string | null
-  celebrityAttendingName?: string | null
-  celebrityPhotoUrl?: string | null
-  panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null }[]
+  celebrities?: { id: string; name: string; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
+  panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; userId: string | null }[]
 }
 
 const inputStyle = {
@@ -141,11 +140,17 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [competitionPrizeFirst, setCompetitionPrizeFirst] = useState('')
   const [competitionPrizeSecond, setCompetitionPrizeSecond] = useState('')
   const [competitionPrizeThird, setCompetitionPrizeThird] = useState('')
-  const [celebrityAttendingName, setCelebrityAttendingName] = useState('')
-  const [celebrityPhotoUrl, setCelebrityPhotoUrl] = useState<string | null>(null)
-  const [celebrityPhotoUploading, setCelebrityPhotoUploading] = useState(false)
-  const [panelists, setPanelists] = useState<{ id?: string; name: string; bio: string; photoUrl: string | null }[]>([])
-  const [panelistPhotoUploading, setPanelistPhotoUploading] = useState<number | null>(null)
+  // Accept-to-Appear (§8, session 57) - panelists/celebrities are no
+  // longer free-text/full-replace state; they're server-owned rows fetched
+  // straight from `event`, with their own dedicated invite/remove
+  // endpoints. Only the search-and-invite UI needs local state.
+  const [panelistSearch, setPanelistSearch] = useState('')
+  const [panelistSearchResults, setPanelistSearchResults] = useState<{ id: string; name: string; displayName: string | null; avatar: string | null }[]>([])
+  const [panelistBioDraft, setPanelistBioDraft] = useState('')
+  const [panelistInviting, setPanelistInviting] = useState(false)
+  const [celebritySearch, setCelebritySearch] = useState('')
+  const [celebritySearchResults, setCelebritySearchResults] = useState<{ id: string; name: string; displayName: string | null; avatar: string | null }[]>([])
+  const [celebrityInviting, setCelebrityInviting] = useState(false)
   const [plusOnesRequired, setPlusOnesRequired] = useState('0')
   const [defaultCompensationType, setDefaultCompensationType] = useState<'FREE' | 'PAID' | 'BUY_IN'>('FREE')
   const [defaultFeeAmount, setDefaultFeeAmount] = useState('')
@@ -294,9 +299,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setCompetitionPrizeFirst(data.competitionPrizeFirst || '')
         setCompetitionPrizeSecond(data.competitionPrizeSecond || '')
         setCompetitionPrizeThird(data.competitionPrizeThird || '')
-        setCelebrityAttendingName(data.celebrityAttendingName || '')
-        setCelebrityPhotoUrl(data.celebrityPhotoUrl || null)
-        setPanelists((data.panelists || []).map((p) => ({ id: p.id, name: p.name, bio: p.bio || '', photoUrl: p.photoUrl })))
         setPlusOnesRequired(String(data.plusOnesRequired ?? 0))
         setDefaultCompensationType(data.defaultCompensationType || 'FREE')
         setDefaultFeeAmount(data.defaultFeeAmount != null ? String(data.defaultFeeAmount) : '')
@@ -417,9 +419,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           competitionPrizeFirst: isCompetitionShow ? competitionPrizeFirst : null,
           competitionPrizeSecond: isCompetitionShow ? competitionPrizeSecond : null,
           competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
-          celebrityAttendingName: isCompetitionShow ? celebrityAttendingName : null,
-          celebrityPhotoUrl: isCompetitionShow ? celebrityPhotoUrl : null,
-          panelists: isCompetitionShow ? panelists : [],
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -458,63 +457,106 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  const handleCelebrityPhotoUpload = async (file: File) => {
-    setCelebrityPhotoUploading(true)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch(`/api/events/${id}/celebrity-photo`, { method: 'POST', body: fd })
+  // Accept-to-Appear (§8, session 57) - replaces the old free-text
+  // celebrity/panelist photo-upload handlers entirely. Public display
+  // always reads the linked account's own avatar once ACCEPTED, so
+  // organiser-side photo upload has no path to ever surface publicly
+  // anymore; not worth keeping around. refetchEvent() re-pulls the full
+  // owner payload after any invite/remove action, same pattern the rest
+  // of this page already uses for server-owned state.
+  const refetchEvent = useCallback(async () => {
+    const res = await fetch(`/api/events/${id}/owner`)
+    if (res.ok) setEvent(await res.json())
+  }, [id])
+
+  const searchPanelistCandidates = async (q: string) => {
+    setPanelistSearch(q)
+    if (q.trim().length < 2) {
+      setPanelistSearchResults([])
+      return
+    }
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+    if (res.ok) {
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Upload failed')
-      setCelebrityPhotoUrl(data.celebrityPhotoUrl)
-      showToast('Celebrity photo uploaded.', 'success')
-    } catch (err: any) {
-      showToast(err.message || 'Upload failed', 'error')
-    } finally {
-      setCelebrityPhotoUploading(false)
+      setPanelistSearchResults(data.users)
     }
   }
 
-  const handleCelebrityPhotoRemove = async () => {
+  const invitePanelist = async (userId: string) => {
+    setPanelistInviting(true)
     try {
-      const res = await fetch(`/api/events/${id}/celebrity-photo`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to remove photo')
-      setCelebrityPhotoUrl(null)
-    } catch (err: any) {
-      showToast(err.message || 'Failed to remove photo', 'error')
-    }
-  }
-
-  // Photo upload only applies to panelists that already have a real id
-  // (i.e. loaded from the server on this page load) - a freshly-added row
-  // has no id yet since panelists are full-replaced (deleteMany+create) on
-  // Save, which assigns fresh ids. Save first, then come back to add a
-  // photo - same two-step flow the underlay/marker builders already use
-  // for anything keyed by an id that doesn't exist until after a save.
-  const handlePanelistPhotoUpload = async (index: number, panelistId: string, file: File) => {
-    setPanelistPhotoUploading(index)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch(`/api/events/${id}/panelists/${panelistId}/photo`, { method: 'POST', body: fd })
+      const res = await fetch(`/api/events/${id}/panelists/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, bio: panelistBioDraft }),
+      })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Upload failed')
-      setPanelists((prev) => prev.map((p, i) => (i === index ? { ...p, photoUrl: data.photoUrl } : p)))
-      showToast('Panelist photo uploaded.', 'success')
+      if (!res.ok) throw new Error(data.error || 'Invite failed')
+      setPanelistSearch('')
+      setPanelistSearchResults([])
+      setPanelistBioDraft('')
+      showToast('Invite sent. They\'ll appear on the public page once they accept.', 'success')
+      await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Upload failed', 'error')
+      showToast(err.message || 'Invite failed', 'error')
     } finally {
-      setPanelistPhotoUploading(null)
+      setPanelistInviting(false)
     }
   }
 
-  const handlePanelistPhotoRemove = async (index: number, panelistId: string) => {
+  const removePanelist = async (panelistId: string) => {
+    if (!confirm('Remove this panelist?')) return
     try {
-      const res = await fetch(`/api/events/${id}/panelists/${panelistId}/photo`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to remove photo')
-      setPanelists((prev) => prev.map((p, i) => (i === index ? { ...p, photoUrl: null } : p)))
+      const res = await fetch(`/api/events/${id}/panelists/${panelistId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to remove')
+      await refetchEvent()
     } catch (err: any) {
-      showToast(err.message || 'Failed to remove photo', 'error')
+      showToast(err.message || 'Failed to remove', 'error')
+    }
+  }
+
+  const searchCelebrityCandidates = async (q: string) => {
+    setCelebritySearch(q)
+    if (q.trim().length < 2) {
+      setCelebritySearchResults([])
+      return
+    }
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`)
+    if (res.ok) {
+      const data = await res.json()
+      setCelebritySearchResults(data.users)
+    }
+  }
+
+  const inviteCelebrity = async (userId: string) => {
+    setCelebrityInviting(true)
+    try {
+      const res = await fetch(`/api/events/${id}/celebrities/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Invite failed')
+      setCelebritySearch('')
+      setCelebritySearchResults([])
+      showToast('Invite sent. They\'ll appear on the public page once they accept.', 'success')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || 'Invite failed', 'error')
+    } finally {
+      setCelebrityInviting(false)
+    }
+  }
+
+  const removeCelebrity = async (celebrityId: string) => {
+    if (!confirm('Remove this celebrity invite?')) return
+    try {
+      const res = await fetch(`/api/events/${id}/celebrities/${celebrityId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to remove')
+      await refetchEvent()
+    } catch (err: any) {
+      showToast(err.message || 'Failed to remove', 'error')
     }
   }
 
@@ -637,89 +679,110 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={labelStyle}>Celebrity Attending (name)</label>
-                    <input style={inputStyle} value={celebrityAttendingName} onChange={(e) => setCelebrityAttendingName(e.target.value)} placeholder="Optional - shown prominently on the event page" />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px' }}>
-                      {celebrityPhotoUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={celebrityPhotoUrl} alt="Celebrity" style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover' }} />
-                      )}
-                      <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', cursor: celebrityPhotoUploading ? 'default' : 'pointer', opacity: celebrityPhotoUploading ? 0.5 : 1 }}>
-                        {celebrityPhotoUploading ? 'Uploading…' : celebrityPhotoUrl ? 'Replace photo' : 'Upload photo'}
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          disabled={celebrityPhotoUploading}
-                          style={{ display: 'none' }}
-                          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCelebrityPhotoUpload(f); e.target.value = '' }}
-                        />
-                      </label>
-                      {celebrityPhotoUrl && (
-                        <button type="button" onClick={handleCelebrityPhotoRemove} style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                          Remove
-                        </button>
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={labelStyle}>Celebrity Attending</label>
+                    <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '10px' }}>
+                      Invited by AFA account — they'll only appear publicly once they accept.
+                    </p>
+                    {(event?.celebrities || []).map((c) => (
+                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-white)', borderRadius: '8px' }}>
+                        {c.photoUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={c.photoUrl} alt={c.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                        )}
+                        <span style={{ fontSize: '13px', fontWeight: 600, flex: 1 }}>{c.name}</span>
+                        <span style={{
+                          fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
+                          background: c.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : c.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
+                          color: c.status === 'ACCEPTED' ? 'var(--afa-sage)' : c.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                        }}>
+                          {c.status}
+                        </span>
+                        <button type="button" onClick={() => removeCelebrity(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+                      </div>
+                    ))}
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        style={inputStyle}
+                        value={celebritySearch}
+                        onChange={(e) => searchCelebrityCandidates(e.target.value)}
+                        placeholder="Search by name to invite..."
+                        disabled={celebrityInviting}
+                      />
+                      {celebritySearchResults.length > 0 && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                          {celebritySearchResults.map((u) => (
+                            <button
+                              key={u.id}
+                              type="button"
+                              onClick={() => inviteCelebrity(u.id)}
+                              disabled={celebrityInviting}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                            >
+                              {u.displayName || u.name}
+                            </button>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  <label style={labelStyle}>Panelists</label>
-                  {panelists.map((p, i) => (
-                    <div key={p.id || `new-${i}`} style={{ display: 'flex', gap: '8px', marginBottom: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <input
-                        style={{ ...inputStyle, flex: 1, minWidth: '140px' }}
-                        value={p.name}
-                        onChange={(e) => setPanelists((prev) => prev.map((row, idx) => (idx === i ? { ...row, name: e.target.value } : row)))}
-                        placeholder="Panelist name"
-                      />
-                      <input
-                        style={{ ...inputStyle, flex: 2, minWidth: '160px' }}
-                        value={p.bio}
-                        onChange={(e) => setPanelists((prev) => prev.map((row, idx) => (idx === i ? { ...row, bio: e.target.value } : row)))}
-                        placeholder="Short bio (optional)"
-                      />
-                      {p.id ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {p.photoUrl && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={p.photoUrl} alt={p.name} style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
-                          )}
-                          <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-terracotta)', cursor: panelistPhotoUploading === i ? 'default' : 'pointer', opacity: panelistPhotoUploading === i ? 0.5 : 1, whiteSpace: 'nowrap' }}>
-                            {panelistPhotoUploading === i ? 'Uploading…' : p.photoUrl ? 'Replace' : 'Photo'}
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              disabled={panelistPhotoUploading === i}
-                              style={{ display: 'none' }}
-                              onChange={(e) => { const f = e.target.files?.[0]; if (f && p.id) handlePanelistPhotoUpload(i, p.id, f); e.target.value = '' }}
-                            />
-                          </label>
-                          {p.photoUrl && (
-                            <button type="button" onClick={() => p.id && handlePanelistPhotoRemove(i, p.id)} style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                              ✕ photo
-                            </button>
-                          )}
+                  <div>
+                    <label style={labelStyle}>Panelists</label>
+                    <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '10px' }}>
+                      Same as Celebrity — invited by account, only shown publicly once accepted.
+                    </p>
+                    {(event?.panelists || []).map((p) => (
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-white)', borderRadius: '8px' }}>
+                        {p.photoUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.photoUrl} alt={p.name} style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '13px', fontWeight: 600 }}>{p.name}</div>
+                          {p.bio && <div style={{ fontSize: '11px', opacity: 0.6 }}>{p.bio}</div>}
                         </div>
-                      ) : (
-                        <span style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.45, whiteSpace: 'nowrap' }}>Save first to add photo</span>
+                        <span style={{
+                          fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
+                          background: p.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : p.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
+                          color: p.status === 'ACCEPTED' ? 'var(--afa-sage)' : p.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                        }}>
+                          {p.status}
+                        </span>
+                        <button type="button" onClick={() => removePanelist(p.id)} style={{ background: 'transparent', border: 'none', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+                      </div>
+                    ))}
+                    <input
+                      style={{ ...inputStyle, marginBottom: '8px' }}
+                      value={panelistBioDraft}
+                      onChange={(e) => setPanelistBioDraft(e.target.value)}
+                      placeholder="Bio for next invite (optional)"
+                    />
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        style={inputStyle}
+                        value={panelistSearch}
+                        onChange={(e) => searchPanelistCandidates(e.target.value)}
+                        placeholder="Search by name to invite..."
+                        disabled={panelistInviting}
+                      />
+                      {panelistSearchResults.length > 0 && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                          {panelistSearchResults.map((u) => (
+                            <button
+                              key={u.id}
+                              type="button"
+                              onClick={() => invitePanelist(u.id)}
+                              disabled={panelistInviting}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                            >
+                              {u.displayName || u.name}
+                            </button>
+                          ))}
+                        </div>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => setPanelists((prev) => prev.filter((_, idx) => idx !== i))}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer', fontSize: '18px', padding: '4px 8px' }}
-                        aria-label="Remove panelist"
-                      >
-                        ✕
-                      </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setPanelists((prev) => [...prev, { name: '', bio: '', photoUrl: null }])}
-                    style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1px dashed rgba(200,68,26,0.4)', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', marginTop: '4px' }}
-                  >
-                    + Add panelist
-                  </button>
+                  </div>
                 </div>
               )}
             </section>

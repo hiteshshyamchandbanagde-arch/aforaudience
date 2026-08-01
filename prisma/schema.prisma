@@ -279,6 +279,9 @@ model User {
   sentMessages           Message[]
   companionTagsSent      CompanionTag[] @relation("CompanionTagTagger")
   companionTagsReceived  CompanionTag[] @relation("CompanionTagTagged")
+  // Accept-to-Appear (§8, session 57)
+  panelistInvites  EventPanelist[] @relation("PanelistInvites")
+  celebrityInvites Celebrity[]     @relation("CelebrityInvites")
 }
 
 model PushSubscription {
@@ -1038,14 +1041,36 @@ model Event {
   competitionPrizeSecond String?
   competitionPrizeThird  String?
 
-  // Celebrity attending - name + photo per Hitesh's choice, shown
-  // prominently on the public event page. Deliberately just a name/photo
-  // pair (no bio/structured record) - this is a marketing highlight, not
-  // a lineup entry; the celebrity isn't performing or being booked.
-  celebrityAttendingName String?
-  celebrityPhotoUrl      String?
+  // Celebrity attending - DEPRECATED session 57 (reputation epic §8,
+  // Accept-to-Appear). Promoted to its own Celebrity model below so a
+  // consent status (PENDING/ACCEPTED/DECLINED) + userId can be attached
+  // cleanly, same shape as EventPanelist, and to open the door to more
+  // than one celebrity per event later. Columns kept (not dropped) per
+  // the standing "don't drop until matching code merges" rule - one QA
+  // test event still has celebrityAttendingName set, backfilled into the
+  // new model at PENDING (no real consent existed under the old scalar
+  // fields, so PENDING - not ACCEPTED - is the honest status). No code
+  // reads/writes these columns anymore as of this commit.
+  celebrityAttendingName String? // @deprecated - use Celebrity model
+  celebrityPhotoUrl      String? // @deprecated - use Celebrity model
 
-  panelists EventPanelist[]
+  panelists   EventPanelist[]
+  celebrities Celebrity[]
+}
+
+// Accept-to-Appear (reputation epic §8, session 57) - shared status enum
+// for EventPanelist and Celebrity. Closes a real gap in what PR #300
+// shipped: an organiser could previously name/photo *any* person as
+// Panelist or Celebrity Attending with zero verification from them -
+// live reputational/legal exposure once public. Now: organiser invites
+// by lookup, status starts PENDING (visible only to the organiser while
+// building the event), the person accepts/declines from their own AFA
+// account, and only ACCEPTED entries ever appear on the public
+// poster/event page - presence on the poster *is* the proof of consent.
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 // Structured panelist entries for competition shows (name + bio + photo
@@ -1063,6 +1088,37 @@ model EventPanelist {
   photoUrl  String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
+
+  // Accept-to-Appear (§8, session 57). name/photoUrl above stay as the
+  // organiser's PENDING-stage draft; once status flips to ACCEPTED, the
+  // public-facing read swaps to the linked user's own profile name/avatar
+  // instead - an organiser can invite someone but can't put words or an
+  // image in their mouth the person didn't put there. Existing rows (all
+  // pre-dating this field) default PENDING, matching honest current
+  // consent state - none of them have actually been accepted by anyone.
+  status      InviteStatus @default(PENDING)
+  userId      String?
+  user        User?        @relation("PanelistInvites", fields: [userId], references: [id])
+  respondedAt DateTime?
+}
+
+// Celebrity attending (§8, session 57) - promoted from two scalar fields
+// on Event (see deprecation note there) to its own model, same shape and
+// same reasoning as EventPanelist. `order` future-proofs multiple
+// celebrities per event even though today's UI still only surfaces one.
+model Celebrity {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  status      InviteStatus @default(PENDING)
+  userId      String?
+  user        User?        @relation("CelebrityInvites", fields: [userId], references: [id])
+  respondedAt DateTime?
 }
 
 model Application {

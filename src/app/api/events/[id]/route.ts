@@ -62,27 +62,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
-      celebrityAttendingName, celebrityPhotoUrl, panelists,
     } = body
 
-    // Competition show (31 Jul) - same shape as POST, panelists only kept
-    // when isCompetitionShow is (or remains) true. photoUrl is passed
-    // through as-sent by the client (it already holds whatever GET
-    // returned) rather than re-uploaded here - full-replace below gives
-    // panelists new ids each edit, same accepted tradeoff as ticketTiers
-    // (see comment below); nothing else references EventPanelist.id
-    // across saves, only the photo-upload route uses it transiently.
+    // Competition show - prize fields only kept when isCompetitionShow is
+    // (or remains) true, same as before. Panelists/celebrity (§8, session
+    // 57, Accept-to-Appear) are no longer handled by this route at all -
+    // see the comment at the write site below.
     const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
-    const validPanelistsEdit = resolvedIsCompetitionShow && Array.isArray(panelists)
-      ? panelists
-          .filter((p: any) => typeof p?.name === 'string' && p.name.trim() !== '')
-          .map((p: any, i: number) => ({
-            name: String(p.name).trim().slice(0, 100),
-            bio: typeof p.bio === 'string' && p.bio.trim() !== '' ? p.bio.trim().slice(0, 500) : null,
-            photoUrl: typeof p.photoUrl === 'string' && p.photoUrl ? p.photoUrl : null,
-            order: i,
-          }))
-      : []
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
     // all, meaning a Numbered-venue event's per-section pricing could only
@@ -213,15 +199,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           competitionPrizeFirst: resolvedIsCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
           competitionPrizeSecond: resolvedIsCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
           competitionPrizeThird: resolvedIsCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
-          celebrityAttendingName: resolvedIsCompetitionShow && celebrityAttendingName ? String(celebrityAttendingName).trim().slice(0, 100) : null,
-          celebrityPhotoUrl: resolvedIsCompetitionShow && celebrityPhotoUrl ? String(celebrityPhotoUrl) : null,
         }),
-        ...(panelists !== undefined && {
-          panelists: {
-            deleteMany: {},
-            create: validPanelistsEdit,
-          },
-        }),
+        // Panelists/celebrity (§8, session 57) are deliberately NEVER
+        // touched by this general event PATCH anymore, even if a client
+        // sent a `panelists` field - the old deleteMany+create full-replace
+        // would have destroyed real invite/consent state (status, userId,
+        // respondedAt) on every unrelated event edit. They're managed
+        // exclusively through their own dedicated invite endpoints now:
+        // POST/DELETE /api/events/[id]/panelists(/invite) and /celebrities(/invite).
       },
     })
 

@@ -35,7 +35,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   // attendance - naming it "Verified" rather than "Watched" is
   // deliberately honest about this until §7 Phase 2 (per-seat check-in)
   // closes the gap.
-  const eventIds = artist ? [...new Set(artist.performances.map((p) => p.eventId))] : []
+  const eventIds = artist ? [...new Set(artist.performances.map((p: { eventId: string }) => p.eventId))] : []
   const checkedInBookings = eventIds.length
     ? await prisma.booking.findMany({
         where: { eventId: { in: eventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
