@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { formatSeatLabels } from '@/lib/seat-labels'
 
 // Attendee list for the check-in screen - "who's checked in / who's still
 // pending" for an Organiser or Admin. Only CONFIRMED bookings count as real
@@ -34,16 +35,51 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     const bookings = await prisma.booking.findMany({
       where: { eventId, status: 'CONFIRMED' },
-      include: { user: { select: { name: true, displayName: true } } },
+      include: {
+        user: { select: { name: true, displayName: true } },
+        // Companion Tagging Phase 2 (step 6) - only ACCEPTED tags surface
+        // at the door. PENDING/DECLINED were never confirmed by the
+        // tagged person, so there's nothing to check in.
+        companionTags: {
+          where: { status: 'ACCEPTED' },
+          include: { taggedUser: { select: { name: true, displayName: true } } },
+          // Deterministic order, not creation order - needed below to
+          // zip against seat labels the same way on every request.
+          orderBy: { taggedUserId: 'asc' },
+        },
+        bookingSeats: { include: { seat: true } },
+      },
       orderBy: [{ checkedInAt: 'asc' }, { createdAt: 'asc' }],
     })
 
-    const attendees = bookings.map((b) => ({
-      bookingId: b.id,
-      name: b.user.displayName || b.user.name,
-      seats: b.seats,
-      checkedInAt: b.checkedInAt,
-    }))
+    const attendees = bookings.map((b) => {
+      // Display-only "who's roughly sitting where" for NUMBERED bookings
+      // (Hitesh, session 54 - people move seats after the interval anyway,
+      // this doesn't need to be exact, just needs a label at the door).
+      // Deterministic zip (booker first, then companions sorted by id,
+      // against seat labels sorted the same way every request) rather
+      // than actually-random, so the label doesn't shuffle on every
+      // refresh of this screen - nothing is persisted or tracked as real
+      // seat assignment.
+      const seatLabels = b.bookingSeats.length > 0
+        ? formatSeatLabels(b.bookingSeats.map((bs) => bs.seat))
+        : []
+      const [bookerSeatLabel, ...companionSeatLabels] = seatLabels
+
+      return {
+        bookingId: b.id,
+        name: b.user.displayName || b.user.name,
+        seats: b.seats,
+        seatLabel: bookerSeatLabel ?? null,
+        checkedInAt: b.checkedInAt,
+        companions: b.companionTags.map((t, i) => ({
+          id: t.id,
+          name: t.taggedUser.displayName || t.taggedUser.name,
+          seatLabel: companionSeatLabels[i] ?? null,
+          checkedInAt: t.checkedInAt,
+        })),
+      }
+    })
 
     return NextResponse.json({
       total: attendees.length,

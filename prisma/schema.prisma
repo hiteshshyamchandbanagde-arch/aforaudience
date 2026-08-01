@@ -277,6 +277,11 @@ model User {
   reviewReplies          ReviewReply[]
   conversationParticipants ConversationParticipant[]
   sentMessages           Message[]
+  companionTagsSent      CompanionTag[] @relation("CompanionTagTagger")
+  companionTagsReceived  CompanionTag[] @relation("CompanionTagTagged")
+  // Accept-to-Appear (§8, session 57)
+  panelistInvites  EventPanelist[] @relation("PanelistInvites")
+  celebrityInvites Celebrity[]     @relation("CelebrityInvites")
 }
 
 model PushSubscription {
@@ -450,7 +455,6 @@ model Artist {
   styleTag     String[]
   videoReel    String[]
   socialLinks  Json?
-  hypScore     Float    @default(0)
   createdAt    DateTime @default(now())
 
   // "Artist Background" (23 Jul, Hitesh's expanded scope) - a richer,
@@ -469,6 +473,20 @@ model Artist {
 
   applications  Application[]
   performances  Performance[]
+  organiserRatings OrganiserArtistRating[]
+
+  // Scene Status (reputation epic §1, amended session 55) — Headliner tier
+  // is deliberately fully manual, admin-only, no formula/threshold. Admin
+  // weighs whatever signals matter (audience reaction, gig count, organiser
+  // rating, Hype Score) and sets this directly - "not a small thing to get,
+  // it's supposed to be earned." See docs/artist-reputation-system-design.md
+  // Amendment 1.
+  isSceneStatusHeadliner Boolean @default(false)
+  // Optional admin audit note captured at the moment Headliner is granted
+  // (session 55, /dashboard/admin/artists) - not required, but since the
+  // tag is meant to be deliberate/earned, worth a lightweight paper trail
+  // of why. Not shown publicly, admin-only, same as organiser ratings.
+  headlinerNote          String?
 }
 
 enum FollowTargetType {
@@ -547,6 +565,34 @@ model Organiser {
   venueBookings VenueBooking[]
   bookingRequests VenueBookingRequest[]
   payoutLedgerEntries OrganiserPayoutLedger[]
+  artistRatings OrganiserArtistRating[]
+}
+
+// Artist Reputation epic (design doc, session 52-53) - the one genuine
+// net-new schema piece. Organiser's private rating of an Artist after a
+// specific Performance. NEVER shown publicly - raw score/comment feed
+// only into Scene Status (Artist model, §1) and are otherwise visible
+// only to the rating Organiser and the rated Artist. Scoped per
+// Performance (not a single running score per Organiser-Artist pair) so
+// an Organiser can rate the same Artist again after a later booking, and
+// so a rating can be tied back to a specific real gig if ever disputed.
+// One rating per Organiser per Performance - re-rating updates in place
+// via upsert on the unique constraint rather than allowing duplicates to
+// pile up.
+model OrganiserArtistRating {
+  id            String      @id @default(cuid())
+  organiserId   String
+  organiser     Organiser   @relation(fields: [organiserId], references: [id])
+  artistId      String
+  artist        Artist      @relation(fields: [artistId], references: [id])
+  performanceId String
+  performance   Performance @relation(fields: [performanceId], references: [id])
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([organiserId, performanceId])
 }
 
 // Not yet consulted with a CA - entity type matters for Section 194-O
@@ -841,6 +887,37 @@ model PlatformSettings {
   ticketCommissionRate         Float    @default(0.08)
   /// @deprecated dead per fifth amendment — do not read
   performerSlotCommissionRate  Float    @default(0.08)
+
+  // Scene Status tier thresholds (reputation epic §1, amended session 55).
+  // Configurable rather than hardcoded, deliberately - the design doc
+  // itself says the exact formula is "TBD once we see real data volume",
+  // and Scene Status is live-computed on every view (session 53), so a
+  // config value can be tuned instantly as real usage patterns emerge, no
+  // deploy/migration needed. Only Rising and Featured are automatic;
+  // Headliner stays fully manual/admin-only by design, no config here for
+  // it. See docs/artist-reputation-system-design.md Amendment 1.
+  sceneStatusRisingMinGigs           Int   @default(3)
+  sceneStatusRisingMinAvgRating      Float @default(4.0)
+  sceneStatusRisingMinAttendees      Int   @default(5)
+  sceneStatusFeaturedVouchThreshold  Int   @default(5)
+
+  // Admin artist roster (session 56, /dashboard/admin/artists) - how many
+  // of an artist's most recent scored shows to average for the roster's
+  // Hype Score column. Configurable per Hitesh's call (session 56): "recent
+  // 5 shows, configurable by admin". Distinct from the Rising thresholds
+  // above - this is a display/aggregation setting, not a tier input; Hype
+  // Score itself isn't part of the Rising formula.
+  artistRosterHypeScoreLookback     Int   @default(5)
+
+  // Audience Choice voting default weights (§6, session 58) - organiser
+  // can override per event (Event.audienceVoteWeight etc, nullable,
+  // resolves here when unset). Confirmed default 80/10/10, must always
+  // sum to 100 and respect the doc's ~50% Audience floor - enforced at
+  // the setter/API layer, not a DB constraint.
+  audienceVoteWeightDefault  Int @default(80)
+  panelistVoteWeightDefault  Int @default(10)
+  celebrityVoteWeightDefault Int @default(10)
+
   updatedAt                    DateTime @updatedAt
 }
 
@@ -973,14 +1050,47 @@ model Event {
   competitionPrizeSecond String?
   competitionPrizeThird  String?
 
-  // Celebrity attending - name + photo per Hitesh's choice, shown
-  // prominently on the public event page. Deliberately just a name/photo
-  // pair (no bio/structured record) - this is a marketing highlight, not
-  // a lineup entry; the celebrity isn't performing or being booked.
-  celebrityAttendingName String?
-  celebrityPhotoUrl      String?
+  // Celebrity attending - DEPRECATED session 57 (reputation epic §8,
+  // Accept-to-Appear). Promoted to its own Celebrity model below so a
+  // consent status (PENDING/ACCEPTED/DECLINED) + userId can be attached
+  // cleanly, same shape as EventPanelist, and to open the door to more
+  // than one celebrity per event later. Columns kept (not dropped) per
+  // the standing "don't drop until matching code merges" rule - one QA
+  // test event still has celebrityAttendingName set, backfilled into the
+  // new model at PENDING (no real consent existed under the old scalar
+  // fields, so PENDING - not ACCEPTED - is the honest status). No code
+  // reads/writes these columns anymore as of this commit.
+  celebrityAttendingName String? // @deprecated - use Celebrity model
+  celebrityPhotoUrl      String? // @deprecated - use Celebrity model
 
-  panelists EventPanelist[]
+  panelists   EventPanelist[]
+  celebrities Celebrity[]
+
+  // Audience Choice voting (§6, session 58) - organiser-chosen weighting
+  // per event, nullable so an event that never touches this always
+  // follows the current PlatformSettings default rather than freezing at
+  // whatever the default happened to be when the event was created.
+  // Confirmed default (Hitesh, session 58): 80/10/10 - leaning harder
+  // into "Audience Choice" than the design doc's own 70/20/10 example.
+  audienceVoteWeight  Int?
+  panelistVoteWeight  Int?
+  celebrityVoteWeight Int?
+  votes               CompetitionVote[]
+}
+
+// Accept-to-Appear (reputation epic §8, session 57) - shared status enum
+// for EventPanelist and Celebrity. Closes a real gap in what PR #300
+// shipped: an organiser could previously name/photo *any* person as
+// Panelist or Celebrity Attending with zero verification from them -
+// live reputational/legal exposure once public. Now: organiser invites
+// by lookup, status starts PENDING (visible only to the organiser while
+// building the event), the person accepts/declines from their own AFA
+// account, and only ACCEPTED entries ever appear on the public
+// poster/event page - presence on the poster *is* the proof of consent.
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 // Structured panelist entries for competition shows (name + bio + photo
@@ -998,6 +1108,70 @@ model EventPanelist {
   photoUrl  String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
+
+  // Accept-to-Appear (§8, session 57). name/photoUrl above stay as the
+  // organiser's PENDING-stage draft; once status flips to ACCEPTED, the
+  // public-facing read swaps to the linked user's own profile name/avatar
+  // instead - an organiser can invite someone but can't put words or an
+  // image in their mouth the person didn't put there. Existing rows (all
+  // pre-dating this field) default PENDING, matching honest current
+  // consent state - none of them have actually been accepted by anyone.
+  status      InviteStatus @default(PENDING)
+  userId      String?
+  user        User?        @relation("PanelistInvites", fields: [userId], references: [id])
+  respondedAt DateTime?
+}
+
+// Celebrity attending (§8, session 57) - promoted from two scalar fields
+// on Event (see deprecation note there) to its own model, same shape and
+// same reasoning as EventPanelist. `order` future-proofs multiple
+// celebrities per event even though today's UI still only surfaces one.
+model Celebrity {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  status      InviteStatus @default(PENDING)
+  userId      String?
+  user        User?        @relation("CelebrityInvites", fields: [userId], references: [id])
+  respondedAt DateTime?
+}
+
+// Audience Choice voting (reputation epic §6, session 58) - three voter
+// categories, each ranking their own top 3 (Borda 3/2/1). voterId's
+// meaning is category-dependent: bookingId for AUDIENCE (one vote per
+// booking, not per attendee - the same per-booking check-in limitation
+// §3/§7 already document), userId for PANELIST/CELEBRITY (must have an
+// ACCEPTED invite for this specific event, §8). A person eligible in more
+// than one category (e.g. an accepted panelist who also bought a ticket)
+// gets a separate ballot per category they qualify for - these are role-
+// based ballots, not mutually exclusive identities.
+enum VoterCategory {
+  AUDIENCE
+  PANELIST
+  CELEBRITY
+}
+
+model CompetitionVote {
+  id            String        @id @default(cuid())
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category      VoterCategory
+  voterId       String
+  performanceId String
+  performance   Performance   @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  rank          Int
+  createdAt     DateTime      @default(now())
+
+  // One rank slot per voter per category (can't cast two different
+  // performances at rank 1, say), and one vote per performance per voter
+  // per category (can't rank the same performance at both 1st and 2nd).
+  @@unique([eventId, category, voterId, rank])
+  @@unique([eventId, category, voterId, performanceId])
 }
 
 model Application {
@@ -1029,6 +1203,8 @@ model Performance {
 
   reviews   Review[]
   plusOnes  PlusOne[]
+  organiserRatings OrganiserArtistRating[]
+  votes     CompetitionVote[]
 
   // Artist self-cancellation (session 21, 23 Jul). cancelledAt null =
   // active slot. Cancelling within 24h of the event is blocked entirely
@@ -1043,6 +1219,17 @@ model Performance {
   // chooses to keep it afterward, never the artist's call and never the
   // default.
   buyInRefundStatus BuyInRefundStatus?
+
+  // Scene Status Featured tier (reputation epic §1, amended session 55).
+  // Organiser marks an artist Featured at lineup placement/management time
+  // (this Performance row) - distinct from the post-show OrganiserArtistRating
+  // flow, no dependency on it. Featured tier itself is live-computed: count
+  // of DISTINCT organisers (via Event.organiserId) who've set this true for
+  // the artist, compared against PlatformSettings.sceneStatusFeaturedVouchThreshold.
+  // Distinct-organiser (not raw vouch count) deliberately prevents one
+  // organiser gaming it via repeat bookings of the same artist. See
+  // docs/artist-reputation-system-design.md Amendment 1.
+  isFeaturedVouch Boolean @default(false)
 }
 
 enum BuyInRefundStatus {
@@ -1119,6 +1306,12 @@ model Booking {
   checkedInAt       DateTime?
   checkedInByUserId String?
 
+  // Post-show rating prompt (reputation epic §5). Set once the push has
+  // fired for this booking so the cron never double-sends - "one push
+  // per event" is a hard rule in the design (repeat pestering risks
+  // eroding trust in the push channel generally).
+  ratingPromptSentAt DateTime?
+
   // Audience self-serve cancellation (design.md "Refund policy",
   // session 47, 29 Jul - graduated tiers by days-before-event).
   // cancelledAt is set for both CANCELLED (no refund, <7 days) and
@@ -1132,12 +1325,74 @@ model Booking {
   refundAmount     Float?
   razorpayRefundId String?
 
+  // Companion Tagging Phase 1 (reputation epic §7). Consent is captured
+  // once per booking, at checkout, and covers using the resulting tags
+  // for Verified/Repeat Attendee counts and Scene Status computation -
+  // not just "share who I went with" visibility. Deliberately separate
+  // from any individual CompanionTag row so revoking consent later (not
+  // built yet, but the field exists for it) doesn't require touching
+  // every tag. False/null by default - tagging is opt-in, never assumed.
+  companionTaggingConsent   Boolean   @default(false)
+  companionTaggingConsentAt DateTime?
+  companionTags             CompanionTag[]
+
   payment     Payment?
   bookingSeats BookingSeat[]
   plusOnes    PlusOne[]
   payoutLedgerEntry OrganiserPayoutLedger?
 
   @@index([status, expiresAt])
+  @@index([checkedInAt, ratingPromptSentAt])
+}
+
+// Companion Tagging Phase 1 - checkout-time capture. Tagging links a real
+// AFA account (not free text), which is why this needs a consent/response
+// handshake on BOTH sides: the booker consents to their booking being used
+// this way (Booking.companionTaggingConsent), and the tagged person must
+// separately ACCEPT before the tag counts toward anything about *them*
+// (Verified/Repeat Attendee counts, Scene Status) - a booker tagging
+// someone shouldn't unilaterally attach reputation data to another
+// person's account. PENDING tags are inert everywhere except the tagged
+// user's own "you've been tagged" inbox.
+//
+// Phase 2 (per-seat check-in, step 6, not yet built) is the actual
+// physical-attendance verification layer this feeds into - this phase is
+// only the social capture + consent step, not verification.
+model CompanionTag {
+  id             String             @id @default(cuid())
+  bookingId      String
+  booking        Booking            @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  taggedByUserId String
+  taggedBy       User               @relation("CompanionTagTagger", fields: [taggedByUserId], references: [id])
+  taggedUserId   String
+  taggedUser     User               @relation("CompanionTagTagged", fields: [taggedUserId], references: [id])
+  status         CompanionTagStatus @default(PENDING)
+  createdAt      DateTime           @default(now())
+  respondedAt    DateTime?
+
+  // Phase 2 (per-seat/per-attendee check-in, step 6). Deliberately
+  // separate from Booking.checkedInAt - the booker's own scan checks in
+  // the booking as a whole (unchanged, EPIC N), while each ACCEPTED
+  // companion is checked in individually at the door. Only meaningful
+  // once status is ACCEPTED - enforced at the API level, not the schema.
+  //
+  // No physical seat-to-companion mapping exists (checkout never
+  // collects "which seat is X sitting in"), so this is genuinely
+  // per-attendee check-in, not per-physical-seat matching - flagging
+  // that distinction explicitly since the build-order item is titled
+  // "per-seat check-in" but the data model doesn't support literal
+  // seat assignment without a much larger checkout change.
+  checkedInAt       DateTime?
+  checkedInByUserId String?
+
+  @@unique([bookingId, taggedUserId])
+  @@index([taggedUserId, status])
+}
+
+enum CompanionTagStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 // Manual-transfer payout ledger (added 28 Jul, replacing the Route

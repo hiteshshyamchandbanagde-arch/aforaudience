@@ -63,7 +63,23 @@ export async function toggleFollow(userId: string, targetType: FollowTargetType,
   return { following: true, notifyEnabled: true }
 }
 
-// Bell toggle - mutes/unmutes new-activity push for an existing follow.
+// Post-show rating nudge (reputation epic §5): rating a performer earns
+// automatic early-notification access to their next event, via the
+// existing Follow + notifyFollowersOfNewEvent plumbing - no new
+// infrastructure needed for "early access." Unlike toggleFollow, this
+// never un-follows and is a silent no-op if already following (doesn't
+// reset an existing notifyEnabled=false mute).
+export async function ensureFollowing(userId: string, targetType: FollowTargetType, targetId: string) {
+  const existing = await prisma.follow.findUnique({
+    where: { userId_targetType_targetId: { userId, targetType, targetId } },
+  })
+  if (existing) return
+
+  const owner = await resolveTargetOwner(targetType, targetId)
+  if (!owner) return
+
+  await prisma.follow.create({ data: { userId, targetType, targetId } })
+}
 // Returns null if not currently following (nothing to mute).
 export async function setNotifyEnabled(
   userId: string,

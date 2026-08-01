@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import AudienceChoiceVoting from "@/components/AudienceChoiceVoting"
 import SeatPicker from "@/components/SeatPicker"
 import { formatEventTimeRange } from "@/lib/eventTime"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
@@ -26,10 +27,13 @@ interface Performer {
     bio?: string | null
     genre: string[]
     styleTag: string[]
-    hypScore: number
     user: { name: string }
   }
   reviews: Review[]
+  // Reputation epic §4 - per-show Hype Score, live-computed server-side.
+  // Null until the show has been over 2hrs AND has 5+ reviews - the
+  // client just hides the badge when it's null, no eligibility logic here.
+  hypeScore?: number | null
 }
 
 interface TicketTier {
@@ -64,8 +68,7 @@ interface EventData {
   competitionPrizeFirst?: string | null
   competitionPrizeSecond?: string | null
   competitionPrizeThird?: string | null
-  celebrityAttendingName?: string | null
-  celebrityPhotoUrl?: string | null
+  celebrities?: { id: string; name: string; photoUrl: string | null }[]
   panelists?: { id: string; name: string; bio: string | null; photoUrl: string | null }[]
 }
 
@@ -415,18 +418,22 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     </div>
                   )}
 
-                  {event.celebrityAttendingName && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)", marginBottom: "20px" }}>
-                      {event.celebrityPhotoUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={event.celebrityPhotoUrl} alt={event.celebrityAttendingName} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
-                      )}
-                      <div>
-                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Celebrity Attending</div>
-                        <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{event.celebrityAttendingName}</div>
-                      </div>
+                  {event.celebrities && event.celebrities.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+                      {event.celebrities.map((c) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "14px", background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)" }}>
+                          {c.photoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={c.photoUrl} alt={c.name} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
+                          ) : (
+                            <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
+                          )}
+                          <div>
+                            <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Celebrity Attending</div>
+                            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{c.name}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
@@ -451,6 +458,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       </div>
                     </div>
                   )}
+
+                  <AudienceChoiceVoting eventId={event.id} isCompetitionShow={event.isCompetitionShow} />
                 </div>
               )}
             </div>
@@ -469,12 +478,18 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         {p.artist.user.name.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)", marginBottom: "4px" }}>{p.artist.user.name}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)" }}>{p.artist.user.name}</div>
+                          {p.hypeScore != null && (
+                            <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.1)", padding: "2px 8px", borderRadius: "999px" }}>
+                              🔥 {p.hypeScore.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
                         {p.artist.genre.length > 0 && (
                           <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
                         )}
                         <div style={{ display: "flex", gap: "16px" }}>
-                          <span style={{ fontSize: "13px", color: "var(--afa-ink)" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
                           <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
                         </div>
 

@@ -20,6 +20,20 @@ export type PlatformSettings = {
   minAudienceBookingFee: number // paise — floor an audience member can drop the fee to
   maxAudienceBookingFee: number // paise — per-transaction ceiling (standard fee + overrides both bounded by this)
   chatMaxMessagesPerSession: number
+  // Scene Status thresholds (reputation epic §1, amended session 55) — see
+  // src/lib/scene-status.ts for how these are consumed. Headliner has no
+  // config here deliberately - fully manual, no formula.
+  sceneStatusRisingMinGigs: number
+  sceneStatusRisingMinAvgRating: number
+  sceneStatusRisingMinAttendees: number
+  sceneStatusFeaturedVouchThreshold: number
+  // Admin artist roster (session 56) - how many of an artist's most recent
+  // scored shows to average for the roster's Hype Score column.
+  artistRosterHypeScoreLookback: number
+  // Audience Choice voting defaults (§6, session 58)
+  audienceVoteWeightDefault: number
+  panelistVoteWeightDefault: number
+  celebrityVoteWeightDefault: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -29,6 +43,14 @@ const SETTINGS_SELECT = {
   minAudienceBookingFee: true,
   maxAudienceBookingFee: true,
   chatMaxMessagesPerSession: true,
+  sceneStatusRisingMinGigs: true,
+  sceneStatusRisingMinAvgRating: true,
+  sceneStatusRisingMinAttendees: true,
+  sceneStatusFeaturedVouchThreshold: true,
+  artistRosterHypeScoreLookback: true,
+  audienceVoteWeightDefault: true,
+  panelistVoteWeightDefault: true,
+  celebrityVoteWeightDefault: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -125,6 +147,104 @@ export async function setChatMaxMessagesPerSession(
     where: { id: SINGLETON_ID },
     update: { chatMaxMessagesPerSession: cap },
     create: { id: SINGLETON_ID, chatMaxMessagesPerSession: cap },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for Scene Status's Rising and Featured thresholds
+ * (reputation epic §1, amended session 55). Headliner has no setter here —
+ * deliberately manual/admin-toggle-only, see Artist.isSceneStatusHeadliner.
+ * All fields optional per call so a single-field PATCH doesn't reset the
+ * others (same convention as setAudienceFeeSettings/setChatMaxMessagesPerSession).
+ */
+export async function setSceneStatusThresholds(input: {
+  risingMinGigs?: number
+  risingMinAvgRating?: number
+  risingMinAttendees?: number
+  featuredVouchThreshold?: number
+}): Promise<PlatformSettings> {
+  const data: Record<string, number> = {}
+
+  if (input.risingMinGigs !== undefined) {
+    if (!Number.isInteger(input.risingMinGigs) || input.risingMinGigs < 0) {
+      throw new Error("sceneStatusRisingMinGigs must be a non-negative integer")
+    }
+    data.sceneStatusRisingMinGigs = input.risingMinGigs
+  }
+  if (input.risingMinAvgRating !== undefined) {
+    if (!Number.isFinite(input.risingMinAvgRating) || input.risingMinAvgRating < 0 || input.risingMinAvgRating > 5) {
+      throw new Error("sceneStatusRisingMinAvgRating must be between 0 and 5")
+    }
+    data.sceneStatusRisingMinAvgRating = input.risingMinAvgRating
+  }
+  if (input.risingMinAttendees !== undefined) {
+    if (!Number.isInteger(input.risingMinAttendees) || input.risingMinAttendees < 0) {
+      throw new Error("sceneStatusRisingMinAttendees must be a non-negative integer")
+    }
+    data.sceneStatusRisingMinAttendees = input.risingMinAttendees
+  }
+  if (input.featuredVouchThreshold !== undefined) {
+    if (!Number.isInteger(input.featuredVouchThreshold) || input.featuredVouchThreshold < 1) {
+      throw new Error("sceneStatusFeaturedVouchThreshold must be a positive integer")
+    }
+    data.sceneStatusFeaturedVouchThreshold = input.featuredVouchThreshold
+  }
+
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: data,
+    create: { id: SINGLETON_ID, ...data },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for the artist roster's Hype Score lookback window
+ * (session 56) - how many of an artist's most recent scored shows to
+ * average on /dashboard/admin/artists. Separate from setSceneStatusThresholds
+ * since this is a display/aggregation setting, not a tier-computation input.
+ */
+export async function setArtistRosterHypeScoreLookback(lookback: number): Promise<PlatformSettings> {
+  if (!Number.isInteger(lookback) || lookback < 1) {
+    throw new Error("artistRosterHypeScoreLookback must be a positive integer")
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { artistRosterHypeScoreLookback: lookback },
+    create: { id: SINGLETON_ID, artistRosterHypeScoreLookback: lookback },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for the Audience Choice voting default weights (§6,
+ * session 58). Must sum to 100 and respect the design doc's ~50%
+ * Audience floor - enforced here, same validation an organiser's
+ * per-event override goes through (see events/[id]/route.ts).
+ */
+export async function setAudienceChoiceWeightDefaults(input: {
+  audience: number
+  panelist: number
+  celebrity: number
+}): Promise<PlatformSettings> {
+  const { audience, panelist, celebrity } = input
+  if (![audience, panelist, celebrity].every((n) => Number.isInteger(n) && n >= 0)) {
+    throw new Error("Weights must be non-negative integers")
+  }
+  if (audience + panelist + celebrity !== 100) {
+    throw new Error("Weights must sum to 100")
+  }
+  if (audience < 50) {
+    throw new Error("Audience weight must be at least 50 (Audience Choice floor, per design)")
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
+    create: { id: SINGLETON_ID, audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
     select: SETTINGS_SELECT,
   })
   return row

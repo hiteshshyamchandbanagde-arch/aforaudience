@@ -62,27 +62,42 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       isFree, ticketPrice, totalSeats, dresscode, vibe, surpriseAct, publish, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
-      celebrityAttendingName, celebrityPhotoUrl, panelists,
+      audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
     } = body
 
-    // Competition show (31 Jul) - same shape as POST, panelists only kept
-    // when isCompetitionShow is (or remains) true. photoUrl is passed
-    // through as-sent by the client (it already holds whatever GET
-    // returned) rather than re-uploaded here - full-replace below gives
-    // panelists new ids each edit, same accepted tradeoff as ticketTiers
-    // (see comment below); nothing else references EventPanelist.id
-    // across saves, only the photo-upload route uses it transiently.
+    // Competition show - prize fields only kept when isCompetitionShow is
+    // (or remains) true, same as before. Panelists/celebrity (§8, session
+    // 57, Accept-to-Appear) are no longer handled by this route at all -
+    // see the comment at the write site below.
     const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
-    const validPanelistsEdit = resolvedIsCompetitionShow && Array.isArray(panelists)
-      ? panelists
-          .filter((p: any) => typeof p?.name === 'string' && p.name.trim() !== '')
-          .map((p: any, i: number) => ({
-            name: String(p.name).trim().slice(0, 100),
-            bio: typeof p.bio === 'string' && p.bio.trim() !== '' ? p.bio.trim().slice(0, 500) : null,
-            photoUrl: typeof p.photoUrl === 'string' && p.photoUrl ? p.photoUrl : null,
-            order: i,
-          }))
-      : []
+
+    // Audience Choice vote weights (§6, session 58) - organiser override,
+    // all three or none (avoids a partial write leaving weights that
+    // don't sum to 100). null clears back to following the platform
+    // default. Validated here, same guardrails as the platform-default
+    // setter (setAudienceChoiceWeightDefaults).
+    const hasVoteWeights = audienceVoteWeight !== undefined || panelistVoteWeight !== undefined || celebrityVoteWeight !== undefined
+    let voteWeightsUpdate: { audienceVoteWeight: number | null; panelistVoteWeight: number | null; celebrityVoteWeight: number | null } | undefined
+    if (hasVoteWeights) {
+      const allNull = audienceVoteWeight === null && panelistVoteWeight === null && celebrityVoteWeight === null
+      if (allNull) {
+        voteWeightsUpdate = { audienceVoteWeight: null, panelistVoteWeight: null, celebrityVoteWeight: null }
+      } else {
+        const a = Number(audienceVoteWeight)
+        const p = Number(panelistVoteWeight)
+        const c = Number(celebrityVoteWeight)
+        if (![a, p, c].every((n) => Number.isInteger(n) && n >= 0)) {
+          return NextResponse.json({ error: 'Vote weights must be non-negative integers' }, { status: 400 })
+        }
+        if (a + p + c !== 100) {
+          return NextResponse.json({ error: 'Vote weights must sum to 100' }, { status: 400 })
+        }
+        if (a < 50) {
+          return NextResponse.json({ error: 'Audience weight must be at least 50 (Audience Choice floor, per design)' }, { status: 400 })
+        }
+        voteWeightsUpdate = { audienceVoteWeight: a, panelistVoteWeight: p, celebrityVoteWeight: c }
+      }
+    }
 
     // §9.2 (26 Jul) - Edit Event previously had no ticketTiers handling at
     // all, meaning a Numbered-venue event's per-section pricing could only
@@ -213,15 +228,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           competitionPrizeFirst: resolvedIsCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
           competitionPrizeSecond: resolvedIsCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
           competitionPrizeThird: resolvedIsCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
-          celebrityAttendingName: resolvedIsCompetitionShow && celebrityAttendingName ? String(celebrityAttendingName).trim().slice(0, 100) : null,
-          celebrityPhotoUrl: resolvedIsCompetitionShow && celebrityPhotoUrl ? String(celebrityPhotoUrl) : null,
         }),
-        ...(panelists !== undefined && {
-          panelists: {
-            deleteMany: {},
-            create: validPanelistsEdit,
-          },
-        }),
+        ...(voteWeightsUpdate && voteWeightsUpdate),
+        // Panelists/celebrity (§8, session 57) are deliberately NEVER
+        // touched by this general event PATCH anymore, even if a client
+        // sent a `panelists` field - the old deleteMany+create full-replace
+        // would have destroyed real invite/consent state (status, userId,
+        // respondedAt) on every unrelated event edit. They're managed
+        // exclusively through their own dedicated invite endpoints now:
+        // POST/DELETE /api/events/[id]/panelists(/invite) and /celebrities(/invite).
       },
     })
 

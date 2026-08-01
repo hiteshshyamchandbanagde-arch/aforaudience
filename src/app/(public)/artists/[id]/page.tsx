@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import ArtistProfileClientPage from './ArtistProfileClientPage'
+import { getSceneStatus } from '@/lib/scene-status'
 
 export default async function ArtistProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -21,8 +22,41 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     ? await prisma.follow.count({ where: { targetType: 'ARTIST', targetId: id } })
     : 0
 
+  // Verified/Repeat Attendees (reputation epic §3) - live-computed per
+  // Hitesh's decision (session 53). Distinct AUDIENCE ACCOUNTS with a
+  // checked-in CONFIRMED booking at any event this artist performed at -
+  // deliberately counted by distinct user, not by seat or by booking, so
+  // a 4-seat group booking checked in once still reads as 1 verified
+  // attendee, not 4. Repeat = same user checked in across 2+ DIFFERENT
+  // events. Known limitation (documented in the design, not hidden):
+  // check-in is per-booking not per-person, so someone who came only for
+  // the headliner still counts as a verified attendee of the opener too,
+  // and one person checking in a group booking undercounts real
+  // attendance - naming it "Verified" rather than "Watched" is
+  // deliberately honest about this until §7 Phase 2 (per-seat check-in)
+  // closes the gap.
+  const eventIds = artist ? [...new Set(artist.performances.map((p: { eventId: string }) => p.eventId))] : []
+  const checkedInBookings = eventIds.length
+    ? await prisma.booking.findMany({
+        where: { eventId: { in: eventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
+        select: { userId: true, eventId: true },
+      })
+    : []
+  const attendeeEventsByUser = new Map<string, Set<string>>()
+  for (const b of checkedInBookings) {
+    if (!attendeeEventsByUser.has(b.userId)) attendeeEventsByUser.set(b.userId, new Set())
+    attendeeEventsByUser.get(b.userId)!.add(b.eventId)
+  }
+  const verifiedAttendees = attendeeEventsByUser.size
+  const repeatAttendees = [...attendeeEventsByUser.values()].filter((events) => events.size >= 2).length
+
+  // Scene Status (reputation epic §1, amended session 55) - live-computed,
+  // same architectural choice as Verified/Repeat Attendees above. See
+  // src/lib/scene-status.ts.
+  const sceneStatus = artist ? await getSceneStatus(artist.id) : null
+
   const artistWithFollowers = artist
-    ? { ...artist, _count: { ...artist._count, followers: followerCount } }
+    ? { ...artist, _count: { ...artist._count, followers: followerCount }, verifiedAttendees, repeatAttendees }
     : null
 
   // Verified badge (blue tick) - automatic, from live feedback (18 Jul).
@@ -44,6 +78,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     <ArtistProfileClientPage
       artist={artistWithFollowers ? JSON.parse(JSON.stringify(artistWithFollowers)) : null}
       isVerified={isVerified}
+      sceneStatus={sceneStatus}
     />
   )
 }

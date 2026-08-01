@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import type { SceneStatusTier } from "@/lib/scene-status"
 
 interface Performance {
   id: string
@@ -24,7 +25,6 @@ interface ArtistData {
   bio: string
   genre: string[]
   styleTag: string[]
-  hypScore: number
   socialLinks: Record<string, string> | null
   videoReel: string[]
   tagline: string | null
@@ -36,6 +36,8 @@ interface ArtistData {
   user: { name: string; avatar: string | null }
   performances: Performance[]
   _count: { performances: number; followers: number }
+  verifiedAttendees: number
+  repeatAttendees: number
 }
 
 const SOCIAL_ICON: Record<string, string> = {
@@ -44,7 +46,15 @@ const SOCIAL_ICON: Record<string, string> = {
   twitter: "🐦",
 }
 
-export default function ArtistProfilePage({ artist, isVerified }: { artist: ArtistData | null; isVerified?: boolean }) {
+export default function ArtistProfilePage({
+  artist,
+  isVerified,
+  sceneStatus,
+}: {
+  artist: ArtistData | null
+  isVerified?: boolean
+  sceneStatus?: SceneStatusTier | null
+}) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   const { status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
@@ -134,7 +144,6 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
               {artist.genre.map((g) => (
                 <span key={g} style={{ background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
               ))}
-              <span style={{ background: "rgba(201,151,58,0.9)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>🔥 Hype {artist.hypScore.toFixed(1)}</span>
             </div>
             <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               {artist.user.name}
@@ -144,6 +153,39 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
                   style={{ fontSize: "0.45em", background: "var(--afa-social-blue)", color: "white", width: "1.1em", height: "1.1em", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                 >
                   ✓
+                </span>
+              )}
+              {sceneStatus && sceneStatus !== "NEW_EMERGING" && (
+                <span
+                  title={
+                    sceneStatus === "HEADLINER"
+                      ? "Headliner — admin-recognized, earned through track record and reputation"
+                      : sceneStatus === "FEATURED"
+                      ? "Featured — vouched for by multiple organisers"
+                      : "Rising — building a strong track record"
+                  }
+                  style={{
+                    fontSize: "0.32em",
+                    fontWeight: 700,
+                    padding: "0.35em 0.7em",
+                    borderRadius: "999px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.3em",
+                    flexShrink: 0,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    background:
+                      sceneStatus === "HEADLINER"
+                        ? "var(--afa-gold)"
+                        : sceneStatus === "FEATURED"
+                        ? "rgba(201,151,58,0.2)"
+                        : "rgba(255,255,255,0.12)",
+                    color: sceneStatus === "HEADLINER" ? "var(--afa-plum-black)" : sceneStatus === "FEATURED" ? "var(--afa-gold)" : "rgba(255,255,255,0.85)",
+                    border: sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
+                  }}
+                >
+                  {sceneStatus === "HEADLINER" ? "★ Headliner" : sceneStatus === "FEATURED" ? "Featured" : "Rising"}
                 </span>
               )}
             </h1>
@@ -197,14 +239,22 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
       <div style={{ background: "white", borderBottom: "1px solid rgba(14,12,10,0.08)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "20px 48px", display: "flex", gap: "48px", flexWrap: "wrap" }}>
           {[
-            { num: `🔥 ${artist.hypScore.toFixed(1)}`, label: "Hype Score" },
             { num: followerCount, label: "Followers" },
+            {
+              num: artist.verifiedAttendees,
+              label: "Verified Attendees",
+              title: "Audience accounts who checked in at a show this artist performed at",
+              extra: artist.repeatAttendees > 0 ? `${artist.repeatAttendees} repeat` : null,
+            },
             { num: artist._count.performances, label: "Total Shows" },
             { num: upcomingShows.length, label: "Upcoming" },
           ].map((stat) => (
-            <div key={stat.label}>
+            <div key={stat.label} title={"title" in stat ? stat.title : undefined}>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1 }}>{stat.num}</div>
-              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>{stat.label}</div>
+              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>
+                {stat.label}
+                {"extra" in stat && stat.extra && <span style={{ opacity: 0.7 }}> · {stat.extra}</span>}
+              </div>
             </div>
           ))}
         </div>

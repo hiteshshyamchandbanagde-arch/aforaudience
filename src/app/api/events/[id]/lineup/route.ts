@@ -103,12 +103,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     await prisma.$transaction(
-      order.map((item: { performanceId: string; duration: number }, index: number) =>
+      order.map((item: { performanceId: string; duration: number; isFeaturedVouch?: boolean }, index: number) =>
         prisma.performance.update({
           where: { id: item.performanceId },
           data: {
             slot: index + 1,
             duration: Math.max(1, Math.min(180, Math.round(Number(item.duration) || 10))),
+            // Scene Status Featured vouch (§1, amended session 55) — only
+            // written when the client actually sends a boolean, so an
+            // unrelated reorder/duration-only PATCH can't silently flip it.
+            ...(typeof item.isFeaturedVouch === 'boolean' ? { isFeaturedVouch: item.isFeaturedVouch } : {}),
           },
         })
       )
@@ -152,6 +156,7 @@ function computeTimeBlocks(eventStartTime: string, performances: any[]) {
       buyInAmount: p.buyInAmount,
       startLabel: base !== null ? minutesToLabel(startMinutes) : null,
       endLabel: base !== null ? minutesToLabel(endMinutes) : null,
+      isFeaturedVouch: p.isFeaturedVouch,
     }
   })
 }

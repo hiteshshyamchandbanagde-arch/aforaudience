@@ -43,7 +43,7 @@ export async function GET() {
         performance: {
           select: {
             artistId: true,
-            artist: { select: { id: true, hypScore: true, user: { select: { name: true, displayName: true, avatar: true } } } },
+            artist: { select: { id: true, user: { select: { name: true, displayName: true, avatar: true } } } },
           },
         },
       },

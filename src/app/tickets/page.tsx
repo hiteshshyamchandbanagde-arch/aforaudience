@@ -8,6 +8,14 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 
+// Companion Tagging Phase 1 (reputation epic §7) - tags where the
+// logged-in user is the one being tagged, awaiting their response.
+interface PendingCompanionTag {
+  id: string
+  taggedBy: { id: string; name: string; displayName: string | null }
+  booking: { id: string; event: { id: string; title: string; date: string; startTime: string } }
+}
+
 interface BookingItem {
   id: string
   seats: Record<string, number>
@@ -95,6 +103,8 @@ export default function MyTicketsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<string | null>(null)
+  const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
+  const [respondingTag, setRespondingTag] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -112,9 +122,37 @@ export default function MyTicketsPage() {
     }
   }
 
+  const loadPendingTags = async () => {
+    try {
+      const res = await fetch('/api/companions/mine')
+      if (!res.ok) return
+      const data = await res.json()
+      setPendingTags(data.tags || [])
+    } catch {
+      // Non-critical - the rest of the page still works.
+    }
+  }
+
   useEffect(() => {
-    if (session?.user) load()
+    if (session?.user) {
+      load()
+      loadPendingTags()
+    }
   }, [session])
+
+  const respondToTag = async (tagId: string, accept: boolean) => {
+    setRespondingTag(tagId)
+    try {
+      const res = await fetch(`/api/companions/${tagId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept }),
+      })
+      if (res.ok) setPendingTags((prev) => prev.filter((t) => t.id !== tagId))
+    } finally {
+      setRespondingTag(null)
+    }
+  }
 
   const cancelBooking = async (b: BookingItem) => {
     if (b.status === 'CONFIRMED') {
@@ -159,6 +197,42 @@ export default function MyTicketsPage() {
           {error && (
             <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
               {error}
+            </div>
+          )}
+
+          {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been
+              tagged" inbox. Sits above the ticket list since it needs a
+              response, unlike the tickets below which are just informational. */}
+          {pendingTags.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+                You've been tagged
+              </h2>
+              {pendingTags.map((t) => (
+                <div key={t.id} style={{ background: 'var(--afa-white)', border: '1px solid rgba(200,68,26,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+                  <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
+                    <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong> tagged you as their companion for{' '}
+                    <strong>{t.booking.event.title}</strong> on{' '}
+                    {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => respondToTag(t.id, true)}
+                      disabled={respondingTag === t.id}
+                      style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
+                    >
+                      {respondingTag === t.id ? 'Confirming…' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => respondToTag(t.id, false)}
+                      disabled={respondingTag === t.id}
+                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

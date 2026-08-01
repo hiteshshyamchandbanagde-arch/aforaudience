@@ -36,6 +36,35 @@ export default function AdminSettingsPage() {
   const [maxChatCap, setMaxChatCap] = useState<number>(200)
   const [chatSaving, setChatSaving] = useState(false)
 
+  // Scene Status thresholds (reputation epic §1, amended session 55) —
+  // Rising and Featured only. Headliner is deliberately not here at all —
+  // fully manual/admin-toggle-only, no formula, no config.
+  const [risingMinGigs, setRisingMinGigs] = useState<string>('')
+  const [risingMinAvgRating, setRisingMinAvgRating] = useState<string>('')
+  const [risingMinAttendees, setRisingMinAttendees] = useState<string>('')
+  const [featuredVouchThreshold, setFeaturedVouchThreshold] = useState<string>('')
+  const [initialRisingMinGigs, setInitialRisingMinGigs] = useState<number>(3)
+  const [initialRisingMinAvgRating, setInitialRisingMinAvgRating] = useState<number>(4.0)
+  const [initialRisingMinAttendees, setInitialRisingMinAttendees] = useState<number>(5)
+  const [initialFeaturedVouchThreshold, setInitialFeaturedVouchThreshold] = useState<number>(5)
+  const [sceneStatusSaving, setSceneStatusSaving] = useState(false)
+
+  // Admin artist roster (session 56) - Hype Score lookback window,
+  // separate save action from the Scene Status thresholds above since
+  // it's a display/aggregation setting, not a tier input.
+  const [rosterLookback, setRosterLookback] = useState<string>('')
+  const [initialRosterLookback, setInitialRosterLookback] = useState<number>(5)
+  const [rosterLookbackSaving, setRosterLookbackSaving] = useState(false)
+
+  // Audience Choice voting default weights (§6, session 58)
+  const [audienceWeight, setAudienceWeight] = useState<string>('')
+  const [panelistWeight, setPanelistWeight] = useState<string>('')
+  const [celebrityWeight, setCelebrityWeight] = useState<string>('')
+  const [initialAudienceWeight, setInitialAudienceWeight] = useState<number>(80)
+  const [initialPanelistWeight, setInitialPanelistWeight] = useState<number>(10)
+  const [initialCelebrityWeight, setInitialCelebrityWeight] = useState<number>(10)
+  const [voteWeightsSaving, setVoteWeightsSaving] = useState(false)
+
   // Display currency rates (Option A). One row per non-INR currency;
   // rateInputs holds the live-edited value per code, savingCode tracks
   // which row (if any) is mid-save, so each row's button state is
@@ -82,6 +111,33 @@ export default function AdminSettingsPage() {
         setInitialChatCap(cap)
         setChatCap(String(cap))
         setMaxChatCap(data.limits.maxChatMessagesCap)
+
+        const rGigs = data.settings.sceneStatusRisingMinGigs
+        const rRating = data.settings.sceneStatusRisingMinAvgRating
+        const rAttendees = data.settings.sceneStatusRisingMinAttendees
+        const fThreshold = data.settings.sceneStatusFeaturedVouchThreshold
+        setInitialRisingMinGigs(rGigs)
+        setInitialRisingMinAvgRating(rRating)
+        setInitialRisingMinAttendees(rAttendees)
+        setInitialFeaturedVouchThreshold(fThreshold)
+        setRisingMinGigs(String(rGigs))
+        setRisingMinAvgRating(String(rRating))
+        setRisingMinAttendees(String(rAttendees))
+        setFeaturedVouchThreshold(String(fThreshold))
+
+        const lookback = data.settings.artistRosterHypeScoreLookback
+        setInitialRosterLookback(lookback)
+        setRosterLookback(String(lookback))
+
+        const aw = data.settings.audienceVoteWeightDefault
+        const pw = data.settings.panelistVoteWeightDefault
+        const cw = data.settings.celebrityVoteWeightDefault
+        setInitialAudienceWeight(aw)
+        setInitialPanelistWeight(pw)
+        setInitialCelebrityWeight(cw)
+        setAudienceWeight(String(aw))
+        setPanelistWeight(String(pw))
+        setCelebrityWeight(String(cw))
       } catch (err: any) {
         setLoadError(err.message)
       } finally {
@@ -215,6 +271,125 @@ export default function AdminSettingsPage() {
   const currentChatCap = Math.round(Number(chatCap || 0))
   const isChatCapDirty = currentChatCap !== initialChatCap
   const isChatCapValid = Number.isInteger(Number(chatCap))
+
+  const saveSceneStatusThresholds = async () => {
+    setSceneStatusSaving(true)
+    try {
+      const gigs = Number(risingMinGigs)
+      const rating = Number(risingMinAvgRating)
+      const attendees = Number(risingMinAttendees)
+      const threshold = Number(featuredVouchThreshold)
+      if (!Number.isInteger(gigs) || gigs < 0) throw new Error('Min gigs must be a non-negative whole number')
+      if (!Number.isFinite(rating) || rating < 0 || rating > 5) throw new Error('Min avg rating must be between 0 and 5')
+      if (!Number.isInteger(attendees) || attendees < 0) throw new Error('Min attendees must be a non-negative whole number')
+      if (!Number.isInteger(threshold) || threshold < 1) throw new Error('Featured vouch threshold must be a positive whole number')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sceneStatusRisingMinGigs: gigs,
+          sceneStatusRisingMinAvgRating: rating,
+          sceneStatusRisingMinAttendees: attendees,
+          sceneStatusFeaturedVouchThreshold: threshold,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRisingMinGigs(data.settings.sceneStatusRisingMinGigs)
+      setInitialRisingMinAvgRating(data.settings.sceneStatusRisingMinAvgRating)
+      setInitialRisingMinAttendees(data.settings.sceneStatusRisingMinAttendees)
+      setInitialFeaturedVouchThreshold(data.settings.sceneStatusFeaturedVouchThreshold)
+      showToast('Saved. Scene Status thresholds are live-computed, so this takes effect immediately — no deploy needed.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setSceneStatusSaving(false)
+    }
+  }
+
+  const isSceneStatusDirty =
+    Math.round(Number(risingMinGigs || 0)) !== initialRisingMinGigs ||
+    Number(risingMinAvgRating) !== initialRisingMinAvgRating ||
+    Math.round(Number(risingMinAttendees || 0)) !== initialRisingMinAttendees ||
+    Math.round(Number(featuredVouchThreshold || 0)) !== initialFeaturedVouchThreshold
+  const isSceneStatusValid =
+    Number.isInteger(Number(risingMinGigs)) &&
+    Number(risingMinGigs) >= 0 &&
+    Number.isFinite(Number(risingMinAvgRating)) &&
+    Number(risingMinAvgRating) >= 0 &&
+    Number(risingMinAvgRating) <= 5 &&
+    Number.isInteger(Number(risingMinAttendees)) &&
+    Number(risingMinAttendees) >= 0 &&
+    Number.isInteger(Number(featuredVouchThreshold)) &&
+    Number(featuredVouchThreshold) >= 1
+
+  const saveRosterLookback = async () => {
+    setRosterLookbackSaving(true)
+    try {
+      const lookback = Number(rosterLookback)
+      if (!Number.isInteger(lookback) || lookback < 1) {
+        throw new Error('Lookback must be a positive whole number')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artistRosterHypeScoreLookback: lookback }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRosterLookback(data.settings.artistRosterHypeScoreLookback)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setRosterLookbackSaving(false)
+    }
+  }
+  const isRosterLookbackDirty = Math.round(Number(rosterLookback || 0)) !== initialRosterLookback
+  const isRosterLookbackValid = Number.isInteger(Number(rosterLookback)) && Number(rosterLookback) >= 1
+
+  const saveVoteWeightDefaults = async () => {
+    setVoteWeightsSaving(true)
+    try {
+      const a = Number(audienceWeight)
+      const p = Number(panelistWeight)
+      const c = Number(celebrityWeight)
+      if (![a, p, c].every((n) => Number.isInteger(n) && n >= 0)) throw new Error('Weights must be non-negative whole numbers')
+      if (a + p + c !== 100) throw new Error('Weights must sum to 100')
+      if (a < 50) throw new Error('Audience weight must be at least 50 (Audience Choice floor)')
+
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audienceVoteWeightDefault: a,
+          panelistVoteWeightDefault: p,
+          celebrityVoteWeightDefault: c,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialAudienceWeight(data.settings.audienceVoteWeightDefault)
+      setInitialPanelistWeight(data.settings.panelistVoteWeightDefault)
+      setInitialCelebrityWeight(data.settings.celebrityVoteWeightDefault)
+      showToast('Saved. Applies to any Competition Show event that hasn\'t set its own override.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setVoteWeightsSaving(false)
+    }
+  }
+  const isVoteWeightsDirty =
+    Math.round(Number(audienceWeight || 0)) !== initialAudienceWeight ||
+    Math.round(Number(panelistWeight || 0)) !== initialPanelistWeight ||
+    Math.round(Number(celebrityWeight || 0)) !== initialCelebrityWeight
+  const voteWeightsSum = Math.round(Number(audienceWeight || 0)) + Math.round(Number(panelistWeight || 0)) + Math.round(Number(celebrityWeight || 0))
+  const isVoteWeightsValid =
+    Number.isInteger(Number(audienceWeight)) && Number(audienceWeight) >= 50 &&
+    Number.isInteger(Number(panelistWeight)) && Number(panelistWeight) >= 0 &&
+    Number.isInteger(Number(celebrityWeight)) && Number(celebrityWeight) >= 0 &&
+    voteWeightsSum === 100
 
   if (loading) {
     return (
@@ -436,6 +611,192 @@ export default function AdminSettingsPage() {
             }}
           >
             {chatSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Scene Status thresholds
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Rising and Featured are automatic, computed live on every profile/poster view — changes here take effect immediately, no deploy needed. Headliner isn't configurable here — it's a fully manual, admin-only tag (set per-artist), deliberately not earned via any formula.
+          </p>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN COMPLETED GIGS
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinGigs}
+            onChange={(e) => setRisingMinGigs(e.target.value)}
+            placeholder="3"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN AVERAGE REVIEW RATING (0–5)
+          </label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min={0}
+            max={5}
+            step="0.1"
+            value={risingMinAvgRating}
+            onChange={(e) => setRisingMinAvgRating(e.target.value)}
+            placeholder="4.0"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            RISING — MIN VERIFIED ATTENDEES
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step="1"
+            value={risingMinAttendees}
+            onChange={(e) => setRisingMinAttendees(e.target.value)}
+            placeholder="5"
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15, marginBottom: 16 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            FEATURED — MIN DISTINCT ORGANISERS WHO VOUCHED
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={featuredVouchThreshold}
+              onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
+              placeholder="5"
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }}
+            />
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
+          </p>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={rosterLookback}
+              onChange={(e) => setRosterLookback(e.target.value)}
+              placeholder="5"
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }}
+            />
+            <button
+              onClick={saveRosterLookback}
+              disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}
+              style={{
+                background: 'var(--afa-terracotta)',
+                color: 'white',
+                padding: '9px 16px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 'default' : 'pointer',
+                opacity: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 0.5 : 1,
+              }}
+            >
+              {rosterLookbackSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
+          </p>
+
+          <button
+            onClick={saveSceneStatusThresholds}
+            disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}
+            style={{
+              background: 'var(--afa-terracotta)',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 'default' : 'pointer',
+              opacity: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 0.5 : 1,
+            }}
+          >
+            {sceneStatusSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Audience Choice default weights
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Applies to any Competition Show event that hasn't set its own override on the Edit Event page. Must sum to 100, Audience must be at least 50 (the "Audience Choice" floor — otherwise it stops being genuinely audience-driven).
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 11, color: voteWeightsSum === 100 ? 'var(--afa-taupe)' : 'var(--afa-terracotta)', marginBottom: 16 }}>
+            Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
+          </p>
+
+          <button
+            onClick={saveVoteWeightDefaults}
+            disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}
+            style={{
+              background: 'var(--afa-terracotta)',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 'default' : 'pointer',
+              opacity: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 0.5 : 1,
+            }}
+          >
+            {voteWeightsSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
 

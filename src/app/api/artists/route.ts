@@ -8,7 +8,12 @@ export async function GET() {
         user: { select: { name: true, avatar: true } },
         _count: { select: { performances: true } },
       },
-      orderBy: { hypScore: 'desc' },
+      // hypScore (profile-level, always 0, never written) retired as part
+      // of the reputation epic - real per-show Hype Score now lives on
+      // Performance/event pages, not here. Sorting falls back to gig
+      // count until Scene Status (§1 of the reputation design) ships and
+      // becomes the real "who's trending" signal.
+      orderBy: { performances: { _count: 'desc' } },
     })
 
     return NextResponse.json(artists)

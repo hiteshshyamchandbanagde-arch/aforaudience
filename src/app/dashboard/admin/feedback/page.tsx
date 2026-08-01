@@ -453,6 +453,7 @@ export default function AdminFeedbackPage() {
               <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Revenue</a>
               <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Accounts</a>
               <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Bookings</a>
+              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Artist Roster</a>
             </div>
           </div>
 
