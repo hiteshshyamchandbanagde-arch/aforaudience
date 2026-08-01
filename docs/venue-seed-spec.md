@@ -74,9 +74,36 @@ Two-step script:
     needed per owner, cycle deterministically (e.g. by owner index × offset) so the
     international set gets used but isn't the majority — India stays Pune-first in
     practice for most owners given the pool weighting.
-- **Naming:** `{OwnerName} — {City} {Type} Venue` (e.g.
-  `VenueOwner00000005 — Pune GA Venue`) — greppable/deterministic, matches the
-  load-test naming philosophy.
+- **Naming — realistic, not deterministic-testing-style (Hitesh, session 62):** every
+  venue gets a real-sounding name, not a `VenueOwner00000005 — Pune GA Venue` style
+  identifier. Build from a curated pool of name components — a "flavor" word/phrase
+  (e.g. Blue Note, Sunset, Silver Screen, Rhythm House, The Attic, Marina Bay, Old
+  Town, Crescent, Skyline, Velvet Room, Riverside, Moonlight) combined with a
+  type-appropriate suffix matched to capacity/seating mode (Hall, Auditorium,
+  Amphitheatre, Arena, Grounds, Theatre, Lounge, Community Center, Convention Centre)
+  — e.g. "The Blue Note Lounge", "Riverside Amphitheatre", "Skyline Convention
+  Centre". City name is not baked into the venue name itself (real venues usually
+  don't put their own city in their name) — city lives in the separate `city` field.
+  **Idempotency note:** since names are no longer deterministic strings, top-up logic
+  on re-run must key off (`ownerId`, `city`, seating-mode/type-tag) combinations
+  already present for that owner — not off matching the name — to decide what's
+  missing and needs creating.
+- **Address / location — realistic, not null (Hitesh, session 62):** every venue gets
+  a real-sounding street address, not a bare city with everything else null. Build
+  from a small per-city pool of real neighborhood/area names (e.g. Pune: Koregaon
+  Park, FC Road, Baner, Viman Nagar, Kalyani Nagar; Mumbai: Bandra, Andheri, Lower
+  Parel, Powai; similar curated lists for the rest of the city pool — Claude Code can
+  source a handful of real, well-known localities per city, this doesn't need to be
+  exhaustive) + a generated building/plot number, e.g. `"221, Koregaon Park, Pune"`.
+  No live Places API calls per venue (keeps this free/fast, in scope stays inside the
+  existing ~$10/month Maps budget which is reserved for real venue registration, not
+  bulk seed data). For `lat`/`lng`: use one approximate **city-centroid** coordinate
+  pair per city (hardcoded lookup table, not per-address precision) so map-based
+  features have something real to plot rather than null — good enough for realism at
+  seed-data scale, not meant to be geocode-accurate to the street. `state`/`country`
+  populated from the same city lookup (e.g. Pune → Maharashtra, India). `placeId`
+  left null (that field is specifically for real Places API-resolved addresses, per
+  the existing `mapsUrl`/`placeId` invariant in the schema comment — don't fake one).
 - **Seats for NUMBERED venues:** generate real `Seat` rows summing to ~the venue's
   capacity, using the existing `defaultZoneName()` helper (Front → Middle → Back →
   Recliner → Zone N, per design.md §9.5) for zone labels. Reuse whatever internal
@@ -100,8 +127,6 @@ Two-step script:
     populate a placeholder number here.
   - `isApproved: true` on every venue (not otherwise specified, needed so seed venues
     actually appear as usable/live data rather than stuck pending admin approval).
-  - Address/state/country/lat/lng left null (no real Places API resolution needed for
-    seed data) — `city` alone populated.
 
 ## Guards (carry over from existing seed scripts)
 
