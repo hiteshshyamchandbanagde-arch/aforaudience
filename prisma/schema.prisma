@@ -277,6 +277,8 @@ model User {
   reviewReplies          ReviewReply[]
   conversationParticipants ConversationParticipant[]
   sentMessages           Message[]
+  companionTagsSent      CompanionTag[] @relation("CompanionTagTagger")
+  companionTagsReceived  CompanionTag[] @relation("CompanionTagTagged")
 }
 
 model PushSubscription {
@@ -1167,6 +1169,17 @@ model Booking {
   refundAmount     Float?
   razorpayRefundId String?
 
+  // Companion Tagging Phase 1 (reputation epic §7). Consent is captured
+  // once per booking, at checkout, and covers using the resulting tags
+  // for Verified/Repeat Attendee counts and Scene Status computation -
+  // not just "share who I went with" visibility. Deliberately separate
+  // from any individual CompanionTag row so revoking consent later (not
+  // built yet, but the field exists for it) doesn't require touching
+  // every tag. False/null by default - tagging is opt-in, never assumed.
+  companionTaggingConsent   Boolean   @default(false)
+  companionTaggingConsentAt DateTime?
+  companionTags             CompanionTag[]
+
   payment     Payment?
   bookingSeats BookingSeat[]
   plusOnes    PlusOne[]
@@ -1174,6 +1187,41 @@ model Booking {
 
   @@index([status, expiresAt])
   @@index([checkedInAt, ratingPromptSentAt])
+}
+
+// Companion Tagging Phase 1 - checkout-time capture. Tagging links a real
+// AFA account (not free text), which is why this needs a consent/response
+// handshake on BOTH sides: the booker consents to their booking being used
+// this way (Booking.companionTaggingConsent), and the tagged person must
+// separately ACCEPT before the tag counts toward anything about *them*
+// (Verified/Repeat Attendee counts, Scene Status) - a booker tagging
+// someone shouldn't unilaterally attach reputation data to another
+// person's account. PENDING tags are inert everywhere except the tagged
+// user's own "you've been tagged" inbox.
+//
+// Phase 2 (per-seat check-in, step 6, not yet built) is the actual
+// physical-attendance verification layer this feeds into - this phase is
+// only the social capture + consent step, not verification.
+model CompanionTag {
+  id             String             @id @default(cuid())
+  bookingId      String
+  booking        Booking            @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  taggedByUserId String
+  taggedBy       User               @relation("CompanionTagTagger", fields: [taggedByUserId], references: [id])
+  taggedUserId   String
+  taggedUser     User               @relation("CompanionTagTagged", fields: [taggedUserId], references: [id])
+  status         CompanionTagStatus @default(PENDING)
+  createdAt      DateTime           @default(now())
+  respondedAt    DateTime?
+
+  @@unique([bookingId, taggedUserId])
+  @@index([taggedUserId, status])
+}
+
+enum CompanionTagStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 // Manual-transfer payout ledger (added 28 Jul, replacing the Route

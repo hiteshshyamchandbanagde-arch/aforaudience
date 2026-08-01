@@ -63,6 +63,10 @@ type BookingState = {
   } | null
 }
 
+// Companion Tagging Phase 1 (reputation epic §7) types.
+type CompanionUser = { id: string; name: string; displayName: string | null; avatar: string | null }
+type CompanionTag = { id: string; status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; taggedUser: CompanionUser }
+
 export default function CheckoutPage() {
   const params = useParams<{ bookingId: string }>()
   const bookingId = params?.bookingId
@@ -76,6 +80,16 @@ export default function CheckoutPage() {
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [scriptReady, setScriptReady] = useState(false)
+
+  // Companion Tagging Phase 1 - separate from the payment state above
+  // since tagging never blocks or is blocked by the payment flow.
+  const [companionConsent, setCompanionConsent] = useState(false)
+  const [companionTags, setCompanionTags] = useState<CompanionTag[]>([])
+  const [companionQuery, setCompanionQuery] = useState('')
+  const [companionResults, setCompanionResults] = useState<CompanionUser[]>([])
+  const [companionSearching, setCompanionSearching] = useState(false)
+  const [companionBusy, setCompanionBusy] = useState(false)
+  const [companionError, setCompanionError] = useState('')
 
   // Display-only currency preference (Option A). Loaded once, alongside
   // the booking - real charge/settlement is always INR regardless of
@@ -154,6 +168,104 @@ export default function CheckoutPage() {
       cancelled = true
     }
   }, [authStatus])
+
+  // Load existing companion tags/consent once the booking is known.
+  // Independent of payment state - tagging is available on PENDING
+  // bookings too, same as the rest of this page's summary.
+  useEffect(() => {
+    if (!bookingId || authStatus !== 'authenticated') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}/companions`)
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        setCompanionConsent(!!data.companionTaggingConsent)
+        setCompanionTags(data.tags || [])
+      } catch {
+        // Non-critical - checkout still works without this section.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [bookingId, authStatus])
+
+  // Debounced companion search - 2 char minimum matches the API's floor.
+  useEffect(() => {
+    if (companionQuery.trim().length < 2) {
+      setCompanionResults([])
+      return
+    }
+    let cancelled = false
+    setCompanionSearching(true)
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/users/search?q=${encodeURIComponent(companionQuery.trim())}`)
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        setCompanionResults(data.users || [])
+      } catch {
+        if (!cancelled) setCompanionResults([])
+      } finally {
+        if (!cancelled) setCompanionSearching(false)
+      }
+    }, 300)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+  }, [companionQuery])
+
+  const toggleCompanionConsent = async (checked: boolean) => {
+    if (!bookingId) return
+    setCompanionError('')
+    setCompanionConsent(checked) // optimistic
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ consent: checked }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+    } catch {
+      setCompanionConsent(!checked) // revert
+      setCompanionError('Could not save that - try again.')
+    }
+  }
+
+  const addCompanion = async (u: CompanionUser) => {
+    if (!bookingId) return
+    setCompanionBusy(true)
+    setCompanionError('')
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addUserIds: [u.id] }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to tag')
+      setCompanionTags(data.tags || [])
+      setCompanionQuery('')
+      setCompanionResults([])
+    } catch (err: any) {
+      setCompanionError(err.message || 'Could not tag that person.')
+    } finally {
+      setCompanionBusy(false)
+    }
+  }
+
+  const removeCompanion = async (tagId: string) => {
+    if (!bookingId) return
+    setCompanionBusy(true)
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/companions?tagId=${tagId}`, { method: 'DELETE' })
+      if (res.ok) setCompanionTags((prev) => prev.filter((t) => t.id !== tagId))
+    } finally {
+      setCompanionBusy(false)
+    }
+  }
 
   const handlePay = async () => {
     if (!state?.payment || !state.payment.keyId) return
@@ -593,6 +705,108 @@ export default function CheckoutPage() {
               {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : 'Free'}
             </span>
           </div>
+        </div>
+
+        {/* Companion Tagging Phase 1 (reputation epic §7) - optional, never
+            blocks payment. Search is disabled until consent is checked,
+            since the API itself refuses to create tags without it. */}
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 14,
+            padding: 20,
+            marginBottom: 20,
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Bring your crew (optional)</div>
+          <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 12 }}>
+            Tag AFA friends you're going with — they'll get a request to confirm.
+          </p>
+
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, opacity: 0.75, marginBottom: 12, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={companionConsent}
+              onChange={(e) => toggleCompanionConsent(e.target.checked)}
+              style={{ marginTop: 2 }}
+            />
+            <span>
+              I agree that confirmed companion tags can count toward Verified/Repeat Attendee counts and Scene Status
+              — for both me and the people I tag.
+            </span>
+          </label>
+
+          {companionTags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: companionConsent ? 12 : 0 }}>
+              {companionTags.map((t) => (
+                <span
+                  key={t.id}
+                  style={{
+                    fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6,
+                    background: 'var(--afa-cream)', borderRadius: 999, padding: '5px 6px 5px 12px',
+                  }}
+                >
+                  {t.taggedUser.displayName || t.taggedUser.name}
+                  <span style={{ opacity: 0.5, fontSize: 11 }}>
+                    {t.status === 'PENDING' ? '(pending)' : t.status === 'ACCEPTED' ? '(confirmed)' : '(declined)'}
+                  </span>
+                  <button
+                    onClick={() => removeCompanion(t.id)}
+                    disabled={companionBusy}
+                    aria-label={`Remove ${t.taggedUser.name}`}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, opacity: 0.5, padding: '0 4px' }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {companionConsent && (
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                value={companionQuery}
+                onChange={(e) => setCompanionQuery(e.target.value)}
+                placeholder="Search by name..."
+                disabled={companionBusy}
+                style={{
+                  width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
+                  border: '1px solid rgba(14,12,10,0.15)', boxSizing: 'border-box',
+                }}
+              />
+              {companionSearching && (
+                <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>Searching…</div>
+              )}
+              {companionResults.length > 0 && (
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {companionResults
+                    .filter((u) => !companionTags.some((t) => t.taggedUser.id === u.id))
+                    .map((u) => (
+                      <button
+                        key={u.id}
+                        onClick={() => addCompanion(u)}
+                        disabled={companionBusy}
+                        style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(14,12,10,0.08)',
+                          background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
+                        }}
+                      >
+                        <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 12 }}>@{u.name}</span></span>
+                        <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600, fontSize: 12 }}>+ Tag</span>
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {companionError && (
+            <div style={{ fontSize: 12, color: 'var(--afa-error)', marginTop: 8 }}>{companionError}</div>
+          )}
         </div>
 
         {error && (
