@@ -44,7 +44,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     },
   })
 
-  if (!event || event.status !== 'APPROVED') {
+  // Public page must stay reachable for events that have wrapped up too
+  // (Event.status can be COMPLETED), not just APPROVED - otherwise the
+  // page 404s the moment an event is over, which would also hide the
+  // Hype Score badge/reviews it's specifically meant to surface.
+  // DRAFT / PENDING_APPROVAL / CANCELLED remain excluded.
+  if (!event || !['APPROVED', 'COMPLETED'].includes(event.status)) {
     return <EventDetailClientPage event={null} canReview={false} />
   }
 
