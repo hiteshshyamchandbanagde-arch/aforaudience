@@ -213,6 +213,12 @@ model User {
   password    String
   role        Role     @default(AUDIENCE)
   avatar      String?
+  // Optional "About You" text (session 62, design.md §9.5). Applies to any
+  // role but primarily targets Audience, which has no dedicated child
+  // profile table of its own (unlike Artist/Organiser/VenueOwner) — their
+  // name+photo already surface publicly in ratings/feedback today, so this
+  // closes that gap. Deliberately optional/never required at signup.
+  bio         String?
   isVerified  Boolean  @default(false)
   isApproved  Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -613,6 +619,9 @@ model VenueOwner {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
+  // Session 62, design.md §9.5 - Organiser already had bio, VenueOwner
+  // didn't. Powers the public VenueOwner bio profile page.
+  bio         String?
   isApproved  Boolean  @default(false)
   createdAt   DateTime @default(now())
 

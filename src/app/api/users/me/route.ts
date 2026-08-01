@@ -24,6 +24,7 @@ export async function GET() {
       code: true,
       isVerified: true,
       avatar: true,
+      bio: true,
       displayCurrency: true,
     },
   })
@@ -35,10 +36,10 @@ export async function GET() {
 
 // PATCH /api/users/me
 //
-// Currently supports one editable field: displayName. Kept as a
-// generic "me" endpoint so future editable profile fields (avatar,
-// bio for non-artist users, notification prefs) land here rather
-// than proliferating per-field routes.
+// Generic "me" endpoint for account-level editable fields: displayName,
+// avatar, displayCurrency, bio (session 62 - Audience-facing "About You",
+// design.md §9.5). Future editable profile fields land here rather than
+// proliferating per-field routes.
 //
 // Auth-required. Only affects the calling user's own row.
 export async function PATCH(req: Request) {
@@ -61,7 +62,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null } = {}
+    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null } = {}
 
     // Only touch displayName if it appears in the body. Undefined means
     // "not touched"; null/empty string means "clear". A trimmed non-empty
@@ -122,6 +123,22 @@ export async function PATCH(req: Request) {
       }
     }
 
+    // Optional "About You" bio (session 62, design.md §9.5) - same
+    // trim/cap/null-clears pattern as displayName above. Never required;
+    // this is the Audience-facing counterpart to Artist.bio/Organiser.bio.
+    // Capped at 500 chars - this is a short "about you" blurb shown next
+    // to ratings/reviews, not a full biography page like Artist gets.
+    if (Object.prototype.hasOwnProperty.call(body, 'bio')) {
+      const raw = body.bio
+      if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+        updates.bio = null
+      } else if (typeof raw === 'string') {
+        updates.bio = raw.trim().slice(0, 500)
+      } else {
+        return NextResponse.json({ error: 'bio must be a string or null' }, { status: 400 })
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No editable fields provided' }, { status: 400 })
     }
@@ -135,6 +152,7 @@ export async function PATCH(req: Request) {
         displayName: true,
         email: true,
         avatar: true,
+        bio: true,
         displayCurrency: true,
       },
     })
