@@ -35,6 +35,8 @@ interface ArtistData {
   user: { name: string; avatar: string | null }
   performances: Performance[]
   _count: { performances: number; followers: number }
+  verifiedAttendees: number
+  repeatAttendees: number
 }
 
 const SOCIAL_ICON: Record<string, string> = {
@@ -196,12 +198,21 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "20px 48px", display: "flex", gap: "48px", flexWrap: "wrap" }}>
           {[
             { num: followerCount, label: "Followers" },
+            {
+              num: artist.verifiedAttendees,
+              label: "Verified Attendees",
+              title: "Audience accounts who checked in at a show this artist performed at",
+              extra: artist.repeatAttendees > 0 ? `${artist.repeatAttendees} repeat` : null,
+            },
             { num: artist._count.performances, label: "Total Shows" },
             { num: upcomingShows.length, label: "Upcoming" },
           ].map((stat) => (
-            <div key={stat.label}>
+            <div key={stat.label} title={"title" in stat ? stat.title : undefined}>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1 }}>{stat.num}</div>
-              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>{stat.label}</div>
+              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>
+                {stat.label}
+                {"extra" in stat && stat.extra && <span style={{ opacity: 0.7 }}> · {stat.extra}</span>}
+              </div>
             </div>
           ))}
         </div>
