@@ -450,7 +450,6 @@ model Artist {
   styleTag     String[]
   videoReel    String[]
   socialLinks  Json?
-  hypScore     Float    @default(0)
   createdAt    DateTime @default(now())
 
   // "Artist Background" (23 Jul, Hitesh's expanded scope) - a richer,
@@ -469,6 +468,7 @@ model Artist {
 
   applications  Application[]
   performances  Performance[]
+  organiserRatings OrganiserArtistRating[]
 }
 
 enum FollowTargetType {
@@ -547,6 +547,34 @@ model Organiser {
   venueBookings VenueBooking[]
   bookingRequests VenueBookingRequest[]
   payoutLedgerEntries OrganiserPayoutLedger[]
+  artistRatings OrganiserArtistRating[]
+}
+
+// Artist Reputation epic (design doc, session 52-53) - the one genuine
+// net-new schema piece. Organiser's private rating of an Artist after a
+// specific Performance. NEVER shown publicly - raw score/comment feed
+// only into Scene Status (Artist model, §1) and are otherwise visible
+// only to the rating Organiser and the rated Artist. Scoped per
+// Performance (not a single running score per Organiser-Artist pair) so
+// an Organiser can rate the same Artist again after a later booking, and
+// so a rating can be tied back to a specific real gig if ever disputed.
+// One rating per Organiser per Performance - re-rating updates in place
+// via upsert on the unique constraint rather than allowing duplicates to
+// pile up.
+model OrganiserArtistRating {
+  id            String      @id @default(cuid())
+  organiserId   String
+  organiser     Organiser   @relation(fields: [organiserId], references: [id])
+  artistId      String
+  artist        Artist      @relation(fields: [artistId], references: [id])
+  performanceId String
+  performance   Performance @relation(fields: [performanceId], references: [id])
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([organiserId, performanceId])
 }
 
 // Not yet consulted with a CA - entity type matters for Section 194-O
@@ -1029,6 +1057,7 @@ model Performance {
 
   reviews   Review[]
   plusOnes  PlusOne[]
+  organiserRatings OrganiserArtistRating[]
 
   // Artist self-cancellation (session 21, 23 Jul). cancelledAt null =
   // active slot. Cancelling within 24h of the event is blocked entirely

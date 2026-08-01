@@ -26,7 +26,6 @@ interface Performer {
     bio?: string | null
     genre: string[]
     styleTag: string[]
-    hypScore: number
     user: { name: string }
   }
   reviews: Review[]
@@ -474,7 +473,6 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                           <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
                         )}
                         <div style={{ display: "flex", gap: "16px" }}>
-                          <span style={{ fontSize: "13px", color: "var(--afa-ink)" }}>🔥 Hype {p.artist.hypScore.toFixed(1)}</span>
                           <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>Slot #{p.slot} · {p.duration} min</span>
                         </div>
 

@@ -8,7 +8,6 @@ interface ArtistItem {
   bio: string
   genre: string[]
   styleTag: string[]
-  hypScore: number
   user: { name: string; avatar: string | null }
   _count: { performances: number }
 }
@@ -21,7 +20,6 @@ export default function ArtistsPage() {
 
   const [search, setSearch] = useState("")
   const [selectedGenre, setSelectedGenre] = useState("All")
-  const [sortBy, setSortBy] = useState<"hype" | "shows">("hype")
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -58,9 +56,11 @@ export default function ArtistsPage() {
       const matchGenre = selectedGenre === "All" || a.genre.includes(selectedGenre)
       return matchSearch && matchGenre
     })
-    .sort((a, b) => (sortBy === "hype" ? b.hypScore - a.hypScore : b._count.performances - a._count.performances))
+    .sort((a, b) => b._count.performances - a._count.performances)
 
-  const risingStar = artists.length > 0 ? [...artists].sort((a, b) => b.hypScore - a.hypScore)[0] : null
+  // Rising Star temporarily keys off gig count - real signal will be
+  // Scene Status (§1, reputation epic) once it ships.
+  const risingStar = artists.length > 0 ? [...artists].sort((a, b) => b._count.performances - a._count.performances)[0] : null
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
@@ -107,12 +107,6 @@ export default function ArtistsPage() {
               </button>
             ))}
           </div>
-          <div style={{ marginLeft: "auto" }}>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "hype" | "shows")} style={{ padding: "8px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", color: "var(--afa-ink)", background: "white", cursor: "pointer", outline: "none" }}>
-              <option value="hype">Sort: Hype Score</option>
-              <option value="shows">Sort: Most Shows</option>
-            </select>
-          </div>
         </div>
 
         {/* RISING STAR */}
@@ -122,7 +116,7 @@ export default function ArtistsPage() {
             <div style={{ flex: 1, minWidth: "200px" }}>
               <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>Top Artist Right Now</div>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.name}</div>
-              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>Hype Score {risingStar.hypScore.toFixed(1)} · {risingStar._count.performances} shows</div>
+              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} show{risingStar._count.performances === 1 ? "" : "s"}</div>
             </div>
             <Link href={`/artists/${risingStar.id}`} style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View Profile</Link>
           </div>
@@ -170,11 +164,7 @@ export default function ArtistsPage() {
                         <span key={tag} style={{ background: "var(--afa-cream)", color: "var(--afa-ink)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-around" }}>
-                      <div style={{ textAlign: "center" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>🔥 {artist.hypScore.toFixed(1)}</div>
-                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Hype</div>
-                      </div>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
                       <div style={{ textAlign: "center" }}>
                         <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{artist._count.performances}</div>
                         <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Shows</div>

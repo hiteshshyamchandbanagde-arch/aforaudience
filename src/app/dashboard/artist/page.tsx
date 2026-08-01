@@ -60,7 +60,6 @@ interface ArtistProfile {
   genre: string[]
   styleTag: string[]
   socialLinks: Record<string, string> | null
-  hypScore: number
   name: string
   applications: Application[]
   performances: Performance[]
@@ -212,7 +211,7 @@ export default function ArtistDashboard() {
                 {profile.name}
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>
-                Hype Score: {profile.hypScore.toFixed(1)} · {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
+                {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -236,7 +235,7 @@ export default function ArtistDashboard() {
               beginning", not as a flat empty state. Gated strictly on real zero
               numbers (not a low-but-nonzero score) so it never contradicts actual
               stats once the artist has any real activity. */}
-          {profile.performances.length === 0 && profile.followers.length === 0 && profile.hypScore === 0 && (
+          {profile.performances.length === 0 && profile.followers.length === 0 && (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.15)' }}>
               <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '4px' }}>
                 Today is just the beginning 🎤

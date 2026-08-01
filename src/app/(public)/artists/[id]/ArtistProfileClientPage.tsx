@@ -24,7 +24,6 @@ interface ArtistData {
   bio: string
   genre: string[]
   styleTag: string[]
-  hypScore: number
   socialLinks: Record<string, string> | null
   videoReel: string[]
   tagline: string | null
@@ -134,7 +133,6 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
               {artist.genre.map((g) => (
                 <span key={g} style={{ background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
               ))}
-              <span style={{ background: "rgba(201,151,58,0.9)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>🔥 Hype {artist.hypScore.toFixed(1)}</span>
             </div>
             <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "white", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               {artist.user.name}
@@ -197,7 +195,6 @@ export default function ArtistProfilePage({ artist, isVerified }: { artist: Arti
       <div style={{ background: "white", borderBottom: "1px solid rgba(14,12,10,0.08)" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "20px 48px", display: "flex", gap: "48px", flexWrap: "wrap" }}>
           {[
-            { num: `🔥 ${artist.hypScore.toFixed(1)}`, label: "Hype Score" },
             { num: followerCount, label: "Followers" },
             { num: artist._count.performances, label: "Total Shows" },
             { num: upcomingShows.length, label: "Upcoming" },
