@@ -174,6 +174,28 @@ function ProfileContent() {
     if (session?.user) loadStatuses()
   }, [session])
 
+  // s60-profile-status-stale-no-refetch: loadStatuses only ran on
+  // useEffect([session]) - the NextAuth session object doesn't change on
+  // ordinary navigation, so a user sitting on this page when their
+  // org/venue/artist application gets approved elsewhere saw stale
+  // "pending" until a hard refresh or re-login. Refetch on window focus
+  // and tab visibility change closes that gap without polling - picks up
+  // the change the next time they actually look at the tab, which is
+  // when it matters.
+  useEffect(() => {
+    if (!session?.user) return
+    const handleFocus = () => loadStatuses()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadStatuses()
+    }
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [session])
+
   const applyOrganiser = async () => {
     if (!orgName.trim()) {
       setError('Enter an organisation or brand name first.')
