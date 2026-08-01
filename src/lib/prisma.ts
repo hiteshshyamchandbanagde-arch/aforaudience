@@ -11,7 +11,24 @@ const getDatabaseUrl = () => {
   return url
 }
 
-const connectionString = getDatabaseUrl()
+const rawConnectionString = getDatabaseUrl()
+
+// pg-connection-string@2.14+ (pulled in by pg@8.22.0's own dependency
+// range, not a stale-lockfile artifact - a fresh install resolves here
+// regardless) now aliases sslmode=require to full verify-full cert-chain
+// verification. That silently overrides the `ssl: { rejectUnauthorized:
+// false }` config below and breaks against Supabase's pooler cert chain
+// with "self-signed certificate in certificate chain" - confirmed
+// reproducing this exact failure via scripts/qa-seed.ts before this fix
+// was applied there first (seed59-prod-tls-risk). uselibpqcompat=true is
+// pg's own documented escape hatch: it restores libpq-compatible parsing,
+// where our explicit ssl object below wins again. Any future prod
+// redeploy (dependency bump, cache clear, anything) would otherwise be
+// exposed to the same connectivity break, so this needed to land ahead
+// of the qa->main freeze lifting rather than waiting for it.
+const connectionString = rawConnectionString.includes("uselibpqcompat=")
+  ? rawConnectionString
+  : `${rawConnectionString}${rawConnectionString.includes("?") ? "&" : "?"}uselibpqcompat=true`
 
 // Previously also set NODE_TLS_REJECT_UNAUTHORIZED=0 globally here, which
 // disabled certificate verification for every outbound TLS connection the
