@@ -82,6 +82,18 @@ function ProfileContent() {
   const [initialDisplayCurrency, setInitialDisplayCurrency] = useState('INR')
   const [savingCurrency, setSavingCurrency] = useState(false)
 
+  // "About You" - optional photo + short bio (session 62, design.md §9.5).
+  // Same load/save shape as displayName/displayCurrency above: loaded from
+  // /api/users/me, its own PATCH, its own saving flag. Never required -
+  // this closes the gap where a person's name+photo already show publicly
+  // in ratings/feedback today but there's nowhere to add context to them.
+  const [avatar, setAvatar] = useState('')
+  const [initialAvatar, setInitialAvatar] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [bio, setBio] = useState('')
+  const [initialBio, setInitialBio] = useState('')
+  const [savingAbout, setSavingAbout] = useState(false)
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
@@ -102,6 +114,12 @@ function ProfileContent() {
       const currentCurrency = d.user?.displayCurrency ?? 'INR'
       setDisplayCurrency(currentCurrency)
       setInitialDisplayCurrency(currentCurrency)
+      const currentAvatar = d.user?.avatar ?? ''
+      setAvatar(currentAvatar)
+      setInitialAvatar(currentAvatar)
+      const currentBio = d.user?.bio ?? ''
+      setBio(currentBio)
+      setInitialBio(currentBio)
     }
     // Set regardless of meRes.ok - if the fetch failed we still want to
     // stop showing the placeholder and fall through to the username,
@@ -167,6 +185,52 @@ function ProfileContent() {
       setError(err.message || 'Failed to save')
     } finally {
       setSavingCurrency(false)
+    }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+    setUploadingAvatar(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Upload failed - please try again.')
+        return
+      }
+      setAvatar(data.url)
+    } catch {
+      setError('Upload failed - please try again.')
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const saveAbout = async () => {
+    setSavingAbout(true)
+    setMessage('')
+    setError('')
+    try {
+      const res = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: avatar.trim() || null, bio: bio.trim() || null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      setInitialAvatar(data.user?.avatar ?? '')
+      setInitialBio(data.user?.bio ?? '')
+      setMessage('About you saved.')
+      await updateSession()
+    } catch (err: any) {
+      setError(err.message || 'Failed to save')
+    } finally {
+      setSavingAbout(false)
     }
   }
 
@@ -394,6 +458,54 @@ function ProfileContent() {
               }}
             >
               {savingName ? 'Saving…' : 'Save display name'}
+            </button>
+          </div>
+
+          {/* "About You" - optional photo + short bio (session 62,
+              design.md §9.5). Never required. Shown wherever this
+              account's name/photo already surface publicly, e.g.
+              ratings and feedback on events. */}
+          <div style={cardStyle}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+              About you
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+              Optional. Shown alongside your name wherever it already appears publicly, like event ratings and feedback.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
+              {avatar && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
+              )}
+              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                {uploadingAvatar ? 'Uploading...' : avatar ? 'Change photo' : 'Upload photo'}
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder="A short line about you (optional)"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit' }}
+            />
+            <button
+              onClick={saveAbout}
+              disabled={savingAbout || (avatar === initialAvatar && bio === initialBio)}
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'white',
+                background: 'var(--afa-terracotta)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                cursor: savingAbout || (avatar === initialAvatar && bio === initialBio) ? 'default' : 'pointer',
+                opacity: savingAbout || (avatar === initialAvatar && bio === initialBio) ? 0.5 : 1,
+              }}
+            >
+              {savingAbout ? 'Saving…' : 'Save'}
             </button>
           </div>
 
