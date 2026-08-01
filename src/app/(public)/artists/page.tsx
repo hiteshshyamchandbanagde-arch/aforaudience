@@ -1,6 +1,6 @@
 "use client"
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 
 type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
@@ -34,6 +34,26 @@ const SCENE_STATUS_RANK: Record<SceneStatusTier, number> = {
 }
 
 export default function ArtistsPage() {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
+
+  // Same click-guard as /events (PR #261) - a plain Link with no click
+  // feedback reads as "nothing happened" on a slow render, so repeat
+  // clicks each fired a fresh un-deduped navigation (confirmed via
+  // Vercel logs: 10+ duplicate GETs for the same id within seconds on
+  // /events). This card grid had the same plain-Link pattern and the
+  // same live-reported symptom ("works after 2-3 clicks or more") - the
+  // #261 fix was never carried over here. First click claims the card
+  // and ignores further clicks until it resolves.
+  const goToArtist = (id: string) => {
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/artists/${id}`)
+    })
+  }
+
   const [artists, setArtists] = useState<ArtistItem[]>([])
   const [approvedGenres, setApprovedGenres] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -147,7 +167,13 @@ export default function ArtistsPage() {
               <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.name}</div>
               <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} show{risingStar._count.performances === 1 ? "" : "s"}</div>
             </div>
-            <Link href={`/artists/${risingStar.id}`} style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>View Profile</Link>
+            <button
+              onClick={() => goToArtist(risingStar.id)}
+              disabled={!!navigatingId}
+              style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, border: "none", cursor: navigatingId ? "default" : "pointer", whiteSpace: "nowrap", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
+            >
+              {navigatingId === risingStar.id ? "Loading…" : "View Profile"}
+            </button>
           </div>
         )}
 
@@ -166,12 +192,58 @@ export default function ArtistsPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
-            {filtered.map((artist) => (
-              <Link key={artist.id} href={`/artists/${artist.id}`} style={{ textDecoration: "none" }}>
+            {filtered.map((artist) => {
+              const isNavigatingThis = navigatingId === artist.id
+              return (
                 <div
+                  key={artist.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-busy={isNavigatingThis}
+                  onClick={() => goToArtist(artist.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      goToArtist(artist.id)
+                    }
+                  }}
                   className="hover-lift-card"
-                  style={{ background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", cursor: "pointer" }}
+                  style={{
+                    background: "white",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    border: "1px solid rgba(14,12,10,0.08)",
+                    position: "relative",
+                    cursor: navigatingId ? "default" : "pointer",
+                    opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
+                    transition: "opacity 0.15s ease",
+                  }}
                 >
+                  {isNavigatingThis && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        zIndex: 2,
+                        background: "rgba(255,255,255,0.7)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          border: "3px solid rgba(14,12,10,0.15)",
+                          borderTopColor: "var(--afa-terracotta)",
+                          animation: "afa-spin 0.7s linear infinite",
+                        }}
+                      />
+                      <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                  )}
                   <div style={{ height: "120px", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", padding: "24px", gap: "16px" }}>
                     <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
                       {artist.user.avatar ? (
@@ -220,8 +292,8 @@ export default function ArtistsPage() {
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
