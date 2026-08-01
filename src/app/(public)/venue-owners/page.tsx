@@ -6,7 +6,7 @@ import SiteNav from "@/components/SiteNav"
 interface VenueOwnerItem {
   id: string
   bio: string | null
-  user: { name: string; avatar: string | null }
+  user: { name: string; displayName: string | null; avatar: string | null }
   _count: { venues: number }
 }
 
@@ -40,7 +40,7 @@ export default function VenueOwnersPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = owners.filter((o) => o.user.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
@@ -89,6 +89,7 @@ export default function VenueOwnersPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
             {filtered.map((owner) => {
               const isNavigatingThis = navigatingId === owner.id
+              const displayName = owner.user.displayName || owner.user.name
               return (
                 <div
                   key={owner.id}
@@ -124,12 +125,12 @@ export default function VenueOwnersPage() {
                     <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
                       {owner.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={owner.user.avatar} alt={owner.user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        owner.user.name.charAt(0).toUpperCase()
+                        displayName.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{owner.user.name}</div>
+                    <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
                     <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
