@@ -27,6 +27,9 @@ export type PlatformSettings = {
   sceneStatusRisingMinAvgRating: number
   sceneStatusRisingMinAttendees: number
   sceneStatusFeaturedVouchThreshold: number
+  // Admin artist roster (session 56) - how many of an artist's most recent
+  // scored shows to average for the roster's Hype Score column.
+  artistRosterHypeScoreLookback: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -40,6 +43,7 @@ const SETTINGS_SELECT = {
   sceneStatusRisingMinAvgRating: true,
   sceneStatusRisingMinAttendees: true,
   sceneStatusFeaturedVouchThreshold: true,
+  artistRosterHypeScoreLookback: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -185,6 +189,25 @@ export async function setSceneStatusThresholds(input: {
     where: { id: SINGLETON_ID },
     update: data,
     create: { id: SINGLETON_ID, ...data },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for the artist roster's Hype Score lookback window
+ * (session 56) - how many of an artist's most recent scored shows to
+ * average on /dashboard/admin/artists. Separate from setSceneStatusThresholds
+ * since this is a display/aggregation setting, not a tier-computation input.
+ */
+export async function setArtistRosterHypeScoreLookback(lookback: number): Promise<PlatformSettings> {
+  if (!Number.isInteger(lookback) || lookback < 1) {
+    throw new Error("artistRosterHypeScoreLookback must be a positive integer")
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { artistRosterHypeScoreLookback: lookback },
+    create: { id: SINGLETON_ID, artistRosterHypeScoreLookback: lookback },
     select: SETTINGS_SELECT,
   })
   return row

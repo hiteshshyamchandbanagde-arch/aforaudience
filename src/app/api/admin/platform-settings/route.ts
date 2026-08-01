@@ -7,6 +7,7 @@ import {
   setAudienceFeeSettings,
   setChatMaxMessagesPerSession,
   setSceneStatusThresholds,
+  setArtistRosterHypeScoreLookback,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -70,12 +71,13 @@ export async function PATCH(req: Request) {
   const hasRisingMinAttendees = Object.prototype.hasOwnProperty.call(body, 'sceneStatusRisingMinAttendees')
   const hasFeaturedThreshold = Object.prototype.hasOwnProperty.call(body, 'sceneStatusFeaturedVouchThreshold')
   const hasSceneStatus = hasRisingMinGigs || hasRisingMinAvgRating || hasRisingMinAttendees || hasFeaturedThreshold
+  const hasRosterLookback = Object.prototype.hasOwnProperty.call(body, 'artistRosterHypeScoreLookback')
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, or a sceneStatus* field is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, or artistRosterHypeScoreLookback is required',
       },
       { status: 400 }
     )
@@ -120,6 +122,14 @@ export async function PATCH(req: Request) {
         risingMinAttendees: hasRisingMinAttendees ? Number(body.sceneStatusRisingMinAttendees) : undefined,
         featuredVouchThreshold: hasFeaturedThreshold ? Number(body.sceneStatusFeaturedVouchThreshold) : undefined,
       })
+    }
+
+    if (hasRosterLookback) {
+      const lookback = Number(body.artistRosterHypeScoreLookback)
+      if (!Number.isInteger(lookback) || lookback < 1) {
+        return NextResponse.json({ error: 'artistRosterHypeScoreLookback must be a positive integer' }, { status: 400 })
+      }
+      updated = await setArtistRosterHypeScoreLookback(lookback)
     }
 
     return NextResponse.json({ settings: updated })

@@ -49,6 +49,13 @@ export default function AdminSettingsPage() {
   const [initialFeaturedVouchThreshold, setInitialFeaturedVouchThreshold] = useState<number>(5)
   const [sceneStatusSaving, setSceneStatusSaving] = useState(false)
 
+  // Admin artist roster (session 56) - Hype Score lookback window,
+  // separate save action from the Scene Status thresholds above since
+  // it's a display/aggregation setting, not a tier input.
+  const [rosterLookback, setRosterLookback] = useState<string>('')
+  const [initialRosterLookback, setInitialRosterLookback] = useState<number>(5)
+  const [rosterLookbackSaving, setRosterLookbackSaving] = useState(false)
+
   // Display currency rates (Option A). One row per non-INR currency;
   // rateInputs holds the live-edited value per code, savingCode tracks
   // which row (if any) is mid-save, so each row's button state is
@@ -108,6 +115,10 @@ export default function AdminSettingsPage() {
         setRisingMinAvgRating(String(rRating))
         setRisingMinAttendees(String(rAttendees))
         setFeaturedVouchThreshold(String(fThreshold))
+
+        const lookback = data.settings.artistRosterHypeScoreLookback
+        setInitialRosterLookback(lookback)
+        setRosterLookback(String(lookback))
       } catch (err: any) {
         setLoadError(err.message)
       } finally {
@@ -293,6 +304,31 @@ export default function AdminSettingsPage() {
     Number(risingMinAttendees) >= 0 &&
     Number.isInteger(Number(featuredVouchThreshold)) &&
     Number(featuredVouchThreshold) >= 1
+
+  const saveRosterLookback = async () => {
+    setRosterLookbackSaving(true)
+    try {
+      const lookback = Number(rosterLookback)
+      if (!Number.isInteger(lookback) || lookback < 1) {
+        throw new Error('Lookback must be a positive whole number')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ artistRosterHypeScoreLookback: lookback }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialRosterLookback(data.settings.artistRosterHypeScoreLookback)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setRosterLookbackSaving(false)
+    }
+  }
+  const isRosterLookbackDirty = Math.round(Number(rosterLookback || 0)) !== initialRosterLookback
+  const isRosterLookbackValid = Number.isInteger(Number(rosterLookback)) && Number(rosterLookback) >= 1
 
   if (loading) {
     return (
@@ -593,6 +629,42 @@ export default function AdminSettingsPage() {
           </div>
           <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
             Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
+          </p>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={rosterLookback}
+              onChange={(e) => setRosterLookback(e.target.value)}
+              placeholder="5"
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }}
+            />
+            <button
+              onClick={saveRosterLookback}
+              disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}
+              style={{
+                background: 'var(--afa-terracotta)',
+                color: 'white',
+                padding: '9px 16px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 'default' : 'pointer',
+                opacity: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 0.5 : 1,
+              }}
+            >
+              {rosterLookbackSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
           </p>
 
           <button

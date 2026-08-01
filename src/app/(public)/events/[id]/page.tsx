@@ -2,17 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import EventDetailClientPage from './EventDetailClientPage'
-import { getEventEndDateTime } from '@/lib/eventTime'
-
-// Reputation epic §4 - Hype Score display gate. Score only surfaces once
-// the show has been over for HYPE_SCORE_WINDOW_HOURS (early partial
-// averages from the first few reviews right after doors-close are noisy
-// and not what "Hype Score" should represent) AND there are at least
-// HYPE_SCORE_MIN_REVIEWS reviews (same reasoning - a single 5-star from
-// a friend shouldn't read as a score). Live-computed on every request
-// per the epic's session-53 decision, not cached/batch.
-const HYPE_SCORE_WINDOW_HOURS = 2
-const HYPE_SCORE_MIN_REVIEWS = 5
+import { computeHypeScore } from '@/lib/hype-score'
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -80,17 +70,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   }
   // Hype Score - per-performance, live-computed from the same reviews
   // already fetched above (no extra query). Null when not yet eligible;
-  // the client only renders the badge when it gets a number.
-  const hypeScoreEligibleFrom = new Date(getEventEndDateTime(event).getTime() + HYPE_SCORE_WINDOW_HOURS * 60 * 60 * 1000)
-  const hypeScoreEligible = Date.now() >= hypeScoreEligibleFrom.getTime()
-  const lineupWithHype = event.lineup.map((p) => {
-    const eligibleReviews = p.reviews.filter((r) => r.rating != null)
-    const hypeScore =
-      hypeScoreEligible && eligibleReviews.length >= HYPE_SCORE_MIN_REVIEWS
-        ? Math.round((eligibleReviews.reduce((sum, r) => sum + r.rating, 0) / eligibleReviews.length) * 10) / 10
-        : null
-    return { ...p, hypeScore }
-  })
+  // the client only renders the badge when it gets a number. Shared logic
+  // now lives in src/lib/hype-score.ts (session 56) - also reused by the
+  // admin artist roster.
+  const lineupWithHype = event.lineup.map((p: { reviews: { rating: number | null }[] }) => ({ ...p, hypeScore: computeHypeScore(event, p.reviews) }))
   const eventForClient = { ...event, lineup: lineupWithHype, totalSeats: displayTotalSeats, availableSeats: displayAvailableSeats }
 
   // Client-side half of the review-eligibility gate (server-side half —

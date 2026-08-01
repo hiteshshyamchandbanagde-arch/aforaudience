@@ -479,6 +479,11 @@ model Artist {
   // it's supposed to be earned." See docs/artist-reputation-system-design.md
   // Amendment 1.
   isSceneStatusHeadliner Boolean @default(false)
+  // Optional admin audit note captured at the moment Headliner is granted
+  // (session 55, /dashboard/admin/artists) - not required, but since the
+  // tag is meant to be deliberate/earned, worth a lightweight paper trail
+  // of why. Not shown publicly, admin-only, same as organiser ratings.
+  headlinerNote          String?
 }
 
 enum FollowTargetType {
@@ -892,6 +897,14 @@ model PlatformSettings {
   sceneStatusRisingMinAvgRating      Float @default(4.0)
   sceneStatusRisingMinAttendees      Int   @default(5)
   sceneStatusFeaturedVouchThreshold  Int   @default(5)
+
+  // Admin artist roster (session 56, /dashboard/admin/artists) - how many
+  // of an artist's most recent scored shows to average for the roster's
+  // Hype Score column. Configurable per Hitesh's call (session 56): "recent
+  // 5 shows, configurable by admin". Distinct from the Rising thresholds
+  // above - this is a display/aggregation setting, not a tier input; Hype
+  // Score itself isn't part of the Rising formula.
+  artistRosterHypeScoreLookback     Int   @default(5)
 
   updatedAt                    DateTime @updatedAt
 }
