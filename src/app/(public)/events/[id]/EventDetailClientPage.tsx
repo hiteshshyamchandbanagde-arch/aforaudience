@@ -29,6 +29,10 @@ interface Performer {
     user: { name: string }
   }
   reviews: Review[]
+  // Reputation epic §4 - per-show Hype Score, live-computed server-side.
+  // Null until the show has been over 2hrs AND has 5+ reviews - the
+  // client just hides the badge when it's null, no eligibility logic here.
+  hypeScore?: number | null
 }
 
 interface TicketTier {
@@ -468,7 +472,14 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         {p.artist.user.name.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)", marginBottom: "4px" }}>{p.artist.user.name}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)" }}>{p.artist.user.name}</div>
+                          {p.hypeScore != null && (
+                            <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.1)", padding: "2px 8px", borderRadius: "999px" }}>
+                              🔥 {p.hypeScore.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
                         {p.artist.genre.length > 0 && (
                           <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
                         )}
