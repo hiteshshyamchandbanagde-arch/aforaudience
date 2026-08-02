@@ -124,6 +124,12 @@ export default function SupportWidget() {
   const [bugAction, setBugAction] = useState('');
   const [bugExpected, setBugExpected] = useState('');
   const [bugActual, setBugActual] = useState('');
+  // Lighter structure for FEATURE_IDEA - just enough to get the "why"
+  // without the repro/expected/actual shape a bug needs. Problem is
+  // optional (some ideas are pure "wouldn't it be nice", not a pain
+  // point) - the idea itself is the only required part.
+  const [featureProblem, setFeatureProblem] = useState('');
+  const [featureIdea, setFeatureIdea] = useState('');
   const [fbSubmitting, setFbSubmitting] = useState(false);
   const [fbSubmitted, setFbSubmitted] = useState(false);
   const [fbFromChatbot, setFbFromChatbot] = useState(false);
@@ -228,8 +234,34 @@ export default function SupportWidget() {
     }
   };
 
+  // Suggested improvement (2 Aug, Hitesh asked for feedback-form ideas):
+  // the chatbot's "send this to the team" fallback always landed as
+  // category=QUESTION, even when someone was clearly describing
+  // something broken in plain language ("nothing happens when I
+  // click..."). Simple keyword check - not trying to be clever, just
+  // catching the obvious cases - so those land pre-selected as BUG and
+  // get the structured template instead of dumping a vague sentence
+  // into Question. Genuine questions are unaffected.
+  const BUG_SIGNAL_WORDS = [
+    'not working', "doesn't work", 'does not work', 'broken', 'error',
+    'bug', 'crash', 'stuck', 'fails', 'failed', 'blank', 'nothing happens',
+    "won't", 'wont ', "can't", 'cant ', 'unable to', 'glitch',
+  ];
+  const looksLikeBugReport = (text: string) => {
+    const lower = text.toLowerCase();
+    return BUG_SIGNAL_WORDS.some((w) => lower.includes(w));
+  };
+
   const openFeedbackFromChat = (unansweredQuestion: string) => {
-    setFbMessage(unansweredQuestion);
+    if (looksLikeBugReport(unansweredQuestion)) {
+      setFbCategory('BUG');
+      setBugAction(unansweredQuestion);
+      setFbMessage('');
+    } else {
+      setFbCategory('QUESTION');
+      setFbMessage(unansweredQuestion);
+      setBugAction('');
+    }
     setFbFromChatbot(true);
     setFbSubmitted(false);
     setPanel('feedback');
@@ -301,10 +333,16 @@ export default function SupportWidget() {
   };
 
   const isBugCategory = fbCategory === 'BUG';
+  const isFeatureCategory = fbCategory === 'FEATURE_IDEA';
   const composedBugMessage = `What I did: ${bugAction.trim()}\nWhat I expected: ${bugExpected.trim()}\nWhat happened instead: ${bugActual.trim()}`;
+  const composedFeatureMessage = featureProblem.trim()
+    ? `Problem: ${featureProblem.trim()}\nIdea: ${featureIdea.trim()}`
+    : `Idea: ${featureIdea.trim()}`;
   const fbCanSubmit = isBugCategory
     ? Boolean(bugAction.trim() && bugActual.trim())
-    : Boolean(fbMessage.trim());
+    : isFeatureCategory
+      ? Boolean(featureIdea.trim())
+      : Boolean(fbMessage.trim());
 
   const submitFeedback = async () => {
     if (!fbCanSubmit || fbSubmitting) return;
@@ -315,7 +353,7 @@ export default function SupportWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category: fbCategory,
-          message: isBugCategory ? composedBugMessage : fbMessage.trim(),
+          message: isBugCategory ? composedBugMessage : isFeatureCategory ? composedFeatureMessage : fbMessage.trim(),
           pageUrl: typeof window !== 'undefined' ? window.location.pathname : undefined,
           fromChatbot: fbFromChatbot,
           attachmentData: fbAttachmentDataUrl ?? undefined,
@@ -327,6 +365,8 @@ export default function SupportWidget() {
         setBugAction('');
         setBugExpected('');
         setBugActual('');
+        setFeatureProblem('');
+        setFeatureIdea('');
         setFbFromChatbot(false);
         clearAttachment();
       } else {
@@ -666,6 +706,45 @@ export default function SupportWidget() {
                         onChange={(e) => setBugActual(e.target.value)}
                         rows={2}
                         placeholder="e.g. The field stayed blank, had to type it myself"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                    </>
+                  ) : isFeatureCategory ? (
+                    <>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        What problem does this solve? <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+                      </label>
+                      <textarea
+                        value={featureProblem}
+                        onChange={(e) => setFeatureProblem(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. I can never remember which events I already reported feedback on"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        What would you like to see?
+                      </label>
+                      <textarea
+                        value={featureIdea}
+                        onChange={(e) => setFeatureIdea(e.target.value)}
+                        rows={3}
+                        placeholder="e.g. A page showing my own past feedback and its status"
                         style={{
                           width: '100%',
                           padding: '8px 10px',
