@@ -353,6 +353,23 @@ function AdminFeedbackBoard() {
   }, [filtered])
 
   const selectedItem = allLoadedItems.find((it) => it.id === selectedId) || null
+  // Feedback (2 Aug, Hitesh): prev/next navigation within the detail
+  // panel so reviewing a batch doesn't mean close -> find next card ->
+  // reopen every time. Deliberately walks `filtered` (the list as
+  // currently filtered/sorted on screen), not the raw loaded set - "next"
+  // should mean the next thing you'd actually see, respecting whatever
+  // category/severity/status/keyword filter is active. Pilot surface for
+  // this pattern (modal detail view = cheapest correct implementation);
+  // full-page detail views (Events/Artists/Venues) are a separate,
+  // larger effort - carrying list position across a real page
+  // navigation - not attempted here.
+  const selectedIndex = selectedId ? filtered.findIndex((it) => it.id === selectedId) : -1
+  const goToPrev = () => {
+    if (selectedIndex > 0) setSelectedId(filtered[selectedIndex - 1].id)
+  }
+  const goToNext = () => {
+    if (selectedIndex >= 0 && selectedIndex < filtered.length - 1) setSelectedId(filtered[selectedIndex + 1].id)
+  }
 
   if (status === 'loading' || loading)
     return (
@@ -726,6 +743,11 @@ function AdminFeedbackBoard() {
           onClose={() => setSelectedId(null)}
           onSetStatus={(s) => patchItem(selectedItem.id, { status: s })}
           onSetSeverity={(s) => patchItem(selectedItem.id, { severity: s })}
+          onPrev={goToPrev}
+          onNext={goToNext}
+          hasPrev={selectedIndex > 0}
+          hasNext={selectedIndex >= 0 && selectedIndex < filtered.length - 1}
+          position={selectedIndex >= 0 ? { index: selectedIndex + 1, total: filtered.length } : null}
         />
       )}
     </>

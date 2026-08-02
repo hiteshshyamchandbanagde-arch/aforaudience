@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type TouchEvent } from 'react'
 
 // Admin Dashboard v1 detail panel (design.md §9.1).
 //
@@ -59,12 +59,22 @@ export default function FeedbackDetailPanel({
   onClose,
   onSetStatus,
   onSetSeverity,
+  onPrev,
+  onNext,
+  hasPrev = false,
+  hasNext = false,
+  position = null,
 }: {
   item: FeedbackDetailItem
   busy: boolean
   onClose: () => void
   onSetStatus: (status: string) => void
   onSetSeverity: (severity: string | null) => void
+  onPrev?: () => void
+  onNext?: () => void
+  hasPrev?: boolean
+  hasNext?: boolean
+  position?: { index: number; total: number } | null
 }) {
   const [expandedImage, setExpandedImage] = useState(false)
 
@@ -74,11 +84,44 @@ export default function FeedbackDetailPanel({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      // Ignore arrow keys while typing anywhere (there's no text input in
+      // this panel today, but this stays safe if one's ever added) and
+      // while an image is expanded (arrows shouldn't fight image viewing
+      // even though there's no zoom/pan here yet).
+      const target = e.target as HTMLElement | null
+      const isTyping = target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+      if (isTyping) return
+      if (e.key === 'ArrowLeft' && onPrev) onPrev()
+      if (e.key === 'ArrowRight' && onNext) onNext()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, onPrev, onNext])
+
+  // Swipe left/right to move prev/next on mobile (Feedback 2 Aug,
+  // Hitesh). Horizontal-delta-dominant threshold, same shape as
+  // SiteNav's existing vertical swipe-to-close - only fires once past a
+  // clear threshold and only when the gesture is more horizontal than
+  // vertical, so it doesn't fight normal vertical scrolling of a long
+  // message/changelog.
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null)
+  const SWIPE_THRESHOLD_PX = 60
+  const handleTouchStart = (e: TouchEvent) => {
+    setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+  }
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (!touchStartPos) return
+    const dx = e.changedTouches[0].clientX - touchStartPos.x
+    const dy = e.changedTouches[0].clientY - touchStartPos.y
+    setTouchStartPos(null)
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
+    if (dx > 0 && onPrev) onPrev()
+    else if (dx < 0 && onNext) onNext()
+  }
 
   return (
     <div
@@ -98,7 +141,7 @@ export default function FeedbackDetailPanel({
         }
       `}</style>
       <div className="fb-detail-backdrop" onClick={onClose} />
-      <div className="fb-detail-panel">
+      <div className="fb-detail-panel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <div style={{ padding: '20px 20px 32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -115,6 +158,50 @@ export default function FeedbackDetailPanel({
               ×
             </button>
           </div>
+
+          {position && (onPrev || onNext) && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <button
+                onClick={onPrev}
+                disabled={!hasPrev}
+                aria-label="Previous"
+                style={{
+                  background: 'var(--afa-white)',
+                  border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
+                  borderRadius: '999px',
+                  width: '32px',
+                  height: '32px',
+                  fontSize: '16px',
+                  cursor: hasPrev ? 'pointer' : 'default',
+                  opacity: hasPrev ? 1 : 0.35,
+                  color: 'var(--afa-ink)',
+                }}
+              >
+                ‹
+              </button>
+              <span style={{ fontSize: '12px', color: 'var(--afa-taupe)' }}>
+                {position.index} of {position.total}
+              </span>
+              <button
+                onClick={onNext}
+                disabled={!hasNext}
+                aria-label="Next"
+                style={{
+                  background: 'var(--afa-white)',
+                  border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
+                  borderRadius: '999px',
+                  width: '32px',
+                  height: '32px',
+                  fontSize: '16px',
+                  cursor: hasNext ? 'pointer' : 'default',
+                  opacity: hasNext ? 1 : 0.35,
+                  color: 'var(--afa-ink)',
+                }}
+              >
+                ›
+              </button>
+            </div>
+          )}
 
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-ink)' }}>
             {item.title || item.message.slice(0, 60)}
