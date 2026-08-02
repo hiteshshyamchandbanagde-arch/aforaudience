@@ -103,10 +103,48 @@ export default function EventsPage() {
   // its dropdown without a second fetch of the same data.
   const [organisers, setOrganisers] = useState<OrganiserItem[]>([])
 
+  // FEAT-2608-036 fast-follow (2 Aug) - /api/events now accepts ?city= and
+  // filters server-side (indexed via Venue_city_idx), so the previous
+  // "fetch everything, filter client-side" approach is gone: this effect
+  // re-fetches whenever selectedCity changes, and the request only ever
+  // carries the events that actually match. Dropdown *options* can't come
+  // from this scoped fetch though (narrowing to Pune would leave no way
+  // to discover Mumbai exists) - those come from /api/venues/cities
+  // instead, which always reflects every city regardless of the current
+  // filter.
+  const [cities, setCities] = useState<string[]>([])
+  useEffect(() => {
+    fetch("/api/venues/cities")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.cities) setCities(data.cities) })
+      .catch(() => {})
+  }, [])
+
+  // Resolve the user's default location once and apply it as the initial
+  // filter - still just a starting point, freely changed/cleared via the
+  // same dropdown as before. Waits on `cities` so it can validate the
+  // guess is actually one we have events for before applying it.
+  const cityAutoAppliedRef = useRef(false)
+  useEffect(() => {
+    if (cityAutoAppliedRef.current) return
+    if (cities.length === 0) return
+    cityAutoAppliedRef.current = true
+    fetch("/api/user/location")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.city && cities.includes(data.city)) {
+          setSelectedCity(data.city)
+        }
+      })
+      .catch(() => {})
+  }, [cities])
+
   useEffect(() => {
     const fetchEvents = async () => {
+      setLoading(true)
       try {
-        const res = await fetch("/api/events")
+        const url = selectedCity === "All Cities" ? "/api/events" : `/api/events?city=${encodeURIComponent(selectedCity)}`
+        const res = await fetch(url)
         if (!res.ok) throw new Error("Failed to load events")
         const data = await res.json()
         setEvents(data)
@@ -117,36 +155,7 @@ export default function EventsPage() {
       }
     }
     fetchEvents()
-  }, [])
-
-  const cities = Array.from(new Set(events.map((e) => e.venue?.city).filter(Boolean))) as string[]
-
-  // FEAT-2608-036 - pre-fill the existing city filter with the user's
-  // resolved location (profile choice / cookie / IP-geo guess) rather
-  // than leaving it on "All Cities". Deliberately still just sets
-  // `selectedCity`, which the person is free to change or clear back to
-  // "All Cities" via the same dropdown as before - this doesn't touch
-  // /api/events itself, so it's not yet a server-side query filter (all
-  // events are still fetched up front for the existing tab/type/price
-  // filtering above); that's a separate, larger change if we want the
-  // fetch itself to be scoped, flagged separately rather than silently
-  // bundled in here.
-  const cityAutoAppliedRef = useRef(false)
-  useEffect(() => {
-    if (cityAutoAppliedRef.current) return
-    if (cities.length === 0) return
-    fetch("/api/user/location")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (cityAutoAppliedRef.current) return
-        cityAutoAppliedRef.current = true
-        if (data?.city && cities.includes(data.city)) {
-          setSelectedCity(data.city)
-        }
-      })
-      .catch(() => { cityAutoAppliedRef.current = true })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cities.length])
+  }, [selectedCity])
 
   const filtered = events.filter((e) => {
     const matchSearch =
