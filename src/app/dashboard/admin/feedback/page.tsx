@@ -1,8 +1,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import FeedbackTrends from '@/components/admin/FeedbackTrends'
@@ -86,9 +86,10 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { dateStyle: 'medium' })
 }
 
-export default function AdminFeedbackPage() {
+function AdminFeedbackBoard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { showToast } = useToast()
 
   const [items, setItems] = useState<FeedbackItem[]>([])
@@ -155,6 +156,41 @@ export default function AdminFeedbackPage() {
       setLoading(false)
     })()
   }, [session])
+
+  // Command Center deep-link (Feedback cms9ywqy4): the "Feedback health"
+  // tiles link here with ?status= and/or ?category= so a click on e.g.
+  // "Resolved" or "Feature ideas" lands directly on that slice instead of
+  // making Hitesh re-apply filters by hand. Category maps straight onto
+  // the existing client-side categoryFilter. Status maps to a scroll-to-
+  // column (RESOLVED also flips the lazy-load toggle first, since that
+  // column doesn't exist in the DOM until it's loaded) rather than
+  // hiding the other columns - keeps the board's existing filter model
+  // untouched, this is just "start here" not "show only this."
+  useEffect(() => {
+    if (!session?.user || loading) return
+    const statusParam = searchParams.get('status')
+    const categoryParam = searchParams.get('category')
+
+    if (categoryParam && Object.prototype.hasOwnProperty.call(CATEGORY_LABELS, categoryParam)) {
+      setCategoryFilter(categoryParam)
+    }
+
+    if ((statusParam === 'RESOLVED' || statusParam === 'ALL') && !showResolved) {
+      toggleShowResolved()
+    }
+
+    if (statusParam && statusParam !== 'ALL' && STATUSES.includes(statusParam)) {
+      // Give the (possibly just-toggled) column a tick to mount before
+      // scrolling to it.
+      setTimeout(() => {
+        document.getElementById(`fb-col-${statusParam}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, statusParam === 'RESOLVED' ? 350 : 50)
+    }
+    // Deliberately runs once the board has finished its initial load,
+    // not on every searchParams/showResolved change - this is a
+    // "where do I land" behavior, not a live filter sync.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, loading])
 
   const actOnGenreRequest = async (id: string, action: 'approve' | 'reject') => {
     setActioningGenreId(id)
@@ -619,7 +655,7 @@ export default function AdminFeedbackPage() {
             }}
           >
             {(showResolved ? STATUSES : STATUSES.filter((s) => s !== 'RESOLVED')).map((statusCol) => (
-              <div key={statusCol}>
+              <div key={statusCol} id={`fb-col-${statusCol}`}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
                   {labelize(statusCol)} <span style={{ color: 'var(--afa-taupe)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
                 </div>
@@ -651,5 +687,13 @@ export default function AdminFeedbackPage() {
         />
       )}
     </>
+  )
+}
+
+export default function AdminFeedbackPage() {
+  return (
+    <Suspense fallback={<BrandLoader />}>
+      <AdminFeedbackBoard />
+    </Suspense>
   )
 }

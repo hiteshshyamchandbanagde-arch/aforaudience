@@ -138,8 +138,8 @@ function IconBars() {
 // tear-line separating the icon "stub" zone from the number. Grounded in
 // what this platform actually sells: tickets.
 
-function TicketTile({ icon, value, label, accent }: { icon: React.ReactNode; value: React.ReactNode; label: string; accent: string }) {
-  return (
+function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNode; value: React.ReactNode; label: string; accent: string; href?: string }) {
+  const content = (
     <div
       style={{
         position: 'relative',
@@ -150,6 +150,8 @@ function TicketTile({ icon, value, label, accent }: { icon: React.ReactNode; val
         alignItems: 'stretch',
         overflow: 'hidden',
         minHeight: '84px',
+        transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+        cursor: href ? 'pointer' : 'default',
       }}
     >
       <span
@@ -181,6 +183,18 @@ function TicketTile({ icon, value, label, accent }: { icon: React.ReactNode; val
         <div style={{ fontSize: '11.5px', color: 'var(--afa-taupe)', marginTop: '3px' }}>{label}</div>
       </div>
     </div>
+  )
+
+  if (!href) return content
+
+  // Feedback cms9ywqy4: tiles link straight into the filtered/scrolled
+  // board view (see /dashboard/admin/feedback's Command Center deep-link
+  // handling) instead of leaving Hitesh to reapply the same filter by
+  // hand every time.
+  return (
+    <Link href={href} style={{ textDecoration: 'none', display: 'block' }} aria-label={`${label}: ${value}`}>
+      {content}
+    </Link>
   )
 }
 
@@ -340,11 +354,11 @@ export default function AdminCommandCenter() {
         <div style={{ marginBottom: '10px' }}>
           <div style={sectionLabel}>Feedback health</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
-            <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-ink)" />
-            <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-gold)" />
-            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="Tested" accent="var(--afa-plum)" />
-            <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-sage)" />
-            <TicketTile icon={<IconBulb />} value={k?.featureIdeas ?? '—'} label="Feature ideas" accent="var(--afa-amber)" />
+            <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-ink)" href="/dashboard/admin/feedback?status=ALL" />
+            <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-gold)" href="/dashboard/admin/feedback?status=NEW" />
+            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="Tested" accent="var(--afa-plum)" href="/dashboard/admin/feedback?status=TESTED" />
+            <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-sage)" href="/dashboard/admin/feedback?status=RESOLVED" />
+            <TicketTile icon={<IconBulb />} value={k?.featureIdeas ?? '—'} label="Feature ideas" accent="var(--afa-amber)" href="/dashboard/admin/feedback?category=FEATURE_IDEA" />
           </div>
         </div>
 
