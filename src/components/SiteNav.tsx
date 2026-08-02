@@ -171,25 +171,54 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       touchStartY.current = null
     }
   }
-  // Theme Phase 1 - mirrors what layout.tsx's pre-paint script already
-  // applied to <html>, so this just needs to read it back for the
-  // button's own label/state (never causes a flash - the attribute is
-  // already set by the time this component hydrates).
-  const [theme, setTheme] = useState<'default' | 'indigo'>('default')
+  // Theme Phase 2 - was a binary default<->indigo toggle button (Phase 1).
+  // Widened to a picker backed by this array because 4 more themes are
+  // planned this batch (Vermilion, Royal Purple, Midnight Sapphire,
+  // Noir) - a toggle only ever handles 2 states, so it would have needed
+  // rebuilding into a picker anyway on the very next theme. Doing that
+  // rebuild now, on theme #3, means every theme after this one is just a
+  // CSS block in globals.css plus one entry in this array - no further
+  // SiteNav changes. Order here is also menu display order.
+  const THEMES = [
+    { id: 'default', label: 'Default', emoji: '🌙' },
+    { id: 'indigo', label: 'Indigo', emoji: '🪔' },
+    { id: 'peacock', label: 'Peacock', emoji: '🦚' },
+  ] as const
+  type ThemeId = typeof THEMES[number]['id']
+
+  // Mirrors what layout.tsx's pre-paint script already applied to <html>,
+  // so this just reads it back for the picker's own state (never causes
+  // a flash - the attribute is already set by the time this hydrates).
+  const [theme, setThemeState] = useState<ThemeId>('default')
   useEffect(() => {
-    if (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'indigo') {
-      setTheme('indigo')
-    }
+    if (typeof document === 'undefined') return
+    const current = document.documentElement.getAttribute('data-theme')
+    const match = THEMES.find((t) => t.id === current)
+    if (match) setThemeState(match.id)
   }, [])
-  const toggleTheme = () => {
-    const next = theme === 'indigo' ? 'default' : 'indigo'
-    setTheme(next)
-    if (next === 'indigo') {
-      document.documentElement.setAttribute('data-theme', 'indigo')
-    } else {
-      document.documentElement.removeAttribute('data-theme')
+
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false)
+  const themeMenuRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!themeMenuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setThemeMenuOpen(false)
+      }
     }
-    try { localStorage.setItem('afa-theme', next) } catch (e) {}
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [themeMenuOpen])
+
+  const applyTheme = (id: ThemeId) => {
+    setThemeState(id)
+    if (id === 'default') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', id)
+    }
+    try { localStorage.setItem('afa-theme', id) } catch (e) {}
+    setThemeMenuOpen(false)
   }
 
   const primaryLinks = backHref
@@ -300,14 +329,31 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           {!backHref && <SearchBox />}
           {!backHref && <LocationChip />}
 
-          <button
-            onClick={toggleTheme}
-            title={theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
-            aria-label={theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '15px', padding: 0 }}
-          >
-            {theme === 'indigo' ? '🪔' : '🌙'}
-          </button>
+          <div ref={themeMenuRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setThemeMenuOpen((v) => !v)}
+              title="Change theme"
+              aria-label="Change theme"
+              aria-expanded={themeMenuOpen}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '15px', padding: 0 }}
+            >
+              {THEMES.find((t) => t.id === theme)?.emoji}
+            </button>
+            {themeMenuOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-cream)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+                {THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => applyTheme(t.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === t.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === t.id ? 700 : 500, cursor: 'pointer' }}
+                  >
+                    <span>{t.emoji}</span>
+                    <span>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {status === "loading" ? null : user ? (
             <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -384,13 +430,23 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
       >
-        <button
-          onClick={toggleTheme}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }}
-        >
-          <span>{theme === 'indigo' ? '🪔' : '🌙'}</span>
-          {theme === 'indigo' ? 'Switch to default theme' : 'Switch to Indigo theme'}
-        </button>
+        <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Theme
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {THEMES.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => applyTheme(t.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === t.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === t.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === t.id ? 700 : 500, cursor: 'pointer' }}
+              >
+                <span>{t.emoji}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {primaryLinks.map((l) => (
           <Link
             key={l.key}

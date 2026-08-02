@@ -60,7 +60,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/*
-          Theme Phase 1 - reads the saved theme preference and sets it on
+          Theme Phase 1/2 - reads the saved theme preference and sets it on
           <html> BEFORE first paint, so there's no flash of the default
           theme then a flip to the saved one. Deliberately raw inline
           script in <head>, not a client component - a client component's
@@ -70,13 +70,23 @@ export default function RootLayout({
           contexts, and a missing/invalid value is intentionally a no-op
           - the CSS default (no data-theme attribute) is the standard
           light look, so worst case here is just "shows the default".
+
+          Allow-list check (indexOf against a fixed array) rather than
+          just "truthy and not 'default'" - a stale/corrupted localStorage
+          value should fall back to default, not get set as a data-theme
+          attribute with no matching CSS block. Kept as a literal array
+          here (not imported from SiteNav's THEMES) because this runs
+          before any JS module graph loads - it has to be self-contained.
+          When adding a new theme's CSS block, add its id to this array
+          too, or the saved preference won't survive a hard refresh.
         */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
                 var t = localStorage.getItem('afa-theme');
-                if (t === 'indigo') document.documentElement.setAttribute('data-theme', 'indigo');
+                var valid = ['indigo', 'peacock'];
+                if (valid.indexOf(t) !== -1) document.documentElement.setAttribute('data-theme', t);
               } catch (e) {}
             `,
           }}
