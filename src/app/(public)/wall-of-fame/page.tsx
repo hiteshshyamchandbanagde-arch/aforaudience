@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useState, useTransition } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 
@@ -87,7 +86,34 @@ export default function WallOfFamePage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
             {/* ARTIST OF THE MONTH */}
-            <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", overflow: "hidden" }}>
+            <div
+              role={data?.artistOfMonth ? "link" : undefined}
+              tabIndex={data?.artistOfMonth ? 0 : undefined}
+              aria-busy={navigatingKey === "artist-of-month"}
+              onClick={() => data?.artistOfMonth && goTo("artist-of-month", `/artists/${data.artistOfMonth.id}`)}
+              onKeyDown={(e) => {
+                if (data?.artistOfMonth && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault()
+                  goTo("artist-of-month", `/artists/${data.artistOfMonth.id}`)
+                }
+              }}
+              style={{
+                position: "relative",
+                background: "white",
+                borderRadius: "16px",
+                border: "1px solid rgba(14,12,10,0.08)",
+                overflow: "hidden",
+                cursor: data?.artistOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
+                opacity: navigatingKey && navigatingKey !== "artist-of-month" ? 0.5 : 1,
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              {navigatingKey === "artist-of-month" && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                  <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                </div>
+              )}
               <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", padding: "28px 28px 24px" }}>
                 <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", marginBottom: "6px" }}>
                   🎤 Artist of the Month
@@ -110,15 +136,41 @@ export default function WallOfFamePage() {
                     : `Once an artist gets at least ${data?.minReviews ?? 3} reviews in a calendar month, they'll show up here.`}
                 </p>
                 {data?.artistOfMonth && (
-                  <Link href={`/artists/${data.artistOfMonth.id}`} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)", textDecoration: "none" }}>
+                  <span style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)" }}>
                     View profile →
-                  </Link>
+                  </span>
                 )}
               </div>
             </div>
 
             {/* EVENT OF THE MONTH */}
-            <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", overflow: "hidden" }}>
+            <div
+              role={data?.eventOfMonth ? "link" : undefined}
+              tabIndex={data?.eventOfMonth ? 0 : undefined}
+              aria-busy={navigatingKey === "event-of-month"}
+              onClick={() => data?.eventOfMonth && goTo("event-of-month", `/events/${data.eventOfMonth.id}`)}
+              onKeyDown={(e) => {
+                if (data?.eventOfMonth && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault()
+                  goTo("event-of-month", `/events/${data.eventOfMonth.id}`)
+                }
+              }}
+              style={{
+                position: "relative",
+                background: "white",
+                borderRadius: "16px",
+                border: "1px solid rgba(14,12,10,0.08)",
+                overflow: "hidden",
+                cursor: data?.eventOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
+                opacity: navigatingKey && navigatingKey !== "event-of-month" ? 0.5 : 1,
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              {navigatingKey === "event-of-month" && (
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                </div>
+              )}
               <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", padding: "28px 28px 24px" }}>
                 <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", marginBottom: "6px" }}>
                   🎪 Event of the Month
@@ -141,9 +193,9 @@ export default function WallOfFamePage() {
                     : `Once an event gets at least ${data?.minReviews ?? 3} reviews in a calendar month, it'll show up here.`}
                 </p>
                 {data?.eventOfMonth && (
-                  <Link href={`/events/${data.eventOfMonth.id}`} style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)", textDecoration: "none" }}>
+                  <span style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)" }}>
                     View event →
-                  </Link>
+                  </span>
                 )}
               </div>
             </div>
