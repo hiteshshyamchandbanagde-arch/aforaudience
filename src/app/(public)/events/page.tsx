@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 import { isNightEvent } from "@/lib/eventTime"
@@ -134,7 +135,21 @@ export default function EventsPage() {
               : loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
           </p>
           {contentMode === "events" && (
-          <div style={{ position: "relative" }}>
+          <BrowseSearchDropdown
+            query={search}
+            items={filtered}
+            getId={(e) => e.id}
+            emptyLabel="events"
+            onSelect={(e) => goToEvent(e.id)}
+            renderRow={(e) => (
+              <>
+                <span style={{ fontWeight: 600 }}>{e.title}</span>
+                <span style={{ opacity: 0.5, marginLeft: "8px" }}>
+                  {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
+                </span>
+              </>
+            )}
+          >
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -142,7 +157,7 @@ export default function EventsPage() {
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
-          </div>
+          </BrowseSearchDropdown>
           )}
         </div>
       </div>
