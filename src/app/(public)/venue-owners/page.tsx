@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 
 interface VenueOwnerItem {
   id: string
@@ -54,7 +55,16 @@ export default function VenueOwnersPage() {
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {loading ? "Loading venue owners..." : `${filtered.length} venue owners hosting live shows`}
           </p>
-          <div style={{ position: "relative" }}>
+          <BrowseSearchDropdown
+            query={search}
+            items={filtered}
+            getId={(o) => o.id}
+            emptyLabel="venue owners"
+            onSelect={(o) => goToOwner(o.id)}
+            renderRow={(o) => (
+              <span style={{ fontWeight: 600 }}>{o.user.displayName || o.user.name}</span>
+            )}
+          >
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -62,7 +72,7 @@ export default function VenueOwnersPage() {
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
-          </div>
+          </BrowseSearchDropdown>
         </div>
       </div>
 
