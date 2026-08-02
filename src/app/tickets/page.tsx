@@ -27,6 +27,13 @@ interface BookingItem {
   createdAt: string
   cancelledAt: string | null
   refundAmount: number | null
+  // Session 65 (Hitesh feedback) - who's tagged on this booking + their
+  // response status, same PENDING/ACCEPTED/DECLINED shape as checkout.
+  companionTags: {
+    id: string
+    status: 'PENDING' | 'ACCEPTED' | 'DECLINED'
+    taggedUser: { id: string; name: string; displayName: string | null }
+  }[]
   event: {
     id: string
     title: string
@@ -267,6 +274,18 @@ export default function MyTicketsPage() {
                     </span>
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
                   </div>
+                  {b.companionTags && b.companionTags.length > 0 && (
+                    <p style={{ fontSize: '12.5px', color: 'var(--afa-ink)', opacity: 0.65, margin: '8px 0 0' }}>
+                      Going with{' '}
+                      {b.companionTags.map((t, i) => (
+                        <span key={t.id}>
+                          {i > 0 && ', '}
+                          {t.taggedUser.displayName || t.taggedUser.name}{' '}
+                          {t.status === 'PENDING' ? '(pending)' : t.status === 'ACCEPTED' ? '(confirmed)' : '(declined)'}
+                        </span>
+                      ))}
+                    </p>
+                  )}
                   {isLivePending && (
                     <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {b.totalAmount > 0 && (

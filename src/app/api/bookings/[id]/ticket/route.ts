@@ -43,6 +43,12 @@ export async function GET(
         user: true,
         event: { include: { venue: true } },
         bookingSeats: { include: { seat: true } },
+        // Session 65 (Hitesh feedback) - "Going with" line on the PDF
+        // itself, since the PDF is the artifact that actually gets
+        // shown/shared/printed, not just viewed in-app.
+        companionTags: {
+          select: { status: true, taggedUser: { select: { name: true, displayName: true } } },
+        },
       },
     })
     if (!booking) {
@@ -74,6 +80,10 @@ export async function GET(
       attendeeName:
         booking.user?.displayName ?? booking.user?.name ?? 'Guest',
       purchasedAt: booking.createdAt,
+      companions: booking.companionTags.map((t: { status: 'PENDING' | 'ACCEPTED' | 'DECLINED'; taggedUser: { name: string; displayName: string | null } }) => ({
+        name: t.taggedUser.displayName || t.taggedUser.name,
+        status: t.status,
+      })),
     }
 
     const pdfBytes = await generateTicketPdf(data)
