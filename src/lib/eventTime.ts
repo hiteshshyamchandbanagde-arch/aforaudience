@@ -26,3 +26,16 @@ export function getEventEndDateTime(event: { date: Date; startTime: string; endT
   if (crossesMidnight) end.setDate(end.getDate() + 1)
   return end
 }
+
+// Feedback cms9z2k6c (2 Aug) - Hitesh: a night-event indicator so users
+// can tell at a glance an event starts late, without opening it.
+// Threshold is 9pm (21:00) per his ask - startTime is 24hr "HH:MM"
+// storage regardless of what the venue's own listing time convention
+// looks like, so this is a plain hour comparison, no timezone/locale
+// handling needed. Single source of truth so the events listing and
+// detail page (and anywhere else this gets added later) agree on
+// exactly the same cutoff.
+export function isNightEvent(startTime: string): boolean {
+  const [h] = startTime.split(':').map(Number)
+  return h >= 21
+}
