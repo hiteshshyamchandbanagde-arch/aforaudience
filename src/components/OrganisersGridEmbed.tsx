@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 
 interface OrganiserItem {
   id: string
@@ -10,10 +11,16 @@ interface OrganiserItem {
   _count: { events: number }
 }
 
-// Lean grid, no hero/search header - used inside the Events↔Organisers
-// toggle (session 62, design.md §9.5 - toggle-based discovery entry
-// point). The full standalone page at /organisers has its own hero/search
-// version; this is the embeddable variant for a tab context.
+// Session 65 - added search + BrowseSearchDropdown here (was a lean grid
+// with none at all - see history below). This embed is what the
+// Events↔Organisers toggle actually renders; the standalone /organisers
+// page's search never reached anyone using the real nav flow.
+//
+// Originally: "Lean grid, no hero/search header - used inside the
+// Events↔Organisers toggle (session 62, design.md §9.5 - toggle-based
+// discovery entry point). The full standalone page at /organisers has
+// its own hero/search version; this is the embeddable variant for a tab
+// context."
 export default function OrganisersGridEmbed() {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -21,6 +28,7 @@ export default function OrganisersGridEmbed() {
   const [organisers, setOrganisers] = useState<OrganiserItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [search, setSearch] = useState("")
 
   useEffect(() => {
     fetch("/api/organisers")
@@ -45,9 +53,30 @@ export default function OrganisersGridEmbed() {
   if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
   if (organisers.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No organisers found yet.</p>
 
+  const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
-      {organisers.map((org) => {
+    <div>
+      <BrowseSearchDropdown
+        query={search}
+        items={filtered}
+        getId={(o) => o.id}
+        emptyLabel="organisers"
+        onSelect={(o) => goToOrganiser(o.id)}
+        renderRow={(o) => (
+          <span style={{ fontWeight: 600 }}>{o.orgName}</span>
+        )}
+      >
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search organisers..."
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+        />
+      </BrowseSearchDropdown>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+      {filtered.map((org) => {
         const isNavigatingThis = navigatingId === org.id
         return (
           <div
@@ -99,6 +128,7 @@ export default function OrganisersGridEmbed() {
           </div>
         )
       })}
+      </div>
     </div>
   )
 }
