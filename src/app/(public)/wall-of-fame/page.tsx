@@ -1,6 +1,7 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 
 interface LeaderboardEntry {
@@ -20,9 +21,25 @@ interface WallOfFameData {
 }
 
 export default function WallOfFamePage() {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
   const [data, setData] = useState<WallOfFameData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  // Same click-guard as /events (#261), /artists (#312), /venues (#313) -
+  // Top Organisers/Top Venues leaderboard rows had ZERO click target
+  // before this (not a guard gap, no navigation existed at all - same
+  // bug class as the My Applications cards fixed in #314). Prefixed key
+  // ("org:"/"venue:") since both lists share one guard state.
+  const [navigatingKey, setNavigatingKey] = useState<string | null>(null)
+
+  const goTo = (key: string, href: string) => {
+    if (navigatingKey) return
+    setNavigatingKey(key)
+    startTransition(() => {
+      router.push(href)
+    })
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -146,13 +163,67 @@ export default function WallOfFamePage() {
                   <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>No organiser has {data.minReviews}+ reviews yet.</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {data.topOrganisers.map((o, i) => (
-                      <div key={o.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 0", borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
-                        <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{o.name}</div>
-                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
-                      </div>
-                    ))}
+                    {data.topOrganisers.map((o, i) => {
+                      const key = `org:${o.id}`
+                      const isNavigatingThis = navigatingKey === key
+                      return (
+                        <div
+                          key={o.id}
+                          role="link"
+                          tabIndex={0}
+                          aria-busy={isNavigatingThis}
+                          onClick={() => goTo(key, `/organisers/${o.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault()
+                              goTo(key, `/organisers/${o.id}`)
+                            }
+                          }}
+                          style={{
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "8px 4px",
+                            borderRadius: "6px",
+                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none",
+                            cursor: navigatingKey ? "default" : "pointer",
+                            opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
+                            transition: "opacity 0.15s ease, background 0.15s ease",
+                          }}
+                        >
+                          {isNavigatingThis && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 2,
+                                borderRadius: "6px",
+                                background: "rgba(255,255,255,0.7)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "18px",
+                                  height: "18px",
+                                  borderRadius: "50%",
+                                  border: "2px solid rgba(14,12,10,0.15)",
+                                  borderTopColor: "var(--afa-terracotta)",
+                                  animation: "afa-spin 0.7s linear infinite",
+                                }}
+                              />
+                              <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
+                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{o.name}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -163,13 +234,67 @@ export default function WallOfFamePage() {
                   <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>No venue has {data.minReviews}+ reviews yet.</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {data.topVenues.map((v, i) => (
-                      <div key={v.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "8px 0", borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
-                        <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
-                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
-                      </div>
-                    ))}
+                    {data.topVenues.map((v, i) => {
+                      const key = `venue:${v.id}`
+                      const isNavigatingThis = navigatingKey === key
+                      return (
+                        <div
+                          key={v.id}
+                          role="link"
+                          tabIndex={0}
+                          aria-busy={isNavigatingThis}
+                          onClick={() => goTo(key, `/venues/${v.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault()
+                              goTo(key, `/venues/${v.id}`)
+                            }
+                          }}
+                          style={{
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "8px 4px",
+                            borderRadius: "6px",
+                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none",
+                            cursor: navigatingKey ? "default" : "pointer",
+                            opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
+                            transition: "opacity 0.15s ease, background 0.15s ease",
+                          }}
+                        >
+                          {isNavigatingThis && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                inset: 0,
+                                zIndex: 2,
+                                borderRadius: "6px",
+                                background: "rgba(255,255,255,0.7)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "18px",
+                                  height: "18px",
+                                  borderRadius: "50%",
+                                  border: "2px solid rgba(14,12,10,0.15)",
+                                  borderTopColor: "var(--afa-terracotta)",
+                                  animation: "afa-spin 0.7s linear infinite",
+                                }}
+                              />
+                              <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
+                            </div>
+                          )}
+                          <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
+                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
