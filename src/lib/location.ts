@@ -3,6 +3,15 @@ import type { cookies as cookiesFn, headers as headersFn } from 'next/headers'
 export const LOCATION_COOKIE = 'afa_loc'
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 90 // 90 days
 
+// Self-caught (2 Aug, right after shipping the country field): a cookie
+// written before `country` existed just... kept winning over re-detection
+// forever, since cookie beats fresh IP-geo in the precedence order below.
+// Any future schema change to what this cookie stores would hit the same
+// silent-stale-forever bug. Bumping this version forces old cookies to be
+// treated as absent (falls through to fresh detection) instead of trusted
+// as-is - bump it again the next time this shape changes.
+const LOCATION_COOKIE_VERSION = 2
+
 export interface ResolvedLocation {
   city: string | null
   lat: number | null
@@ -19,6 +28,11 @@ function parseCookie(raw: string | undefined): { city: string; lat: number | nul
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
+    // No `v` at all = pre-versioning cookie (e.g. from before the
+    // country field existed) - deliberately NOT accepted even if it
+    // otherwise looks usable, so a schema change always gets a chance
+    // to re-run detection rather than being masked by an old cache hit.
+    if (parsed?.v !== LOCATION_COOKIE_VERSION) return null
     if (typeof parsed?.city === 'string' && parsed.city) {
       return {
         city: parsed.city,
@@ -28,7 +42,7 @@ function parseCookie(raw: string | undefined): { city: string; lat: number | nul
       }
     }
   } catch {
-    // malformed/legacy cookie value - ignore, fall through to detection
+    // malformed cookie value - ignore, fall through to detection
   }
   return null
 }
@@ -81,7 +95,7 @@ export async function resolveLocation(opts: {
 }
 
 export function locationCookieValue(city: string, lat: number | null, lng: number | null, country: string | null): string {
-  return JSON.stringify({ city, lat, lng, country })
+  return JSON.stringify({ v: LOCATION_COOKIE_VERSION, city, lat, lng, country })
 }
 
 export const LOCATION_COOKIE_OPTIONS = {
