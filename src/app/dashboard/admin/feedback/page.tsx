@@ -16,11 +16,14 @@ import BrandLoader from '@/components/BrandLoader'
 // category/severity/page/keyword filtering, trend charts, a detail panel
 // with changelog history, and self-serve status+severity editing.
 //
-// Data loading is split into three pieces so the "Show Resolved" toggle
-// stays a genuine lazy fetch rather than always loading everything:
-//   - `items`         → NEW + REVIEWED, loaded on mount (the default board)
-//   - `resolvedItems` → RESOLVED only, loaded the first time the toggle
-//                       is switched on, cached after that
+// Data loading is split into three pieces so the "Show Resolved /
+// Rejected" toggle stays a genuine lazy fetch rather than always
+// loading everything:
+//   - `items`         → everything except RESOLVED/REJECTED (the API's
+//                       default, no status param), loaded on mount
+//   - `resolvedItems` → RESOLVED + REJECTED (both terminal/closed
+//                       states), loaded the first time the toggle is
+//                       switched on, cached after that
 //   - `trendItems`    → everything (status=ALL), loaded once on mount in
 //                       the background - trend charts need the full
 //                       picture regardless of what's toggled on screen
@@ -68,11 +71,25 @@ const SEVERITY_COLORS: Record<string, string> = {
   CRITICAL: 'var(--afa-error)',
 }
 
-const STATUSES = ['NEW', 'REVIEWED', 'TESTED', 'RESOLVED']
+// Workflow overhaul (session 63, Hitesh's design). Two-field split -
+// `status` is the fix lifecycle, `deployStage` is the deploy-promotion
+// pipeline (only meaningful once status = RESOLVED). CLOSED_STATUSES
+// (RESOLVED + REJECTED) are lazy-loaded behind the "Show Resolved /
+// Rejected" toggle, same reasoning as before: the open board is what
+// gets checked constantly, closed items are an occasional lookup.
+const STATUSES = [
+  'NEW', 'UNDER_REVIEW', 'BUILD_QUEUE', 'IN_BUILD', 'BUILD_COMPLETE',
+  'IN_TEST', 'REOPENED', 'RESOLVED', 'REJECTED',
+]
+const CLOSED_STATUSES = ['RESOLVED', 'REJECTED']
+const DEPLOY_STAGES = ['DEPLOYED_QA', 'IN_PRODUCT', 'NOTIFIED_USER', 'CLOSED']
 const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 function labelize(v: string) {
-  return v.charAt(0) + v.slice(1).toLowerCase()
+  return v
+    .split('_')
+    .map((w) => (w === 'QA' ? 'QA' : w.charAt(0) + w.slice(1).toLowerCase()))
+    .join(' ')
 }
 
 function timeAgo(iso: string) {
@@ -176,9 +193,9 @@ function AdminFeedbackBoard() {
       setCategoryFilter(categoryParam)
     }
 
-    if (statusParam === 'RESOLVED') {
+    if (statusParam === 'RESOLVED' || statusParam === 'REJECTED') {
       if (!showResolved) toggleShowResolved()
-      setStatusFocus('RESOLVED')
+      setStatusFocus(statusParam)
     } else if (statusParam && statusParam !== 'ALL' && STATUSES.includes(statusParam)) {
       setStatusFocus(statusParam)
     } else if (statusParam === 'ALL' && !showResolved) {
@@ -251,16 +268,23 @@ function AdminFeedbackBoard() {
     setShowResolved(next)
     if (next && !resolvedLoaded) {
       setResolvedLoading(true)
-      const res = await fetch('/api/admin/feedback?status=RESOLVED')
-      if (res.ok) {
-        setResolvedItems((await res.json()).items)
-        setResolvedLoaded(true)
-      }
+      // Both terminal states loaded together - "Show Resolved / Rejected"
+      // is one toggle, not two, since they're both "this is done, nothing
+      // more to check" from a board perspective.
+      const [resolvedRes, rejectedRes] = await Promise.all([
+        fetch('/api/admin/feedback?status=RESOLVED'),
+        fetch('/api/admin/feedback?status=REJECTED'),
+      ])
+      const combined: FeedbackItem[] = []
+      if (resolvedRes.ok) combined.push(...(await resolvedRes.json()).items)
+      if (rejectedRes.ok) combined.push(...(await rejectedRes.json()).items)
+      setResolvedItems(combined)
+      setResolvedLoaded(true)
       setResolvedLoading(false)
     }
   }
 
-  const patchItem = async (id: string, body: { status?: string; severity?: string | null }) => {
+  const patchItem = async (id: string, body: { status?: string; deployStage?: string | null; note?: string; severity?: string | null }) => {
     setActioningId(id)
     try {
       const res = await fetch('/api/admin/feedback', {
@@ -284,7 +308,7 @@ function AdminFeedbackBoard() {
         const current = [...items, ...resolvedItems].find((it) => it.id === id)
         if (current) {
           const movedItem = withChangeLog(current)
-          if (body.status === 'RESOLVED') {
+          if (CLOSED_STATUSES.includes(body.status)) {
             setItems((prev) => prev.filter((it) => it.id !== id))
             setResolvedItems((prev) => {
               const withoutDup = prev.filter((it) => it.id !== id)
@@ -306,6 +330,7 @@ function AdminFeedbackBoard() {
       setTrendItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...updated } : it)))
 
       if (body.status) showToast(`Marked ${labelize(body.status)}.`, 'success')
+      else if (body.deployStage !== undefined) showToast(`Deploy stage set to ${body.deployStage ? labelize(body.deployStage) : 'unset'}.`, 'success')
       else if (body.severity !== undefined) showToast(`Severity set to ${body.severity ? labelize(body.severity) : 'unset'}.`, 'success')
     } catch {
       showToast('Update failed — please try again.', 'error')
@@ -347,7 +372,7 @@ function AdminFeedbackBoard() {
   }, [allLoadedItems, statusFocus, categoryFilter, severityFilter, pageFilter, keyword, sortBy])
 
   const columns = useMemo(() => {
-    const cols: Record<string, FeedbackItem[]> = { NEW: [], REVIEWED: [], TESTED: [], RESOLVED: [] }
+    const cols: Record<string, FeedbackItem[]> = Object.fromEntries(STATUSES.map((s) => [s, []]))
     for (const it of filtered) cols[it.status]?.push(it)
     return cols
   }, [filtered])
@@ -463,7 +488,19 @@ function AdminFeedbackBoard() {
           <select
             value={item.status}
             disabled={actioningId === item.id}
-            onChange={(e) => patchItem(item.id, { status: e.target.value })}
+            onChange={(e) => {
+              const next = e.target.value
+              // REJECTED/REOPENED need a note (server enforces this too) -
+              // this quick-select has nowhere to type one, so route to
+              // the full panel instead of firing a request that'll just
+              // bounce with a 400.
+              if (next === 'REJECTED' || next === 'REOPENED') {
+                setSelectedId(item.id)
+                showToast(`Open the detail view to set ${labelize(next)} - it needs a note.`, 'error')
+                return
+              }
+              patchItem(item.id, { status: next })
+            }}
             style={{ ...inputStyle, fontSize: '12px', padding: '5px 8px', flex: 1 }}
           >
             {STATUSES.map((s) => (
@@ -700,20 +737,26 @@ function AdminFeedbackBoard() {
             </select>
             <label style={{ fontSize: '13px', color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', cursor: 'pointer' }}>
               <input type="checkbox" checked={showResolved} onChange={toggleShowResolved} disabled={resolvedLoading} />
-              {resolvedLoading ? 'Loading resolved…' : 'Show Resolved'}
+              {resolvedLoading ? 'Loading…' : 'Show Resolved / Rejected'}
             </label>
           </div>
 
-          {/* Desktop board */}
+          {/* Desktop board - horizontally scrolling now that there are
+              up to 9 status columns (was a fixed 3/4-column grid when
+              there were only 4 statuses total). Equal-fraction columns
+              stopped being readable well before 9. */}
           <div
             className="fb-board"
             style={{
-              gridTemplateColumns: showResolved ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)',
+              gridAutoFlow: 'column',
+              gridAutoColumns: '220px',
               gap: '16px',
               marginTop: '16px',
+              overflowX: 'auto',
+              paddingBottom: '8px',
             }}
           >
-            {(showResolved ? STATUSES : STATUSES.filter((s) => s !== 'RESOLVED')).map((statusCol) => (
+            {(showResolved ? STATUSES : STATUSES.filter((s) => !CLOSED_STATUSES.includes(s))).map((statusCol) => (
               <div key={statusCol} id={`fb-col-${statusCol}`}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
                   {labelize(statusCol)} <span style={{ color: 'var(--afa-taupe)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
@@ -741,7 +784,8 @@ function AdminFeedbackBoard() {
           item={selectedItem}
           busy={actioningId === selectedItem.id}
           onClose={() => setSelectedId(null)}
-          onSetStatus={(s) => patchItem(selectedItem.id, { status: s })}
+          onSetStatus={(s, note) => patchItem(selectedItem.id, { status: s, note })}
+          onSetDeployStage={(ds) => patchItem(selectedItem.id, { deployStage: ds })}
           onSetSeverity={(s) => patchItem(selectedItem.id, { severity: s })}
           onPrev={goToPrev}
           onNext={goToNext}

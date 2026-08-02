@@ -356,7 +356,7 @@ export default function AdminCommandCenter() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
             <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-ink)" href="/dashboard/admin/feedback?status=ALL" />
             <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-gold)" href="/dashboard/admin/feedback?status=NEW" />
-            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="Tested" accent="var(--afa-plum)" href="/dashboard/admin/feedback?status=TESTED" />
+            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="In Test" accent="var(--afa-plum)" href="/dashboard/admin/feedback?status=IN_TEST" />
             <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-sage)" href="/dashboard/admin/feedback?status=RESOLVED" />
             <TicketTile icon={<IconBulb />} value={k?.featureIdeas ?? '—'} label="Feature ideas" accent="var(--afa-amber)" href="/dashboard/admin/feedback?category=FEATURE_IDEA" />
           </div>

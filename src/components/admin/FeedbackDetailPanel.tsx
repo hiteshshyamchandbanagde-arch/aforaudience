@@ -15,16 +15,19 @@ export interface ChangeLogEntry {
   field: string
   fromValue: string | null
   toValue: string
+  note: string | null
   createdAt: string
 }
 
 export interface FeedbackDetailItem {
   id: string
+  displayId: string | null
   category: string
   message: string
   pageUrl: string | null
   fromChatbot: boolean
   status: string
+  deployStage: string | null
   severity: string | null
   title: string | null
   resolvedAt: string | null
@@ -34,7 +37,17 @@ export interface FeedbackDetailItem {
   changeLog: ChangeLogEntry[]
 }
 
-const STATUSES = ['NEW', 'REVIEWED', 'TESTED', 'RESOLVED']
+// Workflow overhaul (session 63, Hitesh's design) - two-field split.
+// STATUSES is the fix lifecycle; DEPLOY_STAGES only matters once
+// status = RESOLVED (see FeedbackDetailPanel's own rendering below).
+const STATUSES = [
+  'NEW', 'UNDER_REVIEW', 'BUILD_QUEUE', 'IN_BUILD', 'BUILD_COMPLETE',
+  'IN_TEST', 'RESOLVED', 'REJECTED', 'REOPENED',
+]
+const DEPLOY_STAGES = ['DEPLOYED_QA', 'IN_PRODUCT', 'NOTIFIED_USER', 'CLOSED']
+// REJECTED needs a reason, REOPENED needs a comment on what's still
+// wrong - Hitesh's explicit design, enforced server-side too.
+const NOTE_REQUIRED_STATUSES = ['REJECTED', 'REOPENED']
 const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -50,7 +63,10 @@ function fmtDateTime(d: string | null) {
 }
 
 function labelize(v: string) {
-  return v.charAt(0) + v.slice(1).toLowerCase()
+  return v
+    .split('_')
+    .map((w) => (w === 'QA' ? 'QA' : w.charAt(0) + w.slice(1).toLowerCase()))
+    .join(' ')
 }
 
 export default function FeedbackDetailPanel({
@@ -58,6 +74,7 @@ export default function FeedbackDetailPanel({
   busy,
   onClose,
   onSetStatus,
+  onSetDeployStage,
   onSetSeverity,
   onPrev,
   onNext,
@@ -68,7 +85,8 @@ export default function FeedbackDetailPanel({
   item: FeedbackDetailItem
   busy: boolean
   onClose: () => void
-  onSetStatus: (status: string) => void
+  onSetStatus: (status: string, note?: string) => void
+  onSetDeployStage: (deployStage: string | null) => void
   onSetSeverity: (severity: string | null) => void
   onPrev?: () => void
   onNext?: () => void
@@ -77,6 +95,11 @@ export default function FeedbackDetailPanel({
   position?: { index: number; total: number } | null
 }) {
   const [expandedImage, setExpandedImage] = useState(false)
+  // Set when a REJECTED/REOPENED click is pending a note - shows the
+  // inline textarea + confirm/cancel instead of applying immediately,
+  // since those two transitions require justification (Hitesh's design).
+  const [pendingNoteStatus, setPendingNoteStatus] = useState<string | null>(null)
+  const [noteDraft, setNoteDraft] = useState('')
   // Parity fix (2 Aug) after reviewing PR #328's full-page version of
   // this pattern: guard against a rapid double swipe/key-press firing
   // onPrev/onNext twice before the panel's content has updated. Lower
@@ -89,6 +112,8 @@ export default function FeedbackDetailPanel({
   useEffect(() => {
     setExpandedImage(false)
     setNavGuard(false)
+    setPendingNoteStatus(null)
+    setNoteDraft('')
   }, [item.id])
 
   const guardedPrev = () => {
@@ -169,6 +194,11 @@ export default function FeedbackDetailPanel({
               <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-taupe)' }}>
                 {item.category}
               </span>
+              {item.displayId && (
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', fontFamily: 'monospace' }}>
+                  {item.displayId}
+                </span>
+              )}
               {item.fromChatbot && <span style={{ fontSize: '11px', color: 'var(--afa-taupe)' }}>via chatbot</span>}
             </div>
             <button
@@ -269,7 +299,14 @@ export default function FeedbackDetailPanel({
                 <button
                   key={s}
                   disabled={busy}
-                  onClick={() => onSetStatus(s)}
+                  onClick={() => {
+                    if (NOTE_REQUIRED_STATUSES.includes(s) && s !== item.status) {
+                      setPendingNoteStatus(s)
+                      setNoteDraft('')
+                    } else {
+                      onSetStatus(s)
+                    }
+                  }}
                   style={{
                     fontSize: '12px',
                     fontWeight: 600,
@@ -286,7 +323,80 @@ export default function FeedbackDetailPanel({
                 </button>
               ))}
             </div>
+            {pendingNoteStatus && (
+              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-white)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.1)' }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-ink)' }}>
+                  {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
+                </div>
+                <textarea
+                  autoFocus
+                  value={noteDraft}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  rows={3}
+                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', resize: 'vertical', fontFamily: 'inherit' }}
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button
+                    disabled={busy || !noteDraft.trim()}
+                    onClick={() => {
+                      onSetStatus(pendingNoteStatus, noteDraft.trim())
+                      setPendingNoteStatus(null)
+                      setNoteDraft('')
+                    }}
+                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-cream)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    disabled={busy}
+                    onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
+                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', color: 'var(--afa-ink)', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
+          {item.status === 'RESOLVED' && (
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+                Deploy Stage
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  disabled={busy}
+                  onClick={() => onSetDeployStage(null)}
+                  style={{
+                    fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
+                    border: !item.deployStage ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    background: !item.deployStage ? 'var(--afa-ink)' : 'transparent',
+                    color: !item.deployStage ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                    cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
+                  }}
+                >
+                  Unset
+                </button>
+                {DEPLOY_STAGES.map((ds) => (
+                  <button
+                    key={ds}
+                    disabled={busy}
+                    onClick={() => onSetDeployStage(ds)}
+                    style={{
+                      fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
+                      border: item.deployStage === ds ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                      background: item.deployStage === ds ? 'var(--afa-sage)' : 'transparent',
+                      color: item.deployStage === ds ? 'white' : 'var(--afa-ink)',
+                      cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
+                    }}
+                  >
+                    {labelize(ds)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>Severity</div>
@@ -352,6 +462,9 @@ export default function FeedbackDetailPanel({
                 <span style={{ fontWeight: 600 }}>{labelize(entry.field)}</span>:{' '}
                 {entry.fromValue ? labelize(entry.fromValue) : 'unset'} → {labelize(entry.toValue)}
                 <span style={{ color: 'var(--afa-taupe)' }}> · {fmtDateTime(entry.createdAt)}</span>
+                {entry.note && (
+                  <div style={{ marginTop: '4px', fontStyle: 'italic', opacity: 0.85 }}>"{entry.note}"</div>
+                )}
               </div>
             ))}
           </div>

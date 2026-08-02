@@ -79,7 +79,11 @@ export async function GET() {
   })
   const openCriticalHigh = await prisma.feedback.count({
     where: {
-      status: { in: ['NEW', 'REVIEWED', 'TESTED'] },
+      // Workflow overhaul (session 63) - "open" now means anything not
+      // RESOLVED/REJECTED, not just the old 3-value NEW/REVIEWED/TESTED
+      // set. Same OPEN_STATUSES list as /api/admin/feedback's default
+      // board query.
+      status: { in: ['NEW', 'UNDER_REVIEW', 'BUILD_QUEUE', 'IN_BUILD', 'BUILD_COMPLETE', 'IN_TEST', 'REOPENED'] },
       severity: { in: ['HIGH', 'CRITICAL'] },
     },
   })
@@ -127,8 +131,11 @@ export async function GET() {
   return NextResponse.json({
     kpis: {
       totalFeedback: Object.values(statusMap).reduce((a, b) => a + b, 0),
-      pending: (statusMap['NEW'] || 0) + (statusMap['REVIEWED'] || 0),
-      tested: statusMap['TESTED'] || 0,
+      pending: (statusMap['NEW'] || 0) + (statusMap['UNDER_REVIEW'] || 0),
+      // "tested" -> "inTest" (mirrors FeedbackTrends' regrouping) - also
+      // folds REOPENED in, since a reopened item is back in the same
+      // "still being worked" bucket as IN_TEST from a KPI standpoint.
+      tested: (statusMap['IN_TEST'] || 0) + (statusMap['REOPENED'] || 0),
       resolved: statusMap['RESOLVED'] || 0,
       featureIdeas: featureIdeasCount,
       pendingApprovals,

@@ -139,9 +139,11 @@ function buildAgeDistribution(openItems: TrendFeedbackItem[]) {
 function buildKPIs(items: TrendFeedbackItem[]) {
   return {
     total: items.length,
-    pending: items.filter((i) => i.status === 'NEW' || i.status === 'REVIEWED').length,
-    tested: items.filter((i) => i.status === 'TESTED').length,
+    pending: items.filter((i) => i.status === 'NEW' || i.status === 'UNDER_REVIEW').length,
+    inBuild: items.filter((i) => ['BUILD_QUEUE', 'IN_BUILD', 'BUILD_COMPLETE'].includes(i.status)).length,
+    inTest: items.filter((i) => i.status === 'IN_TEST' || i.status === 'REOPENED').length,
     resolved: items.filter((i) => i.status === 'RESOLVED').length,
+    rejected: items.filter((i) => i.status === 'REJECTED').length,
     featureIdeas: items.filter((i) => i.category === 'FEATURE_IDEA').length,
   }
 }
@@ -190,7 +192,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
   const labelFor = (b: { weekStart?: Date; dayStart?: Date }) =>
     granularity === 'daily' ? dayLabel(b.dayStart as Date) : weekLabel(b.weekStart as Date)
   const categories = buildCategoryBreakdown(items)
-  const openItems = items.filter((i) => i.status !== 'RESOLVED')
+  const openItems = items.filter((i) => i.status !== 'RESOLVED' && i.status !== 'REJECTED')
   const ageBuckets = buildAgeDistribution(openItems)
 
   // --- Opened/resolved line chart geometry (weekly or daily) ---
@@ -222,15 +224,23 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         </div>
         <div style={kpiCard}>
           <div style={kpiValue}>{kpis.pending}</div>
-          <div style={kpiLabel}>Pending (new/reviewed)</div>
+          <div style={kpiLabel}>Pending (new/under review)</div>
         </div>
         <div style={kpiCard}>
-          <div style={kpiValue}>{kpis.tested}</div>
-          <div style={kpiLabel}>Tested</div>
+          <div style={kpiValue}>{kpis.inBuild}</div>
+          <div style={kpiLabel}>In build</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.inTest}</div>
+          <div style={kpiLabel}>In test</div>
         </div>
         <div style={kpiCard}>
           <div style={kpiValue}>{kpis.resolved}</div>
           <div style={kpiLabel}>Resolved</div>
+        </div>
+        <div style={kpiCard}>
+          <div style={kpiValue}>{kpis.rejected}</div>
+          <div style={kpiLabel}>Rejected</div>
         </div>
         <div style={kpiCard}>
           <div style={kpiValue}>{kpis.featureIdeas}</div>

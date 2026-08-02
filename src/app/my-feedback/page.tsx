@@ -7,16 +7,22 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 
 type FeedbackCategory = 'BUG' | 'FEATURE_IDEA' | 'QUESTION' | 'GENERAL' | 'OTHER'
-type FeedbackStatus = 'NEW' | 'REVIEWED' | 'RESOLVED'
+type FeedbackStatus =
+  | 'NEW' | 'UNDER_REVIEW' | 'BUILD_QUEUE' | 'IN_BUILD' | 'BUILD_COMPLETE'
+  | 'IN_TEST' | 'RESOLVED' | 'REJECTED' | 'REOPENED'
+type FeedbackDeployStage = 'DEPLOYED_QA' | 'IN_PRODUCT' | 'NOTIFIED_USER' | 'CLOSED' | null
 
 type FeedbackItem = {
   id: string
+  displayId: string | null
   title: string | null
   message: string
   category: FeedbackCategory
   status: FeedbackStatus
+  deployStage: FeedbackDeployStage
   createdAt: string
   resolvedAt: string | null
+  latestNote: string | null
 }
 
 const CATEGORY_LABEL: Record<FeedbackCategory, string> = {
@@ -27,10 +33,33 @@ const CATEGORY_LABEL: Record<FeedbackCategory, string> = {
   OTHER: 'Other',
 }
 
-const STATUS_STYLE: Record<FeedbackStatus, { label: string; bg: string; fg: string }> = {
+// User-facing labels stay deliberately simpler than the admin board's
+// raw internal pipeline (session 63 workflow overhaul) - a submitter
+// doesn't need to distinguish "Build Queue" from "In Build" from "Build
+// Complete", just "we're working on it". RESOLVED's label depends on
+// deployStage (computed below in statusStyleFor), since "fixed" reads
+// very differently depending on whether it's live yet.
+const STATUS_STYLE: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { label: string; bg: string; fg: string }> = {
   NEW: { label: 'Submitted', bg: 'rgba(14,12,10,0.08)', fg: '#0E0C0A' },
-  REVIEWED: { label: 'In review', bg: '#FFF3E6', fg: '#C2410C' },
-  RESOLVED: { label: 'Resolved', bg: '#E8F5E9', fg: '#2E7D32' },
+  UNDER_REVIEW: { label: 'In review', bg: '#FFF3E6', fg: '#C2410C' },
+  BUILD_QUEUE: { label: 'Queued to build', bg: '#FFF3E6', fg: '#C2410C' },
+  IN_BUILD: { label: 'In progress', bg: '#FFF3E6', fg: '#C2410C' },
+  BUILD_COMPLETE: { label: 'In progress', bg: '#FFF3E6', fg: '#C2410C' },
+  IN_TEST: { label: 'Being tested', bg: '#FFF3E6', fg: '#C2410C' },
+  REOPENED: { label: 'Reopened', bg: '#FFF3E6', fg: '#C2410C' },
+  REJECTED: { label: 'Not planned', bg: 'rgba(14,12,10,0.08)', fg: 'rgba(14,12,10,0.6)' },
+}
+
+function statusStyleFor(item: FeedbackItem): { label: string; bg: string; fg: string } {
+  if (item.status !== 'RESOLVED') return STATUS_STYLE[item.status]
+  if (item.deployStage === 'IN_PRODUCT' || item.deployStage === 'NOTIFIED_USER' || item.deployStage === 'CLOSED') {
+    return { label: 'Fixed - live', bg: '#E8F5E9', fg: '#2E7D32' }
+  }
+  // RESOLVED with no deployStage (or DEPLOYED_QA) - fixed, but not yet
+  // shipped to the live app. Under the current prod freeze this is
+  // where everything sits, so it's worth being explicit rather than
+  // just saying "Resolved" and letting someone assume it's live.
+  return { label: 'Fixed - in testing', bg: '#E8F5E9', fg: '#2E7D32' }
 }
 
 function formatDate(iso: string): string {
@@ -115,7 +144,7 @@ export default function MyFeedbackPage() {
         {items !== null && items.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {items.map((item) => {
-              const statusStyle = STATUS_STYLE[item.status]
+              const statusStyle = statusStyleFor(item)
               return (
                 <div
                   key={item.id}
@@ -130,10 +159,16 @@ export default function MyFeedbackPage() {
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                         {CATEGORY_LABEL[item.category]} · {formatDate(item.createdAt)}
+                        {item.displayId && <> · {item.displayId}</>}
                       </div>
                       <p style={{ margin: '6px 0 0', fontSize: '15px', color: 'var(--afa-black, #0E0C0A)', wordBreak: 'break-word' }}>
                         {item.title || item.message}
                       </p>
+                      {item.latestNote && (
+                        <p style={{ margin: '8px 0 0', fontSize: '13px', color: 'rgba(14,12,10,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                          "{item.latestNote}"
+                        </p>
+                      )}
                     </div>
                     <span
                       style={{
