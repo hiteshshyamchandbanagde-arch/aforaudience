@@ -273,6 +273,20 @@ function ProfileContent() {
     }
   }, [session])
 
+  // BUG-2608-020: submitting via the SupportWidget is an in-page overlay,
+  // not a real navigation/focus change, so the focus/visibility refetch
+  // above never fired for it. The widget broadcasts this event on a
+  // successful submit; just reuse the same loadStatuses() the other
+  // refetch paths already use so the "My Feedback" count updates without
+  // a full reload.
+  useEffect(() => {
+    if (!session?.user) return
+    const handleFeedbackSubmitted = () => loadStatuses()
+    window.addEventListener('afa:feedback-submitted', handleFeedbackSubmitted)
+    return () => window.removeEventListener('afa:feedback-submitted', handleFeedbackSubmitted)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+
   const applyOrganiser = async () => {
     if (!orgName.trim()) {
       setError('Enter an organisation or brand name first.')
