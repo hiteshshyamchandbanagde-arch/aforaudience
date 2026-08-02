@@ -380,6 +380,15 @@ export default function SupportWidget() {
       });
       if (res.ok) {
         setFbSubmitted(true);
+        // BUG-2608-020: the profile card and /my-feedback list both fetch
+        // /api/feedback/mine once on mount with no revalidation trigger, so
+        // a submission made from here (an in-page overlay, not a real
+        // navigation/focus change) never showed up without a hard reload.
+        // Broadcasting a plain window event keeps this widget decoupled
+        // from whichever pages care about the result.
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('afa:feedback-submitted'));
+        }
         setFbMessage('');
         setBugAction('');
         setBugExpected('');
