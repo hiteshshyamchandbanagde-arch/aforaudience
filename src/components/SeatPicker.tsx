@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
@@ -43,6 +43,17 @@ const SEAT_SIZE = 22
 const SEAT_WIDTH_PCT = (SEAT_SIZE / CANVAS_WIDTH) * 100
 const SEAT_HEIGHT_PCT = (SEAT_SIZE / CANVAS_HEIGHT) * 100
 
+// Pinch-to-zoom + pan (session 65, BUG-2608-030) - at high seat counts
+// (600 in the reported case) seats squeeze down to a handful of px on
+// mobile, too small to read the row/seat label or tap reliably. Rather
+// than a library, this is a small self-contained gesture handler using
+// Pointer Events (unifies touch/mouse/pen through one code path - two
+// active pointers = pinch, one = pan/tap). Zoom range is deliberately
+// modest (1x-4x): this is a seat picker, not a photo viewer, and 4x is
+// already enough to make a single seat comfortably tappable.
+const MIN_ZOOM = 1
+const MAX_ZOOM = 4
+
 export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onChange }: Props) {
   const [seats, setSeats] = useState<SeatInfo[]>([])
   const [loading, setLoading] = useState(true)
@@ -54,6 +65,109 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   // at a time, same pattern as the builder and the event-creation
   // pricing preview.
   const [activeLevel, setActiveLevel] = useState('')
+
+  // Pinch/pan state - see MIN_ZOOM/MAX_ZOOM comment above.
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const pinchRef = useRef<{ startDist: number; startZoom: number; startPan: { x: number; y: number } } | null>(null)
+  const panStartRef = useRef<{ startX: number; startY: number; startPan: { x: number; y: number } } | null>(null)
+  const movedRef = useRef(false)
+  // Consumed by the seat's onClick - a pinch/pan gesture ending on top of
+  // a seat would otherwise also fire that seat's click (pointerup ->
+  // click is not automatically suppressed by the browser just because a
+  // drag happened), silently selecting/deselecting a seat as a side
+  // effect of panning. Set on pointerup if real movement was detected,
+  // read-and-cleared once by the next click.
+  const suppressClickRef = useRef(false)
+
+  const distBetween = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y)
+
+  const clampPan = (x: number, y: number, z: number) => {
+    const el = containerRef.current
+    if (!el) return { x, y }
+    const rect = el.getBoundingClientRect()
+    // At zoom 1 there's nothing to pan - content exactly fills the
+    // container. Beyond that, the content is (rect * z) big and centered
+    // via transform-origin: center, so it can drift at most half the
+    // overshoot in either direction before empty space would show.
+    const maxX = (rect.width * (z - 1)) / 2
+    const maxY = (rect.height * (z - 1)) / 2
+    return {
+      x: Math.min(maxX, Math.max(-maxX, x)),
+      y: Math.min(maxY, Math.max(-maxY, y)),
+    }
+  }
+
+  const resetView = () => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }
+
+  const zoomBy = (factor: number) => {
+    setZoom((z) => {
+      const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z * factor))
+      setPan((p) => clampPan(p.x, p.y, next))
+      return next
+    })
+  }
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    movedRef.current = false
+    if (pointersRef.current.size === 2) {
+      const [a, b] = Array.from(pointersRef.current.values())
+      pinchRef.current = { startDist: distBetween(a, b), startZoom: zoom, startPan: pan }
+      panStartRef.current = null
+    } else if (pointersRef.current.size === 1) {
+      panStartRef.current = { startX: e.clientX, startY: e.clientY, startPan: pan }
+    }
+  }
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointersRef.current.has(e.pointerId)) return
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (pointersRef.current.size === 2 && pinchRef.current) {
+      const [a, b] = Array.from(pointersRef.current.values())
+      const scale = distBetween(a, b) / pinchRef.current.startDist
+      const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinchRef.current.startZoom * scale))
+      setZoom(newZoom)
+      setPan(clampPan(pinchRef.current.startPan.x, pinchRef.current.startPan.y, newZoom))
+      movedRef.current = true
+    } else if (pointersRef.current.size === 1 && panStartRef.current && zoom > 1) {
+      const dx = e.clientX - panStartRef.current.startX
+      const dy = e.clientY - panStartRef.current.startY
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) movedRef.current = true
+      setPan(clampPan(panStartRef.current.startPan.x + dx, panStartRef.current.startPan.y + dy, zoom))
+    }
+  }
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    pointersRef.current.delete(e.pointerId)
+    if (pointersRef.current.size === 1) {
+      // Dropped from two fingers to one (end of a pinch) - restart pan
+      // tracking from the remaining pointer's current position so the
+      // content doesn't jump when that finger starts moving again.
+      const remaining = Array.from(pointersRef.current.values())[0]
+      panStartRef.current = { startX: remaining.x, startY: remaining.y, startPan: pan }
+      pinchRef.current = null
+    } else if (pointersRef.current.size === 0) {
+      pinchRef.current = null
+      panStartRef.current = null
+    }
+    if (movedRef.current) suppressClickRef.current = true
+  }
+
+  useEffect(() => {
+    // Switching levels swaps to a completely different coordinate set -
+    // an old zoom/pan would be pointing at the wrong part of a different
+    // map, so reset rather than carry it over.
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }, [activeLevel])
 
   useEffect(() => {
     const fetchSeats = async () => {
@@ -109,8 +223,39 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
 
   return (
     <div>
-      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>
-        Tap a seat to select it. Max {maxSeatsPerBooking} per booking.
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+        <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+          Tap a seat to select it. Max {maxSeatsPerBooking} per booking. Pinch or use +/- to zoom in for easier tapping.
+        </div>
+        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => zoomBy(1 / 1.5)}
+            disabled={zoom <= MIN_ZOOM}
+            aria-label="Zoom out"
+            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)', fontSize: '16px', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            onClick={() => zoomBy(1.5)}
+            disabled={zoom >= MAX_ZOOM}
+            aria-label="Zoom in"
+            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)', fontSize: '16px', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+          >
+            +
+          </button>
+          {zoom > 1 && (
+            <button
+              type="button"
+              onClick={resetView}
+              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-ink)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Reset
+            </button>
+          )}
+        </div>
       </div>
       {zonePrices.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
@@ -142,6 +287,11 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
       )}
       <div
+        ref={containerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         style={{
           position: 'relative',
           width: '100%',
@@ -152,8 +302,23 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           borderRadius: '10px',
           overflow: 'hidden',
           containerType: 'inline-size',
+          // Without this, the browser's own native touch scroll/zoom
+          // fights the pointer handlers above - a one-finger drag on
+          // mobile would scroll the page instead of panning the map, and
+          // a pinch would zoom the whole viewport rather than just the
+          // seat canvas.
+          touchAction: 'none',
+          cursor: zoom > 1 ? 'grab' : 'default',
         } as any}
       >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: 'center center',
+          }}
+        >
         <div
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
@@ -177,7 +342,13 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           return (
             <div
               key={s.id}
-              onClick={() => toggleSeat(s)}
+              onClick={() => {
+                if (suppressClickRef.current) {
+                  suppressClickRef.current = false
+                  return
+                }
+                toggleSeat(s)
+              }}
               title={
                 s.status === 'taken'
                   ? `Row ${s.row}, Seat ${s.number} — taken`
@@ -224,6 +395,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             </div>
           )
         })}
+        </div>
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7 }}>
         <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-terracotta)', marginRight: '4px' }} />Selected</span>
