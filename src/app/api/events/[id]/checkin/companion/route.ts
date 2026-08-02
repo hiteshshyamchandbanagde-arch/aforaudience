@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { ensureFollowing } from '@/lib/follow'
 
 // POST /api/events/[id]/checkin/companion
 // body: { companionTagId }
@@ -77,6 +78,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       where: { id: companionTagId },
       data: { checkedInAt: new Date(), checkedInByUserId: user.id },
     })
+
+    // s60-auto-follow-organiser-on-attendance: a checked-in companion is a
+    // genuine attendee too, not just the booker - same silent nudge.
+    ensureFollowing(tag.taggedUserId, 'ORGANISER', event.organiserId).catch((err) =>
+      console.error('[checkin/companion] ensureFollowing nudge failed', err)
+    )
 
     return NextResponse.json({
       ok: true,
