@@ -6,6 +6,7 @@ import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
+import { getPlatformSettings } from '@/lib/platform-settings'
 
 export async function GET() {
   try {
@@ -207,6 +208,24 @@ export async function POST(req: Request) {
     if (eventDate.getTime() < Date.now()) {
       return NextResponse.json({ error: 'Event date and time must be in the future' }, { status: 400 })
     }
+
+    // Forward-window cap (Feedback cms9ynuxi, 2 Aug) - organisers can't
+    // create an event further out than this without contacting admin.
+    // Admin-configurable, default 3 months. Server-side because the
+    // create form's date-picker max is trivially bypassed by calling
+    // this route directly.
+    const { eventCreationWindowMonths } = await getPlatformSettings()
+    const maxAllowedDate = new Date()
+    maxAllowedDate.setMonth(maxAllowedDate.getMonth() + eventCreationWindowMonths)
+    if (eventDate.getTime() > maxAllowedDate.getTime()) {
+      return NextResponse.json(
+        {
+          error: `Events can only be created up to ${eventCreationWindowMonths} months out. For a later date, reach out to the AforAudience team via the feedback/support widget.`,
+        },
+        { status: 400 }
+      )
+    }
+
     if (!/^\d{1,2}:\d{2}$/.test(String(endTime))) {
       return NextResponse.json({ error: 'Invalid end time' }, { status: 400 })
     }

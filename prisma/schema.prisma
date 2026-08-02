@@ -927,6 +927,20 @@ model PlatformSettings {
   panelistVoteWeightDefault  Int @default(10)
   celebrityVoteWeightDefault Int @default(10)
 
+  // Feedback cms9ynuxi (2 Aug) - Hitesh: "what should be window of future
+  // event creation - could be 3 by default. If beyond that ask permission
+  // from admin." Enforced at event create/edit (see events/route.ts and
+  // events/[id]/route.ts) as a hard month-count cap from today, checked
+  // server-side (client date-picker max is a UX nicety, not the real
+  // enforcement - trivially bypassed by calling the API directly).
+  // Deliberately NOT built: a self-serve "request admin approval to
+  // exceed this" workflow - that's a second, larger feature (needs a
+  // request/approve queue, similar shape to the existing Pending Genre
+  // Requests panel). For now, an organiser who genuinely needs a later
+  // date is directed to contact admin via the support widget; scope
+  // decision, not an oversight - see PR notes.
+  eventCreationWindowMonths Int @default(3)
+
   updatedAt                    DateTime @updatedAt
 }
 

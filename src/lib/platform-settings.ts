@@ -34,6 +34,9 @@ export type PlatformSettings = {
   audienceVoteWeightDefault: number
   panelistVoteWeightDefault: number
   celebrityVoteWeightDefault: number
+  // Event-creation forward window (Feedback cms9ynuxi, 2 Aug) - see
+  // events/route.ts and events/[id]/route.ts for enforcement.
+  eventCreationWindowMonths: number
 }
 
 const SINGLETON_ID = "singleton"
@@ -51,6 +54,7 @@ const SETTINGS_SELECT = {
   audienceVoteWeightDefault: true,
   panelistVoteWeightDefault: true,
   celebrityVoteWeightDefault: true,
+  eventCreationWindowMonths: true,
 } as const
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {
@@ -245,6 +249,29 @@ export async function setAudienceChoiceWeightDefaults(input: {
     where: { id: SINGLETON_ID },
     update: { audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
     create: { id: SINGLETON_ID, audienceVoteWeightDefault: audience, panelistVoteWeightDefault: panelist, celebrityVoteWeightDefault: celebrity },
+    select: SETTINGS_SELECT,
+  })
+  return row
+}
+
+/**
+ * Admin-only setter for how many months out an organiser can create an
+ * event without needing to contact admin first (Feedback cms9ynuxi, 2
+ * Aug - Hitesh's own suggested default was 3). Capped at 24 months as a
+ * sanity backstop against a fat-fingered value effectively disabling
+ * the check.
+ */
+export async function setEventCreationWindowMonths(months: number): Promise<PlatformSettings> {
+  if (!Number.isInteger(months) || months < 1) {
+    throw new Error("eventCreationWindowMonths must be a positive integer")
+  }
+  if (months > 24) {
+    throw new Error("eventCreationWindowMonths cannot exceed 24")
+  }
+  const row = await prisma.platformSettings.upsert({
+    where: { id: SINGLETON_ID },
+    update: { eventCreationWindowMonths: months },
+    create: { id: SINGLETON_ID, eventCreationWindowMonths: months },
     select: SETTINGS_SELECT,
   })
   return row

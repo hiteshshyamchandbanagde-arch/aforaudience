@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { parseAmount } from '@/lib/money-validation'
 import { requireVerifiedPhone } from '@/lib/verification'
+import { getPlatformSettings } from '@/lib/platform-settings'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -81,6 +82,31 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // 57, Accept-to-Appear) are no longer handled by this route at all -
     // see the comment at the write site below.
     const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
+
+    // Forward-window cap (Feedback cms9ynuxi, 2 Aug) - same rule as
+    // event creation, applied here only when `date` is actually being
+    // changed (an untouched date on an existing far-future event isn't
+    // re-validated on every unrelated edit - pre-existing events aren't
+    // retroactively broken by this). No backdating check exists on this
+    // route today either way - that's a separate pre-existing gap, not
+    // touched here, logged separately.
+    if (date) {
+      const candidateDate = new Date(date)
+      if (!Number.isNaN(candidateDate.getTime())) {
+        const { eventCreationWindowMonths } = await getPlatformSettings()
+        const maxAllowedDate = new Date()
+        maxAllowedDate.setMonth(maxAllowedDate.getMonth() + eventCreationWindowMonths)
+        if (candidateDate.getTime() > maxAllowedDate.getTime()) {
+          return NextResponse.json(
+            {
+              error: `Events can only be scheduled up to ${eventCreationWindowMonths} months out. For a later date, reach out to the AforAudience team via the feedback/support widget.`,
+            },
+            { status: 400 }
+          )
+        }
+      }
+    }
+
 
     // Audience Choice vote weights (§6, session 58) - organiser override,
     // all three or none (avoids a partial write leaving weights that
