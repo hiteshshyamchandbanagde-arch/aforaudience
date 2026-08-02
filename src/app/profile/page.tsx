@@ -638,47 +638,54 @@ function ProfileContent() {
               </button>
             )}
           </div>
-        </div>
 
-        <Link
-          href="/my-feedback"
-          style={{
-            display: 'block',
-            ...cardStyle,
-            textDecoration: 'none',
-            color: 'inherit',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-            <div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-                My Feedback
-              </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
-                {feedbackSummary === null
-                  ? "See the bugs, ideas, and questions you've reported, and their status →"
-                  : feedbackSummary.total === 0
-                    ? "You haven't reported anything yet →"
-                    : `${feedbackSummary.total} reported${feedbackSummary.open > 0 ? ` · ${feedbackSummary.open} still open` : ' · all resolved or rejected'} →`}
-              </p>
+          {/* My Feedback link (session 63) was structurally placed OUTSIDE
+              this maxWidth wrapper - the wrapper's closing </div> used to
+              sit right here, before the Link, making it a sibling of this
+              whole centered column instead of the last card inside it.
+              Rendered full-page-width instead of matching every other
+              card (caught live by Hitesh, 2 Aug - "UI/UX not
+              convincing"). Fixed by moving the close to after the Link. */}
+          <Link
+            href="/my-feedback"
+            style={{
+              display: 'block',
+              ...cardStyle,
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+                  My Feedback
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
+                  {feedbackSummary === null
+                    ? "See the bugs, ideas, and questions you've reported, and their status →"
+                    : feedbackSummary.total === 0
+                      ? "You haven't reported anything yet →"
+                      : `${feedbackSummary.total} reported${feedbackSummary.open > 0 ? ` · ${feedbackSummary.open} still open` : ' · all resolved or rejected'} →`}
+                </p>
+              </div>
+              {feedbackSummary !== null && feedbackSummary.open > 0 && (
+                <span
+                  style={{
+                    flexShrink: 0,
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: 'var(--afa-cream)',
+                    background: 'var(--afa-terracotta)',
+                    borderRadius: '999px',
+                    padding: '4px 12px',
+                  }}
+                >
+                  {feedbackSummary.open}
+                </span>
+              )}
             </div>
-            {feedbackSummary !== null && feedbackSummary.open > 0 && (
-              <span
-                style={{
-                  flexShrink: 0,
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: 'var(--afa-cream)',
-                  background: 'var(--afa-terracotta)',
-                  borderRadius: '999px',
-                  padding: '4px 12px',
-                }}
-              >
-                {feedbackSummary.open}
-              </span>
-            )}
-          </div>
-        </Link>
+          </Link>
+        </div>
       </main>
     </>
   )
