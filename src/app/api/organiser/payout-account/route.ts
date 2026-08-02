@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { fetchLinkedAccount } from '@/lib/razorpay'
+import { getPlatformSettings, isDirectPayoutsEnabled } from '@/lib/platform-settings'
 
 // K2 — organiser direct payout (Route split). An organiser's own Razorpay
 // account_id is linked here, then used in POST /api/bookings to split
@@ -39,8 +40,11 @@ export async function GET() {
   const { organiser, error } = await getOrganiserOrError(user.id)
   if (error) return error
 
+  const settings = await getPlatformSettings()
+  const enabled = isDirectPayoutsEnabled(settings)
+
   if (!organiser!.razorpayAccountId) {
-    return NextResponse.json({ linked: false, accountId: null, status: null })
+    return NextResponse.json({ linked: false, accountId: null, status: null, enabled })
   }
 
   // Refresh from Razorpay rather than serving the locally-cached status —
@@ -55,11 +59,11 @@ export async function GET() {
         data: { razorpayAccountStatus: info.status },
       })
     }
-    return NextResponse.json({ linked: true, accountId: info.id, status: info.status })
+    return NextResponse.json({ linked: true, accountId: info.id, status: info.status, enabled })
   } catch (err) {
     console.error('[payout-account.GET] Razorpay lookup failed:', err)
     return NextResponse.json(
-      { linked: true, accountId: organiser!.razorpayAccountId, status: organiser!.razorpayAccountStatus, refreshError: true },
+      { linked: true, accountId: organiser!.razorpayAccountId, status: organiser!.razorpayAccountStatus, refreshError: true, enabled },
       { status: 200 }
     )
   }
@@ -79,6 +83,14 @@ export async function POST(req: Request) {
 
   const { organiser, error } = await getOrganiserOrError(user.id)
   if (error) return error
+
+  const settings = await getPlatformSettings()
+  if (!isDirectPayoutsEnabled(settings)) {
+    return NextResponse.json(
+      { error: 'Direct payouts are currently unavailable on the platform. Ticket revenue is settled to organisers manually for now — reach out via support if you need details.' },
+      { status: 400 }
+    )
+  }
 
   const body = await req.json().catch(() => ({}))
   const accountId = typeof body?.accountId === 'string' ? body.accountId.trim() : ''

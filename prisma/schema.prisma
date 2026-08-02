@@ -979,6 +979,21 @@ model PlatformSettings {
   // decision, not an oversight - see PR notes.
   eventCreationWindowMonths Int @default(3)
 
+  // Direct Payouts (Razorpay Route) admin toggle - session 65. Route is
+  // unavailable on this Razorpay account tier (confirmed 28 Jul - requires
+  // ₹40L+ turnover per RBI Payment Aggregator Directions 2025), so K2
+  // pivoted to a manual two-step transfer model (OrganiserPayoutLedger,
+  // PR #263). This flag gates the pre-pivot "Direct Payouts" surfaces
+  // (organiser dashboard link, /dashboard/organiser/payouts linking form,
+  // payout-account POST) so they stop promoting a Route linking flow that
+  // can't actually work. Default OFF. directPayoutsEnabledUntil is an
+  // optional expiry, lazy-checked on read (no cron) - if set and in the
+  // past, treated as disabled regardless of the bool, so admin can flip
+  // this on temporarily (e.g. to re-test if the account tier changes)
+  // without having to remember to flip it back off.
+  directPayoutsEnabled       Boolean   @default(false)
+  directPayoutsEnabledUntil  DateTime?
+
   updatedAt                    DateTime @updatedAt
 }
 
