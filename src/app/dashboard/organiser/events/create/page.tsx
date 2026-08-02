@@ -133,6 +133,28 @@ export default function CreateEventPage() {
   // doesn't fire before any error has ever been shown.
   const isFirstRender = useRef(true)
 
+  // Feedback cms9ynuxi - UX hint for the date picker's max, mirroring
+  // the server-enforced window. Not the real enforcement (that's
+  // server-side, see events/route.ts) - if this fetch fails for any
+  // reason, maxDateString just stays null and the input has no upper
+  // bound client-side, same as before this feature existed; the
+  // server still rejects out-of-window submissions either way.
+  const [maxDateString, setMaxDateString] = useState<string | null>(null)
+  const [windowMonths, setWindowMonths] = useState<number | null>(null)
+  useEffect(() => {
+    fetch('/api/platform-settings/event-window')
+      .then((res) => res.json())
+      .then((data) => {
+        const months = Number(data?.eventCreationWindowMonths)
+        if (!Number.isFinite(months) || months <= 0) return
+        setWindowMonths(months)
+        const max = new Date()
+        max.setMonth(max.getMonth() + months)
+        setMaxDateString(max.toISOString().slice(0, 10))
+      })
+      .catch(() => {})
+  }, [])
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -556,7 +578,12 @@ export default function CreateEventPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Date *</label>
-                  <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} style={inputStyle} required />
+                  <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} max={maxDateString ?? undefined} style={inputStyle} required />
+                  {windowMonths && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: '4px' }}>
+                      Up to {windowMonths} months out. For a later date, contact us via the feedback widget.
+                    </p>
+                  )}
                 </div>
               </div>
 

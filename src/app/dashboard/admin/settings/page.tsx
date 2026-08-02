@@ -56,6 +56,12 @@ export default function AdminSettingsPage() {
   const [initialRosterLookback, setInitialRosterLookback] = useState<number>(5)
   const [rosterLookbackSaving, setRosterLookbackSaving] = useState(false)
 
+  // Event-creation forward window (Feedback cms9ynuxi, 2 Aug) - how far
+  // out an organiser can pick a date without contacting admin.
+  const [eventWindow, setEventWindow] = useState<string>('')
+  const [initialEventWindow, setInitialEventWindow] = useState<number>(3)
+  const [eventWindowSaving, setEventWindowSaving] = useState(false)
+
   // Audience Choice voting default weights (§6, session 58)
   const [audienceWeight, setAudienceWeight] = useState<string>('')
   const [panelistWeight, setPanelistWeight] = useState<string>('')
@@ -128,6 +134,10 @@ export default function AdminSettingsPage() {
         const lookback = data.settings.artistRosterHypeScoreLookback
         setInitialRosterLookback(lookback)
         setRosterLookback(String(lookback))
+
+        const evWindow = data.settings.eventCreationWindowMonths
+        setInitialEventWindow(evWindow)
+        setEventWindow(String(evWindow))
 
         const aw = data.settings.audienceVoteWeightDefault
         const pw = data.settings.panelistVoteWeightDefault
@@ -348,6 +358,31 @@ export default function AdminSettingsPage() {
   }
   const isRosterLookbackDirty = Math.round(Number(rosterLookback || 0)) !== initialRosterLookback
   const isRosterLookbackValid = Number.isInteger(Number(rosterLookback)) && Number(rosterLookback) >= 1
+
+  const saveEventWindow = async () => {
+    setEventWindowSaving(true)
+    try {
+      const months = Number(eventWindow)
+      if (!Number.isInteger(months) || months < 1 || months > 24) {
+        throw new Error('Window must be a whole number of months, 1-24')
+      }
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventCreationWindowMonths: months }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialEventWindow(data.settings.eventCreationWindowMonths)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setEventWindowSaving(false)
+    }
+  }
+  const isEventWindowDirty = Math.round(Number(eventWindow || 0)) !== initialEventWindow
+  const isEventWindowValid = Number.isInteger(Number(eventWindow)) && Number(eventWindow) >= 1 && Number(eventWindow) <= 24
 
   const saveVoteWeightDefaults = async () => {
     setVoteWeightsSaving(true)
@@ -726,6 +761,43 @@ export default function AdminSettingsPage() {
           </div>
           <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
             Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
+          </p>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            EVENT CREATION WINDOW (MONTHS OUT, MAX)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={24}
+              step="1"
+              value={eventWindow}
+              onChange={(e) => setEventWindow(e.target.value)}
+              placeholder="3"
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(14,12,10,0.15)', fontSize: 15 }}
+            />
+            <button
+              onClick={saveEventWindow}
+              disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}
+              style={{
+                background: 'var(--afa-terracotta)',
+                color: 'white',
+                padding: '9px 16px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 'default' : 'pointer',
+                opacity: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 0.5 : 1,
+              }}
+            >
+              {eventWindowSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            How far out an organiser can pick an event date on Create/Edit Event without contacting admin. Enforced server-side (not just the date-picker's max) — capped at 24 months here as a sanity backstop.
           </p>
 
           <button

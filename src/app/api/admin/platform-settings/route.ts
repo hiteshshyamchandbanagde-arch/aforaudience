@@ -9,6 +9,7 @@ import {
   setSceneStatusThresholds,
   setArtistRosterHypeScoreLookback,
   setAudienceChoiceWeightDefaults,
+  setEventCreationWindowMonths,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -77,12 +78,13 @@ export async function PATCH(req: Request) {
     Object.prototype.hasOwnProperty.call(body, 'audienceVoteWeightDefault') &&
     Object.prototype.hasOwnProperty.call(body, 'panelistVoteWeightDefault') &&
     Object.prototype.hasOwnProperty.call(body, 'celebrityVoteWeightDefault')
+  const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, or all three vote weight defaults together is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -146,6 +148,14 @@ export async function PATCH(req: Request) {
         })
       } catch (e: any) {
         return NextResponse.json({ error: e.message || 'Invalid vote weights' }, { status: 400 })
+      }
+    }
+
+    if (hasEventWindow) {
+      try {
+        updated = await setEventCreationWindowMonths(Number(body.eventCreationWindowMonths))
+      } catch (e: any) {
+        return NextResponse.json({ error: e.message || 'Invalid eventCreationWindowMonths' }, { status: 400 })
       }
     }
 
