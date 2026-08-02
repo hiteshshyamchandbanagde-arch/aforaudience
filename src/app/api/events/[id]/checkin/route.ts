@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { ensureFollowing } from '@/lib/follow'
 
 // Check-in/scan flow (EPIC N). The QR on the ticket PDF (and the "BOOKING ID"
 // text printed alongside it, for manual entry) encodes booking.id as-is -
@@ -77,6 +78,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       where: { id: booking.id },
       data: { checkedInAt: new Date(), checkedInByUserId: user.id },
     })
+
+    // s60-auto-follow-organiser-on-attendance: attending a show earns
+    // automatic early-notification access to that organiser's future
+    // events, same silent-nudge pattern as the reviews route's ARTIST
+    // follow-on-rating. Fire-and-forget, never blocks the check-in itself.
+    ensureFollowing(booking.userId, 'ORGANISER', event.organiserId).catch((err) =>
+      console.error('[checkin] ensureFollowing nudge failed', err)
+    )
 
     return NextResponse.json({
       ok: true,
