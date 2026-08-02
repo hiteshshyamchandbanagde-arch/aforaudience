@@ -35,17 +35,19 @@ function parseCookie(raw: string | undefined): { city: string; lat: number | nul
 
 // Vercel sets these on every request at the edge - no external API call,
 // no billing, city-level only (not GPS-precise). Empty in local dev.
-// City comes URI-encoded (e.g. "Pune" or "New%20Delhi"). No country name
-// header is provided (only a 2-letter x-vercel-ip-country, which doesn't
-// match Venue.country's full-name format) - detected guesses simply
-// carry no country until/unless the person picks a city from the list.
-function detectFromVercelHeaders(headerStore: Awaited<ReturnType<typeof headersFn>>): { city: string; lat: number | null; lng: number | null; country: null } | null {
+// City comes URI-encoded (e.g. "Pune" or "New%20Delhi"). Country comes
+// as a 2-letter ISO code (e.g. "IN") - doesn't match Venue.country's
+// full-name format ("India"), but countryCode() in country-codes.ts
+// passes an already-2-letter code straight through, so this still
+// renders correctly as "Pune (IN)" without needing a name lookup here.
+function detectFromVercelHeaders(headerStore: Awaited<ReturnType<typeof headersFn>>): { city: string; lat: number | null; lng: number | null; country: string | null } | null {
   const rawCity = headerStore.get('x-vercel-ip-city')
   if (!rawCity) return null
   const city = decodeURIComponent(rawCity)
   const lat = parseFloat(headerStore.get('x-vercel-ip-latitude') || '')
   const lng = parseFloat(headerStore.get('x-vercel-ip-longitude') || '')
-  return { city, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null, country: null }
+  const country = headerStore.get('x-vercel-ip-country') || null
+  return { city, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null, country }
 }
 
 // Precedence: explicit profile choice > previously-set cookie > this
