@@ -8,8 +8,11 @@ import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings } from '@/lib/platform-settings'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url)
+    const city = searchParams.get('city')?.trim() || null
+
     const events = await prisma.event.findMany({
       // H3 - a suspended Organiser's future events drop out of public
       // listings immediately (no new tickets sold while suspended), but
@@ -21,7 +24,16 @@ export async function GET() {
       // got a chance to run on it, since it was filtered out before
       // reaching the client). Widen to include COMPLETED; DRAFT/
       // PENDING_APPROVAL/CANCELLED remain excluded.
-      where: { status: { in: ['APPROVED', 'COMPLETED'] }, organiser: { user: { isSuspended: false } } },
+      // FEAT-2608-036 fast-follow - optional ?city= narrows this at the
+      // query level (indexed via Venue_city_idx) instead of the client
+      // fetching every event and throwing most of them away. Omitted/
+      // null = unchanged "All Cities" behaviour, so this stays backward
+      // compatible with any other caller of this route.
+      where: {
+        status: { in: ['APPROVED', 'COMPLETED'] },
+        organiser: { user: { isSuspended: false } },
+        ...(city ? { venue: { city } } : {}),
+      },
       include: { venue: true, lineup: true },
       orderBy: { date: 'asc' },
     })
