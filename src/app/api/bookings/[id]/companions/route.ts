@@ -39,9 +39,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     orderBy: { createdAt: 'asc' },
   })
 
+  // Same seat-count duality as PATCH below - computed once here so the
+  // checkout page can show "X of Y tagged" without re-deriving it.
+  const numberedSeatCount = await prisma.bookingSeat.count({ where: { bookingId: id } })
+  const totalSeats =
+    numberedSeatCount > 0
+      ? numberedSeatCount
+      : Object.values((guard.booking!.seats as Record<string, number>) || {}).reduce((sum, q) => sum + Number(q || 0), 0)
+  const maxCompanions = Math.max(0, totalSeats - 1)
+
   return NextResponse.json({
     companionTaggingConsent: guard.booking!.companionTaggingConsent,
     tags,
+    maxCompanions,
   })
 }
 
@@ -64,6 +74,50 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (addUserIds.includes(user.id)) {
     return NextResponse.json({ error: "You can't tag yourself" }, { status: 400 })
+  }
+
+  // Feedback cmsaodzsy: "must show real data - if 3 tickets purchased
+  // then [max] 2 crew" - companion tags previously had no cap at all,
+  // so a 1-ticket booking could tag an unlimited number of companions
+  // with no physical seat for any of them. Cap = total seats on this
+  // booking minus one (the booker's own seat). Numbered bookings count
+  // real BookingSeat rows; GA bookings sum the seats JSON quantities -
+  // same duality the checkout page already reads for its own summary.
+  // Server-side is the real enforcement (client is UX only) per the
+  // custom-submit-form learning - this endpoint is called directly, not
+  // behind HTML5 form validation.
+  if (addUserIds.length > 0) {
+    const numberedSeatCount = await prisma.bookingSeat.count({ where: { bookingId: id } })
+    const totalSeats =
+      numberedSeatCount > 0
+        ? numberedSeatCount
+        : Object.values((booking.seats as Record<string, number>) || {}).reduce((sum, q) => sum + Number(q || 0), 0)
+    const maxCompanions = Math.max(0, totalSeats - 1)
+
+    const activeTagCount = await prisma.companionTag.count({
+      where: { bookingId: id, status: { not: 'DECLINED' } },
+    })
+    // Only count NEW ids toward the cap - upserting an id that's already
+    // tagged (PENDING/ACCEPTED) doesn't consume another slot.
+    const alreadyTaggedIds = new Set(
+      (await prisma.companionTag.findMany({
+        where: { bookingId: id, status: { not: 'DECLINED' } },
+        select: { taggedUserId: true },
+      })).map((t: { taggedUserId: string }) => t.taggedUserId)
+    )
+    const newTagCount = addUserIds.filter((uid: string) => !alreadyTaggedIds.has(uid)).length
+
+    if (activeTagCount + newTagCount > maxCompanions) {
+      return NextResponse.json(
+        {
+          error:
+            maxCompanions === 0
+              ? "This booking has only your own seat - there's no extra seat to tag a companion for."
+              : `This booking has ${totalSeats} seat${totalSeats === 1 ? '' : 's'} - you can tag up to ${maxCompanions} companion${maxCompanions === 1 ? '' : 's'} alongside your own.`,
+        },
+        { status: 400 }
+      )
+    }
   }
 
   const updateData: any = {}
@@ -106,9 +160,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     orderBy: { createdAt: 'asc' },
   })
 
+  const numberedSeatCountAfter = await prisma.bookingSeat.count({ where: { bookingId: id } })
+  const totalSeatsAfter =
+    numberedSeatCountAfter > 0
+      ? numberedSeatCountAfter
+      : Object.values((booking.seats as Record<string, number>) || {}).reduce((sum, q) => sum + Number(q || 0), 0)
+
   return NextResponse.json({
     companionTaggingConsent: consent ?? booking.companionTaggingConsent,
     tags,
+    maxCompanions: Math.max(0, totalSeatsAfter - 1),
   })
 }
 
