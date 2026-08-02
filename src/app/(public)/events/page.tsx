@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
+import { isNightEvent } from "@/lib/eventTime"
 
 interface EventItem {
   id: string
@@ -405,6 +406,9 @@ export default function EventsPage() {
                       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
                         <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
                         <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🕐 {event.startTime}</span>
+                        {isNightEvent(event.startTime) && (
+                          <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title="Starts after 9 PM">🌙 Night</span>
+                        )}
                         {event.lineup.length > 0 && (
                           <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {event.lineup.length} performing</span>
                         )}
