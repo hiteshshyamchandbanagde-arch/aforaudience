@@ -116,6 +116,77 @@ export async function suggestAvailableUsername(seed: string): Promise<string> {
   }
 }
 
+// On-brand word bank for the initials-suggestion upgrade below - live
+// performance/theatre vocabulary, kept generic (no protected terms), so
+// suggestions feel like *this* platform's signup rather than a plain
+// initials string. Purely cosmetic pairing with the initials seed - adds
+// no identity information, so it doesn't reopen the session-39 /
+// cmse195bc1e27d60e27596011 privacy reasoning above.
+const THEME_WORDS = [
+  "backstage", "spotlight", "encore", "curtaincall", "houselights",
+  "matinee", "greenroom", "showtime", "onstage", "standingovation",
+  "openmic", "frontrow",
+]
+
+function shuffled<T>(arr: T[]): T[] {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+/**
+ * Feedback cmse195bc1e27d60e27596011 follow-up (2 Aug) - the single flat
+ * initials string ("hsb") read as a bare-minimum effort. This generates
+ * up to 3 varied, still fully de-identified options from the same
+ * initials seed: plain, a numbered variant, and a brand-flavored variant
+ * pairing the initials with a theme word. Randomized picks (word choice,
+ * number) so calling this again - the client's "try more" control - a
+ * genuinely different set most of the time, without any extra state.
+ */
+export async function suggestUsernameVariants(seed: string): Promise<string[]> {
+  const base = seed.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 20) || "user"
+  const variants: string[] = []
+  const seen = new Set<string>()
+
+  const tryAdd = async (candidate: string) => {
+    if (seen.has(candidate)) return false
+    seen.add(candidate)
+    const available = await isUsernameAvailable(candidate)
+    if (available) {
+      variants.push(candidate)
+      return true
+    }
+    return false
+  }
+
+  // 1. Plain initials.
+  await tryAdd(base)
+
+  // 2. Initials + a short random number (bounded retries, not sequential
+  // 1/2/3 - a random pick reads less like an auto-incrementing counter).
+  for (let attempt = 0; attempt < 5 && variants.length < 2; attempt++) {
+    await tryAdd(`${base}${Math.floor(Math.random() * 90) + 10}`)
+  }
+
+  // 3. Initials + a random theme word, trying a few words before giving
+  // up and falling back to another number so this slot is rarely empty.
+  const words = shuffled(THEME_WORDS)
+  for (const word of words) {
+    if (variants.length >= 3) break
+    if (await tryAdd(`${base}.${word}`)) break
+  }
+  if (variants.length < 3) {
+    for (let attempt = 0; attempt < 5 && variants.length < 3; attempt++) {
+      await tryAdd(`${base}${Math.floor(Math.random() * 900) + 100}`)
+    }
+  }
+
+  return variants
+}
+
 /**
  * Case-insensitive availability check. Prevents a new user registering
  * `Hitesh` when `hitesh` already exists — which prior to this change

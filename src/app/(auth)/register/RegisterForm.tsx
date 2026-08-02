@@ -48,7 +48,7 @@ export default function RegisterForm() {
   // may not want any part of the platform tying their legal name to an
   // identifier at all.
   //
-  // Middle ground (Feedback cmse195bc1e27d60e27596011, this session):
+  // Middle ground (Feedback cmse195bc1e27d60e27596011, session 63):
   // Hitesh asked for the blank-field gap to be closed but the privacy
   // reasoning above still holds, so this suggests from INITIALS only
   // ("Will Smith" -> "ws"), never the name itself - genuinely
@@ -56,30 +56,43 @@ export default function RegisterForm() {
   // behavior, it's never auto-filled: same "click to accept" pattern as
   // the existing taken-username suggestion below, so the person still
   // deliberately chooses it rather than it silently appearing.
-  const [initialsSuggestion, setInitialsSuggestion] = useState<string | null>(null)
+  //
+  // Upgrade (2 Aug, same Feedback thread): a single flat initials string
+  // read as a bare-minimum effort, so this now fetches up to 3 varied
+  // options (plain / numbered / brand-flavored) from
+  // suggestUsernameVariants, plus a "try more" reroll.
+  const [initialsSuggestions, setInitialsSuggestions] = useState<string[]>([])
+  const [initialsLoading, setInitialsLoading] = useState(false)
 
-  useEffect(() => {
-    if (form.username || !form.fullName.trim()) {
-      setInitialsSuggestion(null)
-      return
-    }
+  const initialsSeed = (() => {
+    if (form.username || !form.fullName.trim()) return ""
     const words = form.fullName.trim().split(/\s+/).filter(Boolean)
     const seed = words.length > 1 ? words.map((w) => w[0]).join("") : words[0]?.slice(0, 3) ?? ""
-    if (seed.length < 2) {
-      setInitialsSuggestion(null)
+    return seed.length >= 2 ? seed : ""
+  })()
+
+  const fetchInitialsSuggestions = async (seed: string) => {
+    setInitialsLoading(true)
+    try {
+      const res = await fetch(`/api/auth/username-suggestions?seed=${encodeURIComponent(seed)}`)
+      const data = await res.json()
+      setInitialsSuggestions(data.variants ?? [])
+    } catch {
+      setInitialsSuggestions([])
+    } finally {
+      setInitialsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!initialsSeed) {
+      setInitialsSuggestions([])
       return
     }
-    const timeout = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/auth/username-check?value=${encodeURIComponent(seed)}`)
-        const data = await res.json()
-        setInitialsSuggestion(data.available ? seed : data.suggestion ?? null)
-      } catch {
-        setInitialsSuggestion(null)
-      }
-    }, 500)
+    const timeout = setTimeout(() => fetchInitialsSuggestions(initialsSeed), 500)
     return () => clearTimeout(timeout)
-  }, [form.fullName, form.username])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialsSeed])
 
   // Live uniqueness check, debounced.
   useEffect(() => {
@@ -319,17 +332,50 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
               />
-              {usernameStatus === "idle" && initialsSuggestion && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
-                  Suggested from your initials:{" "}
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, username: initialsSuggestion }))}
-                    style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0, fontWeight: 600 }}
-                  >
-                    {initialsSuggestion}
-                  </button>
-                </p>
+              {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
+                <div style={{ marginTop: "8px" }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
+                    Suggested from your initials:
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
+                    {initialsSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, username: suggestion }))}
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "var(--afa-terracotta)",
+                          background: "rgba(196,90,52,0.08)",
+                          border: "1px solid rgba(196,90,52,0.25)",
+                          borderRadius: "999px",
+                          padding: "4px 12px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => fetchInitialsSuggestions(initialsSeed)}
+                      disabled={initialsLoading}
+                      title="Try more suggestions"
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--afa-ink)",
+                        opacity: initialsLoading ? 0.4 : 0.6,
+                        background: "none",
+                        border: "none",
+                        cursor: initialsLoading ? "default" : "pointer",
+                        padding: "4px 2px",
+                      }}
+                    >
+                      {initialsLoading ? "…" : "🔀 Try more"}
+                    </button>
+                  </div>
+                </div>
               )}
               {usernameStatus === "checking" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>Checking availability...</p>
