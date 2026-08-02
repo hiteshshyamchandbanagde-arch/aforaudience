@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, type TouchEvent } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
@@ -62,6 +63,111 @@ export default function ArtistProfilePage({
   const [followerCount, setFollowerCount] = useState(artist?._count.followers ?? 0)
   const [followBusy, setFollowBusy] = useState(false)
   const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const router = useRouter()
+
+  // Feedback cmsaicfav (2 Aug) - swipe left/right (mobile) / arrow keys
+  // (desktop) to move to the previous/next artist without going back to
+  // the listing. Follow-up to the same pattern piloted on the Feedback
+  // admin panel (PR #327) - this is the "full-page detail view" version
+  // that pilot deliberately deferred, since each artist has its own URL
+  // and "next" has to mean something specific: the order the person was
+  // actually browsing in, not an arbitrary default.
+  //
+  // /artists stashes its currently filtered/sorted id list into
+  // sessionStorage right before navigating here (see goToArtist in
+  // page.tsx). If that's present and includes this artist, it's used
+  // as-is - swiping through respects whatever search/genre filter was
+  // active. If it's missing or stale (direct link, deep link, or a
+  // filtered-out artist), falls back to the same default order the
+  // listing's own API already returns (ordered by performance count),
+  // so prev/next still works, just without a specific filter to honor.
+  const [navOrder, setNavOrder] = useState<string[] | null>(null)
+  const [navigating, setNavigating] = useState(false)
+
+  useEffect(() => {
+    if (!artist) return
+    let cancelled = false
+
+    const useFallback = async () => {
+      try {
+        const res = await fetch('/api/artists')
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled && Array.isArray(data)) {
+          setNavOrder(data.map((a: { id: string }) => a.id))
+        }
+      } catch {
+        // No nav order - prev/next bar just won't render, rest of the
+        // page is unaffected.
+      }
+    }
+
+    try {
+      const raw = sessionStorage.getItem('afa-artist-nav-order')
+      if (raw) {
+        const stashed = JSON.parse(raw)
+        if (Array.isArray(stashed) && stashed.includes(artist.id)) {
+          setNavOrder(stashed)
+          return
+        }
+      }
+    } catch {
+      // Fall through to fallback fetch below.
+    }
+    useFallback()
+
+    return () => {
+      cancelled = true
+    }
+  }, [artist])
+
+  useEffect(() => {
+    setNavigating(false)
+  }, [artist?.id])
+
+  const navIndex = navOrder && artist ? navOrder.indexOf(artist.id) : -1
+  const prevArtistId = navOrder && navIndex > 0 ? navOrder[navIndex - 1] : null
+  const nextArtistId = navOrder && navIndex >= 0 && navIndex < navOrder.length - 1 ? navOrder[navIndex + 1] : null
+
+  const goToPrevArtist = () => {
+    if (navigating || !prevArtistId) return
+    setNavigating(true)
+    router.push(`/artists/${prevArtistId}`)
+  }
+  const goToNextArtist = () => {
+    if (navigating || !nextArtistId) return
+    setNavigating(true)
+    router.push(`/artists/${nextArtistId}`)
+  }
+
+  useEffect(() => {
+    if (!navOrder) return
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      const isTyping = target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+      if (isTyping) return
+      if (e.key === 'ArrowLeft') goToPrevArtist()
+      if (e.key === 'ArrowRight') goToNextArtist()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navOrder, navigating, prevArtistId, nextArtistId])
+
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null)
+  const SWIPE_THRESHOLD_PX = 60
+  const handleProfileTouchStart = (e: TouchEvent) => {
+    setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+  }
+  const handleProfileTouchEnd = (e: TouchEvent) => {
+    if (!touchStartPos) return
+    const dx = e.changedTouches[0].clientX - touchStartPos.x
+    const dy = e.changedTouches[0].clientY - touchStartPos.y
+    setTouchStartPos(null)
+    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
+    if (dx > 0) goToPrevArtist()
+    else goToNextArtist()
+  }
 
   useEffect(() => {
     if (!artist) return
@@ -130,8 +236,56 @@ export default function ArtistProfilePage({
   const displayName = artist.user.displayName || artist.user.name
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main
+      style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}
+      onTouchStart={handleProfileTouchStart}
+      onTouchEnd={handleProfileTouchEnd}
+    >
       <SiteNav backHref="/artists" backLabel="← Back to Artists" />
+
+      {navOrder && navIndex >= 0 && (
+        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "10px 24px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: "16px" }}>
+          <button
+            onClick={goToPrevArtist}
+            disabled={!prevArtistId}
+            aria-label="Previous artist"
+            style={{
+              background: "var(--afa-white)",
+              border: "1px solid rgba(14,12,10,0.13)",
+              borderRadius: "999px",
+              width: "30px",
+              height: "30px",
+              fontSize: "15px",
+              cursor: prevArtistId ? "pointer" : "default",
+              opacity: prevArtistId ? 1 : 0.35,
+              color: "var(--afa-ink)",
+            }}
+          >
+            ‹
+          </button>
+          <span style={{ fontSize: "12px", color: "var(--afa-taupe, #8a8078)" }}>
+            Artist {navIndex + 1} of {navOrder.length}
+          </span>
+          <button
+            onClick={goToNextArtist}
+            disabled={!nextArtistId}
+            aria-label="Next artist"
+            style={{
+              background: "var(--afa-white)",
+              border: "1px solid rgba(14,12,10,0.13)",
+              borderRadius: "999px",
+              width: "30px",
+              height: "30px",
+              fontSize: "15px",
+              cursor: nextArtistId ? "pointer" : "default",
+              opacity: nextArtistId ? 1 : 0.35,
+              color: "var(--afa-ink)",
+            }}
+          >
+            ›
+          </button>
+        </div>
+      )}
 
       {/* HERO */}
       <div style={{ background: "var(--afa-plum-black)", padding: "64px 48px 40px" }}>

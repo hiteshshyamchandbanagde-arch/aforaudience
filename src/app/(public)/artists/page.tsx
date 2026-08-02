@@ -49,6 +49,22 @@ export default function ArtistsPage() {
   const goToArtist = (id: string) => {
     if (navigatingId) return
     setNavigatingId(id)
+    // Feedback cmsaicfav (2 Aug) - swipe/arrow prev-next on the profile
+    // page needs to know "next relative to what". Stashing the id order
+    // of the list as currently filtered/sorted on screen (search +
+    // genre + the existing performance-count sort) so prev/next on the
+    // profile matches what was actually being browsed, not some other
+    // default order. sessionStorage not state/context - survives the
+    // full-page navigation a Link/router.push does, cleared naturally
+    // on browser close, no size concern (id list only, not full
+    // records).
+    try {
+      sessionStorage.setItem('afa-artist-nav-order', JSON.stringify(filtered.map((a) => a.id)))
+    } catch {
+      // Storage can fail (private browsing, quota) - navigation still
+      // works, the profile page just falls back to its own default
+      // order.
+    }
     startTransition(() => {
       router.push(`/artists/${id}`)
     })
