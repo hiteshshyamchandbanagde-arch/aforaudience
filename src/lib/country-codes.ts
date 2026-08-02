@@ -49,6 +49,11 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
 
 export function countryCode(countryName: string | null | undefined): string | null {
   if (!countryName) return null
+  // Already a 2-letter code (e.g. from Vercel's x-vercel-ip-country
+  // header on a freshly IP-detected location, before the person has
+  // ever picked from the city list) - use it directly rather than
+  // failing the full-name lookup below and silently dropping it.
+  if (/^[A-Z]{2}$/.test(countryName)) return countryName
   return COUNTRY_NAME_TO_CODE[countryName] ?? null
 }
 
