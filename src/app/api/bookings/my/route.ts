@@ -20,6 +20,19 @@ export async function GET() {
     include: {
       event: { include: { venue: true } },
       bookingSeats: { include: { seat: true } },
+      // Session 65 (Hitesh feedback) - surfaces who's tagged on each
+      // booking + their response status directly on My Tickets, not just
+      // buried in the checkout flow. Same PENDING/ACCEPTED/DECLINED
+      // status shape and "(pending)/(confirmed)/(declined)" labels
+      // already used at checkout (src/app/checkout/[bookingId]/page.tsx)
+      // for consistency.
+      companionTags: {
+        select: {
+          id: true,
+          status: true,
+          taggedUser: { select: { id: true, name: true, displayName: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   })

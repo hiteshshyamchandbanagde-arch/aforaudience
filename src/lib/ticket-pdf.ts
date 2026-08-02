@@ -55,6 +55,14 @@ export type TicketData = {
   bookingFeeAmount: number
   attendeeName: string
   purchasedAt: Date
+  // Session 65 (Hitesh feedback) - companion tags for this booking, so
+  // anyone who sees the ticket (printed, screenshotted, forwarded) can
+  // see who else is expected, same PENDING/ACCEPTED/DECLINED status
+  // already shown at checkout. attendeeName above already establishes
+  // who booked it (the "main user"); this just lists who's tagged
+  // alongside them. Optional/omittable - older TicketData construction
+  // sites (if any) don't need to change.
+  companions?: { name: string; status: 'PENDING' | 'ACCEPTED' | 'DECLINED' }[]
 }
 
 export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
@@ -288,6 +296,39 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   }
 
   drawDetail(page, sansBold, sans, col1X, cursorY, "BOOKING ID", t.bookingId, 9)
+
+  // ── Going with (companion tags), if any ─────────────────────────────
+  // Only PENDING/ACCEPTED shown - a DECLINED tag means that person isn't
+  // coming, so listing them here would read as a guest list rather than
+  // "who's actually expected". attendeeName above already establishes
+  // who booked this ticket.
+  const goingWith = (t.companions ?? []).filter((c) => c.status !== "DECLINED")
+  if (goingWith.length > 0) {
+    cursorY -= 40
+    const goingWithLabel = "GOING WITH"
+    page.drawText(goingWithLabel, {
+      x: col1X,
+      y: cursorY + 14,
+      size: 8,
+      font: sansBold,
+      color: COLOR.ember,
+    })
+    const goingWithValue = goingWith
+      .map((c) => `${c.name} ${c.status === "PENDING" ? "(pending)" : "(confirmed)"}`)
+      .join(", ")
+    const goingWithLines = wrap(goingWithValue, sans, 11, PAGE_W - marginX * 2, 2)
+    let gwy = cursorY - 4
+    for (const line of goingWithLines) {
+      page.drawText(line, {
+        x: col1X,
+        y: gwy,
+        size: 11,
+        font: sans,
+        color: COLOR.ink,
+      })
+      gwy -= 15
+    }
+  }
 
   // ── Bottom band: house rules / footer ─────────────────────────────────
   const footerY = 90
