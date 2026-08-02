@@ -528,9 +528,12 @@ export default function CreateEventPage() {
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
             <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '20px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
                 Event Details
               </h2>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '20px' }}>
+                AforAudience is for live performances - music, comedy, theatre, spoken word, and similar. Movie screenings and film events aren&apos;t supported on the platform.
+              </p>
 
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Title *</label>
