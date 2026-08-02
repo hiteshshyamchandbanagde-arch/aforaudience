@@ -250,15 +250,17 @@ export default function ArtistProfilePage({
             disabled={!prevArtistId}
             aria-label="Previous artist"
             style={{
-              background: "var(--afa-white)",
-              border: "1px solid rgba(14,12,10,0.13)",
+              background: prevArtistId ? "var(--afa-terracotta)" : "var(--afa-white)",
+              border: prevArtistId ? "none" : "1px solid rgba(14,12,10,0.13)",
               borderRadius: "999px",
-              width: "30px",
-              height: "30px",
-              fontSize: "15px",
+              width: "34px",
+              height: "34px",
+              fontSize: "16px",
+              fontWeight: 700,
               cursor: prevArtistId ? "pointer" : "default",
               opacity: prevArtistId ? 1 : 0.35,
-              color: "var(--afa-ink)",
+              color: prevArtistId ? "white" : "var(--afa-ink)",
+              boxShadow: prevArtistId ? "0 2px 6px rgba(196,90,52,0.35)" : "none",
             }}
           >
             ‹
@@ -271,15 +273,17 @@ export default function ArtistProfilePage({
             disabled={!nextArtistId}
             aria-label="Next artist"
             style={{
-              background: "var(--afa-white)",
-              border: "1px solid rgba(14,12,10,0.13)",
+              background: nextArtistId ? "var(--afa-terracotta)" : "var(--afa-white)",
+              border: nextArtistId ? "none" : "1px solid rgba(14,12,10,0.13)",
               borderRadius: "999px",
-              width: "30px",
-              height: "30px",
-              fontSize: "15px",
+              width: "34px",
+              height: "34px",
+              fontSize: "16px",
+              fontWeight: 700,
               cursor: nextArtistId ? "pointer" : "default",
               opacity: nextArtistId ? 1 : 0.35,
-              color: "var(--afa-ink)",
+              color: nextArtistId ? "white" : "var(--afa-ink)",
+              boxShadow: nextArtistId ? "0 2px 6px rgba(196,90,52,0.35)" : "none",
             }}
           >
             ›
