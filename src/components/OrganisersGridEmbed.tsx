@@ -16,19 +16,38 @@ interface OrganiserItem {
 // Events↔Organisers toggle actually renders; the standalone /organisers
 // page's search never reached anyone using the real nav flow.
 //
+// Session 65 follow-up: the events/page.tsx hero now owns a single
+// shared search box (same position/styling for both Events and
+// Organisers modes - see Hitesh feedback that two differently-styled
+// search boxes in different spots on the same page read as broken).
+// This embed still owns the fetch (simplest place for it) but accepts
+// `search` as a controlled prop + `hideSearchBar` to suppress its own
+// input when a parent is driving search, and reports the fetched list
+// back up via `onItemsLoaded` so the parent's hero dropdown doesn't need
+// a second fetch. Falls back to fully self-contained behavior (own
+// input, own state) if used anywhere without those props - e.g. if this
+// embed is ever reused in a context without a shared hero search.
+//
 // Originally: "Lean grid, no hero/search header - used inside the
 // Events↔Organisers toggle (session 62, design.md §9.5 - toggle-based
 // discovery entry point). The full standalone page at /organisers has
 // its own hero/search version; this is the embeddable variant for a tab
 // context."
-export default function OrganisersGridEmbed() {
+interface OrganisersGridEmbedProps {
+  search?: string
+  hideSearchBar?: boolean
+  onItemsLoaded?: (items: OrganiserItem[]) => void
+}
+
+export default function OrganisersGridEmbed({ search: controlledSearch, hideSearchBar = false, onItemsLoaded }: OrganisersGridEmbedProps = {}) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
   const [organisers, setOrganisers] = useState<OrganiserItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [search, setSearch] = useState("")
+  const [internalSearch, setInternalSearch] = useState("")
+  const search = controlledSearch !== undefined ? controlledSearch : internalSearch
 
   useEffect(() => {
     fetch("/api/organisers")
@@ -40,6 +59,11 @@ export default function OrganisersGridEmbed() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (onItemsLoaded) onItemsLoaded(organisers)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organisers])
 
   const goToOrganiser = (id: string) => {
     if (navigatingId) return
@@ -57,6 +81,7 @@ export default function OrganisersGridEmbed() {
 
   return (
     <div>
+      {!hideSearchBar && (
       <BrowseSearchDropdown
         query={search}
         items={filtered}
@@ -68,12 +93,13 @@ export default function OrganisersGridEmbed() {
         )}
       >
         <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={internalSearch}
+          onChange={(e) => setInternalSearch(e.target.value)}
           placeholder="Search organisers..."
           style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
         />
       </BrowseSearchDropdown>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
       {filtered.map((org) => {
