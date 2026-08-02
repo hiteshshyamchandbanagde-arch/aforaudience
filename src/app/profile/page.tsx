@@ -94,17 +94,24 @@ function ProfileContent() {
   const [initialBio, setInitialBio] = useState('')
   const [savingAbout, setSavingAbout] = useState(false)
 
+  // Live preview for the "My Feedback" card below (2 Aug, Hitesh) -
+  // previously a static link with no indication of what's actually in
+  // there. Reuses /api/feedback/mine (same data as the full page) but
+  // only needs counts here, not the full list.
+  const [feedbackSummary, setFeedbackSummary] = useState<{ total: number; open: number } | null>(null)
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
   const loadStatuses = async () => {
-    const [meRes, orgRes, venueRes, artistRes, currenciesRes] = await Promise.all([
+    const [meRes, orgRes, venueRes, artistRes, currenciesRes, feedbackRes] = await Promise.all([
       fetch('/api/users/me'),
       fetch('/api/organisers/status'),
       fetch('/api/venue-owners/status'),
       fetch('/api/artists/status'),
       fetch('/api/display-currencies'),
+      fetch('/api/feedback/mine'),
     ])
     if (meRes.ok) {
       const d = await meRes.json()
@@ -140,6 +147,12 @@ function ProfileContent() {
     if (artistRes.ok) {
       const d = await artistRes.json()
       setArtistStatus({ hasProfile: d.hasProfile, isApproved: d.isApproved, isActive: d.isActive })
+    }
+    if (feedbackRes.ok) {
+      const d = await feedbackRes.json()
+      const items: { status: string }[] = d.items ?? []
+      const open = items.filter((it) => it.status !== 'RESOLVED' && it.status !== 'REJECTED').length
+      setFeedbackSummary({ total: items.length, open })
     }
   }
 
@@ -636,12 +649,35 @@ function ProfileContent() {
             color: 'inherit',
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-            My Feedback
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
-            See the bugs, ideas, and questions you&apos;ve reported, and their status →
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+            <div>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+                My Feedback
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
+                {feedbackSummary === null
+                  ? "See the bugs, ideas, and questions you've reported, and their status →"
+                  : feedbackSummary.total === 0
+                    ? "You haven't reported anything yet →"
+                    : `${feedbackSummary.total} reported${feedbackSummary.open > 0 ? ` · ${feedbackSummary.open} still open` : ' · all resolved or rejected'} →`}
+              </p>
+            </div>
+            {feedbackSummary !== null && feedbackSummary.open > 0 && (
+              <span
+                style={{
+                  flexShrink: 0,
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: 'var(--afa-cream)',
+                  background: 'var(--afa-terracotta)',
+                  borderRadius: '999px',
+                  padding: '4px 12px',
+                }}
+              >
+                {feedbackSummary.open}
+              </span>
+            )}
+          </div>
         </Link>
       </main>
     </>

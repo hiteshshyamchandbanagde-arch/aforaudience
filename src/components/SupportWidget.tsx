@@ -267,6 +267,25 @@ export default function SupportWidget() {
     setPanel('feedback');
   };
 
+  // Bug fix (2 Aug) - fromChatbot was ONLY ever set true via the specific
+  // "Send this to the team" CTA above, which only appears when the bot's
+  // answer happens to match a narrow keyword regex (suggestsFallback).
+  // Three other ways into the feedback panel - the plain "Feedback" tab
+  // click, the "chat unavailable" fallback button, and the session-limit
+  // link - all skipped it entirely, even when the person clearly arrived
+  // mid-conversation. Result: fromChatbot was true on zero rows in the
+  // whole database despite people genuinely reporting bugs through chat
+  // first. Fixed by deriving it from actual engagement (does this
+  // session have any chat messages at all?) rather than only the one
+  // narrow CTA, and routing every panel-switch-to-feedback through this
+  // one helper instead of four separate ad-hoc setPanel('feedback')
+  // calls.
+  const switchToFeedbackPanel = () => {
+    if (chatMessages.length > 0) setFbFromChatbot(true);
+    setFbSubmitted(false);
+    setPanel('feedback');
+  };
+
   const handleAttachmentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setFbAttachmentError('');
@@ -450,10 +469,7 @@ export default function SupportWidget() {
               Ask a question
             </button>
             <button
-              onClick={() => {
-                setPanel('feedback');
-                setFbSubmitted(false);
-              }}
+              onClick={switchToFeedbackPanel}
               style={{
                 flex: 1,
                 padding: '12px 8px',
@@ -483,7 +499,7 @@ export default function SupportWidget() {
                     Please use the feedback form instead — the team reads these personally.
                   </div>
                   <button
-                    onClick={() => setPanel('feedback')}
+                    onClick={switchToFeedbackPanel}
                     style={{
                       background: 'var(--afa-terracotta)',
                       color: 'white',
@@ -566,7 +582,7 @@ export default function SupportWidget() {
                         You&apos;ve reached the question limit for this session. Need more
                         help?{' '}
                         <button
-                          onClick={() => setPanel('feedback')}
+                          onClick={switchToFeedbackPanel}
                           style={{
                             color: 'var(--afa-terracotta)',
                             background: 'transparent',
