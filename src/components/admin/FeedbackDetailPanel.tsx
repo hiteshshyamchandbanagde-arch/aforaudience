@@ -77,10 +77,30 @@ export default function FeedbackDetailPanel({
   position?: { index: number; total: number } | null
 }) {
   const [expandedImage, setExpandedImage] = useState(false)
+  // Parity fix (2 Aug) after reviewing PR #328's full-page version of
+  // this pattern: guard against a rapid double swipe/key-press firing
+  // onPrev/onNext twice before the panel's content has updated. Lower
+  // stakes here than the full-page version (a modal content swap is a
+  // synchronous re-render, not a router.push with a real async
+  // window), but cheap to add and keeps both implementations
+  // genuinely identical in behavior, not just similar.
+  const [navGuard, setNavGuard] = useState(false)
 
   useEffect(() => {
     setExpandedImage(false)
+    setNavGuard(false)
   }, [item.id])
+
+  const guardedPrev = () => {
+    if (navGuard || !onPrev) return
+    setNavGuard(true)
+    onPrev()
+  }
+  const guardedNext = () => {
+    if (navGuard || !onNext) return
+    setNavGuard(true)
+    onNext()
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -95,12 +115,13 @@ export default function FeedbackDetailPanel({
       const target = e.target as HTMLElement | null
       const isTyping = target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
       if (isTyping) return
-      if (e.key === 'ArrowLeft' && onPrev) onPrev()
-      if (e.key === 'ArrowRight' && onNext) onNext()
+      if (e.key === 'ArrowLeft') guardedPrev()
+      if (e.key === 'ArrowRight') guardedNext()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose, onPrev, onNext])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, onPrev, onNext, navGuard])
 
   // Swipe left/right to move prev/next on mobile (Feedback 2 Aug,
   // Hitesh). Horizontal-delta-dominant threshold, same shape as
@@ -119,8 +140,8 @@ export default function FeedbackDetailPanel({
     const dy = e.changedTouches[0].clientY - touchStartPos.y
     setTouchStartPos(null)
     if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
-    if (dx > 0 && onPrev) onPrev()
-    else if (dx < 0 && onNext) onNext()
+    if (dx > 0) guardedPrev()
+    else guardedNext()
   }
 
   return (
@@ -162,7 +183,7 @@ export default function FeedbackDetailPanel({
           {position && (onPrev || onNext) && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <button
-                onClick={onPrev}
+                onClick={guardedPrev}
                 disabled={!hasPrev}
                 aria-label="Previous"
                 style={{
@@ -183,7 +204,7 @@ export default function FeedbackDetailPanel({
                 {position.index} of {position.total}
               </span>
               <button
-                onClick={onNext}
+                onClick={guardedNext}
                 disabled={!hasNext}
                 aria-label="Next"
                 style={{
