@@ -235,6 +235,18 @@ model User {
   // known codes, not a free string.
   displayCurrency String?
 
+  // FEAT-2608-036 (2 Aug) - default-location preference for Events/Venues
+  // search. Same pattern as displayCurrency above: null means "no explicit
+  // choice yet", in which case the app falls back to a cookie-stored guess
+  // (see src/lib/location.ts) derived from Vercel's IP geolocation headers
+  // - never written here automatically. Only set once the user actively
+  // picks a city via the header location chip, so this column reflects a
+  // real preference, not a silent auto-detected guess getting persisted
+  // on every anonymous session that happens to log in.
+  defaultCity    String?
+  defaultCityLat Float?
+  defaultCityLng Float?
+
   // H3 — moderation. suspendedByUserId is a plain scalar (not a relation),
   // same pattern as Booking.checkedInByUserId - who did it matters for the
   // admin's own record, doesn't need a join for anything the app does.
@@ -740,6 +752,12 @@ model Venue {
   events        Event[]
   bookingRequests VenueBookingRequest[]
   dayRates      VenueDayRate[]
+
+  // FEAT-2608-036 (2 Aug) - default-location filter reads this column on
+  // every Events/Venues listing request once that filter is wired to a
+  // real WHERE clause, so an index pays for itself immediately rather
+  // than waiting on a future migration.
+  @@index([city])
 }
 
 // §9.4 twenty-fourth amendment - real x/y canvas coordinates (not a

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
+import LocationChip from "@/components/LocationChip"
 
 type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
@@ -297,6 +298,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           ))}
 
           {!backHref && <SearchBox />}
+          {!backHref && <LocationChip />}
 
           <button
             onClick={toggleTheme}
@@ -405,6 +407,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <SearchBox />
           </div>
         )}
+        {!backHref && <LocationChip variant="mobile" />}
 
         {status === "loading" ? null : user ? (
           <>

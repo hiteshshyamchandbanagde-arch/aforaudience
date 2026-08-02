@@ -11,11 +11,18 @@ interface VenueItem {
   priceRangeLabel: string | null
 }
 
-export default function VenuesGridClient({ venues }: { venues: VenueItem[] }) {
+export default function VenuesGridClient({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
+  // FEAT-2608-036 - pre-fill with the resolved location if it's actually
+  // one of the cities we have venues in, same "pre-filled, removable"
+  // pattern as the Events page filter. "All Cities" always available.
+  const cities = Array.from(new Set(venues.map((v) => v.city))).sort()
+  const [selectedCity, setSelectedCity] = useState(
+    defaultCity && cities.includes(defaultCity) ? defaultCity : "All Cities"
+  )
 
   // Same click-guard as /events (PR #261) and /artists (PR #312) - a
   // plain Link gives no click feedback, so a click that doesn't render
@@ -35,9 +42,12 @@ export default function VenuesGridClient({ venues }: { venues: VenueItem[] }) {
   // /venue-owners-style full pages did). Adding it here too so the tab
   // reached via the actual nav link behaves the same as /events /
   // /artists, not just the orphaned standalone route.
-  const filtered = venues.filter(
-    (v) => v.name.toLowerCase().includes(search.toLowerCase()) || v.city.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = venues.filter((v) => {
+    const matchSearch =
+      v.name.toLowerCase().includes(search.toLowerCase()) || v.city.toLowerCase().includes(search.toLowerCase())
+    const matchCity = selectedCity === "All Cities" || v.city === selectedCity
+    return matchSearch && matchCity
+  })
 
   return (
     <div>

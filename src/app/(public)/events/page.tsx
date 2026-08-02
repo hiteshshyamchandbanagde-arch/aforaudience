@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
@@ -120,6 +120,33 @@ export default function EventsPage() {
   }, [])
 
   const cities = Array.from(new Set(events.map((e) => e.venue?.city).filter(Boolean))) as string[]
+
+  // FEAT-2608-036 - pre-fill the existing city filter with the user's
+  // resolved location (profile choice / cookie / IP-geo guess) rather
+  // than leaving it on "All Cities". Deliberately still just sets
+  // `selectedCity`, which the person is free to change or clear back to
+  // "All Cities" via the same dropdown as before - this doesn't touch
+  // /api/events itself, so it's not yet a server-side query filter (all
+  // events are still fetched up front for the existing tab/type/price
+  // filtering above); that's a separate, larger change if we want the
+  // fetch itself to be scoped, flagged separately rather than silently
+  // bundled in here.
+  const cityAutoAppliedRef = useRef(false)
+  useEffect(() => {
+    if (cityAutoAppliedRef.current) return
+    if (cities.length === 0) return
+    fetch("/api/user/location")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cityAutoAppliedRef.current) return
+        cityAutoAppliedRef.current = true
+        if (data?.city && cities.includes(data.city)) {
+          setSelectedCity(data.city)
+        }
+      })
+      .catch(() => { cityAutoAppliedRef.current = true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities.length])
 
   const filtered = events.filter((e) => {
     const matchSearch =

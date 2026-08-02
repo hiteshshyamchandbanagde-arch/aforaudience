@@ -26,7 +26,7 @@ const tabStyle = (active: boolean) => ({
 // deliberately not a new top-level nav route. Venues stay server-fetched
 // (unchanged default view); Owners is fetched client-side on demand only
 // when that tab is actually opened.
-export default function VenuesViewToggle({ venues }: { venues: VenueItem[] }) {
+export default function VenuesViewToggle({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
   const [view, setView] = useState<"venues" | "owners">("venues")
 
   return (
@@ -40,7 +40,7 @@ export default function VenuesViewToggle({ venues }: { venues: VenueItem[] }) {
         venues.length === 0 ? (
           <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No venues found yet. Check back soon!</p>
         ) : (
-          <VenuesGridClient venues={venues} />
+          <VenuesGridClient venues={venues} defaultCity={defaultCity} />
         )
       ) : (
         <VenueOwnersGridEmbed />

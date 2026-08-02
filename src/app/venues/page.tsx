@@ -1,7 +1,11 @@
 import React from 'react'
+import { cookies, headers } from 'next/headers'
+import { getServerSession } from 'next-auth'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
 import VenuesViewToggle from './VenuesViewToggle'
+import { authOptions } from '@/lib/auth'
+import { resolveLocation } from '@/lib/location'
 
 // Without this, Next.js has no dynamic API (cookies/headers/searchParams) to
 // signal that this page needs per-request data, so it can statically render
@@ -45,6 +49,30 @@ function priceRange(venue: { seatingMode?: string; seatMap: unknown; zonePrices?
 export default async function VenuesPage() {
   const venues = await getVenues()
 
+  // FEAT-2608-036 - resolved server-side (profile choice / cookie /
+  // this-request IP-geo guess) and passed down as the initial city
+  // filter value. Same "pre-filled, always removable" pattern as the
+  // Events page - VenuesGridClient's dropdown still defaults to "All
+  // Cities" as an option and the person can pick it any time.
+  const session = await getServerSession(authOptions)
+  let profileCity: string | null = null
+  let profileLat: number | null = null
+  let profileLng: number | null = null
+  if (session?.user) {
+    const user = await prisma.user.findUnique({
+      where: { id: (session.user as any).id },
+      select: { defaultCity: true, defaultCityLat: true, defaultCityLng: true },
+    })
+    if (user?.defaultCity) {
+      profileCity = user.defaultCity
+      profileLat = user.defaultCityLat
+      profileLng = user.defaultCityLng
+    }
+  }
+  const cookieStore = await cookies()
+  const headerStore = await headers()
+  const resolved = await resolveLocation({ profileCity, profileLat, profileLng, cookieStore, headerStore })
+
   return (
     <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav active="venues" />
@@ -64,6 +92,7 @@ export default async function VenuesPage() {
             capacity: v.capacity,
             priceRangeLabel: priceRange(v),
           }))}
+          defaultCity={resolved.city}
         />
       </div>
     </main>
