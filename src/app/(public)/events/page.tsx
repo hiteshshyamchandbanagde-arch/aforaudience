@@ -24,6 +24,17 @@ interface EventItem {
   isCompetitionShow?: boolean
 }
 
+// Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
+// so the hero search (lifted up here, session 65) can type its dropdown
+// items without importing a component-internal type.
+interface OrganiserItem {
+  id: string
+  orgName: string
+  bio: string | null
+  user: { name: string; avatar: string | null }
+  _count: { events: number }
+}
+
 const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
   OPEN_MIC: { emoji: "🎤", color: "var(--afa-green-black)", label: "Open Mic" },
   STAND_UP: { emoji: "😂", color: "var(--afa-maroon-black)", label: "Stand Up" },
@@ -64,6 +75,14 @@ export default function EventsPage() {
     })
   }
 
+  const goToOrganiser = (id: string) => {
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/organisers/${id}`)
+    })
+  }
+
   const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -78,6 +97,11 @@ export default function EventsPage() {
   // design.md §9.5) - deliberately not a new top-level nav route.
   // Independent of `view` above (grid/list is an events-only display mode).
   const [contentMode, setContentMode] = useState<"events" | "organisers">("events")
+  // Populated via OrganisersGridEmbed's onItemsLoaded callback (session
+  // 65) - the embed still owns the /api/organisers fetch, it just also
+  // reports the list up so the hero's single shared search box can build
+  // its dropdown without a second fetch of the same data.
+  const [organisers, setOrganisers] = useState<OrganiserItem[]>([])
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -115,6 +139,11 @@ export default function EventsPage() {
     filtered.reverse()
   }
 
+  // Same `search` box drives both modes (session 65 fix) - the hero
+  // search is now shared rather than two visually-different boxes for
+  // events vs organisers.
+  const filteredOrganisers = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav active="events" />
@@ -134,7 +163,7 @@ export default function EventsPage() {
               ? "The people running the shows"
               : loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
           </p>
-          {contentMode === "events" && (
+          {contentMode === "events" ? (
           <BrowseSearchDropdown
             query={search}
             items={filtered}
@@ -154,6 +183,31 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search events, venues..."
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+            />
+            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
+          </BrowseSearchDropdown>
+          ) : (
+          // Session 65 fix: same hero search box, same position and
+          // styling as the Events mode above - just pointed at organisers
+          // instead. Previously Organisers mode had no search here at all
+          // and a visually different small input further down inside
+          // OrganisersGridEmbed, which read as inconsistent/broken when
+          // switching tabs (Hitesh feedback).
+          <BrowseSearchDropdown
+            query={search}
+            items={filteredOrganisers}
+            getId={(o) => o.id}
+            emptyLabel="organisers"
+            onSelect={(o) => goToOrganiser(o.id)}
+            renderRow={(o) => (
+              <span style={{ fontWeight: 600 }}>{o.orgName}</span>
+            )}
+          >
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search organisers..."
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -200,7 +254,7 @@ export default function EventsPage() {
         </div>
 
         {contentMode === "organisers" ? (
-          <OrganisersGridEmbed />
+          <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
         ) : (
           <>
         {/* UPCOMING / PAST TAB - Hitesh (31 Jul): keep upcoming as the
