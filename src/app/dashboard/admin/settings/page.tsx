@@ -20,6 +20,14 @@ import { useToast } from '@/components/Toast'
 // the UI shows/accepts rupees, since that's what a human types. The
 // two-way conversion is done here so backend stays paise-only.
 
+// datetime-local inputs need "YYYY-MM-DDTHH:mm" with no timezone suffix,
+// rendered in the browser's local time. Padding by hand rather than
+// pulling in a date lib for one formatting helper.
+function toLocalDatetimeInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export default function AdminSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -61,6 +69,12 @@ export default function AdminSettingsPage() {
   const [eventWindow, setEventWindow] = useState<string>('')
   const [initialEventWindow, setInitialEventWindow] = useState<number>(3)
   const [eventWindowSaving, setEventWindowSaving] = useState(false)
+
+  const [directPayoutsEnabled, setDirectPayoutsEnabledState] = useState<boolean>(false)
+  const [initialDirectPayoutsEnabled, setInitialDirectPayoutsEnabled] = useState<boolean>(false)
+  const [directPayoutsUntil, setDirectPayoutsUntil] = useState<string>('') // datetime-local string, '' = no expiry
+  const [initialDirectPayoutsUntil, setInitialDirectPayoutsUntil] = useState<string>('')
+  const [directPayoutsSaving, setDirectPayoutsSaving] = useState(false)
 
   // Audience Choice voting default weights (§6, session 58)
   const [audienceWeight, setAudienceWeight] = useState<string>('')
@@ -138,6 +152,17 @@ export default function AdminSettingsPage() {
         const evWindow = data.settings.eventCreationWindowMonths
         setInitialEventWindow(evWindow)
         setEventWindow(String(evWindow))
+
+        const dpEnabled = !!data.settings.directPayoutsEnabled
+        setInitialDirectPayoutsEnabled(dpEnabled)
+        setDirectPayoutsEnabledState(dpEnabled)
+        // datetime-local input wants "YYYY-MM-DDTHH:mm" in local time, no
+        // seconds/Z. Empty string means no expiry set.
+        const dpUntilStr = data.settings.directPayoutsEnabledUntil
+          ? toLocalDatetimeInputValue(new Date(data.settings.directPayoutsEnabledUntil))
+          : ''
+        setInitialDirectPayoutsUntil(dpUntilStr)
+        setDirectPayoutsUntil(dpUntilStr)
 
         const aw = data.settings.audienceVoteWeightDefault
         const pw = data.settings.panelistVoteWeightDefault
@@ -383,6 +408,33 @@ export default function AdminSettingsPage() {
   }
   const isEventWindowDirty = Math.round(Number(eventWindow || 0)) !== initialEventWindow
   const isEventWindowValid = Number.isInteger(Number(eventWindow)) && Number(eventWindow) >= 1 && Number(eventWindow) <= 24
+
+  const saveDirectPayouts = async () => {
+    setDirectPayoutsSaving(true)
+    try {
+      // Local datetime-local string -> ISO. Empty string means "no expiry".
+      const enabledUntil = directPayoutsUntil ? new Date(directPayoutsUntil).toISOString() : null
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ directPayoutsEnabled, directPayoutsEnabledUntil: enabledUntil }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      setInitialDirectPayoutsEnabled(!!data.settings.directPayoutsEnabled)
+      const savedUntilStr = data.settings.directPayoutsEnabledUntil
+        ? toLocalDatetimeInputValue(new Date(data.settings.directPayoutsEnabledUntil))
+        : ''
+      setInitialDirectPayoutsUntil(savedUntilStr)
+      setDirectPayoutsUntil(savedUntilStr)
+      showToast('Saved.', 'success')
+    } catch (err: any) {
+      showToast(err.message || 'Save failed', 'error')
+    } finally {
+      setDirectPayoutsSaving(false)
+    }
+  }
+  const isDirectPayoutsDirty = directPayoutsEnabled !== initialDirectPayoutsEnabled || directPayoutsUntil !== initialDirectPayoutsUntil
 
   const saveVoteWeightDefaults = async () => {
     setVoteWeightsSaving(true)
@@ -816,6 +868,84 @@ export default function AdminSettingsPage() {
             }}
           >
             {sceneStatusSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+
+        <div
+          style={{
+            background: 'white',
+            border: '1px solid rgba(14,12,10,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Direct payouts (Razorpay Route)
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+            Razorpay Route (auto-split payouts) isn't available on the current account tier — confirmed against RBI's 2025 Payment Aggregator Directions, which require ₹40L+ turnover. K2 payouts run on a manual two-step transfer model instead. This is OFF by default so organisers aren't shown a linking flow that can't work. Flip on only if the account tier changes and Route needs re-testing.
+          </p>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={directPayoutsEnabled}
+              onChange={(e) => setDirectPayoutsEnabledState(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--afa-ink)' }}>
+              Enable direct payouts UI (dashboard link, linking form, API)
+            </span>
+          </label>
+
+          <label
+            style={{
+              display: 'block',
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--afa-terracotta)',
+              letterSpacing: '0.06em',
+              marginBottom: 6,
+            }}
+          >
+            AUTO-DISABLE AT (OPTIONAL)
+          </label>
+          <input
+            type="datetime-local"
+            value={directPayoutsUntil}
+            onChange={(e) => setDirectPayoutsUntil(e.target.value)}
+            disabled={!directPayoutsEnabled}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 6,
+              border: '1px solid rgba(14,12,10,0.15)',
+              fontSize: 15,
+              marginBottom: 8,
+              opacity: directPayoutsEnabled ? 1 : 0.5,
+            }}
+          />
+          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+            Lazy-checked on read, no cron job — leave blank for no auto-expiry. If set, this flips back to disabled on its own past that time, without needing to remember to uncheck it.
+          </p>
+
+          <button
+            onClick={saveDirectPayouts}
+            disabled={directPayoutsSaving || !isDirectPayoutsDirty}
+            style={{
+              background: 'var(--afa-terracotta)',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: directPayoutsSaving || !isDirectPayoutsDirty ? 'default' : 'pointer',
+              opacity: directPayoutsSaving || !isDirectPayoutsDirty ? 0.5 : 1,
+            }}
+          >
+            {directPayoutsSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
 

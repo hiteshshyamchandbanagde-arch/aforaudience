@@ -10,6 +10,7 @@ import {
   setArtistRosterHypeScoreLookback,
   setAudienceChoiceWeightDefaults,
   setEventCreationWindowMonths,
+  setDirectPayoutsEnabled,
   MAX_BOOKING_FEE_PAISE,
   MAX_CHAT_MESSAGES_CAP,
 } from '@/lib/platform-settings'
@@ -79,12 +80,13 @@ export async function PATCH(req: Request) {
     Object.prototype.hasOwnProperty.call(body, 'panelistVoteWeightDefault') &&
     Object.prototype.hasOwnProperty.call(body, 'celebrityVoteWeightDefault')
   const hasEventWindow = Object.prototype.hasOwnProperty.call(body, 'eventCreationWindowMonths')
+  const hasDirectPayouts = Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabled')
 
-  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow) {
+  if (!hasFeeBand && !hasChatCap && !hasSceneStatus && !hasRosterLookback && !hasVoteWeightDefaults && !hasEventWindow && !hasDirectPayouts) {
     return NextResponse.json(
       {
         error:
-          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, or all three vote weight defaults together is required',
+          'audienceBookingFee, minAudienceBookingFee, maxAudienceBookingFee, chatMaxMessagesPerSession, a sceneStatus* field, artistRosterHypeScoreLookback, eventCreationWindowMonths, directPayoutsEnabled, or all three vote weight defaults together is required',
       },
       { status: 400 }
     )
@@ -157,6 +159,22 @@ export async function PATCH(req: Request) {
       } catch (e: any) {
         return NextResponse.json({ error: e.message || 'Invalid eventCreationWindowMonths' }, { status: 400 })
       }
+    }
+
+    if (hasDirectPayouts) {
+      const enabled = body.directPayoutsEnabled
+      if (typeof enabled !== 'boolean') {
+        return NextResponse.json({ error: 'directPayoutsEnabled must be a boolean' }, { status: 400 })
+      }
+      let enabledUntil: Date | null = null
+      if (Object.prototype.hasOwnProperty.call(body, 'directPayoutsEnabledUntil') && body.directPayoutsEnabledUntil) {
+        const parsed = new Date(body.directPayoutsEnabledUntil)
+        if (Number.isNaN(parsed.getTime())) {
+          return NextResponse.json({ error: 'directPayoutsEnabledUntil must be a valid date' }, { status: 400 })
+        }
+        enabledUntil = parsed
+      }
+      updated = await setDirectPayoutsEnabled({ enabled, enabledUntil })
     }
 
     return NextResponse.json({ settings: updated })

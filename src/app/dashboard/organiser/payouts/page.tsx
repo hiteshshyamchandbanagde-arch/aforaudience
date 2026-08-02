@@ -13,6 +13,7 @@ interface PayoutStatus {
   accountId: string | null
   status: string | null
   refreshError?: boolean
+  enabled?: boolean
 }
 
 const STATUS_COPY: Record<string, { label: string; color: string; detail: string }> = {
@@ -141,6 +142,13 @@ export default function OrganiserPayoutsPage() {
                   Refresh status
                 </button>
               </>
+            ) : payout?.enabled === false ? (
+              <>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '8px' }}>Direct payouts aren't available right now</p>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.75, lineHeight: 1.6 }}>
+                  Automatic split payouts aren't currently supported on the platform. Ticket revenue is settled to organisers manually for now — no action needed from you. Reach out via support if you have questions.
+                </p>
+              </>
             ) : (
               <>
                 <p style={{ fontSize: '14px', color: 'var(--afa-ink)', marginBottom: '16px' }}>No payout account linked yet.</p>
@@ -173,9 +181,11 @@ export default function OrganiserPayoutsPage() {
             )}
           </div>
 
-          <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>
-            Test mode only for now — no real money moves. Once your business completes real KYC with Razorpay later, the same account works for live payouts with no changes needed here.
-          </p>
+          {payout?.enabled !== false && (
+            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+              Test mode only for now — no real money moves. Once your business completes real KYC with Razorpay later, the same account works for live payouts with no changes needed here.
+            </p>
+          )}
         </div>
       </main>
     </>

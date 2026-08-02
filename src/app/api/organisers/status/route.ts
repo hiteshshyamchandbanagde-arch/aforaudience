@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { getPlatformSettings, isDirectPayoutsEnabled } from '@/lib/platform-settings'
 
 // Used by the Organiser dashboard to tell apart three states that were
 // previously all collapsed into the same "Failed to fetch events" error:
@@ -25,6 +26,7 @@ export async function GET() {
   }
 
   const organiser = await prisma.organiser.findUnique({ where: { userId: user.id } })
+  const platformSettings = await getPlatformSettings()
 
   return NextResponse.json({
     isOrganiser: !!organiser,
@@ -35,5 +37,6 @@ export async function GET() {
     walletBalance: organiser?.walletBalance ?? 0,
     payoutAccountLinked: !!organiser?.razorpayAccountId,
     payoutAccountStatus: organiser?.razorpayAccountStatus ?? null,
+    directPayoutsEnabled: isDirectPayoutsEnabled(platformSettings),
   })
 }
