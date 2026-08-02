@@ -157,15 +157,16 @@ function AdminFeedbackBoard() {
     })()
   }, [session])
 
-  // Command Center deep-link (Feedback cms9ywqy4): the "Feedback health"
-  // tiles link here with ?status= and/or ?category= so a click on e.g.
-  // "Resolved" or "Feature ideas" lands directly on that slice instead of
-  // making Hitesh re-apply filters by hand. Category maps straight onto
-  // the existing client-side categoryFilter. Status maps to a scroll-to-
-  // column (RESOLVED also flips the lazy-load toggle first, since that
-  // column doesn't exist in the DOM until it's loaded) rather than
-  // hiding the other columns - keeps the board's existing filter model
-  // untouched, this is just "start here" not "show only this."
+  // Command Center deep-link (Feedback cms9ywqy4). First cut (PR #322)
+  // only scrolled the desktop board to the relevant column - on mobile,
+  // where the board grid is hidden and only the plain stacked list
+  // (`filtered`, no status filtering at all) is visible, every tile
+  // landed on the exact same screen. Caught live by Hitesh (2 Aug).
+  // Fixed properly: `statusFocus` now actually filters the list
+  // (mobile and desktop both read `filtered`), with a visible
+  // "Showing: X · View full board" banner so it's obvious the view is
+  // narrowed, and a real way back to the unfiltered board.
+  const [statusFocus, setStatusFocus] = useState<string | null>(null)
   useEffect(() => {
     if (!session?.user || loading) return
     const statusParam = searchParams.get('status')
@@ -175,22 +176,26 @@ function AdminFeedbackBoard() {
       setCategoryFilter(categoryParam)
     }
 
-    if ((statusParam === 'RESOLVED' || statusParam === 'ALL') && !showResolved) {
+    if (statusParam === 'RESOLVED') {
+      if (!showResolved) toggleShowResolved()
+      setStatusFocus('RESOLVED')
+    } else if (statusParam && statusParam !== 'ALL' && STATUSES.includes(statusParam)) {
+      setStatusFocus(statusParam)
+    } else if (statusParam === 'ALL' && !showResolved) {
+      // "Total reported" - reveal everything, no single-status narrowing.
       toggleShowResolved()
-    }
-
-    if (statusParam && statusParam !== 'ALL' && STATUSES.includes(statusParam)) {
-      // Give the (possibly just-toggled) column a tick to mount before
-      // scrolling to it.
-      setTimeout(() => {
-        document.getElementById(`fb-col-${statusParam}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, statusParam === 'RESOLVED' ? 350 : 50)
     }
     // Deliberately runs once the board has finished its initial load,
     // not on every searchParams/showResolved change - this is a
     // "where do I land" behavior, not a live filter sync.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, loading])
+
+  const clearStatusFocus = () => {
+    setStatusFocus(null)
+    setCategoryFilter('ALL')
+    router.replace('/dashboard/admin/feedback')
+  }
 
   const actOnGenreRequest = async (id: string, action: 'approve' | 'reject') => {
     setActioningGenreId(id)
@@ -318,6 +323,7 @@ function AdminFeedbackBoard() {
 
   const filtered = useMemo(() => {
     let list = allLoadedItems.filter((it) => {
+      if (statusFocus && it.status !== statusFocus) return false
       if (categoryFilter !== 'ALL' && it.category !== categoryFilter) return false
       if (severityFilter !== 'ALL' && (it.severity || 'NONE') !== severityFilter) return false
       if (pageFilter && !(it.pageUrl || '').toLowerCase().includes(pageFilter.toLowerCase())) return false
@@ -338,7 +344,7 @@ function AdminFeedbackBoard() {
       list = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }
     return list
-  }, [allLoadedItems, categoryFilter, severityFilter, pageFilter, keyword, sortBy])
+  }, [allLoadedItems, statusFocus, categoryFilter, severityFilter, pageFilter, keyword, sortBy])
 
   const columns = useMemo(() => {
     const cols: Record<string, FeedbackItem[]> = { NEW: [], REVIEWED: [], TESTED: [], RESOLVED: [] }
@@ -603,6 +609,42 @@ function AdminFeedbackBoard() {
             {trendsOpen ? '▾' : '▸'} Trends
           </button>
           {trendsOpen && <FeedbackTrends items={trendItems} />}
+
+          {statusFocus && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                background: 'var(--afa-orange-tint, #FFF3E6)',
+                border: '1px solid var(--afa-ink-a13)',
+                borderRadius: '10px',
+                padding: '10px 14px',
+                marginBottom: '12px',
+                fontSize: '13px',
+              }}
+            >
+              <span>
+                Showing: <strong>{labelize(statusFocus)}</strong> only ({filtered.length})
+              </span>
+              <button
+                onClick={clearStatusFocus}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--afa-ink)',
+                  background: 'var(--afa-white)',
+                  border: '1px solid var(--afa-ink-a13)',
+                  borderRadius: '999px',
+                  padding: '5px 12px',
+                  cursor: 'pointer',
+                }}
+              >
+                View full board
+              </button>
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={inputStyle}>
