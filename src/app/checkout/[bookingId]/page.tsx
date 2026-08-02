@@ -726,7 +726,7 @@ export default function CheckoutPage() {
             marginBottom: 20,
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Bring your buddies (optional)</div>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Tag your buddies (optional)</div>
           <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 12 }}>
             Tag AFA friends you're going with — they'll get a request to confirm.
             {companionMax !== null && (
