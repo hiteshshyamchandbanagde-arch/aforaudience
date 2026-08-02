@@ -331,6 +331,18 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
         {levelSeats.map((s: SeatInfo) => {
           const isSelected = selected.includes(s.id)
+          // Selected seats get a visual "pop" (scale + ring) so the seat
+          // number reads clearly - but that pop is a CSS transform on top
+          // of the canvas wrapper's own zoom transform, and transforms
+          // compound multiplicatively, not additively. At zoom 1 this was
+          // fine (a flat 1.5x). Once pinch-zoom shipped, a selected seat
+          // at e.g. 3x zoom rendered at 1.5 * 3 = 4.5x - ballooning large
+          // enough to swallow its neighbors (live report, session 65).
+          // Dividing the boost by the current zoom keeps the seat's pop
+          // roughly constant on screen regardless of zoom level, clamped
+          // to never shrink below 1x (no boost needed once the zoom
+          // itself already makes the seat comfortably large).
+          const selectedBoost = Math.max(1, 1.5 / zoom)
           const bg =
             s.status === 'taken'
               ? 'var(--afa-ink-a13)'
@@ -378,7 +390,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 // (28 Jul) that the seat number wasn't legible once picked.
                 // z-index lift keeps the ring from being clipped by a
                 // neighboring seat drawn after it in DOM order.
-                transform: isSelected ? 'scale(1.5)' : undefined,
+                transform: isSelected ? `scale(${selectedBoost})` : undefined,
                 zIndex: isSelected ? 2 : undefined,
                 boxShadow: isSelected ? '0 0 0 2px var(--afa-white)' : undefined,
                 color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-white)',
