@@ -44,11 +44,42 @@ export default function RegisterForm() {
   // ("Will Smith" -> "willsmith") until the user edited it themselves.
   // Removed (Feedback cmrxoaeun, session 39) - silently baking someone's
   // real name into a system identifier, even one that's never shown
-  // publicly (displayName/artist.id already keep public surfaces clean -
-  // see User.name's schema comment), is still a real privacy concern for
-  // a performer who may not want any part of the platform tying their
-  // legal name to an identifier at all. The username field now starts
-  // blank - the person picks their own from scratch.
+  // publicly, was flagged as a real privacy concern for a performer who
+  // may not want any part of the platform tying their legal name to an
+  // identifier at all.
+  //
+  // Middle ground (Feedback cmse195bc1e27d60e27596011, this session):
+  // Hitesh asked for the blank-field gap to be closed but the privacy
+  // reasoning above still holds, so this suggests from INITIALS only
+  // ("Will Smith" -> "ws"), never the name itself - genuinely
+  // de-identified, not just visually shortened. And unlike the old
+  // behavior, it's never auto-filled: same "click to accept" pattern as
+  // the existing taken-username suggestion below, so the person still
+  // deliberately chooses it rather than it silently appearing.
+  const [initialsSuggestion, setInitialsSuggestion] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (form.username || !form.fullName.trim()) {
+      setInitialsSuggestion(null)
+      return
+    }
+    const words = form.fullName.trim().split(/\s+/).filter(Boolean)
+    const seed = words.length > 1 ? words.map((w) => w[0]).join("") : words[0]?.slice(0, 3) ?? ""
+    if (seed.length < 2) {
+      setInitialsSuggestion(null)
+      return
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/username-check?value=${encodeURIComponent(seed)}`)
+        const data = await res.json()
+        setInitialsSuggestion(data.available ? seed : data.suggestion ?? null)
+      } catch {
+        setInitialsSuggestion(null)
+      }
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [form.fullName, form.username])
 
   // Live uniqueness check, debounced.
   useEffect(() => {
@@ -288,6 +319,18 @@ export default function RegisterForm() {
                 onChange={handleChange}
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
               />
+              {usernameStatus === "idle" && initialsSuggestion && (
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
+                  Suggested from your initials:{" "}
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, username: initialsSuggestion }))}
+                    style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0, fontWeight: 600 }}
+                  >
+                    {initialsSuggestion}
+                  </button>
+                </p>
+              )}
               {usernameStatus === "checking" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>Checking availability...</p>
               )}
