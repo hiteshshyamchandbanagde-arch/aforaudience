@@ -69,11 +69,19 @@ export async function GET(req: Request) {
     const artistIds = (artists as ArtistListItem[]).map((a) => a.id)
     const sceneStatusById = await getSceneStatusBatch(artistIds)
 
-    const roster = await Promise.all(
-      (artists as ArtistListItem[]).map(async (artist) => {
-        const performances = await prisma.performance.findMany({
-          where: { artistId: artist.id, cancelledAt: null },
+    // Feedback (2 Aug) - Artist Roster took 30+ seconds to load. Root
+    // cause: identical N+1 shape to the /artists slowdown fixed in
+    // PR #311 - a Promise.all wrapping up to 3 sequential DB queries
+    // PER artist (up to 200 artists x up to 3 queries = up to 600
+    // round trips), serialized hard against the connection pool cap.
+    // Rewritten to a fixed small number of batch queries regardless of
+    // roster size, with all aggregation done in memory afterward.
+
+    const allPerfs = artistIds.length
+      ? await prisma.performance.findMany({
+          where: { artistId: { in: artistIds }, cancelledAt: null },
           select: {
+            artistId: true,
             eventId: true,
             event: { select: { date: true, startTime: true, endTime: true, organiserId: true } },
             reviews: { select: { rating: true } },
@@ -81,80 +89,106 @@ export async function GET(req: Request) {
           },
           orderBy: { event: { date: 'desc' } },
         })
+      : []
 
-        type PerfRow = {
-          eventId: string
-          event: { date: Date; startTime: string; endTime: string; organiserId: string }
-          reviews: { rating: number | null }[]
-          isFeaturedVouch: boolean
-        }
-        const perfs = performances as PerfRow[]
+    type PerfRow = {
+      artistId: string
+      eventId: string
+      event: { date: Date; startTime: string; endTime: string; organiserId: string }
+      reviews: { rating: number | null }[]
+      isFeaturedVouch: boolean
+    }
+    const perfsByArtist = new Map<string, PerfRow[]>()
+    for (const p of allPerfs as PerfRow[]) {
+      if (!perfsByArtist.has(p.artistId)) perfsByArtist.set(p.artistId, [])
+      perfsByArtist.get(p.artistId)!.push(p)
+    }
 
-        const gigsPerformed = perfs.length
-
-        const firstGigDate =
-          perfs.length > 0
-            ? perfs.reduce((earliest: Date, p: PerfRow) => (p.event.date < earliest ? p.event.date : earliest), perfs[0].event.date)
-            : null
-
-        // Hype Score - average of the artist's most recent N shows that
-        // actually have a scored Hype Score (shows with no score yet, e.g.
-        // too new or too few reviews, are skipped rather than counted as
-        // zero - N configurable, session 56).
-        const scoredShows = perfs
-          .map((p) => computeHypeScore(p.event, p.reviews))
-          .filter((score): score is number => score !== null)
-        const recentScored = scoredShows.slice(0, settings.artistRosterHypeScoreLookback)
-        const hypeScore =
-          recentScored.length > 0
-            ? Math.round((recentScored.reduce((sum: number, s: number) => sum + s, 0) / recentScored.length) * 10) / 10
-            : null
-
-        const featuredOrganiserIds = new Set(
-          perfs.filter((p) => p.isFeaturedVouch).map((p) => p.event.organiserId)
-        )
-
-        const orgRatingAgg = await prisma.organiserArtistRating.aggregate({
-          where: { artistId: artist.id },
+    const ratingRows = artistIds.length
+      ? await prisma.organiserArtistRating.groupBy({
+          by: ['artistId'],
+          where: { artistId: { in: artistIds } },
           _avg: { rating: true },
           _count: { rating: true },
         })
+      : []
+    type RatingGroupRow = { artistId: string; _avg: { rating: number | null }; _count: { rating: number } }
+    const ratingByArtist = new Map((ratingRows as RatingGroupRow[]).map((r) => [r.artistId, r]))
 
-        const eventIds = [...new Set(perfs.map((p) => p.eventId))]
-        const checkedInBookings = eventIds.length
-          ? await prisma.booking.findMany({
-              where: { eventId: { in: eventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
-              select: { userId: true, eventId: true },
-            })
-          : []
-        const attendeeEventsByUser = new Map<string, Set<string>>()
-        for (const b of checkedInBookings) {
+    // Checked-in bookings across every event any of these artists has
+    // performed at, fetched once - then sliced per artist in memory
+    // below rather than re-queried.
+    const allEventIds = [...new Set((allPerfs as PerfRow[]).map((p) => p.eventId))]
+    const allCheckedInBookings = allEventIds.length
+      ? await prisma.booking.findMany({
+          where: { eventId: { in: allEventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
+          select: { userId: true, eventId: true },
+        })
+      : []
+    const checkedInByEvent = new Map<string, { userId: string }[]>()
+    for (const b of allCheckedInBookings) {
+      if (!checkedInByEvent.has(b.eventId)) checkedInByEvent.set(b.eventId, [])
+      checkedInByEvent.get(b.eventId)!.push({ userId: b.userId })
+    }
+
+    const roster = (artists as ArtistListItem[]).map((artist) => {
+      const perfs = perfsByArtist.get(artist.id) || []
+      const gigsPerformed = perfs.length
+
+      const firstGigDate =
+        perfs.length > 0
+          ? perfs.reduce((earliest: Date, p: PerfRow) => (p.event.date < earliest ? p.event.date : earliest), perfs[0].event.date)
+          : null
+
+      // Hype Score - average of the artist's most recent N shows that
+      // actually have a scored Hype Score (shows with no score yet, e.g.
+      // too new or too few reviews, are skipped rather than counted as
+      // zero - N configurable, session 56).
+      const scoredShows = perfs
+        .map((p) => computeHypeScore(p.event, p.reviews))
+        .filter((score): score is number => score !== null)
+      const recentScored = scoredShows.slice(0, settings.artistRosterHypeScoreLookback)
+      const hypeScore =
+        recentScored.length > 0
+          ? Math.round((recentScored.reduce((sum: number, s: number) => sum + s, 0) / recentScored.length) * 10) / 10
+          : null
+
+      const featuredOrganiserIds = new Set(
+        perfs.filter((p) => p.isFeaturedVouch).map((p) => p.event.organiserId)
+      )
+
+      const eventIds = [...new Set(perfs.map((p) => p.eventId))]
+      const attendeeEventsByUser = new Map<string, Set<string>>()
+      for (const eventId of eventIds) {
+        for (const b of checkedInByEvent.get(eventId) || []) {
           if (!attendeeEventsByUser.has(b.userId)) attendeeEventsByUser.set(b.userId, new Set())
-          attendeeEventsByUser.get(b.userId)!.add(b.eventId)
+          attendeeEventsByUser.get(b.userId)!.add(eventId)
         }
-        const verifiedAttendees = attendeeEventsByUser.size
-        const repeatAttendees = [...attendeeEventsByUser.values()].filter((evts) => evts.size >= 2).length
+      }
+      const verifiedAttendees = attendeeEventsByUser.size
+      const repeatAttendees = [...attendeeEventsByUser.values()].filter((evts) => evts.size >= 2).length
 
-        return {
-          id: artist.id,
-          name: artist.user.displayName || artist.user.name,
-          avatar: artist.user.avatar,
-          sceneStatus: sceneStatusById.get(artist.id) || 'NEW_EMERGING',
-          gigsPerformed,
-          firstGigDate,
-          hypeScore,
-          hypeScoreShowsUsed: recentScored.length,
-          organiserAvgRating: orgRatingAgg._avg.rating,
-          organiserRatingCount: orgRatingAgg._count.rating,
-          verifiedAttendees,
-          repeatAttendees,
-          featuredOrganiserCount: featuredOrganiserIds.size,
-          featuredVouchThreshold: settings.sceneStatusFeaturedVouchThreshold,
-          isSceneStatusHeadliner: artist.isSceneStatusHeadliner,
-          headlinerNote: artist.headlinerNote,
-        }
-      })
-    )
+      const ratingAgg = ratingByArtist.get(artist.id)
+
+      return {
+        id: artist.id,
+        name: artist.user.displayName || artist.user.name,
+        avatar: artist.user.avatar,
+        sceneStatus: sceneStatusById.get(artist.id) || 'NEW_EMERGING',
+        gigsPerformed,
+        firstGigDate,
+        hypeScore,
+        hypeScoreShowsUsed: recentScored.length,
+        organiserAvgRating: ratingAgg?._avg.rating ?? null,
+        organiserRatingCount: ratingAgg?._count.rating ?? 0,
+        verifiedAttendees,
+        repeatAttendees,
+        featuredOrganiserCount: featuredOrganiserIds.size,
+        featuredVouchThreshold: settings.sceneStatusFeaturedVouchThreshold,
+        isSceneStatusHeadliner: artist.isSceneStatusHeadliner,
+        headlinerNote: artist.headlinerNote,
+      }
+    })
 
     return NextResponse.json({
       roster,
