@@ -112,7 +112,7 @@ export default function EventsPage() {
   // to discover Mumbai exists) - those come from /api/venues/cities
   // instead, which always reflects every city regardless of the current
   // filter.
-  const [cities, setCities] = useState<string[]>([])
+  const [cities, setCities] = useState<{ city: string; country: string | null; label: string }[]>([])
   useEffect(() => {
     fetch("/api/venues/cities")
       .then((res) => (res.ok ? res.json() : null))
@@ -125,6 +125,7 @@ export default function EventsPage() {
   // same dropdown as before. Waits on `cities` so it can validate the
   // guess is actually one we have events for before applying it.
   const cityAutoAppliedRef = useRef(false)
+  const cityNames = cities.map((c) => c.city)
   useEffect(() => {
     if (cityAutoAppliedRef.current) return
     if (cities.length === 0) return
@@ -132,11 +133,12 @@ export default function EventsPage() {
     fetch("/api/user/location")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.city && cities.includes(data.city)) {
+        if (data?.city && cityNames.includes(data.city)) {
           setSelectedCity(data.city)
         }
       })
       .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cities])
 
   useEffect(() => {
@@ -361,7 +363,7 @@ export default function EventsPage() {
               className="events-filters-select"
             >
               <option>All Cities</option>
-              {cities.map((c) => <option key={c}>{c}</option>)}
+              {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
             </select>
 
             <div style={{ display: "flex", gap: "6px" }}>

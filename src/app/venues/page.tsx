@@ -58,20 +58,22 @@ export default async function VenuesPage() {
   let profileCity: string | null = null
   let profileLat: number | null = null
   let profileLng: number | null = null
+  let profileCountry: string | null = null
   if (session?.user) {
     const user = await prisma.user.findUnique({
       where: { id: (session.user as any).id },
-      select: { defaultCity: true, defaultCityLat: true, defaultCityLng: true },
+      select: { defaultCity: true, defaultCityLat: true, defaultCityLng: true, defaultCountry: true },
     })
     if (user?.defaultCity) {
       profileCity = user.defaultCity
       profileLat = user.defaultCityLat
       profileLng = user.defaultCityLng
+      profileCountry = user.defaultCountry
     }
   }
   const cookieStore = await cookies()
   const headerStore = await headers()
-  const resolved = await resolveLocation({ profileCity, profileLat, profileLng, cookieStore, headerStore })
+  const resolved = await resolveLocation({ profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore })
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
@@ -89,6 +91,7 @@ export default async function VenuesPage() {
             id: v.id,
             name: v.name,
             city: v.city,
+            country: v.country,
             capacity: v.capacity,
             priceRangeLabel: priceRange(v),
           }))}

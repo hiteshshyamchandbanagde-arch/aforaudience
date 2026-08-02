@@ -7,6 +7,7 @@ interface VenueItem {
   id: string
   name: string
   city: string
+  country: string | null
   capacity: number
   priceRangeLabel: string | null
 }

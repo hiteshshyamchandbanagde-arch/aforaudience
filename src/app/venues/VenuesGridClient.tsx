@@ -2,11 +2,13 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { cityLabel } from "@/lib/country-codes"
 
 interface VenueItem {
   id: string
   name: string
   city: string
+  country: string | null
   capacity: number
   priceRangeLabel: string | null
 }
@@ -19,7 +21,13 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
   // FEAT-2608-036 - pre-fill with the resolved location if it's actually
   // one of the cities we have venues in, same "pre-filled, removable"
   // pattern as the Events page filter. "All Cities" always available.
-  const cities = Array.from(new Set(venues.map((v) => v.city))).sort()
+  // Filter value stays the bare city string (not city+country) - see
+  // comment in api/venues/cities/route.ts on why a genuine city-name
+  // collision across countries isn't fully disambiguated yet.
+  const cityOptions = Array.from(new Map(venues.map((v) => [v.city, v.country])).entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([city, country]) => ({ city, label: cityLabel(city, country) }))
+  const cities = cityOptions.map((c) => c.city)
   const [selectedCity, setSelectedCity] = useState(
     defaultCity && cities.includes(defaultCity) ? defaultCity : "All Cities"
   )
@@ -51,26 +59,42 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
 
   return (
     <div>
-      <BrowseSearchDropdown
-        query={search}
-        items={filtered}
-        getId={(v) => v.id}
-        emptyLabel="venues"
-        onSelect={(v) => goToVenue(v.id)}
-        renderRow={(v) => (
-          <>
-            <span style={{ fontWeight: 600 }}>{v.name}</span>
-            <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
-          </>
-        )}
-      >
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search venues, cities..."
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
-        />
-      </BrowseSearchDropdown>
+      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "20px" }}>
+        <BrowseSearchDropdown
+          query={search}
+          items={filtered}
+          getId={(v) => v.id}
+          emptyLabel="venues"
+          onSelect={(v) => goToVenue(v.id)}
+          renderRow={(v) => (
+            <>
+              <span style={{ fontWeight: 600 }}>{v.name}</span>
+              <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
+            </>
+          )}
+        >
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search venues, cities..."
+            style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+          />
+        </BrowseSearchDropdown>
+
+        {/* FEAT-2608-036 - this select existed only as state/filter logic
+            with no way to actually change it until now; adding the
+            control itself alongside the city+country label work. */}
+        <select
+          value={selectedCity}
+          onChange={(e) => setSelectedCity(e.target.value)}
+          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", color: "var(--afa-ink)", background: "white", cursor: "pointer", outline: "none" }}
+        >
+          <option value="All Cities">All Cities</option>
+          {cityOptions.map((c) => (
+            <option key={c.city} value={c.city}>{c.label}</option>
+          ))}
+        </select>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
       {filtered.map((v) => {
@@ -129,7 +153,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             <h2 style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>
               {v.name}
             </h2>
-            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "14px" }}>{v.city}</p>
+            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "14px" }}>{cityLabel(v.city, v.country)}</p>
             <div style={{ display: "flex", gap: "18px", fontSize: "13px", color: "var(--afa-ink)" }}>
               <span><strong>{v.capacity}</strong> seats</span>
               {v.priceRangeLabel && <span style={{ color: "var(--afa-terracotta)", fontWeight: 700 }}>{v.priceRangeLabel}</span>}
