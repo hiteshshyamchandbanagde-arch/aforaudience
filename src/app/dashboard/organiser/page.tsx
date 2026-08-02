@@ -153,7 +153,7 @@ export default function OrganiserDashboard() {
                 </p>
               )}
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/organiser/edit"
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
