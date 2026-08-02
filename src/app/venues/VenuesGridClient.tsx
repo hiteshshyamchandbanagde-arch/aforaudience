@@ -1,6 +1,7 @@
 "use client"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 
 interface VenueItem {
   id: string
@@ -14,6 +15,7 @@ export default function VenuesGridClient({ venues }: { venues: VenueItem[] }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
 
   // Same click-guard as /events (PR #261) and /artists (PR #312) - a
   // plain Link gives no click feedback, so a click that doesn't render
@@ -29,9 +31,39 @@ export default function VenuesGridClient({ venues }: { venues: VenueItem[] }) {
     })
   }
 
+  // Session 65 - this embed had no search at all (only the standalone
+  // /venue-owners-style full pages did). Adding it here too so the tab
+  // reached via the actual nav link behaves the same as /events /
+  // /artists, not just the orphaned standalone route.
+  const filtered = venues.filter(
+    (v) => v.name.toLowerCase().includes(search.toLowerCase()) || v.city.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
-      {venues.map((v) => {
+    <div>
+      <BrowseSearchDropdown
+        query={search}
+        items={filtered}
+        getId={(v) => v.id}
+        emptyLabel="venues"
+        onSelect={(v) => goToVenue(v.id)}
+        renderRow={(v) => (
+          <>
+            <span style={{ fontWeight: 600 }}>{v.name}</span>
+            <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
+          </>
+        )}
+      >
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search venues, cities..."
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+        />
+      </BrowseSearchDropdown>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+      {filtered.map((v) => {
         const isNavigatingThis = navigatingId === v.id
         return (
           <div
@@ -95,6 +127,7 @@ export default function VenuesGridClient({ venues }: { venues: VenueItem[] }) {
           </div>
         )
       })}
+      </div>
     </div>
   )
 }
