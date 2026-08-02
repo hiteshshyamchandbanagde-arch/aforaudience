@@ -333,6 +333,23 @@ model Feedback {
   user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   fromChatbot Boolean          @default(false)
   status      FeedbackStatus   @default(NEW)
+  // Workflow overhaul (session 63, Hitesh's design). Two-field split:
+  // `status` is the fix lifecycle (is it fixed yet?), `deployStage` is
+  // the environment-promotion pipeline (is the fix live yet?) - these
+  // move independently, especially under the current prod freeze where
+  // everything caps out at DEPLOYED_QA regardless of status. Only
+  // meaningful once status = RESOLVED; null otherwise. Existing 183
+  // RESOLVED rows predate this field and stay null - no historical
+  // record of which of those actually reached QA/prod, so left unknown
+  // rather than guessed. Tracking starts clean from here forward.
+  deployStage FeedbackDeployStage?
+  // Human-readable sequential ID (e.g. "BUG-2608-001") - category
+  // prefix + yearMonth + sequence, same shape as the existing
+  // CodeCounter pattern used elsewhere. The cuid `id` above stays the
+  // real primary key/FK target; `displayId` is purely for humans to
+  // reference in conversation. Nullable + unique so existing rows can
+  // be backfilled without a hard migration-time requirement.
+  displayId   String?          @unique
   // Admin Dashboard v1 (session 33, 26 Jul, design.md §9.1/§9.5). Both
   // nullable, additive, no backfill required - existing rows read fine
   // with severity unset and a client-derived title fallback (first N
@@ -355,9 +372,25 @@ model Feedback {
 
 enum FeedbackStatus {
   NEW
-  REVIEWED
-  TESTED
+  UNDER_REVIEW
+  BUILD_QUEUE
+  IN_BUILD
+  BUILD_COMPLETE
+  IN_TEST
   RESOLVED
+  REJECTED
+  REOPENED
+}
+
+// Only populated once FeedbackStatus = RESOLVED - tracks how far the fix
+// has been promoted. Separate from `status` on purpose: fixed-and-in-QA
+// can sit for a long time (current prod freeze) without meaning the
+// underlying bug isn't actually fixed.
+enum FeedbackDeployStage {
+  DEPLOYED_QA
+  IN_PRODUCT
+  NOTIFIED_USER
+  CLOSED
 }
 
 enum FeedbackSeverity {
@@ -379,6 +412,11 @@ model FeedbackChangeLog {
   field           String
   fromValue       String?
   toValue         String
+  // Workflow overhaul (session 63): free-text context for a transition -
+  // the rejection reason when status -> REJECTED, or the reopen comment
+  // when status -> REOPENED. Optional so ordinary status-only changes
+  // (e.g. IN_BUILD -> BUILD_COMPLETE) don't need one.
+  note            String?
   createdAt       DateTime @default(now())
 
   @@index([feedbackId])

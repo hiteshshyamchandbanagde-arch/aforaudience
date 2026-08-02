@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { nextSequentialCode } from '@/lib/codeCounter';
 
 // ---------------------------------------------------------------------------
 // POST /api/feedback
@@ -24,6 +25,16 @@ function deriveTitle(message: string): string {
   const lastSpace = cut.lastIndexOf(' ');
   return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim() + '…';
 }
+
+// Matches the backfill mapping used in the session-63 migration -
+// keep these two in sync if categories ever change.
+const DISPLAY_ID_PREFIX: Record<string, string> = {
+  BUG: 'BUG',
+  FEATURE_IDEA: 'FEAT',
+  QUESTION: 'QST',
+  GENERAL: 'GEN',
+  OTHER: 'OTH',
+};
 
 const VALID_CATEGORIES = ['BUG', 'FEATURE_IDEA', 'QUESTION', 'GENERAL', 'OTHER'] as const;
 const MAX_MESSAGE_LENGTH = 2000;
@@ -87,6 +98,8 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
 
+  const displayId = await nextSequentialCode(DISPLAY_ID_PREFIX[category]);
+
   const feedback = await prisma.feedback.create({
     data: {
       category: category as (typeof VALID_CATEGORIES)[number],
@@ -95,6 +108,7 @@ export async function POST(req: Request) {
       userId,
       fromChatbot: Boolean(fromChatbot),
       attachmentData: attachmentData ?? null,
+      displayId,
       // Auto-derived for Admin Dashboard board/list rows (design.md §9.1) -
       // first ~60 chars of the message, cut at the last whole word so it
       // doesn't chop mid-word, with an ellipsis if truncated. Never
@@ -102,8 +116,8 @@ export async function POST(req: Request) {
       // stays untouched.
       title: deriveTitle(message.trim()),
     },
-    select: { id: true },
+    select: { id: true, displayId: true },
   });
 
-  return NextResponse.json({ ok: true, id: feedback.id }, { status: 201 });
+  return NextResponse.json({ ok: true, id: feedback.id, displayId: feedback.displayId }, { status: 201 });
 }
