@@ -246,6 +246,12 @@ model User {
   defaultCity    String?
   defaultCityLat Float?
   defaultCityLng Float?
+  // FEAT-2608-036 follow-up (2 Aug) - country of the chosen city, full
+  // name matching Venue.country's format (e.g. "India"), so the header
+  // chip can render "Pune (IN)" via src/lib/country-codes.ts. Only set
+  // together with defaultCity when the user picks from the city list
+  // (which already knows each city's country) - never guessed.
+  defaultCountry String?
 
   // H3 — moderation. suspendedByUserId is a plain scalar (not a relation),
   // same pattern as Booking.checkedInByUserId - who did it matters for the

@@ -7,6 +7,7 @@ export interface ResolvedLocation {
   city: string | null
   lat: number | null
   lng: number | null
+  country: string | null
   // 'profile'   - logged-in user has an explicit User.defaultCity saved
   // 'cookie'    - previously detected/chosen, stored client-side
   // 'detected'  - first-touch guess from Vercel's edge geo headers this request
@@ -14,7 +15,7 @@ export interface ResolvedLocation {
   source: 'profile' | 'cookie' | 'detected' | 'none'
 }
 
-function parseCookie(raw: string | undefined): { city: string; lat: number | null; lng: number | null } | null {
+function parseCookie(raw: string | undefined): { city: string; lat: number | null; lng: number | null; country: string | null } | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
@@ -23,6 +24,7 @@ function parseCookie(raw: string | undefined): { city: string; lat: number | nul
         city: parsed.city,
         lat: typeof parsed.lat === 'number' ? parsed.lat : null,
         lng: typeof parsed.lng === 'number' ? parsed.lng : null,
+        country: typeof parsed.country === 'string' ? parsed.country : null,
       }
     }
   } catch {
@@ -33,14 +35,17 @@ function parseCookie(raw: string | undefined): { city: string; lat: number | nul
 
 // Vercel sets these on every request at the edge - no external API call,
 // no billing, city-level only (not GPS-precise). Empty in local dev.
-// City comes URI-encoded (e.g. "Pune" or "New%20Delhi").
-function detectFromVercelHeaders(headerStore: Awaited<ReturnType<typeof headersFn>>): { city: string; lat: number | null; lng: number | null } | null {
+// City comes URI-encoded (e.g. "Pune" or "New%20Delhi"). No country name
+// header is provided (only a 2-letter x-vercel-ip-country, which doesn't
+// match Venue.country's full-name format) - detected guesses simply
+// carry no country until/unless the person picks a city from the list.
+function detectFromVercelHeaders(headerStore: Awaited<ReturnType<typeof headersFn>>): { city: string; lat: number | null; lng: number | null; country: null } | null {
   const rawCity = headerStore.get('x-vercel-ip-city')
   if (!rawCity) return null
   const city = decodeURIComponent(rawCity)
   const lat = parseFloat(headerStore.get('x-vercel-ip-latitude') || '')
   const lng = parseFloat(headerStore.get('x-vercel-ip-longitude') || '')
-  return { city, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null }
+  return { city, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null, country: null }
 }
 
 // Precedence: explicit profile choice > previously-set cookie > this
@@ -50,13 +55,14 @@ export async function resolveLocation(opts: {
   profileCity?: string | null
   profileLat?: number | null
   profileLng?: number | null
+  profileCountry?: string | null
   cookieStore: Awaited<ReturnType<typeof cookiesFn>>
   headerStore: Awaited<ReturnType<typeof headersFn>>
 }): Promise<ResolvedLocation> {
-  const { profileCity, profileLat, profileLng, cookieStore, headerStore } = opts
+  const { profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore } = opts
 
   if (profileCity) {
-    return { city: profileCity, lat: profileLat ?? null, lng: profileLng ?? null, source: 'profile' }
+    return { city: profileCity, lat: profileLat ?? null, lng: profileLng ?? null, country: profileCountry ?? null, source: 'profile' }
   }
 
   const fromCookie = parseCookie(cookieStore.get(LOCATION_COOKIE)?.value)
@@ -69,11 +75,11 @@ export async function resolveLocation(opts: {
     return { ...detected, source: 'detected' }
   }
 
-  return { city: null, lat: null, lng: null, source: 'none' }
+  return { city: null, lat: null, lng: null, country: null, source: 'none' }
 }
 
-export function locationCookieValue(city: string, lat: number | null, lng: number | null): string {
-  return JSON.stringify({ city, lat, lng })
+export function locationCookieValue(city: string, lat: number | null, lng: number | null, country: string | null): string {
+  return JSON.stringify({ city, lat, lng, country })
 }
 
 export const LOCATION_COOKIE_OPTIONS = {

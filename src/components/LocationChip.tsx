@@ -1,11 +1,19 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { cityLabel } from '@/lib/country-codes'
 
 interface LocationState {
   city: string | null
   lat: number | null
   lng: number | null
+  country: string | null
+}
+
+interface CityOption {
+  city: string
+  country: string | null
+  label: string
 }
 
 // FEAT-2608-036. Small header control: shows the resolved location
@@ -17,7 +25,7 @@ interface LocationState {
 export default function LocationChip({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' }) {
   const [location, setLocation] = useState<LocationState | null>(null)
   const [open, setOpen] = useState(false)
-  const [cities, setCities] = useState<string[]>([])
+  const [cities, setCities] = useState<CityOption[]>([])
   const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,7 +34,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
     let cancelled = false
     fetch('/api/user/location')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled && data) setLocation({ city: data.city, lat: data.lat, lng: data.lng }) })
+      .then((data) => { if (!cancelled && data) setLocation({ city: data.city, lat: data.lat, lng: data.lng, country: data.country ?? null }) })
       .catch(() => {})
     return () => { cancelled = true }
   }, [])
@@ -49,17 +57,17 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleSelect = async (city: string) => {
+  const handleSelect = async (option: CityOption) => {
     setOpen(false)
     setQuery('')
     setSaving(true)
     const previous = location
-    setLocation({ city, lat: null, lng: null })
+    setLocation({ city: option.city, lat: null, lng: null, country: option.country })
     try {
       const res = await fetch('/api/user/location', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ city, lat: null, lng: null }),
+        body: JSON.stringify({ city: option.city, lat: null, lng: null, country: option.country }),
       })
       if (!res.ok) setLocation(previous)
     } catch {
@@ -69,8 +77,8 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
     }
   }
 
-  const filteredCities = cities.filter((c) => c.toLowerCase().includes(query.toLowerCase()))
-  const label = location?.city ?? (location === null ? '…' : 'Set location')
+  const filteredCities = cities.filter((c) => c.city.toLowerCase().includes(query.toLowerCase()))
+  const label = location?.city ? cityLabel(location.city, location.country) : (location === null ? '…' : 'Set location')
 
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
@@ -114,12 +122,12 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             ) : (
               filteredCities.map((c) => (
                 <button
-                  key={c}
+                  key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c === location?.city ? 'rgba(200,68,26,0.08)' : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-ink)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? 'rgba(200,68,26,0.08)' : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-ink)', borderRadius: '6px' }}
                 >
-                  {c}
+                  {c.label}
                 </button>
               ))
             )}
