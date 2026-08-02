@@ -85,6 +85,11 @@ export default function CheckoutPage() {
   // since tagging never blocks or is blocked by the payment flow.
   const [companionConsent, setCompanionConsent] = useState(false)
   const [companionTags, setCompanionTags] = useState<CompanionTag[]>([])
+  // Feedback cmsaodzsy: cap tags to actual seats on this booking (server
+  // is the real enforcement in the API route - this just gives clear
+  // in-line UX instead of letting someone search, pick, and then hit an
+  // error). Null until the GET response arrives.
+  const [companionMax, setCompanionMax] = useState<number | null>(null)
   const [companionQuery, setCompanionQuery] = useState('')
   const [companionResults, setCompanionResults] = useState<CompanionUser[]>([])
   const [companionSearching, setCompanionSearching] = useState(false)
@@ -182,6 +187,7 @@ export default function CheckoutPage() {
         const data = await res.json()
         setCompanionConsent(!!data.companionTaggingConsent)
         setCompanionTags(data.tags || [])
+        setCompanionMax(typeof data.maxCompanions === 'number' ? data.maxCompanions : null)
       } catch {
         // Non-critical - checkout still works without this section.
       }
@@ -247,6 +253,7 @@ export default function CheckoutPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to tag')
       setCompanionTags(data.tags || [])
+      if (typeof data.maxCompanions === 'number') setCompanionMax(data.maxCompanions)
       setCompanionQuery('')
       setCompanionResults([])
     } catch (err: any) {
@@ -722,6 +729,14 @@ export default function CheckoutPage() {
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Bring your crew (optional)</div>
           <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 12 }}>
             Tag AFA friends you're going with — they'll get a request to confirm.
+            {companionMax !== null && (
+              <>
+                {' '}
+                {companionMax === 0
+                  ? "This booking is for 1 seat, so there's no extra seat to tag anyone for."
+                  : `Up to ${companionMax} companion${companionMax === 1 ? '' : 's'} for this booking's ${companionMax + 1} seats.`}
+              </>
+            )}
           </p>
 
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, opacity: 0.75, marginBottom: 12, cursor: 'pointer' }}>
@@ -765,6 +780,13 @@ export default function CheckoutPage() {
           )}
 
           {companionConsent && (
+            companionMax !== null && companionTags.filter((t) => t.status !== 'DECLINED').length >= companionMax ? (
+              companionMax > 0 && (
+                <p style={{ fontSize: 12.5, opacity: 0.55, fontStyle: 'italic' }}>
+                  You've tagged the max ({companionMax}) for this booking. Remove one above to tag someone else.
+                </p>
+              )
+            ) : (
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
@@ -802,6 +824,7 @@ export default function CheckoutPage() {
                 </div>
               )}
             </div>
+            )
           )}
 
           {companionError && (
