@@ -114,6 +114,16 @@ export default function SupportWidget() {
   // Feedback state
   const [fbCategory, setFbCategory] = useState('QUESTION');
   const [fbMessage, setFbMessage] = useState('');
+  // Feedback cmsa7h3x2 - Hitesh asked for a structured template so bug
+  // reports come in usable (what happened vs what was expected) instead
+  // of one-line "it's broken" messages. Only shown for category=BUG;
+  // other categories (feature ideas, questions) don't fit a
+  // repro/expected/actual shape and keep the free-text textarea. Page
+  // isn't a field here - window.location.pathname is already captured
+  // automatically below, no need to make the user type it.
+  const [bugAction, setBugAction] = useState('');
+  const [bugExpected, setBugExpected] = useState('');
+  const [bugActual, setBugActual] = useState('');
   const [fbSubmitting, setFbSubmitting] = useState(false);
   const [fbSubmitted, setFbSubmitted] = useState(false);
   const [fbFromChatbot, setFbFromChatbot] = useState(false);
@@ -290,8 +300,14 @@ export default function SupportWidget() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const isBugCategory = fbCategory === 'BUG';
+  const composedBugMessage = `What I did: ${bugAction.trim()}\nWhat I expected: ${bugExpected.trim()}\nWhat happened instead: ${bugActual.trim()}`;
+  const fbCanSubmit = isBugCategory
+    ? Boolean(bugAction.trim() && bugActual.trim())
+    : Boolean(fbMessage.trim());
+
   const submitFeedback = async () => {
-    if (!fbMessage.trim() || fbSubmitting) return;
+    if (!fbCanSubmit || fbSubmitting) return;
     setFbSubmitting(true);
     try {
       const res = await fetch('/api/feedback', {
@@ -299,7 +315,7 @@ export default function SupportWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category: fbCategory,
-          message: fbMessage.trim(),
+          message: isBugCategory ? composedBugMessage : fbMessage.trim(),
           pageUrl: typeof window !== 'undefined' ? window.location.pathname : undefined,
           fromChatbot: fbFromChatbot,
           attachmentData: fbAttachmentDataUrl ?? undefined,
@@ -308,6 +324,9 @@ export default function SupportWidget() {
       if (res.ok) {
         setFbSubmitted(true);
         setFbMessage('');
+        setBugAction('');
+        setBugExpected('');
+        setBugActual('');
         setFbFromChatbot(false);
         clearAttachment();
       } else {
@@ -601,24 +620,85 @@ export default function SupportWidget() {
                       </option>
                     ))}
                   </select>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-                    Message
-                  </label>
-                  <textarea
-                    value={fbMessage}
-                    onChange={(e) => setFbMessage(e.target.value)}
-                    rows={5}
-                    placeholder="Tell us what's up…"
-                    style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #E5DCCF',
-                      fontSize: 14,
-                      resize: 'vertical',
-                      marginBottom: 12,
-                    }}
-                  />
+                  {isBugCategory ? (
+                    <>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        What did you do?
+                      </label>
+                      <textarea
+                        value={bugAction}
+                        onChange={(e) => setBugAction(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. Entered my full name on the Sign Up page"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        What did you expect? <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+                      </label>
+                      <textarea
+                        value={bugExpected}
+                        onChange={(e) => setBugExpected(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. A username to be suggested automatically"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        What happened instead?
+                      </label>
+                      <textarea
+                        value={bugActual}
+                        onChange={(e) => setBugActual(e.target.value)}
+                        rows={2}
+                        placeholder="e.g. The field stayed blank, had to type it myself"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                        Message
+                      </label>
+                      <textarea
+                        value={fbMessage}
+                        onChange={(e) => setFbMessage(e.target.value)}
+                        rows={5}
+                        placeholder="Tell us what's up…"
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #E5DCCF',
+                          fontSize: 14,
+                          resize: 'vertical',
+                          marginBottom: 12,
+                        }}
+                      />
+                    </>
+                  )}
 
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
                     Screenshot (optional)
@@ -671,7 +751,7 @@ export default function SupportWidget() {
 
                   <button
                     onClick={submitFeedback}
-                    disabled={fbSubmitting || !fbMessage.trim()}
+                    disabled={fbSubmitting || !fbCanSubmit}
                     style={{
                       width: '100%',
                       background: 'var(--afa-terracotta)',
@@ -682,7 +762,7 @@ export default function SupportWidget() {
                       fontWeight: 600,
                       fontSize: 14,
                       cursor: fbSubmitting ? 'default' : 'pointer',
-                      opacity: fbSubmitting || !fbMessage.trim() ? 0.6 : 1,
+                      opacity: fbSubmitting || !fbCanSubmit ? 0.6 : 1,
                     }}
                   >
                     {fbSubmitting ? 'Sending…' : 'Send'}
