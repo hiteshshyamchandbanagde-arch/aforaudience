@@ -77,7 +77,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   // Feedback cmsaodzsy: "must show real data - if 3 tickets purchased
-  // then [max] 2 crew" - companion tags previously had no cap at all,
+  // then [max] 2 buddies" - companion tags previously had no cap at all,
   // so a 1-ticket booking could tag an unlimited number of companions
   // with no physical seat for any of them. Cap = total seats on this
   // booking minus one (the booker's own seat). Numbered bookings count
