@@ -8,7 +8,13 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   const artist = await prisma.artist.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, avatar: true } },
+      // Bug: this select omitted displayName, so ArtistProfileClientPage's
+      // `displayName || name` fallback always resolved to the username
+      // ("qa_artist_001") even when a real displayName existed in the DB
+      // (confirmed: "Sai Jain" is set for this exact account and renders
+      // correctly on the /artists listing card, which fetches it
+      // correctly elsewhere - just not here).
+      user: { select: { name: true, displayName: true, avatar: true } },
       performances: { include: { event: { include: { venue: true } } } },
       _count: { select: { performances: true } },
     },
