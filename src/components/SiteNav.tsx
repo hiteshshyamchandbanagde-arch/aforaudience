@@ -162,6 +162,29 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     return () => { cancelled = true }
   }, [user?.email])
   const [mobileOpen, setMobileOpen] = useState(false)
+  const mobilePanelRef = useRef<HTMLDivElement | null>(null)
+  // BUG (3 Aug, live report): panel had no bounded height/scroll container
+  // at all - fine while its content fit one screen, but Multi-language
+  // Phase 1's Language section pushed it past the fold and the extra
+  // content (Profile, Sign out) became permanently unreachable, with no
+  // page-scroll fallback on the home-page variant since that nav is
+  // position:fixed (taken out of normal document flow, so there's no
+  // page height left to scroll into). Measures available viewport space
+  // below the panel's own top edge and caps it there with overflow-y
+  // auto, instead of guessing a fixed header-height pixel value that
+  // would drift out of sync with real header content changes.
+  const [panelMaxHeight, setPanelMaxHeight] = useState<number | undefined>(undefined)
+  useEffect(() => {
+    if (!mobileOpen) return
+    const update = () => {
+      if (mobilePanelRef.current) {
+        setPanelMaxHeight(window.innerHeight - mobilePanelRef.current.getBoundingClientRect().top)
+      }
+    }
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [mobileOpen])
   // Swipe-up-to-close for the mobile dropdown panel (Feedback f1c26af4) -
   // previously only the X/hamburger button dismissed it; a swipe on the
   // panel just scrolled the page behind it instead. Simple vertical-delta
@@ -173,6 +196,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   }
   const handlePanelTouchMove = (e: React.TouchEvent) => {
     if (touchStartY.current === null) return
+    // Same fix as above, other half: an upward drag to scroll down through
+    // overflowing content is physically identical to the swipe-up-to-close
+    // gesture. When the panel actually needs to scroll, don't intercept it
+    // as a close - let native scroll (now that it has somewhere to scroll
+    // within, see panelMaxHeight above) and the X button handle it instead.
+    const el = mobilePanelRef.current
+    if (el && el.scrollHeight > el.clientHeight + 1) return
     const deltaY = touchStartY.current - e.touches[0].clientY
     if (deltaY > SWIPE_CLOSE_THRESHOLD_PX) {
       setMobileOpen(false)
@@ -489,8 +519,16 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
       {/* Mobile dropdown panel */}
       <div
+        ref={mobilePanelRef}
         className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`}
-        style={{ flexDirection: "column", padding: "8px 24px 20px", borderTop: "1px solid rgba(14,12,10,0.08)" }}
+        style={{
+          flexDirection: "column",
+          padding: "8px 24px 20px",
+          borderTop: "1px solid rgba(14,12,10,0.08)",
+          maxHeight: panelMaxHeight ? `${panelMaxHeight}px` : "80vh",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
       >
