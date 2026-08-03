@@ -32,6 +32,9 @@ const hi: Dictionary = {
   languagePicker: {
     label: "भाषा",
   },
+  themePicker: {
+    label: "थीम",
+  },
   search: {
     placeholder: "इवेंट्स, कलाकार, स्थल खोजें...",
     searching: "खोज जारी है...",

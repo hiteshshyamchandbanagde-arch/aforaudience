@@ -28,6 +28,9 @@ const en = {
   languagePicker: {
     label: "Language",
   },
+  themePicker: {
+    label: "Theme",
+  },
   search: {
     placeholder: "Search events, artists, venues...",
     searching: "Searching...",
