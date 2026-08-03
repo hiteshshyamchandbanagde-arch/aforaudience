@@ -6,6 +6,8 @@ import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
+import { useLocale } from "@/lib/i18n/translate"
+import { LOCALES } from "@/lib/i18n/locales"
 
 type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
@@ -81,10 +83,14 @@ function getRoleLabel(role?: string) {
 // custom hover tooltip (below) shows them on desktop pointer devices.
 // The mobile dropdown panel keeps full text labels unchanged - hover
 // doesn't exist on touch, and that panel has the full width to spare.
-function NavIcon({ label }: { label: string }) {
+// navKey is a stable identifier ('dashboard' | 'messages' | 'myTickets' |
+// 'profile'), separate from the display label - Multi-language Phase 1
+// made accountLinks' labels translatable, so icon lookup can no longer
+// switch on the (now locale-dependent) English label text.
+function NavIcon({ navKey }: { navKey: string }) {
   const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
-  switch (label) {
-    case 'Dashboard':
+  switch (navKey) {
+    case 'dashboard':
       return (
         <svg {...common}>
           <rect x="4" y="4" width="7" height="7" rx="1.5" />
@@ -93,20 +99,20 @@ function NavIcon({ label }: { label: string }) {
           <rect x="13" y="13" width="7" height="7" rx="1.5" />
         </svg>
       )
-    case 'Messages':
+    case 'messages':
       return (
         <svg {...common}>
           <path d="M4 5h16v11H9l-4 4V5z" />
         </svg>
       )
-    case 'My Tickets':
+    case 'myTickets':
       return (
         <svg {...common}>
           <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.2a2 2 0 0 0 0 3.6V15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.2a2 2 0 0 0 0-3.6V9z" />
           <line x1="12.5" y1="7.5" x2="12.5" y2="16.5" strokeDasharray="2.2 2.2" />
         </svg>
       )
-    case 'Profile':
+    case 'profile':
       return (
         <svg {...common}>
           <circle cx="12" cy="8.5" r="3.2" />
@@ -197,7 +203,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   useEffect(() => {
     if (typeof document === 'undefined') return
     const current = document.documentElement.getAttribute('data-theme')
-    const match = THEMES.find((t) => t.id === current)
+    const match = THEMES.find((th) => th.id === current)
     if (match) setThemeState(match.id)
   }, [])
 
@@ -214,6 +220,22 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     return () => document.removeEventListener('mousedown', handleClick)
   }, [themeMenuOpen])
 
+  // Multi-language Phase 1 - same picker shape as the theme menu above
+  // (dropdown desktop, pill row mobile), backed by useLocale()'s
+  // localStorage-persisted state instead of a data- attribute.
+  const [langMenuOpen, setLangMenuOpen] = useState(false)
+  const langMenuRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!langMenuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [langMenuOpen])
+
   const applyTheme = (id: ThemeId) => {
     setThemeState(id)
     if (id === 'default') {
@@ -225,16 +247,27 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     setThemeMenuOpen(false)
   }
 
-  const primaryLinks = backHref
-    ? [{ key: "back", href: backHref, label: backLabel ?? "← Back", isActive: false }]
-    : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: l.label, isActive: active === l.key }))
+  const { locale, setLocale, t } = useLocale()
 
+  const navLabelFor: Record<NavLinkKey, string> = {
+    events: t.nav.events,
+    artists: t.nav.artists,
+    venues: t.nav.venues,
+    "wall-of-fame": t.nav.wallOfFame,
+  }
+
+  const primaryLinks = backHref
+    ? [{ key: "back", href: backHref, label: backLabel ?? t.nav.back, isActive: false }]
+    : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: navLabelFor[l.key], isActive: active === l.key }))
+
+  // key is the stable icon/badge lookup id (see NavIcon); label is the
+  // translated display text - kept separate since Multi-language Phase 1.
   const accountLinks = user
     ? [
-        ...(dashboardLink ? [{ href: dashboardLink, label: "Dashboard", accent: true }] : []),
-        { href: "/dashboard/messages", label: "Messages", accent: false },
-        { href: "/tickets", label: "My Tickets", accent: false },
-        { href: "/profile", label: "Profile", accent: false },
+        ...(dashboardLink ? [{ key: "dashboard", href: dashboardLink, label: t.nav.dashboard, accent: true }] : []),
+        { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false },
+        { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false },
+        { key: "profile", href: "/profile", label: t.nav.profile, accent: false },
       ]
     : []
 
@@ -341,18 +374,43 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               aria-expanded={themeMenuOpen}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '15px', padding: 0 }}
             >
-              {THEMES.find((t) => t.id === theme)?.emoji}
+              {THEMES.find((th) => th.id === theme)?.emoji}
             </button>
             {themeMenuOpen && (
               <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-cream)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
-                {THEMES.map((t) => (
+                {THEMES.map((th) => (
                   <button
-                    key={t.id}
-                    onClick={() => applyTheme(t.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === t.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === t.id ? 700 : 500, cursor: 'pointer' }}
+                    key={th.id}
+                    onClick={() => applyTheme(th.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
                   >
-                    <span>{t.emoji}</span>
-                    <span>{t.label}</span>
+                    <span>{th.emoji}</span>
+                    <span>{th.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div ref={langMenuRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setLangMenuOpen((v) => !v)}
+              title={t.languagePicker.label}
+              aria-label={t.languagePicker.label}
+              aria-expanded={langMenuOpen}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-ink)' }}
+            >
+              {locale.toUpperCase()}
+            </button>
+            {langMenuOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-cream)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+                {LOCALES.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                  >
+                    {l.nativeLabel}
                   </button>
                 ))}
               </div>
@@ -380,13 +438,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   className="sitenav-icon-link"
                   style={{ color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
                 >
-                  <NavIcon label={l.label} />
-                  {l.label === "Dashboard" && pendingCount > 0 && (
+                  <NavIcon navKey={l.key} />
+                  {l.key === "dashboard" && pendingCount > 0 && (
                     <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {pendingCount}
                     </span>
                   )}
-                  {l.label === "Messages" && unreadCount > 0 && (
+                  {l.key === "messages" && unreadCount > 0 && (
                     <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {unreadCount}
                     </span>
@@ -439,14 +497,30 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             Theme
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {THEMES.map((t) => (
+            {THEMES.map((th) => (
               <button
-                key={t.id}
-                onClick={() => applyTheme(t.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === t.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === t.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === t.id ? 700 : 500, cursor: 'pointer' }}
+                key={th.id}
+                onClick={() => applyTheme(th.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
               >
-                <span>{t.emoji}</span>
-                {t.label}
+                <span>{th.emoji}</span>
+                {th.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {t.languagePicker.label}
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {LOCALES.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => setLocale(l.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+              >
+                {l.nativeLabel}
               </button>
             ))}
           </div>
@@ -487,12 +561,12 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
-                {l.label === "Dashboard" && pendingCount > 0 && (
+                {l.key === "dashboard" && pendingCount > 0 && (
                   <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCount}
                   </span>
                 )}
-                {l.label === "Messages" && unreadCount > 0 && (
+                {l.key === "messages" && unreadCount > 0 && (
                   <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {unreadCount}
                   </span>

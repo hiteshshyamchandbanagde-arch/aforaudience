@@ -5,6 +5,7 @@ import SessionGuard from "@/components/SessionGuard"
 import IdleTimeoutGuard from "@/components/IdleTimeoutGuard"
 import NumberInputWheelGuard from "@/components/NumberInputWheelGuard"
 import { ToastProvider } from "@/components/Toast"
+import { LocaleProvider } from "@/lib/i18n/translate"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <SessionGuard />
       <IdleTimeoutGuard />
       <NumberInputWheelGuard />
-      <ToastProvider>{children}</ToastProvider>
+      <LocaleProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </LocaleProvider>
     </SessionProvider>
   )
 }
