@@ -104,6 +104,14 @@ const hi: Dictionary = {
     filterAllCities: "सभी शहर",
     seatsLabel: "सीटें",
   },
+  venueOwnersEmbed: {
+    loading: "स्थल मालिक लोड हो रहे हैं...",
+    emptyNone: "अभी तक कोई स्थल मालिक नहीं मिला।",
+    searchPlaceholder: "स्थल मालिक खोजें...",
+    noBioYet: "अभी तक कोई परिचय नहीं",
+    venueSingular: "स्थल",
+    venuePlural: "स्थल",
+  },
 }
 
 export default hi
