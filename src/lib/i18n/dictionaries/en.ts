@@ -100,6 +100,14 @@ const en = {
     filterAllCities: "All Cities",
     seatsLabel: "seats",
   },
+  venueOwnersEmbed: {
+    loading: "Loading venue owners...",
+    emptyNone: "No venue owners found yet.",
+    searchPlaceholder: "Search venue owners...",
+    noBioYet: "No bio yet",
+    venueSingular: "venue",
+    venuePlural: "venues",
+  },
 }
 
 export default en

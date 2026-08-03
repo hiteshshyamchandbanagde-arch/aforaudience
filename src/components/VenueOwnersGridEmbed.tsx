@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueOwnerItem {
   id: string
@@ -23,6 +24,7 @@ interface VenueOwnerItem {
 // context." - that split turned out to mean the search never actually
 // reached anyone using the real nav flow.
 export default function VenueOwnersGridEmbed() {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -50,9 +52,9 @@ export default function VenueOwnersGridEmbed() {
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading venue owners...</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div>
   if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
-  if (owners.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No venue owners found yet.</p>
+  if (owners.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.venueOwnersEmbed.emptyNone}</p>
 
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
 
@@ -71,7 +73,7 @@ export default function VenueOwnersGridEmbed() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search venue owners..."
+          placeholder={tr.venueOwnersEmbed.searchPlaceholder}
           style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
         />
       </BrowseSearchDropdown>
@@ -122,10 +124,10 @@ export default function VenueOwnersGridEmbed() {
               <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{displayName}</h2>
             </div>
             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
-              {owner.bio || "No bio yet"}
+              {owner.bio || tr.venueOwnersEmbed.noBioYet}
             </p>
             <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {owner._count.venues} venue{owner._count.venues === 1 ? "" : "s"}
+              {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersEmbed.venueSingular : tr.venueOwnersEmbed.venuePlural}
             </div>
           </div>
         )
