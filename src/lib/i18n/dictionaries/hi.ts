@@ -21,6 +21,7 @@ const hi: Dictionary = {
     signIn: "साइन इन करें",
     signUp: "साइन अप करें",
     signOut: "साइन आउट करें",
+    backToVenues: "← स्थलों पर वापस",
   },
   roles: {
     VENUE_OWNER: "स्थल स्वामी",
@@ -131,6 +132,22 @@ const hi: Dictionary = {
     emptyNoneFoundSub: "अपने फ़िल्टर बदलकर देखें",
     genreNotSet: "शैली सेट नहीं है",
     showsLabel: "शो",
+  },
+  venueDetailPage: {
+    notFound: "स्थल नहीं मिला।",
+    getDirections: "दिशा-निर्देश पाएं",
+    totalCapacity: "कुल क्षमता",
+    acousticRating: "ध्वनिक रेटिंग",
+    notRatedYet: "अभी रेटेड नहीं",
+    facilitiesHeading: "सुविधाएं",
+    seatingHeading: "सीटिंग और मूल्य",
+    seatingComingSoon: "सीटिंग विवरण जल्द आ रहे हैं।",
+    following: "✓ फ़ॉलो कर रहे हैं",
+    follow: "+ फ़ॉलो करें",
+    muteNotifications: "नए इवेंट सूचनाएं म्यूट करें",
+    enableNotifications: "नए इवेंट की सूचना पाएं",
+    notificationsOnTitle: "सूचनाएं चालू हैं - म्यूट करने के लिए टैप करें",
+    notificationsOffTitle: "सूचनाएं बंद हैं - चालू करने के लिए टैप करें",
   },
 }
 
