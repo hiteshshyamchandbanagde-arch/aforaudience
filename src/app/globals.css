@@ -223,6 +223,18 @@
   --afa-maroon-black: #071B33;
 }
 
+/* --- Theme Phase 2: "Noir" (Black Tie) - last of the 5 planned themes.
+   Same 3-variable formula, but the odd one out on purpose: a monochrome
+   graphite/charcoal accent rather than another hue, aimed at
+   organiser/venue-owner users who may want something less festive than
+   performers/audience get from the color themes. Closes out the Theme
+   Phase 2 batch - see docs/design.md. */
+[data-theme="noir"] {
+  --afa-terracotta: #2B2B2B;
+  --afa-terracotta-tint: #F4F3F1;
+  --afa-maroon-black: #0A0A0A;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

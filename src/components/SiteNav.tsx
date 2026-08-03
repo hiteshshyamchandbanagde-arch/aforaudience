@@ -186,6 +186,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     { id: 'vermilion', label: 'Vermilion', emoji: '🔥' },
     { id: 'royal-purple', label: 'Royal Purple', emoji: '👑' },
     { id: 'midnight-sapphire', label: 'Midnight Sapphire', emoji: '🌌' },
+    { id: 'noir', label: 'Noir', emoji: '🎩' },
   ] as const
   type ThemeId = typeof THEMES[number]['id']
 
