@@ -202,6 +202,17 @@
   --afa-maroon-black: #2E0509;
 }
 
+/* --- Theme Phase 2: "Royal Purple" (Rajwada) - third of 4 planned themes.
+   Same 3-variable formula. Regal palace purple. Deliberately a distinct
+   hue from the existing --afa-purple (#7B4FA0, used by the Adbhuta mood
+   tag elsewhere in the app) so the two never read as the same color in
+   different contexts. See docs/design.md Theme Phase 2 entry. */
+[data-theme="royal-purple"] {
+  --afa-terracotta: #6A3B8C;
+  --afa-terracotta-tint: #F3ECF8;
+  --afa-maroon-black: #1F0A2E;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
