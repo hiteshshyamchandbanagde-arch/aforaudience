@@ -1,14 +1,15 @@
+"use client"
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import HeroRotator from "@/components/HeroRotator";
 import MoodThemeSection from "@/components/MoodThemeSection";
-
-const TICKER_UNIQUE_ITEMS = ["Open Mic — Mumbai Tonight", "Poetry Slam — Delhi Saturday", "Stand Up Special — Bangalore", "Theater Night — Pune", "Open Mic — Hyderabad Friday", "Comedy Lineup — Chennai", "Spoken Word — Kolkata"];
-const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS];
-
-const HERO_STATS = [{ num: "2,400+", label: "Artists" }, { num: "840+", label: "Events Monthly" }, { num: "120+", label: "Cities" }];
+import { useLocale } from "@/lib/i18n/translate";
 
 export default function Home() {
+  const { t: tr } = useLocale()
+  const TICKER_UNIQUE_ITEMS = [tr.homePage.tickerOpenMicMumbai, tr.homePage.tickerPoetryDelhi, tr.homePage.tickerStandUpBangalore, tr.homePage.tickerTheaterPune, tr.homePage.tickerOpenMicHyderabad, tr.homePage.tickerComedyChennai, tr.homePage.tickerSpokenWordKolkata]
+  const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS]
+  const HERO_STATS = [{ num: "2,400+", label: tr.homePage.statArtists }, { num: "840+", label: tr.homePage.statEventsMonthly }, { num: "120+", label: tr.homePage.statCities }]
   return (
     <main className="min-h-screen" style={{ background: "var(--afa-cream)", color: "var(--afa-ink)", fontFamily: "Georgia, serif" }}>
 
@@ -20,20 +21,20 @@ export default function Home() {
         <div style={{ maxWidth: "560px", flex: "1 1 480px" }}>
           <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-terracotta)", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ display: "inline-block", width: "32px", height: "1px", background: "var(--afa-terracotta)" }}></span>
-            Live Art. Real Moments.
+            {tr.homePage.heroEyebrow}
           </div>
           <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(44px, 5vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-1.5px", color: "var(--afa-ink)", marginBottom: "28px" }}>
-            Where <em style={{ fontStyle: "italic", color: "var(--afa-terracotta)" }}>Art</em><br />finds its<br />Crowd
+            {tr.homePage.heroLine1Prefix}<em style={{ fontStyle: "italic", color: "var(--afa-terracotta)" }}>{tr.homePage.heroLine1Emphasis}</em><br />{tr.homePage.heroLine2}<br />{tr.homePage.heroLine3}
           </h1>
           <p style={{ fontSize: "18px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.65, maxWidth: "440px", lineHeight: 1.7, marginBottom: "44px", fontFamily: "system-ui, sans-serif" }}>
-            The world&apos;s first live art universe — connecting comedians, poets, open mic artists, organisers, and venues in one living ecosystem.
+            {tr.homePage.heroSubtitle}
           </p>
           <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
             <Link href="/events" style={{ background: "var(--afa-terracotta)", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 600, textDecoration: "none" }}>
-              Explore Events
+              {tr.homePage.ctaExploreEvents}
             </Link>
             <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
-              I&apos;m an Artist →
+              {tr.homePage.ctaImArtist}
             </Link>
           </div>
 
@@ -79,17 +80,17 @@ export default function Home() {
       <section style={{ padding: "100px 48px", background: "white" }}>
         <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
-          How it works
+          {tr.homePage.howItWorksEyebrow}
         </div>
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "56px" }}>
-          Four steps to your<br /><em style={{ color: "var(--afa-terracotta)" }}>perfect night out</em>
+          {tr.homePage.howItWorksHeadingPrefix}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.howItWorksHeadingEmphasis}</em>
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "2px" }}>
           {[
-            { num: "01", icon: "🔍", title: "Discover", desc: "Browse events by city, mood, genre or vibe. Free shows, paid shows — filter what fits your night." },
-            { num: "02", icon: "🎟️", title: "Book", desc: "Pick your seat, pay securely via UPI, card or wallet. Done in under 60 seconds." },
-            { num: "03", icon: "📲", title: "Get Ticket", desc: "Receive your PDF ticket + SMS confirmation instantly. Show up, scan and walk in." },
-            { num: "04", icon: "⭐", title: "Rate & Tip", desc: "After the show, rate each performer and send a digital tip directly to the artist." },
+            { num: "01", icon: "🔍", title: tr.homePage.stepDiscoverTitle, desc: tr.homePage.stepDiscoverDesc },
+            { num: "02", icon: "🎟️", title: tr.homePage.stepBookTitle, desc: tr.homePage.stepBookDesc },
+            { num: "03", icon: "📲", title: tr.homePage.stepTicketTitle, desc: tr.homePage.stepTicketDesc },
+            { num: "04", icon: "⭐", title: tr.homePage.stepRateTitle, desc: tr.homePage.stepRateDesc },
           ].map((step) => (
             <div key={step.num} style={{ background: "var(--afa-cream)", padding: "40px 32px" }}>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "72px", fontWeight: 900, color: "var(--afa-terracotta)", opacity: 0.12, lineHeight: 1, marginBottom: "20px", letterSpacing: "-3px" }}>{step.num}</div>
@@ -105,39 +106,39 @@ export default function Home() {
       <section style={{ padding: "100px 48px", background: "var(--afa-cream)" }}>
         <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
-          Who&apos;s it for
+          {tr.homePage.rolesEyebrow}
         </div>
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
-          One platform.<br /><em style={{ color: "var(--afa-terracotta)" }}>Every role.</em>
+          {tr.homePage.rolesHeadingLine1}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.rolesHeadingLine2Emphasis}</em>
         </h2>
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
-          Whether you perform, organise, own a space or simply love live art — AforAudience is built for you.
+          {tr.homePage.rolesSubtitle}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
           {[
             {
-              icon: "👥", name: "Audience", tag: "Art Lover",
-              pitch: "Never miss a show that matches your mood.",
-              benefits: ["Filter events by Navarasa — the feeling you want tonight", "Instant PDF ticket, no queue at the door", "Rate and tip artists directly after the show"],
-              cta: "Explore Events", href: "/events",
+              icon: "👥", name: tr.roles.AUDIENCE, tag: tr.homePage.audienceTag,
+              pitch: tr.homePage.audiencePitch,
+              benefits: [tr.homePage.audienceBenefit1, tr.homePage.audienceBenefit2, tr.homePage.audienceBenefit3],
+              cta: tr.homePage.audienceCta, href: "/events",
             },
             {
-              icon: "🎤", name: "Artist", tag: "Comedian · Poet · Musician",
-              pitch: "Get discovered. Get booked. Build a reputation that travels with you.",
-              benefits: ["A portable Hype Score and review history — yours, not the venue's", "Apply to open mics and shows across cities, not just one scene", "Zero commission on your slot or your tips"],
-              cta: "Apply as Artist", href: "/profile",
+              icon: "🎤", name: tr.roles.ARTIST, tag: tr.homePage.artistTag,
+              pitch: tr.homePage.artistPitch,
+              benefits: [tr.homePage.artistBenefit1, tr.homePage.artistBenefit2, tr.homePage.artistBenefit3],
+              cta: tr.homePage.artistCta, href: "/profile",
             },
             {
-              icon: "🎪", name: "Organiser", tag: "Event Manager",
-              pitch: "Run the whole show — lineup to ticket to payout — from one place.",
-              benefits: ["Post events and manage lineups without spreadsheets or group chats", "Sell tickets with built-in payments, no manual reconciliation", "Never taxed on venue rentals, performer slots, or ticket sales"],
-              cta: "Become an Organiser", href: "/profile",
+              icon: "🎪", name: tr.roles.ORGANISER, tag: tr.homePage.organiserTag,
+              pitch: tr.homePage.organiserPitch,
+              benefits: [tr.homePage.organiserBenefit1, tr.homePage.organiserBenefit2, tr.homePage.organiserBenefit3],
+              cta: tr.homePage.organiserCta, href: "/profile",
             },
             {
-              icon: "🏛️", name: "Venue Owner", tag: "Cafe · Theater · Rooftop",
-              pitch: "Turn empty hours into booked nights.",
-              benefits: ["List your space and set availability in minutes", "Get matched with organisers actively looking for a room", "Keep 100% of your rental — AforAudience takes no cut"],
-              cta: "List Your Venue", href: "/profile",
+              icon: "🏛️", name: tr.roles.VENUE_OWNER, tag: tr.homePage.venueOwnerTag,
+              pitch: tr.homePage.venueOwnerPitch,
+              benefits: [tr.homePage.venueOwnerBenefit1, tr.homePage.venueOwnerBenefit2, tr.homePage.venueOwnerBenefit3],
+              cta: tr.homePage.venueOwnerCta, href: "/profile",
             },
           ].map((role) => (
             <div key={role.name} style={{ border: "1.5px solid rgba(14,12,10,0.1)", borderRadius: "12px", padding: "32px 28px", display: "flex", flexDirection: "column" }}>
@@ -170,35 +171,35 @@ export default function Home() {
               <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             </div>
             <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
-              The world&apos;s first live art universe — where every comedian, poet, musician, organiser, venue and fan is connected.
+              {tr.homePage.footerTagline}
             </p>
           </div>
           {[
             {
-              title: "Platform",
+              title: tr.homePage.footerColPlatform,
               links: [
-                { label: "Browse Events", href: "/events" },
-                { label: "Find Artists", href: "/artists" },
-                { label: "Explore Venues", href: "/venues" },
-                { label: "Livestreams", href: "/livestreams" },
+                { label: tr.homePage.footerBrowseEvents, href: "/events" },
+                { label: tr.homePage.footerFindArtists, href: "/artists" },
+                { label: tr.homePage.footerExploreVenues, href: "/venues" },
+                { label: tr.homePage.footerLivestreams, href: "/livestreams" },
               ],
             },
             {
-              title: "Join As",
+              title: tr.homePage.footerColJoinAs,
               links: [
-                { label: "Artist", href: "/register?role=artist" },
-                { label: "Organiser", href: "/register?role=organiser" },
-                { label: "Venue Owner", href: "/register?role=venue" },
-                { label: "Audience", href: "/register" },
+                { label: tr.roles.ARTIST, href: "/register?role=artist" },
+                { label: tr.roles.ORGANISER, href: "/register?role=organiser" },
+                { label: tr.roles.VENUE_OWNER, href: "/register?role=venue" },
+                { label: tr.roles.AUDIENCE, href: "/register" },
               ],
             },
             {
-              title: "Company",
+              title: tr.homePage.footerColCompany,
               links: [
-                { label: "About Us", href: "/about" },
-                { label: "Blog", href: "/blog" },
-                { label: "Careers", href: "/careers" },
-                { label: "Privacy Policy", href: "/privacy" },
+                { label: tr.homePage.footerAboutUs, href: "/about" },
+                { label: tr.homePage.footerBlog, href: "/blog" },
+                { label: tr.homePage.footerCareers, href: "/careers" },
+                { label: tr.homePage.footerPrivacyPolicy, href: "/privacy" },
               ],
             },
           ].map((col) => (
@@ -213,8 +214,8 @@ export default function Home() {
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
-          <span>© 2025 AforAudience. All rights reserved.</span>
-          <span>Made with ❤️ for the art world</span>
+          <span>{tr.homePage.footerCopyright}</span>
+          <span>{tr.homePage.footerMadeWith}</span>
         </div>
       </footer>
 
