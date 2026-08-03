@@ -213,6 +213,16 @@
   --afa-maroon-black: #1F0A2E;
 }
 
+/* --- Theme Phase 2: "Midnight Sapphire" - fourth of 4 planned themes.
+   Same 3-variable formula. Modern/nightlife-concert feel, distinct hue
+   from existing --afa-blue (#4A6FA5) so the two never collide visually.
+   See docs/design.md Theme Phase 2 entry. */
+[data-theme="midnight-sapphire"] {
+  --afa-terracotta: #17407A;
+  --afa-terracotta-tint: #EAF1FA;
+  --afa-maroon-black: #071B33;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
