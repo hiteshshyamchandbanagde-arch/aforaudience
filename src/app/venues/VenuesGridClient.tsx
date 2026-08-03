@@ -3,6 +3,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import { cityLabel } from "@/lib/country-codes"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueItem {
   id: string
@@ -14,6 +15,7 @@ interface VenueItem {
 }
 
 export default function VenuesGridClient({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -76,7 +78,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search venues, cities..."
+            placeholder={tr.venuesPage.searchPlaceholder}
             style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
           />
         </BrowseSearchDropdown>
@@ -89,7 +91,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
           onChange={(e) => setSelectedCity(e.target.value)}
           style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", color: "var(--afa-ink)", background: "white", cursor: "pointer", outline: "none" }}
         >
-          <option value="All Cities">All Cities</option>
+          <option value="All Cities">{tr.venuesPage.filterAllCities}</option>
           {cityOptions.map((c) => (
             <option key={c.city} value={c.city}>{c.label}</option>
           ))}
@@ -155,7 +157,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             </h2>
             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "14px" }}>{cityLabel(v.city, v.country)}</p>
             <div style={{ display: "flex", gap: "18px", fontSize: "13px", color: "var(--afa-ink)" }}>
-              <span><strong>{v.capacity}</strong> seats</span>
+              <span><strong>{v.capacity}</strong> {tr.venuesPage.seatsLabel}</span>
               {v.priceRangeLabel && <span style={{ color: "var(--afa-terracotta)", fontWeight: 700 }}>{v.priceRangeLabel}</span>}
             </div>
           </div>

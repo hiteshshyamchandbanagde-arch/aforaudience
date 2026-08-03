@@ -94,6 +94,16 @@ const hi: Dictionary = {
     freeBadge: "मुफ़्त",
     leftSuffix: " बचे",
   },
+  venuesPage: {
+    heading: "स्थल",
+    subtitle: "आपके आसपास लाइव कला की मेज़बानी करने वाली जगहें।",
+    tabVenues: "स्थल",
+    tabOwners: "मालिक",
+    emptyNoVenues: "अभी तक कोई स्थल नहीं मिला। जल्द फिर देखें!",
+    searchPlaceholder: "स्थल, शहर खोजें...",
+    filterAllCities: "सभी शहर",
+    seatsLabel: "सीटें",
+  },
 }
 
 export default hi

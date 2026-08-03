@@ -90,6 +90,16 @@ const en = {
     freeBadge: "FREE",
     leftSuffix: " left",
   },
+  venuesPage: {
+    heading: "Venues",
+    subtitle: "Spaces hosting live art near you.",
+    tabVenues: "Venues",
+    tabOwners: "Owners",
+    emptyNoVenues: "No venues found yet. Check back soon!",
+    searchPlaceholder: "Search venues, cities...",
+    filterAllCities: "All Cities",
+    seatsLabel: "seats",
+  },
 }
 
 export default en
