@@ -17,6 +17,7 @@ const en = {
     signIn: "Sign in",
     signUp: "Sign up",
     signOut: "Sign out",
+    backToVenues: "← Back to Venues",
   },
   roles: {
     VENUE_OWNER: "Venue Owner",
@@ -127,6 +128,22 @@ const en = {
     emptyNoneFoundSub: "Try adjusting your filters",
     genreNotSet: "Genre not set",
     showsLabel: "Shows",
+  },
+  venueDetailPage: {
+    notFound: "Venue not found.",
+    getDirections: "Get Directions",
+    totalCapacity: "Total Capacity",
+    acousticRating: "Acoustic Rating",
+    notRatedYet: "Not Rated Yet",
+    facilitiesHeading: "Facilities",
+    seatingHeading: "Seating & Pricing",
+    seatingComingSoon: "Seating details coming soon.",
+    following: "✓ Following",
+    follow: "+ Follow",
+    muteNotifications: "Mute new event notifications",
+    enableNotifications: "Get notified of new events",
+    notificationsOnTitle: "Notifications on - tap to mute",
+    notificationsOffTitle: "Notifications off - tap to enable",
   },
 }
 

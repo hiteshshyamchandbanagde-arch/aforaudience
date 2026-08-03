@@ -1,10 +1,12 @@
 "use client"
 import { useEffect, useState } from "react"
+import { useLocale } from "@/lib/i18n/translate"
 
 // Small, self-contained island of interactivity - the venue detail page
 // itself is a server component with no other client-side state, so this
 // stays isolated rather than converting the whole page.
 export default function VenueFollowButton({ venueId }: { venueId: string }) {
+  const { t: tr } = useLocale()
   const [following, setFollowing] = useState(false)
   const [notifyEnabled, setNotifyEnabledState] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -74,14 +76,14 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
           opacity: busy ? 0.6 : 1,
         }}
       >
-        {following ? "✓ Following" : "+ Follow"}
+        {following ? tr.venueDetailPage.following : tr.venueDetailPage.follow}
       </button>
       {following && (
         <button
           onClick={toggleNotify}
           disabled={busy}
-          aria-label={notifyEnabled ? "Mute new event notifications" : "Get notified of new events"}
-          title={notifyEnabled ? "Notifications on - tap to mute" : "Notifications off - tap to enable"}
+          aria-label={notifyEnabled ? tr.venueDetailPage.muteNotifications : tr.venueDetailPage.enableNotifications}
+          title={notifyEnabled ? tr.venueDetailPage.notificationsOnTitle : tr.venueDetailPage.notificationsOffTitle}
           style={{
             width: "34px",
             height: "34px",
