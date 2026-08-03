@@ -183,6 +183,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     { id: 'default', label: 'Default', emoji: '🌙' },
     { id: 'indigo', label: 'Indigo', emoji: '🪔' },
     { id: 'peacock', label: 'Peacock', emoji: '🦚' },
+    { id: 'vermilion', label: 'Vermilion', emoji: '🔥' },
   ] as const
   type ThemeId = typeof THEMES[number]['id']
 
