@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLocale } from '@/lib/i18n/translate'
 
 type Slide =
   | { type: 'image'; src: string }
@@ -30,6 +31,7 @@ const layerStyle = (isActive: boolean): React.CSSProperties => ({
 })
 
 export default function HeroRotator() {
+  const { t: tr } = useLocale()
   const [active, setActive] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
 
@@ -95,10 +97,10 @@ export default function HeroRotator() {
       />
       <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
-          For artists
+          {tr.homePage.heroRotatorEyebrow}
         </div>
         <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-cream)', lineHeight: 1.3 }}>
-          Your best performance, featured here.
+          {tr.homePage.heroRotatorTagline}
         </div>
       </div>
     </div>

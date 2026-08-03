@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface Rasa {
   emoji: string
@@ -9,16 +10,16 @@ interface Rasa {
   accent: string // hex color used to theme the CTA section when selected
 }
 
-const RASAS: Rasa[] = [
-  { emoji: "❤️", name: "Shringara", sanskrit: "Love", accent: "var(--afa-pink-dark)" },
-  { emoji: "😂", name: "Hasya", sanskrit: "Laughter", accent: "var(--afa-gold-bright)" },
-  { emoji: "😢", name: "Karuna", sanskrit: "Sorrow", accent: "var(--afa-blue)" },
-  { emoji: "⚡", name: "Raudra", sanskrit: "Fury", accent: "var(--afa-error)" },
-  { emoji: "🦁", name: "Vira", sanskrit: "Courage", accent: "var(--afa-terracotta)" },
-  { emoji: "😨", name: "Bhayanaka", sanskrit: "Fear", accent: "var(--afa-indigo-gray)" },
-  { emoji: "🤢", name: "Bibhatsa", sanskrit: "Disgust", accent: "var(--afa-olive)" },
-  { emoji: "🤩", name: "Adbhuta", sanskrit: "Wonder", accent: "var(--afa-purple)" },
-  { emoji: "🕊️", name: "Shanta", sanskrit: "Peace", accent: "var(--afa-teal)" },
+const RASA_META: { emoji: string; name: string; accent: string }[] = [
+  { emoji: "❤️", name: "Shringara", accent: "var(--afa-pink-dark)" },
+  { emoji: "😂", name: "Hasya", accent: "var(--afa-gold-bright)" },
+  { emoji: "😢", name: "Karuna", accent: "var(--afa-blue)" },
+  { emoji: "⚡", name: "Raudra", accent: "var(--afa-error)" },
+  { emoji: "🦁", name: "Vira", accent: "var(--afa-terracotta)" },
+  { emoji: "😨", name: "Bhayanaka", accent: "var(--afa-indigo-gray)" },
+  { emoji: "🤢", name: "Bibhatsa", accent: "var(--afa-olive)" },
+  { emoji: "🤩", name: "Adbhuta", accent: "var(--afa-purple)" },
+  { emoji: "🕊️", name: "Shanta", accent: "var(--afa-teal)" },
 ]
 
 const STORAGE_KEY = "afa-mood-theme"
@@ -34,6 +35,19 @@ const STORAGE_KEY = "afa-mood-theme"
 // Persisted in localStorage so it works for anonymous visitors too and
 // is remembered on return visits.
 export default function MoodThemeSection() {
+  const { t: tr } = useLocale()
+  const RASA_GLOSS: Record<string, string> = {
+    Shringara: tr.homePage.rasaLove,
+    Hasya: tr.homePage.rasaLaughter,
+    Karuna: tr.homePage.rasaSorrow,
+    Raudra: tr.homePage.rasaFury,
+    Vira: tr.homePage.rasaCourage,
+    Bhayanaka: tr.homePage.rasaFear,
+    Bibhatsa: tr.homePage.rasaDisgust,
+    Adbhuta: tr.homePage.rasaWonder,
+    Shanta: tr.homePage.rasaPeace,
+  }
+  const RASAS: Rasa[] = RASA_META.map((r) => ({ ...r, sanskrit: RASA_GLOSS[r.name] }))
   const [selected, setSelected] = useState<Rasa | null>(null)
 
   useEffect(() => {
@@ -42,6 +56,7 @@ export default function MoodThemeSection() {
       const match = RASAS.find((r) => r.name === saved)
       if (match) setSelected(match)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const choose = (rasa: Rasa) => {
@@ -57,16 +72,16 @@ export default function MoodThemeSection() {
       <section style={{ padding: "100px 48px", background: "white", textAlign: "center" }}>
         <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
-          Ancient Indian Wisdom
+          {tr.homePage.navarasaEyebrow}
         </div>
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
-          Find art by <em style={{ color: "var(--afa-terracotta)" }}>Navarasa</em>
+          {tr.homePage.navarasaHeadingPrefix}<em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.navarasaHeadingEmphasis}</em>
         </h2>
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", margin: "0 auto 16px", lineHeight: 1.7 }}>
-          The 9 emotions of Indian classical art. Search events by the feeling you want to experience tonight.
+          {tr.homePage.navarasaSubtitle}
         </p>
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45, marginBottom: "40px" }}>
-          Tap a mood to set your vibe for this visit.
+          {tr.homePage.navarasaHint}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
           {RASAS.map((rasa) => (
@@ -92,20 +107,20 @@ export default function MoodThemeSection() {
       <section style={{ background: accent, textAlign: "center", padding: "100px 48px", transition: "background 0.3s" }}>
         <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "rgba(255,255,255,0.5)", display: "inline-block" }}></span>
-          Join AforAudience
+          {tr.homePage.ctaEyebrow}
         </div>
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "white", marginBottom: "16px" }}>
-          The stage is set.<br />Are you ready?
+          {tr.homePage.ctaHeadingLine1}<br />{tr.homePage.ctaHeadingLine2}
         </h2>
         <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "18px", color: "rgba(255,255,255,0.75)", maxWidth: "540px", margin: "0 auto 44px", lineHeight: 1.7 }}>
-          Join thousands of artists, organisers, venue owners and art lovers already on the platform.
+          {tr.homePage.ctaSubtitle}
         </p>
         <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/events" style={{ background: "white", color: accent, padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 700, textDecoration: "none" }}>
-            Find an Event Tonight
+            {tr.homePage.ctaFindEvent}
           </Link>
           <Link href="/profile" style={{ background: "transparent", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "2px solid rgba(255,255,255,0.4)" }}>
-            Join as Artist
+            {tr.homePage.ctaJoinArtist}
           </Link>
         </div>
       </section>
