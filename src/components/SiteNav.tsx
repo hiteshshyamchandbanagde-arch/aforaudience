@@ -6,7 +6,7 @@ import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
-import { useLocale } from "@/lib/i18n/translate"
+import { useLocale, type Dictionary } from "@/lib/i18n/translate"
 import { LOCALES } from "@/lib/i18n/locales"
 
 type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
@@ -49,18 +49,20 @@ function getDashboardLink(role?: string) {
 // Artist + Venue Owner) wasn't sure which one was currently active just
 // from the header - had to check the dashboard content itself. Small
 // badge next to the greeting makes it explicit at a glance.
-function getRoleLabel(role?: string) {
+// Takes the translated roles dict (t.roles) rather than hardcoding English
+// - Multi-language Phase 1 deepening.
+function getRoleLabel(role: string | undefined, roles: Dictionary["roles"]) {
   switch (role) {
     case "VENUE_OWNER":
-      return "Venue Owner"
+      return roles.VENUE_OWNER
     case "ARTIST":
-      return "Artist"
+      return roles.ARTIST
     case "ORGANISER":
-      return "Organiser"
+      return roles.ORGANISER
     case "ADMIN":
-      return "Admin"
+      return roles.ADMIN
     case "AUDIENCE":
-      return "Audience"
+      return roles.AUDIENCE
     default:
       return null
   }
@@ -423,11 +425,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 className="sitenav-greeting"
                 style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
               >
-                Hi, {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
-              {getRoleLabel(user.role) && (
+              {getRoleLabel(user.role, t.roles) && (
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
-                  {getRoleLabel(user.role)}
+                  {getRoleLabel(user.role, t.roles)}
                 </span>
               )}
               {accountLinks.map((l) => (
@@ -456,16 +458,16 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 onClick={() => signOut({ callbackUrl: "/" })}
                 style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
               >
-                Sign out
+                {t.nav.signOut}
               </button>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-ink)", textDecoration: "none", opacity: 0.7 }}>
-                Sign in
+                {t.nav.signIn}
               </Link>
               <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", background: "var(--afa-ink)", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
-                Sign up
+                {t.nav.signUp}
               </Link>
             </div>
           )}
@@ -546,10 +548,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         {status === "loading" ? null : user ? (
           <>
             <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span>Signed in as {user.displayName || user.name || user.email}</span>
-              {getRoleLabel(user.role) && (
+              <span>{t.nav.signedInAs} {user.displayName || user.name || user.email}</span>
+              {getRoleLabel(user.role, t.roles) && (
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
-                  {getRoleLabel(user.role)}
+                  {getRoleLabel(user.role, t.roles)}
                 </span>
               )}
             </div>
@@ -577,7 +579,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
               style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
             >
-              Sign out
+              {t.nav.signOut}
             </button>
           </>
         ) : (
@@ -587,14 +589,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               onClick={() => setMobileOpen(false)}
               style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
             >
-              Sign in
+              {t.nav.signIn}
             </Link>
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
               style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", textAlign: "center", background: "var(--afa-ink)", padding: "12px 20px", borderRadius: "8px" }}
             >
-              Sign up
+              {t.nav.signUp}
             </Link>
           </div>
         )}

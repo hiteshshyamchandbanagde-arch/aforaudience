@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { cityLabel } from '@/lib/country-codes'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface LocationState {
   city: string | null
@@ -23,6 +24,7 @@ interface CityOption {
 // in. Deliberately no browser Geolocation prompt and no Google Places
 // call - see route/component comments for why.
 export default function LocationChip({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' }) {
+  const { t } = useLocale()
   const [location, setLocation] = useState<LocationState | null>(null)
   const [open, setOpen] = useState(false)
   const [cities, setCities] = useState<CityOption[]>([])
@@ -112,13 +114,13 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search city..."
+            placeholder={t.location.searchCityPlaceholder}
             autoFocus
             style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', marginBottom: '8px', outline: 'none' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (
-              <div style={{ fontSize: '12px', opacity: 0.5, padding: '6px 4px' }}>No matching cities</div>
+              <div style={{ fontSize: '12px', opacity: 0.5, padding: '6px 4px' }}>{t.location.noMatchingCities}</div>
             ) : (
               filteredCities.map((c) => (
                 <button

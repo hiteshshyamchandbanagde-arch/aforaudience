@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface SearchResults {
   events: { id: string; title: string; date: string; city: string | null }[]
@@ -12,6 +13,7 @@ const EMPTY: SearchResults = { events: [], artists: [], venues: [] }
 
 export default function SearchBox() {
   const router = useRouter()
+  const { t } = useLocale()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResults>(EMPTY)
@@ -58,7 +60,7 @@ export default function SearchBox() {
         value={query}
         onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
-        placeholder="Search events, artists, venues..."
+        placeholder={t.search.placeholder}
         className="afa-search-input"
         style={{
           width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
@@ -74,14 +76,14 @@ export default function SearchBox() {
           padding: hasResults || loading ? "10px 0" : "16px",
         }}>
           {loading ? (
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, padding: "6px 16px" }}>Searching...</div>
+            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, padding: "6px 16px" }}>{t.search.searching}</div>
           ) : !hasResults ? (
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>No results for &quot;{query}&quot;</div>
+            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{t.search.noResultsFor.replace("{query}", query)}</div>
           ) : (
             <>
               {results.events.length > 0 && (
                 <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>Events</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
                   {results.events.map((e) => (
                     <button key={e.id} onClick={() => go(`/events/${e.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -92,7 +94,7 @@ export default function SearchBox() {
               )}
               {results.artists.length > 0 && (
                 <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>Artists</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
                   {results.artists.map((a) => (
                     <button key={a.id} onClick={() => go(`/artists/${a.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{a.name}</span>
@@ -103,7 +105,7 @@ export default function SearchBox() {
               )}
               {results.venues.length > 0 && (
                 <div>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>Venues</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
                   {results.venues.map((v) => (
                     <button key={v.id} onClick={() => go(`/venues/${v.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{v.name}</span>
