@@ -288,6 +288,18 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     "wall-of-fame": t.nav.wallOfFame,
   }
 
+  // Mobile Theme/Language sections used to always render every option as
+  // a full pill grid - fine for one 7-theme grid, but stacking a second
+  // (soon 6-language) grid on top of it visibly bloated the panel (live
+  // report, 3 Aug) and would only get worse once Telugu/Tamil/Kannada/
+  // Malayalam are added. Collapsed-by-default summary row (current
+  // selection + chevron) that expands to the pill grid on tap, same
+  // information/options as before, just not force-displayed every time
+  // the menu opens - mirrors the desktop icon-button-opens-dropdown
+  // pattern instead of always-open.
+  const [mobileThemeExpanded, setMobileThemeExpanded] = useState(false)
+  const [mobileLangExpanded, setMobileLangExpanded] = useState(false)
+
   const primaryLinks = backHref
     ? [{ key: "back", href: backHref, label: backLabel ?? t.nav.back, isActive: false }]
     : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: navLabelFor[l.key], isActive: active === l.key }))
@@ -532,38 +544,58 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
       >
-        <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Theme
-          </div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {THEMES.map((th) => (
-              <button
-                key={th.id}
-                onClick={() => applyTheme(th.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
-              >
-                <span>{th.emoji}</span>
-                {th.label}
-              </button>
-            ))}
-          </div>
+        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+          <button
+            onClick={() => setMobileThemeExpanded((v) => !v)}
+            aria-expanded={mobileThemeExpanded}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.themePicker.label}</span>
+              <span>{THEMES.find((th) => th.id === theme)?.emoji} {THEMES.find((th) => th.id === theme)?.label}</span>
+            </span>
+            <span style={{ opacity: 0.5, fontSize: '12px', transform: mobileThemeExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+          </button>
+          {mobileThemeExpanded && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+              {THEMES.map((th) => (
+                <button
+                  key={th.id}
+                  onClick={() => { applyTheme(th.id); setMobileThemeExpanded(false) }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
+                >
+                  <span>{th.emoji}</span>
+                  {th.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {t.languagePicker.label}
-          </div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {LOCALES.map((l) => (
-              <button
-                key={l.id}
-                onClick={() => setLocale(l.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
-              >
-                {l.nativeLabel}
-              </button>
-            ))}
-          </div>
+        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+          <button
+            onClick={() => setMobileLangExpanded((v) => !v)}
+            aria-expanded={mobileLangExpanded}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.languagePicker.label}</span>
+              <span>{LOCALES.find((l) => l.id === locale)?.nativeLabel}</span>
+            </span>
+            <span style={{ opacity: 0.5, fontSize: '12px', transform: mobileLangExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+          </button>
+          {mobileLangExpanded && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+              {LOCALES.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => { setLocale(l.id); setMobileLangExpanded(false) }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                >
+                  {l.nativeLabel}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {primaryLinks.map((l) => (
           <Link
