@@ -108,6 +108,26 @@ const en = {
     venueSingular: "venue",
     venuePlural: "venues",
   },
+  artistsPage: {
+    heroPrefix: "Discover ",
+    heroEmphasis: "Artists",
+    heroSuffix: "",
+    loadingArtists: "Loading artists...",
+    countPerforming: "{n} artists performing live",
+    searchPlaceholder: "Search artists, genres...",
+    filterAll: "All",
+    topArtistNow: "Top Artist Right Now",
+    showsSingular: "show",
+    showsPlural: "shows",
+    loadingEllipsis: "Loading…",
+    viewProfile: "View Profile",
+    emptyNoneYetTitle: "No artists yet",
+    emptyNoneFoundTitle: "No artists found",
+    emptyNoneYetSub: "Check back soon!",
+    emptyNoneFoundSub: "Try adjusting your filters",
+    genreNotSet: "Genre not set",
+    showsLabel: "Shows",
+  },
 }
 
 export default en
