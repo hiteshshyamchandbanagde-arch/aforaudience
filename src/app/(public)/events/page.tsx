@@ -6,6 +6,7 @@ import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 import { isNightEvent } from "@/lib/eventTime"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface EventItem {
   id: string
@@ -57,6 +58,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
 
 export default function EventsPage() {
   const router = useRouter()
+  const { t: tr } = useLocale()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
 
@@ -191,15 +193,15 @@ export default function EventsPage() {
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
             {contentMode === "organisers" ? (
-              <>Meet the <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Organisers</em></>
+              <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
             ) : (
-              <>Find your next <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>live experience</em></>
+              <>{tr.eventsPage.heroPrefixEvents}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.eventsPage.heroEmphasisEvents}</em>{tr.eventsPage.heroSuffixEvents}</>
             )}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {contentMode === "organisers"
-              ? "The people running the shows"
-              : loading ? "Loading events..." : tab === "upcoming" ? `${filtered.length} events happening near you` : `${filtered.length} past events`}
+              ? tr.eventsPage.heroSubtitleOrganisers
+              : loading ? tr.eventsPage.loadingEvents : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
           </p>
           {contentMode === "events" ? (
           <BrowseSearchDropdown
@@ -220,7 +222,7 @@ export default function EventsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search events, venues..."
+              placeholder={tr.eventsPage.searchEventsPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -245,7 +247,7 @@ export default function EventsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search organisers..."
+              placeholder={tr.eventsPage.searchOrganisersPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -275,7 +277,7 @@ export default function EventsPage() {
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
             }}
           >
-            Events
+            {tr.eventsPage.toggleEvents}
           </button>
           <button
             onClick={() => setContentMode("organisers")}
@@ -287,7 +289,7 @@ export default function EventsPage() {
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
             }}
           >
-            Organisers
+            {tr.eventsPage.toggleOrganisers}
           </button>
         </div>
 
@@ -317,7 +319,7 @@ export default function EventsPage() {
                 cursor: "pointer",
               }}
             >
-              {t === "upcoming" ? "Upcoming" : "Past"}
+              {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
             </button>
           ))}
         </div>
@@ -350,7 +352,7 @@ export default function EventsPage() {
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
                   }}
                 >
-                  {type === "All" ? "All" : TYPE_META[type].label}
+                  {type === "All" ? tr.eventsPage.filterAll : tr.eventTypes[type as keyof typeof tr.eventTypes]}
                 </button>
               ))}
             </div>
@@ -362,7 +364,7 @@ export default function EventsPage() {
               onChange={(e) => setSelectedCity(e.target.value)}
               className="events-filters-select"
             >
-              <option>All Cities</option>
+              <option value="All Cities">{tr.eventsPage.filterAllCities}</option>
               {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
             </select>
 
@@ -379,7 +381,7 @@ export default function EventsPage() {
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
                   }}
                 >
-                  {p}
+                  {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
                 </button>
               ))}
             </div>
@@ -392,26 +394,28 @@ export default function EventsPage() {
         </div>
 
         <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "20px" }}>
-          Showing <strong style={{ color: "var(--afa-ink)", opacity: 1 }}>{filtered.length}</strong> events
+          {tr.eventsPage.showingCount.split("{n}")[0]}<strong style={{ color: "var(--afa-ink)", opacity: 1 }}>{filtered.length}</strong>{tr.eventsPage.showingCount.split("{n}")[1]}
         </p>
 
         {/* EVENTS GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading events...</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-              {tab === "past" ? "No past events yet" : events.length === 0 ? "No events published yet" : "No events found"}
+              {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {tab === "past" ? "Events move here automatically once they're over." : events.length === 0 ? "Check back soon — organisers are setting things up." : "Try adjusting your filters"}
+              {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
             </p>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: view === "grid" ? "repeat(auto-fill, minmax(340px, 1fr))" : "1fr", gap: "20px" }}>
             {filtered.map((event) => {
               const meta = TYPE_META[event.type] || TYPE_META.OPEN_MIC
+              const typeKey = (event.type in TYPE_META ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
+              const typeLabel = tr.eventTypes[typeKey]
               const isNavigatingThis = navigatingId === event.id
               return (
                 <div
@@ -470,27 +474,28 @@ export default function EventsPage() {
                     <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
                       {meta.emoji}
                       <span style={{ position: "absolute", top: "12px", left: "12px", background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", letterSpacing: "0.05em" }}>
-                        {meta.label.toUpperCase()}
+                        {typeLabel.toUpperCase()}
                       </span>
                       <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "var(--afa-green-mid)" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                        {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
+                        {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                       </span>
                       {event.isCompetitionShow && (
                         <span style={{ position: "absolute", bottom: "12px", left: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                          🏆 Competition
+                          🏆 {tr.eventsPage.competitionBadge}
                         </span>
                       )}
                       {tab === "past" ? (
                         <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                          Ended
+                          {tr.eventsPage.ended}
                         </span>
                       ) : (() => {
                         const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                         if (status === 'available') return null
                         const badge = AVAILABILITY_BADGE[status]
+                        const statusLabel = tr.availability[status]
                         return (
                           <span style={{ position: "absolute", bottom: "12px", right: "12px", background: badge.bg, color: badge.color, fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
-                            {status === 'filling-fast' ? `🔥 ${badge.label} · ${event.availableSeats} left` : badge.label}
+                            {status === 'filling-fast' ? `🔥 ${statusLabel} · ${event.availableSeats}${tr.eventsPage.leftSuffix}` : statusLabel}
                           </span>
                         )
                       })()}
@@ -505,7 +510,7 @@ export default function EventsPage() {
                     )}
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--afa-terracotta)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
-                        {event.venue ? `${event.venue.name} · ${event.venue.city}` : "Venue TBD"}
+                        {event.venue ? `${event.venue.name} · ${event.venue.city}` : tr.eventsPage.venueTBD}
                       </div>
                       <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px", lineHeight: 1.2 }}>
                         {event.title}
@@ -514,27 +519,27 @@ export default function EventsPage() {
                         <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
                         <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🕐 {event.startTime}</span>
                         {isNightEvent(event.startTime) && (
-                          <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title="Starts after 9 PM">🌙 Night</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title={tr.eventsPage.nightTitle}>🌙 {tr.eventsPage.nightLabel}</span>
                         )}
                         {event.lineup.length > 0 && (
-                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {event.lineup.length} performing</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
                         )}
                       </div>
                       {view === "list" && (
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <span style={{ background: event.isFree ? "var(--afa-green-mid)" : "var(--afa-terracotta)", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
-                            {event.isFree ? "FREE" : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
+                            {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                           </span>
-                          <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{meta.label}</span>
+                          <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{typeLabel}</span>
                           {tab === "past" ? (
-                            <span style={{ fontSize: "12px", color: "var(--afa-ink)", fontWeight: 600, opacity: 0.6 }}>Ended</span>
+                            <span style={{ fontSize: "12px", color: "var(--afa-ink)", fontWeight: 600, opacity: 0.6 }}>{tr.eventsPage.ended}</span>
                           ) : (() => {
                             const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                             if (status === 'available') return null
-                            const badge = AVAILABILITY_BADGE[status]
+                            const statusLabel = tr.availability[status]
                             return (
                               <span style={{ fontSize: "12px", color: status === 'sold-out' ? "var(--afa-ink)" : "var(--afa-red-alt)", fontWeight: 600 }}>
-                                {status === 'filling-fast' ? `🔥 ${badge.label} · ${event.availableSeats} left` : badge.label}
+                                {status === 'filling-fast' ? `🔥 ${statusLabel} · ${event.availableSeats}${tr.eventsPage.leftSuffix}` : statusLabel}
                               </span>
                             )
                           })()}
@@ -543,7 +548,7 @@ export default function EventsPage() {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: view === "grid" ? "12px" : "0", flexShrink: 0 }}>
                       <span style={{ background: "var(--afa-ink)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600 }}>
-                        View Event
+                        {tr.eventsPage.viewEvent}
                       </span>
                     </div>
                   </div>
