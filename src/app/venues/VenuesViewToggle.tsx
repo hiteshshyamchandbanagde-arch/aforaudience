@@ -2,6 +2,7 @@
 import { useState } from "react"
 import VenuesGridClient from "./VenuesGridClient"
 import VenueOwnersGridEmbed from "@/components/VenueOwnersGridEmbed"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueItem {
   id: string
@@ -28,18 +29,19 @@ const tabStyle = (active: boolean) => ({
 // (unchanged default view); Owners is fetched client-side on demand only
 // when that tab is actually opened.
 export default function VenuesViewToggle({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
+  const { t: tr } = useLocale()
   const [view, setView] = useState<"venues" | "owners">("venues")
 
   return (
     <div>
       <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
-        <button style={tabStyle(view === "venues")} onClick={() => setView("venues")}>Venues</button>
-        <button style={tabStyle(view === "owners")} onClick={() => setView("owners")}>Owners</button>
+        <button style={tabStyle(view === "venues")} onClick={() => setView("venues")}>{tr.venuesPage.tabVenues}</button>
+        <button style={tabStyle(view === "owners")} onClick={() => setView("owners")}>{tr.venuesPage.tabOwners}</button>
       </div>
 
       {view === "venues" ? (
         venues.length === 0 ? (
-          <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No venues found yet. Check back soon!</p>
+          <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.venuesPage.emptyNoVenues}</p>
         ) : (
           <VenuesGridClient venues={venues} defaultCity={defaultCity} />
         )

@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import prisma from '@/lib/prisma'
 import SiteNav from '@/components/SiteNav'
 import VenuesViewToggle from './VenuesViewToggle'
+import VenuesHero from './VenuesHero'
 import { authOptions } from '@/lib/auth'
 import { resolveLocation } from '@/lib/location'
 
@@ -79,12 +80,7 @@ export default async function VenuesPage() {
     <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav active="venues" />
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
-          Venues
-        </h1>
-        <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
-          Spaces hosting live art near you.
-        </p>
+        <VenuesHero />
 
         <VenuesViewToggle
           venues={venues.map((v) => ({
