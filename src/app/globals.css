@@ -190,6 +190,18 @@
   --afa-maroon-black: #06231D;
 }
 
+/* --- Theme Phase 2: "Vermilion" (Sindoor) - second of 4 planned themes.
+   Same 3-variable formula as Indigo/Peacock above. Deep auspicious red,
+   the most festive/bold of the batch - deliberately distinct from
+   Default's warm terracotta-orange rather than sitting near it on the
+   color wheel. See docs/design.md Theme Phase 2 entry for the full
+   remaining palette. */
+[data-theme="vermilion"] {
+  --afa-terracotta: #9E1B32;
+  --afa-terracotta-tint: #FDEEF0;
+  --afa-maroon-black: #2E0509;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
