@@ -112,6 +112,26 @@ const hi: Dictionary = {
     venueSingular: "स्थल",
     venuePlural: "स्थल",
   },
+  artistsPage: {
+    heroPrefix: "",
+    heroEmphasis: "कलाकारों",
+    heroSuffix: " को खोजें",
+    loadingArtists: "कलाकार लोड हो रहे हैं...",
+    countPerforming: "{n} कलाकार लाइव प्रस्तुति दे रहे हैं",
+    searchPlaceholder: "कलाकार, शैली खोजें...",
+    filterAll: "सभी",
+    topArtistNow: "अभी का टॉप कलाकार",
+    showsSingular: "शो",
+    showsPlural: "शो",
+    loadingEllipsis: "लोड हो रहा है…",
+    viewProfile: "प्रोफ़ाइल देखें",
+    emptyNoneYetTitle: "अभी तक कोई कलाकार नहीं",
+    emptyNoneFoundTitle: "कोई कलाकार नहीं मिला",
+    emptyNoneYetSub: "जल्द फिर देखें!",
+    emptyNoneFoundSub: "अपने फ़िल्टर बदलकर देखें",
+    genreNotSet: "शैली सेट नहीं है",
+    showsLabel: "शो",
+  },
 }
 
 export default hi

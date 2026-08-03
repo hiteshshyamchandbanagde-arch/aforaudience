@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { useLocale } from "@/lib/i18n/translate"
 
 type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
 
@@ -35,6 +36,7 @@ const SCENE_STATUS_RANK: Record<SceneStatusTier, number> = {
 }
 
 export default function ArtistsPage() {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -136,10 +138,10 @@ export default function ArtistsPage() {
       <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Discover <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Artists</em>
+            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading artists..." : `${filtered.length} artists performing live`}
+            {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.countPerforming.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
             query={search}
@@ -157,7 +159,7 @@ export default function ArtistsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search artists, genres..."
+              placeholder={tr.artistsPage.searchPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -181,7 +183,7 @@ export default function ArtistsPage() {
                 onClick={() => setSelectedGenre(g)}
                 style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-ink)", fontSize: "13px", fontWeight: 500, cursor: "pointer" }}
               >
-                {g}
+                {g === "All" ? tr.artistsPage.filterAll : g}
               </button>
             ))}
           </div>
@@ -192,31 +194,31 @@ export default function ArtistsPage() {
           <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", borderRadius: "16px", padding: "24px 32px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
             <div style={{ fontSize: "56px" }}>🌟</div>
             <div style={{ flex: 1, minWidth: "200px" }}>
-              <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>Top Artist Right Now</div>
+              <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>{tr.artistsPage.topArtistNow}</div>
               <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.displayName || risingStar.user.name}</div>
-              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} show{risingStar._count.performances === 1 ? "" : "s"}</div>
+              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</div>
             </div>
             <button
               onClick={() => goToArtist(risingStar.id)}
               disabled={!!navigatingId}
               style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, border: "none", cursor: navigatingId ? "default" : "pointer", whiteSpace: "nowrap", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
             >
-              {navigatingId === risingStar.id ? "Loading…" : "View Profile"}
+              {navigatingId === risingStar.id ? tr.artistsPage.loadingEllipsis : tr.artistsPage.viewProfile}
             </button>
           </div>
         )}
 
         {/* ARTIST GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading artists...</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.artistsPage.loadingArtists}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎤</div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-              {artists.length === 0 ? "No artists yet" : "No artists found"}
+              {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {artists.length === 0 ? "Check back soon!" : "Try adjusting your filters"}
+              {artists.length === 0 ? tr.artistsPage.emptyNoneYetSub : tr.artistsPage.emptyNoneFoundSub}
             </p>
           </div>
         ) : (
@@ -304,7 +306,7 @@ export default function ArtistsPage() {
                           </span>
                         )}
                       </div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>{artist.genre.join(", ") || "Genre not set"}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>{artist.genre.join(", ") || tr.artistsPage.genreNotSet}</div>
                     </div>
                   </div>
 
@@ -317,7 +319,7 @@ export default function ArtistsPage() {
                     <div style={{ display: "flex", justifyContent: "center" }}>
                       <div style={{ textAlign: "center" }}>
                         <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{artist._count.performances}</div>
-                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Shows</div>
+                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{tr.artistsPage.showsLabel}</div>
                       </div>
                     </div>
                   </div>
