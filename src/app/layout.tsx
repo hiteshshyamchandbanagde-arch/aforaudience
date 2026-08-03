@@ -85,7 +85,7 @@ export default function RootLayout({
             __html: `
               try {
                 var t = localStorage.getItem('afa-theme');
-                var valid = ['indigo', 'peacock', 'vermilion'];
+                var valid = ['indigo', 'peacock', 'vermilion', 'royal-purple'];
                 if (valid.indexOf(t) !== -1) document.documentElement.setAttribute('data-theme', t);
               } catch (e) {}
             `,
