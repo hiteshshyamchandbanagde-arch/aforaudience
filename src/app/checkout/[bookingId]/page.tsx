@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { formatEventTimeRange } from '@/lib/eventTime'
 import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
+import { useLocale } from '@/lib/i18n/translate'
 import {
   loadRazorpayCheckoutScript,
   openRazorpayCheckout,
@@ -72,6 +73,7 @@ export default function CheckoutPage() {
   const bookingId = params?.bookingId
   const router = useRouter()
   const { data: session, status: authStatus } = useSession()
+  const { t: tr } = useLocale()
 
   const [state, setState] = useState<BookingState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -121,7 +123,7 @@ export default function CheckoutPage() {
         const res = await fetch(`/api/bookings/${bookingId}`)
         const data = await res.json()
         if (cancelled) return
-        if (!res.ok) throw new Error(data.error || 'Failed to load booking')
+        if (!res.ok) throw new Error(data.error || tr.checkoutPage.failedToLoadBookingFallback)
         setState(data)
         if (data.booking.status === 'CONFIRMED') setConfirmed(true)
       } catch (err: any) {
@@ -236,7 +238,7 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error('Failed to update')
     } catch {
       setCompanionConsent(!checked) // revert
-      setCompanionError('Could not save that - try again.')
+      setCompanionError(tr.checkoutPage.couldNotSaveRetry)
     }
   }
 
@@ -251,13 +253,13 @@ export default function CheckoutPage() {
         body: JSON.stringify({ addUserIds: [u.id] }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to tag')
+      if (!res.ok) throw new Error(data.error || tr.checkoutPage.failedToTagFallback)
       setCompanionTags(data.tags || [])
       if (typeof data.maxCompanions === 'number') setCompanionMax(data.maxCompanions)
       setCompanionQuery('')
       setCompanionResults([])
     } catch (err: any) {
-      setCompanionError(err.message || 'Could not tag that person.')
+      setCompanionError(err.message || tr.checkoutPage.couldNotTagPerson)
     } finally {
       setCompanionBusy(false)
     }
@@ -312,7 +314,7 @@ export default function CheckoutPage() {
       )
       const confirmData = await confirmRes.json()
       if (!confirmRes.ok) {
-        throw new Error(confirmData.error || 'Payment confirmation failed')
+        throw new Error(confirmData.error || tr.checkoutPage.paymentConfirmationFailedFallback)
       }
       setConfirmed(true)
     } catch (err: any) {
@@ -321,7 +323,7 @@ export default function CheckoutPage() {
         // them try again.
         return
       }
-      setError(err?.message || 'Payment failed')
+      setError(err?.message || tr.checkoutPage.paymentFailedFallback)
     } finally {
       setPaying(false)
       setConfirming(false)
@@ -333,7 +335,7 @@ export default function CheckoutPage() {
       <>
         <SiteNav />
         <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-ink)' }}>
-          Loading your checkout…
+          {tr.checkoutPage.loadingCheckout}
         </div>
       </>
     )
@@ -345,11 +347,11 @@ export default function CheckoutPage() {
         <SiteNav />
         <div style={{ padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 16 }}>
-            Something went wrong
+            {tr.checkoutPage.somethingWrongTitle}
           </h1>
-          <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || 'Booking not found'}</p>
+          <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
           <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
-            ← Back to events
+            {tr.nav.backToEvents}
           </Link>
         </div>
       </>
@@ -410,14 +412,16 @@ export default function CheckoutPage() {
         >
           <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 32, fontWeight: 900, marginBottom: 12 }}>
-            You're in!
+            {tr.checkoutPage.youreIn}
           </h1>
           <p style={{ opacity: 0.7, lineHeight: 1.6, marginBottom: 24 }}>
-            Your booking for <strong>{state.booking.event.title}</strong> is confirmed.
+            {tr.checkoutPage.bookingConfirmedPrefix} <strong>{state.booking.event.title}</strong> {tr.checkoutPage.bookingConfirmedSuffix}
             {state.booking.event.venue && (
               <>
                 {' '}
-                We'll see you at {state.booking.event.venue.name}, {state.booking.event.venue.city}.
+                {tr.checkoutPage.seeYouAtTemplate
+                  .replace('{venue}', state.booking.event.venue.name)
+                  .replace('{city}', state.booking.event.venue.city)}
               </>
             )}
           </p>
@@ -430,17 +434,17 @@ export default function CheckoutPage() {
               marginBottom: 24,
             }}
           >
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Booking ID</div>
+            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.checkoutPage.bookingIdLabel}</div>
             <div style={{ fontFamily: 'monospace', fontSize: 14, marginBottom: 12 }}>
               {state.booking.id}
             </div>
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Seats</div>
+            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.eventDetailPage.seatsLabel}</div>
             <div style={{ fontSize: 14, marginBottom: 12 }}>
               {seatsSummaryText}
             </div>
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>Amount paid</div>
+            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.checkoutPage.amountPaidLabel}</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>
-              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : 'Free'}
+              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -456,7 +460,7 @@ export default function CheckoutPage() {
                 display: 'inline-block',
               }}
             >
-              Download ticket (PDF)
+              {tr.checkoutPage.downloadTicketPdf}
             </a>
             <Link
               href="/tickets"
@@ -470,7 +474,7 @@ export default function CheckoutPage() {
                 display: 'inline-block',
               }}
             >
-              View my tickets →
+              {tr.checkoutPage.viewMyTicketsArrow}
             </Link>
             <Link
               href="/events"
@@ -484,11 +488,11 @@ export default function CheckoutPage() {
                 display: 'inline-block',
               }}
             >
-              Browse more events
+              {tr.checkoutPage.browseMoreEvents}
             </Link>
           </div>
           <p style={{ fontSize: 12, color: 'var(--afa-taupe)', marginTop: 16, lineHeight: 1.6 }}>
-            We've also emailed the ticket to you. Show the QR at the door — screen or print is fine.
+            {tr.checkoutPage.emailedTicketNote}
           </p>
         </main>
       </>
@@ -502,16 +506,16 @@ export default function CheckoutPage() {
         <SiteNav />
         <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
-            This booking was cancelled
+            {tr.checkoutPage.bookingCancelledTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
-            If you still want to attend, head back to the event and book again.
+            {tr.checkoutPage.bookingCancelledBody}
           </p>
           <Link
             href={`/events/${state.booking.event.id}`}
             style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
           >
-            ← Back to event
+            {tr.checkoutPage.backToEventLabel}
           </Link>
         </main>
       </>
@@ -525,10 +529,10 @@ export default function CheckoutPage() {
         <SiteNav />
         <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
-            Your reservation expired
+            {tr.checkoutPage.reservationExpiredTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
-            We only hold seats for 15 minutes so others can book too. Head back to the event and pick your seats again — should only take a moment.
+            {tr.checkoutPage.reservationExpiredBody}
           </p>
           <Link
             href={`/events/${state.booking.event.id}`}
@@ -542,7 +546,7 @@ export default function CheckoutPage() {
               display: 'inline-block',
             }}
           >
-            ← Back to event
+            {tr.checkoutPage.backToEventLabel}
           </Link>
         </main>
       </>
@@ -556,16 +560,16 @@ export default function CheckoutPage() {
         <SiteNav />
         <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
-            Online payments aren't live yet
+            {tr.checkoutPage.paymentsNotLiveTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
-            Your seats are reserved. We'll email you when checkout is ready to complete this booking.
+            {tr.checkoutPage.seatsReservedNotice}
           </p>
           <Link
             href="/tickets"
             style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
           >
-            View my reservations →
+            {tr.checkoutPage.viewMyReservationsArrow}
           </Link>
         </main>
       </>
@@ -575,7 +579,7 @@ export default function CheckoutPage() {
   // --- Normal checkout state
   return (
     <>
-      <SiteNav backHref={`/events/${state.booking.event.id}`} backLabel="← Back to event" />
+      <SiteNav backHref={`/events/${state.booking.event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
       <main
         style={{
           padding: '32px 20px',
@@ -586,10 +590,10 @@ export default function CheckoutPage() {
         }}
       >
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
-          Confirm your booking
+          {tr.checkoutPage.confirmYourBooking}
         </h1>
         <p style={{ opacity: 0.6, marginBottom: 24, fontSize: 14 }}>
-          Reserve seats now — pay in the next 15 minutes to lock them in.
+          {tr.checkoutPage.reserveSeatsNotice}
         </p>
 
         <div
@@ -647,7 +651,7 @@ export default function CheckoutPage() {
                     <span>
                       {g.tierLabel}{g.level ? ` · ${g.level}` : ''} × {g.count}
                       <span style={{ fontSize: 11, opacity: 0.6, display: 'block', marginTop: 2 }}>
-                        Seat{g.count === 1 ? '' : 's'} {g.seatLabels.join(', ')}
+                        {g.count === 1 ? tr.checkoutPage.seatWordCapSingular : tr.checkoutPage.seatWordCapPlural} {g.seatLabels.join(', ')}
                       </span>
                     </span>
                     <span style={{ opacity: 0.7 }}>
@@ -686,9 +690,9 @@ export default function CheckoutPage() {
                 }}
               >
                 <span>
-                  Booking fee
+                  {tr.eventDetailPage.bookingFeeLabel}
                   <span style={{ fontSize: 11, opacity: 0.75, display: 'block', marginTop: 2 }}>
-                    Supports the artist ecosystem — keeps the platform free for artists and venues.
+                    {tr.checkoutPage.bookingFeeHintCheckout}
                   </span>
                 </span>
                 <span>
@@ -707,9 +711,9 @@ export default function CheckoutPage() {
               paddingTop: 16,
             }}
           >
-            <span style={{ fontSize: 14, opacity: 0.6 }}>Total</span>
+            <span style={{ fontSize: 14, opacity: 0.6 }}>{tr.eventDetailPage.totalLabel}</span>
             <span style={{ fontSize: 22, fontWeight: 700 }}>
-              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : 'Free'}
+              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
             </span>
           </div>
         </div>
@@ -726,15 +730,18 @@ export default function CheckoutPage() {
             marginBottom: 20,
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Tag your buddies (optional)</div>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{tr.checkoutPage.tagYourBuddies}</div>
           <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 12 }}>
-            Tag AFA friends you're going with — they'll get a request to confirm.
+            {tr.checkoutPage.tagBuddiesIntro}
             {companionMax !== null && (
               <>
                 {' '}
                 {companionMax === 0
-                  ? "This booking is for 1 seat, so there's no extra seat to tag anyone for."
-                  : `Up to ${companionMax} companion${companionMax === 1 ? '' : 's'} for this booking's ${companionMax + 1} seats.`}
+                  ? tr.checkoutPage.noExtraSeatToTag
+                  : tr.checkoutPage.upToCompanionsTemplate
+                      .replace('{max}', String(companionMax))
+                      .replace('{word}', companionMax === 1 ? tr.checkoutPage.companionSingular : tr.checkoutPage.companionPlural)
+                      .replace('{seats}', String(companionMax + 1))}
               </>
             )}
           </p>
@@ -747,8 +754,7 @@ export default function CheckoutPage() {
               style={{ marginTop: 2 }}
             />
             <span>
-              I agree that confirmed companion tags can count toward Verified/Repeat Attendee counts and Scene Status
-              — for both me and the people I tag.
+              {tr.checkoutPage.companionConsentLabel}
             </span>
           </label>
 
@@ -764,12 +770,12 @@ export default function CheckoutPage() {
                 >
                   {t.taggedUser.displayName || t.taggedUser.name}
                   <span style={{ opacity: 0.5, fontSize: 11 }}>
-                    {t.status === 'PENDING' ? '(pending)' : t.status === 'ACCEPTED' ? '(confirmed)' : '(declined)'}
+                    {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
                   </span>
                   <button
                     onClick={() => removeCompanion(t.id)}
                     disabled={companionBusy}
-                    aria-label={`Remove ${t.taggedUser.name}`}
+                    aria-label={tr.checkoutPage.removeAriaLabelTemplate.replace('{name}', t.taggedUser.name)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, opacity: 0.5, padding: '0 4px' }}
                   >
                     ×
@@ -783,7 +789,7 @@ export default function CheckoutPage() {
             companionMax !== null && companionTags.filter((t) => t.status !== 'DECLINED').length >= companionMax ? (
               companionMax > 0 && (
                 <p style={{ fontSize: 12.5, opacity: 0.55, fontStyle: 'italic' }}>
-                  You've tagged the max ({companionMax}) for this booking. Remove one above to tag someone else.
+                  {tr.checkoutPage.maxTaggedNoticeTemplate.replace('{max}', String(companionMax))}
                 </p>
               )
             ) : (
@@ -792,7 +798,7 @@ export default function CheckoutPage() {
                 type="text"
                 value={companionQuery}
                 onChange={(e) => setCompanionQuery(e.target.value)}
-                placeholder="Search by name..."
+                placeholder={tr.checkoutPage.searchByNamePlaceholder}
                 disabled={companionBusy}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
@@ -800,7 +806,7 @@ export default function CheckoutPage() {
                 }}
               />
               {companionSearching && (
-                <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>Searching…</div>
+                <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>{tr.checkoutPage.searchingEllipsis}</div>
               )}
               {companionResults.length > 0 && (
                 <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -818,7 +824,7 @@ export default function CheckoutPage() {
                         }}
                       >
                         <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 12 }}>@{u.name}</span></span>
-                        <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600, fontSize: 12 }}>+ Tag</span>
+                        <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600, fontSize: 12 }}>{tr.checkoutPage.tagButtonLabel}</span>
                       </button>
                     ))}
                 </div>
@@ -864,12 +870,12 @@ export default function CheckoutPage() {
           }}
         >
           {confirming
-            ? 'Confirming your booking…'
+            ? tr.checkoutPage.confirmingYourBooking
             : paying
-              ? 'Opening payment…'
+              ? tr.checkoutPage.openingPayment
               : state.booking.totalAmount > 0
-                ? `Pay ${formatDisplayMoney(state.booking.totalAmount, displayCurrency)}`
-                : 'Confirm Free Booking'}
+                ? `${tr.checkoutPage.payPrefix} ${formatDisplayMoney(state.booking.totalAmount, displayCurrency)}`
+                : tr.eventDetailPage.confirmFreeBooking}
         </button>
 
         <div
@@ -881,7 +887,7 @@ export default function CheckoutPage() {
             lineHeight: 1.6,
           }}
         >
-          Payments handled securely by Razorpay. UPI, card, and netbanking supported.
+          {tr.checkoutPage.securePaymentFooterCheckout}
         </div>
       </main>
     </>
