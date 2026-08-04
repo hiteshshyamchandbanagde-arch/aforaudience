@@ -3,8 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import EnvBadge from "@/components/EnvBadge"
+import { useLocale } from "@/lib/i18n/translate"
 
 export default function ForgotPasswordPage() {
+  const { t: tr } = useLocale()
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -23,7 +25,7 @@ export default function ForgotPasswordPage() {
       // the API itself never reveals whether the email exists.
       setSubmitted(true)
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError(tr.forgotPasswordPage.somethingWentWrongRetry)
     } finally {
       setLoading(false)
     }
@@ -38,7 +40,7 @@ export default function ForgotPasswordPage() {
             <EnvBadge />
           </Link>
           <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
-            Reset your password
+            {tr.forgotPasswordPage.resetYourPasswordSubtitle}
           </p>
         </div>
 
@@ -46,22 +48,22 @@ export default function ForgotPasswordPage() {
           {submitted ? (
             <div>
               <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
-                Check your email
+                {tr.forgotPasswordPage.checkYourEmailHeading}
               </h2>
               <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.7, lineHeight: 1.6 }}>
-                If an account exists for <strong>{email}</strong>, we&apos;ve sent a link to reset your password. It expires in 1 hour.
+                {tr.forgotPasswordPage.ifAccountExistsPrefix} <strong>{email}</strong>{tr.forgotPasswordPage.ifAccountExistsSuffix}
               </p>
-+             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, lineHeight: 1.6, marginTop: "16px" }}>
-+               Didn&apos;t get anything? Double-check the email address for typos, look in your spam folder, or make sure you&apos;re using the email you originally signed up with.
-+             </p>
+              <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, lineHeight: 1.6, marginTop: "16px" }}>
+                {tr.forgotPasswordPage.didntGetAnything}
+              </p>
             </div>
           ) : (
             <div>
               <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
-                Forgot your password?
+                {tr.forgotPasswordPage.forgotPasswordHeading}
               </h2>
               <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "20px" }}>
-                Enter your email and we&apos;ll send you a reset link.
+                {tr.forgotPasswordPage.enterEmailIntro}
               </p>
 
               {error && (
@@ -71,11 +73,11 @@ export default function ForgotPasswordPage() {
               )}
 
               <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-                Email
+                {tr.registerPage.emailLabel}
               </label>
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder={tr.registerPage.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -87,7 +89,7 @@ export default function ForgotPasswordPage() {
                 disabled={loading || !email}
                 style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "20px" }}
               >
-                {loading ? "Sending..." : "Send reset link"}
+                {loading ? tr.loginPage.sendingEllipsis : tr.forgotPasswordPage.sendResetLinkButton}
               </button>
             </div>
           )}
@@ -95,7 +97,7 @@ export default function ForgotPasswordPage() {
 
         <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
           <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>
-            Back to sign in
+            {tr.forgotPasswordPage.backToSignIn}
           </Link>
         </p>
       </div>

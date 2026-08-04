@@ -374,6 +374,18 @@ const en = {
     invalidCodeFallback: "Invalid code.",
     couldNotResendCodeFallback: "Could not resend code.",
   },
+  forgotPasswordPage: {
+    resetYourPasswordSubtitle: "Reset your password",
+    checkYourEmailHeading: "Check your email",
+    ifAccountExistsPrefix: "If an account exists for",
+    ifAccountExistsSuffix: ", we've sent a link to reset your password. It expires in 1 hour.",
+    didntGetAnything: "Didn't get anything? Double-check the email address for typos, look in your spam folder, or make sure you're using the email you originally signed up with.",
+    forgotPasswordHeading: "Forgot your password?",
+    enterEmailIntro: "Enter your email and we'll send you a reset link.",
+    sendResetLinkButton: "Send reset link",
+    backToSignIn: "Back to sign in",
+    somethingWentWrongRetry: "Something went wrong. Please try again.",
+  },
   homePage: {
     heroEyebrow: "Live Art. Real Moments.",
     heroLine1Prefix: "Where ",
