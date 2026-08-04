@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
+import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
 // Companion Tagging Phase 1 (reputation epic §7) - tags where the
 // logged-in user is the one being tagged, awaiting their response.
@@ -56,20 +57,20 @@ interface BookingItem {
 // isn't possible at all. Server already blocked the actual cancel
 // correctly; this only fixes the preview's wording (and see isPastEvent
 // below, which now hides the button entirely for this case).
-function previewRefund(b: BookingItem): { amount: number; label: string } {
+function previewRefund(b: BookingItem, tr: Dictionary): { amount: number; label: string } {
   const eventStart = eventStartInstant(b)
   const daysBefore = (eventStart.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
-  if (daysBefore <= 0) return { amount: 0, label: "This event has already happened" }
-  if (b.totalAmount <= 0) return { amount: 0, label: 'Free ticket - nothing to refund' }
+  if (daysBefore <= 0) return { amount: 0, label: tr.ticketsPage.refundEventHappened }
+  if (b.totalAmount <= 0) return { amount: 0, label: tr.ticketsPage.refundFreeTicket }
   if (daysBefore >= 14) {
     const amount = Math.max(0, b.totalAmount - b.bookingFeeAmount)
-    return { amount, label: `₹${amount.toLocaleString('en-IN')} refund (14+ days out)` }
+    return { amount, label: tr.ticketsPage.refund14PlusTemplate.replace('{amount}', amount.toLocaleString('en-IN')) }
   }
   if (daysBefore >= 7) {
     const amount = b.totalAmount * 0.5
-    return { amount, label: `₹${amount.toLocaleString('en-IN')} refund - 50% (7-14 days out)` }
+    return { amount, label: tr.ticketsPage.refund50PercentTemplate.replace('{amount}', amount.toLocaleString('en-IN')) }
   }
-  return { amount: 0, label: 'No refund - less than 7 days out' }
+  return { amount: 0, label: tr.ticketsPage.refundLessThan7Days }
 }
 
 function eventStartInstant(b: BookingItem): Date {
@@ -86,12 +87,12 @@ function isPastEvent(b: BookingItem): boolean {
   return eventStartInstant(b).getTime() <= Date.now()
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Reserved — pay to confirm' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Expired — book again' },
-  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Confirmed' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Refunded' },
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)' },
+  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
+  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
+  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)' },
 }
 
 // A booking's display status can differ from its DB status: an expired
@@ -106,6 +107,7 @@ function effectiveStatus(b: BookingItem): string {
 export default function MyTicketsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t: tr } = useLocale()
   const [bookings, setBookings] = useState<BookingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -120,7 +122,7 @@ export default function MyTicketsPage() {
   const load = async () => {
     try {
       const res = await fetch('/api/bookings/my')
-      if (!res.ok) throw new Error('Failed to load your tickets')
+      if (!res.ok) throw new Error(tr.ticketsPage.failedToLoadFallback)
       setBookings(await res.json())
     } catch (err: any) {
       setError(err.message)
@@ -164,11 +166,11 @@ export default function MyTicketsPage() {
   const cancelBooking = async (b: BookingItem) => {
     if (b.status === 'CONFIRMED') {
       if (isPastEvent(b)) {
-        setError("This event has already happened - it can't be cancelled.")
+        setError(tr.ticketsPage.eventAlreadyHappenedCancelError)
         return
       }
-      const { label } = previewRefund(b)
-      if (!window.confirm(`Cancel this ticket?\n\n${label}\n\nThis can't be undone.`)) return
+      const { label } = previewRefund(b, tr)
+      if (!window.confirm(tr.ticketsPage.cancelConfirmDialogTemplate.replace('{label}', label))) return
     }
     setCancelling(b.id)
     setError('')
@@ -176,7 +178,7 @@ export default function MyTicketsPage() {
       const res = await fetch(`/api/bookings/${b.id}`, { method: 'PATCH' })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to cancel')
+        throw new Error(data.error || tr.ticketsPage.failedToCancelFallback)
       }
       await load()
     } catch (err: any) {
@@ -195,10 +197,10 @@ export default function MyTicketsPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
-            My Tickets
+            {tr.ticketsPage.pageTitle}
           </h1>
           <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
-            Reserved bookings need to be paid to lock in your seats. Confirmed bookings are yours.
+            {tr.ticketsPage.pageSubtitle}
           </p>
 
           {error && (
@@ -213,14 +215,15 @@ export default function MyTicketsPage() {
           {pendingTags.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
-                You've been tagged
+                {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
                 <div key={t.id} style={{ background: 'var(--afa-white)', border: '1px solid rgba(200,68,26,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
                   <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
-                    <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong> tagged you as their companion for{' '}
-                    <strong>{t.booking.event.title}</strong> on{' '}
-                    {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}.
+                    <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
+                    {tr.ticketsPage.taggedYouAsCompanionForTemplate
+                      .replace('{event}', t.booking.event.title)
+                      .replace('{date}', new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }))}
                   </p>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
@@ -228,14 +231,14 @@ export default function MyTicketsPage() {
                       disabled={respondingTag === t.id}
                       style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
-                      {respondingTag === t.id ? 'Confirming…' : 'Confirm'}
+                      {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
                     </button>
                     <button
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
                       style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
                     >
-                      Decline
+                      {tr.ticketsPage.declineButton}
                     </button>
                   </div>
                 </div>
@@ -245,7 +248,7 @@ export default function MyTicketsPage() {
 
           {bookings.length === 0 ? (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-ink)', opacity: 0.6 }}>
-              No tickets yet. <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Browse events</Link>
+              {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
             bookings.map((b) => {
@@ -259,7 +262,7 @@ export default function MyTicketsPage() {
                       {b.event.title}
                     </Link>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
-                      {s.label}
+                      {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
                     </span>
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
@@ -269,19 +272,19 @@ export default function MyTicketsPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-ink)' }}>
                     <span>
                       {b.seatLabels && b.seatLabels.length > 0
-                        ? `Seats ${b.seatLabels.join(', ')}`
+                        ? tr.ticketsPage.seatsListTemplate.replace('{labels}', b.seatLabels.join(', '))
                         : Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}
                     </span>
-                    <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : 'Free'}</span>
+                    <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}</span>
                   </div>
                   {b.companionTags && b.companionTags.length > 0 && (
                     <p style={{ fontSize: '12.5px', color: 'var(--afa-ink)', opacity: 0.65, margin: '8px 0 0' }}>
-                      Going with{' '}
+                      {tr.ticketsPage.goingWith}{' '}
                       {b.companionTags.map((t, i) => (
                         <span key={t.id}>
                           {i > 0 && ', '}
                           {t.taggedUser.displayName || t.taggedUser.name}{' '}
-                          {t.status === 'PENDING' ? '(pending)' : t.status === 'ACCEPTED' ? '(confirmed)' : '(declined)'}
+                          {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
                         </span>
                       ))}
                     </p>
@@ -293,7 +296,7 @@ export default function MyTicketsPage() {
                           href={`/checkout/${b.id}`}
                           style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                         >
-                          Pay now →
+                          {tr.ticketsPage.payNowArrow}
                         </Link>
                       )}
                       <button
@@ -301,7 +304,7 @@ export default function MyTicketsPage() {
                         disabled={cancelling === b.id}
                         style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
                       >
-                        {cancelling === b.id ? 'Cancelling...' : 'Cancel'}
+                        {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelButton}
                       </button>
                     </div>
                   )}
@@ -311,17 +314,17 @@ export default function MyTicketsPage() {
                         href={`/api/bookings/${b.id}/ticket`}
                         style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-ink)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                       >
-                        Download ticket (PDF)
+                        {tr.checkoutPage.downloadTicketPdf}
                       </a>
-                      <MessageButton contextType="BOOKING" contextId={b.id} label="Message Organiser" />
+                      <MessageButton contextType="BOOKING" contextId={b.id} label={tr.ticketsPage.messageOrganiser} />
                       {!isPastEvent(b) && (
                         <button
                           onClick={() => cancelBooking(b)}
                           disabled={cancelling === b.id}
-                          title={previewRefund(b).label}
+                          title={previewRefund(b, tr).label}
                           style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
                         >
-                          {cancelling === b.id ? 'Cancelling...' : 'Cancel ticket'}
+                          {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
                         </button>
                       )}
                     </div>
@@ -329,8 +332,8 @@ export default function MyTicketsPage() {
                   {(eff === 'CANCELLED' || eff === 'REFUNDED') && b.cancelledAt && (
                     <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '10px' }}>
                       {eff === 'REFUNDED'
-                        ? `₹${(b.refundAmount ?? 0).toLocaleString('en-IN')} refunded to your original payment method.`
-                        : 'Cancelled - no amount was refunded.'}
+                        ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
+                        : tr.ticketsPage.cancelledNoRefund}
                     </p>
                   )}
                 </div>
