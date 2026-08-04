@@ -395,6 +395,12 @@ const en = {
     updatingEllipsis: "Updating...",
     updatePasswordButton: "Update password",
   },
+  verifyEmailPage: {
+    linkInvalidOrExpired: "This verification link is invalid or has expired.",
+    verifyingEmailEllipsis: "Verifying your email...",
+    emailVerifiedBanner: "✅ Email verified.",
+    continueToAfa: "Continue to AforAudience",
+  },
   homePage: {
     heroEyebrow: "Live Art. Real Moments.",
     heroLine1Prefix: "Where ",
