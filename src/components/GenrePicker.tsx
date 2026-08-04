@@ -1,6 +1,7 @@
 'use client'
 
 import { PRESET_GENRES } from '@/lib/genres'
+import { useLocale } from '@/lib/i18n/translate'
 
 // Same fix pattern as FacilitiesPicker (Feedback 3213952d, session 36) and
 // Dress Code/Vibe (session 36) - replaces free-text "comma separated"
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function GenrePicker({ value, onChange }: Props) {
+  const { t: tr } = useLocale()
   const presetSelected = value.filter((v) => PRESET_GENRES.includes(v))
   // Anything in `value` that isn't one of the presets is "Other" content -
   // this correctly round-trips existing artists who already have free-text
@@ -75,14 +77,14 @@ export default function GenrePicker({ value, onChange }: Props) {
         })}
       </div>
       <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
-        Other <span style={{ fontWeight: 400, opacity: 0.7 }}>(comma separated, optional)</span>
+        {tr.genrePicker.otherLabel} <span style={{ fontWeight: 400, opacity: 0.7 }}>{tr.genrePicker.otherHint}</span>
       </label>
       <input
         type="text"
         value={otherValue}
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
-        placeholder="e.g., Beatboxing, Mimicry"
+        placeholder={tr.genrePicker.otherPlaceholder}
         style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', boxSizing: 'border-box' }}
       />
     </div>

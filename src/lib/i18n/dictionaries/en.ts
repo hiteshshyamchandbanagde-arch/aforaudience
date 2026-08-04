@@ -145,6 +145,16 @@ const en = {
   // are included since they're pure UI strings, not server error.code
   // lookups (that pattern is for auth routes only - see tr.authErrors).
   // Batch 3 (GEN-2608-020) - messages inbox + thread.
+  // BUG-2608-042: GenrePicker "Other" label/placeholder chrome only.
+  // Preset genre names stay English deliberately - they're canonical
+  // taxonomy strings shared with /artists filter-matching and the
+  // GenreRequest moderation system (see src/lib/genres.ts), same
+  // data-vs-chrome split as venue/owner names elsewhere in the app.
+  genrePicker: {
+    otherLabel: "Other",
+    otherHint: " (comma separated, optional)",
+    otherPlaceholder: "e.g., Beatboxing, Mimicry",
+  },
   messagesInboxPage: {
     heading: "Messages",
     emptyState: "No conversations yet. Threads open automatically once a spot, venue booking, or ticket is confirmed.",
