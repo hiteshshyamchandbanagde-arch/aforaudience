@@ -5,17 +5,19 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from "@/lib/i18n/translate"
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token") || ""
+  const { t: tr } = useLocale()
   const [status, setStatus] = useState<"checking" | "ok" | "error">("checking")
   const [error, setError] = useState("")
 
   useEffect(() => {
     if (!token) {
       setStatus("error")
-      setError("This verification link is invalid or has expired.")
+      setError(tr.verifyEmailPage.linkInvalidOrExpired)
       return
     }
 
@@ -28,15 +30,16 @@ function VerifyEmailContent() {
         const data = await res.json()
         if (!res.ok) {
           setStatus("error")
-          setError(data.error || "Something went wrong")
+          setError(data.error || tr.authCommon.somethingWentWrong)
           return
         }
         setStatus("ok")
       })
       .catch(() => {
         setStatus("error")
-        setError("Something went wrong. Please try again.")
+        setError(tr.forgotPasswordPage.somethingWentWrongRetry)
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   return (
@@ -50,15 +53,15 @@ function VerifyEmailContent() {
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)] text-center">
         {status === "checking" && (
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>Verifying your email...</p>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
         )}
         {status === "ok" && (
           <>
             <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
-              ✅ Email verified.
+              {tr.verifyEmailPage.emailVerifiedBanner}
             </div>
             <Link href="/" style={{ color: "var(--afa-terracotta)", fontWeight: 500, fontSize: "14px" }}>
-              Continue to AforAudience
+              {tr.verifyEmailPage.continueToAfa}
             </Link>
           </>
         )}

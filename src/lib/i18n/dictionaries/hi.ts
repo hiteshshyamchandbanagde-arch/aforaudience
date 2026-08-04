@@ -399,6 +399,12 @@ const hi: Dictionary = {
     updatingEllipsis: "अपडेट हो रहा है...",
     updatePasswordButton: "पासवर्ड अपडेट करें",
   },
+  verifyEmailPage: {
+    linkInvalidOrExpired: "यह सत्यापन लिंक अमान्य है या समय समाप्त हो गया है।",
+    verifyingEmailEllipsis: "आपका ईमेल सत्यापित हो रहा है...",
+    emailVerifiedBanner: "✅ ईमेल सत्यापित हो गया।",
+    continueToAfa: "AforAudience पर जारी रखें",
+  },
   homePage: {
     heroEyebrow: "जीवंत कला। असली पल।",
     heroLine1Prefix: "जहां ",
