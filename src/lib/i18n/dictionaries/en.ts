@@ -144,6 +144,25 @@ const en = {
   // Batch 2 (GEN-2608-020) - profile page. Client-side save/error toasts
   // are included since they're pure UI strings, not server error.code
   // lookups (that pattern is for auth routes only - see tr.authErrors).
+  // Batch 3 (GEN-2608-020) - messages inbox + thread.
+  messagesInboxPage: {
+    heading: "Messages",
+    emptyState: "No conversations yet. Threads open automatically once a spot, venue booking, or ticket is confirmed.",
+    unknownParticipant: "Unknown",
+    closedLabel: "· Closed",
+    contextLineup: "Lineup",
+    contextVenue: "Venue",
+    contextTicket: "Ticket",
+  },
+  messageThreadPage: {
+    fallbackTitle: "Conversation",
+    closedNotice: "This conversation is closed - the event is over.",
+    emptyMessages: "No messages yet. Say hello.",
+    inputPlaceholder: "Write a message...",
+    sendBtn: "Send",
+    conversationUnavailable: "This conversation is not available.",
+    sendFailed: "Failed to send message.",
+  },
   profilePage: {
     fallbackTitle: "Your Profile",
     loginCodeLabel: "Your login code: ",
