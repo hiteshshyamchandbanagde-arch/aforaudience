@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueOwnerItem {
   id: string
@@ -13,6 +14,7 @@ interface VenueOwnerItem {
 
 // Session 62, design.md §9.5 - net-new public page, mirrors /organisers.
 export default function VenueOwnersPage() {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -50,16 +52,17 @@ export default function VenueOwnersPage() {
       <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Discover <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Venue Owners</em>
+            {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading venue owners..." : `${filtered.length} venue owners hosting live shows`}
+            {loading ? tr.venueOwnersPage.loading : tr.venueOwnersPage.countHosting.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
             query={search}
             items={filtered}
             getId={(o) => o.id}
-            emptyLabel="venue owners"
+            emptyLabel={tr.common.nounVenueOwners}
+            translate
             onSelect={(o) => goToOwner(o.id)}
             renderRow={(o) => (
               <span style={{ fontWeight: 600 }}>{o.user.displayName || o.user.name}</span>
@@ -68,7 +71,7 @@ export default function VenueOwnersPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search venue owners..."
+              placeholder={tr.venueOwnersPage.searchPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -84,15 +87,15 @@ export default function VenueOwnersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading venue owners...</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏛️</div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-              {owners.length === 0 ? "No venue owners yet" : "No venue owners found"}
+              {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetTitle : tr.venueOwnersPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {owners.length === 0 ? "Check back soon!" : "Try a different search"}
+              {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetSub : tr.venueOwnersPage.emptyNoneFoundSub}
             </p>
           </div>
         ) : (
@@ -144,10 +147,10 @@ export default function VenueOwnersPage() {
                   </div>
                   <div style={{ padding: "16px 20px" }}>
                     <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
-                      {owner.bio || "No bio yet"}
+                      {owner.bio || tr.venueOwnersPage.noBioYet}
                     </p>
                     <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
-                      {owner._count.venues} venue{owner._count.venues === 1 ? "" : "s"}
+                      {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersPage.venueSingular : tr.venueOwnersPage.venuePlural}
                     </div>
                   </div>
                 </div>

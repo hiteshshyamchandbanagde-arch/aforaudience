@@ -139,6 +139,23 @@ const en = {
     venuePlural: "venues",
     seatsLabel: "seats",
   },
+  // BUG-2608-037: standalone /venue-owners list page - separate duplicated
+  // component from VenueOwnersGridEmbed (which uses venueOwnersEmbed above).
+  venueOwnersPage: {
+    heroPrefix: "Discover ",
+    heroEmphasis: "Venue Owners",
+    heroSuffix: "",
+    loading: "Loading venue owners...",
+    countHosting: "{n} venue owners hosting live shows",
+    searchPlaceholder: "Search venue owners...",
+    noBioYet: "No bio yet",
+    venueSingular: "venue",
+    venuePlural: "venues",
+    emptyNoneYetTitle: "No venue owners yet",
+    emptyNoneFoundTitle: "No venue owners found",
+    emptyNoneYetSub: "Check back soon!",
+    emptyNoneFoundSub: "Try a different search",
+  },
   artistsPage: {
     heroPrefix: "Discover ",
     heroEmphasis: "Artists",
