@@ -378,6 +378,18 @@ const hi: Dictionary = {
     invalidCodeFallback: "कोड गलत है।",
     couldNotResendCodeFallback: "कोड दोबारा नहीं भेजा जा सका।",
   },
+  forgotPasswordPage: {
+    resetYourPasswordSubtitle: "अपना पासवर्ड रीसेट करें",
+    checkYourEmailHeading: "अपना ईमेल जांचें",
+    ifAccountExistsPrefix: "अगर कोई खाता",
+    ifAccountExistsSuffix: "के लिए मौजूद है, तो हमने पासवर्ड रीसेट करने के लिए लिंक भेज दिया है। यह 1 घंटे में समाप्त हो जाएगा।",
+    didntGetAnything: "कुछ नहीं मिला? ईमेल पता जांचें, स्पैम फ़ोल्डर देखें, या सुनिश्चित करें कि आप वही ईमेल इस्तेमाल कर रहे हैं जिससे आपने साइन अप किया था।",
+    forgotPasswordHeading: "पासवर्ड भूल गए?",
+    enterEmailIntro: "अपना ईमेल डालें और हम आपको रीसेट लिंक भेजेंगे।",
+    sendResetLinkButton: "रीसेट लिंक भेजें",
+    backToSignIn: "साइन इन पर वापस जाएं",
+    somethingWentWrongRetry: "कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।",
+  },
   homePage: {
     heroEyebrow: "जीवंत कला। असली पल।",
     heroLine1Prefix: "जहां ",
