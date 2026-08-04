@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
+import { useLocale } from "@/lib/i18n/translate"
 
 // Wraps a browse page's existing hero search <input> (+ its icon span,
 // passed as children) and adds a live results dropdown underneath - same
@@ -22,6 +23,15 @@ interface BrowseSearchDropdownProps<T> {
   emptyLabel: string // e.g. "events", "artists" - used in "No {emptyLabel} match ..."
   maxVisible?: number
   children: React.ReactNode
+  // Opt-in (default false, back-compat with pages not yet Hindi-translated -
+  // BUG-2608-041). When true, renders the "No X match Y" wrapper via
+  // tr.common.noResultsMatchTemplate instead of the hardcoded English
+  // string, so it follows the site's language toggle. Only pass this (and a
+  // translated emptyLabel from tr.common.nounX) from pages/components that
+  // already call useLocale() for everything else on the page - passing it
+  // from a still-all-English page would produce a mixed-language string,
+  // which is worse than the plain-English original.
+  translate?: boolean
 }
 
 export default function BrowseSearchDropdown<T>({
@@ -33,7 +43,9 @@ export default function BrowseSearchDropdown<T>({
   emptyLabel,
   maxVisible = 6,
   children,
+  translate = false,
 }: BrowseSearchDropdownProps<T>) {
+  const { t: tr } = useLocale()
   const [focused, setFocused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -64,7 +76,9 @@ export default function BrowseSearchDropdown<T>({
         >
           {visible.length === 0 ? (
             <div style={{ fontSize: "13.5px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              No {emptyLabel} match &quot;{query}&quot;
+              {translate
+                ? tr.common.noResultsMatchTemplate.replace("{items}", emptyLabel).replace("{query}", query)
+                : <>No {emptyLabel} match &quot;{query}&quot;</>}
             </div>
           ) : (
             visible.map((item) => (

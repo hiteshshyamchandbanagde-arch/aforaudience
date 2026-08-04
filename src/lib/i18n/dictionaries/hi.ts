@@ -6,6 +6,14 @@ import type { Dictionary } from "../translate"
 // pure literary Hindi - matches how most Indian consumer apps localize,
 // picked for immediate everyday readability over formal correctness.
 const hi: Dictionary = {
+  common: {
+    noResultsMatchTemplate: '"{query}" से कोई {items} मेल नहीं खाता',
+    nounEvents: "इवेंट्स",
+    nounArtists: "कलाकार",
+    nounVenues: "स्थल",
+    nounOrganisers: "आयोजक",
+    nounVenueOwners: "स्थल मालिक",
+  },
   nav: {
     events: "इवेंट्स",
     artists: "कलाकार",
@@ -120,6 +128,16 @@ const hi: Dictionary = {
     noBioYet: "अभी तक कोई परिचय नहीं",
     venueSingular: "स्थल",
     venuePlural: "स्थल",
+  },
+  venueOwnerDetailPage: {
+    notFoundHeading: "स्थल मालिक नहीं मिला",
+    backToOwners: "← स्थल मालिकों पर वापस जाएं",
+    noBioYet: "इस स्थल मालिक ने अभी तक कोई परिचय नहीं जोड़ा है।",
+    venuesHeading: "स्थल",
+    noPublishedVenuesYet: "अभी तक कोई प्रकाशित स्थल नहीं है।",
+    venueSingular: "स्थल",
+    venuePlural: "स्थल",
+    seatsLabel: "सीटें",
   },
   artistsPage: {
     heroPrefix: "",
@@ -309,6 +327,22 @@ const hi: Dictionary = {
     showPassword: "पासवर्ड दिखाएं",
     hidePassword: "पासवर्ड छुपाएं",
     accountSuspendedMessage: "आपका खाता निलंबित कर दिया गया है। यदि आपको लगता है कि यह गलती है तो सहायता से संपर्क करें।",
+  },
+  authErrors: {
+    ALL_FIELDS_REQUIRED: "सभी फ़ील्ड आवश्यक हैं",
+    INVALID_EMAIL_FORMAT: "कृपया एक मान्य ईमेल पता डालें।",
+    PASSWORD_TOO_SHORT: "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
+    USERNAME_INVALID: "यूज़रनेम 3-20 अक्षर का होना चाहिए, केवल अक्षर/अंक/अंडरस्कोर मान्य हैं",
+    USERNAME_TAKEN: "यह यूज़रनेम पहले से लिया जा चुका है।",
+    EMAIL_TAKEN: "यह ईमेल पता पहले से पंजीकृत है।",
+    PHONE_NOT_INDIA: "फ़िलहाल केवल भारतीय (+91) मोबाइल नंबर OTP सत्यापन के लिए समर्थित हैं।",
+    PHONE_TAKEN: "यह मोबाइल नंबर पहले से पंजीकृत है।",
+    PHONE_REQUIRED: "मोबाइल नंबर आवश्यक है।",
+    IDENTIFIER_REQUIRED: "पहचानकर्ता आवश्यक है।",
+    NO_PHONE_ON_FILE: "इस खाते में कोई मोबाइल नंबर दर्ज नहीं है, इसलिए इसके लिए OTP लॉगिन उपलब्ध नहीं है।",
+    ACCOUNT_NOT_FOUND: "उस पहचानकर्ता के लिए कोई खाता नहीं मिला।",
+    INVALID_PURPOSE: "अमान्य उद्देश्य।",
+    OTP_SEND_FAILED: "OTP भेजने में विफल।",
   },
   loginPage: {
     welcomeBack: "कला की दुनिया में वापस स्वागत है",

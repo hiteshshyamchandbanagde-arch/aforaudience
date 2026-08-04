@@ -66,7 +66,8 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
           query={search}
           items={filtered}
           getId={(v) => v.id}
-          emptyLabel="venues"
+          emptyLabel={tr.common.nounVenues}
+          translate
           onSelect={(v) => goToVenue(v.id)}
           renderRow={(v) => (
             <>
