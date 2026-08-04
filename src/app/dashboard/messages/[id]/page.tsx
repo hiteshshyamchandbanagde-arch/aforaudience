@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Message {
   id: string
@@ -26,6 +27,7 @@ interface ThreadData {
 const POLL_MS = 15000
 
 export default function MessageThreadPage() {
+  const { t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const params = useParams()
@@ -48,7 +50,7 @@ export default function MessageThreadPage() {
       if (res.ok) {
         setThread(await res.json())
       } else if (res.status === 403 || res.status === 404) {
-        showToast('This conversation is not available.', 'error')
+        showToast(tr.messageThreadPage.conversationUnavailable, 'error')
         router.push('/dashboard/messages')
       }
     } finally {
@@ -85,10 +87,10 @@ export default function MessageThreadPage() {
         await fetchThread()
       } else {
         const data = await res.json().catch(() => ({}))
-        showToast(data.error || 'Failed to send message.', 'error')
+        showToast(data.error || tr.messageThreadPage.sendFailed, 'error')
       }
     } catch {
-      showToast('Failed to send message.', 'error')
+      showToast(tr.messageThreadPage.sendFailed, 'error')
     } finally {
       setSending(false)
     }
@@ -111,11 +113,11 @@ export default function MessageThreadPage() {
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
         <div style={{ marginBottom: '12px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: 'var(--afa-ink)', margin: 0 }}>
-            {thread.label ?? 'Conversation'}
+            {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
             <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '4px' }}>
-              This conversation is closed - the event is over.
+              {tr.messageThreadPage.closedNotice}
             </p>
           )}
         </div>
@@ -123,7 +125,7 @@ export default function MessageThreadPage() {
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
           {thread.messages.length === 0 && (
             <p style={{ color: 'var(--afa-ink)', opacity: 0.5, fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>
-              No messages yet. Say hello.
+              {tr.messageThreadPage.emptyMessages}
             </p>
           )}
           {thread.messages.map((m) => {
@@ -164,7 +166,7 @@ export default function MessageThreadPage() {
                   handleSend()
                 }
               }}
-              placeholder="Write a message..."
+              placeholder={tr.messageThreadPage.inputPlaceholder}
               style={{
                 flex: 1,
                 padding: '10px 12px',
@@ -188,7 +190,7 @@ export default function MessageThreadPage() {
                 opacity: sending || !draft.trim() ? 0.6 : 1,
               }}
             >
-              Send
+              {tr.messageThreadPage.sendBtn}
             </button>
           </div>
         ) : null}

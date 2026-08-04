@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface Thread {
   conversationId: string
@@ -18,21 +19,22 @@ interface Thread {
   updatedAt: string
 }
 
-const CONTEXT_LABEL: Record<Thread['contextType'], string> = {
-  PERFORMANCE: 'Lineup',
-  VENUE_BOOKING: 'Venue',
-  BOOKING: 'Ticket',
-}
-
 // v1 scope (design.md §9.4): text-only, ~15-20s polling to match the
 // rest of the app's real-time-ish surfaces - no websockets built yet.
 const POLL_MS = 15000
 
 export default function MessagesInboxPage() {
+  const { t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [threads, setThreads] = useState<Thread[]>([])
   const [loading, setLoading] = useState(true)
+
+  const CONTEXT_LABEL: Record<Thread['contextType'], string> = {
+    PERFORMANCE: tr.messagesInboxPage.contextLineup,
+    VENUE_BOOKING: tr.messagesInboxPage.contextVenue,
+    BOOKING: tr.messagesInboxPage.contextTicket,
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -68,12 +70,12 @@ export default function MessagesInboxPage() {
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-ink)', marginBottom: '24px' }}>
-          Messages
+          {tr.messagesInboxPage.heading}
         </h1>
 
         {threads.length === 0 && (
           <p style={{ color: 'var(--afa-ink)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
-            No conversations yet. Threads open automatically once a spot, venue booking, or ticket is confirmed.
+            {tr.messagesInboxPage.emptyState}
           </p>
         )}
 
@@ -101,14 +103,14 @@ export default function MessagesInboxPage() {
                     {CONTEXT_LABEL[t.contextType]}
                   </span>
                   {!t.isActive && (
-                    <span style={{ fontSize: '11px', opacity: 0.45 }}>· Closed</span>
+                    <span style={{ fontSize: '11px', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
                   )}
                   {t.unread && (
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-terracotta, #b3261e)' }} />
                   )}
                 </div>
                 <div style={{ fontWeight: 600, fontFamily: 'system-ui, sans-serif', marginTop: '2px' }}>
-                  {t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? 'Unknown'}
+                  {t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? tr.messagesInboxPage.unknownParticipant}
                   {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
                 </div>
                 {t.lastMessage && (
