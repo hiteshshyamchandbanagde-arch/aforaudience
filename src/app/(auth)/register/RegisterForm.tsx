@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
+import { useLocale } from "@/lib/i18n/translate"
 
 const inputStyle = (hasError?: boolean) => ({
   width: "100%",
@@ -21,6 +22,7 @@ const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)",
 
 export default function RegisterForm() {
   const router = useRouter()
+  const { t: tr } = useLocale()
   // Feedback cmrzsmlus - landing page "Join As" links now pass ?role=X so
   // the person's original intent survives past registration instead of
   // dropping them on the generic homepage with no memory of why they came.
@@ -134,13 +136,13 @@ export default function RegisterForm() {
 
   const handleRegister = async () => {
     if (form.password !== form.confirm) {
-      setError("Passwords do not match!"); return
+      setError(tr.registerPage.passwordsDontMatch); return
     }
     if (usernameStatus === "taken") {
-      setError("Please choose an available username."); return
+      setError(tr.registerPage.pleaseChooseAvailableUsername); return
     }
     if (!/^\d{10}$/.test(form.phoneNumber)) {
-      setFieldErrors({ phone: "Enter a valid 10-digit mobile number" }); return
+      setFieldErrors({ phone: tr.registerPage.invalidPhoneNumber }); return
     }
 
     setLoading(true)
@@ -164,7 +166,7 @@ export default function RegisterForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        const normalizedError = String(data.error || "Something went wrong")
+        const normalizedError = String(data.error || tr.authCommon.somethingWentWrong)
         if (normalizedError.toLowerCase().includes("email")) {
           setFieldErrors({ email: normalizedError })
         } else if (normalizedError.toLowerCase().includes("phone")) {
@@ -184,7 +186,7 @@ export default function RegisterForm() {
       setStage("otp")
       setLoading(false)
     } catch {
-      setError("Something went wrong")
+      setError(tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -200,13 +202,13 @@ export default function RegisterForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Invalid code.")
+        setError(data.error || tr.registerPage.invalidCodeFallback)
         setLoading(false)
         return
       }
       router.push(`/login?registered=true${intendedRole ? `&role=${intendedRole}` : ""}`)
     } catch {
-      setError("Something went wrong")
+      setError(tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -222,14 +224,14 @@ export default function RegisterForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Could not resend code.")
+        setError(data.error || tr.registerPage.couldNotResendCodeFallback)
         setLoading(false)
         return
       }
       setDevOtp(data.devOtp ?? null)
       setLoading(false)
     } catch {
-      setError("Could not resend code.")
+      setError(tr.registerPage.couldNotResendCodeFallback)
       setLoading(false)
     }
   }
@@ -244,7 +246,7 @@ export default function RegisterForm() {
               <EnvBadge />
             </Link>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
-              Verify your mobile number
+              {tr.registerPage.verifyMobileSubtitle}
             </p>
           </div>
 
@@ -260,7 +262,7 @@ export default function RegisterForm() {
               </div>
             )}
 
-            <label style={labelStyle}>Enter 6-digit code sent to {fullPhone}</label>
+            <label style={labelStyle}>{tr.registerPage.enterCodeLabelTemplate.replace('{phone}', fullPhone ?? '')}</label>
             <input
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
@@ -274,14 +276,14 @@ export default function RegisterForm() {
               disabled={loading || otpCode.length !== 6}
               style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
-              {loading ? "Verifying..." : "Verify"}
+              {loading ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
             </button>
             <button
               onClick={handleResendOtp}
               disabled={loading}
               style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
-              Resend code
+              {tr.loginPage.resendCodeButton}
             </button>
           </div>
         </div>
@@ -298,7 +300,7 @@ export default function RegisterForm() {
             <EnvBadge />
           </Link>
           <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
-            Create your account
+            {tr.registerPage.createAccountSubtitle}
           </p>
         </div>
 
@@ -311,11 +313,11 @@ export default function RegisterForm() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
-              <label style={labelStyle}>Full Name</label>
+              <label style={labelStyle}>{tr.registerPage.fullNameLabel}</label>
               <input
                 name="fullName"
                 type="text"
-                placeholder="Your full name"
+                placeholder={tr.registerPage.fullNamePlaceholder}
                 value={form.fullName}
                 onChange={handleChange}
                 style={inputStyle()}
@@ -323,11 +325,11 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label style={labelStyle}>Username</label>
+              <label style={labelStyle}>{tr.registerPage.usernameLabel}</label>
               <input
                 name="username"
                 type="text"
-                placeholder="Choose a username - not shown publicly, separate from your name"
+                placeholder={tr.registerPage.usernamePlaceholder}
                 value={form.username}
                 onChange={handleChange}
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
@@ -335,7 +337,7 @@ export default function RegisterForm() {
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
                 <div style={{ marginTop: "8px" }}>
                   <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
-                    Suggested from your initials:
+                    {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
                     {initialsSuggestions.map((suggestion) => (
@@ -361,7 +363,7 @@ export default function RegisterForm() {
                       type="button"
                       onClick={() => fetchInitialsSuggestions(initialsSeed)}
                       disabled={initialsLoading}
-                      title="Try more suggestions"
+                      title={tr.registerPage.tryMoreSuggestionsTitle}
                       style={{
                         fontSize: "12px",
                         color: "var(--afa-ink)",
@@ -372,27 +374,27 @@ export default function RegisterForm() {
                         padding: "4px 2px",
                       }}
                     >
-                      {initialsLoading ? "…" : "🔀 Try more"}
+                      {initialsLoading ? "…" : tr.registerPage.tryMoreButton}
                     </button>
                   </div>
                 </div>
               )}
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>Checking availability...</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
               )}
               {usernameStatus === "available" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>Available</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>{tr.registerPage.availableLabel}</p>
               )}
               {usernameStatus === "taken" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-terracotta)" }}>
-                  Taken.{" "}
+                  {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
                       style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
                     >
-                      Use &quot;{usernameSuggestion}&quot; instead
+                      {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </button>
                   )}
                 </p>
@@ -403,11 +405,11 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label style={labelStyle}>Email</label>
+              <label style={labelStyle}>{tr.registerPage.emailLabel}</label>
               <input
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={tr.registerPage.emailPlaceholder}
                 value={form.email}
                 onChange={handleChange}
                 style={inputStyle(!!fieldErrors.email)}
@@ -418,7 +420,7 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label style={labelStyle}>Mobile number</label>
+              <label style={labelStyle}>{tr.registerPage.mobileNumberLabel}</label>
               <div style={{ display: "flex", gap: "8px" }}>
                 <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "var(--afa-cream)" }}>
                   +91
@@ -426,14 +428,14 @@ export default function RegisterForm() {
                 <input
                   name="phoneNumber"
                   type="tel"
-                  placeholder="10-digit number"
+                  placeholder={tr.registerPage.tenDigitPlaceholder}
                   value={form.phoneNumber}
                   onChange={handleChange}
                   style={{ ...inputStyle(!!fieldErrors.phone), flex: 1 }}
                 />
               </div>
               <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45 }}>
-                Used to verify your account with a one-time code.
+                {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
                 <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.phone}</p>
@@ -441,12 +443,12 @@ export default function RegisterForm() {
             </div>
 
             <div>
-              <label style={labelStyle}>Password</label>
+              <label style={labelStyle}>{tr.loginPage.passwordLabel}</label>
               <div style={{ position: "relative" }}>
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Min 8 characters"
+                  placeholder={tr.registerPage.minCharsPlaceholder}
                   value={form.password}
                   onChange={handleChange}
                   style={{ ...inputStyle(), paddingRight: "44px" }}
@@ -454,7 +456,7 @@ export default function RegisterForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
                   style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
                 >
                   {showPassword ? "🙈" : "👁️"}
@@ -462,12 +464,12 @@ export default function RegisterForm() {
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Confirm Password</label>
+              <label style={labelStyle}>{tr.registerPage.confirmPasswordLabel}</label>
               <div style={{ position: "relative" }}>
                 <input
                   name="confirm"
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Repeat password"
+                  placeholder={tr.registerPage.repeatPasswordPlaceholder}
                   value={form.confirm}
                   onChange={handleChange}
                   style={{ ...inputStyle(), paddingRight: "44px" }}
@@ -475,7 +477,7 @@ export default function RegisterForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                  aria-label={showConfirm ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
                   style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
                 >
                   {showConfirm ? "🙈" : "👁️"}
@@ -489,21 +491,21 @@ export default function RegisterForm() {
             disabled={loading || usernameStatus === "taken"}
             style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </button>
           <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
-            By creating an account, you agree to our{" "}
-            <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>Terms of Service</Link> and{" "}
-            <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>Privacy Policy</Link>.
+            {tr.registerPage.agreeToTermsPrefix}{" "}
+            <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
+            <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
           </p>
         </div>
 
         <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
-          Already have an account? {" "}
-          <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
+          {tr.registerPage.alreadyHaveAccountPrefix} {" "}
+          <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
         <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45 }}>
-          Everyone joins as Audience. You can apply to become an Artist, Organiser, or Venue Owner later from your profile.
+          {tr.registerPage.everyoneJoinsAsAudience}
         </p>
       </div>
     </main>
