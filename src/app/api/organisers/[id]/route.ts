@@ -32,6 +32,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return NextResponse.json({
       id: organiser.id,
       orgName: organiser.orgName,
+      code: organiser.code,
       bio: organiser.bio,
       user: organiser.user,
       events: organiser.events,

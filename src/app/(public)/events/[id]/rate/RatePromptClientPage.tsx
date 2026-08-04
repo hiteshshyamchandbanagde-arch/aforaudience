@@ -3,6 +3,7 @@ import { useState } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface EventData {
   id: string
@@ -40,6 +41,7 @@ export default function RatePromptClientPage({
   existingOverallRating: { rating: number; comment: string | null } | null
   ratedPerformanceIds: string[]
 }) {
+  const { t: tr } = useLocale()
   const [authOpen, setAuthOpen] = useState(false)
 
   const [overallRating, setOverallRating] = useState(existingOverallRating?.rating || 0)
@@ -55,7 +57,7 @@ export default function RatePromptClientPage({
 
   const submitOverall = async () => {
     if (overallRating === 0) {
-      setOverallError("Pick a rating first")
+      setOverallError(tr.ratePromptPage.pickRatingFirst)
       return
     }
     setOverallSubmitting(true)
@@ -72,7 +74,7 @@ export default function RatePromptClientPage({
           setAuthOpen(true)
           return
         }
-        throw new Error(data.error || "Failed to submit")
+        throw new Error(data.error || tr.ratePromptPage.submitFailed)
       }
       setOverallSubmitted(true)
       setShowPerformers(true)
@@ -95,7 +97,7 @@ export default function RatePromptClientPage({
       })
       if (!res.ok) {
         const data = await res.json()
-        if (res.status !== 401) throw new Error(data.error || "Failed to submit")
+        if (res.status !== 401) throw new Error(data.error || tr.ratePromptPage.submitFailed)
       } else {
         setRatedIds((prev) => [...prev, performanceId])
       }
@@ -112,7 +114,7 @@ export default function RatePromptClientPage({
       <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <p style={{ color: "var(--afa-ink)", opacity: 0.6 }}>Event not found.</p>
+          <p style={{ color: "var(--afa-ink)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
         </div>
       </main>
     )
@@ -125,13 +127,13 @@ export default function RatePromptClientPage({
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🎤</div>
           <p style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-            You can rate this show once you&apos;ve checked in at the door
+            {tr.ratePromptPage.checkInRequired}
           </p>
           <Link href={`/events/${event.id}`} style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>
-            View event details
+            {tr.ratePromptPage.viewEventDetails}
           </Link>
         </div>
-        <AuthPromptSheet open={authOpen} onClose={() => setAuthOpen(false)} title="Sign in to rate this show" onSuccess={() => setAuthOpen(false)} />
+        <AuthPromptSheet open={authOpen} onClose={() => setAuthOpen(false)} title={tr.ratePromptPage.signInTitle} onSuccess={() => setAuthOpen(false)} />
       </main>
     )
   }
@@ -140,17 +142,17 @@ export default function RatePromptClientPage({
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}>
-        <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>How was it?</p>
+        <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>
         <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "32px" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
           <div style={{ background: "white", borderRadius: "16px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-            <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", marginBottom: "16px" }}>Rate the show overall</p>
+            <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
-              placeholder="Anything you want to add? (optional)"
+              placeholder={tr.ratePromptPage.commentPlaceholder}
               style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical" }}
             />
             {overallError && <p style={{ color: "var(--afa-terracotta)", fontSize: "13px", marginTop: "8px" }}>{overallError}</p>}
@@ -159,13 +161,13 @@ export default function RatePromptClientPage({
               disabled={overallSubmitting}
               style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", border: "none", background: "var(--afa-terracotta)", color: "white", fontSize: "15px", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
             >
-              {overallSubmitting ? "Submitting..." : "Submit rating"}
+              {overallSubmitting ? tr.ratePromptPage.submitting : tr.ratePromptPage.submitRating}
             </button>
           </div>
         ) : (
           <div style={{ background: "white", borderRadius: "16px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ fontSize: "24px" }}>✓</span>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)" }}>Thanks for rating the show.</p>
+            <p style={{ fontSize: "14px", color: "var(--afa-ink)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
         )}
 
@@ -174,14 +176,14 @@ export default function RatePromptClientPage({
             onClick={() => setShowPerformers(true)}
             style={{ background: "none", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 20px", fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)", cursor: "pointer" }}
           >
-            Want to rate any specific performers?
+            {tr.ratePromptPage.rateSpecificPerformers}
           </button>
         )}
 
         {showPerformers && (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>
-              Optional - only rate who you actually watched. Rating a performer gets you early word on their next show.
+              {tr.ratePromptPage.performersHint}
             </p>
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
@@ -189,7 +191,7 @@ export default function RatePromptClientPage({
                 <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "16px 20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
-                    <span style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600 }}>✓ Rated</span>
+                    <span style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <div style={{ display: "flex", gap: "2px" }}>
@@ -208,7 +210,7 @@ export default function RatePromptClientPage({
                         disabled={!perfDrafts[p.id] || perfSubmitting === p.id}
                         style={{ fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-ink)", color: "white", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
                       >
-                        Rate
+                        {tr.ratePromptPage.rateBtn}
                       </button>
                     </div>
                   )}
@@ -220,7 +222,7 @@ export default function RatePromptClientPage({
 
         <div style={{ marginTop: "32px", textAlign: "center" }}>
           <Link href={`/events/${event.id}`} style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>
-            Back to event page
+            {tr.ratePromptPage.backToEvent}
           </Link>
         </div>
       </div>
@@ -228,7 +230,7 @@ export default function RatePromptClientPage({
       <AuthPromptSheet
         open={authOpen}
         onClose={() => setAuthOpen(false)}
-        title="Sign in to rate this show"
+        title={tr.ratePromptPage.signInTitle}
         onSuccess={() => {
           setAuthOpen(false)
           submitOverall()

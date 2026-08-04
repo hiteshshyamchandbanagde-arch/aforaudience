@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
+import { useLocale } from "@/lib/i18n/translate"
 
 type ComingSoonProps = {
   title: string
@@ -7,6 +10,7 @@ type ComingSoonProps = {
 }
 
 export default function ComingSoon({ title, description }: ComingSoonProps) {
+  const { t: tr } = useLocale()
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
@@ -22,13 +26,13 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
         }}
       >
         <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-terracotta)", textTransform: "uppercase", marginBottom: "20px" }}>
-          Coming Soon
+          {tr.comingSoon.badge}
         </div>
         <h1 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>
           {title}
         </h1>
         <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
-          {description ?? "We're still putting this page together. Check back soon."}
+          {description ?? tr.comingSoon.defaultDescription}
         </p>
         <Link
           href="/"
@@ -42,7 +46,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
             borderRadius: "6px",
           }}
         >
-          Back to Home
+          {tr.comingSoon.backHome}
         </Link>
       </div>
     </main>

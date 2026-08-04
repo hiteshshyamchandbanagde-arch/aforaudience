@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface OrganiserItem {
   id: string
@@ -16,6 +17,7 @@ interface OrganiserItem {
 // pattern as /artists (PR #312) and /events (PR #261) - a plain Link with
 // no click feedback reads as "nothing happened" on a slow render.
 export default function OrganisersPage() {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export default function OrganisersPage() {
   useEffect(() => {
     fetch("/api/organisers")
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to load organisers")
+        if (!res.ok) throw new Error(tr.organisersPage.failedToLoad)
         return res.json()
       })
       .then(setOrganisers)
@@ -53,16 +55,17 @@ export default function OrganisersPage() {
       <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Discover <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Organisers</em>
+            {tr.organisersPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.organisersPage.heroEmphasis}</em>{tr.organisersPage.heroSuffix}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-            {loading ? "Loading organisers..." : `${filtered.length} organisers running live shows`}
+            {loading ? tr.organisersPage.loading : tr.organisersPage.countTemplate.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
             query={search}
             items={filtered}
             getId={(o) => o.id}
-            emptyLabel="organisers"
+            emptyLabel={tr.common.nounOrganisers}
+            translate
             onSelect={(o) => goToOrganiser(o.id)}
             renderRow={(o) => (
               <span style={{ fontWeight: 600 }}>{o.orgName}</span>
@@ -71,7 +74,7 @@ export default function OrganisersPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search organisers..."
+              placeholder={tr.organisersPage.searchPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
@@ -87,15 +90,15 @@ export default function OrganisersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading organisers...</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.organisersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
-              {organisers.length === 0 ? "No organisers yet" : "No organisers found"}
+              {organisers.length === 0 ? tr.organisersPage.emptyNoneYetTitle : tr.organisersPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {organisers.length === 0 ? "Check back soon!" : "Try a different search"}
+              {organisers.length === 0 ? tr.organisersPage.emptyNoneYetSub : tr.organisersPage.emptyNoneFoundSub}
             </p>
           </div>
         ) : (
@@ -146,10 +149,10 @@ export default function OrganisersPage() {
                   </div>
                   <div style={{ padding: "16px 20px" }}>
                     <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
-                      {org.bio || "No bio yet"}
+                      {org.bio || tr.organisersPage.noBioYet}
                     </p>
                     <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
-                      {org._count.events} event{org._count.events === 1 ? "" : "s"}
+                      {org._count.events} {org._count.events === 1 ? tr.organisersPage.eventSingular : tr.organisersPage.eventPlural}
                     </div>
                   </div>
                 </div>
