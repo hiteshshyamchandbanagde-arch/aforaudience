@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from '@/lib/i18n/translate'
 
 type Mode = "password" | "otp-request" | "otp-verify"
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t: tr } = useLocale()
   const registered = searchParams.get("registered")
   const justReset = searchParams.get("reset")
   const wasSuspended = searchParams.get("suspended")
@@ -42,19 +44,19 @@ function LoginForm() {
       })
       if (result?.error) {
         if (result.error === "LOCKED") {
-          setError("Too many attempts. Try again in 15 minutes.")
+          setError(tr.loginPage.lockedError)
         } else if (result.error === "SUSPENDED") {
-          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
+          setError(tr.authCommon.accountSuspendedMessage)
         } else if (result.error === "CredentialsSignin") {
-          setError("Invalid credentials")
+          setError(tr.loginPage.invalidCredentialsError)
         } else {
-          setError("Failed to sign in. Please check your credentials.")
+          setError(tr.loginPage.failedSignInError)
         }
         setLoading(false); return
       }
       postLoginRedirect()
     } catch {
-      setError("Something went wrong")
+      setError(tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -69,14 +71,14 @@ function LoginForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Could not send code.")
+        setError(data.error || tr.loginPage.couldNotSendCodeError)
         setLoading(false); return
       }
       setDevOtp(data.devOtp ?? null)
       setMode("otp-verify")
       setLoading(false)
     } catch {
-      setError("Could not send code.")
+      setError(tr.loginPage.couldNotSendCodeError)
       setLoading(false)
     }
   }
@@ -91,15 +93,15 @@ function LoginForm() {
       })
       if (result?.error) {
         if (result.error === "SUSPENDED") {
-          setError("Your account has been suspended. Contact support if you believe this is a mistake.")
+          setError(tr.authCommon.accountSuspendedMessage)
         } else {
-          setError("Invalid or expired code.")
+          setError(tr.loginPage.invalidOrExpiredCodeError)
         }
         setLoading(false); return
       }
       postLoginRedirect()
     } catch {
-      setError("Something went wrong")
+      setError(tr.authCommon.somethingWentWrong)
       setLoading(false)
     }
   }
@@ -112,33 +114,33 @@ function LoginForm() {
           <EnvBadge />
         </Link>
         <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
-          Welcome back to the art world
+          {tr.loginPage.welcomeBack}
         </p>
       </div>
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
         <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "24px" }}>
-          Sign in
+          {tr.loginPage.signInHeading}
         </h2>
 
         {registered && (
           <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
-            ✅ Account created! Please sign in.
+            {tr.loginPage.accountCreatedBanner}
           </div>
         )}
         {justReset && (
           <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
-            ✅ Password updated. Please sign in.
+            {tr.loginPage.passwordUpdatedBanner}
           </div>
         )}
         {wasSuspended && (
           <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
-            Your account has been suspended. Contact support if you believe this is a mistake.
+            {tr.authCommon.accountSuspendedMessage}
           </div>
         )}
         {wasIdle && !wasSuspended && (
           <div style={{ background: "var(--afa-cream)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
-            You were signed out after a period of inactivity. Please sign in again.
+            {tr.loginPage.signedOutIdleBanner}
           </div>
         )}
         {error && (
@@ -155,12 +157,12 @@ function LoginForm() {
         {mode !== "otp-verify" && (
           <div style={{ marginBottom: "16px" }}>
             <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-              Email / Phone / Username / Code
+              {tr.loginPage.identifierLabel}
             </label>
             <input
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="you@example.com, phone, username, or AFA code"
+              placeholder={tr.loginPage.identifierPlaceholder}
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
               style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
             />
@@ -171,12 +173,12 @@ function LoginForm() {
           <>
             <div style={{ marginBottom: "24px" }}>
               <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-                Password
+                {tr.loginPage.passwordLabel}
               </label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Your password"
+                  placeholder={tr.loginPage.passwordPlaceholder}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
@@ -185,7 +187,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
                   style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
                 >
                   {showPassword ? "🙈" : "👁️"}
@@ -197,13 +199,13 @@ function LoginForm() {
               disabled={loading || !identifier || !password}
               style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
             </button>
             <button
               onClick={() => { setMode("otp-request"); setError("") }}
               style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
-              Use OTP instead
+              {tr.loginPage.useOtpInstead}
             </button>
           </>
         )}
@@ -215,13 +217,13 @@ function LoginForm() {
               disabled={loading || !identifier}
               style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
-              {loading ? "Sending..." : "Send code"}
+              {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
             </button>
             <button
               onClick={() => { setMode("password"); setError("") }}
               style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
-              Use password instead
+              {tr.loginPage.usePasswordInstead}
             </button>
           </>
         )}
@@ -230,7 +232,7 @@ function LoginForm() {
           <>
             <div style={{ marginBottom: "24px" }}>
               <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
-                Enter 6-digit code
+                {tr.loginPage.enterCodeLabel}
               </label>
               <input
                 value={otpCode}
@@ -245,29 +247,29 @@ function LoginForm() {
               disabled={loading || otpCode.length !== 6}
               style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
-              {loading ? "Verifying..." : "Verify & Sign In"}
+              {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
             </button>
             <button
               onClick={handleRequestOtp}
               disabled={loading}
               style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
-              Resend code
+              {tr.loginPage.resendCodeButton}
             </button>
           </>
         )}
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>
           <Link href="/forgot-password" style={{ fontSize: "13px", color: "var(--afa-terracotta)", textDecoration: "none" }}>
-            Forgot password?
+            {tr.loginPage.forgotPasswordLink}
           </Link>
         </div>
       </div>
 
       <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
-        Don&apos;t have an account?{" "}
+        {tr.loginPage.noAccountPrefix}{" "}
         <Link href="/register" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>
-          Create one free
+          {tr.loginPage.createOneFreeLink}
         </Link>
       </p>
     </div>
