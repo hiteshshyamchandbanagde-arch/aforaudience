@@ -386,6 +386,15 @@ const en = {
     backToSignIn: "Back to sign in",
     somethingWentWrongRetry: "Something went wrong. Please try again.",
   },
+  resetPasswordPage: {
+    chooseNewPasswordSubtitle: "Choose a new password",
+    resetLinkInvalidOrExpired: "This reset link is invalid or has expired.",
+    requestNewOneLink: "Request a new one",
+    newPasswordLabel: "New password",
+    confirmNewPasswordLabel: "Confirm new password",
+    updatingEllipsis: "Updating...",
+    updatePasswordButton: "Update password",
+  },
   homePage: {
     heroEyebrow: "Live Art. Real Moments.",
     heroLine1Prefix: "Where ",

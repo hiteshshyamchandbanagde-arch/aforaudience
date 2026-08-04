@@ -5,10 +5,12 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from "@/lib/i18n/translate"
 
 function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t: tr } = useLocale()
   const token = searchParams.get("token") || ""
   const [form, setForm] = useState({ password: "", confirm: "" })
   const [loading, setLoading] = useState(false)
@@ -19,11 +21,11 @@ function ResetPasswordForm() {
 
   const handleSubmit = async () => {
     if (!token) {
-      setError("This reset link is invalid or has expired.")
+      setError(tr.resetPasswordPage.resetLinkInvalidOrExpired)
       return
     }
     if (form.password !== form.confirm) {
-      setError("Passwords do not match!")
+      setError(tr.registerPage.passwordsDontMatch)
       return
     }
 
@@ -38,14 +40,14 @@ function ResetPasswordForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || "Something went wrong")
+        setError(data.error || tr.authCommon.somethingWentWrong)
         setLoading(false)
         return
       }
 
       router.push("/login?reset=true")
     } catch {
-      setError("Something went wrong. Please try again.")
+      setError(tr.forgotPasswordPage.somethingWentWrongRetry)
       setLoading(false)
     }
   }
@@ -58,14 +60,14 @@ function ResetPasswordForm() {
           <EnvBadge />
         </Link>
         <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
-          Choose a new password
+          {tr.resetPasswordPage.chooseNewPasswordSubtitle}
         </p>
       </div>
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
         {!token ? (
           <p style={{ fontSize: "14px", color: "var(--afa-terracotta)" }}>
-            This reset link is invalid or has expired. <Link href="/forgot-password" style={{ color: "var(--afa-terracotta)", fontWeight: 500 }}>Request a new one</Link>.
+            {tr.resetPasswordPage.resetLinkInvalidOrExpired} <Link href="/forgot-password" style={{ color: "var(--afa-terracotta)", fontWeight: 500 }}>{tr.resetPasswordPage.requestNewOneLink}</Link>.
           </p>
         ) : (
           <>
@@ -77,8 +79,8 @@ function ResetPasswordForm() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
               {[
-                { label: "New password", name: "password", placeholder: "Min 8 characters" },
-                { label: "Confirm new password", name: "confirm", placeholder: "Repeat password" },
+                { label: tr.resetPasswordPage.newPasswordLabel, name: "password", placeholder: tr.registerPage.minCharsPlaceholder },
+                { label: tr.resetPasswordPage.confirmNewPasswordLabel, name: "confirm", placeholder: tr.registerPage.repeatPasswordPlaceholder },
               ].map((field) => (
                 <div key={field.name}>
                   <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
@@ -96,7 +98,7 @@ function ResetPasswordForm() {
                     <button
                       type="button"
                       onClick={() => setVisible({ ...visible, [field.name]: !visible[field.name as keyof typeof visible] })}
-                      aria-label={visible[field.name as keyof typeof visible] ? "Hide password" : "Show password"}
+                      aria-label={visible[field.name as keyof typeof visible] ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
                       style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
                     >
                       {visible[field.name as keyof typeof visible] ? "🙈" : "👁️"}
@@ -111,7 +113,7 @@ function ResetPasswordForm() {
               disabled={loading}
               style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
-              {loading ? "Updating..." : "Update password"}
+              {loading ? tr.resetPasswordPage.updatingEllipsis : tr.resetPasswordPage.updatePasswordButton}
             </button>
           </>
         )}
