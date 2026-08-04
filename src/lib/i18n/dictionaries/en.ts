@@ -401,6 +401,17 @@ const en = {
     emailVerifiedBanner: "✅ Email verified.",
     continueToAfa: "Continue to AforAudience",
   },
+  verifyPhonePage: {
+    couldNotLoadAccount: "Could not load your account.",
+    verifyYourPhoneHeading: "Verify Your Phone",
+    alreadyVerifiedMessage: "✓ Your phone is already verified. Nothing to do here.",
+    continueArrow: "Continue →",
+    introPrefix: "Booking a ticket needs a verified phone on file - it's how we (and the event Organiser) can reach you about your booking. Verifying takes one code sent to",
+    introSuffix: ".",
+    phoneOnFileFallback: "your number on file",
+    sendVerificationCodeButton: "Send verification code",
+    sixDigitCodePlaceholder: "6-digit code",
+  },
   homePage: {
     heroEyebrow: "Live Art. Real Moments.",
     heroLine1Prefix: "Where ",
