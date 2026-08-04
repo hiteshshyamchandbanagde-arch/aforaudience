@@ -139,6 +139,11 @@ const hi: Dictionary = {
     venuePlural: "स्थल",
     seatsLabel: "सीटें",
   },
+  genrePicker: {
+    otherLabel: "अन्य",
+    otherHint: " (कॉमा से अलग करें, वैकल्पिक)",
+    otherPlaceholder: "जैसे, Beatboxing, Mimicry",
+  },
   messagesInboxPage: {
     heading: "संदेश",
     emptyState: "अभी तक कोई बातचीत नहीं है। स्पॉट, स्थल बुकिंग, या टिकट पुष्ट होते ही थ्रेड अपने आप खुल जाते हैं।",
