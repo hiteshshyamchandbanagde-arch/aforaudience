@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import GenrePicker from '@/components/GenrePicker'
+import { useLocale } from '@/lib/i18n/translate'
 
 type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
 
@@ -30,6 +31,7 @@ const cardStyle = {
 }
 
 function ProfileContent() {
+  const { t: tr } = useLocale()
   const { data: session, status, update: updateSession } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -167,12 +169,12 @@ function ProfileContent() {
         body: JSON.stringify({ displayName: displayName.trim() }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
       setInitialDisplayName(data.user?.displayName ?? '')
-      setMessage('Display name saved.')
+      setMessage(tr.profilePage.displayNameSaved)
       await updateSession()
     } catch (err: any) {
-      setError(err.message || 'Failed to save')
+      setError(err.message || tr.profilePage.genericSaveFailed)
     } finally {
       setSavingName(false)
     }
@@ -189,13 +191,13 @@ function ProfileContent() {
         body: JSON.stringify({ displayCurrency }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
       const saved = data.user?.displayCurrency ?? 'INR'
       setDisplayCurrency(saved)
       setInitialDisplayCurrency(saved)
-      setMessage('Display currency saved.')
+      setMessage(tr.profilePage.displayCurrencySaved)
     } catch (err: any) {
-      setError(err.message || 'Failed to save')
+      setError(err.message || tr.profilePage.genericSaveFailed)
     } finally {
       setSavingCurrency(false)
     }
@@ -213,12 +215,12 @@ function ProfileContent() {
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || 'Upload failed - please try again.')
+        setError(data.error || tr.profilePage.uploadFailed)
         return
       }
       setAvatar(data.url)
     } catch {
-      setError('Upload failed - please try again.')
+      setError(tr.profilePage.uploadFailed)
     } finally {
       setUploadingAvatar(false)
     }
@@ -235,13 +237,13 @@ function ProfileContent() {
         body: JSON.stringify({ avatar: avatar.trim() || null, bio: bio.trim() || null }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to save')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.genericSaveFailed)
       setInitialAvatar(data.user?.avatar ?? '')
       setInitialBio(data.user?.bio ?? '')
-      setMessage('About you saved.')
+      setMessage(tr.profilePage.aboutYouSaved)
       await updateSession()
     } catch (err: any) {
-      setError(err.message || 'Failed to save')
+      setError(err.message || tr.profilePage.genericSaveFailed)
     } finally {
       setSavingAbout(false)
     }
@@ -289,7 +291,7 @@ function ProfileContent() {
 
   const applyOrganiser = async () => {
     if (!orgName.trim()) {
-      setError('Enter an organisation or brand name first.')
+      setError(tr.profilePage.enterOrgNameFirst)
       return
     }
     setApplying('organiser')
@@ -302,7 +304,7 @@ function ProfileContent() {
         body: JSON.stringify({ orgName }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -320,7 +322,7 @@ function ProfileContent() {
     try {
       const res = await fetch('/api/venue-owners/apply', { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -342,7 +344,7 @@ function ProfileContent() {
         body: JSON.stringify({ genre }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to submit application')
+      if (!res.ok) throw new Error(data.error || tr.profilePage.submitApplicationFailed)
       setMessage(data.message)
       await updateSession()
       await loadStatuses()
@@ -394,12 +396,12 @@ function ProfileContent() {
   ) => {
     if (!roleStatus?.hasProfile) return null
     if (!roleStatus.isApproved) {
-      return <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-gold)' }}>⏳ Application pending approval</div>
+      return <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-gold)' }}>{tr.profilePage.pendingApproval}</div>
     }
     if (roleStatus.isActive) {
       return (
         <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
-          ✅ Visit your {label} dashboard →
+          {tr.profilePage.visitDashboardTemplate.replace('{label}', label)}
         </Link>
       )
     }
@@ -409,7 +411,7 @@ function ProfileContent() {
         disabled={switching === kind}
         style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1.5px solid var(--afa-terracotta)', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
-        {switching === kind ? 'Switching...' : `✅ Approved — Switch to your ${label} dashboard`}
+        {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
       </button>
     )
   }
@@ -420,12 +422,12 @@ function ProfileContent() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-            {nameLoaded ? (initialDisplayName || user?.name || 'Your Profile') : '\u00A0'}
+            {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
           {user?.code && (
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
-              Your login code: <span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+              {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
             </p>
           )}
 
@@ -445,16 +447,16 @@ function ProfileContent() {
               blank, so existing users see no change until they set one. */}
           <div style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              Display name
+              {tr.profilePage.displayNameHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              What appears on your tickets and emails. Your login username <strong>{user?.name}</strong> stays the same either way.
+              {tr.profilePage.displayNameDescPrefix}<strong>{user?.name}</strong>{tr.profilePage.displayNameDescSuffix}
             </p>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={nameLoaded ? 'Your full name, e.g. Priya Sharma' : 'Loading…'}
+              placeholder={nameLoaded ? tr.profilePage.namePlaceholderLoaded : tr.profilePage.namePlaceholderLoading}
               disabled={!nameLoaded}
               maxLength={120}
               style={{
@@ -484,7 +486,7 @@ function ProfileContent() {
                 opacity: savingName || displayName.trim() === initialDisplayName.trim() ? 0.5 : 1,
               }}
             >
-              {savingName ? 'Saving…' : 'Save display name'}
+              {savingName ? tr.profilePage.savingEllipsis : tr.profilePage.saveDisplayNameBtn}
             </button>
           </div>
 
@@ -494,18 +496,18 @@ function ProfileContent() {
               ratings and feedback on events. */}
           <div style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              About you
+              {tr.profilePage.aboutYouHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              Optional. Shown alongside your name wherever it already appears publicly, like event ratings and feedback.
+              {tr.profilePage.aboutYouDesc}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
               {avatar && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
+                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
               )}
               <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
-                {uploadingAvatar ? 'Uploading...' : avatar ? 'Change photo' : 'Upload photo'}
+                {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
               </label>
             </div>
@@ -514,7 +516,7 @@ function ProfileContent() {
               onChange={(e) => setBio(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="A short line about you (optional)"
+              placeholder={tr.profilePage.bioPlaceholder}
               style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit' }}
             />
             <button
@@ -532,7 +534,7 @@ function ProfileContent() {
                 opacity: savingAbout || (avatar === initialAvatar && bio === initialBio) ? 0.5 : 1,
               }}
             >
-              {savingAbout ? 'Saving…' : 'Save'}
+              {savingAbout ? tr.profilePage.savingEllipsis : tr.profilePage.saveBtn}
             </button>
           </div>
 
@@ -541,10 +543,10 @@ function ProfileContent() {
               to this user (event prices, checkout totals). */}
           <div style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              Display currency
+              {tr.profilePage.displayCurrencyHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              Shows prices converted to this currency alongside the real ₹ amount. All payments are always charged and settled in Indian Rupees regardless of this setting.
+              {tr.profilePage.displayCurrencyDesc}
             </p>
             <select
               value={displayCurrency}
@@ -572,18 +574,18 @@ function ProfileContent() {
                 opacity: savingCurrency || displayCurrency === initialDisplayCurrency ? 0.5 : 1,
               }}
             >
-              {savingCurrency ? 'Saving…' : 'Save currency'}
+              {savingCurrency ? tr.profilePage.savingEllipsis : tr.profilePage.saveCurrencyBtn}
             </button>
           </div>
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div id="apply-artist" style={cardStyle}>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              Get discovered, apply to perform at events, and track your growth. Goes live immediately, no approval wait.
+              {tr.profilePage.artistUpgradeDesc}
             </p>
 
             {artistStatus?.hasProfile ? (
-              renderRoleStatus(artistStatus, 'artist', 'Artist')
+              renderRoleStatus(artistStatus, 'artist', tr.profilePage.roleLabelArtist)
             ) : (
               <>
                 <div style={{ marginBottom: '12px' }}>
@@ -594,7 +596,7 @@ function ProfileContent() {
                   disabled={applying === 'artist'}
                   style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
                 >
-                  {applying === 'artist' ? 'Setting up...' : 'Become an Artist'}
+                  {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
                 </button>
               </>
             )}
@@ -603,21 +605,21 @@ function ProfileContent() {
           {/* Organiser upgrade */}
           <div id="apply-organiser" style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              Become an Organiser
+              {tr.profilePage.becomeOrganiserHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              Create and publish your own events.
+              {tr.profilePage.becomeOrganiserDesc}
             </p>
 
             {orgStatus?.hasProfile ? (
-              renderRoleStatus(orgStatus, 'organiser', 'Organiser')
+              renderRoleStatus(orgStatus, 'organiser', tr.profilePage.roleLabelOrganiser)
             ) : (
               <>
                 <input
                   type="text"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="Organisation or brand name"
+                  placeholder={tr.profilePage.orgNamePlaceholder}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
                 />
                 <button
@@ -625,7 +627,7 @@ function ProfileContent() {
                   disabled={applying === 'organiser'}
                   style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
                 >
-                  {applying === 'organiser' ? 'Submitting...' : 'Apply'}
+                  {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
                 </button>
               </>
             )}
@@ -634,21 +636,21 @@ function ProfileContent() {
           {/* Venue Owner upgrade */}
           <div id="apply-venue" style={cardStyle}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-              List Your Venue
+              {tr.profilePage.listVenueHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
-              Rent out your space and manage bookings.
+              {tr.profilePage.listVenueDesc}
             </p>
 
             {venueStatus?.hasProfile ? (
-              renderRoleStatus(venueStatus, 'venue', 'Venue')
+              renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
             ) : (
               <button
                 onClick={applyVenueOwner}
                 disabled={applying === 'venue'}
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
               >
-                {applying === 'venue' ? 'Submitting...' : 'Apply'}
+                {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
               </button>
             )}
           </div>
@@ -672,14 +674,18 @@ function ProfileContent() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               <div>
                 <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
-                  My Feedback
+                  {tr.profilePage.myFeedbackHeading}
                 </h2>
                 <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
                   {feedbackSummary === null
-                    ? "See the bugs, ideas, and questions you've reported, and their status →"
+                    ? tr.profilePage.feedbackSummaryDefault
                     : feedbackSummary.total === 0
-                      ? "You haven't reported anything yet →"
-                      : `${feedbackSummary.total} reported${feedbackSummary.open > 0 ? ` · ${feedbackSummary.open} still open` : ' · all resolved or rejected'} →`}
+                      ? tr.profilePage.feedbackSummaryNone
+                      : tr.profilePage.feedbackSummaryReportedTemplate.replace('{total}', String(feedbackSummary.total))
+                        + (feedbackSummary.open > 0
+                          ? tr.profilePage.feedbackOpenSuffix.replace('{n}', String(feedbackSummary.open))
+                          : tr.profilePage.feedbackAllResolvedSuffix)
+                        + tr.profilePage.arrowSuffix}
                 </p>
               </div>
               {feedbackSummary !== null && feedbackSummary.open > 0 && (
