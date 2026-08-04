@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from '@/lib/i18n/translate'
 
 interface BookingItem {
   id: string
@@ -21,6 +22,7 @@ interface BookingItem {
 }
 
 export default function AudienceActivityPage() {
+  const { t: tr } = useLocale()
   const { data: session, status } = useSession()
   const router = useRouter()
   const [bookings, setBookings] = useState<BookingItem[]>([])
@@ -35,7 +37,7 @@ export default function AudienceActivityPage() {
     if (!session?.user) return
     fetch('/api/bookings/my')
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to load your activity')
+        if (!res.ok) throw new Error(tr.audienceActivityPage.failedToLoad)
         return res.json()
       })
       .then(setBookings)
@@ -58,45 +60,45 @@ export default function AudienceActivityPage() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
-            My Activity
+            {tr.audienceActivityPage.heading}
           </h1>
           <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
-            Your spend and event history on AforAudience.
+            {tr.audienceActivityPage.subtitle}
           </p>
 
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Total Spend</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.totalSpend}</p>
                 <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Events Attended</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.eventsAttended}</p>
                 <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{totalEventsAttended}</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Free Events Attended</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.freeEventsAttended}</p>
                 <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{freeEventsAttended}</p>
               </div>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.4, marginTop: '18px' }}>
-              Tips you've given will show here once tipping is available.
+              {tr.audienceActivityPage.tipsNote}
             </p>
           </div>
 
           {confirmed.length === 0 && (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', textAlign: 'center' }}>
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '16px' }}>
-                No confirmed bookings yet.
+                {tr.audienceActivityPage.noConfirmedBookings}
               </p>
               <Link href="/events" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
-                Browse events →
+                {tr.audienceActivityPage.browseEvents}
               </Link>
             </div>
           )}
 
           <Link href="/tickets" style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
-            ← View all my tickets
+            {tr.audienceActivityPage.viewAllTickets}
           </Link>
         </div>
       </main>
