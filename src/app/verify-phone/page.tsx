@@ -76,7 +76,13 @@ function VerifyPhoneInner() {
         body: JSON.stringify({ purpose: 'SIGNUP_VERIFY', phone }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || tr.loginPage.couldNotSendCodeError)
+      if (!res.ok) {
+        // See BUG-2608-038 - prefer the translated message for the
+        // server's stable error `code` over the raw English `error` string.
+        const code = typeof data.code === 'string' ? data.code : undefined
+        const authErrors = tr.authErrors as Record<string, string>
+        throw new Error((code && authErrors[code]) || data.error || tr.loginPage.couldNotSendCodeError)
+      }
       setDevOtp(data.devOtp ?? null)
       setCodeSent(true)
     } catch (err: any) {

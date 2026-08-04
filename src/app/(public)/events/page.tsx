@@ -208,7 +208,8 @@ export default function EventsPage() {
             query={search}
             items={filtered}
             getId={(e) => e.id}
-            emptyLabel="events"
+            emptyLabel={tr.common.nounEvents}
+            translate
             onSelect={(e) => goToEvent(e.id)}
             renderRow={(e) => (
               <>
@@ -238,7 +239,8 @@ export default function EventsPage() {
             query={search}
             items={filteredOrganisers}
             getId={(o) => o.id}
-            emptyLabel="organisers"
+            emptyLabel={tr.common.nounOrganisers}
+            translate
             onSelect={(o) => goToOrganiser(o.id)}
             renderRow={(o) => (
               <span style={{ fontWeight: 600 }}>{o.orgName}</span>

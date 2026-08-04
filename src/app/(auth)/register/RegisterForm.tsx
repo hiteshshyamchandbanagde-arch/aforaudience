@@ -166,15 +166,25 @@ export default function RegisterForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        const normalizedError = String(data.error || tr.authCommon.somethingWentWrong)
-        if (normalizedError.toLowerCase().includes("email")) {
-          setFieldErrors({ email: normalizedError })
-        } else if (normalizedError.toLowerCase().includes("phone")) {
-          setFieldErrors({ phone: normalizedError })
-        } else if (normalizedError.toLowerCase().includes("username")) {
-          setFieldErrors({ username: normalizedError })
+        // `code` is a stable identifier the server returns alongside the
+        // (English) `error` string - look up the translated message instead
+        // of displaying raw English (BUG-2608-038). `field` names which
+        // input the error belongs to, replacing the old English-keyword
+        // sniffing that broke once messages could render in Hindi.
+        const code = typeof data.code === "string" ? data.code : undefined
+        const authErrors = tr.authErrors as Record<string, string>
+        const translatedError =
+          (code && authErrors[code]) || String(data.error || tr.authCommon.somethingWentWrong)
+        const field = typeof data.field === "string" ? data.field : undefined
+
+        if (field === "email") {
+          setFieldErrors({ email: translatedError })
+        } else if (field === "phone") {
+          setFieldErrors({ phone: translatedError })
+        } else if (field === "username") {
+          setFieldErrors({ username: translatedError })
         } else {
-          setError(normalizedError)
+          setError(translatedError)
         }
         setLoading(false)
         return

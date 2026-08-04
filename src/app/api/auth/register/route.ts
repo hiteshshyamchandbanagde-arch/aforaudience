@@ -31,48 +31,80 @@ export async function POST(req: NextRequest) {
     const rawFullName = typeof fullName === "string" ? fullName.trim() : ""
     const normalizedDisplayName = rawFullName.length > 0 ? rawFullName.slice(0, 120) : null
 
+    // `code` is a stable, language-independent identifier the client uses to
+    // look up a translated message (see tr.authErrors in the i18n
+    // dictionaries). `error` stays a plain English string for logs/back-compat.
+    // `field` names which form field the error belongs to, so the client can
+    // route it without sniffing English keywords out of `error` (that
+    // sniffing broke once errors could be shown in Hindi - BUG-2608-038).
     if (!normalizedUsername || !normalizedEmail || !normalizedPhone || !password) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "All fields are required", code: "ALL_FIELDS_REQUIRED" },
+        { status: 400 }
+      )
     }
 
     // Browser <input type="email"> validation is client-side only and can
     // be bypassed (autofill, disabled JS, direct API calls). Two QA users
     // slipped malformed emails (missing "@") through this exact gap.
     if (!isValidEmailFormat(normalizedEmail)) {
-      return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 })
+      return NextResponse.json(
+        { error: "Please enter a valid email address.", code: "INVALID_EMAIL_FORMAT", field: "email" },
+        { status: 400 }
+      )
     }
 
     if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters", code: "PASSWORD_TOO_SHORT", field: "password" },
+        { status: 400 }
+      )
     }
 
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(normalizedUsername)) {
       return NextResponse.json(
-        { error: "Username must be 3-20 characters, letters/numbers/underscore only" },
+        {
+          error: "Username must be 3-20 characters, letters/numbers/underscore only",
+          code: "USERNAME_INVALID",
+          field: "username",
+        },
         { status: 400 }
       )
     }
 
     const usernameOk = await isUsernameAvailable(normalizedUsername)
     if (!usernameOk) {
-      return NextResponse.json({ error: "That username is already taken." }, { status: 400 })
+      return NextResponse.json(
+        { error: "That username is already taken.", code: "USERNAME_TAKEN", field: "username" },
+        { status: 400 }
+      )
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (existingUser) {
-      return NextResponse.json({ error: "That email address is already registered." }, { status: 400 })
+      return NextResponse.json(
+        { error: "That email address is already registered.", code: "EMAIL_TAKEN", field: "email" },
+        { status: 400 }
+      )
     }
 
     if (!normalizedPhone.startsWith("+91")) {
       return NextResponse.json(
-        { error: "Only Indian (+91) phone numbers are supported for OTP verification right now." },
+        {
+          error: "Only Indian (+91) phone numbers are supported for OTP verification right now.",
+          code: "PHONE_NOT_INDIA",
+          field: "phone",
+        },
         { status: 400 }
       )
     }
 
     const existingPhoneUser = await prisma.user.findFirst({ where: { phone: normalizedPhone } })
     if (existingPhoneUser) {
-      return NextResponse.json({ error: "That phone number is already registered." }, { status: 400 })
+      return NextResponse.json(
+        { error: "That phone number is already registered.", code: "PHONE_TAKEN", field: "phone" },
+        { status: 400 }
+      )
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)

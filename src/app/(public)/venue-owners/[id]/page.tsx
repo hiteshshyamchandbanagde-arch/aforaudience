@@ -3,6 +3,7 @@ import { useEffect, useState, use } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 import BrandLoader from "@/components/BrandLoader"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueOwnerDetail {
   id: string
@@ -13,6 +14,7 @@ interface VenueOwnerDetail {
 
 export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
+  const { t: tr } = useLocale()
   const [owner, setOwner] = useState<VenueOwnerDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -36,8 +38,8 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
         <SiteNav />
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏛️</div>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>Venue owner not found</div>
-          <Link href="/venue-owners" style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>← Back to Venue Owners</Link>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
+          <Link href="/venue-owners" style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
         </div>
       </main>
     )
@@ -62,7 +64,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
           <div>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{displayName}</div>
             <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>
-              {owner.venues.length} venue{owner.venues.length === 1 ? "" : "s"}
+              {owner.venues.length} {owner.venues.length === 1 ? tr.venueOwnerDetailPage.venueSingular : tr.venueOwnerDetailPage.venuePlural}
             </div>
           </div>
         </div>
@@ -71,13 +73,13 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ background: "white", borderRadius: "12px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
           <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
-            {owner.bio || "This venue owner hasn't added a bio yet."}
+            {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
         </div>
 
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>Venues</h2>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
         {owner.venues.length === 0 ? (
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>No published venues yet.</p>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
             {owner.venues.map((v) => (
@@ -94,7 +96,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
                 </div>
                 <div style={{ padding: "14px 16px" }}>
                   <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
-                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{v.city} · {v.capacity} seats</div>
+                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
                 </div>
               </Link>
             ))}

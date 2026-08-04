@@ -147,7 +147,8 @@ export default function ArtistsPage() {
             query={search}
             items={filtered}
             getId={(a) => a.id}
-            emptyLabel="artists"
+            emptyLabel={tr.common.nounArtists}
+            translate
             onSelect={(a) => goToArtist(a.id)}
             renderRow={(a) => (
               <>

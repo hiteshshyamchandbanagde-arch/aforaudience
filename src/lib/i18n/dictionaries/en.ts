@@ -2,6 +2,18 @@
 // dictionary (hi.ts, and future te/ta/kn/ml.ts) must implement this exact
 // key shape - see the Dictionary type exported from ../translate.ts.
 const en = {
+  // Shared across all 8 BrowseSearchDropdown call sites (events, artists,
+  // venues, organisers, venue-owners) - fixes BUG-2608-041, a gap that
+  // existed identically on every one of those search boxes, not just
+  // venue-owners where it was first caught.
+  common: {
+    noResultsMatchTemplate: 'No {items} match "{query}"',
+    nounEvents: "events",
+    nounArtists: "artists",
+    nounVenues: "venues",
+    nounOrganisers: "organisers",
+    nounVenueOwners: "venue owners",
+  },
   nav: {
     events: "Events",
     artists: "Artists",
@@ -116,6 +128,16 @@ const en = {
     noBioYet: "No bio yet",
     venueSingular: "venue",
     venuePlural: "venues",
+  },
+  venueOwnerDetailPage: {
+    notFoundHeading: "Venue owner not found",
+    backToOwners: "← Back to Venue Owners",
+    noBioYet: "This venue owner hasn't added a bio yet.",
+    venuesHeading: "Venues",
+    noPublishedVenuesYet: "No published venues yet.",
+    venueSingular: "venue",
+    venuePlural: "venues",
+    seatsLabel: "seats",
   },
   artistsPage: {
     heroPrefix: "Discover ",
@@ -305,6 +327,28 @@ const en = {
     showPassword: "Show password",
     hidePassword: "Hide password",
     accountSuspendedMessage: "Your account has been suspended. Contact support if you believe this is a mistake.",
+  },
+  // Stable error-code -> message map for server-side validation/auth errors.
+  // The API routes return a `code` alongside the (English, for logs) `error`
+  // string; the client looks up the translated message here instead of
+  // displaying the raw server string. Keep keys in sync with the `code`
+  // values returned by src/app/api/auth/register/route.ts and
+  // src/app/api/auth/otp/request/route.ts.
+  authErrors: {
+    ALL_FIELDS_REQUIRED: "All fields are required",
+    INVALID_EMAIL_FORMAT: "Please enter a valid email address.",
+    PASSWORD_TOO_SHORT: "Password must be at least 8 characters",
+    USERNAME_INVALID: "Username must be 3-20 characters, letters/numbers/underscore only",
+    USERNAME_TAKEN: "That username is already taken.",
+    EMAIL_TAKEN: "That email address is already registered.",
+    PHONE_NOT_INDIA: "Only Indian (+91) phone numbers are supported for OTP verification right now.",
+    PHONE_TAKEN: "That phone number is already registered.",
+    PHONE_REQUIRED: "Phone required.",
+    IDENTIFIER_REQUIRED: "Identifier required.",
+    NO_PHONE_ON_FILE: "This account has no phone number on file, so OTP login isn't available for it.",
+    ACCOUNT_NOT_FOUND: "No account found for that identifier.",
+    INVALID_PURPOSE: "Invalid purpose.",
+    OTP_SEND_FAILED: "Failed to send OTP.",
   },
   loginPage: {
     welcomeBack: "Welcome back to the art world",

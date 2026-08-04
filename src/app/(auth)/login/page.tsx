@@ -71,7 +71,13 @@ function LoginForm() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || tr.loginPage.couldNotSendCodeError)
+        // `code` is a stable identifier the server returns alongside the
+        // (English) `error` string - look up the translated message
+        // instead of displaying raw English (BUG-2608-038, e.g. "No
+        // account found for that identifier." leaking through in Hindi mode).
+        const code = typeof data.code === "string" ? data.code : undefined
+        const authErrors = tr.authErrors as Record<string, string>
+        setError((code && authErrors[code]) || data.error || tr.loginPage.couldNotSendCodeError)
         setLoading(false); return
       }
       setDevOtp(data.devOtp ?? null)

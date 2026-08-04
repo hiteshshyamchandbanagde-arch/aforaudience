@@ -64,7 +64,8 @@ export default function VenueOwnersGridEmbed() {
         query={search}
         items={filtered}
         getId={(o) => o.id}
-        emptyLabel="venue owners"
+        emptyLabel={tr.common.nounVenueOwners}
+        translate
         onSelect={(o) => goToOwner(o.id)}
         renderRow={(o) => (
           <span style={{ fontWeight: 600 }}>{o.user.displayName || o.user.name}</span>
