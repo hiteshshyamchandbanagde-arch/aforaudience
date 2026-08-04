@@ -390,6 +390,15 @@ const hi: Dictionary = {
     backToSignIn: "साइन इन पर वापस जाएं",
     somethingWentWrongRetry: "कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।",
   },
+  resetPasswordPage: {
+    chooseNewPasswordSubtitle: "नया पासवर्ड चुनें",
+    resetLinkInvalidOrExpired: "यह रीसेट लिंक अमान्य है या समय समाप्त हो गया है।",
+    requestNewOneLink: "नया लिंक मांगें",
+    newPasswordLabel: "नया पासवर्ड",
+    confirmNewPasswordLabel: "नए पासवर्ड की पुष्टि करें",
+    updatingEllipsis: "अपडेट हो रहा है...",
+    updatePasswordButton: "पासवर्ड अपडेट करें",
+  },
   homePage: {
     heroEyebrow: "जीवंत कला। असली पल।",
     heroLine1Prefix: "जहां ",
