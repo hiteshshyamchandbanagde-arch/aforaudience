@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface LeaderboardEntry {
   id: string
@@ -20,6 +21,7 @@ interface WallOfFameData {
 }
 
 export default function WallOfFamePage() {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [data, setData] = useState<WallOfFameData | null>(null)
@@ -44,7 +46,7 @@ export default function WallOfFamePage() {
     const load = async () => {
       try {
         const res = await fetch("/api/wall-of-fame")
-        if (!res.ok) throw new Error("Failed to load Wall of Fame")
+        if (!res.ok) throw new Error(tr.wallOfFamePage.failedToLoad)
         setData(await res.json())
       } catch (err: any) {
         setError(err.message)
@@ -66,10 +68,10 @@ export default function WallOfFamePage() {
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontSize: "40px", marginBottom: "8px" }}>🏆</div>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            Wall of <em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>Fame</em>
+            {tr.wallOfFamePage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.wallOfFamePage.heroEmphasis}</em>
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)" }}>
-            {loading ? "Loading…" : data ? `Top-rated artist and event of ${data.month}` : ""}
+            {loading ? tr.wallOfFamePage.loading : data ? tr.wallOfFamePage.subtitleTemplate.replace("{month}", data.month) : ""}
           </p>
         </div>
       </div>
@@ -82,7 +84,7 @@ export default function WallOfFamePage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading…</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.wallOfFamePage.loading}</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
             {/* ARTIST OF THE MONTH */}
@@ -116,28 +118,28 @@ export default function WallOfFamePage() {
               )}
               <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", padding: "28px 28px 24px" }}>
                 <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", marginBottom: "6px" }}>
-                  🎤 Artist of the Month
+                  {tr.wallOfFamePage.artistOfMonthBadge}
                 </div>
                 {data?.artistOfMonth ? (
                   <>
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "26px", fontWeight: 700, color: "white" }}>{data.artistOfMonth.name}</div>
                     <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.75)", marginTop: "4px" }}>
-                      {stars(data.artistOfMonth.avgRating)} {data.artistOfMonth.avgRating.toFixed(1)} · {data.artistOfMonth.reviewCount} reviews
+                      {stars(data.artistOfMonth.avgRating)} {data.artistOfMonth.avgRating.toFixed(1)} · {data.artistOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", color: "rgba(255,255,255,0.6)" }}>Not enough reviews yet</div>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", color: "rgba(255,255,255,0.6)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
               </div>
               <div style={{ padding: "20px 28px" }}>
                 <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
                   {data?.artistOfMonth
-                    ? `Highest average audience rating this month, with at least ${data.minReviews} reviews.`
-                    : `Once an artist gets at least ${data?.minReviews ?? 3} reviews in a calendar month, they'll show up here.`}
+                    ? tr.wallOfFamePage.artistBlurbFilled.replace("{n}", String(data.minReviews))
+                    : tr.wallOfFamePage.artistBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
                 </p>
                 {data?.artistOfMonth && (
                   <span style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)" }}>
-                    View profile →
+                    {tr.wallOfFamePage.viewProfile}
                   </span>
                 )}
               </div>
@@ -173,28 +175,28 @@ export default function WallOfFamePage() {
               )}
               <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", padding: "28px 28px 24px" }}>
                 <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", marginBottom: "6px" }}>
-                  🎪 Event of the Month
+                  {tr.wallOfFamePage.eventOfMonthBadge}
                 </div>
                 {data?.eventOfMonth ? (
                   <>
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "26px", fontWeight: 700, color: "white" }}>{data.eventOfMonth.title}</div>
                     <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.75)", marginTop: "4px" }}>
-                      {stars(data.eventOfMonth.avgRating)} {data.eventOfMonth.avgRating.toFixed(1)} · {data.eventOfMonth.reviewCount} reviews
+                      {stars(data.eventOfMonth.avgRating)} {data.eventOfMonth.avgRating.toFixed(1)} · {data.eventOfMonth.reviewCount}{tr.wallOfFamePage.reviewsSuffix}
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", color: "rgba(255,255,255,0.6)" }}>Not enough reviews yet</div>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", color: "rgba(255,255,255,0.6)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
               </div>
               <div style={{ padding: "20px 28px" }}>
                 <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
                   {data?.eventOfMonth
-                    ? `Highest average audience rating this month, with at least ${data.minReviews} reviews.`
-                    : `Once an event gets at least ${data?.minReviews ?? 3} reviews in a calendar month, it'll show up here.`}
+                    ? tr.wallOfFamePage.eventBlurbFilled.replace("{n}", String(data.minReviews))
+                    : tr.wallOfFamePage.eventBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
                 </p>
                 {data?.eventOfMonth && (
                   <span style={{ display: "inline-block", marginTop: "16px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)" }}>
-                    View event →
+                    {tr.wallOfFamePage.viewEvent}
                   </span>
                 )}
               </div>
@@ -206,13 +208,13 @@ export default function WallOfFamePage() {
         {!loading && data && (data.topVenues.length > 0 || data.topOrganisers.length > 0) && (
           <div style={{ marginTop: "40px" }}>
             <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", textAlign: "center" }}>
-              All-Time Leaderboard
+              {tr.wallOfFamePage.allTimeLeaderboard}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
               <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>🎪 Top Organisers</div>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.wallOfFamePage.topOrganisers}</div>
                 {data.topOrganisers.length === 0 ? (
-                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>No organiser has {data.minReviews}+ reviews yet.</p>
+                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {data.topOrganisers.map((o, i) => {
@@ -281,9 +283,9 @@ export default function WallOfFamePage() {
               </div>
 
               <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>🏛️ Top Venues</div>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.wallOfFamePage.topVenues}</div>
                 {data.topVenues.length === 0 ? (
-                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>No venue has {data.minReviews}+ reviews yet.</p>
+                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {data.topVenues.map((v, i) => {
