@@ -195,6 +195,22 @@ const hi: Dictionary = {
     upcoming: "आगामी",
     past: "बीते हुए",
   },
+  followButton: {
+    following: "✓ फॉलो कर रहे हैं",
+    follow: "+ फॉलो करें",
+    muteNotifications: "नए इवेंट नोटिफिकेशन म्यूट करें",
+    enableNotifications: "नए इवेंट्स की सूचना पाएं",
+    notificationsOnTitle: "नोटिफिकेशन चालू - म्यूट करने के लिए टैप करें",
+    notificationsOffTitle: "नोटिफिकेशन बंद - चालू करने के लिए टैप करें",
+  },
+  organisersEmbed: {
+    loading: "आयोजक लोड हो रहे हैं...",
+    emptyNoneFound: "अभी तक कोई आयोजक नहीं मिला।",
+    searchPlaceholder: "आयोजक खोजें...",
+    noBioYet: "अभी तक कोई परिचय नहीं",
+    eventSingular: "इवेंट",
+    eventPlural: "इवेंट्स",
+  },
   organisersPage: {
     heroPrefix: "",
     heroEmphasis: "आयोजकों",

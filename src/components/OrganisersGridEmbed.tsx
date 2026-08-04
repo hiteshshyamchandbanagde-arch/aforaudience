@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { useLocale } from "@/lib/i18n/translate"
 
 interface OrganiserItem {
   id: string
@@ -40,6 +41,7 @@ interface OrganisersGridEmbedProps {
 }
 
 export default function OrganisersGridEmbed({ search: controlledSearch, hideSearchBar = false, onItemsLoaded }: OrganisersGridEmbedProps = {}) {
+  const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -73,9 +75,9 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
     })
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>Loading organisers...</div>
+  if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
   if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
-  if (organisers.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>No organisers found yet.</p>
+  if (organisers.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
@@ -86,7 +88,8 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
         query={search}
         items={filtered}
         getId={(o) => o.id}
-        emptyLabel="organisers"
+        emptyLabel={tr.common.nounOrganisers}
+        translate
         onSelect={(o) => goToOrganiser(o.id)}
         renderRow={(o) => (
           <span style={{ fontWeight: 600 }}>{o.orgName}</span>
@@ -95,7 +98,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
         <input
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
-          placeholder="Search organisers..."
+          placeholder={tr.organisersEmbed.searchPlaceholder}
           style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
         />
       </BrowseSearchDropdown>
@@ -146,10 +149,10 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
               <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{org.orgName}</h2>
             </div>
             <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: org.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
-              {org.bio || "No bio yet"}
+              {org.bio || tr.organisersEmbed.noBioYet}
             </p>
             <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
-              {org._count.events} event{org._count.events === 1 ? "" : "s"}
+              {org._count.events} {org._count.events === 1 ? tr.organisersEmbed.eventSingular : tr.organisersEmbed.eventPlural}
             </div>
           </div>
         )

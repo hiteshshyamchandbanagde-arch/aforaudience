@@ -209,6 +209,29 @@ const en = {
     upcoming: "Upcoming",
     past: "Past",
   },
+  // Shared across VenueFollowButton/OrganiserFollowButton (BUG-2608-043).
+  // venueDetailPage kept its own copies (follow/following/etc.) for
+  // back-compat; this namespace is for follow buttons elsewhere.
+  followButton: {
+    following: "✓ Following",
+    follow: "+ Follow",
+    muteNotifications: "Mute new event notifications",
+    enableNotifications: "Get notified of new events",
+    notificationsOnTitle: "Notifications on - tap to mute",
+    notificationsOffTitle: "Notifications off - tap to enable",
+  },
+  // BUG-2608-043: this is what the Events<->Organisers toggle actually
+  // renders (see component's own comment) - NOT the standalone
+  // /organisers page (tr.organisersPage), which the component's history
+  // notes never reached real nav-flow traffic.
+  organisersEmbed: {
+    loading: "Loading organisers...",
+    emptyNoneFound: "No organisers found yet.",
+    searchPlaceholder: "Search organisers...",
+    noBioYet: "No bio yet",
+    eventSingular: "event",
+    eventPlural: "events",
+  },
   organisersPage: {
     heroPrefix: "Discover ",
     heroEmphasis: "Organisers",

@@ -1,9 +1,11 @@
 "use client"
 import { useEffect, useState } from "react"
+import { useLocale } from "@/lib/i18n/translate"
 
 // Same isolated-island pattern as VenueFollowButton - the organiser detail
 // page is otherwise a plain server component.
 export default function OrganiserFollowButton({ organiserId }: { organiserId: string }) {
+  const { t: tr } = useLocale()
   const [following, setFollowing] = useState(false)
   const [notifyEnabled, setNotifyEnabledState] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -73,14 +75,14 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
           opacity: busy ? 0.6 : 1,
         }}
       >
-        {following ? "✓ Following" : "+ Follow"}
+        {following ? tr.followButton.following : tr.followButton.follow}
       </button>
       {following && (
         <button
           onClick={toggleNotify}
           disabled={busy}
-          aria-label={notifyEnabled ? "Mute new event notifications" : "Get notified of new events"}
-          title={notifyEnabled ? "Notifications on - tap to mute" : "Notifications off - tap to enable"}
+          aria-label={notifyEnabled ? tr.followButton.muteNotifications : tr.followButton.enableNotifications}
+          title={notifyEnabled ? tr.followButton.notificationsOnTitle : tr.followButton.notificationsOffTitle}
           style={{
             width: "34px",
             height: "34px",
