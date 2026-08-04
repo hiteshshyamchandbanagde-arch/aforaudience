@@ -6,6 +6,7 @@ import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import { useLocale } from '@/lib/i18n/translate'
 
 const inputStyle = {
   width: '100%',
@@ -29,6 +30,7 @@ function VerifyPhoneInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/profile'
+  const { t: tr } = useLocale()
 
   const [loading, setLoading] = useState(true)
   const [phone, setPhone] = useState<string | null>(null)
@@ -49,7 +51,7 @@ function VerifyPhoneInner() {
     const load = async () => {
       try {
         const res = await fetch('/api/users/me')
-        if (!res.ok) throw new Error('Could not load your account.')
+        if (!res.ok) throw new Error(tr.verifyPhonePage.couldNotLoadAccount)
         const data = await res.json()
         setUserId(data.user.id)
         setPhone(data.user.phone)
@@ -74,7 +76,7 @@ function VerifyPhoneInner() {
         body: JSON.stringify({ purpose: 'SIGNUP_VERIFY', phone }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Could not send code.')
+      if (!res.ok) throw new Error(data.error || tr.loginPage.couldNotSendCodeError)
       setDevOtp(data.devOtp ?? null)
       setCodeSent(true)
     } catch (err: any) {
@@ -95,7 +97,7 @@ function VerifyPhoneInner() {
         body: JSON.stringify({ phone, userId, code: otpCode }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Invalid code.')
+      if (!res.ok) throw new Error(data.error || tr.registerPage.invalidCodeFallback)
       // Refresh the session so isVerified is current without re-login,
       // then continue wherever the user was trying to go (e.g. back to
       // checkout).
@@ -118,23 +120,22 @@ function VerifyPhoneInner() {
       <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
-            Verify Your Phone
+            {tr.verifyPhonePage.verifyYourPhoneHeading}
           </h1>
 
           {alreadyVerified ? (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <p style={{ fontSize: '15px', color: 'var(--afa-ink)', marginBottom: '16px' }}>
-                ✓ Your phone is already verified. Nothing to do here.
+                {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
               <Link href={next} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
-                Continue →
+                {tr.verifyPhonePage.continueArrow}
               </Link>
             </div>
           ) : (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '20px' }}>
-                Booking a ticket needs a verified phone on file - it's how we (and the event Organiser) can reach you
-                about your booking. Verifying takes one code sent to <strong>{phone || 'your number on file'}</strong>.
+                {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>
 
               {error && (
@@ -154,7 +155,7 @@ function VerifyPhoneInner() {
                   disabled={submitting || !phone}
                   style={{ width: '100%', background: 'var(--afa-terracotta)', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', opacity: submitting || !phone ? 0.6 : 1 }}
                 >
-                  {submitting ? 'Sending...' : 'Send verification code'}
+                  {submitting ? tr.loginPage.sendingEllipsis : tr.verifyPhonePage.sendVerificationCodeButton}
                 </button>
               ) : (
                 <>
@@ -162,7 +163,7 @@ function VerifyPhoneInner() {
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     maxLength={6}
-                    placeholder="6-digit code"
+                    placeholder={tr.verifyPhonePage.sixDigitCodePlaceholder}
                     onKeyDown={(e) => e.key === 'Enter' && verifyCode()}
                     style={{ ...inputStyle, marginBottom: '16px' }}
                   />
@@ -171,14 +172,14 @@ function VerifyPhoneInner() {
                     disabled={submitting || otpCode.length !== 6}
                     style={{ width: '100%', background: 'var(--afa-terracotta)', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', opacity: submitting || otpCode.length !== 6 ? 0.6 : 1, marginBottom: '10px' }}
                   >
-                    {submitting ? 'Verifying...' : 'Verify'}
+                    {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
                   </button>
                   <button
                     onClick={sendCode}
                     disabled={submitting}
                     style={{ width: '100%', background: 'transparent', color: 'var(--afa-terracotta)', padding: '10px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
                   >
-                    Resend code
+                    {tr.loginPage.resendCodeButton}
                   </button>
                 </>
               )}

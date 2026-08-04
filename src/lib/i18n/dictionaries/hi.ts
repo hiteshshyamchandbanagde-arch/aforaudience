@@ -405,6 +405,17 @@ const hi: Dictionary = {
     emailVerifiedBanner: "✅ ईमेल सत्यापित हो गया।",
     continueToAfa: "AforAudience पर जारी रखें",
   },
+  verifyPhonePage: {
+    couldNotLoadAccount: "आपका खाता लोड नहीं हो सका।",
+    verifyYourPhoneHeading: "अपना फ़ोन सत्यापित करें",
+    alreadyVerifiedMessage: "✓ आपका फ़ोन पहले से सत्यापित है। यहां कुछ करने की ज़रूरत नहीं है।",
+    continueArrow: "जारी रखें →",
+    introPrefix: "टिकट बुक करने के लिए सत्यापित फ़ोन नंबर ज़रूरी है - इसी से हम (और इवेंट आयोजक) आपकी बुकिंग के बारे में आपसे संपर्क कर सकते हैं। सत्यापन के लिए बस एक कोड भेजा जाएगा",
+    introSuffix: "पर।",
+    phoneOnFileFallback: "आपके दर्ज नंबर",
+    sendVerificationCodeButton: "सत्यापन कोड भेजें",
+    sixDigitCodePlaceholder: "6 अंकों का कोड",
+  },
   homePage: {
     heroEyebrow: "जीवंत कला। असली पल।",
     heroLine1Prefix: "जहां ",
