@@ -263,6 +263,13 @@ const hi: Dictionary = {
     otherHint: " (कॉमा से अलग करें, वैकल्पिक)",
     otherPlaceholder: "जैसे, Beatboxing, Mimicry",
   },
+  notificationOptIn: {
+    message: "सूचनाएं चालू करें ताकि आप स्वीकृतियां, बुकिंग और अपडेट न चूकें।",
+    enable: "चालू करें",
+    enabling: "चालू हो रहा है…",
+    ariaLabel: "सूचनाएं चालू करें",
+    dismissAriaLabel: "बंद करें",
+  },
   messagesInboxPage: {
     heading: "संदेश",
     emptyState: "अभी तक कोई बातचीत नहीं है। स्पॉट, स्थल बुकिंग, या टिकट पुष्ट होते ही थ्रेड अपने आप खुल जाते हैं।",

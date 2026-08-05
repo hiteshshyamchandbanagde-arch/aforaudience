@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/lib/i18n/translate';
 
 /**
  * "Enable notifications" nudge. Any logged-in role can benefit (admin
@@ -18,6 +19,10 @@ import { usePathname } from 'next/navigation';
  *   - Hidden on auth/checkout/verify-phone/api, same exclusion list as the
  *     other nudges, so it never competes with a page that has its own
  *     time-sensitive ask
+ *
+ * BUG-2608-045: banner text/button were hardcoded English regardless of
+ * language toggle - this is a global cross-page component so it was a
+ * wide-surface-area gap. Now reads tr.notificationOptIn.
  */
 
 const EXCLUDED_PATH_PREFIXES = ['/auth', '/checkout', '/verify-phone', '/api'];
@@ -61,6 +66,7 @@ async function subscribeAndSave() {
 export default function NotificationOptIn() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const { t: tr } = useLocale();
   const [supported, setSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | null>(null);
   const [dismissed, setDismissed] = useState(true); // default true until checked, avoids a flash
@@ -73,21 +79,6 @@ export default function NotificationOptIn() {
     setDismissed(window.sessionStorage.getItem(DISMISSED_KEY) === '1');
   }, []);
 
-  // Handles two cases the banner-based flow above can't reach:
-  //   1. Permission was already granted (on any account, possibly a while
-  //      ago) and the person has since switched to a different logged-in
-  //      account on this same device/browser. Notification.permission is a
-  //      per-origin browser setting, not per-account, so once it's
-  //      'granted' the banner correctly never asks again - but that also
-  //      means a newly logged-in account never gets its own
-  //      PushSubscription row without this.
-  //   2. Permission is 'granted' but no subscription object was ever
-  //      actually created (e.g. granted before the VAPID key was live -
-  //      see subscribeAndSave's comment). subscribeAndSave() handles
-  //      creating one silently in that case too.
-  // No permission prompt needed either way since the browser already
-  // decided; the subscribe endpoint upserts on endpoint + reassigns
-  // userId, so this is safe to call on every login.
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user) return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
@@ -125,7 +116,7 @@ export default function NotificationOptIn() {
   return (
     <div
       role="status"
-      aria-label="Enable notifications"
+      aria-label={tr.notificationOptIn.ariaLabel}
       style={{
         background: 'var(--afa-ink)',
         color: 'var(--afa-cream)',
@@ -142,7 +133,7 @@ export default function NotificationOptIn() {
         🔔
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
-        Turn on notifications so you don&apos;t miss approvals, bookings and updates.
+        {tr.notificationOptIn.message}
       </span>
       <button
         onClick={enable}
@@ -160,11 +151,11 @@ export default function NotificationOptIn() {
           opacity: busy ? 0.7 : 1,
         }}
       >
-        {busy ? 'Enabling…' : 'Enable'}
+        {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
       </button>
       <button
         onClick={dismiss}
-        aria-label="Dismiss"
+        aria-label={tr.notificationOptIn.dismissAriaLabel}
         style={{
           background: 'transparent',
           color: 'rgba(247,243,238,0.6)',

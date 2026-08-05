@@ -284,6 +284,13 @@ const en = {
     otherHint: " (comma separated, optional)",
     otherPlaceholder: "e.g., Beatboxing, Mimicry",
   },
+  notificationOptIn: {
+    message: "Turn on notifications so you don't miss approvals, bookings and updates.",
+    enable: "Enable",
+    enabling: "Enabling…",
+    ariaLabel: "Enable notifications",
+    dismissAriaLabel: "Dismiss",
+  },
   messagesInboxPage: {
     heading: "Messages",
     emptyState: "No conversations yet. Threads open automatically once a spot, venue booking, or ticket is confirmed.",
