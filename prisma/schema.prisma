@@ -1598,3 +1598,23 @@ model ReviewReply {
   createdAt DateTime @default(now())
 }
 
+enum DiaryStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+// Free-form admin log for company/legal/administrative milestones
+// (registration, PAN, GST, current account, CA sign-offs, etc.) - kept
+// separate from Feedback (product bugs/ideas) and design.md (product/
+// engineering decisions). Admin-only, no user-facing surface.
+model AdminDiaryEntry {
+  id        String      @id @default(cuid())
+  title     String
+  notes     String?
+  status    DiaryStatus @default(PENDING)
+  createdBy String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
