@@ -56,6 +56,14 @@ function IconClipboard() {
     </svg>
   )
 }
+function IconBook() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5V5.5a2 2 0 0 1 2-2h13.5v15H6a2 2 0 0 0 0 4h13.5" />
+      <line x1="9" y1="7.5" x2="15" y2="7.5" />
+    </svg>
+  )
+}
 function IconClock() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
@@ -429,6 +437,7 @@ export default function AdminCommandCenter() {
           <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-forest)" />
           <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-plum)" />
           <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-taupe)" />
+          <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-gold)" />
         </div>
       </main>
     </>
