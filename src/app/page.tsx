@@ -17,19 +17,20 @@ export default function Home() {
 
       <SiteNav variant="home" />
 
-      {/* HERO — Editorial Split. Resumes BUG-2607-036 (HIGH: "generic/
-          templated" look) + FEAT-2607-028 (platform-wide visual pass) +
-          FEAT-2608-030 (homepage first, per Hitesh's sequencing). Asymmetric
-          two-column magazine-spread layout instead of a centered hero+CTA+
-          stats stack — oversized headline bleeding left, live "Tonight,
-          near you" data rail right (real upcoming events, not a static
-          image/video slot). Real CTA buttons kept (not the pure inline-text
-          links from the design mock) — conversion clarity for Explore
-          Events / I'm an Artist matters more than strict editorial purity
-          here. Columns use flexWrap (matches the rest of this file's
-          responsive approach) so they naturally stack on narrow screens:
-          headline column first, rail second - no separate mobile layout
-          needed. */}
+      {/* HERO — Editorial Split, now 3-up. Originally a 2-column split
+          (headline + Tonight Near You) with HeroRotator kept as its own
+          full-width strip below (PR #396) - deliberately separate at the
+          time because folding it in was thought to risk the "identical
+          structure at every width" mobile-safety property. Revisited per
+          Hitesh (this session): HeroRotator has no fixed-width
+          assumptions internally (width:100%, fills whatever column it's
+          given - checked before merging it in), so it slots into the same
+          flexWrap row as a third column without any mobile-specific
+          markup - same wrap-to-stack behavior as before, just one more
+          item in the row. The real trade-off is desktop typography: the
+          headline column shrinks from ~55% width to ~⅓, so its clamp()
+          ceiling comes down too (88px -> 60px) - otherwise "finds its /
+          Crowd" would wrap wrong at the new column width. */}
       <section style={{ padding: "0", position: "relative" }}>
         {/* Subtle grain overlay - self-contained inline SVG noise, no
             asset/network dependency. Flat color fields (even good ones)
@@ -38,46 +39,33 @@ export default function Home() {
             low-opacity so it's felt, not seen. */}
         <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.035, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "multiply" }} />
         <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
-          <div className="hero-fade-1" style={{ flex: "1.15 1 480px", padding: "72px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "22px" }}>
+          <div className="hero-fade-1" style={{ flex: "1.3 1 380px", padding: "56px 36px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "18px" }}>
               {tr.homePage.heroIssueTag}
             </div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(46px, 7vw, 88px)", fontWeight: 700, lineHeight: 0.96, letterSpacing: "-1.5px", color: "var(--afa-ink)", marginBottom: "10px" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4.4vw, 60px)", fontWeight: 700, lineHeight: 0.98, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "10px" }}>
               {tr.homePage.heroLine1Prefix}{tr.homePage.heroLine1Emphasis}<br />{tr.homePage.heroLine2}<br /><em style={{ fontStyle: "italic", fontWeight: 500, color: "var(--afa-terracotta)" }}>{tr.homePage.heroLine3}</em>
             </h1>
-            <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.65, maxWidth: "400px", lineHeight: 1.7, margin: "26px 0", paddingLeft: "18px", borderLeft: "3px solid var(--afa-terracotta)", fontFamily: "var(--font-sans)" }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.65, maxWidth: "340px", lineHeight: 1.65, margin: "22px 0", paddingLeft: "16px", borderLeft: "3px solid var(--afa-terracotta)", fontFamily: "var(--font-sans)" }}>
               {tr.homePage.heroSubtitle}
             </p>
-            <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
-              <Link href="/events" style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "15px 32px", borderRadius: "6px", fontSize: "14px", fontWeight: 700, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+              <Link href="/events" style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 700, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
                 {tr.homePage.ctaExploreEvents}
               </Link>
-              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "15px 32px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)", fontFamily: "var(--font-sans)" }}>
+              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)", fontFamily: "var(--font-sans)" }}>
                 {tr.homePage.ctaImArtist}
               </Link>
             </div>
           </div>
 
-          <div className="hero-fade-2" style={{ flex: "0.85 1 360px", padding: "48px 32px", display: "flex", alignItems: "center" }}>
+          <div className="hero-fade-2" style={{ flex: "0.85 1 280px", padding: "40px 20px", display: "flex", alignItems: "center" }}>
             <TonightNearYou />
           </div>
-        </div>
-      </section>
 
-      {/* FOR ARTISTS SHOWCASE — restored. This was wrongly dropped when
-          HeroRotator was pulled out of the hero for the Editorial Split
-          rebuild (PR #394) - it's not just a visual asset, it's the
-          artist-recruitment message ("Your best performance, featured
-          here") with real photo/video content, which the homepage
-          shouldn't have lost. Kept as its own strip rather than folded
-          back into the two-column hero, since cramming it back in would
-          undo Editorial Split's mobile-safety property (no
-          overlap/rotation to collapse, same structure at every width) -
-          this is a full-width block instead, so it doesn't compete with
-          either hero column. */}
-      <section style={{ padding: "0 48px 64px" }}>
-        <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
-          <HeroRotator />
+          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px" }}>
+            <HeroRotator />
+          </div>
         </div>
       </section>
 
@@ -163,12 +151,13 @@ export default function Home() {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .hero-fade-1, .hero-fade-2 {
+        .hero-fade-1, .hero-fade-2, .hero-fade-3 {
           animation: heroFadeUp 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .hero-fade-2 { animation-delay: 120ms; }
+        .hero-fade-3 { animation-delay: 220ms; }
         @media (prefers-reduced-motion: reduce) {
-          .hero-fade-1, .hero-fade-2 { animation: none; }
+          .hero-fade-1, .hero-fade-2, .hero-fade-3 { animation: none; }
         }
       `}</style>
     </main>
