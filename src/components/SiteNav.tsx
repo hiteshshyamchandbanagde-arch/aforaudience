@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
@@ -127,6 +128,16 @@ function NavIcon({ navKey }: { navKey: string }) {
 }
 
 export default function SiteNav({ active, variant = "page", backHref, backLabel }: SiteNavProps) {
+  // GEN-2608-030: the primary nav links (Events/Artists/Venues/Wall of
+  // Fame) already had an `active` prop mechanism for highlighting, but
+  // it's opt-in per-page and only 4 of ~50 pages pass it - separate,
+  // pre-existing gap not addressed here. The actual reported gap (report
+  // came from /tickets/) is that the icon-link row (Dashboard/Messages/
+  // My Tickets/Profile) had no active-state logic at all, on desktop or
+  // mobile. Pathname-prefix match against each link's own href - safe
+  // since dashboardLink is role-specific (e.g. /dashboard/artist) and
+  // never collides with the sibling /dashboard/messages route.
+  const pathname = usePathname()
   const isHome = variant === "home"
   const { data: session, status } = useSession()
   const user = session?.user as { name?: string | null; displayName?: string | null; email?: string | null; role?: string } | undefined
@@ -327,7 +338,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false },
         { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false },
         { key: "profile", href: "/profile", label: t.nav.profile, accent: false },
-      ]
+      ].map((l) => ({ ...l, isActive: pathname === l.href || pathname?.startsWith(l.href + "/") || false }))
     : []
 
   return (
@@ -494,8 +505,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   key={l.href}
                   href={l.href}
                   aria-label={l.label}
+                  aria-current={l.isActive ? "page" : undefined}
                   className="sitenav-icon-link"
-                  style={{ color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+                  style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
                 >
                   <NavIcon navKey={l.key} />
                   {l.key === "dashboard" && pendingCount > 0 && (
@@ -650,7 +662,8 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
+                aria-current={l.isActive ? "page" : undefined}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
                 {l.key === "dashboard" && pendingCount > 0 && (
