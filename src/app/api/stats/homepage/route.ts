@@ -37,7 +37,7 @@ export async function GET() {
         where: {
           status: 'APPROVED',
           organiser: { user: { isSuspended: false } },
-          venue: { city: { not: null } },
+          venueId: { not: null },
         },
         select: { venue: { select: { city: true } } },
         distinct: ['venueId'],
