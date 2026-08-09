@@ -694,6 +694,7 @@ const hi: Dictionary = {
     statArtists: "कलाकार",
     statEventsMonthly: "मासिक इवेंट्स",
     statCities: "शहर",
+    growthTagline: "अच्छी चीज़ें समय के साथ बढ़ती हैं। इस शुरुआत का हिस्सा बनिए।",
     heroIssueTag: "जीवंत कला, असली पल",
     heroInlineCtaPrefix: "शुरू करें ",
     heroInlineCtaLink: "आज रात के शो →",
