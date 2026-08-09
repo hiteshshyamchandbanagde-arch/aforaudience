@@ -17,6 +17,26 @@ interface PendingCompanionTag {
   booking: { id: string; event: { id: string; title: string; date: string; startTime: string } }
 }
 
+// BUG-2608-033 - same shape as PendingCompanionTag plus venue, for the
+// "you're going as a guest" ticket-like cards below. A confirmed
+// companion never has a Booking of their own, so this is intentionally
+// not a BookingItem - no seats/price/PDF, just enough to show they're
+// going.
+interface AcceptedCompanionTag {
+  id: string
+  taggedBy: { id: string; name: string; displayName: string | null }
+  booking: {
+    id: string
+    event: {
+      id: string
+      title: string
+      date: string
+      startTime: string
+      venue: { name: string; city: string } | null
+    }
+  }
+}
+
 interface BookingItem {
   id: string
   seats: Record<string, number>
@@ -113,6 +133,7 @@ export default function MyTicketsPage() {
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<string | null>(null)
   const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
+  const [acceptedTags, setAcceptedTags] = useState<AcceptedCompanionTag[]>([])
   const [respondingTag, setRespondingTag] = useState<string | null>(null)
 
   useEffect(() => {
@@ -142,10 +163,25 @@ export default function MyTicketsPage() {
     }
   }
 
+  // BUG-2608-033 - separate fetch (rather than folding into
+  // loadPendingTags) since it's a genuinely different list with its own
+  // card treatment below, not more pending-inbox items.
+  const loadAcceptedTags = async () => {
+    try {
+      const res = await fetch('/api/companions/mine?status=ACCEPTED')
+      if (!res.ok) return
+      const data = await res.json()
+      setAcceptedTags(data.tags || [])
+    } catch {
+      // Non-critical - the rest of the page still works.
+    }
+  }
+
   useEffect(() => {
     if (session?.user) {
       load()
       loadPendingTags()
+      loadAcceptedTags()
     }
   }, [session])
 
@@ -157,7 +193,14 @@ export default function MyTicketsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accept }),
       })
-      if (res.ok) setPendingTags((prev) => prev.filter((t) => t.id !== tagId))
+      if (res.ok) {
+        setPendingTags((prev) => prev.filter((t) => t.id !== tagId))
+        // Accepting moves it straight into the "going as a guest" list
+        // below - refetch rather than guess-shape the item locally,
+        // this list is small and infrequent so the extra round trip is
+        // cheap.
+        if (accept) loadAcceptedTags()
+      }
     } finally {
       setRespondingTag(null)
     }
@@ -246,7 +289,40 @@ export default function MyTicketsPage() {
             </div>
           )}
 
-          {bookings.length === 0 ? (
+          {/* BUG-2608-033 - confirmed companion tags rendered as their
+              own ticket-like cards. Deliberately lighter than the real
+              booking cards below (no price, no seat labels, no PDF
+              download) - a companion never has a Booking of their own,
+              so this shows only what's actually true: they're confirmed
+              to attend as someone else's guest. */}
+          {acceptedTags.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+                {tr.ticketsPage.youreGoingAsGuest}
+              </h2>
+              {acceptedTags.map((t) => (
+                <div key={t.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', textDecoration: 'none' }}>
+                      {t.booking.event.title}
+                    </Link>
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', whiteSpace: 'nowrap' }}>
+                      {tr.ticketsPage.companionConfirmedPill}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
+                    {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {t.booking.event.startTime}
+                    {t.booking.event.venue && <> · {t.booking.event.venue.name}, {t.booking.event.venue.city}</>}
+                  </p>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.65, margin: 0 }}>
+                    {tr.ticketsPage.guestOfTemplate.replace('{name}', t.taggedBy.displayName || t.taggedBy.name)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {bookings.length === 0 && acceptedTags.length === 0 ? (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-ink)', opacity: 0.6 }}>
               {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>

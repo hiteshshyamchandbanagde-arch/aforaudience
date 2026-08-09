@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { sendPushToUser } from '@/lib/push'
 
 // PATCH /api/companions/[tagId]/respond
 // body: { accept: boolean }
@@ -24,7 +25,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ tagId:
     return NextResponse.json({ error: 'accept (boolean) is required' }, { status: 400 })
   }
 
-  const tag = await prisma.companionTag.findUnique({ where: { id: tagId } })
+  const tag = await prisma.companionTag.findUnique({
+    where: { id: tagId },
+    include: {
+      taggedUser: { select: { name: true, displayName: true } },
+      booking: { select: { event: { select: { title: true } } } },
+    },
+  })
   if (!tag) {
     return NextResponse.json({ error: 'Tag not found' }, { status: 404 })
   }
@@ -39,6 +46,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ tagId:
     where: { id: tagId },
     data: { status: body.accept ? 'ACCEPTED' : 'DECLINED', respondedAt: new Date() },
   })
+
+  // BUG-2608-034 - the booker was never told their companion had
+  // responded at all (this route had zero notification logic). Same
+  // best-effort "don't fail the request over a push" pattern as the tag
+  // creation notify in bookings/[id]/companions/route.ts.
+  const responderName = tag.taggedUser.displayName || tag.taggedUser.name
+  const eventTitle = tag.booking.event.title
+  sendPushToUser(tag.taggedByUserId, {
+    title: body.accept ? 'Companion confirmed' : 'Companion declined',
+    body: body.accept
+      ? `${responderName} confirmed they're coming to ${eventTitle}.`
+      : `${responderName} declined your companion tag for ${eventTitle}.`,
+    url: '/tickets',
+  }).catch((err) => console.error('[companions/respond] notify booker failed', err))
 
   return NextResponse.json({ tag: updated })
 }
