@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
-import HeroRotator from "@/components/HeroRotator";
+import TonightNearYou from "@/components/TonightNearYou";
 import MoodThemeSection from "@/components/MoodThemeSection";
 import { useLocale } from "@/lib/i18n/translate";
 
@@ -9,59 +9,49 @@ export default function Home() {
   const { t: tr } = useLocale()
   const TICKER_UNIQUE_ITEMS = [tr.homePage.tickerOpenMicMumbai, tr.homePage.tickerPoetryDelhi, tr.homePage.tickerStandUpBangalore, tr.homePage.tickerTheaterPune, tr.homePage.tickerOpenMicHyderabad, tr.homePage.tickerComedyChennai, tr.homePage.tickerSpokenWordKolkata]
   const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS]
-  const HERO_STATS = [{ num: "2,400+", label: tr.homePage.statArtists }, { num: "840+", label: tr.homePage.statEventsMonthly }, { num: "120+", label: tr.homePage.statCities }]
   return (
     <main className="min-h-screen" style={{ background: "var(--afa-cream)", color: "var(--afa-ink)", fontFamily: "Georgia, serif" }}>
 
       <SiteNav variant="home" />
 
-      {/* HERO */}
-      <section style={{ padding: "96px 48px 80px" }}>
-        <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", gap: "48px", flexWrap: "wrap" }}>
-        <div style={{ maxWidth: "560px", flex: "1 1 480px" }}>
-          <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-terracotta)", textTransform: "uppercase", marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ display: "inline-block", width: "32px", height: "1px", background: "var(--afa-terracotta)" }}></span>
-            {tr.homePage.heroEyebrow}
-          </div>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(44px, 5vw, 72px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-1.5px", color: "var(--afa-ink)", marginBottom: "28px" }}>
-            {tr.homePage.heroLine1Prefix}<em style={{ fontStyle: "italic", color: "var(--afa-terracotta)" }}>{tr.homePage.heroLine1Emphasis}</em><br />{tr.homePage.heroLine2}<br />{tr.homePage.heroLine3}
-          </h1>
-          <p style={{ fontSize: "18px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.65, maxWidth: "440px", lineHeight: 1.7, marginBottom: "44px", fontFamily: "system-ui, sans-serif" }}>
-            {tr.homePage.heroSubtitle}
-          </p>
-          <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
-            <Link href="/events" style={{ background: "var(--afa-terracotta)", color: "white", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 600, textDecoration: "none" }}>
-              {tr.homePage.ctaExploreEvents}
-            </Link>
-            <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "16px 36px", borderRadius: "6px", fontSize: "15px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
-              {tr.homePage.ctaImArtist}
-            </Link>
-          </div>
-
-          {/* STATS (default position — under CTAs, all screen sizes) */}
-          <div className="hero-stats-inline" style={{ display: "flex", gap: "40px", marginTop: "56px", paddingTop: "40px", borderTop: "1px solid rgba(14,12,10,0.1)", flexWrap: "wrap" }}>
-            {HERO_STATS.map((s) => (
-              <div key={s.label}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1, marginBottom: "4px" }}>{s.num}</div>
-                <div style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* STATS (wide-screen only — fills the gap between text and hero image; hidden below 1600px, inline version above hidden above it) */}
-        <div className="hero-stats-gap" style={{ flex: "0 0 auto", display: "none", flexDirection: "column", justifyContent: "center", gap: "36px", padding: "0 4px" }}>
-          {HERO_STATS.map((s) => (
-            <div key={s.label}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1, marginBottom: "4px", whiteSpace: "nowrap" }}>{s.num}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{s.label}</div>
+      {/* HERO — Editorial Split. Resumes BUG-2607-036 (HIGH: "generic/
+          templated" look) + FEAT-2607-028 (platform-wide visual pass) +
+          FEAT-2608-030 (homepage first, per Hitesh's sequencing). Asymmetric
+          two-column magazine-spread layout instead of a centered hero+CTA+
+          stats stack — oversized headline bleeding left, live "Tonight,
+          near you" data rail right (real upcoming events, not a static
+          image/video slot). Real CTA buttons kept (not the pure inline-text
+          links from the design mock) — conversion clarity for Explore
+          Events / I'm an Artist matters more than strict editorial purity
+          here. Columns use flexWrap (matches the rest of this file's
+          responsive approach) so they naturally stack on narrow screens:
+          headline column first, rail second - no separate mobile layout
+          needed. */}
+      <section style={{ padding: "0" }}>
+        <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
+          <div style={{ flex: "1.15 1 480px", padding: "72px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "22px" }}>
+              {tr.homePage.heroIssueTag}
             </div>
-          ))}
-        </div>
+            <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(46px, 7vw, 88px)", fontWeight: 900, lineHeight: 0.94, letterSpacing: "-2.5px", color: "var(--afa-ink)", marginBottom: "10px" }}>
+              {tr.homePage.heroLine1Prefix}{tr.homePage.heroLine1Emphasis}<br />{tr.homePage.heroLine2}<br /><em style={{ fontStyle: "italic", fontWeight: 400, color: "var(--afa-terracotta)" }}>{tr.homePage.heroLine3}</em>
+            </h1>
+            <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.65, maxWidth: "400px", lineHeight: 1.7, margin: "26px 0", paddingLeft: "18px", borderLeft: "3px solid var(--afa-terracotta)", fontFamily: "system-ui, sans-serif" }}>
+              {tr.homePage.heroSubtitle}
+            </p>
+            <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
+              <Link href="/events" style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "15px 32px", borderRadius: "6px", fontSize: "14px", fontWeight: 700, textDecoration: "none" }}>
+                {tr.homePage.ctaExploreEvents}
+              </Link>
+              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-ink)", padding: "15px 32px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)" }}>
+                {tr.homePage.ctaImArtist}
+              </Link>
+            </div>
+          </div>
 
-        <div style={{ flex: "1 1 400px", maxWidth: "720px" }}>
-          <HeroRotator />
-        </div>
+          <div style={{ flex: "0.85 1 360px", padding: "48px 32px", display: "flex", alignItems: "center" }}>
+            <TonightNearYou />
+          </div>
         </div>
       </section>
 
@@ -223,10 +213,6 @@ export default function Home() {
         @keyframes ticker {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-50%, 0, 0); }
-        }
-        @media (min-width: 1600px) {
-          .hero-stats-inline { display: none !important; }
-          .hero-stats-gap { display: flex !important; }
         }
       `}</style>
     </main>
