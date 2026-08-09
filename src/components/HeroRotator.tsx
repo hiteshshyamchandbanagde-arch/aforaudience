@@ -96,10 +96,10 @@ export default function HeroRotator() {
         }}
       />
       <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
-        <div style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
           {tr.homePage.heroRotatorEyebrow}
         </div>
-        <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-cream)', lineHeight: 1.3 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-cream)', lineHeight: 1.3 }}>
           {tr.homePage.heroRotatorTagline}
         </div>
       </div>
