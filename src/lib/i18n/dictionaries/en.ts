@@ -551,6 +551,12 @@ const en = {
     youveBeenTagged: "You've been tagged",
     taggedYouAsCompanionForTemplate: "tagged you as their companion for {event} on {date}.",
     goingWith: "Going with",
+    // BUG-2608-033 - accepted companion tags now render as their own
+    // ticket-like cards, since accepting one produced no visible ticket
+    // anywhere before this.
+    youreGoingAsGuest: "You're going as a guest",
+    guestOfTemplate: "Guest of {name}",
+    companionConfirmedPill: "Confirmed",
     confirmButton: "Confirm",
     confirmingEllipsis: "Confirming…",
     declineButton: "Decline",

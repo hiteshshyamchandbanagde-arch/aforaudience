@@ -161,6 +161,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       .catch(() => {})
     return () => { cancelled = true }
   }, [user?.email])
+  // BUG-2608-032 - same "persistent badge, not just a one-shot push"
+  // treatment as unreadCount above, for pending companion-tag
+  // confirmations. Runs for every logged-in user (anyone can be tagged
+  // as a companion regardless of role), lands on the myTickets link
+  // since that's where /tickets already surfaces the accept/decline UI.
+  const [pendingCompanionCount, setPendingCompanionCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/companions/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCompanionCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
   const [mobileOpen, setMobileOpen] = useState(false)
   const mobilePanelRef = useRef<HTMLDivElement | null>(null)
   // BUG (3 Aug, live report): panel had no bounded height/scroll container
@@ -493,6 +508,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       {unreadCount}
                     </span>
                   )}
+                  {l.key === "myTickets" && pendingCompanionCount > 0 && (
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                      {pendingCompanionCount}
+                    </span>
+                  )}
                   <span className="sitenav-tooltip">{l.label}</span>
                 </Link>
               ))}
@@ -641,6 +661,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 {l.key === "messages" && unreadCount > 0 && (
                   <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {unreadCount}
+                  </span>
+                )}
+                {l.key === "myTickets" && pendingCompanionCount > 0 && (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                    {pendingCompanionCount}
                   </span>
                 )}
               </Link>
