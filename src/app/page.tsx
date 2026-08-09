@@ -39,7 +39,7 @@ export default function Home() {
             low-opacity so it's felt, not seen. */}
         <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.035, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "multiply" }} />
         <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
-          <div className="hero-fade-1" style={{ flex: "1.3 1 380px", padding: "56px 36px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="hero-fade-1" style={{ flex: "1.3 1 380px", padding: "40px 36px 56px", display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "18px" }}>
               {tr.homePage.heroIssueTag}
             </div>
