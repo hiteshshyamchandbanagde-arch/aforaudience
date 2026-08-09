@@ -145,6 +145,16 @@ export default function ArtistsNearYou() {
           ))}
         </>
       )}
+
+      {artists !== null && (
+        <Link
+          href="/profile"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.12)', textDecoration: 'none', color: 'var(--afa-gold)', fontFamily: 'var(--font-sans)', fontSize: '11.5px', fontWeight: 700 }}
+        >
+          <span>{tr.homePage.artistsRailApplyCta}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      )}
     </div>
   )
 }
