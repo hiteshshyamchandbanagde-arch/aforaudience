@@ -31,7 +31,7 @@ export default function Home() {
           headline column shrinks from ~55% width to ~⅓, so its clamp()
           ceiling comes down too (88px -> 60px) - otherwise "finds its /
           Crowd" would wrap wrong at the new column width. */}
-      <section style={{ padding: "28px 0 0", position: "relative" }}>
+      <section style={{ padding: "64px 0 0", position: "relative" }}>
         {/* Subtle grain overlay - self-contained inline SVG noise, no
             asset/network dependency. Flat color fields (even good ones)
             read as "digital default" without any texture; a faint grain
@@ -40,7 +40,7 @@ export default function Home() {
         <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.035, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "multiply" }} />
         <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
           <div className="hero-fade-1" style={{ flex: "1.3 1 380px", padding: "40px 36px 56px", display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "18px" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "20px" }}>
               {tr.homePage.heroIssueTag}
             </div>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4.4vw, 60px)", fontWeight: 700, lineHeight: 0.98, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "10px" }}>
