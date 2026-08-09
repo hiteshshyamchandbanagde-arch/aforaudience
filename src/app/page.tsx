@@ -2,7 +2,7 @@
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import TonightNearYou from "@/components/TonightNearYou";
-import HeroRotator from "@/components/HeroRotator";
+import ArtistsNearYou from "@/components/ArtistsNearYou";
 import MoodThemeSection from "@/components/MoodThemeSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import RolesSection from "@/components/RolesSection";
@@ -18,20 +18,18 @@ export default function Home() {
 
       <SiteNav variant="home" />
 
-      {/* HERO — Editorial Split, now 3-up. Originally a 2-column split
-          (headline + Tonight Near You) with HeroRotator kept as its own
-          full-width strip below (PR #396) - deliberately separate at the
-          time because folding it in was thought to risk the "identical
-          structure at every width" mobile-safety property. Revisited per
-          Hitesh (this session): HeroRotator has no fixed-width
-          assumptions internally (width:100%, fills whatever column it's
-          given - checked before merging it in), so it slots into the same
-          flexWrap row as a third column without any mobile-specific
-          markup - same wrap-to-stack behavior as before, just one more
-          item in the row. The real trade-off is desktop typography: the
-          headline column shrinks from ~55% width to ~⅓, so its clamp()
-          ceiling comes down too (88px -> 60px) - otherwise "finds its /
-          Crowd" would wrap wrong at the new column width. */}
+      {/* HERO — Editorial Split, 3-up: headline + two symmetric "near
+          you" rails. The third column was originally HeroRotator (a
+          static "For Artists" showcase, PR #396/#400) - replaced with
+          ArtistsNearYou (GEN-2608-032) once real per-city artist data
+          existed to match TonightNearYou's pattern, so both side rails
+          are now equally location-aware rather than one live + one
+          static. The artist-acquisition pitch HeroRotator carried still
+          lives in RolesSection below the fold, so nothing is lost
+          site-wide - just moved out of the hero fold. Same flexWrap
+          row / wrap-to-stack behavior as before; ArtistsNearYou mirrors
+          TonightNearYou's width:100% sizing so the column math is
+          unchanged. */}
       <section style={{ padding: "64px 0 0", position: "relative" }}>
         {/* Subtle grain overlay - self-contained inline SVG noise, no
             asset/network dependency. Flat color fields (even good ones)
@@ -64,8 +62,8 @@ export default function Home() {
             <TonightNearYou />
           </div>
 
-          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px" }}>
-            <HeroRotator />
+          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "stretch" }}>
+            <ArtistsNearYou />
           </div>
         </div>
       </section>
