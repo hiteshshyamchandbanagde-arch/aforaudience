@@ -224,21 +224,6 @@ export default function NearYouTabs() {
           ))}
         </>
       )}
-
-      {!isEvents && artists !== null && (
-        <Link
-          href="/profile"
-          style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.12)', textDecoration: 'none', color: 'inherit' }}
-        >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {tr.homePage.artistsRailApplyEyebrow}
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: '#F7F3EE' }}>
-            <span>{tr.homePage.artistsRailApplyCta}</span>
-            <span aria-hidden="true">→</span>
-          </span>
-        </Link>
-      )}
     </div>
   )
 }
