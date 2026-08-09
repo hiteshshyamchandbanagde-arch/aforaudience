@@ -80,7 +80,7 @@ export default function TonightNearYou() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--afa-ink)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE' }}>
+    <div style={{ background: 'var(--afa-ink)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '14px', margin: 0 }}>{tr.homePage.tonightRailHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
@@ -136,7 +136,7 @@ export default function TonightNearYou() {
         </>
       )}
 
-      <div style={{ display: 'flex', gap: '20px', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.15)' }}>
+      <div style={{ display: 'flex', gap: '20px', marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.15)' }}>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>2,400+</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statArtists}</div>

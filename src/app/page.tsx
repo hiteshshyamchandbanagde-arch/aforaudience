@@ -59,7 +59,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-fade-2" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "center" }}>
+          <div className="hero-fade-2" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "stretch" }}>
             <TonightNearYou />
           </div>
 
