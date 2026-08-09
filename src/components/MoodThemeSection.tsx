@@ -70,17 +70,17 @@ export default function MoodThemeSection() {
     <>
       {/* NAVARASA */}
       <section style={{ padding: "100px 48px", background: "white", textAlign: "center" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
           {tr.homePage.navarasaEyebrow}
         </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
           {tr.homePage.navarasaHeadingPrefix}<em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.navarasaHeadingEmphasis}</em>
         </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", margin: "0 auto 16px", lineHeight: 1.7 }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", margin: "0 auto 16px", lineHeight: 1.7 }}>
           {tr.homePage.navarasaSubtitle}
         </p>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45, marginBottom: "40px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45, marginBottom: "40px" }}>
           {tr.homePage.navarasaHint}
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "8px", maxWidth: "900px", margin: "0 auto" }}>
@@ -96,8 +96,8 @@ export default function MoodThemeSection() {
               }}
             >
               <div style={{ fontSize: "32px" }}>{rasa.emoji}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "12px", fontWeight: 700, color: "var(--afa-ink)" }}>{rasa.name}</div>
-              <div style={{ fontFamily: "monospace", fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.65 }}>{rasa.sanskrit}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, color: "var(--afa-ink)" }}>{rasa.name}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.65 }}>{rasa.sanskrit}</div>
             </div>
           ))}
         </div>
@@ -105,14 +105,14 @@ export default function MoodThemeSection() {
 
       {/* CTA - themed by the selected mood, defaults to the original ember-red */}
       <section style={{ background: accent, textAlign: "center", padding: "100px 48px", transition: "background 0.3s" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
           <span style={{ width: "24px", height: "1px", background: "rgba(255,255,255,0.5)", display: "inline-block" }}></span>
           {tr.homePage.ctaEyebrow}
         </div>
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "white", marginBottom: "16px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-1px", color: "white", marginBottom: "16px" }}>
           {tr.homePage.ctaHeadingLine1}<br />{tr.homePage.ctaHeadingLine2}
         </h2>
-        <p style={{ fontFamily: "system-ui, sans-serif", fontSize: "18px", color: "rgba(255,255,255,0.75)", maxWidth: "540px", margin: "0 auto 44px", lineHeight: 1.7 }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "18px", color: "rgba(255,255,255,0.75)", maxWidth: "540px", margin: "0 auto 44px", lineHeight: 1.7 }}>
           {tr.homePage.ctaSubtitle}
         </p>
         <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
