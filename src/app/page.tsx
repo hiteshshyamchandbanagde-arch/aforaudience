@@ -1,8 +1,8 @@
 "use client"
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
-import TonightNearYou from "@/components/TonightNearYou";
-import ArtistsNearYou from "@/components/ArtistsNearYou";
+import NearYouTabs from "@/components/NearYouTabs";
+import HeroRotator from "@/components/HeroRotator";
 import MoodThemeSection from "@/components/MoodThemeSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import RolesSection from "@/components/RolesSection";
@@ -18,18 +18,19 @@ export default function Home() {
 
       <SiteNav variant="home" />
 
-      {/* HERO — Editorial Split, 3-up: headline + two symmetric "near
-          you" rails. The third column was originally HeroRotator (a
-          static "For Artists" showcase, PR #396/#400) - replaced with
-          ArtistsNearYou (GEN-2608-032) once real per-city artist data
-          existed to match TonightNearYou's pattern, so both side rails
-          are now equally location-aware rather than one live + one
-          static. The artist-acquisition pitch HeroRotator carried still
-          lives in RolesSection below the fold, so nothing is lost
-          site-wide - just moved out of the hero fold. Same flexWrap
-          row / wrap-to-stack behavior as before; ArtistsNearYou mirrors
-          TonightNearYou's width:100% sizing so the column math is
-          unchanged. */}
+      {/* HERO — Editorial Split, 3-up: headline + NearYouTabs + HeroRotator.
+          Third iteration this session (GEN-2608-032): started as headline +
+          TonightNearYou + static HeroRotator (PR #396/#400) -> swapped
+          HeroRotator for a data-driven ArtistsNearYou card (#405/#407/#408)
+          -> Hitesh then asked for events+artists combined into ONE panel
+          (this change), so TonightNearYou and ArtistsNearYou merged into
+          NearYouTabs (tabbed, full list per tab, not trimmed) and
+          HeroRotator moved back into the 3rd column as the visual media
+          showcase it always was - that's what "your performance, featured
+          here" actually meant (photos/video, not a text CTA - corrected
+          mid-session after initially misreading it as a link).
+          TonightNearYou.tsx and ArtistsNearYou.tsx left unused in the repo
+          rather than deleted, same as HeroRotator was earlier. */}
       <section style={{ padding: "64px 0 0", position: "relative" }}>
         {/* Subtle grain overlay - self-contained inline SVG noise, no
             asset/network dependency. Flat color fields (even good ones)
@@ -59,11 +60,11 @@ export default function Home() {
           </div>
 
           <div className="hero-fade-2" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "stretch" }}>
-            <TonightNearYou />
+            <NearYouTabs />
           </div>
 
-          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "stretch" }}>
-            <ArtistsNearYou />
+          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px" }}>
+            <HeroRotator />
           </div>
         </div>
       </section>
