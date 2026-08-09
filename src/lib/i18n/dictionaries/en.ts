@@ -725,7 +725,7 @@ const en = {
     statArtists: "Artists",
     statEventsMonthly: "Events Monthly",
     statCities: "Cities",
-    heroIssueTag: "Issue №1 · Live Art, Real Moments",
+    heroIssueTag: "Live Art, Real Moments",
     heroInlineCtaPrefix: "Start with ",
     heroInlineCtaLink: "tonight's shows →",
     heroInlineCtaOr: " or ",
