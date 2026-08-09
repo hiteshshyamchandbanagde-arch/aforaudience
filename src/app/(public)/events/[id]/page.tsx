@@ -4,6 +4,16 @@ import prisma from '@/lib/prisma'
 import EventDetailClientPage from './EventDetailClientPage'
 import { computeHypeScore } from '@/lib/hype-score'
 
+// GEN-2608-027 - same eventStartInstant convention used in
+// bookings/[id]/route.ts, performances/[id]/cancel/route.ts, and
+// api/reviews/route.ts (the real server-side gate this mirrors).
+function eventStartInstant(date: Date, startTime: string): Date {
+  const [h, m] = startTime.split(':').map(Number)
+  const start = new Date(date)
+  start.setHours(h, m, 0, 0)
+  return start
+}
+
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
@@ -139,7 +149,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       },
       select: { id: true },
     })
-    canReview = !!checkedInBooking
+    // GEN-2608-027 - checked-in alone isn't sufficient: an organiser can
+    // scan a booking in ahead of the actual show, which previously let
+    // the button render for an event that hadn't happened yet. Real
+    // enforcement lives in POST /api/reviews; this just keeps the UI
+    // consistent with it instead of showing a button the API will 403.
+    canReview = !!checkedInBooking && eventStartInstant(event.date, event.startTime).getTime() <= Date.now()
   }
 
   return <EventDetailClientPage event={JSON.parse(JSON.stringify(eventForClient))} canReview={canReview} />

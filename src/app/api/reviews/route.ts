@@ -5,6 +5,19 @@ import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 import { ensureFollowing } from '@/lib/follow'
 
+// GEN-2608-027 - combines Event.date + startTime into a real instant,
+// same pattern already used in bookings/[id]/route.ts,
+// performances/[id]/cancel/route.ts, and POST /api/events (backdated-event
+// validation). No shared lib for this exists yet across those call sites,
+// so following the established per-file convention here too rather than
+// introducing a refactor under this bug fix's banner.
+function eventStartInstant(date: Date, startTime: string): Date {
+  const [h, m] = startTime.split(':').map(Number)
+  const start = new Date(date)
+  start.setHours(h, m, 0, 0)
+  return start
+}
+
 // G2 - rate a performer post-show. Gated on the reviewer having an actual
 // CONFIRMED + checked-in booking for this event - EPIC N's check-in
 // system (src/app/api/events/[id]/checkin) now exists, so this can
@@ -31,10 +44,22 @@ export async function POST(req: Request) {
 
     const checkedInBooking = await prisma.booking.findFirst({
       where: { userId: user.id, eventId, status: 'CONFIRMED', checkedInAt: { not: null } },
+      include: { event: { select: { date: true, startTime: true } } },
     })
     if (!checkedInBooking) {
       return NextResponse.json(
         { error: 'You can review this event after checking in at the door.' },
+        { status: 403 }
+      )
+    }
+
+    // GEN-2608-027 - checked-in alone isn't sufficient: an organiser can
+    // scan a booking in ahead of the actual show (early doors, or by
+    // mistake/testing), which previously let someone rate performances
+    // for an event that hadn't happened yet.
+    if (eventStartInstant(checkedInBooking.event.date, checkedInBooking.event.startTime).getTime() > Date.now()) {
+      return NextResponse.json(
+        { error: "You can review this event once it's actually happened." },
         { status: 403 }
       )
     }
