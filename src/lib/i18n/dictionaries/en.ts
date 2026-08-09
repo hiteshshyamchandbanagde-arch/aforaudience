@@ -725,6 +725,7 @@ const en = {
     statArtists: "Artists",
     statEventsMonthly: "Events Monthly",
     statCities: "Cities",
+    growthTagline: "Good things grow with time. Be part of the beginning.",
     heroIssueTag: "Live Art, Real Moments",
     heroInlineCtaPrefix: "Start with ",
     heroInlineCtaLink: "tonight's shows →",

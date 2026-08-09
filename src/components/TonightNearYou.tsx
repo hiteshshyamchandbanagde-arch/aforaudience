@@ -47,7 +47,6 @@ export default function TonightNearYou() {
   const { t: tr } = useLocale()
   const [events, setEvents] = useState<UpcomingEvent[] | null>(null)
   const [matchedCity, setMatchedCity] = useState<string | null>(null)
-  const [stats, setStats] = useState<{ artists: number | null; eventsThisMonth: number | null; cities: number | null } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -75,30 +74,6 @@ export default function TonightNearYou() {
         }
       } catch {
         if (!cancelled) setEvents([])
-      }
-    })()
-    return () => { cancelled = true }
-  }, [])
-
-  // GEN-2608-004 / FEAT-2607-059: the stat row used to be static
-  // placeholder numbers ("2,400+ Artists" etc) from the original design
-  // mock, flagged twice as fake data. /api/stats/homepage returns real
-  // counts under the same visibility rules as the rest of the public
-  // site. Fetched separately from the events call above (different
-  // endpoint, no shared loading state needed) - null on failure, which
-  // the render below treats as "hide this stat" rather than showing 0
-  // (0 would read as "this platform has no artists", which isn't
-  // necessarily true - it just means the count failed to load).
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const res = await fetch('/api/stats/homepage')
-        if (!res.ok) throw new Error('failed')
-        const data = await res.json()
-        if (!cancelled) setStats(data)
-      } catch {
-        if (!cancelled) setStats({ artists: null, eventsThisMonth: null, cities: null })
       }
     })()
     return () => { cancelled = true }
@@ -160,27 +135,6 @@ export default function TonightNearYou() {
           ))}
         </>
       )}
-
-      <div style={{ display: 'flex', gap: '20px', marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.15)' }}>
-        {stats?.artists != null && (
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>{stats.artists.toLocaleString('en-IN')}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statArtists}</div>
-          </div>
-        )}
-        {stats?.eventsThisMonth != null && (
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>{stats.eventsThisMonth.toLocaleString('en-IN')}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statEventsMonthly}</div>
-          </div>
-        )}
-        {stats?.cities != null && (
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>{stats.cities.toLocaleString('en-IN')}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statCities}</div>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

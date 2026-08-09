@@ -6,6 +6,7 @@ import HeroRotator from "@/components/HeroRotator";
 import MoodThemeSection from "@/components/MoodThemeSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import RolesSection from "@/components/RolesSection";
+import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import { useLocale } from "@/lib/i18n/translate";
 
 export default function Home() {
@@ -68,6 +69,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <PlatformGrowthStrip />
 
       {/* TICKER */}
       <div style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "14px 0", overflow: "hidden", borderTop: "2px solid var(--afa-terracotta)" }}>
