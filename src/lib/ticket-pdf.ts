@@ -122,9 +122,19 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
   cursorY -= 20
   drawHairline(page, marginX, cursorY, PAGE_W - marginX * 2)
 
-  // ── "Admit One" section ───────────────────────────────────────────────
+  // ── "Admit One/N" section ─────────────────────────────────────────────
+  // BUG-2608-031 - this used to hardcode "ADMIT ONE" regardless of how
+  // many seats/tickets the booking actually covers. Same numbered-vs-GA
+  // duality used elsewhere (bookings/[id]/companions/route.ts,
+  // bookings/my/route.ts): numbered venues count real seatLabels,
+  // GA sums the seats quantity map.
+  const admitCount =
+    t.seatLabels && t.seatLabels.length > 0
+      ? t.seatLabels.length
+      : Object.values(t.seats || {}).reduce((sum, q) => sum + Number(q || 0), 0) || 1
+  const admitText = admitCount <= 1 ? "ADMIT ONE" : `ADMIT ${admitCount}`
   cursorY -= 44
-  page.drawText("ADMIT ONE", {
+  page.drawText(admitText, {
     x: marginX,
     y: cursorY,
     size: 10,
@@ -134,7 +144,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     // char-by-char draw isn't worth it for one line.
   })
   cursorY -= 4
-  drawUnderline(page, marginX, cursorY, sansBold.widthOfTextAtSize("ADMIT ONE", 10))
+  drawUnderline(page, marginX, cursorY, sansBold.widthOfTextAtSize(admitText, 10))
 
   // ── Event title (may wrap) ────────────────────────────────────────────
   cursorY -= 46
