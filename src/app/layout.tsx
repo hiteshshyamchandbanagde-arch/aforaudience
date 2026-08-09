@@ -1,9 +1,25 @@
 import type { Metadata, Viewport } from "next";
+import { Newsreader, Manrope, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
 import SupportWidget from "@/components/SupportWidget";
+
+// Real webfonts, not system-font fallbacks. "Georgia, serif" /
+// "monospace" everywhere was a big part of why the site read as
+// generic/templated (BUG-2607-036) - a designed typeface is one of the
+// highest-leverage things separating "looks default" from "looks
+// premium." Exposed as CSS custom properties so any component can opt
+// in via var(--font-display) etc. without importing next/font itself.
+// Newsreader = editorial serif (optically sized, real italics) for
+// headlines. Manrope = warm geometric sans for body/UI. IBM Plex Mono
+// = has actual character vs. generic monospace, for
+// eyebrows/labels/stats. Currently wired into the homepage only -
+// platform-wide rollout is the natural next slice of FEAT-2607-028.
+const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-display", style: ["normal", "italic"], display: "swap" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
@@ -126,7 +142,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className={`${newsreader.variable} ${manrope.variable} ${plexMono.variable}`}>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.

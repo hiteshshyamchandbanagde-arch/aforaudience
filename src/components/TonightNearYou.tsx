@@ -82,15 +82,26 @@ export default function TonightNearYou() {
   return (
     <div style={{ background: 'var(--afa-ink)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
-        <h4 style={{ fontFamily: 'Georgia, serif', fontSize: '14px', margin: 0 }}>{tr.homePage.tonightRailHeading}</h4>
-        <span style={{ fontFamily: 'monospace', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
+        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '14px', margin: 0 }}>{tr.homePage.tonightRailHeading}</h4>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
       </div>
 
       {events === null && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} style={{ height: '38px', borderRadius: '6px', background: 'rgba(247,243,238,0.06)' }} />
+            <div
+              key={i}
+              style={{
+                height: '38px',
+                borderRadius: '6px',
+                background: 'linear-gradient(90deg, rgba(247,243,238,0.05) 0%, rgba(247,243,238,0.12) 50%, rgba(247,243,238,0.05) 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'railShimmer 1.6s ease-in-out infinite',
+                animationDelay: `${i * 120}ms`,
+              }}
+            />
           ))}
+          <style>{`@keyframes railShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
         </div>
       )}
 
@@ -109,13 +120,15 @@ export default function TonightNearYou() {
             <Link
               key={ev.id}
               href={`/events/${ev.id}`}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 0', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: '6px', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(247,243,238,0.05)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
-                <div style={{ fontSize: '10px', color: '#a89880' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
+                <div style={{ fontSize: '10px', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--afa-terracotta)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-terracotta)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(ev.date, ev.startTime)}
               </div>
             </Link>
@@ -125,16 +138,16 @@ export default function TonightNearYou() {
 
       <div style={{ display: 'flex', gap: '20px', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.15)' }}>
         <div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700 }}>2,400+</div>
-          <div style={{ fontFamily: 'monospace', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statArtists}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>2,400+</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statArtists}</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700 }}>840+</div>
-          <div style={{ fontFamily: 'monospace', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statEventsMonthly}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>840+</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statEventsMonthly}</div>
         </div>
         <div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700 }}>120+</div>
-          <div style={{ fontFamily: 'monospace', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statCities}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700 }}>120+</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: '#a89880', textTransform: 'uppercase' }}>{tr.homePage.statCities}</div>
         </div>
       </div>
     </div>
