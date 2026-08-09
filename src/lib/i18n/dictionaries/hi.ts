@@ -694,7 +694,7 @@ const hi: Dictionary = {
     statArtists: "कलाकार",
     statEventsMonthly: "मासिक इवेंट्स",
     statCities: "शहर",
-    heroIssueTag: "अंक №1 · जीवंत कला, असली पल",
+    heroIssueTag: "जीवंत कला, असली पल",
     heroInlineCtaPrefix: "शुरू करें ",
     heroInlineCtaLink: "आज रात के शो →",
     heroInlineCtaOr: " या ",
