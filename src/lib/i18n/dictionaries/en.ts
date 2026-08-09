@@ -739,6 +739,7 @@ const en = {
     artistsRailBadge: "Performing soon",
     artistsRailEmpty: "No upcoming performers to show just yet — check back soon.",
     artistsRailCityFallbackNote: "No one near you yet — here's who's performing soonest, anywhere.",
+    artistsRailApplyCta: "Want to be featured here? Apply as an artist",
     tickerOpenMicMumbai: "Open Mic — Mumbai Tonight",
     tickerPoetryDelhi: "Poetry Slam — Delhi Saturday",
     tickerStandUpBangalore: "Stand Up Special — Bangalore",

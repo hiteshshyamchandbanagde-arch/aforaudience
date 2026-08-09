@@ -708,6 +708,7 @@ const hi: Dictionary = {
     artistsRailBadge: "जल्द प्रस्तुति",
     artistsRailEmpty: "अभी दिखाने के लिए कोई आगामी कलाकार नहीं है — जल्द ही फिर देखें।",
     artistsRailCityFallbackNote: "आपके पास अभी कोई नहीं है — यहां सबसे जल्दी प्रस्तुति देने वाला कलाकार है, कहीं भी हो।",
+    artistsRailApplyCta: "यहां दिखना चाहते हैं? कलाकार के रूप में आवेदन करें",
     tickerOpenMicMumbai: "ओपन माइक — मुंबई आज रात",
     tickerPoetryDelhi: "पोएट्री स्लैम — दिल्ली शनिवार",
     tickerStandUpBangalore: "स्टैंड अप स्पेशल — बैंगलोर",
