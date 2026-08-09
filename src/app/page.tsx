@@ -4,6 +4,8 @@ import SiteNav from "@/components/SiteNav";
 import TonightNearYou from "@/components/TonightNearYou";
 import HeroRotator from "@/components/HeroRotator";
 import MoodThemeSection from "@/components/MoodThemeSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
+import RolesSection from "@/components/RolesSection";
 import { useLocale } from "@/lib/i18n/translate";
 
 export default function Home() {
@@ -90,90 +92,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* HOW IT WORKS */}
-      <section style={{ padding: "100px 48px", background: "white" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
-          {tr.homePage.howItWorksEyebrow}
-        </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "56px" }}>
-          {tr.homePage.howItWorksHeadingPrefix}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.howItWorksHeadingEmphasis}</em>
-        </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "2px" }}>
-          {[
-            { num: "01", icon: "🔍", title: tr.homePage.stepDiscoverTitle, desc: tr.homePage.stepDiscoverDesc },
-            { num: "02", icon: "🎟️", title: tr.homePage.stepBookTitle, desc: tr.homePage.stepBookDesc },
-            { num: "03", icon: "📲", title: tr.homePage.stepTicketTitle, desc: tr.homePage.stepTicketDesc },
-            { num: "04", icon: "⭐", title: tr.homePage.stepRateTitle, desc: tr.homePage.stepRateDesc },
-          ].map((step) => (
-            <div key={step.num} style={{ background: "var(--afa-cream)", padding: "40px 32px" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "72px", fontWeight: 800, color: "var(--afa-terracotta)", opacity: 0.12, lineHeight: 1, marginBottom: "20px", letterSpacing: "-3px" }}>{step.num}</div>
-              <div style={{ fontSize: "36px", marginBottom: "16px" }}>{step.icon}</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{step.title}</div>
-              <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6 }}>{step.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <HowItWorksSection />
 
-      {/* ROLES */}
-      <section style={{ padding: "100px 48px", background: "var(--afa-cream)" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
-          {tr.homePage.rolesEyebrow}
-        </div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
-          {tr.homePage.rolesHeadingLine1}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.rolesHeadingLine2Emphasis}</em>
-        </h2>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
-          {tr.homePage.rolesSubtitle}
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
-          {[
-            {
-              icon: "👥", name: tr.roles.AUDIENCE, tag: tr.homePage.audienceTag,
-              pitch: tr.homePage.audiencePitch,
-              benefits: [tr.homePage.audienceBenefit1, tr.homePage.audienceBenefit2, tr.homePage.audienceBenefit3],
-              cta: tr.homePage.audienceCta, href: "/events",
-            },
-            {
-              icon: "🎤", name: tr.roles.ARTIST, tag: tr.homePage.artistTag,
-              pitch: tr.homePage.artistPitch,
-              benefits: [tr.homePage.artistBenefit1, tr.homePage.artistBenefit2, tr.homePage.artistBenefit3],
-              cta: tr.homePage.artistCta, href: "/profile",
-            },
-            {
-              icon: "🎪", name: tr.roles.ORGANISER, tag: tr.homePage.organiserTag,
-              pitch: tr.homePage.organiserPitch,
-              benefits: [tr.homePage.organiserBenefit1, tr.homePage.organiserBenefit2, tr.homePage.organiserBenefit3],
-              cta: tr.homePage.organiserCta, href: "/profile",
-            },
-            {
-              icon: "🏛️", name: tr.roles.VENUE_OWNER, tag: tr.homePage.venueOwnerTag,
-              pitch: tr.homePage.venueOwnerPitch,
-              benefits: [tr.homePage.venueOwnerBenefit1, tr.homePage.venueOwnerBenefit2, tr.homePage.venueOwnerBenefit3],
-              cta: tr.homePage.venueOwnerCta, href: "/profile",
-            },
-          ].map((role) => (
-            <div key={role.name} style={{ border: "1.5px solid rgba(14,12,10,0.1)", borderRadius: "12px", padding: "32px 28px", display: "flex", flexDirection: "column" }}>
-              <div style={{ fontSize: "36px", marginBottom: "16px" }}>{role.icon}</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "19px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>{role.name}</div>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", padding: "3px 9px", borderRadius: "4px", background: "var(--afa-mist)", color: "var(--afa-ink)", opacity: 0.7, alignSelf: "flex-start", marginBottom: "16px" }}>{role.tag}</span>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "15px", fontStyle: "italic", color: "var(--afa-terracotta)", lineHeight: 1.5, marginBottom: "18px" }}>{role.pitch}</div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
-                {role.benefits.map((b) => (
-                  <li key={b} style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65, lineHeight: 1.5, display: "flex", gap: "8px" }}>
-                    <span style={{ color: "var(--afa-terracotta)", flexShrink: 0 }}>✓</span>{b}
-                  </li>
-                ))}
-              </ul>
-              <Link href={role.href} style={{ fontFamily: "var(--font-sans)", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                {role.cta} →
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+      <RolesSection />
 
       <MoodThemeSection />
 
