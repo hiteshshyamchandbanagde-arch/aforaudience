@@ -2,6 +2,7 @@
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import TonightNearYou from "@/components/TonightNearYou";
+import HeroRotator from "@/components/HeroRotator";
 import MoodThemeSection from "@/components/MoodThemeSection";
 import { useLocale } from "@/lib/i18n/translate";
 
@@ -58,6 +59,23 @@ export default function Home() {
           <div className="hero-fade-2" style={{ flex: "0.85 1 360px", padding: "48px 32px", display: "flex", alignItems: "center" }}>
             <TonightNearYou />
           </div>
+        </div>
+      </section>
+
+      {/* FOR ARTISTS SHOWCASE — restored. This was wrongly dropped when
+          HeroRotator was pulled out of the hero for the Editorial Split
+          rebuild (PR #394) - it's not just a visual asset, it's the
+          artist-recruitment message ("Your best performance, featured
+          here") with real photo/video content, which the homepage
+          shouldn't have lost. Kept as its own strip rather than folded
+          back into the two-column hero, since cramming it back in would
+          undo Editorial Split's mobile-safety property (no
+          overlap/rotation to collapse, same structure at every width) -
+          this is a full-width block instead, so it doesn't compete with
+          either hero column. */}
+      <section style={{ padding: "0 48px 64px" }}>
+        <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
+          <HeroRotator />
         </div>
       </section>
 
