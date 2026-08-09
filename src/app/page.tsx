@@ -31,7 +31,7 @@ export default function Home() {
           headline column shrinks from ~55% width to ~⅓, so its clamp()
           ceiling comes down too (88px -> 60px) - otherwise "finds its /
           Crowd" would wrap wrong at the new column width. */}
-      <section style={{ padding: "0", position: "relative" }}>
+      <section style={{ padding: "28px 0 0", position: "relative" }}>
         {/* Subtle grain overlay - self-contained inline SVG noise, no
             asset/network dependency. Flat color fields (even good ones)
             read as "digital default" without any texture; a faint grain
