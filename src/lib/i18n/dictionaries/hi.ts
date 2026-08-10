@@ -553,6 +553,12 @@ const hi: Dictionary = {
     refund14PlusTemplate: "₹{amount} रिफंड (14+ दिन शेष)",
     refund50PercentTemplate: "₹{amount} रिफंड - 50% (7-14 दिन शेष)",
     refundLessThan7Days: "कोई रिफंड नहीं - 7 दिन से कम शेष",
+    sectionToday: "आज",
+    sectionThisWeekend: "इस सप्ताहांत",
+    sectionUpcoming: "आगामी",
+    sectionPast: "पिछले",
+    attendedPill: "उपस्थित रहे",
+    missedPill: "छूट गया",
   },
   authCommon: {
     somethingWentWrong: "कुछ गड़बड़ हो गई",

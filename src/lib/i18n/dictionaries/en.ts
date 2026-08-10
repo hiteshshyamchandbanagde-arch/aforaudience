@@ -578,6 +578,13 @@ const en = {
     refund14PlusTemplate: "₹{amount} refund (14+ days out)",
     refund50PercentTemplate: "₹{amount} refund - 50% (7-14 days out)",
     refundLessThan7Days: "No refund - less than 7 days out",
+    // FEAT-2608-006 - date-based sections so tickets aren't one flat list.
+    sectionToday: "Today",
+    sectionThisWeekend: "This weekend",
+    sectionUpcoming: "Upcoming",
+    sectionPast: "Past",
+    attendedPill: "Attended",
+    missedPill: "Missed",
   },
   authCommon: {
     somethingWentWrong: "Something went wrong",
