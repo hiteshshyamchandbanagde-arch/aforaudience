@@ -639,6 +639,7 @@ const en = {
   registerPage: {
     verifyMobileSubtitle: "Verify your mobile number",
     createAccountSubtitle: "Create your account",
+    createAccountSubtitleForRoleTemplate: "Create your {role} account",
     enterCodeLabelTemplate: "Enter 6-digit code sent to {phone}",
     verifyButton: "Verify",
     fullNameLabel: "Full Name",
