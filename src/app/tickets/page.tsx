@@ -48,6 +48,10 @@ interface BookingItem {
   createdAt: string
   cancelledAt: string | null
   refundAmount: number | null
+  // FEAT-2608-006 - already returned by /api/bookings/my (Booking is a
+  // full-scalar `include`, not a `select`), just never surfaced in the
+  // UI before. Used to split the Past section into attended/missed.
+  checkedInAt: string | null
   // Session 65 (Hitesh feedback) - who's tagged on this booking + their
   // response status, same PENDING/ACCEPTED/DECLINED shape as checkout.
   companionTags: {
@@ -105,6 +109,23 @@ function eventStartInstant(b: BookingItem): Date {
 // reject on click.
 function isPastEvent(b: BookingItem): boolean {
   return eventStartInstant(b).getTime() <= Date.now()
+}
+
+// FEAT-2608-006 - date-based sections (Today / This weekend / Upcoming /
+// Past) instead of one flat list. "This weekend" means the next Sat or
+// Sun within the coming 7 days - matches how people actually think about
+// "this weekend" rather than a fixed Mon-Sun calendar week.
+type TicketSection = 'today' | 'weekend' | 'upcoming' | 'past'
+
+function getSection(b: BookingItem): TicketSection {
+  const start = eventStartInstant(b)
+  const now = new Date()
+  if (start.getTime() <= now.getTime()) return 'past'
+  if (start.toDateString() === now.toDateString()) return 'today'
+  const diffDays = (start.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+  const day = start.getDay() // 0 = Sun, 6 = Sat
+  if (diffDays <= 7 && (day === 0 || day === 6)) return 'weekend'
+  return 'upcoming'
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
@@ -327,18 +348,56 @@ export default function MyTicketsPage() {
               {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
-            bookings.map((b) => {
+            (['today', 'weekend', 'upcoming', 'past'] as TicketSection[]).map((section) => {
+              const items = bookings.filter((b) => getSection(b) === section)
+              if (items.length === 0) return null
+              const heading = {
+                today: tr.ticketsPage.sectionToday,
+                weekend: tr.ticketsPage.sectionThisWeekend,
+                upcoming: tr.ticketsPage.sectionUpcoming,
+                past: tr.ticketsPage.sectionPast,
+              }[section]
+              return (
+                <div key={section} style={{ marginBottom: '24px' }}>
+                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+                    {heading}
+                  </h2>
+                  {items.map((b) => renderCard(b))}
+                </div>
+              )
+            })
+          )}
+        </div>
+      </main>
+    </>
+  )
+
+  // Extracted so the four date-sections above can share one card
+  // renderer instead of duplicating this JSX per bucket.
+  function renderCard(b: BookingItem) {
               const eff = effectiveStatus(b)
               const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
               const isLivePending = eff === 'PENDING'
+              const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
               return (
                 <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', textDecoration: 'none' }}>
                       {b.event.title}
                     </Link>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
-                      {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
+                    <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
+                        {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
+                      </span>
+                      {showAttendancePill && (
+                        <span style={{
+                          fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
+                          background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(14,12,10,0.08)',
+                          color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-ink)',
+                        }}>
+                          {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
+                        </span>
+                      )}
                     </span>
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
@@ -414,10 +473,5 @@ export default function MyTicketsPage() {
                   )}
                 </div>
               )
-            })
-          )}
-        </div>
-      </main>
-    </>
-  )
+  }
 }
