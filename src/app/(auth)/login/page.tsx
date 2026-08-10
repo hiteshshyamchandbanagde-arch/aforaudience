@@ -21,8 +21,16 @@ function LoginForm() {
   // started from a specific "Join As X" link, land the person on
   // Profile (where the "Become an X" application cards live) instead of
   // the generic homepage, which had no memory of why they signed up.
+  //
+  // GEN-2608-036 correction (caught in live click-test): this used to
+  // push to plain "/profile" - the role decided WHETHER to redirect
+  // there but the actual value never made it into the URL, so /profile's
+  // own highlight/auto-focus effect (which reads ?role=) had nothing to
+  // read. Registered fine, verified fine, then landed on a completely
+  // generic profile page with no highlighted card and nothing focused -
+  // exactly what was reported. Now forwards the value.
   const intendedRole = searchParams.get("role")
-  const postLoginRedirect = () => router.push(intendedRole ? "/profile" : "/")
+  const postLoginRedirect = () => router.push(intendedRole ? `/profile?role=${intendedRole}` : "/")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [identifier, setIdentifier] = useState("")
