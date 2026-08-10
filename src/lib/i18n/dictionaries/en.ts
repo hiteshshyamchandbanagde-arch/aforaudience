@@ -640,6 +640,7 @@ const en = {
     verifyMobileSubtitle: "Verify your mobile number",
     createAccountSubtitle: "Create your account",
     createAccountSubtitleForRoleTemplate: "Create your {role} account",
+    roleConfirmationTemplate: "Signing up as {role} — you'll complete your application from your profile next.",
     enterCodeLabelTemplate: "Enter 6-digit code sent to {phone}",
     verifyButton: "Verify",
     fullNameLabel: "Full Name",

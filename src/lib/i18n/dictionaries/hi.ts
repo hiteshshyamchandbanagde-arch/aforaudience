@@ -609,6 +609,7 @@ const hi: Dictionary = {
     verifyMobileSubtitle: "अपना मोबाइल नंबर सत्यापित करें",
     createAccountSubtitle: "अपना खाता बनाएं",
     createAccountSubtitleForRoleTemplate: "अपना {role} खाता बनाएं",
+    roleConfirmationTemplate: "{role} के रूप में साइन अप कर रहे हैं — इसके बाद आप अपनी प्रोफ़ाइल से आवेदन पूरा करेंगे।",
     enterCodeLabelTemplate: "{phone} पर भेजा गया 6 अंकों का कोड डालें",
     verifyButton: "सत्यापित करें",
     fullNameLabel: "पूरा नाम",

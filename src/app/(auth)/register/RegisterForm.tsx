@@ -509,6 +509,21 @@ export default function RegisterForm() {
             </div>
           </div>
 
+          {/* GEN-2608-038: reinforces intent right at the commit point
+              (Hitesh's suggestion, live-testing) instead of only at the
+              top of the form. Deliberately non-interactive and phrased as
+              "you'll complete your application after this step" - every
+              registration creates an AUDIENCE account regardless of
+              intendedRole (see route.ts), so this must never read as a
+              choice of account type. Reuses intendedRoleLabel from the
+              subtitle above (#415); only renders when a role param was
+              recognized. */}
+          {intendedRoleLabel && (
+            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65 }}>
+              {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
+            </p>
+          )}
+
           <button
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken"}
