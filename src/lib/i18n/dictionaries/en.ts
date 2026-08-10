@@ -642,6 +642,8 @@ const en = {
     failedSignInError: "Failed to sign in. Please check your credentials.",
     couldNotSendCodeError: "Could not send code.",
     invalidOrExpiredCodeError: "Invalid or expired code.",
+    orDivider: "or",
+    continueWithGoogle: "Continue with Google",
   },
   registerPage: {
     verifyMobileSubtitle: "Verify your mobile number",

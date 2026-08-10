@@ -1,9 +1,12 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcrypt from "bcryptjs"
+import { randomUUID } from "crypto"
 import { prisma } from "@/lib/prisma"
 import { resolveIdentifierToUser } from "@/lib/auth-helpers"
+import { suggestAvailableUsername } from "@/lib/auth-helpers"
 import { verifyOtp } from "@/lib/otp"
 
 const LOCKOUT_THRESHOLD = 5
@@ -14,8 +17,42 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000 // 15 minutes
 // response timing from being a trivial way to enumerate accounts.
 const DUMMY_HASH = bcrypt.hashSync("aforaudience-timing-guard", 12)
 
+// QST-2607-009 (10 Aug) - the default PrismaAdapter.createUser only ever
+// receives {email, name, image} from Google and would pass that straight
+// to prisma.user.create - which fails outright here: `password` is a
+// required column (no OAuth-only accounts in this schema) and `name`
+// doubles as the unique, format-constrained login username (3-20 chars,
+// [a-zA-Z0-9_]), not a free-text display name like "Priya Sharma". This
+// override only fires for a genuinely new email (returning users resolve
+// via getUserByAccount/getUserByEmail before createUser is ever called,
+// see allowDangerousEmailAccountLinking below) - reuses the same
+// suggestAvailableUsername() the manual signup flow's username-suggestions
+// endpoint already uses, and the same "new account defaults to Audience,
+// pre-approved, phone unverified" shape as /api/auth/register. The random
+// password hash is intentionally never returned to the user anywhere -
+// only "Forgot password" can ever produce a usable one for this account.
+const prismaAdapter = PrismaAdapter(prisma) as any
+const adapter = {
+  ...prismaAdapter,
+  createUser: async (data: { email: string; name?: string | null; image?: string | null }) => {
+    const username = await suggestAvailableUsername(data.name || data.email.split("@")[0])
+    return prisma.user.create({
+      data: {
+        name: username,
+        displayName: data.name || null,
+        email: data.email,
+        avatar: data.image || null,
+        password: bcrypt.hashSync(randomUUID(), 12),
+        role: "AUDIENCE",
+        isApproved: true,
+        isVerified: false,
+      },
+    })
+  },
+}
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter,
   providers: [
     CredentialsProvider({
       id: "credentials",
@@ -134,7 +171,27 @@ export const authOptions: NextAuthOptions = {
           phone: user.phone,
         }
       }
-    })
+    }),
+    // QST-2607-009 (10 Aug) - Google Sign-In, additive alongside credentials/OTP,
+    // not a replacement. Conditionally included so a QA/preview environment
+    // without GOOGLE_CLIENT_ID/SECRET set yet still boots normally with the
+    // other two providers - the login page only renders the Google button
+    // when NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED is set (see login page), so
+    // there's no dead button pointing at a disabled provider either.
+    // allowDangerousEmailAccountLinking is safe specifically because Google
+    // itself verifies the email before ever handing it to us - an existing
+    // credentials-registered account with the same email gets linked, not
+    // duplicated. Never enable this flag for a provider that doesn't
+    // guarantee email verification.
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async jwt({ token, user }) {
