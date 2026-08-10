@@ -22,13 +22,19 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
   venue: 'VENUE_OWNER',
 }
 
-const cardStyle = {
+// GEN-2608-036: `active` highlights the card someone was routed to via
+// the ?role= carry-through (see the useEffect below) - a visible cue that
+// this is the specific application they came here for, not just wherever
+// scrollIntoView happened to land them.
+const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-white)',
   borderRadius: '12px',
   padding: '24px',
-  border: '1px solid rgba(14,12,10,0.08)',
+  border: active ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',
+  boxShadow: active ? '0 0 0 4px rgba(196,90,54,0.12)' : 'none',
   marginBottom: '16px',
-}
+  transition: 'border-color 400ms ease, box-shadow 400ms ease',
+})
 
 function ProfileContent() {
   const { t: tr } = useLocale()
@@ -40,11 +46,33 @@ function ProfileContent() {
   // redirect's ?role= carry-through (originating from a landing-page
   // "Join As X" link), scroll straight to that application card instead
   // of leaving them to find it among three on the page themselves.
+  //
+  // GEN-2608-036: neither apply action can be fully automatic - Artist
+  // needs a genre pick, Organiser needs an org name, and even Venue
+  // Owner (no required field) shouldn't silently submit from a link
+  // click with no confirming action from the person. So this gets as
+  // close to "direct apply" as real required input allows: highlight
+  // the exact card (2.5s glow, cleared after) and focus its first
+  // input/button so the very next thing the person does is fill that
+  // one field and hit the button, instead of scanning three cards to
+  // find the one they meant.
+  const [highlightedCard, setHighlightedCard] = useState<'artist' | 'organiser' | 'venue' | null>(null)
   useEffect(() => {
     const role = searchParams.get('role')
-    if (!role) return
+    if (role !== 'artist' && role !== 'organiser' && role !== 'venue') return
     const el = document.getElementById(`apply-${role}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setHighlightedCard(role)
+    const focusTimer = setTimeout(() => {
+      const focusable = el.querySelector<HTMLElement>('input, button')
+      focusable?.focus()
+    }, 500)
+    const clearTimer = setTimeout(() => setHighlightedCard(null), 2500)
+    return () => {
+      clearTimeout(focusTimer)
+      clearTimeout(clearTimer)
+    }
   }, [searchParams])
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
@@ -445,7 +473,7 @@ function ProfileContent() {
           {/* Display name — separate from the login username. Shows on
               tickets, emails, and greetings. Falls back to username if
               blank, so existing users see no change until they set one. */}
-          <div style={cardStyle}>
+          <div style={cardStyle()}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               {tr.profilePage.displayNameHeading}
             </h2>
@@ -494,7 +522,7 @@ function ProfileContent() {
               design.md §9.5). Never required. Shown wherever this
               account's name/photo already surface publicly, e.g.
               ratings and feedback on events. */}
-          <div style={cardStyle}>
+          <div style={cardStyle()}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               {tr.profilePage.aboutYouHeading}
             </h2>
@@ -541,7 +569,7 @@ function ProfileContent() {
           {/* Display-only currency preference (Option A). Real settlement
               stays INR always - this only changes how amounts are shown
               to this user (event prices, checkout totals). */}
-          <div style={cardStyle}>
+          <div style={cardStyle()}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               {tr.profilePage.displayCurrencyHeading}
             </h2>
@@ -579,7 +607,7 @@ function ProfileContent() {
           </div>
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
-          <div id="apply-artist" style={cardStyle}>
+          <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
             <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.artistUpgradeDesc}
             </p>
@@ -603,7 +631,7 @@ function ProfileContent() {
           </div>
 
           {/* Organiser upgrade */}
-          <div id="apply-organiser" style={cardStyle}>
+          <div id="apply-organiser" style={cardStyle(highlightedCard === 'organiser')}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               {tr.profilePage.becomeOrganiserHeading}
             </h2>
@@ -634,7 +662,7 @@ function ProfileContent() {
           </div>
 
           {/* Venue Owner upgrade */}
-          <div id="apply-venue" style={cardStyle}>
+          <div id="apply-venue" style={cardStyle(highlightedCard === 'venue')}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
               {tr.profilePage.listVenueHeading}
             </h2>
@@ -666,7 +694,7 @@ function ProfileContent() {
             href="/my-feedback"
             style={{
               display: 'block',
-              ...cardStyle,
+              ...cardStyle(),
               textDecoration: 'none',
               color: 'inherit',
             }}
