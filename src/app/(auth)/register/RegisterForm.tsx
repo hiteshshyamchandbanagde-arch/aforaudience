@@ -28,6 +28,17 @@ export default function RegisterForm() {
   // dropping them on the generic homepage with no memory of why they came.
   const searchParams = useSearchParams()
   const intendedRole = searchParams.get("role")
+  // GEN-2608-037: the subtitle below stayed generic ("Create your
+  // account") regardless of which "Join As X" link brought someone here -
+  // no visible acknowledgment that the click did anything, even though
+  // intendedRole was already being captured and carried through to
+  // /profile (Hitesh, live click-test). Maps the URL value to the same
+  // role labels already used in the footer links themselves.
+  const intendedRoleLabel: string | null =
+    intendedRole === "artist" ? tr.roles.ARTIST :
+    intendedRole === "organiser" ? tr.roles.ORGANISER :
+    intendedRole === "venue" ? tr.roles.VENUE_OWNER :
+    null
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string; username?: string }>({})
@@ -310,7 +321,9 @@ export default function RegisterForm() {
             <EnvBadge />
           </Link>
           <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
-            {tr.registerPage.createAccountSubtitle}
+            {intendedRoleLabel
+              ? tr.registerPage.createAccountSubtitleForRoleTemplate.replace('{role}', intendedRoleLabel)
+              : tr.registerPage.createAccountSubtitle}
           </p>
         </div>
 

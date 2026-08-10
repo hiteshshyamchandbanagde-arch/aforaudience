@@ -608,6 +608,7 @@ const hi: Dictionary = {
   registerPage: {
     verifyMobileSubtitle: "अपना मोबाइल नंबर सत्यापित करें",
     createAccountSubtitle: "अपना खाता बनाएं",
+    createAccountSubtitleForRoleTemplate: "अपना {role} खाता बनाएं",
     enterCodeLabelTemplate: "{phone} पर भेजा गया 6 अंकों का कोड डालें",
     verifyButton: "सत्यापित करें",
     fullNameLabel: "पूरा नाम",
