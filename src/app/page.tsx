@@ -3,7 +3,6 @@ import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import NearYouTabs from "@/components/NearYouTabs";
 import HeroRotator from "@/components/HeroRotator";
-import MoodThemeSection from "@/components/MoodThemeSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import RolesSection from "@/components/RolesSection";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
@@ -86,7 +85,6 @@ export default function Home() {
 
       <RolesSection />
 
-      <MoodThemeSection />
 
       {/* FOOTER */}
       <footer style={{ background: "var(--afa-ink)", color: "var(--afa-cream)", padding: "64px 48px 32px" }}>
