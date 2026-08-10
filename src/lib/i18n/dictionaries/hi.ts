@@ -610,6 +610,8 @@ const hi: Dictionary = {
     failedSignInError: "साइन इन नहीं हो सका। कृपया अपनी जानकारी जांचें।",
     couldNotSendCodeError: "कोड नहीं भेजा जा सका।",
     invalidOrExpiredCodeError: "कोड गलत है या समय समाप्त हो गया।",
+    orDivider: "या",
+    continueWithGoogle: "Google से जारी रखें",
   },
   registerPage: {
     verifyMobileSubtitle: "अपना मोबाइल नंबर सत्यापित करें",
