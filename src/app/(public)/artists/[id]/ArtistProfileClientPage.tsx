@@ -129,6 +129,19 @@ export default function ArtistProfilePage({
   const prevArtistId = navOrder && navIndex > 0 ? navOrder[navIndex - 1] : null
   const nextArtistId = navOrder && navIndex >= 0 && navIndex < navOrder.length - 1 ? navOrder[navIndex + 1] : null
 
+  // BUG-2608-025 (10 Aug) - each prev/next hop took 2-3s. Two causes, both
+  // fixed together: (1) the server page did 4 sequential DB round-trips
+  // per artist (see page.tsx) with no parallelization, and (2) router.push
+  // alone doesn't prefetch the way <Link> does, so every hop paid the
+  // full RSC fetch+render cost with nothing pre-warmed. Prefetching both
+  // neighbors as soon as they're known means the RSC payload for whichever
+  // one gets clicked is usually already in flight or cached by the time
+  // the person acts.
+  useEffect(() => {
+    if (prevArtistId) router.prefetch(`/artists/${prevArtistId}`)
+    if (nextArtistId) router.prefetch(`/artists/${nextArtistId}`)
+  }, [prevArtistId, nextArtistId, router])
+
   const goToPrevArtist = () => {
     if (navigating || !prevArtistId) return
     setNavigating(true)
