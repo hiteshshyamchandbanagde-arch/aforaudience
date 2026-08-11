@@ -20,13 +20,28 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     },
   })
 
+  // BUG-2608-025 (10 Aug) - these 3 queries were previously sequential
+  // (followerCount, then checkedInBookings, then sceneStatus), each
+  // paying its own round-trip on every prev/next hop. followerCount only
+  // needs `id` (not the artist result), and checkedInBookings/sceneStatus
+  // only need artist.id/performances, which are already resolved above -
+  // none of the three depend on each other, so they run concurrently.
+  const eventIds = artist ? [...new Set(artist.performances.map((p: { eventId: string }) => p.eventId))] : []
+  const [followerCount, checkedInBookings, sceneStatus] = await Promise.all([
+    artist ? prisma.follow.count({ where: { targetType: 'ARTIST', targetId: id } }) : Promise.resolve(0),
+    eventIds.length
+      ? prisma.booking.findMany({
+          where: { eventId: { in: eventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
+          select: { userId: true, eventId: true },
+        })
+      : Promise.resolve([]),
+    artist ? getSceneStatus(artist.id) : Promise.resolve(null),
+  ])
+
   // Follow is now polymorphic (Artist/Venue/Organiser share one table), so
   // there's no more direct Artist.followers relation to count via _count -
   // computed separately and folded into the same _count shape the client
   // component already expects.
-  const followerCount = artist
-    ? await prisma.follow.count({ where: { targetType: 'ARTIST', targetId: id } })
-    : 0
 
   // Verified/Repeat Attendees (reputation epic §3) - live-computed per
   // Hitesh's decision (session 53). Distinct AUDIENCE ACCOUNTS with a
@@ -41,13 +56,6 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   // attendance - naming it "Verified" rather than "Watched" is
   // deliberately honest about this until §7 Phase 2 (per-seat check-in)
   // closes the gap.
-  const eventIds = artist ? [...new Set(artist.performances.map((p: { eventId: string }) => p.eventId))] : []
-  const checkedInBookings = eventIds.length
-    ? await prisma.booking.findMany({
-        where: { eventId: { in: eventIds }, status: 'CONFIRMED', checkedInAt: { not: null } },
-        select: { userId: true, eventId: true },
-      })
-    : []
   const attendeeEventsByUser = new Map<string, Set<string>>()
   for (const b of checkedInBookings) {
     if (!attendeeEventsByUser.has(b.userId)) attendeeEventsByUser.set(b.userId, new Set())
@@ -58,8 +66,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
 
   // Scene Status (reputation epic §1, amended session 55) - live-computed,
   // same architectural choice as Verified/Repeat Attendees above. See
-  // src/lib/scene-status.ts.
-  const sceneStatus = artist ? await getSceneStatus(artist.id) : null
+  // src/lib/scene-status.ts. Now fetched in the Promise.all above.
 
   const artistWithFollowers = artist
     ? { ...artist, _count: { ...artist._count, followers: followerCount }, verifiedAttendees, repeatAttendees }
