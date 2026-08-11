@@ -306,3 +306,16 @@
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
+
+/* FEAT-2608-044 - the Venues/Artists card grids use role="link" divs for
+   the click-guard pattern (PR #261/#312), which get no visible focus ring
+   by default the way a real <a> would. Scoped to .afa-focusable rather
+   than every role="link" site-wide, to stay within this ticket's scope. */
+.afa-focusable:focus-visible {
+  outline: 2px solid var(--afa-terracotta);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift-card { transition: none; }
+  .hover-lift-card:hover { transform: none; }
+}
