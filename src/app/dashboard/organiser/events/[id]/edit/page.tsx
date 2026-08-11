@@ -10,7 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
-import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK } from '@/lib/event-terms'
+import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
   id?: string
@@ -60,6 +60,7 @@ interface EventDetail {
   plusOnesRequired: number
   termsChecklist?: string[]
   specialNotes?: string | null
+  ageLimit?: string | null
   specialNotesStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
   specialNotesRejectionReason?: string | null
   defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
@@ -150,6 +151,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   // on every render just because the field has a value.
   const [termsChecklist, setTermsChecklist] = useState<string[]>([])
   const [specialNotes, setSpecialNotes] = useState('')
+  const [ageLimit, setAgeLimit] = useState('')
   const [specialNotesOriginal, setSpecialNotesOriginal] = useState('')
   const [specialNotesStatus, setSpecialNotesStatus] = useState<'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'>('NONE')
   const [specialNotesRejectionReason, setSpecialNotesRejectionReason] = useState<string | null>(null)
@@ -326,6 +328,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setSurpriseAct(data.surpriseAct)
         setTermsChecklist(data.termsChecklist || [])
         setSpecialNotes(data.specialNotes || '')
+        setAgeLimit(data.ageLimit || '')
         setSpecialNotesOriginal(data.specialNotes || '')
         setSpecialNotesStatus(data.specialNotesStatus || 'NONE')
         setSpecialNotesRejectionReason(data.specialNotesRejectionReason || null)
@@ -455,6 +458,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
           termsChecklist,
           specialNotes: specialNotes.trim() || null,
+          ageLimit: ageLimit || null,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -737,6 +741,18 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
                   booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
                 </p>
+
+                <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
+                  <label style={labelStyle}>Age limit</label>
+                  <PresetSelectWithOther
+                    value={ageLimit}
+                    onChange={setAgeLimit}
+                    presets={AGE_LIMIT_PRESETS}
+                    placeholder="e.g., 25+ (ladies free before 9pm)"
+                    inputStyle={inputStyle}
+                  />
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
                   {EVENT_TERMS_CHECKLIST.map((term) => (
                     <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: 'var(--afa-ink)' }}>

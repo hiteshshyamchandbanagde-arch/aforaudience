@@ -1232,6 +1232,18 @@ model Event {
   specialNotesStatus          EventNoteStatus   @default(NONE)
   specialNotesRejectionReason String?
   specialNotesReviewedAt      DateTime?
+
+  // FEAT-2608-045 follow-up (11 Aug) - structured age limit, replacing
+  // the AGE_RESTRICTION checklist checkbox (a plain checkbox couldn't
+  // say WHAT the age limit actually was - an organiser had to fall back
+  // to specialNotes just to say "16+", which meant an extra admin-review
+  // round-trip for something that should just be a dropdown value).
+  // Nullable/optional - "not specified" is the default, same as
+  // dresscode/vibe. Preset options in src/lib/event-terms.ts; "Other"
+  // free text follows the same PresetSelectWithOther pattern already
+  // used for Dress Code/Vibe, so this is just a plain string, not an
+  // enum - keeps the "type your own" escape hatch cheap.
+  ageLimit String?
 }
 
 // Accept-to-Appear (reputation epic §8, session 57) - shared status enum
