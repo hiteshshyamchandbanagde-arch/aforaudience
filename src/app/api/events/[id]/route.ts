@@ -76,7 +76,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
       audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
-      termsChecklist, specialNotes,
+      termsChecklist, specialNotes, ageLimit,
     } = body
 
     // Competition show - prize fields only kept when isCompetitionShow is
@@ -298,6 +298,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             : [],
         }),
         ...(specialNotesUpdate && specialNotesUpdate),
+        ...(ageLimit !== undefined && { ageLimit: ageLimit ? String(ageLimit).trim().slice(0, 60) : null }),
         // Panelists/celebrity (§8, session 57) are deliberately NEVER
         // touched by this general event PATCH anymore, even if a client
         // sent a `panelists` field - the old deleteMany+create full-replace

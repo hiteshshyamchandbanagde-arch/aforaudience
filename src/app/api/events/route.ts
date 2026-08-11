@@ -117,7 +117,7 @@ export async function POST(req: Request) {
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
-      termsChecklist, specialNotes,
+      termsChecklist, specialNotes, ageLimit,
     } = body
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
@@ -342,6 +342,10 @@ export async function POST(req: Request) {
           : [],
         specialNotes: specialNotes ? String(specialNotes).trim().slice(0, SPECIAL_NOTES_MAX_LENGTH) : null,
         specialNotesStatus: specialNotes && String(specialNotes).trim() ? 'PENDING' : 'NONE',
+        // FEAT-2608-045 follow-up - free string, same 60-char cap as the
+        // Dress Code/Vibe "Other" fallback (PresetSelectWithOther), since
+        // this uses the identical preset-or-custom pattern.
+        ageLimit: ageLimit ? String(ageLimit).trim().slice(0, 60) : null,
       },
     })
 

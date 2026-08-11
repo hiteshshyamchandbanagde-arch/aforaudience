@@ -65,6 +65,7 @@ interface EventData {
   termsChecklist?: string[]
   specialNotes?: string | null
   specialNotesStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  ageLimit?: string | null
   venue: { name: string; address: string; city: string; facilities: string[]; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
   organiser: { id: string; orgName: string } | null
   lineup: Performer[]
@@ -406,17 +407,25 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               </div>
 
               {/* FEAT-2608-045 - checklist items the organiser selected at
-                  creation, AFA's platform-wide refund/cancellation policy
-                  (linked, not duplicated - see event-terms.ts), and the
-                  organiser's free-text special note ONLY once admin-
-                  approved. A PENDING/REJECTED note is never shown here -
-                  same principle as the Feedback table never exposing
+                  creation, the structured age limit (follow-up, 11 Aug -
+                  replaces the old AGE_RESTRICTION checkbox so the actual
+                  limit is shown, not just that one exists), AFA's
+                  platform-wide refund/cancellation policy (linked, not
+                  duplicated - see event-terms.ts), and the organiser's
+                  free-text special note ONLY once admin-approved. A
+                  PENDING/REJECTED note is never shown here - same
+                  principle as the Feedback table never exposing
                   unreviewed content publicly. */}
-              {((event.termsChecklist && event.termsChecklist.length > 0) || (event.specialNotesStatus === 'APPROVED' && event.specialNotes)) && (
+              {(event.ageLimit || (event.termsChecklist && event.termsChecklist.length > 0) || (event.specialNotesStatus === 'APPROVED' && event.specialNotes)) && (
                 <div style={{ marginBottom: "32px" }}>
                   <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
                     {tr.eventDetailPage.eventTermsHeading}
                   </h3>
+                  {event.ageLimit && (
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--afa-terracotta)", color: "white", fontSize: "13px", fontWeight: 700, padding: "5px 12px", borderRadius: "6px", marginBottom: "12px" }}>
+                      🔞 {event.ageLimit}
+                    </div>
+                  )}
                   {event.termsChecklist && event.termsChecklist.length > 0 && (
                     <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px", marginBottom: event.specialNotesStatus === 'APPROVED' && event.specialNotes ? "16px" : 0 }}>
                       {EVENT_TERMS_CHECKLIST.filter((t) => event.termsChecklist!.includes(t.key)).map((t) => (

@@ -836,13 +836,11 @@ const en = {
   // (matches every other dashboard-only label) - only the PUBLIC event
   // page actually looks up this translated version.
   eventTermsChecklist: {
-    AGE_RESTRICTION: "Age restriction / valid ID required at entry",
     NO_OUTSIDE_FOOD: "No outside food or beverages",
     NO_RECORDING: "No photography or recording during the show",
     NO_RE_ENTRY: "No re-entry once you've exited",
     LATECOMER_HOLD: "Latecomers seated only at a break/interval",
     BAG_RESTRICTION: "Bag size or prohibited items restriction",
-    DRESS_CODE: "Dress code applies",
     NO_PARKING: "Parking not provided at the venue",
   },
 }
