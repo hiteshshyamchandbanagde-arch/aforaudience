@@ -98,6 +98,21 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
   )
 }
 
-// Same reasoning as venues/page.tsx and events/[id]/page.tsx - no dynamic
-// API is used here otherwise, so force per-request rendering.
-export const dynamic = 'force-dynamic'
+// BUG-2608-025 follow-up (11 Aug, caught live - still 2-3s per hop after
+// PR #420): force-dynamic was the real culprit, not the DB queries.
+// Confirmed via Vercel runtime logs - every prev/next hop showed 2-3
+// duplicate GETs to the same artist page within ~1s of each other. That's
+// router.prefetch() (added in #420) firing a real request ahead of time,
+// then the actual click firing ANOTHER fresh request - because
+// force-dynamic opts this route out of the Router Cache entirely, so the
+// prefetched response could never be reused. The person was still paying
+// the full round-trip on click either way; the prefetch was pure waste.
+//
+// Unlike venues/page.tsx and events/[id]/page.tsx (which genuinely need
+// force-dynamic for live seat availability), nothing on this page is
+// that time-sensitive - bio, tour stops, performance history, and scene
+// status don't need per-request freshness. A short revalidate window
+// lets Next actually cache and reuse the prefetched neighbor pages, so
+// clicking prev/next after landing (the normal case) is instant instead
+// of re-fetching from scratch every time.
+export const revalidate = 30
