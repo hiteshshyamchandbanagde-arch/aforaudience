@@ -47,6 +47,11 @@ export default function EditArtistProfilePage() {
   const [influences, setInfluences] = useState('')
   const [acknowledgments, setAcknowledgments] = useState('')
   const [goals, setGoals] = useState('')
+  // FEAT-2608-047 - each row: city/country required, date/link optional.
+  // Local-only `key` for React list identity - not persisted, since a
+  // fresh id is assigned per row on every load (full-replace save, same
+  // as ticketTiers elsewhere) rather than tracking DB ids client-side.
+  const [tourStops, setTourStops] = useState<{ key: string; city: string; country: string; date: string; link: string }[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -75,6 +80,15 @@ export default function EditArtistProfilePage() {
         setInfluences(data.influences || '')
         setAcknowledgments(data.acknowledgments || '')
         setGoals(data.goals || '')
+        setTourStops(
+          (data.tourStops || []).map((t: any, i: number) => ({
+            key: `${i}-${t.id || Math.random()}`,
+            city: t.city || '',
+            country: t.country || '',
+            date: t.date ? String(t.date).slice(0, 10) : '',
+            link: t.link || '',
+          }))
+        )
 
         if (userRes.ok) {
           const userData = await userRes.json()
@@ -116,6 +130,18 @@ export default function EditArtistProfilePage() {
     }
   }
 
+  // FEAT-2608-047 - simple add/update/remove for the local tour-stop
+  // rows; the actual save (full-replace) happens in save() below.
+  const addTourStop = () => {
+    setTourStops((prev) => [...prev, { key: `new-${Date.now()}-${Math.random()}`, city: '', country: '', date: '', link: '' }])
+  }
+  const updateTourStop = (key: string, field: 'city' | 'country' | 'date' | 'link', value: string) => {
+    setTourStops((prev) => prev.map((t) => (t.key === key ? { ...t, [field]: value } : t)))
+  }
+  const removeTourStop = (key: string) => {
+    setTourStops((prev) => prev.filter((t) => t.key !== key))
+  }
+
   const save = async () => {
     setSaving(true)
     try {
@@ -134,6 +160,9 @@ export default function EditArtistProfilePage() {
             influences,
             acknowledgments,
             goals,
+            tourStops: tourStops
+              .filter((t) => t.city.trim() && t.country.trim())
+              .map((t) => ({ city: t.city.trim(), country: t.country.trim(), date: t.date || null, link: t.link.trim() || null })),
           }),
         }),
         fetch('/api/users/me', {
@@ -258,6 +287,38 @@ export default function EditArtistProfilePage() {
               <label style={labelStyle}>Goals &amp; Ambitions</label>
               <textarea value={goals} onChange={(e) => setGoals(e.target.value)} rows={3} placeholder="Where you want this to go" style={{ ...inputStyle, resize: 'vertical' as const }} />
             </div>
+          </div>
+
+          {/* FEAT-2608-047 (11 Aug) - self-managed tour highlight, so an
+              artist can show they perform beyond Pune/India. Purely
+              informational - not tied to AFA's booking flow, since these
+              shows aren't happening through the platform. */}
+          <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
+            <label style={labelStyle}>Tour</label>
+            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+              Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
+            </p>
+            {tourStops.map((stop) => (
+              <div key={stop.key} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '8px', marginBottom: '10px', alignItems: 'start' }}>
+                <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder="City" style={inputStyle} />
+                <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder="Country" style={inputStyle} />
+                <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
+                <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder="Link (optional)" style={inputStyle} />
+                <button
+                  onClick={() => removeTourStop(stop.key)}
+                  aria-label="Remove tour stop"
+                  style={{ fontSize: '13px', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer' }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={addTourStop}
+              style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1px dashed var(--afa-terracotta)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
+            >
+              + Add tour stop
+            </button>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

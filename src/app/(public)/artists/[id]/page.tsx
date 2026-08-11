@@ -17,6 +17,8 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
       user: { select: { name: true, displayName: true, avatar: true } },
       performances: { include: { event: { include: { venue: true } } } },
       _count: { select: { performances: true } },
+      // FEAT-2608-047 - self-managed tour highlight
+      tourStops: { orderBy: { date: 'asc' } },
     },
   })
 

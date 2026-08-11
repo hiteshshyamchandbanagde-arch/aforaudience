@@ -574,6 +574,7 @@ model Artist {
   applications  Application[]
   performances  Performance[]
   organiserRatings OrganiserArtistRating[]
+  tourStops     ArtistTourStop[]
 
   // Scene Status (reputation epic §1, amended session 55) — Headliner tier
   // is deliberately fully manual, admin-only, no formula/threshold. Admin
@@ -587,6 +588,26 @@ model Artist {
   // tag is meant to be deliberate/earned, worth a lightweight paper trail
   // of why. Not shown publicly, admin-only, same as organiser ratings.
   headlinerNote          String?
+}
+
+// FEAT-2608-047 (11 Aug) - self-managed list of tour stops so an artist
+// can show they perform beyond Pune/India (country, continent, world),
+// distinct from Performance (which is a real AFA-booked event on this
+// platform - a tour stop is informational only, not tied to a booking
+// flow, since those shows aren't happening through AFA). Full-replace on
+// save from the artist edit page, same pattern as Event.ticketTiers -
+// the artist always sends their complete current list, not a diff.
+model ArtistTourStop {
+  id        String    @id @default(cuid())
+  artistId  String
+  artist    Artist    @relation(fields: [artistId], references: [id])
+  city      String
+  country   String
+  date      DateTime?
+  link      String?
+  createdAt DateTime  @default(now())
+
+  @@index([artistId])
 }
 
 enum FollowTargetType {
