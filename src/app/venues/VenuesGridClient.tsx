@@ -3,6 +3,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import { cityLabel } from "@/lib/country-codes"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueItem {
@@ -103,7 +104,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px" }}>
       {filtered.map((v) => {
         const isNavigatingThis = navigatingId === v.id
-        const photo = v.photos && v.photos.length > 0 ? v.photos[0] : null
+        const photo = v.photos?.find((p) => !isPlaceholderImageUrl(p)) || null
         return (
           <div
             key={v.id}
@@ -157,11 +158,16 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             )}
 
             {/* PHOTOGRAPH - venue.photos was fetched but never rendered
-                anywhere on this grid (BUG-2607-036 / FEAT-2608-044); 1118
-                of 1132 approved QA venues have at least one. Falls back to
-                a monogram-on-grain panel (same grain texture as the
-                homepage hero) for the small remainder without one, rather
-                than a broken-image icon or blank space. */}
+                anywhere on this grid (BUG-2607-036 / FEAT-2608-044). Most
+                QA "photos" (1118/1132) turned out to be picsum.photos
+                random-seed placeholders, not real venue photography -
+                caught live (11 Aug) when a Pune convention centre
+                rendered as a New York taxi street. isPlaceholderImageUrl
+                filters those out at the `photo` computation above, so
+                this falls back to the monogram-on-grain panel (same
+                grain texture as the homepage hero) for placeholder or
+                genuinely absent photos alike, rather than showing
+                content that misrepresents the venue. */}
             <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: "var(--afa-maroon-black)", overflow: "hidden" }}>
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element

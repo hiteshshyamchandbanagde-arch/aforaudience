@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
@@ -231,6 +232,12 @@ export default function ArtistsPage() {
             {filtered.map((artist) => {
               const isNavigatingThis = navigatingId === artist.id
               const displayName = artist.user.displayName || artist.user.name
+              // 11 Aug (Hitesh live click-test): 100/408 QA artists have
+              // a GitHub avatars URL as their avatar (dev/test filler,
+              // not a photo) - shown live as Sai Jain's "portrait" being
+              // literally the GitHub mascot. isPlaceholderImageUrl treats
+              // these as no-photo so they fall through to the monogram.
+              const portraitUrl = artist.user.avatar && !isPlaceholderImageUrl(artist.user.avatar) ? artist.user.avatar : null
               return (
                 <div
                   key={artist.id}
@@ -283,16 +290,19 @@ export default function ArtistsPage() {
                   )}
 
                   {/* PORTRAIT - user.avatar was previously shrunk into a
-                      72px circle inside a plum-black header strip; 401 of
-                      408 QA artists actually have one, so it's promoted
-                      to a real portrait photograph (same photo-first
-                      grammar as the redesigned venue card) with the
-                      badge overlaid via a gradient scrim rather than
-                      floating in a header bar. */}
+                      72px circle inside a plum-black header strip. 301 of
+                      401 QA avatars are real uploaded photos, promoted to
+                      a full portrait (same photo-first grammar as the
+                      redesigned venue card) with the badge overlaid via
+                      the photo instead of a header bar. The other 100 are
+                      a GitHub avatars URL (dev/test filler) -
+                      isPlaceholderImageUrl above filters those out so
+                      they fall back to the monogram rather than showing
+                      the GitHub mascot as someone's portrait. */}
                   <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: "var(--afa-plum-black)", overflow: "hidden" }}>
-                    {artist.user.avatar ? (
+                    {portraitUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={artist.user.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={portraitUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : (
                       <>
                         <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.06, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
