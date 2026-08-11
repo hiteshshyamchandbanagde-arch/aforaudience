@@ -93,6 +93,11 @@ export default function EventsPage() {
   const [selectedType, setSelectedType] = useState("All")
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
+  // OTH-2608-009: sort control for the events list. "date" preserves the
+  // existing default ordering (API returns date-ascending; Past tab
+  // reverses it below, same as before this feature existed) so nobody's
+  // current experience changes unless they actively pick a different sort.
+  const [sortBy, setSortBy] = useState<"date" | "priceLowHigh" | "priceHighLow" | "fillingFast">("date")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
   // Toggle-based discovery entry point for Organisers (session 62,
@@ -172,11 +177,22 @@ export default function EventsPage() {
     const matchTab = tab === "upcoming" ? !isPastEvent(e) : isPastEvent(e)
     return matchSearch && matchType && matchCity && matchPrice && matchTab
   })
-  if (tab === "past") {
-    // API returns date ascending (soonest-first, right for Upcoming) -
-    // Past reads better newest-first, so reverse rather than re-sort
-    // from scratch.
-    filtered.reverse()
+  if (sortBy === "date") {
+    if (tab === "past") {
+      // API returns date ascending (soonest-first, right for Upcoming) -
+      // Past reads better newest-first, so reverse rather than re-sort
+      // from scratch.
+      filtered.reverse()
+    }
+  } else if (sortBy === "priceLowHigh" || sortBy === "priceHighLow") {
+    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ?? 0)
+    filtered.sort((a, b) => sortBy === "priceLowHigh" ? price(a) - price(b) : price(b) - price(a))
+  } else if (sortBy === "fillingFast") {
+    // % of seats already booked, descending - surfaces events closest to
+    // selling out first, a reasonable proxy for "popular" without needing
+    // a dedicated popularity metric.
+    const bookedRatio = (e: EventItem) => (e.totalSeats > 0 ? (e.totalSeats - e.availableSeats) / e.totalSeats : 0)
+    filtered.sort((a, b) => bookedRatio(b) - bookedRatio(a))
   }
 
   // Same `search` box drives both modes (session 65 fix) - the hero
@@ -387,6 +403,18 @@ export default function EventsPage() {
                 </button>
               ))}
             </div>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="events-filters-select"
+              aria-label={tr.eventsPage.sortLabel}
+            >
+              <option value="date">{tr.eventsPage.sortDate}</option>
+              <option value="priceLowHigh">{tr.eventsPage.sortPriceLowHigh}</option>
+              <option value="priceHighLow">{tr.eventsPage.sortPriceHighLow}</option>
+              <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
+            </select>
 
             <div className="events-filters-view-toggle">
               <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "var(--afa-ink)" : "transparent", color: view === "grid" ? "white" : "var(--afa-ink)", cursor: "pointer", fontSize: "16px" }}>⊞</button>
