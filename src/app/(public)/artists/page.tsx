@@ -3,7 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
-import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
+import { isPlaceholderImageUrl, monogramTone } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
@@ -298,8 +298,11 @@ export default function ArtistsPage() {
                       a GitHub avatars URL (dev/test filler) -
                       isPlaceholderImageUrl above filters those out so
                       they fall back to the monogram rather than showing
-                      the GitHub mascot as someone's portrait. */}
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: "var(--afa-plum-black)", overflow: "hidden" }}>
+                      the GitHub mascot as someone's portrait. Also true
+                      for 100% of no-avatar artists in QA - monogramTone
+                      rotates through the same dark-tone palette as the
+                      venue card so a grid of fallbacks stays varied. */}
+                  <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: portraitUrl ? "var(--afa-plum-black)" : monogramTone(artist.id), overflow: "hidden" }}>
                     {portraitUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={portraitUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
