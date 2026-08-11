@@ -185,8 +185,22 @@ export default function EventsPage() {
       filtered.reverse()
     }
   } else if (sortBy === "priceLowHigh" || sortBy === "priceHighLow") {
-    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ?? 0)
-    filtered.sort((a, b) => sortBy === "priceLowHigh" ? price(a) - price(b) : price(b) - price(a))
+    // BUG (caught live by Hitesh's click-test, 11 Aug): a few events are
+    // marked isFree=false but have no real ticketPrice set (bad data -
+    // the create-event API doesn't require a price when isFree is false,
+    // separately flagged as GEN-2608-041). Treating that missing price as
+    // ₹0 made these events sort to the very top of "Price: Low to High" -
+    // showing up as the "cheapest" event even though their own badge
+    // shows "—" (no price to display) instead of a number. Now pushed to
+    // the end regardless of sort direction - never shown as a fake deal.
+    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ?? Infinity)
+    filtered.sort((a, b) => {
+      const pa = price(a), pb = price(b)
+      if (pa === Infinity && pb === Infinity) return 0
+      if (pa === Infinity) return 1
+      if (pb === Infinity) return -1
+      return sortBy === "priceLowHigh" ? pa - pb : pb - pa
+    })
   } else if (sortBy === "fillingFast") {
     // % of seats already booked, descending - surfaces events closest to
     // selling out first, a reasonable proxy for "popular" without needing
