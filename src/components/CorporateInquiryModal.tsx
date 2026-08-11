@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import PresetSelectWithOther from "./PresetSelectWithOther"
 
 type CorporateInquiryModalProps = {
   open: boolean
@@ -19,6 +20,20 @@ const EMPTY_FORM = {
   budgetRange: "",
   message: "",
 }
+
+// UX fast-follow (11 Aug) - free text let a test submission through as
+// "Ggggggg". A structured range is faster to fill on mobile (tap vs
+// type) and keeps the data usable for the artist deciding whether to
+// respond, while "Custom" still covers anything outside these bands via
+// the same PresetSelectWithOther pattern already used for Dress Code/
+// Vibe/Age Limit elsewhere in the app.
+const BUDGET_RANGE_PRESETS = [
+  "Under ₹25,000",
+  "₹25,000 – ₹50,000",
+  "₹50,000 – ₹1,00,000",
+  "₹1,00,000 – ₹2,50,000",
+  "₹2,50,000+",
+]
 
 // FEAT-2608-046 - corporate show booking, inquiry-only. No auth required
 // to submit (the corporate buyer isn't necessarily an AFA account holder
@@ -121,7 +136,6 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                 { label: "Event Type", name: "eventType", type: "text", placeholder: "Annual day, product launch..." },
                 { label: "City", name: "city", type: "text", placeholder: "Pune" },
                 { label: "Preferred Date", name: "preferredDate", type: "date", placeholder: "" },
-                { label: "Budget Range", name: "budgetRange", type: "text", placeholder: "e.g. ₹50,000 – ₹1,00,000" },
               ].map((field) => (
                 <div key={field.name}>
                   <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
@@ -137,6 +151,18 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   />
                 </div>
               ))}
+              <div>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                  Budget Range
+                </label>
+                <PresetSelectWithOther
+                  value={form.budgetRange}
+                  onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
+                  presets={BUDGET_RANGE_PRESETS}
+                  placeholder="e.g. ₹75,000 or 'flexible'"
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
               <div>
                 <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Message
