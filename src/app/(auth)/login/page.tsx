@@ -288,7 +288,7 @@ function LoginForm() {
             </div>
             <button
               type="button"
-              onClick={() => signIn("google")}
+              onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
               style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "white", color: "var(--afa-ink)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
