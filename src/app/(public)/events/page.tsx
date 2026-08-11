@@ -193,7 +193,15 @@ export default function EventsPage() {
     // showing up as the "cheapest" event even though their own badge
     // shows "—" (no price to display) instead of a number. Now pushed to
     // the end regardless of sort direction - never shown as a fake deal.
-    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ?? Infinity)
+    // Second bug caught live (same click-test pass): the E2E test fixture
+    // "Waitlist/Wallet Flow" has isFree=false with ticketPrice explicitly
+    // 0 (not null), which `?? Infinity` doesn't catch - only null/
+    // undefined trigger a `??` fallback, so a real zero sailed straight
+    // through as if it were a genuine ₹0 price. Any non-free event with
+    // no truthy price (null OR 0) is equally "no real price to show" -
+    // its own badge already renders "—" either way (line ~510/561) - so
+    // both must be treated the same here.
+    const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ? e.ticketPrice : Infinity)
     filtered.sort((a, b) => {
       const pa = price(a), pb = price(b)
       if (pa === Infinity && pb === Infinity) return 0
