@@ -39,6 +39,23 @@ const BUDGET_RANGE_PRESETS = [
 // to submit (the corporate buyer isn't necessarily an AFA account holder
 // at all) - same bottom-sheet pattern as AuthPromptSheet, just a plain
 // form instead of a login prompt.
+
+// Hardening pass (11 Aug, caught live): fields had no length caps at all
+// - a click-test submitted a ~40-char repeated string as a phone number
+// and 40+ char garbage in Company Name/City with no pushback. Every
+// field below now has a maxLength matched by an identical cap
+// server-side (route.ts), so a direct API call can't bypass this either.
+const FIELD_LIMITS: Record<string, number> = {
+  companyName: 100,
+  contactName: 80,
+  contactEmail: 120,
+  contactPhone: 20,
+  eventType: 100,
+  city: 60,
+}
+const MESSAGE_LIMIT = 500
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function CorporateInquiryModal({ open, onClose, artistId, artistName }: CorporateInquiryModalProps) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
@@ -63,6 +80,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
   const handleSubmit = async () => {
     if (!form.companyName.trim() || !form.contactName.trim() || !form.contactEmail.trim()) {
       setError("Company name, your name, and email are required.")
+      return
+    }
+    if (!EMAIL_PATTERN.test(form.contactEmail.trim())) {
+      setError("That email address doesn't look right - double check it.")
       return
     }
     setLoading(true)
@@ -147,6 +168,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                     placeholder={field.placeholder}
                     value={form[field.name as keyof typeof form]}
                     onChange={handleChange}
+                    maxLength={FIELD_LIMITS[field.name]}
                     style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
@@ -173,6 +195,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   value={form.message}
                   onChange={handleChange}
                   rows={3}
+                  maxLength={MESSAGE_LIMIT}
                   style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
                 />
               </div>

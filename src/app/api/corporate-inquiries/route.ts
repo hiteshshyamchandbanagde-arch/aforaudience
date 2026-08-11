@@ -11,6 +11,25 @@ import { sendCorporateInquiryEmail } from '@/lib/email'
 // as a public contact form. Basic required-field + email-shape validation
 // only; no rate limiting yet (same posture as other public forms in this
 // codebase today, not a new gap introduced here).
+//
+// Length caps (11 Aug, caught live): matches CorporateInquiryModal's
+// client-side maxLength attributes - a direct API call bypasses the
+// client entirely, so truncating server-side too rather than trusting
+// the browser is the only real guarantee. Truncate-not-reject: a client
+// that already enforced maxLength never trips this, and a slightly-too-
+// long value degrades gracefully instead of losing the whole submission.
+const FIELD_LIMITS: Record<string, number> = {
+  companyName: 100,
+  contactName: 80,
+  contactEmail: 120,
+  contactPhone: 20,
+  eventType: 100,
+  city: 60,
+  budgetRange: 60,
+}
+const MESSAGE_LIMIT = 500
+const cap = (v: string, limit: number) => v.slice(0, limit)
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -35,15 +54,15 @@ export async function POST(req: Request) {
     const inquiry = await prisma.corporateBookingInquiry.create({
       data: {
         artistId,
-        companyName: companyName.trim(),
-        contactName: contactName.trim(),
-        contactEmail: contactEmail.trim(),
-        contactPhone: contactPhone?.trim() || null,
-        eventType: eventType?.trim() || null,
-        city: city?.trim() || null,
+        companyName: cap(companyName.trim(), FIELD_LIMITS.companyName),
+        contactName: cap(contactName.trim(), FIELD_LIMITS.contactName),
+        contactEmail: cap(contactEmail.trim(), FIELD_LIMITS.contactEmail),
+        contactPhone: contactPhone?.trim() ? cap(contactPhone.trim(), FIELD_LIMITS.contactPhone) : null,
+        eventType: eventType?.trim() ? cap(eventType.trim(), FIELD_LIMITS.eventType) : null,
+        city: city?.trim() ? cap(city.trim(), FIELD_LIMITS.city) : null,
         preferredDate: preferredDate ? new Date(preferredDate) : null,
-        budgetRange: budgetRange?.trim() || null,
-        message: message?.trim() || null,
+        budgetRange: budgetRange?.trim() ? cap(budgetRange.trim(), FIELD_LIMITS.budgetRange) : null,
+        message: message?.trim() ? cap(message.trim(), MESSAGE_LIMIT) : null,
       },
     })
 
