@@ -120,6 +120,21 @@ export default function ArtistProfilePage({
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || "Failed to send invite")
       setInviteResult({ ok: true, message: `${displayName} added to your lineup!` })
+      // Bug caught live (11 Aug): local organiserEvents state was never
+      // updated after a successful invite, so the just-invited event
+      // stayed selectable in the dropdown until a full page reload -
+      // picking it again correctly hit the server's duplicate guard
+      // ("already applied") instead of the event simply disappearing
+      // from the list the way it should the moment it's no longer
+      // eligible. Patch the local application list for this event so
+      // invitableEvents excludes it immediately, no refetch needed.
+      setOrganiserEvents((prev) =>
+        prev.map((e) =>
+          e.id === selectedInviteEventId
+            ? { ...e, applications: [...(e.applications || []), { artistId: artist.id }] }
+            : e
+        )
+      )
       setSelectedInviteEventId("")
     } catch (err: any) {
       setInviteResult({ ok: false, message: err.message || "Something went wrong" })
