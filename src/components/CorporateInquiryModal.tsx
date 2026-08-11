@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import PresetSelectWithOther from "./PresetSelectWithOther"
 
 type CorporateInquiryModalProps = {
@@ -62,7 +62,43 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
   const [error, setError] = useState("")
   const [submitted, setSubmitted] = useState(false)
 
+  // City suggestions (11 Aug) - deliberately NOT the CityAutocomplete/
+  // Google Places component used on venue create/edit: that endpoint is
+  // auth-gated specifically to stop anonymous traffic from hammering the
+  // billed Google quota (see api/places/autocomplete/route.ts), and this
+  // form has to work for a corporate buyer with no AFA account at all.
+  // /api/venues/cities is the same safe pattern already used for the
+  // signed-out /events city filter - free, public, DB-backed, scoped to
+  // cities we actually have venues in. Free text always still works if
+  // their city isn't in the list (same graceful-degradation pattern as
+  // the Places-backed autocompletes elsewhere).
+  const [cityOptions, setCityOptions] = useState<{ city: string; label: string }[]>([])
+  const [cityOpen, setCityOpen] = useState(false)
+  const cityFieldRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    fetch("/api/venues/cities")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.cities) setCityOptions(data.cities) })
+      .catch(() => {})
+  }, [open])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (cityFieldRef.current && !cityFieldRef.current.contains(e.target as Node)) {
+        setCityOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   if (!open) return null
+
+  const cityMatches = form.city.trim()
+    ? cityOptions.filter((c) => c.label.toLowerCase().includes(form.city.trim().toLowerCase())).slice(0, 6)
+    : []
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -155,8 +191,6 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                 { label: "Email *", name: "contactEmail", type: "email", placeholder: "you@company.com" },
                 { label: "Phone", name: "contactPhone", type: "tel", placeholder: "+91 98765 43210" },
                 { label: "Event Type", name: "eventType", type: "text", placeholder: "Annual day, product launch..." },
-                { label: "City", name: "city", type: "text", placeholder: "Pune" },
-                { label: "Preferred Date", name: "preferredDate", type: "date", placeholder: "" },
               ].map((field) => (
                 <div key={field.name}>
                   <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
@@ -173,6 +207,49 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   />
                 </div>
               ))}
+              <div ref={cityFieldRef} style={{ position: "relative" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                  City
+                </label>
+                <input
+                  name="city"
+                  type="text"
+                  placeholder="Pune"
+                  value={form.city}
+                  onChange={(e) => { handleChange(e); setCityOpen(true) }}
+                  onFocus={() => setCityOpen(true)}
+                  maxLength={FIELD_LIMITS.city}
+                  autoComplete="off"
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                />
+                {cityOpen && cityMatches.length > 0 && (
+                  <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "white", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", boxShadow: "0 4px 16px rgba(14,12,10,0.12)", zIndex: 20, maxHeight: "220px", overflowY: "auto" }}>
+                    {cityMatches.map((c) => (
+                      <button
+                        key={c.label}
+                        type="button"
+                        onClick={() => { setForm((prev) => ({ ...prev, city: c.city })); setCityOpen(false) }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 12px", border: "none", background: "transparent", cursor: "pointer", fontSize: "14px", color: "var(--afa-ink)" }}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                  Preferred Date
+                </label>
+                <input
+                  name="preferredDate"
+                  type="date"
+                  value={form.preferredDate}
+                  onChange={handleChange}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
               <div>
                 <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Budget Range
