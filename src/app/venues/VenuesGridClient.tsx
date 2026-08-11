@@ -3,7 +3,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import { cityLabel } from "@/lib/country-codes"
-import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
+import { isPlaceholderImageUrl, monogramTone } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueItem {
@@ -167,8 +167,13 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                 this falls back to the monogram-on-grain panel (same
                 grain texture as the homepage hero) for placeholder or
                 genuinely absent photos alike, rather than showing
-                content that misrepresents the venue. */}
-            <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: "var(--afa-maroon-black)", overflow: "hidden" }}>
+                content that misrepresents the venue. With near-total
+                placeholder coverage in QA (1118/1132), almost every card
+                landed on this fallback at once - monogramTone(v.id)
+                rotates deterministically through the existing dark-tone
+                design tokens so a full grid of fallbacks doesn't read as
+                one flat monotonous block. */}
+            <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: photo ? "var(--afa-maroon-black)" : monogramTone(v.id), overflow: "hidden" }}>
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
