@@ -11,6 +11,7 @@ interface VenueItem {
   country: string | null
   capacity: number
   priceRangeLabel: string | null
+  photos: string[]
 }
 
 const tabStyle = (active: boolean) => ({

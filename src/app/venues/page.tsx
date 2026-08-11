@@ -77,7 +77,7 @@ export default async function VenuesPage() {
   const resolved = await resolveLocation({ profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore })
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'var(--font-sans)' }}>
       <SiteNav active="venues" />
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
         <VenuesHero />
@@ -90,6 +90,11 @@ export default async function VenuesPage() {
             country: v.country,
             capacity: v.capacity,
             priceRangeLabel: priceRange(v),
+            // photos is a plain scalar column on Venue, already returned
+            // by the default findMany (no top-level `select` in
+            // getVenues) - the redesigned card (FEAT-2608-044) is the
+            // first thing on this page to actually render it.
+            photos: v.photos,
           }))}
           defaultCity={resolved.city}
         />

@@ -131,16 +131,20 @@ export default function ArtistsPage() {
       : null
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "var(--font-sans)" }}>
       <SiteNav active="artists" />
 
-      {/* HERO */}
-      <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
+      {/* HERO - font tokens brought in line with the homepage's actual
+          Newsreader/Manrope/IBM Plex Mono setup (FEAT-2608-044); this
+          page was still hardcoded to Georgia/system-ui, the exact
+          "inconsistent typography" gap named in BUG-2607-036. */}
+      <div style={{ background: "var(--afa-ink)", padding: "56px 48px", position: "relative", overflow: "hidden" }}>
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.04, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
+        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", position: "relative" }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
+            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic", fontWeight: 500 }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
           </div>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.countPerforming.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
@@ -161,7 +165,7 @@ export default function ArtistsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.artistsPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", fontFamily: "var(--font-sans)", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -182,7 +186,7 @@ export default function ArtistsPage() {
               <button
                 key={g}
                 onClick={() => setSelectedGenre(g)}
-                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-ink)", fontSize: "13px", fontWeight: 500, cursor: "pointer" }}
+                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-ink)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
               >
                 {g === "All" ? tr.artistsPage.filterAll : g}
               </button>
@@ -195,14 +199,14 @@ export default function ArtistsPage() {
           <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", borderRadius: "16px", padding: "24px 32px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
             <div style={{ fontSize: "56px" }}>🌟</div>
             <div style={{ flex: 1, minWidth: "200px" }}>
-              <div style={{ fontFamily: "monospace", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>{tr.artistsPage.topArtistNow}</div>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.displayName || risingStar.user.name}</div>
-              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>{tr.artistsPage.topArtistNow}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.displayName || risingStar.user.name}</div>
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</div>
             </div>
             <button
               onClick={() => goToArtist(risingStar.id)}
               disabled={!!navigatingId}
-              style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, border: "none", cursor: navigatingId ? "default" : "pointer", whiteSpace: "nowrap", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
+              style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-sans)", border: "none", cursor: navigatingId ? "default" : "pointer", whiteSpace: "nowrap", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
             >
               {navigatingId === risingStar.id ? tr.artistsPage.loadingEllipsis : tr.artistsPage.viewProfile}
             </button>
@@ -211,14 +215,14 @@ export default function ArtistsPage() {
 
         {/* ARTIST GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.artistsPage.loadingArtists}</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎤</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetSub : tr.artistsPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -240,10 +244,10 @@ export default function ArtistsPage() {
                       goToArtist(artist.id)
                     }
                   }}
-                  className="hover-lift-card"
+                  className="hover-lift-card afa-focusable"
                   style={{
                     background: "white",
-                    borderRadius: "16px",
+                    borderRadius: "10px",
                     overflow: "hidden",
                     border: "1px solid rgba(14,12,10,0.08)",
                     position: "relative",
@@ -277,51 +281,64 @@ export default function ArtistsPage() {
                       <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   )}
-                  <div style={{ height: "120px", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", padding: "24px", gap: "16px" }}>
-                    <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
-                      {artist.user.avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={artist.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        displayName.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", flexWrap: "wrap" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "white" }}>{displayName}</div>
-                        {artist.sceneStatus && CARD_BADGE[artist.sceneStatus] && (
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              fontWeight: 700,
-                              padding: "2px 8px",
-                              borderRadius: "99px",
-                              letterSpacing: "0.03em",
-                              textTransform: "uppercase",
-                              background: CARD_BADGE[artist.sceneStatus]!.bg,
-                              color: CARD_BADGE[artist.sceneStatus]!.color,
-                              border: artist.sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
-                            }}
-                          >
-                            {CARD_BADGE[artist.sceneStatus]!.label}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>{artist.genre.join(", ") || tr.artistsPage.genreNotSet}</div>
-                    </div>
+
+                  {/* PORTRAIT - user.avatar was previously shrunk into a
+                      72px circle inside a plum-black header strip; 401 of
+                      408 QA artists actually have one, so it's promoted
+                      to a real portrait photograph (same photo-first
+                      grammar as the redesigned venue card) with the
+                      badge overlaid via a gradient scrim rather than
+                      floating in a header bar. */}
+                  <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: "var(--afa-plum-black)", overflow: "hidden" }}>
+                    {artist.user.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={artist.user.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <>
+                        <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.06, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: "48px", fontStyle: "italic", color: "rgba(247,243,238,0.35)" }}>
+                          {displayName.charAt(0).toUpperCase()}
+                        </div>
+                      </>
+                    )}
+                    {artist.sceneStatus && CARD_BADGE[artist.sceneStatus] && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "12px",
+                          right: "12px",
+                          fontFamily: "var(--font-sans)",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          padding: "3px 10px",
+                          borderRadius: "99px",
+                          letterSpacing: "0.03em",
+                          textTransform: "uppercase",
+                          background: CARD_BADGE[artist.sceneStatus]!.bg,
+                          color: CARD_BADGE[artist.sceneStatus]!.color,
+                          border: artist.sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
+                        }}
+                      >
+                        {CARD_BADGE[artist.sceneStatus]!.label}
+                      </span>
+                    )}
                   </div>
 
-                  <div style={{ padding: "16px 20px" }}>
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "14px", minHeight: "24px" }}>
+                  {/* WALL-LABEL - same mono/gold/diamond caption device as
+                      the redesigned venue card, genre + shows count in
+                      place of city + capacity. */}
+                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-gold)", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span>{artist.genre.length > 0 ? artist.genre.slice(0, 2).join(" / ") : tr.artistsPage.genreNotSet}</span>
+                    <span style={{ color: "var(--afa-terracotta)" }}>◆</span>
+                    <span>{artist._count.performances} {artist._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</span>
+                  </div>
+
+                  <div style={{ padding: "6px 18px 18px" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{displayName}</div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ background: "var(--afa-cream)", color: "var(--afa-ink)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-cream)", color: "var(--afa-ink)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
                       ))}
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <div style={{ textAlign: "center" }}>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{artist._count.performances}</div>
-                        <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{tr.artistsPage.showsLabel}</div>
-                      </div>
                     </div>
                   </div>
                 </div>
