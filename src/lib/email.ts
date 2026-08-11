@@ -46,6 +46,40 @@ export async function sendEmailVerificationEmail(to: string, verifyUrl: string) 
   })
 }
 
+// FEAT-2608-046 - corporate booking inquiry (inquiry-only, no payment
+// flow). Notifies the artist by email since there's no in-app inbox for
+// this yet - the artist dashboard list (GET /api/corporate-inquiries) is
+// the source of truth either way, this is just the "someone reached you"
+// nudge.
+export async function sendCorporateInquiryEmail(
+  to: string,
+  artistName: string,
+  inquiry: { companyName: string; contactName: string; contactEmail: string; contactPhone: string | null; eventType: string | null; city: string | null; message: string | null }
+) {
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set, skipping send. Corporate inquiry for:", artistName)
+    return
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    replyTo: inquiry.contactEmail,
+    subject: `New corporate booking inquiry from ${inquiry.companyName}`,
+    html: `
+      <p>Hi ${artistName},</p>
+      <p><strong>${inquiry.companyName}</strong> is interested in booking you for a private/corporate event.</p>
+      <ul>
+        <li><strong>Contact:</strong> ${inquiry.contactName} (${inquiry.contactEmail}${inquiry.contactPhone ? `, ${inquiry.contactPhone}` : ""})</li>
+        ${inquiry.eventType ? `<li><strong>Event type:</strong> ${inquiry.eventType}</li>` : ""}
+        ${inquiry.city ? `<li><strong>City:</strong> ${inquiry.city}</li>` : ""}
+        ${inquiry.message ? `<li><strong>Message:</strong> ${inquiry.message}</li>` : ""}
+      </ul>
+      <p>This is a direct lead, not a platform booking - reach out to them directly to discuss and confirm. You can also view all your inquiries from your AforAudience dashboard.</p>
+    `,
+  })
+}
+
 // Ticket delivery. Sent from the delivery orchestrator once a booking
 // transitions to CONFIRMED. PDF is passed in as bytes so the caller
 // controls PDF generation lifecycle (regenerate on demand from the

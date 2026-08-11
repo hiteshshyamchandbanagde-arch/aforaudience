@@ -588,6 +588,43 @@ model Artist {
   // tag is meant to be deliberate/earned, worth a lightweight paper trail
   // of why. Not shown publicly, admin-only, same as organiser ratings.
   headlinerNote          String?
+
+  corporateInquiries CorporateBookingInquiry[]
+}
+
+// FEAT-2608-046 (11 Aug) - corporate show booking, scoped as inquiry-only
+// per Hitesh's call: no payment flow, since K2 payout (manual-transfer
+// ledger) isn't built yet and the §9(5)/194-O TDS consultation is still
+// pending - moving real corporate money through the platform before either
+// of those lands isn't something to build now. This is a lead-gen form: a
+// corporate buyer (not necessarily an AFA account holder - no auth
+// required to submit) reaches a verified artist, and everything past
+// submission (negotiation, contract, payment) happens off-platform, same
+// as it already does today without this feature. Meant as a natural
+// fast-follow into a real booking flow once K2 + tax clearance land.
+enum CorporateInquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model CorporateBookingInquiry {
+  id            String                 @id @default(cuid())
+  artistId      String
+  artist        Artist                 @relation(fields: [artistId], references: [id])
+  companyName   String
+  contactName   String
+  contactEmail  String
+  contactPhone  String?
+  eventType     String?
+  city          String?
+  preferredDate DateTime?
+  budgetRange   String?
+  message       String?
+  status        CorporateInquiryStatus @default(NEW)
+  createdAt     DateTime               @default(now())
+
+  @@index([artistId])
 }
 
 // FEAT-2608-047 (11 Aug) - self-managed list of tour stops so an artist
