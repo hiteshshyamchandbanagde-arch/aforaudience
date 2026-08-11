@@ -230,12 +230,19 @@ export default function ArtistDashboard() {
                 {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/artist/edit"
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
               >
                 Edit Profile
+              </Link>
+              {/* FEAT-2608-046 - corporate booking inquiries inbox */}
+              <Link
+                href="/dashboard/artist/corporate-inquiries"
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
+              >
+                Corporate Inquiries
               </Link>
               <Link
                 href="/dashboard/artist/events"

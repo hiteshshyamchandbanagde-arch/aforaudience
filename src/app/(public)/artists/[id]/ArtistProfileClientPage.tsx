@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import CorporateInquiryModal from "@/components/CorporateInquiryModal"
 import type { SceneStatusTier } from "@/lib/scene-status"
 
 interface Performance {
@@ -64,6 +65,7 @@ export default function ArtistProfilePage({
   const [followerCount, setFollowerCount] = useState(artist?._count.followers ?? 0)
   const [followBusy, setFollowBusy] = useState(false)
   const [showAuthSheet, setShowAuthSheet] = useState(false)
+  const [showCorporateModal, setShowCorporateModal] = useState(false)
   const router = useRouter()
 
   // Feedback cmsaicfav (2 Aug) - swipe left/right (mobile) / arrow keys
@@ -585,8 +587,30 @@ export default function ArtistProfilePage({
               Log In
             </Link>
           </div>
+
+          {/* FEAT-2608-046 - corporate/private booking, inquiry-only. No
+              login required to submit, deliberately separate from the
+              Organiser card above (a corporate buyer isn't necessarily
+              an AFA account holder at all). */}
+          <div style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)" }}>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
+            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry - no account needed.</p>
+            <button
+              onClick={() => setShowCorporateModal(true)}
+              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-ink)", border: "1.5px solid rgba(14,12,10,0.2)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
+            >
+              Send Inquiry
+            </button>
+          </div>
         </div>
       </div>
+
+      <CorporateInquiryModal
+        open={showCorporateModal}
+        onClose={() => setShowCorporateModal(false)}
+        artistId={artist.id}
+        artistName={displayName}
+      />
 
       <AuthPromptSheet
         open={showAuthSheet}
