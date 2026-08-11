@@ -7,6 +7,7 @@ import { requireVerifiedPhone } from '@/lib/verification'
 import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings } from '@/lib/platform-settings'
+import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 
 export async function GET(req: Request) {
   try {
@@ -116,6 +117,7 @@ export async function POST(req: Request) {
       maxPerformers, applicationApprovalMode, maxSeatsPerBooking, plusOnesRequired,
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
+      termsChecklist, specialNotes,
     } = body
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
@@ -329,6 +331,17 @@ export async function POST(req: Request) {
         competitionPrizeFirst: isCompetitionShow && competitionPrizeFirst ? String(competitionPrizeFirst).trim().slice(0, 200) : null,
         competitionPrizeSecond: isCompetitionShow && competitionPrizeSecond ? String(competitionPrizeSecond).trim().slice(0, 200) : null,
         competitionPrizeThird: isCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
+        // FEAT-2608-045 - termsChecklist filtered against the known key
+        // list server-side (never trust client-sent keys directly into an
+        // array shown publicly). specialNotes goes to PENDING on
+        // creation whenever non-empty - never auto-visible, always needs
+        // admin approval first. Empty/missing notes stay at the DB
+        // default (NONE) - nothing to review.
+        termsChecklist: Array.isArray(termsChecklist)
+          ? termsChecklist.filter((k: unknown) => typeof k === 'string' && EVENT_TERMS_CHECKLIST_KEYS.includes(k))
+          : [],
+        specialNotes: specialNotes ? String(specialNotes).trim().slice(0, SPECIAL_NOTES_MAX_LENGTH) : null,
+        specialNotesStatus: specialNotes && String(specialNotes).trim() ? 'PENDING' : 'NONE',
       },
     })
 

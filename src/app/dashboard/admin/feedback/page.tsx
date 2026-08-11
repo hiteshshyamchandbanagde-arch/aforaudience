@@ -48,6 +48,14 @@ interface GenreRequestItem {
   createdAt: string
 }
 
+interface EventNoteItem {
+  id: string
+  title: string
+  specialNotes: string | null
+  date: string
+  organiser: { orgName: string } | null
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   BUG: 'Bug',
   FEATURE_IDEA: 'Feature idea',
@@ -136,6 +144,13 @@ function AdminFeedbackBoard() {
   const [genreRequestsOpen, setGenreRequestsOpen] = useState(true)
   const [actioningGenreId, setActioningGenreId] = useState<string | null>(null)
 
+  // FEAT-2608-045 (11 Aug) - pending event "special notes" awaiting
+  // review before they're shown publicly. Same collapsible pattern as
+  // genre requests, but reject requires a reason (Hitesh's call).
+  const [eventNotes, setEventNotes] = useState<EventNoteItem[]>([])
+  const [eventNotesOpen, setEventNotesOpen] = useState(true)
+  const [actioningEventNoteId, setActioningEventNoteId] = useState<string | null>(null)
+
   const [showResolved, setShowResolved] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [severityFilter, setSeverityFilter] = useState('ALL')
@@ -151,11 +166,12 @@ function AdminFeedbackBoard() {
     if (!session?.user) return
     ;(async () => {
       setLoading(true)
-      const [boardRes, trendsRes, approvalsRes, genreRes] = await Promise.all([
+      const [boardRes, trendsRes, approvalsRes, genreRes, eventNotesRes] = await Promise.all([
         fetch('/api/admin/feedback'),
         fetch('/api/admin/feedback?status=ALL'),
         fetch('/api/admin/approvals'),
         fetch('/api/admin/genre-requests'),
+        fetch('/api/admin/event-notes'),
       ])
       if (boardRes.status === 403) {
         setForbidden(true)
@@ -170,6 +186,7 @@ function AdminFeedbackBoard() {
         setVenueOwners(approvalsData.venueOwners)
       }
       if (genreRes.ok) setGenreRequests((await genreRes.json()).pending)
+      if (eventNotesRes.ok) setEventNotes((await eventNotesRes.json()).pending)
       setLoading(false)
     })()
   }, [session])
@@ -233,6 +250,42 @@ function AdminFeedbackBoard() {
       showToast('Failed to update — please try again.', 'error')
     } finally {
       setActioningGenreId(null)
+    }
+  }
+
+  // FEAT-2608-045 - reject requires a reason (unlike genre requests
+  // above), so the organiser knows what to fix rather than just seeing
+  // their note silently never appear. window.prompt is a deliberate,
+  // minimal choice here - a full modal would be disproportionate for a
+  // single required text input in an admin-only moderation queue.
+  const actOnEventNote = async (id: string, action: 'approve' | 'reject') => {
+    let reason: string | null = null
+    if (action === 'reject') {
+      reason = window.prompt('Reason for rejecting this note (shown to the organiser):')
+      if (reason === null) return // cancelled
+      if (!reason.trim()) {
+        showToast('A rejection reason is required.', 'error')
+        return
+      }
+    }
+    setActioningEventNoteId(id)
+    try {
+      const res = await fetch('/api/admin/event-notes', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action, reason }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        showToast(data.error || 'Failed to update — please try again.', 'error')
+        return
+      }
+      showToast(action === 'approve' ? 'Approved - now visible on the event page.' : 'Rejected - organiser will see the reason.', 'success')
+      setEventNotes((prev) => prev.filter((n) => n.id !== id))
+    } catch {
+      showToast('Failed to update — please try again.', 'error')
+    } finally {
+      setActioningEventNoteId(null)
     }
   }
 
@@ -632,6 +685,40 @@ function AdminFeedbackBoard() {
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
                       <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* FEAT-2608-045 (11 Aug) - pending event "special notes" -
+              organiser-authored free text, never auto-visible. Approving
+              shows it on the event's public page; rejecting requires a
+              reason so the organiser knows what to fix. */}
+          <button
+            onClick={() => setEventNotesOpen((v) => !v)}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+          >
+            {eventNotesOpen ? '▾' : '▸'} Pending Event Notes ({eventNotes.length})
+          </button>
+          {eventNotesOpen && (
+            <div style={{ marginBottom: '28px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
+                Free-text "special notes" organisers added to an event - never shown publicly until approved here.
+              </p>
+              {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {eventNotes.map((n) => (
+                <div key={n.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{n.title}</div>
+                      {n.organiser && <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>{n.organiser.orgName}</div>}
+                      <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>

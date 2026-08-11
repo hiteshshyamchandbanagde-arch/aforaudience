@@ -10,6 +10,7 @@ import SeatPicker from "@/components/SeatPicker"
 import { formatEventTimeRange, isNightEvent } from "@/lib/eventTime"
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 import { useLocale } from "@/lib/i18n/translate"
+import { EVENT_TERMS_CHECKLIST, REFUND_POLICY_LINK } from "@/lib/event-terms"
 
 interface Review {
   id: string
@@ -61,6 +62,9 @@ interface EventData {
   vibe?: string | null
   surpriseAct: boolean
   plusOnesRequired: number
+  termsChecklist?: string[]
+  specialNotes?: string | null
+  specialNotesStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
   venue: { name: string; address: string; city: string; facilities: string[]; seatingMode?: 'GENERAL_ADMISSION' | 'NUMBERED' } | null
   organiser: { id: string; orgName: string } | null
   lineup: Performer[]
@@ -400,6 +404,42 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   </div>
                 ))}
               </div>
+
+              {/* FEAT-2608-045 - checklist items the organiser selected at
+                  creation, AFA's platform-wide refund/cancellation policy
+                  (linked, not duplicated - see event-terms.ts), and the
+                  organiser's free-text special note ONLY once admin-
+                  approved. A PENDING/REJECTED note is never shown here -
+                  same principle as the Feedback table never exposing
+                  unreviewed content publicly. */}
+              {((event.termsChecklist && event.termsChecklist.length > 0) || (event.specialNotesStatus === 'APPROVED' && event.specialNotes)) && (
+                <div style={{ marginBottom: "32px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
+                    {tr.eventDetailPage.eventTermsHeading}
+                  </h3>
+                  {event.termsChecklist && event.termsChecklist.length > 0 && (
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px", marginBottom: event.specialNotesStatus === 'APPROVED' && event.specialNotes ? "16px" : 0 }}>
+                      {EVENT_TERMS_CHECKLIST.filter((t) => event.termsChecklist!.includes(t.key)).map((t) => (
+                        <li key={t.key} style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.8, display: "flex", gap: "8px" }}>
+                          <span style={{ color: "var(--afa-terracotta)" }}>•</span>
+                          {tr.eventTermsChecklist[t.key as keyof typeof tr.eventTermsChecklist] || t.label}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
+                    <div style={{ background: "white", borderRadius: "10px", padding: "14px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
+                      <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>{tr.eventDetailPage.specialNoteLabel}</div>
+                      <div style={{ fontSize: "14px", color: "var(--afa-ink)", lineHeight: 1.6 }}>{event.specialNotes}</div>
+                    </div>
+                  )}
+                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginTop: "12px" }}>
+                    {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[0]}
+                    <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.eventDetailPage.refundPolicyLinkLabel}</Link>
+                    {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[1]}
+                  </p>
+                </div>
+              )}
 
               {event.isCompetitionShow && (
                 <div style={{ marginBottom: "32px" }}>

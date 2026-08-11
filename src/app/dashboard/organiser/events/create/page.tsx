@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK } from '@/lib/event-terms'
 
 interface SeatSection {
   id?: string
@@ -184,6 +185,11 @@ export default function CreateEventPage() {
   const [competitionPrizeThird, setCompetitionPrizeThird] = useState('')
   const [venueId, setVenueId] = useState('')
   const [bookingAmount, setBookingAmount] = useState('')
+  // FEAT-2608-045 - event-specific terms checklist + special notes
+  // (admin-reviewed before shown publicly). AFA's own refund/cancellation
+  // policy is platform-wide, not entered here - see REFUND_POLICY_LINK.
+  const [termsChecklist, setTermsChecklist] = useState<string[]>([])
+  const [specialNotes, setSpecialNotes] = useState('')
   // §4.5 - performer economics + booking cap, Event-level (E8/E9/E13)
   const [maxPerformers, setMaxPerformers] = useState('')
   const [applicationApprovalMode, setApplicationApprovalMode] = useState<'MANUAL' | 'AUTO'>('MANUAL')
@@ -500,6 +506,8 @@ export default function CreateEventPage() {
           competitionPrizeFirst: isCompetitionShow ? competitionPrizeFirst : null,
           competitionPrizeSecond: isCompetitionShow ? competitionPrizeSecond : null,
           competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
+          termsChecklist,
+          specialNotes: specialNotes.trim() || null,
           publish,
         }),
       })
@@ -633,6 +641,54 @@ export default function CreateEventPage() {
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
+
+              {/* FEAT-2608-045 - curated checklist rather than free text,
+                  so an organiser can't accidentally write something that
+                  conflicts with AFA's own refund/cancellation policy
+                  (linked below, platform-wide, not editable here). */}
+              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(14,12,10,0.08)' }}>
+                <label style={labelStyle}>Event terms</label>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '10px' }}>
+                  Select anything that applies to this event. AFA's refund and cancellation policy applies to every
+                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                  {EVENT_TERMS_CHECKLIST.map((term) => (
+                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: 'var(--afa-ink)' }}>
+                      <input
+                        type="checkbox"
+                        checked={termsChecklist.includes(term.key)}
+                        onChange={(e) => {
+                          setTermsChecklist((prev) =>
+                            e.target.checked ? [...prev, term.key] : prev.filter((k) => k !== term.key)
+                          )
+                        }}
+                        style={{ marginTop: '3px' }}
+                      />
+                      <span>{term.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: '18px' }}>
+                  <label style={labelStyle}>Special notes (optional)</label>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '6px' }}>
+                    Anything specific to this event that isn't covered above. Reviewed by AFA before it's shown
+                    publicly — you'll see the status on your event dashboard.
+                  </p>
+                  <textarea
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value.slice(0, SPECIAL_NOTES_MAX_LENGTH))}
+                    maxLength={SPECIAL_NOTES_MAX_LENGTH}
+                    rows={3}
+                    placeholder="e.g., This show includes strobe lighting and haze effects."
+                    style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.4, marginTop: '4px', textAlign: 'right' }}>
+                    {specialNotes.length}/{SPECIAL_NOTES_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                 <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />

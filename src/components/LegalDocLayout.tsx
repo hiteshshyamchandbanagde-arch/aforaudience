@@ -58,9 +58,10 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
   )
 }
 
-export function H2({ children }: { children: React.ReactNode }) {
+export function H2({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
     <h2
+      id={id}
       style={{
         fontFamily: SERIF,
         fontSize: "22px",
@@ -70,6 +71,7 @@ export function H2({ children }: { children: React.ReactNode }) {
         marginBottom: "14px",
         paddingBottom: "10px",
         borderBottom: `1px solid ${MIST}`,
+        scrollMarginTop: "24px",
       }}
     >
       {children}

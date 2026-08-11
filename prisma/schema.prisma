@@ -30,6 +30,18 @@ enum EventStatus {
   COMPLETED
 }
 
+// FEAT-2608-045 (11 Aug) - organiser-authored "special notes" on an event
+// go through admin review before they're shown publicly, same shape as
+// GenreRequestStatus but with a required rejection reason (Hitesh:
+// "reject with reason make sense") and a NONE state so an event with no
+// notes at all doesn't show up as a pending review item.
+enum EventNoteStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
@@ -1202,6 +1214,24 @@ model Event {
   panelistVoteWeight  Int?
   celebrityVoteWeight Int?
   votes               CompetitionVote[]
+
+  // FEAT-2608-045 (11 Aug) - event-specific terms. termsChecklist stores
+  // selected keys from the fixed checklist in src/lib/event-terms.ts (not
+  // a DB enum, so the list stays easy to tweak) - deliberately NOT free
+  // text, so an organiser can't accidentally write something that
+  // conflicts with AFA's own refund/cancellation policy (that policy is
+  // platform-wide and NOT stored per-event - see src/lib/refund-policy.ts
+  // / the static policy page). specialNotes is the one free-text
+  // exception, capped at 300 chars in the UI, gated behind admin review
+  // (specialNotesStatus) before it's shown publicly - never auto-visible.
+  // Editing specialNotes after approval resets status back to PENDING
+  // (enforced in the API route, not the DB) so a bland approved note
+  // can't be quietly swapped for something that shouldn't be there.
+  termsChecklist              String[]          @default([])
+  specialNotes                String?
+  specialNotesStatus          EventNoteStatus   @default(NONE)
+  specialNotesRejectionReason String?
+  specialNotesReviewedAt      DateTime?
 }
 
 // Accept-to-Appear (reputation epic §8, session 57) - shared status enum
