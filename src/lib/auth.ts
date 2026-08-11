@@ -257,7 +257,21 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    // FEAT-2608-008 (10 Aug) - "why do I have to log in again and again"
+    // turned out to already be mostly solved: IdleTimeoutGuard.tsx already
+    // force-logs-out ADMIN (30min) and ORGANISER/VENUE_OWNER (24h) on
+    // inactivity regardless of this value, so extending it here changes
+    // nothing for those higher-risk roles - it only affects ARTIST/
+    // AUDIENCE, who have no idle guard and were purely governed by this
+    // number. 30 days -> 90 days for those roles. Deliberately NOT the
+    // "auto-login from phone number, no credentials" version originally
+    // asked for - that's a SIM-swap risk (whoever gets your number gets
+    // your account with zero proof of identity). This keeps the same
+    // "prove who you are once, then stay in" pattern used everywhere
+    // else, just for longer, and payment-critical paths still don't rely
+    // on this alone (Razorpay checkout still requires OTP where relevant).
+    maxAge: 90 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
