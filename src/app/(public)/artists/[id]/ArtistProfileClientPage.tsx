@@ -34,6 +34,7 @@ interface ArtistData {
   influences: string | null
   acknowledgments: string | null
   goals: string | null
+  tourStops?: { id: string; city: string; country: string; date: string | null; link: string | null }[]
   user: { name: string; displayName: string | null; avatar: string | null }
   performances: Performance[]
   _count: { performances: number; followers: number }
@@ -476,6 +477,38 @@ export default function ArtistProfilePage({
                   </p>
                 </div>
               ))}
+
+              {/* FEAT-2608-047 (11 Aug) - self-managed tour list, purely
+                  informational (not tied to AFA's booking flow - these
+                  shows aren't happening through the platform). Sorted by
+                  date server-side; undated stops sort last. */}
+              {artist.tourStops && artist.tourStops.length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
+                    Tour
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {artist.tourStops.map((stop) => (
+                      <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", borderRadius: "10px", padding: "12px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
+                        <span style={{ fontSize: "18px" }}>📍</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{stop.city}, {stop.country}</div>
+                          {stop.date && (
+                            <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.55 }}>
+                              {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            </div>
+                          )}
+                        </div>
+                        {stop.link && (
+                          <a href={stop.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
+                            Details →
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {artist.videoReel.length > 0 && (
                 <>
