@@ -4,13 +4,14 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendCorporateInquiryEmail } from '@/lib/email'
 
-// FEAT-2608-046 - corporate show booking, inquiry-only. Deliberately no
-// auth required to POST: the person reaching out is a corporate buyer,
-// not necessarily an AFA account holder at all (Organiser/Artist/etc
-// accounts don't apply here) - same "anyone can reach an artist" shape
-// as a public contact form. Basic required-field + email-shape validation
-// only; no rate limiting yet (same posture as other public forms in this
-// codebase today, not a new gap introduced here).
+// FEAT-2608-046 - corporate show booking, inquiry-only. Login required
+// as of 11 Aug (Hitesh's rule): any authenticated AFA user can submit -
+// no role restriction, since a corporate rep might legitimately hold any
+// account type (most likely AUDIENCE). Not scoped to a submittedByUserId
+// on the record itself (schema unchanged) - contactName/contactEmail are
+// still what gets sent to the artist, same as before; the login gate is
+// purely to stop anonymous abuse, not to attribute the inquiry to an
+// account.
 //
 // Length caps (11 Aug, caught live): matches CorporateInquiryModal's
 // client-side maxLength attributes - a direct API call bypasses the
@@ -32,6 +33,11 @@ const cap = (v: string, limit: number) => v.slice(0, limit)
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
     const { artistId, companyName, contactName, contactEmail, contactPhone, eventType, city, preferredDate, budgetRange, message } = body
 

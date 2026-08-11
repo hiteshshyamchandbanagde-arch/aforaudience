@@ -1,12 +1,18 @@
 "use client"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import PresetSelectWithOther from "./PresetSelectWithOther"
+import CityAutocomplete from "./CityAutocomplete"
 
 type CorporateInquiryModalProps = {
   open: boolean
   onClose: () => void
   artistId: string
   artistName: string
+  // Login is now required to open this modal at all (11 Aug, Hitesh's
+  // rule) - the caller already has the session, so pass through what we
+  // can to save the person re-typing their own name/email.
+  prefillName?: string
+  prefillEmail?: string
 }
 
 const EMPTY_FORM = {
@@ -35,10 +41,11 @@ const BUDGET_RANGE_PRESETS = [
   "₹2,50,000+",
 ]
 
-// FEAT-2608-046 - corporate show booking, inquiry-only. No auth required
-// to submit (the corporate buyer isn't necessarily an AFA account holder
-// at all) - same bottom-sheet pattern as AuthPromptSheet, just a plain
-// form instead of a login prompt.
+// FEAT-2608-046 - corporate show booking, inquiry-only. Login required
+// as of 11 Aug (Hitesh's rule) - gated one level up (ArtistProfileClientPage
+// won't even open this modal until signed in), same bottom-sheet pattern
+// as AuthPromptSheet either way, just a plain form instead of a login
+// prompt once past that gate.
 
 // Hardening pass (11 Aug, caught live): fields had no length caps at all
 // - a click-test submitted a ~40-char repeated string as a phone number
@@ -56,49 +63,26 @@ const FIELD_LIMITS: Record<string, number> = {
 const MESSAGE_LIMIT = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export default function CorporateInquiryModal({ open, onClose, artistId, artistName }: CorporateInquiryModalProps) {
+export default function CorporateInquiryModal({ open, onClose, artistId, artistName, prefillName, prefillEmail }: CorporateInquiryModalProps) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [submitted, setSubmitted] = useState(false)
 
-  // City suggestions (11 Aug) - deliberately NOT the CityAutocomplete/
-  // Google Places component used on venue create/edit: that endpoint is
-  // auth-gated specifically to stop anonymous traffic from hammering the
-  // billed Google quota (see api/places/autocomplete/route.ts), and this
-  // form has to work for a corporate buyer with no AFA account at all.
-  // /api/venues/cities is the same safe pattern already used for the
-  // signed-out /events city filter - free, public, DB-backed, scoped to
-  // cities we actually have venues in. Free text always still works if
-  // their city isn't in the list (same graceful-degradation pattern as
-  // the Places-backed autocompletes elsewhere).
-  const [cityOptions, setCityOptions] = useState<{ city: string; label: string }[]>([])
-  const [cityOpen, setCityOpen] = useState(false)
-  const cityFieldRef = useRef<HTMLDivElement>(null)
-
+  // Prefill from the now-required session on open, but only into empty
+  // fields - never clobber something the person already typed if this
+  // re-opens mid-edit.
   useEffect(() => {
     if (!open) return
-    fetch("/api/venues/cities")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data?.cities) setCityOptions(data.cities) })
-      .catch(() => {})
+    setForm((prev) => ({
+      ...prev,
+      contactName: prev.contactName || prefillName || "",
+      contactEmail: prev.contactEmail || prefillEmail || "",
+    }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (cityFieldRef.current && !cityFieldRef.current.contains(e.target as Node)) {
-        setCityOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
   if (!open) return null
-
-  const cityMatches = form.city.trim()
-    ? cityOptions.filter((c) => c.label.toLowerCase().includes(form.city.trim().toLowerCase())).slice(0, 6)
-    : []
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -207,36 +191,24 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   />
                 </div>
               ))}
-              <div ref={cityFieldRef} style={{ position: "relative" }}>
+              <div>
                 <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   City
                 </label>
-                <input
-                  name="city"
-                  type="text"
-                  placeholder="Pune"
+                {/* Real Google Places lookup (11 Aug) - safe to use now
+                    that this modal only opens for a signed-in user, so
+                    the auth-gated /api/places/autocomplete endpoint (see
+                    that route's own comment on billed-quota protection)
+                    is no longer being asked to serve anonymous traffic.
+                    Full world coverage, not just cities we have venues
+                    in - free text still works if nothing resolves. */}
+                <CityAutocomplete
                   value={form.city}
-                  onChange={(e) => { handleChange(e); setCityOpen(true) }}
-                  onFocus={() => setCityOpen(true)}
-                  maxLength={FIELD_LIMITS.city}
-                  autoComplete="off"
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  onChange={(city) => setForm((prev) => ({ ...prev, city: city.slice(0, FIELD_LIMITS.city) }))}
+                  onResolved={(location) => setForm((prev) => ({ ...prev, city: location.city.slice(0, FIELD_LIMITS.city) }))}
+                  placeholder="Pune"
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
-                {cityOpen && cityMatches.length > 0 && (
-                  <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "white", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", boxShadow: "0 4px 16px rgba(14,12,10,0.12)", zIndex: 20, maxHeight: "220px", overflowY: "auto" }}>
-                    {cityMatches.map((c) => (
-                      <button
-                        key={c.label}
-                        type="button"
-                        onClick={() => { setForm((prev) => ({ ...prev, city: c.city })); setCityOpen(false) }}
-                        onMouseDown={(e) => e.preventDefault()}
-                        style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 12px", border: "none", background: "transparent", cursor: "pointer", fontSize: "14px", color: "var(--afa-ink)" }}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
               <div>
                 <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>

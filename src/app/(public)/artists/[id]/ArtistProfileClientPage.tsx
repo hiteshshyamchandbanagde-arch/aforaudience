@@ -59,12 +59,16 @@ export default function ArtistProfilePage({
   sceneStatus?: SceneStatusTier | null
 }) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
-  const { status: sessionStatus } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
   const [notifyEnabled, setNotifyEnabledState] = useState(true)
   const [followerCount, setFollowerCount] = useState(artist?._count.followers ?? 0)
   const [followBusy, setFollowBusy] = useState(false)
   const [showAuthSheet, setShowAuthSheet] = useState(false)
+  // FEAT-2608-046 (11 Aug, Hitesh's rule): booking inquiries now require
+  // login, same as Follow - one shared AuthPromptSheet gates both, so
+  // this tracks which action to resume once sign-in succeeds.
+  const [authAction, setAuthAction] = useState<"follow" | "corporate" | null>(null)
   const [showCorporateModal, setShowCorporateModal] = useState(false)
   const router = useRouter()
 
@@ -199,6 +203,7 @@ export default function ArtistProfilePage({
   const toggleFollow = async () => {
     if (!artist) return
     if (sessionStatus !== "authenticated") {
+      setAuthAction("follow")
       setShowAuthSheet(true)
       return
     }
@@ -212,6 +217,17 @@ export default function ArtistProfilePage({
     } finally {
       setFollowBusy(false)
     }
+  }
+
+  // FEAT-2608-046 (11 Aug, Hitesh's rule): booking inquiries now require
+  // login, same gate as Follow above.
+  const openCorporateInquiry = () => {
+    if (sessionStatus !== "authenticated") {
+      setAuthAction("corporate")
+      setShowAuthSheet(true)
+      return
+    }
+    setShowCorporateModal(true)
   }
 
   const toggleNotify = async () => {
@@ -588,15 +604,14 @@ export default function ArtistProfilePage({
             </Link>
           </div>
 
-          {/* FEAT-2608-046 - corporate/private booking, inquiry-only. No
-              login required to submit, deliberately separate from the
-              Organiser card above (a corporate buyer isn't necessarily
-              an AFA account holder at all). */}
+          {/* FEAT-2608-046 - corporate/private booking, inquiry-only.
+              Login required as of 11 Aug (Hitesh's rule) - same gate as
+              Follow. */}
           <div style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)" }}>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
-            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry - no account needed.</p>
+            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry.</p>
             <button
-              onClick={() => setShowCorporateModal(true)}
+              onClick={openCorporateInquiry}
               style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-ink)", border: "1.5px solid rgba(14,12,10,0.2)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
             >
               Send Inquiry
@@ -610,16 +625,22 @@ export default function ArtistProfilePage({
         onClose={() => setShowCorporateModal(false)}
         artistId={artist.id}
         artistName={displayName}
+        prefillName={session?.user ? ((session.user as any).displayName || session.user.name || "") : ""}
+        prefillEmail={session?.user?.email || ""}
       />
 
       <AuthPromptSheet
         open={showAuthSheet}
         onClose={() => setShowAuthSheet(false)}
-        title={`Sign in to follow ${displayName}`}
-        subtitle="Get notified when they book a new show"
+        title={authAction === "corporate" ? `Sign in to book ${displayName}` : `Sign in to follow ${displayName}`}
+        subtitle={authAction === "corporate" ? "Booking inquiries now require an AforAudience account" : "Get notified when they book a new show"}
         onSuccess={() => {
           setShowAuthSheet(false)
-          toggleFollow()
+          if (authAction === "corporate") {
+            setShowCorporateModal(true)
+          } else {
+            toggleFollow()
+          }
         }}
       />
     </main>
