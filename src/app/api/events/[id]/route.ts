@@ -6,6 +6,7 @@ import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { parseAmount } from '@/lib/money-validation'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { getPlatformSettings } from '@/lib/platform-settings'
+import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -75,6 +76,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount, ticketTiers,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
       audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
+      termsChecklist, specialNotes,
     } = body
 
     // Competition show - prize fields only kept when isCompetitionShow is
@@ -82,6 +84,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // 57, Accept-to-Appear) are no longer handled by this route at all -
     // see the comment at the write site below.
     const resolvedIsCompetitionShow = isCompetitionShow !== undefined ? Boolean(isCompetitionShow) : event.isCompetitionShow
+
+    // FEAT-2608-045 - specialNotes only re-enters review when it actually
+    // changes. Same text resubmitted (or the field simply not present in
+    // this PATCH) leaves an already-APPROVED note alone - only a genuine
+    // edit resets to PENDING, per the standing rule that a bland approved
+    // note can't be quietly swapped for something that shouldn't be
+    // there. Clearing the field entirely drops status back to NONE
+    // (nothing left to review) and wipes any prior rejection reason.
+    let specialNotesUpdate: Record<string, unknown> | undefined
+    if (specialNotes !== undefined) {
+      const trimmed = specialNotes ? String(specialNotes).trim().slice(0, SPECIAL_NOTES_MAX_LENGTH) : ''
+      const changed = trimmed !== (event.specialNotes || '')
+      specialNotesUpdate = {
+        specialNotes: trimmed || null,
+        specialNotesStatus: !trimmed ? 'NONE' : changed ? 'PENDING' : event.specialNotesStatus,
+        specialNotesRejectionReason: !trimmed || changed ? null : event.specialNotesRejectionReason,
+        specialNotesReviewedAt: !trimmed || changed ? null : event.specialNotesReviewedAt,
+      }
+    }
 
     // Forward-window cap (Feedback cms9ynuxi, 2 Aug) - same rule as
     // event creation, applied here only when `date` is actually being
@@ -267,6 +288,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           competitionPrizeThird: resolvedIsCompetitionShow && competitionPrizeThird ? String(competitionPrizeThird).trim().slice(0, 200) : null,
         }),
         ...(voteWeightsUpdate && voteWeightsUpdate),
+        // FEAT-2608-045 - termsChecklist full-replace (same pattern as
+        // ticketTiers above), server-filtered against the known key list.
+        // specialNotesUpdate computed above already encodes the
+        // "only reset to PENDING on a genuine change" rule.
+        ...(termsChecklist !== undefined && {
+          termsChecklist: Array.isArray(termsChecklist)
+            ? termsChecklist.filter((k: unknown) => typeof k === 'string' && EVENT_TERMS_CHECKLIST_KEYS.includes(k))
+            : [],
+        }),
+        ...(specialNotesUpdate && specialNotesUpdate),
         // Panelists/celebrity (§8, session 57) are deliberately NEVER
         // touched by this general event PATCH anymore, even if a client
         // sent a `panelists` field - the old deleteMany+create full-replace

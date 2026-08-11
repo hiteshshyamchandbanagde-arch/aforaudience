@@ -35,7 +35,7 @@ export default function TermsPage() {
         Impersonating someone else, or creating an account for anyone other than yourself, isn't allowed.
       </P>
 
-      <H2>3. Booking tickets (Audience)</H2>
+      <H2 id="booking">3. Booking tickets (Audience)</H2>
       <UL>
         <LI>
           Prices shown at checkout include the ticket price plus a small platform booking fee (

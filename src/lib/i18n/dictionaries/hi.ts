@@ -418,6 +418,10 @@ const hi: Dictionary = {
     totalSeatsLabel: "कुल सीटें",
     yes: "हां",
     no: "नहीं",
+    eventTermsHeading: "इवेंट की शर्तें",
+    specialNoteLabel: "विशेष टिप्पणी",
+    refundPolicyLinkText: "AFA की रिफंड और रद्दीकरण नीति हर बुकिंग पर लागू होती है — {link}.",
+    refundPolicyLinkLabel: "यहां देखें",
     competitionShow: "🏆 प्रतियोगिता शो",
     firstPrize: "पहला इनाम",
     secondPrize: "दूसरा इनाम",
@@ -791,6 +795,17 @@ const hi: Dictionary = {
     ctaSubtitle: "हज़ारों कलाकारों, आयोजकों, स्थल मालिकों और कला प्रेमियों से जुड़ें जो पहले से ही प्लेटफ़ॉर्म पर हैं।",
     ctaFindEvent: "आज रात का इवेंट खोजें",
     ctaJoinArtist: "कलाकार के रूप में जुड़ें",
+  },
+
+  eventTermsChecklist: {
+    AGE_RESTRICTION: "आयु प्रतिबंध / प्रवेश पर वैध ID आवश्यक",
+    NO_OUTSIDE_FOOD: "बाहर का खाना या पेय पदार्थ अनुमति नहीं",
+    NO_RECORDING: "शो के दौरान फ़ोटोग्राफ़ी या रिकॉर्डिंग अनुमति नहीं",
+    NO_RE_ENTRY: "एक बार बाहर जाने पर पुनः प्रवेश अनुमति नहीं",
+    LATECOMER_HOLD: "देर से आने वालों को केवल ब्रेक/इंटरवल में बैठाया जाएगा",
+    BAG_RESTRICTION: "बैग के आकार या प्रतिबंधित वस्तुओं पर सीमा",
+    DRESS_CODE: "ड्रेस कोड लागू है",
+    NO_PARKING: "स्थल पर पार्किंग उपलब्ध नहीं",
   },
 }
 

@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK } from '@/lib/event-terms'
 
 interface SeatSection {
   id?: string
@@ -57,6 +58,10 @@ interface EventDetail {
   vibe?: string | null
   surpriseAct: boolean
   plusOnesRequired: number
+  termsChecklist?: string[]
+  specialNotes?: string | null
+  specialNotesStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  specialNotesRejectionReason?: string | null
   defaultCompensationType: 'FREE' | 'PAID' | 'BUY_IN'
   defaultFeeAmount: number | null
   defaultBuyInAmount: number | null
@@ -139,6 +144,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [isFree, setIsFree] = useState(true)
   const [ticketPrice, setTicketPrice] = useState('')
   const [surpriseAct, setSurpriseAct] = useState(false)
+  // FEAT-2608-045 - specialNotesOriginal tracks what was loaded from the
+  // server so the "you're about to reset this to pending" warning only
+  // shows when the organiser has actually typed something different, not
+  // on every render just because the field has a value.
+  const [termsChecklist, setTermsChecklist] = useState<string[]>([])
+  const [specialNotes, setSpecialNotes] = useState('')
+  const [specialNotesOriginal, setSpecialNotesOriginal] = useState('')
+  const [specialNotesStatus, setSpecialNotesStatus] = useState<'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED'>('NONE')
+  const [specialNotesRejectionReason, setSpecialNotesRejectionReason] = useState<string | null>(null)
   const [isCompetitionShow, setIsCompetitionShow] = useState(false)
   const [competitionPrizeFirst, setCompetitionPrizeFirst] = useState('')
   const [competitionPrizeSecond, setCompetitionPrizeSecond] = useState('')
@@ -310,6 +324,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         setIsFree(data.isFree)
         setTicketPrice(data.ticketPrice != null ? String(data.ticketPrice) : '')
         setSurpriseAct(data.surpriseAct)
+        setTermsChecklist(data.termsChecklist || [])
+        setSpecialNotes(data.specialNotes || '')
+        setSpecialNotesOriginal(data.specialNotes || '')
+        setSpecialNotesStatus(data.specialNotesStatus || 'NONE')
+        setSpecialNotesRejectionReason(data.specialNotesRejectionReason || null)
         setIsCompetitionShow(Boolean(data.isCompetitionShow))
         setCompetitionPrizeFirst(data.competitionPrizeFirst || '')
         setCompetitionPrizeSecond(data.competitionPrizeSecond || '')
@@ -434,6 +453,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           competitionPrizeFirst: isCompetitionShow ? competitionPrizeFirst : null,
           competitionPrizeSecond: isCompetitionShow ? competitionPrizeSecond : null,
           competitionPrizeThird: isCompetitionShow ? competitionPrizeThird : null,
+          termsChecklist,
+          specialNotes: specialNotes.trim() || null,
           ...(publishOverride !== undefined ? { publish: publishOverride } : {}),
         }),
       })
@@ -708,6 +729,85 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
+
+              {/* FEAT-2608-045 */}
+              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(14,12,10,0.08)' }}>
+                <label style={labelStyle}>Event terms</label>
+                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '10px' }}>
+                  Select anything that applies to this event. AFA's refund and cancellation policy applies to every
+                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                  {EVENT_TERMS_CHECKLIST.map((term) => (
+                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: 'var(--afa-ink)' }}>
+                      <input
+                        type="checkbox"
+                        checked={termsChecklist.includes(term.key)}
+                        onChange={(e) => {
+                          setTermsChecklist((prev) =>
+                            e.target.checked ? [...prev, term.key] : prev.filter((k) => k !== term.key)
+                          )
+                        }}
+                        style={{ marginTop: '3px' }}
+                      />
+                      <span>{term.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: '18px' }}>
+                  <label style={labelStyle}>Special notes (optional)</label>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '6px' }}>
+                    Anything specific to this event that isn't covered above. Reviewed by AFA before it's shown
+                    publicly.
+                  </p>
+
+                  {specialNotesStatus !== 'NONE' && (
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        padding: '4px 10px',
+                        borderRadius: '999px',
+                        marginBottom: '8px',
+                        ...(specialNotesStatus === 'APPROVED'
+                          ? { background: 'var(--afa-success-bg)', color: 'var(--afa-green-deep)' }
+                          : specialNotesStatus === 'REJECTED'
+                            ? { background: 'var(--afa-error-bg)', color: 'var(--afa-error)' }
+                            : { background: 'var(--afa-amber-tint)', color: 'var(--afa-brown-gold)' }),
+                      }}
+                    >
+                      {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : '⏳ Pending review'}
+                    </div>
+                  )}
+                  {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
+                    <p style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '8px' }}>
+                      Reason: {specialNotesRejectionReason}
+                    </p>
+                  )}
+                  {specialNotesStatus === 'APPROVED' && specialNotes !== specialNotesOriginal && (
+                    <p style={{ fontSize: '12px', color: 'var(--afa-brown-gold)', marginBottom: '8px' }}>
+                      Editing this will send it back for review — it won't be visible on your event page until
+                      re-approved.
+                    </p>
+                  )}
+
+                  <textarea
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value.slice(0, SPECIAL_NOTES_MAX_LENGTH))}
+                    maxLength={SPECIAL_NOTES_MAX_LENGTH}
+                    rows={3}
+                    placeholder="e.g., This show includes strobe lighting and haze effects."
+                    style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.4, marginTop: '4px', textAlign: 'right' }}>
+                    {specialNotes.length}/{SPECIAL_NOTES_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '14px', color: 'var(--afa-ink)' }}>
                 <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />

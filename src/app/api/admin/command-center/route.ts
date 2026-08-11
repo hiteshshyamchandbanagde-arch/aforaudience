@@ -49,6 +49,7 @@ export async function GET() {
     pendingOrganisers,
     pendingVenueOwners,
     pendingGenreRequests,
+    pendingEventNotes,
     erroredDeliveries,
     monthBookings,
   ] = await Promise.all([
@@ -59,6 +60,9 @@ export async function GET() {
     prisma.organiser.count({ where: { isApproved: false } }),
     prisma.venueOwner.count({ where: { isApproved: false } }),
     prisma.genreRequest.count({ where: { status: 'PENDING' } }).catch(() => 0),
+    // FEAT-2608-045 (11 Aug) - pending event special notes, same
+    // attention-queue treatment as pending genre requests above.
+    prisma.event.count({ where: { specialNotesStatus: 'PENDING' } }).catch(() => 0),
     prisma.booking.count({ where: { status: 'CONFIRMED', deliveredAt: null, deliveryError: { not: null } } }),
     prisma.booking.findMany({
       where: { status: 'CONFIRMED', createdAt: { gte: monthStart } },
@@ -126,6 +130,9 @@ export async function GET() {
   }
   if (pendingGenreRequests > 0) {
     attention.push({ label: 'Genre requests waiting', count: pendingGenreRequests, href: '/dashboard/admin/feedback', tone: 'warning' })
+  }
+  if (pendingEventNotes > 0) {
+    attention.push({ label: 'Event notes waiting', count: pendingEventNotes, href: '/dashboard/admin/feedback', tone: 'warning' })
   }
 
   return NextResponse.json({

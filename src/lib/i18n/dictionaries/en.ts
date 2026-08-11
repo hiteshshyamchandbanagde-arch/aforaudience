@@ -440,6 +440,10 @@ const en = {
     totalSeatsLabel: "Total Seats",
     yes: "Yes",
     no: "No",
+    eventTermsHeading: "Event terms",
+    specialNoteLabel: "Special note",
+    refundPolicyLinkText: "AFA's refund and cancellation policy applies to every booking — {link}.",
+    refundPolicyLinkLabel: "view it here",
     competitionShow: "🏆 Competition Show",
     firstPrize: "1st Prize",
     secondPrize: "2nd Prize",
@@ -823,6 +827,23 @@ const en = {
     ctaSubtitle: "Join thousands of artists, organisers, venue owners and art lovers already on the platform.",
     ctaFindEvent: "Find an Event Tonight",
     ctaJoinArtist: "Join as Artist",
+  },
+
+  // FEAT-2608-045 (11 Aug) - checklist labels keyed to match
+  // EVENT_TERMS_CHECKLIST in src/lib/event-terms.ts. Kept separate from
+  // eventDetailPage since the same keys are also read on the organiser
+  // dashboard create/edit pages, which are deliberately English-only
+  // (matches every other dashboard-only label) - only the PUBLIC event
+  // page actually looks up this translated version.
+  eventTermsChecklist: {
+    AGE_RESTRICTION: "Age restriction / valid ID required at entry",
+    NO_OUTSIDE_FOOD: "No outside food or beverages",
+    NO_RECORDING: "No photography or recording during the show",
+    NO_RE_ENTRY: "No re-entry once you've exited",
+    LATECOMER_HOLD: "Latecomers seated only at a break/interval",
+    BAG_RESTRICTION: "Bag size or prohibited items restriction",
+    DRESS_CODE: "Dress code applies",
+    NO_PARKING: "Parking not provided at the venue",
   },
 }
 
