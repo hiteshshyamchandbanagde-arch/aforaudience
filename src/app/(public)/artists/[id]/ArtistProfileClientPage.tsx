@@ -72,6 +72,62 @@ export default function ArtistProfilePage({
   const [showCorporateModal, setShowCorporateModal] = useState(false)
   const router = useRouter()
 
+  // "Book for your event" card, real invite version (11 Aug, Hitesh:
+  // "keep it invite for published event"). Only fetched for a logged-in
+  // Organiser - reuses the existing /api/events/my-events endpoint
+  // (already Organiser-only) rather than a new one just for this list.
+  const userRole = (session?.user as any)?.role as string | undefined
+  const [organiserEvents, setOrganiserEvents] = useState<any[]>([])
+  const [selectedInviteEventId, setSelectedInviteEventId] = useState("")
+  const [inviting, setInviting] = useState(false)
+  const [inviteResult, setInviteResult] = useState<{ ok: boolean; message: string } | null>(null)
+
+  useEffect(() => {
+    if (userRole !== "ORGANISER") return
+    fetch("/api/events/my-events")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((events) => setOrganiserEvents(Array.isArray(events) ? events : []))
+      .catch(() => {})
+  }, [userRole])
+
+  const isPastInviteEvent = (e: { date: string; startTime: string }) => {
+    const [h, m] = e.startTime.split(":").map(Number)
+    const start = new Date(e.date)
+    start.setHours(h, m, 0, 0)
+    return start.getTime() <= Date.now()
+  }
+
+  // Published, still upcoming, and this artist isn't already
+  // applied/booked on it - same duplicate guard the API enforces,
+  // filtered here too so it's never offered as a selectable option in
+  // the first place.
+  const invitableEvents = artist
+    ? organiserEvents.filter(
+        (e) => e.status === "APPROVED" && !isPastInviteEvent(e) && !(e.applications || []).some((a: any) => a.artistId === artist.id)
+      )
+    : []
+
+  const sendInvite = async () => {
+    if (!artist || !selectedInviteEventId) return
+    setInviting(true)
+    setInviteResult(null)
+    try {
+      const res = await fetch(`/api/events/${selectedInviteEventId}/invite-artist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artistId: artist.id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || "Failed to send invite")
+      setInviteResult({ ok: true, message: `${displayName} added to your lineup!` })
+      setSelectedInviteEventId("")
+    } catch (err: any) {
+      setInviteResult({ ok: false, message: err.message || "Something went wrong" })
+    } finally {
+      setInviting(false)
+    }
+  }
+
   // Feedback cmsaicfav (2 Aug) - swipe left/right (mobile) / arrow keys
   // (desktop) to move to the previous/next artist without going back to
   // the listing. Follow-up to the same pattern piloted on the Feedback
@@ -598,10 +654,57 @@ export default function ArtistProfilePage({
 
           <div style={{ background: "var(--afa-ink)", borderRadius: "12px", padding: "20px" }}>
             <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "8px" }}>🎤 Book for your event</div>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {displayName} to apply for your event.</p>
-            <Link href="/login" style={{ display: "block", background: "var(--afa-terracotta)", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
-              Log In
-            </Link>
+
+            {sessionStatus === "authenticated" && userRole === "ORGANISER" ? (
+              <>
+                <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "14px" }}>
+                  Invite {displayName} directly into one of your published events.
+                </p>
+                {invitableEvents.length === 0 ? (
+                  <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>
+                    No eligible published events right now - {displayName} may already be in the lineup for all of yours, or none are published yet.
+                  </p>
+                ) : (
+                  <>
+                    <select
+                      value={selectedInviteEventId}
+                      onChange={(e) => { setSelectedInviteEventId(e.target.value); setInviteResult(null) }}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.08)", color: "white", fontSize: "13px", marginBottom: "10px" }}
+                    >
+                      <option value="" style={{ color: "black" }}>Select an event...</option>
+                      {invitableEvents.map((e) => (
+                        <option key={e.id} value={e.id} style={{ color: "black" }}>
+                          {e.title} · {new Date(e.date).toLocaleDateString()}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={sendInvite}
+                      disabled={!selectedInviteEventId || inviting}
+                      style={{ display: "block", width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", border: "none", cursor: !selectedInviteEventId || inviting ? "default" : "pointer", opacity: !selectedInviteEventId || inviting ? 0.6 : 1 }}
+                    >
+                      {inviting ? "Sending..." : "Invite to Lineup"}
+                    </button>
+                  </>
+                )}
+                {inviteResult && (
+                  <p style={{ fontSize: "12px", marginTop: "10px", color: inviteResult.ok ? "var(--afa-sage)" : "var(--afa-terracotta)" }}>
+                    {inviteResult.message}
+                  </p>
+                )}
+              </>
+            ) : sessionStatus === "authenticated" ? (
+              <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+                Organisers can invite {displayName} directly into their published events.
+              </p>
+            ) : (
+              <>
+                <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {displayName} directly into your event's lineup.</p>
+                <Link href="/login" style={{ display: "block", background: "var(--afa-terracotta)", color: "white", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
+                  Log In
+                </Link>
+              </>
+            )}
           </div>
 
           {/* FEAT-2608-046 - corporate/private booking, inquiry-only.
