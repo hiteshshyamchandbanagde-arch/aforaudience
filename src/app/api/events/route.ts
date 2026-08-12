@@ -126,10 +126,10 @@ export async function POST(req: Request) {
     // stop, not a standalone event. Verified up front (ownership + not
     // terminal) so the rest of validation can treat it as a normal
     // event creation with a couple of extra fields tacked on.
-    let tour: { id: string; status: string } | null = null
+    let tour: { id: string; status: string; organiserId: string } | null = null
     if (tourId) {
-      tour = await prisma.tour.findUnique({ where: { id: String(tourId) }, select: { id: true, status: true, organiserId: true } as any })
-      if (!tour || (tour as any).organiserId !== organiser.id) {
+      tour = await prisma.tour.findUnique({ where: { id: String(tourId) }, select: { id: true, status: true, organiserId: true } })
+      if (!tour || tour.organiserId !== organiser.id) {
         return NextResponse.json({ error: 'Tour not found' }, { status: 404 })
       }
       if (tour.status === 'CANCELLED' || tour.status === 'COMPLETED') {
