@@ -299,7 +299,19 @@ export default function EditArtistProfilePage() {
               Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
             </p>
             {tourStops.map((stop) => (
-              <div key={stop.key} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '8px', marginBottom: '10px', alignItems: 'start' }}>
+              <div
+                key={stop.key}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: '8px',
+                  marginBottom: '10px',
+                  padding: '12px',
+                  border: '1px solid rgba(14,12,10,0.08)',
+                  borderRadius: '8px',
+                  alignItems: 'start',
+                }}
+              >
                 <input type="text" value={stop.city} onChange={(e) => updateTourStop(stop.key, 'city', e.target.value)} placeholder="City" style={inputStyle} />
                 <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder="Country" style={inputStyle} />
                 <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
@@ -307,9 +319,9 @@ export default function EditArtistProfilePage() {
                 <button
                   onClick={() => removeTourStop(stop.key)}
                   aria-label="Remove tour stop"
-                  style={{ fontSize: '13px', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer' }}
+                  style={{ fontSize: '13px', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer', width: '100%' }}
                 >
-                  ✕
+                  ✕ Remove
                 </button>
               </div>
             ))}
