@@ -180,6 +180,12 @@ export default function OrganiserDashboard() {
                 )}
               </Link>
               <Link
+                href="/dashboard/organiser/tours"
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+              >
+                🚌 Tours
+              </Link>
+              <Link
                 href="/dashboard/organiser/events/create"
                 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
