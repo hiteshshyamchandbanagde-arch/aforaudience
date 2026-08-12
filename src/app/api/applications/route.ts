@@ -36,6 +36,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Event not found or not open for applications' }, { status: 404 })
     }
 
+    // Tour by Organiser (12 Aug) - open local/beginner slots on a Tour
+    // stop can have their own applicationDeadline, independent of the
+    // event date itself (organiser wants lineup locked in before the
+    // show, not right up to showtime).
+    if (event.applicationDeadline && event.applicationDeadline.getTime() < Date.now()) {
+      return NextResponse.json({ error: 'Applications for this event have closed.' }, { status: 400 })
+    }
+
     const existing = await prisma.application.findFirst({
       where: { eventId, artistId: artist.id },
     })

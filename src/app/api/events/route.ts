@@ -8,6 +8,7 @@ import { parseAmount } from '@/lib/money-validation'
 import { notifyFollowersOfNewEvent } from '@/lib/follow'
 import { getPlatformSettings } from '@/lib/platform-settings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
+import { recomputeTourStatus } from '@/lib/tours'
 
 export async function GET(req: Request) {
   try {
@@ -118,7 +119,51 @@ export async function POST(req: Request) {
       defaultCompensationType, defaultFeeAmount, defaultBuyInAmount,
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
       termsChecklist, specialNotes, ageLimit,
+      tourId, openSlotCount, slotDuration, applicationDeadline,
     } = body
+
+    // Tour by Organiser (12 Aug) - if tourId is present, this is a Tour
+    // stop, not a standalone event. Verified up front (ownership + not
+    // terminal) so the rest of validation can treat it as a normal
+    // event creation with a couple of extra fields tacked on.
+    let tour: { id: string; status: string } | null = null
+    if (tourId) {
+      tour = await prisma.tour.findUnique({ where: { id: String(tourId) }, select: { id: true, status: true, organiserId: true } as any })
+      if (!tour || (tour as any).organiserId !== organiser.id) {
+        return NextResponse.json({ error: 'Tour not found' }, { status: 404 })
+      }
+      if (tour.status === 'CANCELLED' || tour.status === 'COMPLETED') {
+        return NextResponse.json({ error: 'This Tour is no longer accepting new stops' }, { status: 400 })
+      }
+    }
+    const MAX_OPEN_SLOTS = 50
+    let openSlotCountValue: number | null = null
+    if (openSlotCount !== undefined && openSlotCount !== null && openSlotCount !== '') {
+      const n = Number(openSlotCount)
+      if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > MAX_OPEN_SLOTS) {
+        return NextResponse.json({ error: `Open slot count must be a whole number between 0 and ${MAX_OPEN_SLOTS}.` }, { status: 400 })
+      }
+      openSlotCountValue = n
+    }
+    let slotDurationValue: number | null = null
+    if (slotDuration !== undefined && slotDuration !== null && slotDuration !== '') {
+      const n = Number(slotDuration)
+      if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1 || n > 180) {
+        return NextResponse.json({ error: 'Slot duration must be a whole number of minutes between 1 and 180.' }, { status: 400 })
+      }
+      slotDurationValue = n
+    }
+    let applicationDeadlineValue: Date | null = null
+    if (applicationDeadline) {
+      const d = new Date(applicationDeadline)
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: 'Invalid application deadline' }, { status: 400 })
+      }
+      if (d.getTime() < Date.now()) {
+        return NextResponse.json({ error: 'Application deadline must be in the future' }, { status: 400 })
+      }
+      applicationDeadlineValue = d
+    }
 
     // Verify-gate only applies at Publish - a Draft isn't a commitment an
     // Organiser plans around yet (see lib/verification.ts doc comment).
@@ -346,6 +391,15 @@ export async function POST(req: Request) {
         // Dress Code/Vibe "Other" fallback (PresetSelectWithOther), since
         // this uses the identical preset-or-custom pattern.
         ageLimit: ageLimit ? String(ageLimit).trim().slice(0, 60) : null,
+        // Tour by Organiser (12 Aug) - category/tourId set only when a
+        // valid tourId was verified above; openSlotCount/slotDuration/
+        // applicationDeadline are independent of that (kept simple,
+        // not DB-restricted to TOUR_STOP - see schema comment).
+        category: tour ? 'TOUR_STOP' : 'STANDALONE',
+        tourId: tour ? tour.id : null,
+        openSlotCount: openSlotCountValue,
+        slotDuration: slotDurationValue,
+        applicationDeadline: applicationDeadlineValue,
       },
     })
 
@@ -428,6 +482,10 @@ export async function POST(req: Request) {
     if (event.status === 'APPROVED') {
       notifyFollowersOfNewEvent('ORGANISER', organiser.id, event)
       if (venueId) notifyFollowersOfNewEvent('VENUE', venueId, event)
+    }
+
+    if (tour) {
+      await recomputeTourStatus(tour.id)
     }
 
     return NextResponse.json(event, { status: 201 })

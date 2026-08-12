@@ -16,7 +16,7 @@ export async function GET() {
   }
   const userId = (session.user as any).id
 
-  const [panelistInvites, celebrityInvites] = await Promise.all([
+  const [panelistInvites, celebrityInvites, tourInvites] = await Promise.all([
     prisma.eventPanelist.findMany({
       where: { userId, status: 'PENDING' },
       include: { event: { select: { id: true, title: true, date: true, organiser: { select: { user: { select: { name: true, displayName: true } } } } } } },
@@ -27,7 +27,27 @@ export async function GET() {
       include: { event: { select: { id: true, title: true, date: true, organiser: { select: { user: { select: { name: true, displayName: true } } } } } } },
       orderBy: { createdAt: 'desc' },
     }),
+    // Tour by Organiser (12 Aug) - one consent per artist per Tour, so
+    // this returns one row per outstanding Tour invite, not one per
+    // stop. Includes the Tour's stops so the artist can see exactly
+    // what they're being asked to confirm before responding once.
+    prisma.tourArtistConsent.findMany({
+      where: { artist: { userId }, status: 'PENDING' },
+      include: {
+        tour: {
+          select: {
+            id: true,
+            title: true,
+            subject: true,
+            slug: true,
+            organiser: { select: { orgName: true } },
+            stops: { select: { id: true, title: true, date: true, venue: { select: { name: true, city: true } } }, orderBy: { date: 'asc' } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ])
 
-  return NextResponse.json({ panelistInvites, celebrityInvites })
+  return NextResponse.json({ panelistInvites, celebrityInvites, tourInvites })
 }

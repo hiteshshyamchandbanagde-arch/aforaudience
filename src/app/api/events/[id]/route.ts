@@ -7,13 +7,27 @@ import { parseAmount } from '@/lib/money-validation'
 import { requireVerifiedPhone } from '@/lib/verification'
 import { getPlatformSettings } from '@/lib/platform-settings'
 import { EVENT_TERMS_CHECKLIST_KEYS, SPECIAL_NOTES_MAX_LENGTH } from '@/lib/event-terms'
+import { isTourStopBookable, recomputeTourStatus } from '@/lib/tours'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const event = await prisma.event.findUnique({
       where: { id },
-      include: { venue: true, organiser: { include: { user: { select: { isSuspended: true } } } }, panelists: { orderBy: { order: 'asc' } } },
+      include: {
+        venue: true,
+        organiser: { include: { user: { select: { isSuspended: true } } } },
+        panelists: { orderBy: { order: 'asc' } },
+        // Tour by Organiser (12 Aug) - surfaced so an artist applying for
+        // an open slot sees full Tour context (headliner, tour name) per
+        // Hitesh's explicit call, not a bare/anonymous event listing.
+        tour: { select: { id: true, title: true, subject: true, slug: true } },
+        lineup: {
+          where: { cancelledAt: null },
+          include: { artist: { include: { user: { select: { name: true, displayName: true } } } } },
+          orderBy: { slot: 'asc' },
+        },
+      },
     })
 
     // H3 - same suspension gate as the public listing (GET /api/events),
@@ -77,6 +91,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       isCompetitionShow, competitionPrizeFirst, competitionPrizeSecond, competitionPrizeThird,
       audienceVoteWeight, panelistVoteWeight, celebrityVoteWeight,
       termsChecklist, specialNotes, ageLimit,
+      openSlotCount, slotDuration, applicationDeadline,
     } = body
 
     // Competition show - prize fields only kept when isCompetitionShow is
@@ -197,6 +212,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         resolvedStatus = 'DRAFT'
       } else if (!event.venueId) {
         return NextResponse.json({ error: 'A venue must be attached before publishing. Save as a draft to continue without one.' }, { status: 400 })
+      } else if (event.category === 'TOUR_STOP') {
+        // Tour by Organiser (12 Aug) - a Tour stop can't go bookable
+        // while any of ITS OWN fixed-lineup artists still has a
+        // pending consent invite (scoped to this stop's lineup only,
+        // so another stop's outstanding invite never blocks this one).
+        const bookable = await isTourStopBookable(event.id)
+        if (!bookable.ok) {
+          return NextResponse.json(
+            { error: `This Tour stop can't be published until every listed artist confirms. Still waiting on ${bookable.pendingArtistIds.length} artist(s).` },
+            { status: 400 }
+          )
+        }
+        const confirmedBooking = await prisma.venueBooking.findFirst({
+          where: { eventId: event.id, venueId: event.venueId, status: 'CONFIRMED' },
+        })
+        resolvedStatus = confirmedBooking ? 'APPROVED' : 'PENDING_APPROVAL'
       } else {
         const confirmedBooking = await prisma.venueBooking.findFirst({
           where: { eventId: event.id, venueId: event.venueId, status: 'CONFIRMED' },
@@ -299,6 +330,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         }),
         ...(specialNotesUpdate && specialNotesUpdate),
         ...(ageLimit !== undefined && { ageLimit: ageLimit ? String(ageLimit).trim().slice(0, 60) : null }),
+        // Tour by Organiser (12 Aug) - open local/beginner slots, only
+        // relevant for TOUR_STOP events but not gated on category here
+        // (schema note: no reason to hard-couple them). Same bounds as
+        // POST /api/events.
+        ...(openSlotCount !== undefined && {
+          openSlotCount: openSlotCount === null || openSlotCount === '' ? null : parseInt(openSlotCount),
+        }),
+        ...(slotDuration !== undefined && {
+          slotDuration: slotDuration === null || slotDuration === '' ? null : parseInt(slotDuration),
+        }),
+        ...(applicationDeadline !== undefined && {
+          applicationDeadline: applicationDeadline ? new Date(applicationDeadline) : null,
+        }),
         // Panelists/celebrity (§8, session 57) are deliberately NEVER
         // touched by this general event PATCH anymore, even if a client
         // sent a `panelists` field - the old deleteMany+create full-replace
@@ -314,6 +358,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (resolvedStatus === 'APPROVED' && event.status !== 'APPROVED') {
       notifyFollowersOfNewEvent('ORGANISER', event.organiserId, updated)
       if (event.venueId) notifyFollowersOfNewEvent('VENUE', event.venueId, updated)
+    }
+
+    if (event.tourId && resolvedStatus) {
+      await recomputeTourStatus(event.tourId)
     }
 
     return NextResponse.json(updated)
