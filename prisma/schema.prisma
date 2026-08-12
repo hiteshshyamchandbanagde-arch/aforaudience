@@ -99,6 +99,68 @@ enum ApprovalMode {
   AUTO
 }
 
+// Tour by Organiser (12 Aug, "as a collaborator" session). Distinct from
+// the pre-existing ArtistTourStop (self-reported, informational only,
+// FEAT-2608-047) - a Tour is Organiser-owned, wraps real bookable Events,
+// and every fixed-lineup artist across it must consent before any stop
+// goes live. Single- or multi-artist. DRAFT while the organiser is still
+// adding stops/lineup; PENDING_CONSENT once at least one artist has an
+// outstanding invite; LIVE once every currently-listed artist has
+// accepted. Individual stops can still go live incrementally: a stop's
+// own publish gate checks only ITS OWN Performance.artistIds against
+// TourArtistConsent (computed at request time, no separate stored flag),
+// so one artist's outstanding invite on a different stop doesn't block
+// this one. CANCELLED/COMPLETED are terminal.
+enum TourStatus {
+  DRAFT
+  PENDING_CONSENT
+  LIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum EventCategory {
+  STANDALONE
+  TOUR_STOP
+}
+
+model Tour {
+  id           String     @id @default(cuid())
+  organiserId  String
+  organiser    Organiser  @relation(fields: [organiserId], references: [id])
+  title        String
+  subject      String?
+  slug         String     @unique
+  status       TourStatus @default(DRAFT)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  stops        Event[]
+  consents     TourArtistConsent[]
+
+  @@index([organiserId])
+}
+
+// One consent record per artist per Tour (not per stop) - an artist
+// listed across several stops only has to respond once. A DECLINE lets
+// the organiser drop that artist from their stop(s) and re-invite a
+// replacement without blocking other artists' already-accepted stops.
+// Reuses InviteStatus (same shape as EventPanelist/Celebrity Accept-to-
+// Appear) rather than a bespoke enum, per existing convention.
+model TourArtistConsent {
+  id        String        @id @default(cuid())
+  tourId    String
+  tour      Tour          @relation(fields: [tourId], references: [id])
+  artistId  String
+  artist    Artist        @relation(fields: [artistId], references: [id])
+  status    InviteStatus  @default(PENDING)
+  respondedAt DateTime?
+  createdAt DateTime      @default(now())
+
+  @@unique([tourId, artistId])
+  @@index([artistId])
+}
+
 enum VenueBookingRequestStatus {
   PENDING
   ACCEPTED
@@ -575,6 +637,7 @@ model Artist {
   performances  Performance[]
   organiserRatings OrganiserArtistRating[]
   tourStops     ArtistTourStop[]
+  tourConsents  TourArtistConsent[]
 
   // Scene Status (reputation epic §1, amended session 55) — Headliner tier
   // is deliberately fully manual, admin-only, no formula/threshold. Admin
@@ -724,6 +787,7 @@ model Organiser {
   bookingRequests VenueBookingRequest[]
   payoutLedgerEntries OrganiserPayoutLedger[]
   artistRatings OrganiserArtistRating[]
+  tours         Tour[]
 }
 
 // Artist Reputation epic (design doc, session 52-53) - the one genuine
@@ -1302,6 +1366,27 @@ model Event {
   // used for Dress Code/Vibe, so this is just a plain string, not an
   // enum - keeps the "type your own" escape hatch cheap.
   ageLimit String?
+
+  // Tour by Organiser (12 Aug). category defaults STANDALONE so every
+  // existing Event row is valid with no backfill. tourId is set only
+  // when category is TOUR_STOP - enforced in the API layer, not the DB,
+  // same pattern as specialNotes/specialNotesStatus above.
+  category            EventCategory @default(STANDALONE)
+  tourId               String?
+  tour                 Tour?    @relation(fields: [tourId], references: [id])
+
+  // Open local/beginner slots alongside a Tour stop's fixed headliner
+  // lineup (Hitesh, 12 Aug: "organiser decide how many open spot for
+  // local artist, duration too"). Reuses the existing Application/
+  // Performance flow unchanged - openSlotCount/slotDuration/
+  // applicationDeadline just gate whether the Apply action is shown and
+  // when it closes; approval is the same organiser review as any other
+  // event. Only meaningful when category is TOUR_STOP, but not DB-
+  // restricted to it in case a future STANDALONE event wants the same
+  // shape - no reason to hard-couple them.
+  openSlotCount        Int?
+  slotDuration         Int?
+  applicationDeadline  DateTime?
 }
 
 // Accept-to-Appear (reputation epic §8, session 57) - shared status enum
