@@ -53,10 +53,12 @@ export default function ArtistProfilePage({
   artist,
   isVerified,
   sceneStatus,
+  realTourStops,
 }: {
   artist: ArtistData | null
   isVerified?: boolean
   sceneStatus?: SceneStatusTier | null
+  realTourStops?: { id: string; title: string; date: string; startTime: string; venue: { name: string; city: string } | null; tour: { title: string; slug: string } | null }[]
 }) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
   const { data: session, status: sessionStatus } = useSession()
@@ -566,6 +568,39 @@ export default function ArtistProfilePage({
                   </p>
                 </div>
               ))}
+
+              {/* Tour by Organiser (12 Aug) - real, bookable Tour stops,
+                  visually distinct ("Book on AFA") from the self-reported
+                  informational list below it, so an audience member never
+                  taps expecting to book and finds out it's just a note. */}
+              {realTourStops && realTourStops.length > 0 && (
+                <div style={{ marginBottom: "28px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
+                    Tour
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {realTourStops.map((stop) => (
+                      <Link
+                        key={stop.id}
+                        href={`/events/${stop.id}`}
+                        style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", borderRadius: "10px", padding: "12px 16px", border: "1px solid var(--afa-sage)", textDecoration: "none" }}
+                      >
+                        <span style={{ fontSize: "18px" }}>🎟️</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>
+                            {stop.title}{stop.venue && ` — ${stop.venue.city}`}
+                          </div>
+                          <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.55 }}>
+                            {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            {stop.tour && ` · Part of ${stop.tour.title}`}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-sage)", whiteSpace: "nowrap" }}>Book on AFA →</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* FEAT-2608-047 (11 Aug) - self-managed tour list, purely
                   informational (not tied to AFA's booking flow - these

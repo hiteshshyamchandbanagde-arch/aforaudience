@@ -22,6 +22,23 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
     },
   })
 
+  // Tour by Organiser (12 Aug) - real, bookable Tour stops this artist
+  // is fixed-lineup on, distinct from the self-reported tourStops above.
+  // Only ever APPROVED/COMPLETED (same public-visibility rule as the
+  // Tour landing page itself) and only where this artist's own
+  // Performance is still active (not cancelled - e.g. after a decline).
+  const realTourStops = artist
+    ? await prisma.event.findMany({
+        where: {
+          category: 'TOUR_STOP',
+          status: { in: ['APPROVED', 'COMPLETED'] },
+          lineup: { some: { artistId: artist.id, cancelledAt: null } },
+        },
+        include: { venue: { select: { name: true, city: true } }, tour: { select: { title: true, slug: true } } },
+        orderBy: { date: 'asc' },
+      })
+    : []
+
   // BUG-2608-025 (10 Aug) - these 3 queries were previously sequential
   // (followerCount, then checkedInBookings, then sceneStatus), each
   // paying its own round-trip on every prev/next hop. followerCount only
@@ -94,6 +111,7 @@ export default async function ArtistProfilePage({ params }: { params: Promise<{ 
       artist={artistWithFollowers ? JSON.parse(JSON.stringify(artistWithFollowers)) : null}
       isVerified={isVerified}
       sceneStatus={sceneStatus}
+      realTourStops={JSON.parse(JSON.stringify(realTourStops))}
     />
   )
 }

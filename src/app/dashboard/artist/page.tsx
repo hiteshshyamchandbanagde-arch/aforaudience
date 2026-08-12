@@ -30,6 +30,18 @@ interface Review {
   reply: { text: string; author: { name: string; displayName: string | null } } | null
 }
 
+interface TourInvite {
+  id: string
+  tour: {
+    id: string
+    title: string
+    subject: string | null
+    slug: string
+    organiser: { orgName: string }
+    stops: { id: string; title: string; date: string; venue: { name: string; city: string } | null }[]
+  }
+}
+
 interface Performance {
   id: string
   slot: number
@@ -98,6 +110,11 @@ export default function ArtistDashboard() {
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
   const [replySubmitting, setReplySubmitting] = useState<string | null>(null)
   const [localReplies, setLocalReplies] = useState<Record<string, { text: string; author: { name: string; displayName: string | null } }>>({})
+  // Tour by Organiser (12 Aug) - pending Tour consent invites, same
+  // "You've been tagged" inbox pattern as panelist/celebrity Accept-to-
+  // Appear (GET /api/invites/mine).
+  const [tourInvites, setTourInvites] = useState<TourInvite[]>([])
+  const [respondingTour, setRespondingTour] = useState<string | null>(null)
 
   const submitReply = async (reviewId: string) => {
     const text = (replyDrafts[reviewId] || '').trim()
@@ -147,6 +164,39 @@ export default function ArtistDashboard() {
       fetchProfile()
     }
   }, [session])
+
+  useEffect(() => {
+    const fetchTourInvites = async () => {
+      try {
+        const res = await fetch('/api/invites/mine')
+        if (res.ok) {
+          const data = await res.json()
+          setTourInvites(data.tourInvites || [])
+        }
+      } catch {
+        // Non-critical for this view.
+      }
+    }
+    if (session?.user) fetchTourInvites()
+  }, [session])
+
+  const respondToTourInvite = async (consentId: string, accept: boolean) => {
+    setRespondingTour(consentId)
+    try {
+      const res = await fetch(`/api/tour-invites/${consentId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to respond')
+      setTourInvites((prev) => prev.filter((inv) => inv.id !== consentId))
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setRespondingTour(null)
+    }
+  }
 
   const cancelPerformance = async (performanceId: string) => {
     if (!window.confirm("Cancel this performance? If it's a Buy-in slot, your payment is recorded as refunded.")) return
@@ -252,6 +302,49 @@ export default function ArtistDashboard() {
               </Link>
             </div>
           </div>
+
+          {/* Tour by Organiser (12 Aug) - pending consent invites, one per
+              Tour (not per stop). Placed right after the header, same
+              can't-miss-it priority as the corporate-inquiry inbox link. */}
+          {tourInvites.length > 0 && (
+            <div style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {tourInvites.map((inv) => (
+                <div key={inv.id} style={{ background: 'var(--afa-white)', border: '1px solid var(--afa-gold)', borderRadius: '12px', padding: '20px 24px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-gold)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                    Tour invite
+                  </p>
+                  <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>{inv.tour.title}</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '10px' }}>
+                    {inv.tour.organiser.orgName} wants to feature you on this Tour
+                    {inv.tour.stops.length > 0 && ` — ${inv.tour.stops.length} stop${inv.tour.stops.length > 1 ? 's' : ''}`}.
+                  </p>
+                  {inv.tour.stops.length > 0 && (
+                    <ul style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.8, marginBottom: '14px', paddingLeft: '18px' }}>
+                      {inv.tour.stops.map((s) => (
+                        <li key={s.id}>{s.title} — {new Date(s.date).toLocaleDateString()}{s.venue ? `, ${s.venue.city}` : ''}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={() => respondToTourInvite(inv.id, true)}
+                      disabled={respondingTour === inv.id}
+                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-sage)', border: 'none', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => respondToTourInvite(inv.id, false)}
+                      disabled={respondingTour === inv.id}
+                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Growth messaging for brand-new artists (Hitesh, 31 Jul feedback): a fresh
               profile with zero performances/followers/hype should read as "just the
