@@ -20,6 +20,7 @@ export const LOCALES = [
   { id: "ta", label: "Tamil", nativeLabel: "தமிழ்" },
   { id: "kn", label: "Kannada", nativeLabel: "ಕನ್ನಡ" },
   { id: "ml", label: "Malayalam", nativeLabel: "മലയാളം" },
+  { id: "gu", label: "Gujarati", nativeLabel: "ગુજરાતી" },
 ] as const
 
 export type LocaleId = typeof LOCALES[number]["id"]
