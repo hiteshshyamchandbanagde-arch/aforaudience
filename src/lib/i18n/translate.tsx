@@ -7,6 +7,8 @@ import te from "./dictionaries/te"
 import ta from "./dictionaries/ta"
 import kn from "./dictionaries/kn"
 import ml from "./dictionaries/ml"
+import gu from "./dictionaries/gu"
+import bn from "./dictionaries/bn"
 import { DEFAULT_LOCALE, VALID_LOCALE_IDS, type LocaleId } from "./locales"
 
 export type Dictionary = typeof en
@@ -18,6 +20,8 @@ const DICTIONARIES: Record<LocaleId, Dictionary> = {
   ta,
   kn,
   ml,
+  gu,
+  bn,
 }
 
 const STORAGE_KEY = "afa-locale"

@@ -4,8 +4,12 @@
 // (event/artist bios etc., which have no clean translation story and
 // aren't attempted here). Hindi shipped first; Telugu/Tamil/Kannada/
 // Malayalam added 13 Aug (same nav-chrome scope, same array-driven
-// picker - no infra rework needed to add them, exactly per the "array
-// now, content later" pattern this file originally described).
+// picker). Gujarati/Bengali added same day, continuing sequentially
+// (Hitesh: "go one by one, gujrati, bengali, german, french,
+// spainish... don't wait for my reply") - German/French/Spanish are
+// next, noting they sit outside AFA's India-only functional scope
+// (phone verification, payment settlement) even though this UI-text
+// addition itself doesn't change that.
 //
 // Persistence is localStorage-only for this pilot (mirrors afa-theme),
 // not a User.locale DB field yet - deliberately not adding a migration
@@ -20,6 +24,8 @@ export const LOCALES = [
   { id: "ta", label: "Tamil", nativeLabel: "தமிழ்" },
   { id: "kn", label: "Kannada", nativeLabel: "ಕನ್ನಡ" },
   { id: "ml", label: "Malayalam", nativeLabel: "മലയാളം" },
+  { id: "gu", label: "Gujarati", nativeLabel: "ગુજરાતી" },
+  { id: "bn", label: "Bengali", nativeLabel: "বাংলা" },
 ] as const
 
 export type LocaleId = typeof LOCALES[number]["id"]
