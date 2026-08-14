@@ -10,6 +10,7 @@ import ml from "./dictionaries/ml"
 import gu from "./dictionaries/gu"
 import bn from "./dictionaries/bn"
 import de from "./dictionaries/de"
+import fr from "./dictionaries/fr"
 import { DEFAULT_LOCALE, VALID_LOCALE_IDS, type LocaleId } from "./locales"
 
 export type Dictionary = typeof en
@@ -24,6 +25,7 @@ const DICTIONARIES: Record<LocaleId, Dictionary> = {
   gu,
   bn,
   de,
+  fr,
 }
 
 const STORAGE_KEY = "afa-locale"

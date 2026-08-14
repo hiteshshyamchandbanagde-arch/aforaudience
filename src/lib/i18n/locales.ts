@@ -27,6 +27,7 @@ export const LOCALES = [
   { id: "gu", label: "Gujarati", nativeLabel: "ગુજરાતી" },
   { id: "bn", label: "Bengali", nativeLabel: "বাংলা" },
   { id: "de", label: "German", nativeLabel: "Deutsch" },
+  { id: "fr", label: "French", nativeLabel: "Français" },
 ] as const
 
 export type LocaleId = typeof LOCALES[number]["id"]
