@@ -33,17 +33,20 @@ test("audience member can register, log in, select seats, and reach checkout wit
   await expect(page).toHaveURL(/\/$/, { timeout: 10_000 }); // login redirects to "/"
 
   await page.goto("/events");
-  // Only "View Event" is a real <Link> - the card title text itself isn't
-  // clickable (confirmed via a real trace, 23 Jul: clicking the bare title
-  // did nothing, and a loose /events/ regex silently "passed" anyway since
-  // it also matches the listing page itself, hiding the real failure until
-  // the seat locator timed out several steps later).
-  const card = page
-    .locator("div")
-    .filter({ hasText: "Jaipur Mic Gala 100" })
-    .filter({ has: page.getByRole("link", { name: /view event/i }) })
-    .last();
-  await card.getByRole("link", { name: /view event/i }).click();
+  // The whole card is now a single role="link" element whose accessible
+  // name is the full card text (title, price, "View Event", etc.) - the
+  // current click-guard card pattern (PR #261/#312), not the older "only a
+  // nested View Event link is clickable" DOM from 23 Jul.
+  //
+  // Don't match on "view event" text: every card ends with those words, so
+  // a name regex of /view event/i matches all 8 cards at once and
+  // Playwright correctly refuses to click an ambiguous target (confirmed
+  // via a real CI trace, 13 Aug: locator resolved to 8 elements, hiding the
+  // real failure until the seat locator timed out several steps later).
+  // Match on the unique title instead and click the card directly - there's
+  // no separate nested link to find.
+  const card = page.getByRole("link", { name: /Jaipur Mic Gala 100/i });
+  await card.click();
   // Require an actual id segment after /events/ - the loose /\/events\//
   // regex matches the listing page too and would false-pass with zero
   // navigation.
