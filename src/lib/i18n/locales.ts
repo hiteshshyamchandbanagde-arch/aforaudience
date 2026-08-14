@@ -2,11 +2,10 @@
 // narrow for this pilot: SiteNav chrome only (nav links, account menu,
 // language picker itself) - NOT static pages, NOT user-generated content
 // (event/artist bios etc., which have no clean translation story and
-// aren't attempted here). Hindi ships first; Telugu/Tamil/Kannada/
-// Malayalam are added as LOCALES entries + dictionary files once Hindi is
-// confirmed clean on a real device - no further picker/infra rework
-// needed, same "array now, content later" pattern as the Theme Phase 2
-// picker rebuild.
+// aren't attempted here). Hindi shipped first; Telugu/Tamil/Kannada/
+// Malayalam added 13 Aug (same nav-chrome scope, same array-driven
+// picker - no infra rework needed to add them, exactly per the "array
+// now, content later" pattern this file originally described).
 //
 // Persistence is localStorage-only for this pilot (mirrors afa-theme),
 // not a User.locale DB field yet - deliberately not adding a migration
@@ -17,6 +16,10 @@
 export const LOCALES = [
   { id: "en", label: "English", nativeLabel: "English" },
   { id: "hi", label: "Hindi", nativeLabel: "हिन्दी" },
+  { id: "te", label: "Telugu", nativeLabel: "తెలుగు" },
+  { id: "ta", label: "Tamil", nativeLabel: "தமிழ்" },
+  { id: "kn", label: "Kannada", nativeLabel: "ಕನ್ನಡ" },
+  { id: "ml", label: "Malayalam", nativeLabel: "മലയാളം" },
 ] as const
 
 export type LocaleId = typeof LOCALES[number]["id"]

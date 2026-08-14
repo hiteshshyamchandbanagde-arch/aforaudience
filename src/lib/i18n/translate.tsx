@@ -3,6 +3,10 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import en from "./dictionaries/en"
 import hi from "./dictionaries/hi"
+import te from "./dictionaries/te"
+import ta from "./dictionaries/ta"
+import kn from "./dictionaries/kn"
+import ml from "./dictionaries/ml"
 import { DEFAULT_LOCALE, VALID_LOCALE_IDS, type LocaleId } from "./locales"
 
 export type Dictionary = typeof en
@@ -10,6 +14,10 @@ export type Dictionary = typeof en
 const DICTIONARIES: Record<LocaleId, Dictionary> = {
   en,
   hi,
+  te,
+  ta,
+  kn,
+  ml,
 }
 
 const STORAGE_KEY = "afa-locale"
