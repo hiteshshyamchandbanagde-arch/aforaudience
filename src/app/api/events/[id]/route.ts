@@ -207,6 +207,26 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (publish) {
         const verifyError = requireVerifiedPhone(user, 'publishing this event')
         if (verifyError) return verifyError
+
+        // GEN-2608-040 (15 Aug) - same requirement as POST /api/events:
+        // a paid event can't publish with no price anywhere. Resolves
+        // against the FINAL effective state (this PATCH's fields where
+        // provided, existing event/DB values otherwise), since a
+        // publish-only PATCH often resends neither isFree, ticketPrice,
+        // nor ticketTiers at all.
+        const effectiveIsFree = isFree !== undefined ? Boolean(isFree) : event.isFree
+        if (!effectiveIsFree) {
+          const effectiveHasTierPricing = ticketTiers !== undefined
+            ? validTiers.length > 0
+            : (await prisma.ticketTier.count({ where: { eventId: id } })) > 0
+          const effectiveTicketPrice = ticketPrice !== undefined ? ticketPrice : event.ticketPrice
+          if (!effectiveHasTierPricing && (effectiveTicketPrice === undefined || effectiveTicketPrice === null)) {
+            return NextResponse.json(
+              { error: 'A ticket price is required before publishing a paid event. Set a price, add priced sections, or mark the event as free.' },
+              { status: 400 }
+            )
+          }
+        }
       }
       if (!publish) {
         resolvedStatus = 'DRAFT'
