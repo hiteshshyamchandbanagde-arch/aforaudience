@@ -128,7 +128,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               📊 {venue.name} — Revenue
             </h1>
-            <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
+            <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
             </span>
           </div>
@@ -157,13 +157,13 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Timeline */}
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-sage)', borderRadius: '3px 3px 0 0' }} />
-                    <span style={{ fontSize: '9px', color: 'rgba(14,12,10,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: '9px', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -175,16 +175,16 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Recent bookings */}
           <Section title="Recent bookings">
             {recentBookings.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
+                    <span style={{ color: 'rgba(245,245,240,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
+                    <span style={{ color: 'rgba(245,245,240,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'rgba(14,12,10,0.4)' }}>{timeAgo(b.createdAt)}</span>
+                    <span style={{ color: 'rgba(245,245,240,0.4)' }}>{timeAgo(b.createdAt)}</span>
                   </div>
                 ))}
               </div>
@@ -198,17 +198,17 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
-    <div style={{ background: muted ? 'rgba(14,12,10,0.03)' : 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
-      <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '16px' }}>
+      <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

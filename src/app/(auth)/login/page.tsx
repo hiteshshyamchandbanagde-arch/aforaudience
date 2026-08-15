@@ -153,7 +153,7 @@ function LoginForm() {
           </div>
         )}
         {wasIdle && !wasSuspended && (
-          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
+          <div style={{ background: "var(--afa-mist)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}

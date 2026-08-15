@@ -252,7 +252,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </p>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             {!cameraOn ? (
               <button
                 onClick={() => { setCameraError(''); setCameraOn(true) }}
@@ -270,7 +270,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                   onClick={() => setCameraOn(false)}
                   style={{
                     width: '100%', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
-                    border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '10px', cursor: 'pointer', marginTop: '12px',
+                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '10px', cursor: 'pointer', marginTop: '12px',
                   }}
                 >
                   Stop Camera
@@ -282,7 +282,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             )}
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--afa-text-primary)' }}>
               Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(booking ID printed on the ticket)</span>
             </label>
@@ -294,7 +294,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 onKeyDown={(e) => { if (e.key === 'Enter') submitCode(manualCode) }}
                 placeholder="e.g., ckabc123..."
                 style={{
-                  flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)',
+                  flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)',
                   background: 'var(--afa-surface-raised)', fontSize: '14px', color: 'var(--afa-text-primary)',
                 }}
               />
@@ -312,7 +312,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <button
               onClick={() => {
                 const next = !listOpen
@@ -338,8 +338,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                       onClick={() => setListFilter(f)}
                       style={{
                         flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                        border: listFilter === f ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                        background: listFilter === f ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                        border: listFilter === f ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
+                        background: listFilter === f ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
                         color: listFilter === f ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
                       }}
                     >
@@ -394,7 +394,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                       padding: '8px 12px', borderRadius: '8px', fontSize: '12.5px',
                                       background: c.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
-                                      border: c.checkedInAt ? 'none' : '1px dashed rgba(14,12,10,0.15)',
+                                      border: c.checkedInAt ? 'none' : '1px dashed rgba(245,245,240,0.15)',
                                     }}
                                   >
                                     <span style={{ color: 'var(--afa-text-primary)' }}>

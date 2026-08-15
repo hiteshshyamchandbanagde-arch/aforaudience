@@ -50,7 +50,7 @@ const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
@@ -559,7 +559,7 @@ export default function CreateEventPage() {
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                 Event Details
               </h2>
@@ -648,7 +648,7 @@ export default function CreateEventPage() {
                   so an organiser can't accidentally write something that
                   conflicts with AFA's own refund/cancellation policy
                   (linked below, platform-wide, not editable here). */}
-              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(14,12,10,0.08)' }}>
+              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
@@ -735,7 +735,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Book a Venue
               </h2>
@@ -785,7 +785,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Seats & pricing */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Seats & Ticket Price
               </h2>
@@ -815,7 +815,7 @@ export default function CreateEventPage() {
                         </div>
                       )}
                       {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
-                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
                           <div>
                             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               {selectedVenue?.seatingMode === 'NUMBERED' && (
@@ -862,7 +862,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Lineup & approvals */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '18px' }}>
                 Lineup &amp; Approvals
               </h2>
@@ -904,8 +904,8 @@ export default function CreateEventPage() {
                       onClick={() => setDefaultCompensationType(opt.value)}
                       style={{
                         padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
+                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
                         color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
                       }}
                     >
@@ -931,8 +931,8 @@ export default function CreateEventPage() {
                       onClick={() => setApplicationApprovalMode(mode)}
                       style={{
                         flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: applicationApprovalMode === mode ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                        border: applicationApprovalMode === mode ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
+                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
                         color: applicationApprovalMode === mode ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
                       }}
                     >
@@ -968,7 +968,7 @@ export default function CreateEventPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => submit(false)}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 Save as Draft
               </button>

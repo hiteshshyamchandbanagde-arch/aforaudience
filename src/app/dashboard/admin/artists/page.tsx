@@ -40,7 +40,7 @@ interface ArtistRow {
 type SortKey = 'name' | 'gigsPerformed' | 'hypeScore' | 'firstGigDate' | 'organiserAvgRating' | 'verifiedAttendees' | 'featuredOrganiserCount'
 
 const TIER_STYLE: Record<string, { label: string; bg: string; color: string }> = {
-  NEW_EMERGING: { label: 'New / Emerging', bg: 'rgba(14,12,10,0.06)', color: 'rgba(14,12,10,0.5)' },
+  NEW_EMERGING: { label: 'New / Emerging', bg: 'rgba(245,245,240,0.06)', color: 'rgba(245,245,240,0.5)' },
   RISING: { label: 'Rising', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   FEATURED: { label: 'Featured', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
   HEADLINER: { label: '★ Headliner', bg: 'var(--afa-gold)', color: 'var(--afa-plum-black)' },
@@ -159,7 +159,7 @@ export default function AdminArtistsPage() {
       onClick={() => toggleSort(key)}
       style={{
         background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
-        fontSize: '11px', fontWeight: 700, color: sortKey === key ? 'var(--afa-terracotta)' : 'rgba(14,12,10,0.4)',
+        fontSize: '11px', fontWeight: 700, color: sortKey === key ? 'var(--afa-terracotta)' : 'rgba(245,245,240,0.4)',
         textTransform: 'uppercase', letterSpacing: '0.04em',
       }}
     >
@@ -180,7 +180,7 @@ export default function AdminArtistsPage() {
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             🎤 Artist Roster
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '680px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)', marginBottom: '20px', maxWidth: '680px' }}>
             Rising and Featured are fully automatic — thresholds live at{' '}
             <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Platform Settings</Link>.
             Headliner is the one manual call here — deliberately not a formula. Organiser ratings are private everywhere except this page, where they're shown to inform your decision.
@@ -191,12 +191,12 @@ export default function AdminArtistsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search artist name..."
-              style={{ flex: '1 1 220px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px' }}
+              style={{ flex: '1 1 220px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
             />
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px' }}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -222,7 +222,7 @@ export default function AdminArtistsPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {sorted.length === 0 && !loading && (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No artists match.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No artists match.</p>
             )}
             {sorted.map((a) => {
               const tier = TIER_STYLE[a.sceneStatus]
@@ -231,7 +231,7 @@ export default function AdminArtistsPage() {
                   key={a.id}
                   style={{
                     background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
-                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-gold)' : '1px solid rgba(14,12,10,0.08)',
+                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.08)',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
@@ -246,7 +246,7 @@ export default function AdminArtistsPage() {
                             {tier.label}
                           </span>
                         </p>
-                        <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '2px' }}>
+                        <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '2px' }}>
                           {timeInScene(a.firstGigDate)} in the scene
                         </p>
                       </div>
@@ -267,7 +267,7 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '12px', width: '160px' }}
+                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px' }}
                           />
                           <button
                             onClick={() => handleHeadlinerToggle(a)}
@@ -281,7 +281,7 @@ export default function AdminArtistsPage() {
                       {a.headlinerNote && (
                         <button
                           onClick={() => setExpandedNote(expandedNote === a.id ? null : a.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'rgba(14,12,10,0.4)', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ background: 'transparent', border: 'none', color: 'rgba(245,245,240,0.4)', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                           {expandedNote === a.id ? 'Hide note' : 'View note'}
                         </button>
@@ -295,7 +295,7 @@ export default function AdminArtistsPage() {
                     </p>
                   )}
 
-                  <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                  <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
                     <Stat label="Gigs Performed" value={a.gigsPerformed} />
                     <Stat
                       label="Hype Score"
