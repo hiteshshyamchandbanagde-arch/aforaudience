@@ -114,7 +114,7 @@ export default function NearYouTabs() {
   const loading = isEvents ? events === null : artists === null
 
   return (
-    <div style={{ background: 'var(--afa-ink)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '14px', margin: 0 }}>{tr.homePage.nearYouHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>

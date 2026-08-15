@@ -55,7 +55,7 @@ export default function PlatformGrowthStrip() {
   ].filter((s) => s.value != null)
 
   return (
-    <section style={{ background: 'var(--afa-ink)' }}>
+    <section style={{ background: 'var(--afa-surface-inverse)' }}>
       <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: '40px 48px' }}>
         <p className="growth-strip-tagline" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(18px, 2.2vw, 24px)', color: '#F7F3EE', margin: 0, lineHeight: 1.4 }}>
           {tr.homePage.growthTagline}

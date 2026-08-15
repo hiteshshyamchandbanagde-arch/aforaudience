@@ -66,8 +66,8 @@ export default function GenrePicker({ value, onChange }: Props) {
                 padding: '7px 14px',
                 borderRadius: '999px',
                 border: selected ? '1px solid var(--afa-ink)' : '1px solid rgba(14,12,10,0.15)',
-                background: selected ? 'var(--afa-ink)' : 'transparent',
-                color: selected ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                background: selected ? 'var(--afa-fill-solid)' : 'transparent',
+                color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 cursor: 'pointer',
               }}
             >
@@ -76,7 +76,7 @@ export default function GenrePicker({ value, onChange }: Props) {
           )
         })}
       </div>
-      <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
+      <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
         {tr.genrePicker.otherLabel} <span style={{ fontWeight: 400, opacity: 0.7 }}>{tr.genrePicker.otherHint}</span>
       </label>
       <input

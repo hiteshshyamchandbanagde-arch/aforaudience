@@ -173,11 +173,11 @@ export default function AdminArtistsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             🎤 Artist Roster
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '680px' }}>
@@ -240,7 +240,7 @@ export default function AdminArtistsPage() {
                         {!a.avatar && a.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {a.name}
                           <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '999px', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                             {tier.label}
@@ -290,7 +290,7 @@ export default function AdminArtistsPage() {
                   </div>
 
                   {expandedNote === a.id && a.headlinerNote && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'rgba(201,151,58,0.08)', borderRadius: '6px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'rgba(201,151,58,0.08)', borderRadius: '6px' }}>
                       &quot;{a.headlinerNote}&quot;
                     </p>
                   )}
@@ -331,8 +331,8 @@ export default function AdminArtistsPage() {
 function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: '10px', color: 'var(--afa-ink)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: '10px', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
         {label}{sub && <span style={{ opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}> · {sub}</span>}
       </div>
     </div>

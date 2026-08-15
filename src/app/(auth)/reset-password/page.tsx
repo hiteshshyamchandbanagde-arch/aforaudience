@@ -55,11 +55,11 @@ function ResetPasswordForm() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-       <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-ink)] no-underline">
+       <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline">
           <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
-        <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
+        <p className="text-[14px] text-[var(--afa-text-primary)] opacity-50 mt-2">
           {tr.resetPasswordPage.chooseNewPasswordSubtitle}
         </p>
       </div>
@@ -83,7 +83,7 @@ function ResetPasswordForm() {
                 { label: tr.resetPasswordPage.confirmNewPasswordLabel, name: "confirm", placeholder: tr.registerPage.repeatPasswordPlaceholder },
               ].map((field) => (
                 <div key={field.name}>
-                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                     {field.label}
                   </label>
                   <div style={{ position: "relative" }}>
@@ -93,7 +93,7 @@ function ResetPasswordForm() {
                       value={form[field.name as keyof typeof form]}
                       onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
                       onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                     />
                     <button
                       type="button"
@@ -124,7 +124,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+    <main className="min-h-screen bg-[var(--afa-surface-page)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
       <Suspense fallback={<BrandLoader />}>
         <ResetPasswordForm />
       </Suspense>

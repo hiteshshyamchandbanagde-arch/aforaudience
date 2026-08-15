@@ -130,7 +130,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
     <div role="dialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "rgba(14,12,10,0.45)" }} />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-cream)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "88vh", overflowY: "auto", boxSizing: "border-box" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "88vh", overflowY: "auto", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(14,12,10,0.15)" }} />
         </div>
@@ -138,10 +138,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
         {submitted ? (
           <div style={{ textAlign: "center", padding: "24px 8px" }}>
             <div style={{ fontSize: "40px", marginBottom: "12px" }}>✅</div>
-            <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+            <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               Inquiry sent!
             </h2>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
               {artistName} has been notified and will reach out to you directly at the email/phone you provided.
             </p>
             <button
@@ -154,10 +154,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
         ) : (
           <>
             <div style={{ textAlign: "center", marginBottom: "18px" }}>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
                 Book {artistName} for your event
               </h2>
-              <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>
+              <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
                 For corporate or private events. Sends directly to the artist - no payment happens here.
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                 { label: "Event Type", name: "eventType", type: "text", placeholder: "Annual day, product launch..." },
               ].map((field) => (
                 <div key={field.name}>
-                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                     {field.label}
                   </label>
                   <input
@@ -187,12 +187,12 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                     value={form[field.name as keyof typeof form]}
                     onChange={handleChange}
                     maxLength={FIELD_LIMITS[field.name]}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
               ))}
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   City
                 </label>
                 {/* Real Google Places lookup (11 Aug) - safe to use now
@@ -207,11 +207,11 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={(city) => setForm((prev) => ({ ...prev, city: city.slice(0, FIELD_LIMITS.city) }))}
                   onResolved={(location) => setForm((prev) => ({ ...prev, city: location.city.slice(0, FIELD_LIMITS.city) }))}
                   placeholder="Pune"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Preferred Date
                 </label>
                 <input
@@ -219,11 +219,11 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   type="date"
                   value={form.preferredDate}
                   onChange={handleChange}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Budget Range
                 </label>
                 <PresetSelectWithOther
@@ -231,11 +231,11 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
                   presets={BUDGET_RANGE_PRESETS}
                   placeholder="e.g. ₹75,000 or 'flexible'"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Message
                 </label>
                 <textarea
@@ -245,7 +245,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={handleChange}
                   rows={3}
                   maxLength={MESSAGE_LIMIT}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
                 />
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
 
             <button
               onClick={handleClose}
-              style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-ink)", opacity: 0.4, fontSize: "13px", padding: "6px 0 0", cursor: "pointer" }}
+              style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-text-primary)", opacity: 0.4, fontSize: "13px", padding: "6px 0 0", cursor: "pointer" }}
             >
               Cancel
             </button>

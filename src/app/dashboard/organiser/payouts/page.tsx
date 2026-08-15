@@ -99,14 +99,14 @@ export default function OrganiserPayoutsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
             Direct Payouts
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '28px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '28px' }}>
             Link your Razorpay account so ticket revenue settles straight to you — AforAudience only ever keeps the small audience booking fee, never a cut of your ticket price.
           </p>
 
@@ -119,15 +119,15 @@ export default function OrganiserPayoutsPage() {
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
             {payout?.linked ? (
               <>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
-                <p style={{ fontSize: '15px', fontFamily: 'monospace', color: 'var(--afa-ink)', marginBottom: '16px' }}>{payout.accountId}</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
+                <p style={{ fontSize: '15px', fontFamily: 'monospace', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>{payout.accountId}</p>
 
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>Status</p>
-                <p style={{ fontSize: '17px', fontWeight: 700, color: statusInfo?.color || 'var(--afa-ink)', marginBottom: '8px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Status</p>
+                <p style={{ fontSize: '17px', fontWeight: 700, color: statusInfo?.color || 'var(--afa-text-primary)', marginBottom: '8px' }}>
                   {statusInfo?.label || payout.status}
                 </p>
                 {statusInfo?.detail && (
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '20px' }}>{statusInfo.detail}</p>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>{statusInfo.detail}</p>
                 )}
                 {payout.refreshError && (
                   <p style={{ fontSize: '13px', color: 'var(--afa-gold)', marginBottom: '20px' }}>
@@ -137,28 +137,28 @@ export default function OrganiserPayoutsPage() {
 
                 <button
                   onClick={() => { setLoading(true); fetchPayout() }}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
                 >
                   Refresh status
                 </button>
               </>
             ) : payout?.enabled === false ? (
               <>
-                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '8px' }}>Direct payouts aren't available right now</p>
-                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.75, lineHeight: 1.6 }}>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Direct payouts aren't available right now</p>
+                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.75, lineHeight: 1.6 }}>
                   Automatic split payouts aren't currently supported on the platform. Ticket revenue is settled to organisers manually for now — no action needed from you. Reach out via support if you have questions.
                 </p>
               </>
             ) : (
               <>
-                <p style={{ fontSize: '14px', color: 'var(--afa-ink)', marginBottom: '16px' }}>No payout account linked yet.</p>
-                <ol style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.75, paddingLeft: '20px', marginBottom: '20px', lineHeight: 1.7 }}>
+                <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>No payout account linked yet.</p>
+                <ol style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.75, paddingLeft: '20px', marginBottom: '20px', lineHeight: 1.7 }}>
                   <li>On the Razorpay Dashboard (test mode), go to <strong>Route → Accounts → Add Account</strong></li>
                   <li>Fill in your business/bank details (dummy data is fine in test mode — no KYC docs needed)</li>
                   <li>Copy the account ID it generates (starts with <code>acc_</code>) and paste it below</li>
                 </ol>
 
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'block', marginBottom: '6px' }}>
                   Razorpay account ID
                 </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -172,7 +172,7 @@ export default function OrganiserPayoutsPage() {
                   <button
                     onClick={linkAccount}
                     disabled={saving || !accountIdInput.trim()}
-                    style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', padding: '10px 22px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+                    style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '10px 22px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
                   >
                     {saving ? 'Linking…' : 'Link account'}
                   </button>
@@ -182,7 +182,7 @@ export default function OrganiserPayoutsPage() {
           </div>
 
           {payout?.enabled !== false && (
-            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
               Test mode only for now — no real money moves. Once your business completes real KYC with Razorpay later, the same account works for live payouts with no changes needed here.
             </p>
           )}

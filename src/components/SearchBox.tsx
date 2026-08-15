@@ -65,7 +65,7 @@ export default function SearchBox() {
         style={{
           width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
           border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "13px",
-          background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box",
+          background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box",
         }}
       />
       {open && query.trim().length >= 2 && (
@@ -76,14 +76,14 @@ export default function SearchBox() {
           padding: hasResults || loading ? "10px 0" : "16px",
         }}>
           {loading ? (
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, padding: "6px 16px" }}>{t.search.searching}</div>
+            <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, padding: "6px 16px" }}>{t.search.searching}</div>
           ) : !hasResults ? (
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{t.search.noResultsFor.replace("{query}", query)}</div>
+            <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{t.search.noResultsFor.replace("{query}", query)}</div>
           ) : (
             <>
               {results.events.length > 0 && (
                 <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
                   {results.events.map((e) => (
                     <button key={e.id} onClick={() => go(`/events/${e.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -94,7 +94,7 @@ export default function SearchBox() {
               )}
               {results.artists.length > 0 && (
                 <div style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
                   {results.artists.map((a) => (
                     <button key={a.id} onClick={() => go(`/artists/${a.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{a.name}</span>
@@ -105,7 +105,7 @@ export default function SearchBox() {
               )}
               {results.venues.length > 0 && (
                 <div>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-ink)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
                   {results.venues.map((v) => (
                     <button key={v.id} onClick={() => go(`/venues/${v.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{v.name}</span>
@@ -124,5 +124,5 @@ export default function SearchBox() {
 
 const rowStyle: React.CSSProperties = {
   display: "block", width: "100%", textAlign: "left", padding: "8px 16px",
-  border: "none", background: "transparent", cursor: "pointer", fontSize: "13px", color: "var(--afa-ink)",
+  border: "none", background: "transparent", cursor: "pointer", fontSize: "13px", color: "var(--afa-text-primary)",
 }

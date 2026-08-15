@@ -95,7 +95,7 @@ export default function AuthPromptSheet({
           position: "relative",
           width: "100%",
           maxWidth: "480px",
-          background: "var(--afa-cream)",
+          background: "var(--afa-surface-raised)",
           borderRadius: "20px 20px 0 0",
           padding: "8px 24px 28px",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
@@ -116,10 +116,10 @@ export default function AuthPromptSheet({
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: subtitle ? "4px" : 0 }}>
+          <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "4px" : 0 }}>
             {title}
           </h2>
-          {subtitle && <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>{subtitle}</div>}
+          {subtitle && <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>{subtitle}</div>}
         </div>
 
         {error && (
@@ -134,7 +134,7 @@ export default function AuthPromptSheet({
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                 {field.label}
               </label>
               <input
@@ -144,7 +144,7 @@ export default function AuthPromptSheet({
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}
@@ -158,7 +158,7 @@ export default function AuthPromptSheet({
           {loading ? "Signing in..." : "Sign In & Continue"}
         </button>
 
-        <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
           New here?{" "}
           <Link href="/register" style={{ color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none" }}>
             Create an account
@@ -167,7 +167,7 @@ export default function AuthPromptSheet({
 
         <button
           onClick={onClose}
-          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-ink)", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
+          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-text-primary)", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
         >
           Keep browsing
         </button>

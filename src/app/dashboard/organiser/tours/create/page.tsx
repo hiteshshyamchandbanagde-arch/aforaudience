@@ -15,9 +15,9 @@ const inputStyle = {
   border: '1px solid rgba(14,12,10,0.15)',
   background: 'var(--afa-white)',
   fontSize: '14px',
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
-const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '6px' }
+const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
 
 export default function CreateTourPage() {
   const { status } = useSession()
@@ -62,10 +62,10 @@ export default function CreateTourPage() {
       <main style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '20px', marginBottom: '8px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '20px', marginBottom: '8px' }}>
           Create a Tour
         </h1>
-        <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '28px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '28px' }}>
           Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
         </p>
 
@@ -95,7 +95,7 @@ export default function CreateTourPage() {
           <button
             onClick={handleCreate}
             disabled={saving}
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Creating...' : 'Create Tour'}
           </button>

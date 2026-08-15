@@ -22,8 +22,8 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
             borderRadius: '6px',
             border: 'none',
             cursor: 'pointer',
-            color: value === r.value ? 'var(--afa-cream)' : 'var(--afa-ink)',
-            background: value === r.value ? 'var(--afa-ink)' : 'transparent',
+            color: value === r.value ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+            background: value === r.value ? 'var(--afa-fill-solid)' : 'transparent',
           }}
         >
           {r.label}

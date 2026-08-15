@@ -84,8 +84,8 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
 
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
-      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', background: 'rgba(14,12,10,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
+      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }
+      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(14,12,10,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
@@ -127,7 +127,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
                   key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? 'rgba(200,68,26,0.08)' : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-ink)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? 'rgba(200,68,26,0.08)' : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
                 >
                   {c.label}
                 </button>

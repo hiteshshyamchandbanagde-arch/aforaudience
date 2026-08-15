@@ -169,7 +169,7 @@ function FeedbackDetailOverlay({
           position: 'relative',
           width: 'min(480px, 100%)',
           height: '100%',
-          background: 'var(--afa-cream)',
+          background: 'var(--afa-surface-raised)',
           padding: '28px 24px',
           overflowY: 'auto',
           boxShadow: '-8px 0 24px rgba(0,0,0,0.15)',
@@ -318,7 +318,7 @@ export default function MyFeedbackPage() {
   }
 
   return (
-    <div style={{ background: 'var(--afa-cream)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
       <SiteNav variant="page" />
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px 64px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-black, #0E0C0A)' }}>

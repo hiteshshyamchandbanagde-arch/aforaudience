@@ -66,7 +66,7 @@ export default function HowItWorksSection() {
         <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
         {tr.homePage.howItWorksEyebrow}
       </div>
-      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "72px", maxWidth: "700px" }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-text-primary)", marginBottom: "72px", maxWidth: "700px" }}>
         {tr.homePage.howItWorksHeadingPrefix}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.howItWorksHeadingEmphasis}</em>
       </h2>
 
@@ -81,10 +81,10 @@ export default function HowItWorksSection() {
               <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700, color: STEP_COLOR[i], letterSpacing: "0.05em" }}>
                 0{i + 1}
               </div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "21px", fontWeight: 700, color: "var(--afa-ink)", margin: "6px 0 8px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "21px", fontWeight: 700, color: "var(--afa-text-primary)", margin: "6px 0 8px" }}>
                 {step.title}
               </div>
-              <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.62, lineHeight: 1.65, maxWidth: "260px" }}>
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.62, lineHeight: 1.65, maxWidth: "260px" }}>
                 {step.desc}
               </div>
             </div>

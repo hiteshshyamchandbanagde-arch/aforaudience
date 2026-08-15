@@ -118,11 +118,11 @@ export default function AdminUsersPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             🚩 Accounts
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-ink)' }}>
+                    <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
                       {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>

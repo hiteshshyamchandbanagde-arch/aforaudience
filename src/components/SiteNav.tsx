@@ -395,8 +395,8 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           top: calc(100% + 8px);
           left: 50%;
           transform: translateX(-50%) translateY(-4px);
-          background: var(--afa-ink);
-          color: var(--afa-cream);
+          background: var(--afa-surface-inverse);
+          color: var(--afa-on-fill-solid);
           font-size: 11px;
           font-weight: 600;
           white-space: nowrap;
@@ -419,7 +419,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           href="/"
           onClick={() => setMobileOpen(false)}
           className="sitenav-logo"
-          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}
+          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}
         >
           <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
           <EnvBadge />
@@ -428,7 +428,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         {/* Desktop: full row, unchanged from before */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
@@ -447,12 +447,12 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               {THEMES.find((th) => th.id === theme)?.emoji}
             </button>
             {themeMenuOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-cream)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
                 {THEMES.map((th) => (
                   <button
                     key={th.id}
                     onClick={() => applyTheme(th.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
                   >
                     <span>{th.emoji}</span>
                     <span>{th.label}</span>
@@ -468,17 +468,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               title={t.languagePicker.label}
               aria-label={t.languagePicker.label}
               aria-expanded={langMenuOpen}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-ink)' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
             >
               {locale.toUpperCase()}
             </button>
             {langMenuOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-cream)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
                 {LOCALES.map((l) => (
                   <button
                     key={l.id}
                     onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                   >
                     {l.nativeLabel}
                   </button>
@@ -491,7 +491,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <span
                 className="sitenav-greeting"
-                style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
+                style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
               >
                 {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
@@ -507,21 +507,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   aria-label={l.label}
                   aria-current={l.isActive ? "page" : undefined}
                   className="sitenav-icon-link"
-                  style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+                  style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
                 >
                   <NavIcon navKey={l.key} />
                   {l.key === "dashboard" && pendingCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {pendingCount}
                     </span>
                   )}
                   {l.key === "messages" && unreadCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {unreadCount}
                     </span>
                   )}
                   {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                       {pendingCompanionCount}
                     </span>
                   )}
@@ -530,17 +530,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               ))}
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
+                style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
               >
                 {t.nav.signOut}
               </button>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-ink)", textDecoration: "none", opacity: 0.7 }}>
+              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
                 {t.nav.signIn}
               </Link>
-              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", background: "var(--afa-ink)", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
+              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
                 {t.nav.signUp}
               </Link>
             </div>
@@ -555,9 +555,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           aria-expanded={mobileOpen}
           style={{ alignItems: "center", justifyContent: "center", width: "36px", height: "36px", border: "none", background: "transparent", cursor: "pointer", flexDirection: "column", gap: "4px" }}
         >
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-ink)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
+          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
         </button>
       </div>
 
@@ -582,7 +582,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             aria-expanded={mobileThemeExpanded}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
           >
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.themePicker.label}</span>
               <span>{THEMES.find((th) => th.id === theme)?.emoji} {THEMES.find((th) => th.id === theme)?.label}</span>
             </span>
@@ -594,7 +594,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 <button
                   key={th.id}
                   onClick={() => { applyTheme(th.id); setMobileThemeExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
                 >
                   <span>{th.emoji}</span>
                   {th.label}
@@ -609,7 +609,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             aria-expanded={mobileLangExpanded}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
           >
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.languagePicker.label}</span>
               <span>{LOCALES.find((l) => l.id === locale)?.nativeLabel}</span>
             </span>
@@ -621,7 +621,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 <button
                   key={l.id}
                   onClick={() => { setLocale(l.id); setMobileLangExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-ink)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                 >
                   {l.nativeLabel}
                 </button>
@@ -634,7 +634,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             key={l.key}
             href={l.href}
             onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
+            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
           >
             {l.label}
           </Link>
@@ -649,7 +649,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
         {status === "loading" ? null : user ? (
           <>
-            <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span>{t.nav.signedInAs} {user.displayName || user.name || user.email}</span>
               {getRoleLabel(user.role, t.roles) && (
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
@@ -663,21 +663,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
                 aria-current={l.isActive ? "page" : undefined}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-ink)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
                 {l.key === "dashboard" && pendingCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCount}
                   </span>
                 )}
                 {l.key === "messages" && unreadCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {unreadCount}
                   </span>
                 )}
                 {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-cream)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCompanionCount}
                   </span>
                 )}
@@ -685,7 +685,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             ))}
             <button
               onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
-              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-ink)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
+              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
             >
               {t.nav.signOut}
             </button>
@@ -695,14 +695,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
+              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
             >
               {t.nav.signIn}
             </Link>
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-cream)", textDecoration: "none", textAlign: "center", background: "var(--afa-ink)", padding: "12px 20px", borderRadius: "8px" }}
+              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", textAlign: "center", background: "var(--afa-fill-solid)", padding: "12px 20px", borderRadius: "8px" }}
             >
               {t.nav.signUp}
             </Link>

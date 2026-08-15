@@ -49,7 +49,7 @@ interface EventInfo {
 
 const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
   PAID: { label: 'Paid', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  FREE: { label: 'Free', bg: 'rgba(14,12,10,0.06)', color: 'var(--afa-ink)' },
+  FREE: { label: 'Free', bg: 'rgba(14,12,10,0.06)', color: 'var(--afa-text-primary)' },
   BUY_IN: { label: 'Buy-in', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
 }
 
@@ -102,12 +102,12 @@ function SortableRow({
         ⠿
       </button>
 
-      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-ink)', color: 'var(--afa-cream)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {item.slot}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--afa-ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {item.artistName}
         </p>
         {item.startLabel && item.endLabel && (
@@ -287,11 +287,11 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '12px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.55)', marginBottom: '24px' }}>
@@ -360,7 +360,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                 onClick={handleSave}
                 disabled={!dirty || saving}
                 style={{
-                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)',
+                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)',
                   background: dirty ? 'var(--afa-terracotta)' : 'rgba(14,12,10,0.3)',
                   border: 'none', padding: '12px 28px', borderRadius: '8px',
                   cursor: dirty && !saving ? 'pointer' : 'not-allowed',

@@ -164,11 +164,11 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
     >
       <span
         aria-hidden
-        style={{ position: 'absolute', left: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-cream)' }}
+        style={{ position: 'absolute', left: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-surface-raised)' }}
       />
       <span
         aria-hidden
-        style={{ position: 'absolute', right: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-cream)' }}
+        style={{ position: 'absolute', right: '-9px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--afa-surface-raised)' }}
       />
       <div
         style={{
@@ -185,7 +185,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         {icon}
       </div>
       <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
         <div style={{ fontSize: '11.5px', color: 'var(--afa-taupe)', marginTop: '3px' }}>{label}</div>
@@ -216,7 +216,7 @@ function QuickLink({ href, icon, label, accent }: { href: string; icon: React.Re
         gap: '8px',
         fontSize: '13px',
         fontWeight: 600,
-        color: 'var(--afa-ink)',
+        color: 'var(--afa-text-primary)',
         background: 'var(--afa-white)',
         border: '1px solid var(--afa-ink-a8)',
         borderBottom: `2.5px solid ${accent}`,
@@ -281,7 +281,7 @@ export default function AdminCommandCenter() {
       <>
         <SiteNav />
         <main style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)' }}>Admin access required.</p>
+          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
         </main>
       </>
     )
@@ -294,10 +294,10 @@ export default function AdminCommandCenter() {
     <>
       <SiteNav />
       <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px', overflowX: 'hidden' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
           Command Center
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '26px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>
           Everything that needs your attention, at a glance.
         </p>
 
@@ -322,12 +322,12 @@ export default function AdminCommandCenter() {
                     padding: '14px 18px',
                   }}
                 >
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)' }}>{a.label}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.label}</span>
                   <span
                     style={{
                       fontSize: '13px',
                       fontWeight: 700,
-                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-ink)',
+                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-text-primary)',
                       background: a.tone === 'critical' ? 'var(--afa-error-border)' : 'var(--afa-ink-a8)',
                       borderRadius: '999px',
                       padding: '2px 10px',
@@ -389,7 +389,7 @@ export default function AdminCommandCenter() {
             marginBottom: '26px',
           }}
         >
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '16px' }}>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
             Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
           </div>
           <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginLeft: '-2px', paddingLeft: '2px' }}>

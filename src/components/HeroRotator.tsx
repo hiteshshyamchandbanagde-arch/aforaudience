@@ -49,7 +49,7 @@ export default function HeroRotator() {
         width: '100%',
         borderRadius: '16px',
         overflow: 'hidden',
-        background: 'var(--afa-ink)',
+        background: 'var(--afa-fill-solid)',
       }}
     >
       {SLIDES.map((src, i) => (
@@ -68,7 +68,7 @@ export default function HeroRotator() {
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
           {tr.homePage.heroRotatorEyebrow}
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-cream)', lineHeight: 1.3 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-on-fill-solid)', lineHeight: 1.3 }}>
           {tr.homePage.heroRotatorTagline}
         </div>
       </div>

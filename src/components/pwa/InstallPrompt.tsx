@@ -114,8 +114,8 @@ export default function InstallPrompt() {
         right: 16,
         bottom: 16,
         zIndex: 50,
-        background: 'var(--afa-ink)',
-        color: 'var(--afa-cream)',
+        background: 'var(--afa-fill-solid)',
+        color: 'var(--afa-on-fill-solid)',
         borderRadius: 16,
         boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
         padding: 16,
@@ -139,7 +139,7 @@ export default function InstallPrompt() {
         aria-label="Dismiss install prompt"
         style={{
           background: 'transparent',
-          color: 'var(--afa-cream)',
+          color: 'var(--afa-on-fill-solid)',
           border: 'none',
           padding: '8px 12px',
           fontSize: 14,

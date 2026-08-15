@@ -422,8 +422,8 @@ export default function SupportWidget() {
           width: 56,
           height: 56,
           borderRadius: '50%',
-          background: 'var(--afa-ink)',
-          color: 'var(--afa-cream)',
+          background: 'var(--afa-fill-solid)',
+          color: 'var(--afa-on-fill-solid)',
           border: 'none',
           boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
           fontSize: 24,
@@ -452,7 +452,7 @@ export default function SupportWidget() {
             maxWidth: 'calc(100vw - 40px)',
             height: 460,
             maxHeight: 'calc(100vh - 140px)',
-            background: 'var(--afa-cream)',
+            background: 'var(--afa-surface-raised)',
             borderRadius: 16,
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             display: 'flex',
@@ -467,8 +467,8 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'chat' ? 'var(--afa-ink)' : 'transparent',
-                color: panel === 'chat' ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                background: panel === 'chat' ? 'var(--afa-fill-solid)' : 'transparent',
+                color: panel === 'chat' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: 14,
@@ -482,8 +482,8 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'feedback' ? 'var(--afa-ink)' : 'transparent',
-                color: panel === 'feedback' ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                background: panel === 'feedback' ? 'var(--afa-fill-solid)' : 'transparent',
+                color: panel === 'feedback' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 border: 'none',
                 fontWeight: 600,
                 fontSize: 14,
@@ -498,7 +498,7 @@ export default function SupportWidget() {
             <>
               {!chatEnabled ? (
                 <div style={{ flex: 1, padding: 20, textAlign: 'center' }}>
-                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: 'var(--afa-ink)' }}>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: 'var(--afa-text-primary)' }}>
                     <ChatIcon size={36} />
                   </div>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
@@ -543,7 +543,7 @@ export default function SupportWidget() {
                             fontSize: 14,
                             lineHeight: 1.4,
                             background: m.role === 'user' ? 'var(--afa-terracotta)' : 'var(--afa-tan)',
-                            color: m.role === 'user' ? 'white' : 'var(--afa-ink)',
+                            color: m.role === 'user' ? 'white' : 'var(--afa-text-primary)',
                             float: m.role === 'user' ? 'right' : 'left',
                             clear: 'both',
                           }}

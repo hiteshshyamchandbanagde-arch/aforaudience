@@ -24,7 +24,7 @@ export default function BrandLoader({ label = 'Loading...' }: { label?: string }
         </path>
       </svg>
       {label && (
-        <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+        <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
           {label}
         </span>
       )}

@@ -65,38 +65,38 @@ export default function AudienceActivityPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
             {tr.audienceActivityPage.heading}
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             {tr.audienceActivityPage.subtitle}
           </p>
 
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.totalSpend}</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.totalSpend}</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.eventsAttended}</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{totalEventsAttended}</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.eventsAttended}</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{totalEventsAttended}</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.freeEventsAttended}</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-ink)' }}>{freeEventsAttended}</p>
+                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.freeEventsAttended}</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{freeEventsAttended}</p>
               </div>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.4, marginTop: '18px' }}>
+            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: '18px' }}>
               {tr.audienceActivityPage.tipsNote}
             </p>
           </div>
 
           {confirmed.length === 0 && (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', textAlign: 'center' }}>
-              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '16px' }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
                 {tr.audienceActivityPage.noConfirmedBookings}
               </p>
               <Link href="/events" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
@@ -105,7 +105,7 @@ export default function AudienceActivityPage() {
             </div>
           )}
 
-          <Link href="/tickets" style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
+          <Link href="/tickets" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
             {tr.audienceActivityPage.viewAllTickets}
           </Link>
         </div>

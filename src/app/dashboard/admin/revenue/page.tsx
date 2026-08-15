@@ -114,12 +114,12 @@ export default function AdminRevenueOverviewPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-ink)' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               💰 Platform Revenue
             </h1>
             <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
@@ -233,7 +233,7 @@ function SummaryCard({ label, value, sub }: { label: string; value: string; sub?
   return (
     <div style={{ background: 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
-      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-ink)' }}>{value}</p>
+      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
@@ -242,7 +242,7 @@ function SummaryCard({ label, value, sub }: { label: string; value: string; sub?
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '14px' }}>{title}</h2>
+      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
   )

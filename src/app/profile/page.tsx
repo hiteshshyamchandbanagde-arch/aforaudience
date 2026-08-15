@@ -447,14 +447,14 @@ function ProfileContent() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
             {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
+          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
           {user?.code && (
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
               {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
             </p>
           )}
@@ -474,10 +474,10 @@ function ProfileContent() {
               tickets, emails, and greetings. Falls back to username if
               blank, so existing users see no change until they set one. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.displayNameHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.displayNameDescPrefix}<strong>{user?.name}</strong>{tr.profilePage.displayNameDescSuffix}
             </p>
             <input
@@ -523,10 +523,10 @@ function ProfileContent() {
               account's name/photo already surface publicly, e.g.
               ratings and feedback on events. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.aboutYouHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.aboutYouDesc}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
@@ -534,7 +534,7 @@ function ProfileContent() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
               )}
-              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
               </label>
@@ -570,10 +570,10 @@ function ProfileContent() {
               stays INR always - this only changes how amounts are shown
               to this user (event prices, checkout totals). */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.displayCurrencyHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.displayCurrencyDesc}
             </p>
             <select
@@ -608,7 +608,7 @@ function ProfileContent() {
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.artistUpgradeDesc}
             </p>
 
@@ -622,7 +622,7 @@ function ProfileContent() {
                 <button
                   onClick={applyArtist}
                   disabled={applying === 'artist'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
                 >
                   {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
                 </button>
@@ -632,10 +632,10 @@ function ProfileContent() {
 
           {/* Organiser upgrade */}
           <div id="apply-organiser" style={cardStyle(highlightedCard === 'organiser')}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.becomeOrganiserHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.becomeOrganiserDesc}
             </p>
 
@@ -653,7 +653,7 @@ function ProfileContent() {
                 <button
                   onClick={applyOrganiser}
                   disabled={applying === 'organiser'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
                 >
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
                 </button>
@@ -663,10 +663,10 @@ function ProfileContent() {
 
           {/* Venue Owner upgrade */}
           <div id="apply-venue" style={cardStyle(highlightedCard === 'venue')}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.listVenueHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.listVenueDesc}
             </p>
 
@@ -676,7 +676,7 @@ function ProfileContent() {
               <button
                 onClick={applyVenueOwner}
                 disabled={applying === 'venue'}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
               >
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
               </button>
@@ -701,10 +701,10 @@ function ProfileContent() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               <div>
-                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
                   {tr.profilePage.myFeedbackHeading}
                 </h2>
-                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: 0 }}>
+                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
                   {feedbackSummary === null
                     ? tr.profilePage.feedbackSummaryDefault
                     : feedbackSummary.total === 0
@@ -722,7 +722,7 @@ function ProfileContent() {
                     flexShrink: 0,
                     fontSize: '13px',
                     fontWeight: 700,
-                    color: 'var(--afa-cream)',
+                    color: 'var(--afa-on-fill-solid)',
                     background: 'var(--afa-terracotta)',
                     borderRadius: '999px',
                     padding: '4px 12px',

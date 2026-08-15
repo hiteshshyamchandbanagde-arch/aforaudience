@@ -123,17 +123,17 @@ function LoginForm() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-ink)] no-underline">
+        <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline">
           <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
-        <p className="text-[14px] text-[var(--afa-ink)] opacity-50 mt-2">
+        <p className="text-[14px] text-[var(--afa-text-primary)] opacity-50 mt-2">
           {tr.loginPage.welcomeBack}
         </p>
       </div>
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "24px" }}>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "24px" }}>
           {tr.loginPage.signInHeading}
         </h2>
 
@@ -153,7 +153,7 @@ function LoginForm() {
           </div>
         )}
         {wasIdle && !wasSuspended && (
-          <div style={{ background: "var(--afa-cream)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-text-primary)" }}>
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}
@@ -163,14 +163,14 @@ function LoginForm() {
           </div>
         )}
         {devOtp && mode === "otp-verify" && (
-          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
+          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
             QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
           </div>
         )}
 
         {mode !== "otp-verify" && (
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
               {tr.loginPage.identifierLabel}
             </label>
             <input
@@ -178,7 +178,7 @@ function LoginForm() {
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder={tr.loginPage.identifierPlaceholder}
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
-              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
             />
           </div>
         )}
@@ -186,7 +186,7 @@ function LoginForm() {
         {mode === "password" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.passwordLabel}
               </label>
               <div style={{ position: "relative" }}>
@@ -196,7 +196,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
                 <button
                   type="button"
@@ -245,7 +245,7 @@ function LoginForm() {
         {mode === "otp-verify" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.enterCodeLabel}
               </label>
               <input
@@ -253,7 +253,7 @@ function LoginForm() {
                 onChange={(e) => setOtpCode(e.target.value)}
                 maxLength={6}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
             <button
@@ -283,13 +283,13 @@ function LoginForm() {
           <>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0" }}>
               <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
-              <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+              <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
               <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
             </div>
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "white", color: "var(--afa-ink)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "white", color: "var(--afa-text-primary)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>
@@ -309,7 +309,7 @@ function LoginForm() {
         </div>
       </div>
 
-      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
+      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
         {tr.loginPage.noAccountPrefix}{" "}
         <Link href="/register" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>
           {tr.loginPage.createOneFreeLink}
@@ -321,7 +321,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+    <main className="min-h-screen bg-[var(--afa-surface-page)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
       <Suspense fallback={<BrandLoader />}>
         <LoginForm />
       </Suspense>

@@ -462,12 +462,12 @@ function AdminFeedbackBoard() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
               Admin access only
             </h1>
-            <p style={{ color: 'var(--afa-ink)', opacity: 0.6 }}>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               This page is restricted to platform administrators.
             </p>
           </div>
@@ -482,7 +482,7 @@ function AdminFeedbackBoard() {
     borderRadius: '8px',
     border: '1px solid rgba(14,12,10,0.15)',
     background: 'var(--afa-white)',
-    color: 'var(--afa-ink)',
+    color: 'var(--afa-text-primary)',
   }
 
   const cardStyle: React.CSSProperties = {
@@ -528,7 +528,7 @@ function AdminFeedbackBoard() {
         </div>
         <span style={{ fontSize: '11px', color: 'var(--afa-taupe)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
       </div>
-      <div style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, marginBottom: '4px' }}>
+      <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, marginBottom: '4px' }}>
         {item.title || item.message.slice(0, 80)}
       </div>
       {item.pageUrl && (
@@ -591,18 +591,18 @@ function AdminFeedbackBoard() {
           .fb-mobile-list { display: block; }
         }
       `}</style>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', margin: 0 }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: 0 }}>
               Admin Dashboard
             </h1>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Platform Settings</a>
-              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Revenue</a>
-              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Accounts</a>
-              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Bookings</a>
-              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-ink)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Artist Roster</a>
+              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Platform Settings</a>
+              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Revenue</a>
+              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Accounts</a>
+              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Bookings</a>
+              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Artist Roster</a>
             </div>
           </div>
 
@@ -613,7 +613,7 @@ function AdminFeedbackBoard() {
               it every time. */}
           <button
             onClick={() => setApprovalsOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
           >
             {approvalsOpen ? '▾' : '▸'} Pending Approvals ({organisers.length + venueOwners.length})
           </button>
@@ -622,14 +622,14 @@ function AdminFeedbackBoard() {
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>
                 Organisers ({organisers.length})
               </h2>
-              {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
+              {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
               {organisers.map((o) => (
                 <div key={o.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{o.orgName}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
-                      {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
+                      <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
+                      {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
@@ -642,13 +642,13 @@ function AdminFeedbackBoard() {
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginTop: '20px', marginBottom: '10px' }}>
                 Venue Owners ({venueOwners.length})
               </h2>
-              {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {venueOwners.map((v) => (
                 <div key={v.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{v.user.name}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6 }}>{v.user.email}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{v.user.email}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
@@ -668,16 +668,16 @@ function AdminFeedbackBoard() {
               GLOBAL filter surface. */}
           <button
             onClick={() => setGenreRequestsOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
           >
             {genreRequestsOpen ? '▾' : '▸'} Pending Genre Requests ({genreRequests.length})
           </button>
           {genreRequestsOpen && (
             <div style={{ marginBottom: '28px' }}>
-              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '10px' }}>
                 New "Other" genre values artists have typed in - already visible on their own profile. Approving adds it as a public filter option on /artists; rejecting keeps it out of that shared list.
               </p>
-              {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {genreRequests.map((g) => (
                 <div key={g.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -698,23 +698,23 @@ function AdminFeedbackBoard() {
               reason so the organiser knows what to fix. */}
           <button
             onClick={() => setEventNotesOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
           >
             {eventNotesOpen ? '▾' : '▸'} Pending Event Notes ({eventNotes.length})
           </button>
           {eventNotesOpen && (
             <div style={{ marginBottom: '28px' }}>
-              <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '10px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '10px' }}>
                 Free-text "special notes" organisers added to an event - never shown publicly until approved here.
               </p>
-              {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing pending.</p>}
+              {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {eventNotes.map((n) => (
                 <div key={n.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{n.title}</div>
-                      {n.organiser && <div style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, marginBottom: '8px' }}>{n.organiser.orgName}</div>}
-                      <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
+                      {n.organiser && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '8px' }}>{n.organiser.orgName}</div>}
+                      <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
@@ -726,10 +726,10 @@ function AdminFeedbackBoard() {
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '4px' }}>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
             Feedback
           </h2>
-          <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
             Submitted via the support widget — both the manual form and questions the chatbot couldn&apos;t answer.
           </p>
 
@@ -738,7 +738,7 @@ function AdminFeedbackBoard() {
             style={{
               fontSize: '12px',
               fontWeight: 700,
-              color: 'var(--afa-ink)',
+              color: 'var(--afa-text-primary)',
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
@@ -774,7 +774,7 @@ function AdminFeedbackBoard() {
                 style={{
                   fontSize: '12px',
                   fontWeight: 600,
-                  color: 'var(--afa-ink)',
+                  color: 'var(--afa-text-primary)',
                   background: 'var(--afa-white)',
                   border: '1px solid var(--afa-ink-a13)',
                   borderRadius: '999px',
@@ -822,7 +822,7 @@ function AdminFeedbackBoard() {
               <option value="oldest">Oldest first</option>
               <option value="severity">Severity (high → low)</option>
             </select>
-            <label style={{ fontSize: '13px', color: 'var(--afa-ink)', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', cursor: 'pointer' }}>
+            <label style={{ fontSize: '13px', color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', cursor: 'pointer' }}>
               <input type="checkbox" checked={showResolved} onChange={toggleShowResolved} disabled={resolvedLoading} />
               {resolvedLoading ? 'Loading…' : 'Show Resolved / Rejected'}
             </label>
@@ -845,7 +845,7 @@ function AdminFeedbackBoard() {
           >
             {(showResolved ? STATUSES : STATUSES.filter((s) => !CLOSED_STATUSES.includes(s))).map((statusCol) => (
               <div key={statusCol} id={`fb-col-${statusCol}`}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                   {labelize(statusCol)} <span style={{ color: 'var(--afa-taupe)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
                 </div>
                 {(columns[statusCol] || []).length === 0 && (
@@ -859,7 +859,7 @@ function AdminFeedbackBoard() {
           {/* Mobile stacked list */}
           <div className="fb-mobile-list" style={{ marginTop: '10px' }}>
             {filtered.length === 0 && (
-              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>Nothing matches these filters.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing matches these filters.</p>
             )}
             {filtered.map((item) => renderCard(item, true))}
           </div>

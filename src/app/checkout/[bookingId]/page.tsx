@@ -334,7 +334,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-ink)' }}>
+        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
           {tr.checkoutPage.loadingCheckout}
         </div>
       </>
@@ -407,7 +407,7 @@ export default function CheckoutPage() {
             maxWidth: 560,
             margin: '0 auto',
             fontFamily: 'system-ui, sans-serif',
-            color: 'var(--afa-ink)',
+            color: 'var(--afa-text-primary)',
           }}
         >
           <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
@@ -427,7 +427,7 @@ export default function CheckoutPage() {
           </p>
           <div
             style={{
-              background: 'var(--afa-cream)',
+              background: 'var(--afa-surface-raised)',
               border: '1px solid rgba(14,12,10,0.08)',
               borderRadius: 12,
               padding: 20,
@@ -451,7 +451,7 @@ export default function CheckoutPage() {
             <a
               href={`/api/bookings/${state.booking.id}/ticket`}
               style={{
-                background: 'var(--afa-ink)',
+                background: 'var(--afa-fill-solid)',
                 color: 'white',
                 padding: '12px 20px',
                 borderRadius: 10,
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
             <Link
               href="/events"
               style={{
-                color: 'var(--afa-ink)',
+                color: 'var(--afa-text-primary)',
                 padding: '12px 20px',
                 borderRadius: 10,
                 fontWeight: 600,
@@ -586,7 +586,7 @@ export default function CheckoutPage() {
           maxWidth: 560,
           margin: '0 auto',
           fontFamily: 'system-ui, sans-serif',
-          color: 'var(--afa-ink)',
+          color: 'var(--afa-text-primary)',
         }}
       >
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
@@ -765,7 +765,7 @@ export default function CheckoutPage() {
                   key={t.id}
                   style={{
                     fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6,
-                    background: 'var(--afa-cream)', borderRadius: 999, padding: '5px 6px 5px 12px',
+                    background: 'var(--afa-surface-raised)', borderRadius: 999, padding: '5px 6px 5px 12px',
                   }}
                 >
                   {t.taggedUser.displayName || t.taggedUser.name}

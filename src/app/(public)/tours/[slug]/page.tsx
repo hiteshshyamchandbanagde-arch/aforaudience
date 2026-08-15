@@ -36,7 +36,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
       <>
         <SiteNav />
         <main style={{ maxWidth: '700px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-          <p style={{ fontSize: '17px', color: 'var(--afa-ink)' }}>This Tour isn't available.</p>
+          <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)' }}>This Tour isn't available.</p>
         </main>
       </>
     )
@@ -49,18 +49,18 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
           Tour · {tour.organiser.orgName}
         </p>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '34px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '12px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '34px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
           {tour.title}
         </h1>
         {tour.subject && (
-          <p style={{ fontSize: '16px', color: 'var(--afa-ink)', opacity: 0.75, marginBottom: '32px', maxWidth: '600px' }}>
+          <p style={{ fontSize: '16px', color: 'var(--afa-text-primary)', opacity: 0.75, marginBottom: '32px', maxWidth: '600px' }}>
             {tour.subject}
           </p>
         )}
 
         {tour.stops.length === 0 ? (
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6 }}>No stops are open for booking yet - check back soon.</p>
+            <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops are open for booking yet - check back soon.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -71,19 +71,19 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
                 style={{ display: 'block', background: 'var(--afa-white)', borderRadius: '12px', padding: '22px 24px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
-                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)' }}>{stop.title}</h3>
+                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                   {stop.status === 'COMPLETED' && (
-                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
                       Completed
                     </span>
                   )}
                 </div>
-                <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.65, marginBottom: '10px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: '10px' }}>
                   {new Date(stop.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {stop.startTime}
                   {stop.venue && ` · ${stop.venue.name}, ${stop.venue.city}`}
                 </p>
                 {stop.lineup.length > 0 && (
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                     Featuring {stop.lineup.map((l: (typeof stop.lineup)[number]) => l.artist.user.displayName || l.artist.user.name).join(', ')}
                   </p>
                 )}

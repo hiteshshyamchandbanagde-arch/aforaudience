@@ -181,7 +181,7 @@ export default function FeedbackDetailPanel({
     >
       <style>{`
         .fb-detail-backdrop { position: absolute; inset: 0; background: rgba(14,12,10,0.35); }
-        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-cream); box-shadow: -8px 0 24px rgba(14,12,10,0.12); overflow-y: auto; }
+        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px rgba(14,12,10,0.12); overflow-y: auto; }
         @media (max-width: 780px) {
           .fb-detail-panel { width: 100%; }
         }
@@ -204,7 +204,7 @@ export default function FeedbackDetailPanel({
             <button
               onClick={onClose}
               aria-label="Close"
-              style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--afa-ink)', lineHeight: 1, padding: '4px' }}
+              style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: '4px' }}
             >
               ×
             </button>
@@ -225,7 +225,7 @@ export default function FeedbackDetailPanel({
                   fontSize: '16px',
                   cursor: hasPrev ? 'pointer' : 'default',
                   opacity: hasPrev ? 1 : 0.35,
-                  color: 'var(--afa-ink)',
+                  color: 'var(--afa-text-primary)',
                 }}
               >
                 ‹
@@ -246,7 +246,7 @@ export default function FeedbackDetailPanel({
                   fontSize: '16px',
                   cursor: hasNext ? 'pointer' : 'default',
                   opacity: hasNext ? 1 : 0.35,
-                  color: 'var(--afa-ink)',
+                  color: 'var(--afa-text-primary)',
                 }}
               >
                 ›
@@ -254,11 +254,11 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-ink)' }}>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-text-primary)' }}>
             {item.title || item.message.slice(0, 60)}
           </h2>
 
-          <div style={{ fontSize: '14px', color: 'var(--afa-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+          <div style={{ fontSize: '14px', color: 'var(--afa-text-primary)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
             {item.message}
           </div>
 
@@ -293,7 +293,7 @@ export default function FeedbackDetailPanel({
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>Status</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Status</div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {STATUSES.map((s) => (
                 <button
@@ -313,8 +313,8 @@ export default function FeedbackDetailPanel({
                     padding: '6px 12px',
                     borderRadius: '999px',
                     border: item.status === s ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                    background: item.status === s ? 'var(--afa-ink)' : 'transparent',
-                    color: item.status === s ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                    background: item.status === s ? 'var(--afa-fill-solid)' : 'transparent',
+                    color: item.status === s ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.6 : 1,
                   }}
@@ -325,7 +325,7 @@ export default function FeedbackDetailPanel({
             </div>
             {pendingNoteStatus && (
               <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-white)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.1)' }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-ink)' }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>
                 <textarea
@@ -343,14 +343,14 @@ export default function FeedbackDetailPanel({
                       setPendingNoteStatus(null)
                       setNoteDraft('')
                     }}
-                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: 'none', background: 'var(--afa-ink)', color: 'var(--afa-cream)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
+                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
                   >
                     Confirm
                   </button>
                   <button
                     disabled={busy}
                     onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
-                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', color: 'var(--afa-ink)', cursor: 'pointer' }}
+                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
                   >
                     Cancel
                   </button>
@@ -361,7 +361,7 @@ export default function FeedbackDetailPanel({
 
           {item.status === 'RESOLVED' && (
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                 Deploy Stage
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -371,8 +371,8 @@ export default function FeedbackDetailPanel({
                   style={{
                     fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
                     border: !item.deployStage ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                    background: !item.deployStage ? 'var(--afa-ink)' : 'transparent',
-                    color: !item.deployStage ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                    background: !item.deployStage ? 'var(--afa-fill-solid)' : 'transparent',
+                    color: !item.deployStage ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
                   }}
                 >
@@ -387,7 +387,7 @@ export default function FeedbackDetailPanel({
                       fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
                       border: item.deployStage === ds ? 'none' : '1px solid rgba(14,12,10,0.15)',
                       background: item.deployStage === ds ? 'var(--afa-sage)' : 'transparent',
-                      color: item.deployStage === ds ? 'white' : 'var(--afa-ink)',
+                      color: item.deployStage === ds ? 'white' : 'var(--afa-text-primary)',
                       cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
                     }}
                   >
@@ -399,7 +399,7 @@ export default function FeedbackDetailPanel({
           )}
 
           <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>Severity</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Severity</div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <button
                 disabled={busy}
@@ -410,8 +410,8 @@ export default function FeedbackDetailPanel({
                   padding: '6px 12px',
                   borderRadius: '999px',
                   border: !item.severity ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                  background: !item.severity ? 'var(--afa-ink)' : 'transparent',
-                  color: !item.severity ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                  background: !item.severity ? 'var(--afa-fill-solid)' : 'transparent',
+                  color: !item.severity ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                   cursor: busy ? 'default' : 'pointer',
                   opacity: busy ? 0.6 : 1,
                 }}
@@ -430,7 +430,7 @@ export default function FeedbackDetailPanel({
                     borderRadius: '999px',
                     border: item.severity === sev ? 'none' : '1px solid rgba(14,12,10,0.15)',
                     background: item.severity === sev ? SEVERITY_COLORS[sev] : 'transparent',
-                    color: item.severity === sev ? 'white' : 'var(--afa-ink)',
+                    color: item.severity === sev ? 'white' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.6 : 1,
                   }}
@@ -442,7 +442,7 @@ export default function FeedbackDetailPanel({
           </div>
 
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
               History
             </div>
             {item.changeLog.length === 0 && (
@@ -453,7 +453,7 @@ export default function FeedbackDetailPanel({
                 key={entry.id}
                 style={{
                   fontSize: '12px',
-                  color: 'var(--afa-ink)',
+                  color: 'var(--afa-text-primary)',
                   opacity: 0.75,
                   padding: '8px 0',
                   borderTop: '1px solid rgba(14,12,10,0.06)',

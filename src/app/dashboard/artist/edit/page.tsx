@@ -17,7 +17,7 @@ const inputStyle = {
   border: '1px solid rgba(14,12,10,0.15)',
   background: 'var(--afa-white)',
   fontSize: '14px',
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
 
 const labelStyle = {
@@ -25,7 +25,7 @@ const labelStyle = {
   fontSize: '13px',
   fontWeight: 600,
   marginBottom: '6px',
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
 
 export default function EditArtistProfilePage() {
@@ -191,14 +191,14 @@ export default function EditArtistProfilePage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/artist" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
             Edit Your Profile
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             This is what organisers see when you apply to their events.
           </p>
 
@@ -210,13 +210,13 @@ export default function EditArtistProfilePage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
                 )}
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
               </div>
               <details>
-                <summary style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
+                <summary style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
                 <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: '8px' }} />
               </details>
             </div>
@@ -251,10 +251,10 @@ export default function EditArtistProfilePage() {
           {/* Artist Background - a richer, entirely optional storytelling
               section beyond the short bio above. Nothing here is required. */}
           <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               Your Background
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '18px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
               All optional - share as much or as little of your story as you want.
             </p>
 
@@ -295,7 +295,7 @@ export default function EditArtistProfilePage() {
               shows aren't happening through the platform. */}
           <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
             <label style={labelStyle}>Tour</label>
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
             </p>
             {tourStops.map((stop) => (
@@ -337,11 +337,11 @@ export default function EditArtistProfilePage() {
             <button
               onClick={save}
               disabled={saving}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
             >
               {saving ? 'Saving...' : 'Save Profile'}
             </button>
-            <Link href="/dashboard/artist" style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, textDecoration: 'none' }}>
+            <Link href="/dashboard/artist" style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
               Cancel
             </Link>
           </div>

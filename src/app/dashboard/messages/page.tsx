@@ -69,12 +69,12 @@ export default function MessagesInboxPage() {
     <>
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-ink)', marginBottom: '24px' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
           {tr.messagesInboxPage.heading}
         </h1>
 
         {threads.length === 0 && (
-          <p style={{ color: 'var(--afa-ink)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
+          <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
             {tr.messagesInboxPage.emptyState}
           </p>
         )}
@@ -94,7 +94,7 @@ export default function MessagesInboxPage() {
                 border: '1px solid rgba(14,12,10,0.1)',
                 background: t.unread ? 'rgba(212,163,60,0.08)' : 'var(--afa-cream, #fff)',
                 textDecoration: 'none',
-                color: 'var(--afa-ink)',
+                color: 'var(--afa-text-primary)',
               }}
             >
               <div style={{ minWidth: 0, flex: 1 }}>
