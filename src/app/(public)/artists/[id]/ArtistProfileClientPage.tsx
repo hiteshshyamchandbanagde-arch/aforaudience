@@ -355,8 +355,8 @@ export default function ArtistProfilePage({
             disabled={!prevArtistId}
             aria-label="Previous artist"
             style={{
-              background: prevArtistId ? "var(--afa-terracotta)" : "var(--afa-white)",
-              border: prevArtistId ? "none" : "1px solid rgba(14,12,10,0.13)",
+              background: prevArtistId ? "var(--afa-terracotta)" : "var(--afa-surface-raised)",
+              border: prevArtistId ? "none" : "1px solid rgba(245,245,240,0.13)",
               borderRadius: "999px",
               width: "34px",
               height: "34px",
@@ -378,8 +378,8 @@ export default function ArtistProfilePage({
             disabled={!nextArtistId}
             aria-label="Next artist"
             style={{
-              background: nextArtistId ? "var(--afa-terracotta)" : "var(--afa-white)",
-              border: nextArtistId ? "none" : "1px solid rgba(14,12,10,0.13)",
+              background: nextArtistId ? "var(--afa-terracotta)" : "var(--afa-surface-raised)",
+              border: nextArtistId ? "none" : "1px solid rgba(245,245,240,0.13)",
               borderRadius: "999px",
               width: "34px",
               height: "34px",

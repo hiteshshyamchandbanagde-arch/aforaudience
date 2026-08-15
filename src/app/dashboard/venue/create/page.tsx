@@ -19,7 +19,7 @@ const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
@@ -284,7 +284,7 @@ export default function CreateVenuePage() {
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Basic details */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Basic Details
               </h2>
@@ -391,7 +391,7 @@ export default function CreateVenuePage() {
             </section>
 
             {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Rental Rate
               </h2>
@@ -411,8 +411,8 @@ export default function CreateVenuePage() {
                     onClick={() => setRateType(t)}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
+                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
                       color: rateType === t ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
                     }}
                   >
@@ -448,7 +448,7 @@ export default function CreateVenuePage() {
               )}
 
               {rateType !== 'FLEXIBLE' && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
@@ -460,7 +460,7 @@ export default function CreateVenuePage() {
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(14,12,10,0.05)' }}>
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
                           <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>₹</span>
@@ -482,7 +482,7 @@ export default function CreateVenuePage() {
             </section>
 
             {/* Seating & pricing */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
@@ -493,14 +493,14 @@ export default function CreateVenuePage() {
                 <button
                   type="button"
                   onClick={() => setSeatingChoice('GENERAL_ADMISSION')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.15)', background: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
                 >
                   Section-based (General Admission)
                 </button>
                 <button
                   type="button"
                   onClick={() => setSeatingChoice('NUMBERED')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)', background: seatingChoice === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: seatingChoice === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.15)', background: seatingChoice === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: seatingChoice === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
                 >
                   Numbered seats — I'll build this after
                 </button>
@@ -554,7 +554,7 @@ export default function CreateVenuePage() {
                 onClick={() => submit(false)}
                 style={{
                   fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
-                  border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
+                  border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1,
                 }}
               >
                 Save as Draft

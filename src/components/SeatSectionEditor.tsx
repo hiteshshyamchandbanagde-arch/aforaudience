@@ -148,7 +148,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           // badge). Conflating the two is what caused the badge to show
           // on untouched rows - see isIncompleteSection's note above.
           const isFree = section.price !== '' && Number(section.price) === 0
-          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'rgba(14,12,10,0.08)'
+          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'rgba(245,245,240,0.08)'
           return (
           <div
             key={section.id}
@@ -177,7 +177,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 const normalized = normalizeWhitespace(e.target.value)
                 if (normalized !== e.target.value) updateSection(section.id, "name", normalized)
               }}
-              style={{ ...inputStyle, ...(borderColor !== 'rgba(14,12,10,0.08)' ? { border: `1px solid ${borderColor}` } : {}) }}
+              style={{ ...inputStyle, ...(borderColor !== 'rgba(245,245,240,0.08)' ? { border: `1px solid ${borderColor}` } : {}) }}
             />
             <input
               type="number"
@@ -264,7 +264,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         style={{
           marginTop: "14px",
           background: "none",
-          border: "1px dashed rgba(14,12,10,0.3)",
+          border: "1px dashed rgba(245,245,240,0.3)",
           borderRadius: "8px",
           padding: "10px 18px",
           fontSize: "14px",

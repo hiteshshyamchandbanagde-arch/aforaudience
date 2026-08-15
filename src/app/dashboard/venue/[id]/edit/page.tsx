@@ -43,7 +43,7 @@ const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
@@ -251,7 +251,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Basic Details
               </h2>
@@ -352,7 +352,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 now (session 39 finding, Hitesh) - an owner had no way to
                 update their rate, including day-wise overrides, after
                 venue creation. Mirrors venue create page's section exactly. */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Rental Rate
               </h2>
@@ -372,8 +372,8 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                     onClick={() => setRateType(t)}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)',
-                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-white)',
+                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
+                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
                       color: rateType === t ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
                     }}
                   >
@@ -409,7 +409,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {rateType !== 'FLEXIBLE' && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
@@ -421,7 +421,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(14,12,10,0.05)' }}>
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
                           <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>₹</span>
@@ -442,7 +442,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>
@@ -454,7 +454,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
-                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Have real numbered seats instead?</div>
                       <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -472,7 +472,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {venue.seatingMode === 'NUMBERED' && (
-                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>This venue uses Numbered Seating</div>
                     <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -503,7 +503,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save & Unpublish
                 </button>
@@ -512,7 +512,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(undefined)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </button>

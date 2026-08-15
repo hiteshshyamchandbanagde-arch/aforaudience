@@ -125,7 +125,7 @@ export default function AdminUsersPage() {
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             🚩 Accounts
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
             Suspending blocks login immediately and hides the account's future events/venues from public
             listings. It does not cancel existing confirmed bookings or already-published events. Fully
             reversible — unsuspend at any time.
@@ -136,12 +136,12 @@ export default function AdminUsersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name, display name, or email..."
-              style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px' }}
+              style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px' }}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
@@ -156,14 +156,14 @@ export default function AdminUsersPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {users.length === 0 && !loading && (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No users match.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No users match.</p>
             )}
             {users.map((u) => (
               <div
                 key={u.id}
                 style={{
                   background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
-                  border: u.isSuspended ? '1px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',
+                  border: u.isSuspended ? '1px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.08)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
@@ -172,7 +172,7 @@ export default function AdminUsersPage() {
                       {u.displayName || u.name}
                       {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
-                    <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)' }}>{u.email} · {u.role}</p>
+                    <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
                       <p style={{ fontSize: '12px', color: 'var(--afa-terracotta)', marginTop: '6px' }}>
                         Reason: {u.suspendReason}
@@ -195,7 +195,7 @@ export default function AdminUsersPage() {
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', width: '160px' }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px' }}
                         />
                         <button
                           onClick={() => handleSuspend(u.id)}
