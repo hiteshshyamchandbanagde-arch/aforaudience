@@ -90,7 +90,10 @@ export default function TourDetailPage() {
 
   const loadTour = async () => {
     try {
-      const res = await fetch('/api/tours/mine')
+      // BUG-2608-051: explicit no-store since this is always called
+      // right after a mutation (add/remove artist, publish, cancel) -
+      // this refetch must never be served from any HTTP cache layer.
+      const res = await fetch('/api/tours/mine', { cache: 'no-store' })
       if (!res.ok) throw new Error('Failed to load Tour')
       const data = await res.json()
       const found = (data.tours || []).find((t: TourDetail) => t.id === tourId)
@@ -147,7 +150,7 @@ export default function TourDetailPage() {
       showToast('Stop added as draft - add lineup, then publish', 'success')
       setShowAddStop(false)
       setStopTitle(''); setStopDescription(''); setStopDate(''); setStopVenueId(''); setStopOpenSlots(''); setStopDeadline('')
-      loadTour()
+      await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
     } finally {
@@ -166,7 +169,7 @@ export default function TourDetailPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to add artist')
       showToast(data.consentStatus === 'ACCEPTED' ? 'Artist added to lineup' : 'Artist added - invite sent, awaiting their confirmation', 'success')
-      loadTour()
+      await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
     } finally {
@@ -180,7 +183,7 @@ export default function TourDetailPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to remove artist')
       showToast('Artist removed from lineup', 'success')
-      loadTour()
+      await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
     }
@@ -196,7 +199,7 @@ export default function TourDetailPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to publish stop')
       showToast('Stop published', 'success')
-      loadTour()
+      await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
     }
@@ -212,7 +215,7 @@ export default function TourDetailPage() {
       })
       if (!res.ok) throw new Error('Failed to cancel Tour')
       showToast('Tour cancelled', 'success')
-      loadTour()
+      await loadTour()
     } catch (err: any) {
       showToast(err.message, 'error')
     }
