@@ -44,7 +44,16 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run e2e suite against live QA
-        run: npx playwright test
+        # competition-show.spec.ts and waitlist-wallet-credit.spec.ts are
+        # deliberately excluded here - each has its own workflow_dispatch-only
+        # yml (e2e-competition-show.yml, e2e-waitlist-wallet.yml) and header
+        # comment saying it's not yet in the auto-run cadence, but a bare
+        # `playwright test` picks up every spec file regardless of that intent
+        # (found via BUG-2608-056, 15 Aug - both specs were silently running
+        # in every push/nightly run despite their own comments). Excluded by
+        # listing every OTHER spec file explicitly (discovered dynamically,
+        # not hardcoded) so newly-added specs are still picked up automatically.
+        run: npx playwright test $(ls e2e/*.spec.ts | grep -v -E 'competition-show\.spec\.ts|waitlist-wallet-credit\.spec\.ts' | tr '\n' ' ')
         env:
           CI: true
 
