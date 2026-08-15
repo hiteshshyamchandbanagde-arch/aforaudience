@@ -136,8 +136,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 // DELETE /api/events/[id]/tour-lineup?artistId=xxx
 // Organiser removes an artist from a Tour stop's fixed lineup (e.g.
 // after a decline, before inviting a replacement). Cancels their
-// Performance row - does not touch TourArtistConsent, since that's
-// scoped to the whole Tour, not this one stop.
+// Performance row. TourArtistConsent is scoped to the whole Tour, not
+// this one stop, so it's left alone UNLESS this was the artist's last
+// active Performance across every stop of the Tour AND their consent
+// is still PENDING (BUG-2608-052) - otherwise a removed artist's
+// outstanding invite lingers forever and keeps recomputeTourStatus()
+// stuck on PENDING_CONSENT even after every real stop is live. An
+// ACCEPTED consent is never touched here (they already consented to
+// the Tour; deleting it would wrongly re-prompt them if re-added).
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: eventId } = await params
@@ -172,7 +178,24 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     await prisma.performance.update({ where: { id: performance.id }, data: { cancelledAt: new Date() } })
 
-    if (event.tourId) await recomputeTourStatus(event.tourId)
+    if (event.tourId) {
+      const remainingElsewhere = await prisma.performance.count({
+        where: {
+          artistId,
+          cancelledAt: null,
+          event: { tourId: event.tourId },
+        },
+      })
+      if (remainingElsewhere === 0) {
+        const consent = await prisma.tourArtistConsent.findUnique({
+          where: { tourId_artistId: { tourId: event.tourId, artistId } },
+        })
+        if (consent && consent.status === 'PENDING') {
+          await prisma.tourArtistConsent.delete({ where: { id: consent.id } })
+        }
+      }
+      await recomputeTourStatus(event.tourId)
+    }
 
     return NextResponse.json({ removed: true })
   } catch (err) {
