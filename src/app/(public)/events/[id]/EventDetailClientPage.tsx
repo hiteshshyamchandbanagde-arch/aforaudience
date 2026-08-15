@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { useSession } from "next-auth/react"
+import { useSession, getSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import AudienceChoiceVoting from "@/components/AudienceChoiceVoting"
@@ -283,7 +283,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
     }
   }
 
-  const handleBookClick = () => {
+  const handleBookClick = async () => {
     if (totalSelected === 0) {
       setBookingError(tr.eventDetailPage.selectSeatFirst)
       return
@@ -303,8 +303,30 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       return
     }
     if (status !== "authenticated") {
-      setShowAuthSheet(true)
-      return
+      // BUG-2608-055: useSession()'s client-side status can briefly read
+      // "unauthenticated" right after a real login - on a cold serverless
+      // function the hook can settle in that order (loading ->
+      // unauthenticated -> authenticated) instead of going straight to
+      // "authenticated". The Continue button was already enabled by then
+      // (only "loading" disables it), so a click here used to be
+      // misrouted straight to the sign-in sheet even for a genuinely
+      // signed-in person - confirmed via CI: zero /api/bookings requests
+      // ever fired in the failing runs.
+      //
+      // Guests really are unauthenticated and should see the sign-in
+      // sheet, so we can't just widen the disabled condition without
+      // breaking that intended flow. Instead, before trusting the
+      // possibly-stale hook, ask the server directly - getSession() hits
+      // /api/auth/session fresh, same source of truth the middleware and
+      // API routes use, so it can't be behind the hook.
+      const freshSession = await getSession()
+      if (freshSession?.user) {
+        // Genuinely already signed in - proceed as if status had been
+        // "authenticated" all along.
+      } else {
+        setShowAuthSheet(true)
+        return
+      }
     }
     reserveSeats()
   }
