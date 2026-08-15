@@ -48,6 +48,34 @@ function langToggle(page: import("@playwright/test").Page, currentLocaleId: stri
 // real sentence fragments that happen to contain a period.
 const RAW_KEY_LEAK = /\b[a-z]+\.[a-zA-Z]+\b/;
 
+// Locales that also get the reload-persistence check, which adds a real
+// page reload + wait per locale on top of the switch check every locale
+// already gets. Trimmed after the first CI run of the full 11-locale
+// version (session 70 continuation) hit the job's 20-minute timeout and
+// got cancelled before producing a report - couldn't tell from that
+// alone whether this spec was the cause or the pre-existing flaky
+// competition-show/waitlist-wallet specs were, so cutting this spec's
+// own unambiguous cost first rather than guessing blind. One Indic
+// script (Tamil), one Latin-script addition (German), one already-
+// shipped baseline (Hindi) - representative spread, not exhaustive.
+const RELOAD_CHECK_LOCALES = new Set(["hi", "de", "ta"]);
+
+// playwright.config.ts runs every spec on both chromium-desktop and
+// mobile-chrome, serially (workers: 1, fullyParallel: false - QA is a
+// single shared env/DB). This spec asserts attribute values and text
+// presence only, nothing viewport-dependent - real layout/overflow
+// checking is explicitly out of scope (see file header), so running it
+// twice would double CI time for zero extra signal. Scoped to desktop
+// only; this decision is what actually got the full suite back inside
+// the job's 20-minute budget after the first attempt (all 11 locales x
+// both projects) timed out and got cancelled without producing a report.
+test.beforeEach(async ({}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium-desktop",
+    "Attribute/text checks only, not viewport-dependent - see file header."
+  );
+});
+
 for (const { id, nativeLabel } of LOCALES) {
   test(`language switcher: ${id} - nav updates and lang attribute is set`, async ({ page }) => {
     await page.goto("/");
@@ -71,22 +99,25 @@ for (const { id, nativeLabel } of LOCALES) {
     expect(navText).not.toMatch(RAW_KEY_LEAK);
   });
 
-  test(`language switcher: ${id} - persists across reload`, async ({ page }) => {
-    await page.goto("/");
-    await langToggle(page, "en").click();
-    await page.getByText(nativeLabel, { exact: true }).click();
-    await expect(page.locator("html")).toHaveAttribute("lang", id);
+  if (RELOAD_CHECK_LOCALES.has(id)) {
+    test(`language switcher: ${id} - persists across reload`, async ({ page }) => {
+      await page.goto("/");
+      await langToggle(page, "en").click();
+      await page.getByText(nativeLabel, { exact: true }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", id);
 
-    await page.reload();
+      await page.reload();
 
-    // Per translate.tsx's own documented tradeoff, there's no pre-paint
-    // script for this pilot - a saved non-English preference can flash
-    // English briefly before the client-side effect reads localStorage
-    // and flips it. So this waits for the attribute rather than asserting
-    // immediately post-reload, instead of treating that flash as a
-    // failure - it isn't one, it's a documented, accepted limitation.
-    await expect(page.locator("html")).toHaveAttribute("lang", id, { timeout: 5_000 });
-  });
+      // Per translate.tsx's own documented tradeoff, there's no pre-paint
+      // script for this pilot - a saved non-English preference can flash
+      // English briefly before the client-side effect reads localStorage
+      // and flips it. So this waits for the attribute rather than
+      // asserting immediately post-reload, instead of treating that
+      // flash as a failure - it isn't one, it's a documented, accepted
+      // limitation.
+      await expect(page.locator("html")).toHaveAttribute("lang", id, { timeout: 5_000 });
+    });
+  }
 }
 
 test("proper nouns and currency stay in English/INR regardless of active language", async ({ page }) => {
