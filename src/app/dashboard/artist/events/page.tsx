@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import PosterShareCard from '@/components/PosterShareCard'
@@ -55,6 +55,16 @@ export default function BrowseEventsToApplyPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<EventItem[]>([])
+  // BUG-2608-053 (follow-up from FEAT-2608-048) - this page had no city/
+  // country filter at all, unlike the public Events browse and Venues
+  // listing (FEAT-2608-036). Same pattern as (public)/events/page.tsx:
+  // /api/events already accepts ?city= and filters server-side (indexed
+  // via Venue_city_idx), and /api/venues/cities gives the full option
+  // list regardless of the current filter, so the dropdown doesn't
+  // narrow itself out of its own options.
+  const [cities, setCities] = useState<{ city: string; country: string | null; label: string }[]>([])
+  const [selectedCity, setSelectedCity] = useState('All Cities')
+  const cityAutoAppliedRef = useRef(false)
   const [applicationStatus, setApplicationStatus] = useState<Record<string, string>>({})
   // Session 39 (Feedback ec6e4adf) - maps eventId -> this artist's own
   // Performance id, so the poster share card can be shown for their
@@ -71,17 +81,60 @@ export default function BrowseEventsToApplyPage() {
     }
   }, [status, router])
 
+  // Cities list is independent of the current filter - always the full
+  // set we have approved venues in, same source the public Events page
+  // uses, so the dropdown never narrows itself out of its own options.
   useEffect(() => {
-    const fetchData = async () => {
+    fetch('/api/venues/cities')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.cities) setCities(data.cities) })
+      .catch(() => {})
+  }, [])
+
+  // Apply the artist's resolved default location as a starting filter,
+  // once, the moment we know it's a real option (validated against the
+  // cities list first - same guard the public page uses so an unknown
+  // or stale guess doesn't silently zero out the results).
+  useEffect(() => {
+    if (cityAutoAppliedRef.current) return
+    if (cities.length === 0) return
+    cityAutoAppliedRef.current = true
+    const cityNames = cities.map((c) => c.city)
+    fetch('/api/user/location')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.city && cityNames.includes(data.city)) {
+          setSelectedCity(data.city)
+        }
+      })
+      .catch(() => {})
+  }, [cities])
+
+  useEffect(() => {
+    if (!session?.user) return
+    const fetchEvents = async () => {
+      setLoading(true)
       try {
-        const [eventsRes, profileRes] = await Promise.all([
-          fetch('/api/events'),
-          fetch('/api/artists/me'),
-        ])
+        const url = selectedCity === 'All Cities' ? '/api/events' : `/api/events?city=${encodeURIComponent(selectedCity)}`
+        const eventsRes = await fetch(url)
         if (!eventsRes.ok) throw new Error('Failed to fetch events')
         const eventsData = await eventsRes.json()
         setEvents(eventsData)
+      } catch (err: any) {
+        showToast(err.message || 'Failed to load events', 'error')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [session, selectedCity])
 
+  // Applications/performances status is per-artist, not per-city - fetched
+  // once per session, independent of the events filter above.
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profileRes = await fetch('/api/artists/me')
         if (profileRes.ok) {
           const profile = await profileRes.json()
           const statusMap: Record<string, string> = {}
@@ -96,15 +149,13 @@ export default function BrowseEventsToApplyPage() {
           }
           setPerformanceIdByEvent(perfMap)
         }
-      } catch (err: any) {
-        showToast(err.message || 'Failed to load events', 'error')
-      } finally {
-        setLoading(false)
+      } catch {
+        // Non-fatal - the events list above still renders without this.
       }
     }
 
     if (session?.user) {
-      fetchData()
+      fetchProfile()
     }
   }, [session])
 
@@ -141,9 +192,24 @@ export default function BrowseEventsToApplyPage() {
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
             Browse Events
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '16px' }}>
             Apply to perform at published events.
           </p>
+
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            style={{
+              fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)',
+              background: 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.15)',
+              borderRadius: '999px', padding: '8px 14px', marginBottom: '32px', cursor: 'pointer',
+            }}
+          >
+            <option value="All Cities">All Cities</option>
+            {cities.map((c) => (
+              <option key={`${c.city}-${c.country ?? ''}`} value={c.city}>{c.label}</option>
+            ))}
+          </select>
 
           {events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
