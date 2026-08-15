@@ -83,7 +83,7 @@ function ResetPasswordForm() {
                 { label: tr.resetPasswordPage.confirmNewPasswordLabel, name: "confirm", placeholder: tr.registerPage.repeatPasswordPlaceholder },
               ].map((field) => (
                 <div key={field.name}>
-                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                     {field.label}
                   </label>
                   <div style={{ position: "relative" }}>

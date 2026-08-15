@@ -133,7 +133,7 @@ function LoginForm() {
       </div>
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "24px" }}>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "24px" }}>
           {tr.loginPage.signInHeading}
         </h2>
 
@@ -153,7 +153,7 @@ function LoginForm() {
           </div>
         )}
         {wasIdle && !wasSuspended && (
-          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-text-primary)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}
@@ -163,14 +163,14 @@ function LoginForm() {
           </div>
         )}
         {devOtp && mode === "otp-verify" && (
-          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
+          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
             QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
           </div>
         )}
 
         {mode !== "otp-verify" && (
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
               {tr.loginPage.identifierLabel}
             </label>
             <input
@@ -186,7 +186,7 @@ function LoginForm() {
         {mode === "password" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.passwordLabel}
               </label>
               <div style={{ position: "relative" }}>
@@ -245,7 +245,7 @@ function LoginForm() {
         {mode === "otp-verify" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.enterCodeLabel}
               </label>
               <input
@@ -283,7 +283,7 @@ function LoginForm() {
           <>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0" }}>
               <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
-              <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+              <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
               <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
             </div>
             <button

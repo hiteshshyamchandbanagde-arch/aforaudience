@@ -53,7 +53,7 @@ function VerifyEmailContent() {
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)] text-center">
         {status === "checking" && (
-          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
         )}
         {status === "ok" && (
           <>
