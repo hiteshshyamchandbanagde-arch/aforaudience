@@ -118,6 +118,34 @@
      so it can never accidentally get swept into a future theme block. */
   --afa-brand-mark: #C8441A;
 
+  /* --- Theme Phase 2a - semantic surface/text tokens (FEAT-2608-051) ---
+     A role-based layer on top of the Phase 0 --afa-* palette above.
+     Every value below is currently IDENTICAL to its --afa-* source -
+     zero visual change in this commit. The point is naming: today
+     --afa-ink is used for two different jobs that happen to share one
+     hex value - "body text color on the cream page" and "the fill
+     color of a solid button/badge with light text on top" (~135
+     spots, audited 15 Aug). Phase 1's dark-theme attempt showed that
+     inverting --afa-ink directly breaks the second group (illegible
+     light-on-light). These semantic names let Phase 2b retarget each
+     of the ~1,042 existing usages onto the role it actually plays,
+     so Phase 2c can give surface/inverse/fill-solid independent dark
+     values instead of one shared ink value forced to serve three
+     different jobs at once. Do not rename or remove --afa-ink/-cream
+     themselves - Phase 2b migrates usages onto these new names
+     file-by-file, it doesn't delete the source palette. */
+  --afa-surface-page: var(--afa-cream);
+  --afa-surface-raised: var(--afa-cream-tint-1);
+  --afa-surface-inverse: var(--afa-ink);
+
+  --afa-text-primary: var(--afa-ink);
+  --afa-text-secondary: var(--afa-ink-a40);
+  --afa-text-muted: var(--afa-ink-a13);
+  --afa-text-inverse: var(--afa-cream);
+
+  --afa-fill-solid: var(--afa-ink);
+  --afa-on-fill-solid: var(--afa-cream);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
