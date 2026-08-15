@@ -64,7 +64,7 @@ export default function SearchBox() {
         className="afa-search-input"
         style={{
           width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
-          border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "13px",
+          border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "13px",
           background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box",
         }}
       />

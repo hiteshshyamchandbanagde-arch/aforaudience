@@ -181,13 +181,13 @@ export default function ArtistsPage() {
         )}
 
         {/* FILTERS */}
-        <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
             {["All", ...genres].map((g) => (
               <button
                 key={g}
                 onClick={() => setSelectedGenre(g)}
-                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-text-primary)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
+                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-text-primary)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
               >
                 {g === "All" ? tr.artistsPage.filterAll : g}
               </button>
@@ -256,7 +256,7 @@ export default function ArtistsPage() {
                     background: "white",
                     borderRadius: "10px",
                     overflow: "hidden",
-                    border: "1px solid rgba(14,12,10,0.08)",
+                    border: "1px solid rgba(245,245,240,0.08)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
@@ -280,7 +280,7 @@ export default function ArtistsPage() {
                           width: "28px",
                           height: "28px",
                           borderRadius: "50%",
-                          border: "3px solid rgba(14,12,10,0.15)",
+                          border: "3px solid rgba(245,245,240,0.15)",
                           borderTopColor: "var(--afa-terracotta)",
                           animation: "afa-spin 0.7s linear infinite",
                         }}

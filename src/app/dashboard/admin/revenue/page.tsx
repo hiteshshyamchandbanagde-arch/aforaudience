@@ -122,12 +122,12 @@ export default function AdminRevenueOverviewPage() {
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               💰 Platform Revenue
             </h1>
-            <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>
+            <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
             </span>
           </div>
 
-          <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
             Per the "never tax the scene" policy, the platform's only revenue is the audience-side
             booking fee — currently set to <strong>{money(currentFeeSettingRupees)}/ticket</strong> (change
             at <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-terracotta)' }}>Settings</Link>). Venue
@@ -151,13 +151,13 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Platform revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }} />
-                    <span style={{ fontSize: '9px', color: 'rgba(14,12,10,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: '9px', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -168,10 +168,10 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Top organisers by platform fee generated">
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(14,12,10,0.5)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(245,245,240,0.5)', padding: '0 12px' }}>
                   <span>Organiser</span>
                   <span>Platform Fee</span>
                   <span>Ticket Volume</span>
@@ -183,7 +183,7 @@ export default function AdminRevenueOverviewPage() {
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
                       fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
-                      border: '1px solid rgba(14,12,10,0.06)',
+                      border: '1px solid rgba(245,245,240,0.06)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{o.orgName}</span>
@@ -198,10 +198,10 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Top events by platform fee generated">
             {events.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(14,12,10,0.5)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(245,245,240,0.5)', padding: '0 12px' }}>
                   <span>Event</span>
                   <span>Platform Fee</span>
                   <span>Bookings</span>
@@ -212,7 +212,7 @@ export default function AdminRevenueOverviewPage() {
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
                       fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
-                      border: '1px solid rgba(14,12,10,0.06)',
+                      border: '1px solid rgba(245,245,240,0.06)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -231,17 +231,17 @@ export default function AdminRevenueOverviewPage() {
 
 function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
-      <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '16px' }}>
+      <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

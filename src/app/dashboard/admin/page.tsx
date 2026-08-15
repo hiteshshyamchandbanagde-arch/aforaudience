@@ -153,7 +153,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         position: 'relative',
         background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
-        border: '1px solid var(--afa-ink-a8)',
+        border: '1px solid rgba(245,245,240,0.08)',
         display: 'flex',
         alignItems: 'stretch',
         overflow: 'hidden',
@@ -179,7 +179,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
           justifyContent: 'center',
           background: `${accent}14`,
           color: accent,
-          borderRight: '1px dashed var(--afa-ink-a13)',
+          borderRight: '1px dashed rgba(245,245,240,0.13)',
         }}
       >
         {icon}
@@ -218,7 +218,7 @@ function QuickLink({ href, icon, label, accent }: { href: string; icon: React.Re
         fontWeight: 600,
         color: 'var(--afa-text-primary)',
         background: 'var(--afa-surface-raised)',
-        border: '1px solid var(--afa-ink-a8)',
+        border: '1px solid rgba(245,245,240,0.08)',
         borderBottom: `2.5px solid ${accent}`,
         borderRadius: '10px',
         padding: '9px 16px',
@@ -313,7 +313,7 @@ export default function AdminCommandCenter() {
                   style={{
                     background: 'var(--afa-surface-raised)',
                     borderRadius: '10px',
-                    border: '1px solid var(--afa-ink-a8)',
+                    border: '1px solid rgba(245,245,240,0.08)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -328,7 +328,7 @@ export default function AdminCommandCenter() {
                       fontSize: '13px',
                       fontWeight: 700,
                       color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-text-primary)',
-                      background: a.tone === 'critical' ? 'var(--afa-error-border)' : 'var(--afa-ink-a8)',
+                      background: a.tone === 'critical' ? 'var(--afa-error-border)' : 'rgba(245,245,240,0.08)',
                       borderRadius: '999px',
                       padding: '2px 10px',
                     }}
@@ -345,7 +345,7 @@ export default function AdminCommandCenter() {
             style={{
               marginBottom: '28px',
               background: 'var(--afa-mint-tint)',
-              border: '1px solid var(--afa-ink-a8)',
+              border: '1px solid rgba(245,245,240,0.08)',
               borderLeft: '4px solid var(--afa-sage)',
               borderRadius: '10px',
               padding: '14px 18px',
@@ -384,7 +384,7 @@ export default function AdminCommandCenter() {
           style={{
             background: 'var(--afa-surface-raised)',
             borderRadius: '14px',
-            border: '1px solid var(--afa-ink-a8)',
+            border: '1px solid rgba(245,245,240,0.08)',
             padding: '20px 22px',
             marginBottom: '26px',
           }}
@@ -397,7 +397,7 @@ export default function AdminCommandCenter() {
               {/* subtle gridlines */}
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} style={{ borderTop: '1px solid var(--afa-ink-a8)' }} />
+                  <div key={i} style={{ borderTop: '1px solid rgba(245,245,240,0.08)' }} />
                 ))}
               </div>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '6px', height: '100%' }}>

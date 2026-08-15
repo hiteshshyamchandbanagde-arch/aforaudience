@@ -17,7 +17,7 @@ interface VenueItem {
 const tabStyle = (active: boolean) => ({
   padding: "8px 18px",
   borderRadius: "999px",
-  border: `1.5px solid ${active ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+  border: `1.5px solid ${active ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
   background: active ? "var(--afa-terracotta)" : "transparent",
   color: active ? "white" : "var(--afa-text-primary)",
   fontSize: "13px",

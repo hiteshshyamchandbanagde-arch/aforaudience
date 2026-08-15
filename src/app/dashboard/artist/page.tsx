@@ -283,14 +283,14 @@ export default function ArtistDashboard() {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/artist/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
               >
                 Edit Profile
               </Link>
               {/* FEAT-2608-046 - corporate booking inquiries inbox */}
               <Link
                 href="/dashboard/artist/corporate-inquiries"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px' }}
               >
                 Corporate Inquiries
               </Link>
@@ -370,7 +370,7 @@ export default function ArtistDashboard() {
                   Complete your profile →
                 </Link>
               </div>
-              <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(14,12,10,0.08)', overflow: 'hidden' }}>
+              <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-terracotta)', borderRadius: '999px' }} />
               </div>
               <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '8px' }}>
@@ -380,7 +380,7 @@ export default function ArtistDashboard() {
           )}
 
           {/* Profile summary */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: profile.bio ? 0.8 : 0.4, marginBottom: '16px', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
               {profile.bio || 'No bio yet — add one from Edit Profile.'}
             </p>
@@ -401,7 +401,7 @@ export default function ArtistDashboard() {
               to show, so a brand-new artist with zero performances doesn't
               see an empty ₹0/₹0/₹0 block. */}
           {(totalCompensation > 0 || totalSpend > 0) && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Recorded Earnings
               </h2>
@@ -448,7 +448,7 @@ export default function ArtistDashboard() {
                 {allReviews.map((r) => {
                   const reply = r.reply || localReplies[r.id]
                   return (
-                    <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                    <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(245,245,240,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                         <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
                         <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
@@ -461,20 +461,20 @@ export default function ArtistDashboard() {
                       </p>
 
                       {reply ? (
-                        <div style={{ marginTop: '4px', paddingTop: '10px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                        <div style={{ marginTop: '4px', paddingTop: '10px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
                           <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.85, lineHeight: 1.5 }}>
                             <strong>Your reply:</strong> {reply.text}
                           </p>
                         </div>
                       ) : (
-                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(14,12,10,0.06)', display: 'flex', gap: '8px' }}>
+                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(245,245,240,0.06)', display: 'flex', gap: '8px' }}>
                           <input
                             type="text"
                             placeholder="Write a reply..."
                             value={replyDrafts[r.id] || ''}
                             onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
                             maxLength={500}
-                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
                           />
                           <button
                             onClick={() => submitReply(r.id)}
@@ -510,7 +510,7 @@ export default function ArtistDashboard() {
                 {profile.followers.map((f) => {
                   const label = f.user.displayName || f.user.name
                   return (
-                    <div key={f.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div key={f.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
                         width: '32px', height: '32px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, flexShrink: 0,
@@ -538,7 +538,7 @@ export default function ArtistDashboard() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {upcoming.map((p) => (
-                  <div key={p.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div key={p.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                     <div>
                       <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
                       <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -599,7 +599,7 @@ export default function ArtistDashboard() {
                         background: 'var(--afa-surface-raised)',
                         borderRadius: '10px',
                         padding: '16px 20px',
-                        border: '1px solid rgba(14,12,10,0.08)',
+                        border: '1px solid rgba(245,245,240,0.08)',
                         cursor: navigatingEventId ? 'default' : 'pointer',
                         opacity: navigatingEventId && !isNavigatingThis ? 0.5 : 1,
                         transition: 'opacity 0.15s ease',
@@ -623,7 +623,7 @@ export default function ArtistDashboard() {
                               width: '22px',
                               height: '22px',
                               borderRadius: '50%',
-                              border: '3px solid rgba(14,12,10,0.15)',
+                              border: '3px solid rgba(245,245,240,0.15)',
                               borderTopColor: 'var(--afa-terracotta)',
                               animation: 'afa-spin 0.7s linear infinite',
                             }}

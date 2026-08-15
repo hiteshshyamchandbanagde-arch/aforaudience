@@ -311,7 +311,7 @@ export default function EventsPage() {
             onClick={() => setContentMode("events")}
             style={{
               padding: "8px 18px", borderRadius: "999px",
-              border: `1.5px solid ${contentMode === "events" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+              border: `1.5px solid ${contentMode === "events" ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
               background: contentMode === "events" ? "var(--afa-terracotta)" : "transparent",
               color: contentMode === "events" ? "white" : "var(--afa-text-primary)",
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
@@ -323,7 +323,7 @@ export default function EventsPage() {
             onClick={() => setContentMode("organisers")}
             style={{
               padding: "8px 18px", borderRadius: "999px",
-              border: `1.5px solid ${contentMode === "organisers" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+              border: `1.5px solid ${contentMode === "organisers" ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
               background: contentMode === "organisers" ? "var(--afa-terracotta)" : "transparent",
               color: contentMode === "organisers" ? "white" : "var(--afa-text-primary)",
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
@@ -487,7 +487,7 @@ export default function EventsPage() {
                     background: "white",
                     borderRadius: "16px",
                     overflow: "hidden",
-                    border: "1px solid rgba(14,12,10,0.08)",
+                    border: "1px solid rgba(245,245,240,0.08)",
                     textDecoration: "none",
                     color: "inherit",
                     display: "block",
@@ -514,7 +514,7 @@ export default function EventsPage() {
                           width: "28px",
                           height: "28px",
                           borderRadius: "50%",
-                          border: "3px solid rgba(14,12,10,0.15)",
+                          border: "3px solid rgba(245,245,240,0.15)",
                           borderTopColor: "var(--afa-terracotta)",
                           animation: "afa-spin 0.7s linear infinite",
                         }}
@@ -532,12 +532,12 @@ export default function EventsPage() {
                         {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                       </span>
                       {event.isCompetitionShow && (
-                        <span style={{ position: "absolute", bottom: "12px", left: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
+                        <span style={{ position: "absolute", bottom: "12px", left: "12px", background: "rgba(245,245,240,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                           🏆 {tr.eventsPage.competitionBadge}
                         </span>
                       )}
                       {tab === "past" ? (
-                        <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(14,12,10,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
+                        <span style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(245,245,240,0.75)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
                           {tr.eventsPage.ended}
                         </span>
                       ) : (() => {

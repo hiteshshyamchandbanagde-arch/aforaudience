@@ -103,7 +103,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "white",
                 borderRadius: "16px",
-                border: "1px solid rgba(14,12,10,0.08)",
+                border: "1px solid rgba(245,245,240,0.08)",
                 overflow: "hidden",
                 cursor: data?.artistOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "artist-of-month" ? 0.5 : 1,
@@ -112,7 +112,7 @@ export default function WallOfFamePage() {
             >
               {navigatingKey === "artist-of-month" && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
                   <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                 </div>
               )}
@@ -161,7 +161,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "white",
                 borderRadius: "16px",
-                border: "1px solid rgba(14,12,10,0.08)",
+                border: "1px solid rgba(245,245,240,0.08)",
                 overflow: "hidden",
                 cursor: data?.eventOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "event-of-month" ? 0.5 : 1,
@@ -170,7 +170,7 @@ export default function WallOfFamePage() {
             >
               {navigatingKey === "event-of-month" && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
                 </div>
               )}
               <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", padding: "28px 28px 24px" }}>
@@ -211,7 +211,7 @@ export default function WallOfFamePage() {
               {tr.wallOfFamePage.allTimeLeaderboard}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(245,245,240,0.08)", padding: "24px 28px" }}>
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.wallOfFamePage.topOrganisers}</div>
                 {data.topOrganisers.length === 0 ? (
                   <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
@@ -240,7 +240,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "6px",
-                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none",
+                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(245,245,240,0.06)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -264,7 +264,7 @@ export default function WallOfFamePage() {
                                   width: "18px",
                                   height: "18px",
                                   borderRadius: "50%",
-                                  border: "2px solid rgba(14,12,10,0.15)",
+                                  border: "2px solid rgba(245,245,240,0.15)",
                                   borderTopColor: "var(--afa-terracotta)",
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}
@@ -282,7 +282,7 @@ export default function WallOfFamePage() {
                 )}
               </div>
 
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.08)", padding: "24px 28px" }}>
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(245,245,240,0.08)", padding: "24px 28px" }}>
                 <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.wallOfFamePage.topVenues}</div>
                 {data.topVenues.length === 0 ? (
                   <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
@@ -311,7 +311,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "6px",
-                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(14,12,10,0.06)" : "none",
+                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(245,245,240,0.06)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -335,7 +335,7 @@ export default function WallOfFamePage() {
                                   width: "18px",
                                   height: "18px",
                                   borderRadius: "50%",
-                                  border: "2px solid rgba(14,12,10,0.15)",
+                                  border: "2px solid rgba(245,245,240,0.15)",
                                   borderTopColor: "var(--afa-terracotta)",
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}

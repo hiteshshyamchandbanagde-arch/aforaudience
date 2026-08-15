@@ -52,7 +52,7 @@ export default function Home() {
               <Link href="/events" style={{ background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 700, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
                 {tr.homePage.ctaExploreEvents}
               </Link>
-              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-text-primary)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(14,12,10,0.2)", fontFamily: "var(--font-sans)" }}>
+              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-text-primary)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(245,245,240,0.2)", fontFamily: "var(--font-sans)" }}>
                 {tr.homePage.ctaImArtist}
               </Link>
             </div>

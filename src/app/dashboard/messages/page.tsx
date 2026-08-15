@@ -91,7 +91,7 @@ export default function MessagesInboxPage() {
                 gap: '12px',
                 padding: '14px 16px',
                 borderRadius: '10px',
-                border: '1px solid rgba(14,12,10,0.1)',
+                border: '1px solid rgba(245,245,240,0.1)',
                 background: t.unread ? 'rgba(212,163,60,0.08)' : 'var(--afa-cream, #fff)',
                 textDecoration: 'none',
                 color: 'var(--afa-text-primary)',

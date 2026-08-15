@@ -105,7 +105,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 padding: '14px 16px 16px',
                 fontSize: 14,
                 lineHeight: 1.45,
-                boxShadow: '0 10px 30px rgba(14,12,10,0.16)',
+                boxShadow: '0 10px 30px rgba(245,245,240,0.16)',
                 animation: 'toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                 overflow: 'hidden',
               }}

@@ -146,14 +146,14 @@ export default function RatePromptClientPage({
         <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
-          <div style={{ background: "white", borderRadius: "16px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
+          <div style={{ background: "white", borderRadius: "16px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
             <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
               placeholder={tr.ratePromptPage.commentPlaceholder}
-              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical" }}
+              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical" }}
             />
             {overallError && <p style={{ color: "var(--afa-terracotta)", fontSize: "13px", marginTop: "8px" }}>{overallError}</p>}
             <button
@@ -165,7 +165,7 @@ export default function RatePromptClientPage({
             </button>
           </div>
         ) : (
-          <div style={{ background: "white", borderRadius: "16px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ background: "white", borderRadius: "16px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ fontSize: "24px" }}>✓</span>
             <p style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
@@ -174,7 +174,7 @@ export default function RatePromptClientPage({
         {overallSubmitted && event.lineup.length > 0 && !showPerformers && (
           <button
             onClick={() => setShowPerformers(true)}
-            style={{ background: "none", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 20px", fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)", cursor: "pointer" }}
+            style={{ background: "none", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "8px", padding: "12px 20px", fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)", cursor: "pointer" }}
           >
             {tr.ratePromptPage.rateSpecificPerformers}
           </button>
@@ -188,7 +188,7 @@ export default function RatePromptClientPage({
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
               return (
-                <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "16px 20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+                <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "16px 20px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
                     <span style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>

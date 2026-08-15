@@ -26,7 +26,7 @@ export default function HelpIcon({ text }: { text: string }) {
           width: '16px',
           height: '16px',
           borderRadius: '50%',
-          border: '1px solid rgba(14,12,10,0.35)',
+          border: '1px solid rgba(245,245,240,0.35)',
           background: 'transparent',
           color: 'var(--afa-text-primary)',
           opacity: 0.7,

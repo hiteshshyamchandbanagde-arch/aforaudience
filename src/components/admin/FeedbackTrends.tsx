@@ -151,7 +151,7 @@ function buildKPIs(items: TrendFeedbackItem[]) {
 const kpiCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
-  border: '1px solid rgba(14,12,10,0.08)',
+  border: '1px solid rgba(245,245,240,0.08)',
   padding: '14px 16px',
   flex: '1 1 120px',
 }
@@ -172,7 +172,7 @@ const kpiLabel: React.CSSProperties = {
 const chartCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
-  border: '1px solid rgba(14,12,10,0.08)',
+  border: '1px solid rgba(245,245,240,0.08)',
   padding: '18px',
 }
 
@@ -274,7 +274,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                     fontWeight: 600,
                     padding: '4px 9px',
                     borderRadius: '999px',
-                    border: granularity === g ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    border: granularity === g ? 'none' : '1px solid rgba(245,245,240,0.15)',
                     background: granularity === g ? 'var(--afa-fill-solid)' : 'transparent',
                     color: granularity === g ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: 'pointer',
@@ -287,7 +287,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
             {/* baseline */}
-            <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} stroke="rgba(14,12,10,0.15)" strokeWidth={1} />
+            <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} stroke="rgba(245,245,240,0.15)" strokeWidth={1} />
             <path d={openedPath} fill="none" stroke="var(--afa-terracotta)" strokeWidth={2} />
             <path d={resolvedPath} fill="none" stroke="var(--afa-sage)" strokeWidth={2} />
             {series.map((w, i) => (
@@ -319,7 +319,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
-            <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(14,12,10,0.06)', overflow: 'hidden' }}>
+            <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(245,245,240,0.06)', overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',

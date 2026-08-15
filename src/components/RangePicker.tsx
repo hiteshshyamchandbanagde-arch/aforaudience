@@ -10,7 +10,7 @@ const RANGES: { value: string; label: string }[] = [
 
 export default function RangePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div style={{ display: 'inline-flex', gap: '4px', background: 'rgba(14,12,10,0.05)', padding: '4px', borderRadius: '8px' }}>
+    <div style={{ display: 'inline-flex', gap: '4px', background: 'rgba(245,245,240,0.05)', padding: '4px', borderRadius: '8px' }}>
       {RANGES.map((r) => (
         <button
           key={r.value}

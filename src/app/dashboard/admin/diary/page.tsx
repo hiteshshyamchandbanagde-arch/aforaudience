@@ -129,19 +129,19 @@ export default function AdminDiaryPage() {
         </p>
 
         {showForm && (
-          <div style={{ background: 'white', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
+          <div style={{ background: 'white', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
             <input
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Title (e.g. GST registration)"
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '15px', marginBottom: '10px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '15px', marginBottom: '10px', boxSizing: 'border-box' }}
             />
             <textarea
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
               placeholder="Notes (optional)"
               rows={3}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' }}
             />
             <button
               onClick={handleCreate}
@@ -160,7 +160,7 @@ export default function AdminDiaryPage() {
             {entries.map((entry) => {
               const meta = STATUS_META[entry.status]
               return (
-                <div key={entry.id} style={{ background: 'white', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '12px', padding: '18px 20px' }}>
+                <div key={entry.id} style={{ background: 'white', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '12px', padding: '18px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '8px' : '0' }}>
                     <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: meta.color, background: meta.bg, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap' }}>
@@ -181,7 +181,7 @@ export default function AdminDiaryPage() {
                           fontWeight: 600,
                           padding: '6px 12px',
                           borderRadius: '999px',
-                          border: s === entry.status ? `1.5px solid ${STATUS_META[s].color}` : '1px solid rgba(14,12,10,0.15)',
+                          border: s === entry.status ? `1.5px solid ${STATUS_META[s].color}` : '1px solid rgba(245,245,240,0.15)',
                           background: s === entry.status ? STATUS_META[s].bg : 'transparent',
                           color: s === entry.status ? STATUS_META[s].color : 'var(--afa-text-primary)',
                           opacity: s === entry.status ? 1 : 0.55,

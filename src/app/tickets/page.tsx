@@ -130,10 +130,10 @@ function getSection(b: BookingItem): TicketSection {
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
+  EXPIRED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
   CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
+  REFUNDED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
 }
 
 // A booking's display status can differ from its DB status: an expired
@@ -300,7 +300,7 @@ export default function MyTicketsPage() {
                     <button
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
+                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
                     >
                       {tr.ticketsPage.declineButton}
                     </button>
@@ -322,7 +322,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(245,245,240,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
@@ -344,7 +344,7 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
@@ -380,7 +380,7 @@ export default function MyTicketsPage() {
               const isLivePending = eff === 'PENDING'
               const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
               return (
-                <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(245,245,240,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {b.event.title}
@@ -392,7 +392,7 @@ export default function MyTicketsPage() {
                       {showAttendancePill && (
                         <span style={{
                           fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
-                          background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(14,12,10,0.08)',
+                          background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(245,245,240,0.08)',
                           color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)',
                         }}>
                           {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}

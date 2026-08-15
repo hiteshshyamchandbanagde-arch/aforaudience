@@ -428,7 +428,7 @@ export default function CheckoutPage() {
           <div
             style={{
               background: 'var(--afa-surface-raised)',
-              border: '1px solid rgba(14,12,10,0.08)',
+              border: '1px solid rgba(245,245,240,0.08)',
               borderRadius: 12,
               padding: 20,
               marginBottom: 24,
@@ -484,7 +484,7 @@ export default function CheckoutPage() {
                 borderRadius: 10,
                 fontWeight: 600,
                 textDecoration: 'none',
-                border: '1px solid rgba(14,12,10,0.15)',
+                border: '1px solid rgba(245,245,240,0.15)',
                 display: 'inline-block',
               }}
             >
@@ -599,7 +599,7 @@ export default function CheckoutPage() {
         <div
           style={{
             background: 'white',
-            border: '1px solid rgba(14,12,10,0.08)',
+            border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -632,7 +632,7 @@ export default function CheckoutPage() {
 
           <div
             style={{
-              borderTop: '1px solid rgba(14,12,10,0.06)',
+              borderTop: '1px solid rgba(245,245,240,0.06)',
               paddingTop: 16,
               marginBottom: 12,
             }}
@@ -685,7 +685,7 @@ export default function CheckoutPage() {
                   padding: '10px 0 4px',
                   fontSize: 13,
                   opacity: 0.75,
-                  borderTop: '1px dashed rgba(14,12,10,0.08)',
+                  borderTop: '1px dashed rgba(245,245,240,0.08)',
                   marginTop: 6,
                 }}
               >
@@ -707,7 +707,7 @@ export default function CheckoutPage() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid rgba(14,12,10,0.08)',
+              borderTop: '1px solid rgba(245,245,240,0.08)',
               paddingTop: 16,
             }}
           >
@@ -724,7 +724,7 @@ export default function CheckoutPage() {
         <div
           style={{
             background: 'white',
-            border: '1px solid rgba(14,12,10,0.08)',
+            border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -802,7 +802,7 @@ export default function CheckoutPage() {
                 disabled={companionBusy}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
-                  border: '1px solid rgba(14,12,10,0.15)', boxSizing: 'border-box',
+                  border: '1px solid rgba(245,245,240,0.15)', boxSizing: 'border-box',
                 }}
               />
               {companionSearching && (
@@ -819,7 +819,7 @@ export default function CheckoutPage() {
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(14,12,10,0.08)',
+                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(245,245,240,0.08)',
                           background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
                         }}
                       >

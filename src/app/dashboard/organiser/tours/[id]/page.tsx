@@ -12,7 +12,7 @@ const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
@@ -238,7 +238,7 @@ export default function TourDetailPage() {
         </div>
 
         {/* Artist consent status */}
-        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '24px' }}>
+        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>Artist consent</h2>
           {tour.consents.length === 0 ? (
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
@@ -269,7 +269,7 @@ export default function TourDetailPage() {
         </div>
 
         {showAddStop && (
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '20px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
               <div>
                 <label style={labelStyle}>Stop title</label>
@@ -331,7 +331,7 @@ export default function TourDetailPage() {
                 </div>
               )}
             </div>
-            <div style={{ borderTop: '1px solid rgba(14,12,10,0.08)', paddingTop: '14px', marginBottom: '14px' }}>
+            <div style={{ borderTop: '1px solid rgba(245,245,240,0.08)', paddingTop: '14px', marginBottom: '14px' }}>
               <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Open local/beginner slots (optional)</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
                 <div>
@@ -370,7 +370,7 @@ export default function TourDetailPage() {
                 return q.length > 0 && name.includes(q) && !alreadyIn
               })
               return (
-                <div key={stop.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={stop.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(245,245,240,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', gap: '10px' }}>
                     <div>
                       <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
@@ -446,7 +446,7 @@ export default function TourDetailPage() {
         )}
 
         {tour.status !== 'CANCELLED' && tour.status !== 'COMPLETED' && (
-          <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
             <button
               onClick={handleCancelTour}
               style={{ fontSize: '13px', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}

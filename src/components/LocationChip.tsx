@@ -84,8 +84,8 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
 
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
-      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(14,12,10,0.06)', width: '100%', textAlign: 'left' }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(14,12,10,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
+      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
+      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
@@ -102,9 +102,9 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             left: variant === 'mobile' ? 0 : 'auto',
             right: variant === 'mobile' ? 0 : 0,
             background: 'var(--afa-surface-raised)',
-            border: '1px solid rgba(14,12,10,0.15)',
+            border: '1px solid rgba(245,245,240,0.15)',
             borderRadius: '10px',
-            boxShadow: '0 8px 24px rgba(14,12,10,0.15)',
+            boxShadow: '0 8px 24px rgba(245,245,240,0.15)',
             zIndex: 40,
             width: '240px',
             padding: '10px',
@@ -116,7 +116,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
             autoFocus
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', marginBottom: '8px', outline: 'none' }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '8px', outline: 'none' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (

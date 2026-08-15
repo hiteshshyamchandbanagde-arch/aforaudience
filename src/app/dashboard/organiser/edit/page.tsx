@@ -8,7 +8,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 
 const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit' }
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit' }
 
 // Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
 // previously these could only be set once, at apply-time. Powers the new
@@ -146,13 +146,13 @@ export default function OrganiserEditPage() {
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Profile Picture</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
+                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
                 )}
                 <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}

@@ -176,19 +176,19 @@ export default function VenueDashboard() {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/venue/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Edit Profile
               </Link>
               <Link
                 href="/dashboard/venue/sales"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 📊 Revenue Overview
               </Link>
               <Link
                 href="/dashboard/venue/bookings"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Booking Requests
                 {pendingBookings > 0 && (
@@ -199,7 +199,7 @@ export default function VenueDashboard() {
               </Link>
               <Link
                 href="/dashboard/venue-requests"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Flexible Requests
                 {pendingFlexRequests > 0 && (
@@ -224,7 +224,7 @@ export default function VenueDashboard() {
           )}
 
           {venues.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No venues yet</p>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Register your first venue to start hosting events</p>
               <Link
@@ -240,7 +240,7 @@ export default function VenueDashboard() {
                 <div
                   key={venue.id}
                   onClick={() => router.push(`/dashboard/venue/${venue.id}`)}
-                  style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                  style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245,245,240,0.08)', cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>
@@ -273,7 +273,7 @@ export default function VenueDashboard() {
                   <div style={{ display: 'flex', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
                     <Link
                       href={`/dashboard/venue/${venue.id}`}
-                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                     >
                       View
                     </Link>
@@ -286,7 +286,7 @@ export default function VenueDashboard() {
                     {venue.seatingMode === 'NUMBERED' && (
                       <Link
                         href={`/dashboard/venue/${venue.id}/seat-map`}
-                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                       >
                         Seat Map
                       </Link>
