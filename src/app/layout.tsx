@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Manrope, IBM_Plex_Mono } from "next/font/google";
+import {
+  Newsreader, Manrope, IBM_Plex_Mono,
+  Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu,
+  Noto_Sans_Kannada, Noto_Sans_Malayalam, Noto_Sans_Gujarati, Noto_Sans_Bengali,
+} from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
@@ -20,6 +24,22 @@ import SupportWidget from "@/components/SupportWidget";
 const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-display", style: ["normal", "italic"], display: "swap" });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
+
+// Phase 2c multi-script fix (FEAT-2608-051): --font-sans (Manrope) only
+// covers Latin, so headings/body silently fell back to a generic system
+// font for 6 of AFA's 11 UI languages. Each Noto Sans script family gets
+// its own CSS variable here; globals.css chains them all into a single
+// --font-sans fallback stack. Browsers resolve font-family fallback per
+// *character* via each font's unicode-range, so listing all 7 costs
+// nothing extra for a Latin-only page - the Devanagari font file is
+// only ever fetched when Devanagari characters are actually present.
+const notoDevanagari = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["400", "500"], variable: "--font-devanagari", display: "swap" });
+const notoTamil = Noto_Sans_Tamil({ subsets: ["tamil"], weight: ["400", "500"], variable: "--font-tamil", display: "swap" });
+const notoTelugu = Noto_Sans_Telugu({ subsets: ["telugu"], weight: ["400", "500"], variable: "--font-telugu", display: "swap" });
+const notoKannada = Noto_Sans_Kannada({ subsets: ["kannada"], weight: ["400", "500"], variable: "--font-kannada", display: "swap" });
+const notoMalayalam = Noto_Sans_Malayalam({ subsets: ["malayalam"], weight: ["400", "500"], variable: "--font-malayalam", display: "swap" });
+const notoGujarati = Noto_Sans_Gujarati({ subsets: ["gujarati"], weight: ["400", "500"], variable: "--font-gujarati", display: "swap" });
+const notoBengali = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "500"], variable: "--font-bengali", display: "swap" });
 
 export const metadata: Metadata = {
   title: "A for Audience — Where Art Finds Its Crowd",
@@ -142,7 +162,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${newsreader.variable} ${manrope.variable} ${plexMono.variable}`}>
+      <body className={`${newsreader.variable} ${manrope.variable} ${plexMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.

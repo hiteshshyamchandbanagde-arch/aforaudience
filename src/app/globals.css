@@ -134,17 +134,30 @@
      different jobs at once. Do not rename or remove --afa-ink/-cream
      themselves - Phase 2b migrates usages onto these new names
      file-by-file, it doesn't delete the source palette. */
-  --afa-surface-page: var(--afa-cream);
-  --afa-surface-raised: var(--afa-cream-tint-1);
-  --afa-surface-inverse: var(--afa-ink);
+  /* --- Theme Phase 2c - dark-stage values (FEAT-2608-051) ---
+     "Direction B" agreed with Hitesh: dark stage-lit surfaces, one
+     saturated accent standing in for spotlight energy, rather than
+     the Phase 0/1 warm cream/gold heritage palette. Going straight to
+     default (Hitesh's call) rather than opt-in - this IS the new
+     default look as of this commit. Because Phase 2b already gave
+     every one of the ~1,147 ink/cream usages a semantic role, these
+     three tokens can now genuinely diverge instead of sharing one
+     hex value: surface-page/surface-inverse are both dark but at
+     different depths (inverse reads as a deliberately deeper band -
+     footer, ticker, splash), while fill-solid is the bright accent
+     so buttons actually pop against the dark page instead of
+     vanishing into it. */
+  --afa-surface-page: #141414;
+  --afa-surface-raised: #1F1F1F;
+  --afa-surface-inverse: #0A0A0A;
 
-  --afa-text-primary: var(--afa-ink);
-  --afa-text-secondary: var(--afa-ink-a40);
-  --afa-text-muted: var(--afa-ink-a13);
-  --afa-text-inverse: var(--afa-cream);
+  --afa-text-primary: #F5F5F0;
+  --afa-text-secondary: rgba(245, 245, 240, 0.65);
+  --afa-text-muted: rgba(245, 245, 240, 0.4);
+  --afa-text-inverse: #F5F5F0;
 
-  --afa-fill-solid: var(--afa-ink);
-  --afa-on-fill-solid: var(--afa-cream);
+  --afa-fill-solid: #FF5A36;
+  --afa-on-fill-solid: var(--afa-brown-black);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -307,6 +320,22 @@
   html {
     @apply font-sans;
   }
+}
+/* Phase 2c multi-script fix (FEAT-2608-051), unlayered so it wins over
+   the @apply font-sans above regardless of source order. Manrope only
+   covers Latin, so this chains in each Noto Sans script family (loaded
+   in layout.tsx) as fallbacks - the browser resolves font-family
+   per-character via unicode-range, so a Devanagari/Tamil/etc. glyph
+   gets a real designed font instead of silently falling back to the
+   OS default. This fixes the INHERITED base case immediately. Known
+   remaining gap: components that set an explicit inline
+   fontFamily: "var(--font-sans)" (a common pattern in this codebase)
+   still resolve to Manrope-only at that element, since an inline
+   style overrides inheritance - closing that needs the same kind of
+   mechanical multi-file pass Phase 2b did for color tokens, not yet
+   done, tracked in FEAT-2608-051. */
+html {
+  font-family: var(--font-sans), var(--font-devanagari), var(--font-tamil), var(--font-telugu), var(--font-kannada), var(--font-malayalam), var(--font-gujarati), var(--font-bengali), sans-serif;
 }
 .hero-rotator {
   height: 100%;
