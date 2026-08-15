@@ -564,17 +564,17 @@ export default function EventsPage() {
                       <div style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--afa-terracotta)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
                         {event.venue ? `${event.venue.name} · ${event.venue.city}` : tr.eventsPage.venueTBD}
                       </div>
-                      <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.2 }}>
+                      <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px", lineHeight: 1.2 }}>
                         {event.title}
                       </div>
                       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
-                        <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>🕐 {event.startTime}</span>
+                        <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
+                        <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🕐 {event.startTime}</span>
                         {isNightEvent(event.startTime) && (
                           <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title={tr.eventsPage.nightTitle}>🌙 {tr.eventsPage.nightLabel}</span>
                         )}
                         {event.lineup.length > 0 && (
-                          <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
                         )}
                       </div>
                       {view === "list" && (
@@ -582,15 +582,15 @@ export default function EventsPage() {
                           <span style={{ background: event.isFree ? "var(--afa-green-mid)" : "var(--afa-terracotta)", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
                             {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                           </span>
-                          <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{typeLabel}</span>
+                          <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{typeLabel}</span>
                           {tab === "past" ? (
-                            <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", fontWeight: 600, opacity: 0.6 }}>{tr.eventsPage.ended}</span>
+                            <span style={{ fontSize: "12px", color: "var(--afa-ink)", fontWeight: 600, opacity: 0.6 }}>{tr.eventsPage.ended}</span>
                           ) : (() => {
                             const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                             if (status === 'available') return null
                             const statusLabel = tr.availability[status]
                             return (
-                              <span style={{ fontSize: "12px", color: status === 'sold-out' ? "var(--afa-text-primary)" : "var(--afa-red-alt)", fontWeight: 600 }}>
+                              <span style={{ fontSize: "12px", color: status === 'sold-out' ? "var(--afa-ink)" : "var(--afa-red-alt)", fontWeight: 600 }}>
                                 {status === 'filling-fast' ? `🔥 ${statusLabel} · ${event.availableSeats}${tr.eventsPage.leftSuffix}` : statusLabel}
                               </span>
                             )
