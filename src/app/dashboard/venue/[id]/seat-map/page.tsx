@@ -255,7 +255,7 @@ function computeGridSeats(config: GridConfig, originX: number, originY: number):
 const inputStyle = {
   padding: '8px 10px',
   borderRadius: '6px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   background: 'var(--afa-surface-raised)',
   fontSize: '13px',
   color: 'var(--afa-text-primary)',
@@ -1372,8 +1372,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             onClick={() => setSeatingMode('GENERAL_ADMISSION')}
             style={{
               padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(14,12,10,0.15)',
-              background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
+              border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.15)',
+              background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
               color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
             }}
           >
@@ -1383,8 +1383,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             onClick={() => setSeatingMode('NUMBERED')}
             style={{
               padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(14,12,10,0.15)',
-              background: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
+              border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.15)',
+              background: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
               color: seatingMode === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
             }}
           >
@@ -1401,7 +1401,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               border: seatMapFrozen ? '1px solid var(--afa-terracotta)' : '1px dashed rgba(14,12,10,0.2)',
             }}
           >
-            <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
               {seatMapFrozen ? (
                 <><strong>🔒 Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
               ) : (
@@ -1415,7 +1415,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: freezing ? 'default' : 'pointer',
                 border: 'none', opacity: freezing ? 0.6 : 1,
                 background: seatMapFrozen ? 'var(--afa-white)' : 'var(--afa-terracotta)',
-                color: seatMapFrozen ? 'var(--afa-text-primary)' : 'var(--afa-white)',
+                color: seatMapFrozen ? 'var(--afa-ink)' : 'var(--afa-white)',
                 ...(seatMapFrozen ? { border: '1px solid rgba(14,12,10,0.2)' } : {}),
               }}
             >
@@ -1433,7 +1433,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && (
           <div style={{ marginBottom: '20px' }}>
             {levels.length === 1 ? (
-              <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
+              <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
                 + This venue has more than one level (e.g. Balcony, 1st Floor)
               </button>
             ) : (
@@ -1446,8 +1446,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         onClick={() => setActiveLevel(lvl)}
                         style={{
                           padding: '7px 14px', borderRadius: '8px 0 0 8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                          border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
+                          border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
                           color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-text-primary)',
                         }}
                       >
@@ -1458,8 +1458,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         title={`Remove ${levelLabel(lvl)}`}
                         style={{
                           padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
-                          border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.15)', borderLeft: 'none',
-                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
+                          border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)', borderLeft: 'none',
+                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
                           color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-error)',
                         }}
                       >
@@ -1467,7 +1467,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       </button>
                     </div>
                   ))}
-                  <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
+                  <button onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '7px 12px', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
                     + Add level
                   </button>
                 </div>
@@ -1498,7 +1498,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startDrawMyself}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)',
+                borderRadius: '12px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '6px' }}>For hands-on control</div>
@@ -1520,19 +1520,19 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>What's your seating shape?</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Straight rows facing the stage
                   </button>
-                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Curved rows, round tables, or a U-shape
                   </button>
                 </div>
                 {wizardShape === 'other' && (
-                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'var(--afa-cream-tint-1)', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'var(--afa-cream-tint-1)', fontSize: '13px', color: 'var(--afa-ink)' }}>
                     Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. You can either draw that shape by hand, or start from straight rows here and adjust later.
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                       <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
-                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
+                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
                     </div>
                   </div>
                 )}
@@ -1546,10 +1546,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   e.g. "Front" costs more than "Back". Each section is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardMultiZone === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
+                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
                     No, one section for everything
                   </button>
-                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardMultiZone === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
+                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
                     Yes, multiple sections
                   </button>
                 </div>
@@ -1612,7 +1612,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
-                    <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                    <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                       + Add another zone
                     </button>
                     {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
@@ -1624,7 +1624,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button
                     onClick={wizardNext}
                     disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0}
@@ -1643,10 +1643,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step. This sets the same walkway for every zone to start; if different zones need different splits, fine-tune each one separately afterward in the advanced Generate Grid panel.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardHasVerticalAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
+                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasVerticalAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasVerticalAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
                     No, one solid block
                   </button>
-                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasVerticalAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardHasVerticalAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
+                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasVerticalAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasVerticalAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
                     Yes, a center walkway
                   </button>
                 </div>
@@ -1662,7 +1662,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <button
                           key={opt.label}
                           onClick={() => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((rg) => ({ ...rg, verticalAisles: rg.verticalAisles.map((a, i) => (i === 0 ? { ...a, gapPx: opt.px } : a)) })) }))}
-                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
+                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
                         >
                           {opt.label}
                         </button>
@@ -1672,7 +1672,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
                 </div>
               </div>
@@ -1689,7 +1689,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <button
                       key={opt}
                       onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
-                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
+                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
                     >
                       {opt}
                     </button>
@@ -1701,7 +1701,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {gridConfig.rowAlignment === 'right' && 'Every row ends at the stage-right edge — wider rows only grow toward stage-left.'}
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
                 </div>
               </div>
@@ -1714,8 +1714,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   e.g. a walking gap after row 10, so rows 11+ have extra space in front of them. You can add more than one - answering Yes adds a row-number field below for each gangway.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardHasAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>Yes</button>
-                  <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(14,12,10,0.2)', background: wizardHasAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-white)', color: wizardHasAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>No</button>
+                  <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>Yes</button>
+                  <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>No</button>
                 </div>
 
                 {wizardHasAisle === true && (
@@ -1728,14 +1728,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
                     ))}
-                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
                       + Add another gangway
                     </button>
                   </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} disabled={wizardHasAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasAisle === null ? 0.5 : 1 }}>Next: Preview</button>
                 </div>
               </div>
@@ -1765,7 +1765,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={finishWizard} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Looks good — continue to fine-tune</button>
                 </div>
               </div>
@@ -1785,10 +1785,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
               {isMobile ? (
                 <div style={{ padding: '14px 16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', marginBottom: '14px' }}>
-                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', margin: '0 0 4px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', margin: '0 0 4px' }}>
                     Viewing only on this screen
                   </p>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, margin: 0 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7, margin: 0 }}>
                     Placing, moving, and generating seats needs more room than a phone gives you. Pinch or scroll below to check the current layout, and switch to a tablet or desktop to make changes.
                   </p>
                 </div>
@@ -1813,8 +1813,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
                       style={{
                         padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: manualPlacement ? 'none' : '1px solid rgba(14,12,10,0.2)',
-                        background: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
+                        border: manualPlacement ? 'none' : '1px solid rgba(245,245,240,0.2)',
+                        background: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
                         color: manualPlacement ? 'var(--afa-white)' : 'var(--afa-text-primary)',
                       }}
                     >
@@ -1871,7 +1871,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <label
                   style={{
                     padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
-                    border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
+                    border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
                     opacity: underlayUploading ? 0.6 : 1,
                   }}
                 >
@@ -1911,7 +1911,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
               {showGenerator && !isMobile && (
                 <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
                     This is a starting point, not a final layout. Set the shape below and it drops seats onto the canvas above - then hand-edit anything (move, add, delete) just like a manually placed seat.
                   </p>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1921,7 +1921,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
                   </div>
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
                     These are canvas units, not a real-world measurement - bigger number means more empty space. Adjust and watch the preview above; there's no need to know exactly what "px" means.
                   </p>
 
@@ -1937,14 +1937,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
                           border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.15)',
                           background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
-                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)',
+                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-ink)',
                         }}
                       >
                         {opt}
                       </button>
                     ))}
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
                     {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides, so every row shares one central aisle — the shape of a real fan-style hall.'}
                     {gridConfig.rowAlignment === 'left' && 'Every row starts at the same left edge — wider rows only grow to the right. Use this if one side of your venue is against a wall.'}
                     {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
@@ -1973,7 +1973,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '4px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
                         Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat. The scale already runs the full width, so a position near the right edge just means a number close to 100 - there's no separate "from the right" field needed.
                       </div>
                       {rg.verticalAisles.map((a) => (
@@ -1991,12 +1991,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         </div>
                       ))}
-                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
+                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
                         + Add vertical aisle to this zone
                       </button>
                     </div>
                   ))}
-                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
+                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
                     + Add row group / zone
                   </button>
 
@@ -2010,7 +2010,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                     </div>
                   ))}
-                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
+                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
                     + Add horizontal aisle
                   </button>
 
