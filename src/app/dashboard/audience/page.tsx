@@ -13,6 +13,7 @@ interface BookingItem {
   totalAmount: number
   status: string
   createdAt: string
+  checkedInAt: string | null
   event: {
     id: string
     title: string
@@ -51,8 +52,15 @@ export default function AudienceActivityPage() {
 
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
   const totalSpend = confirmed.reduce((sum, b) => sum + b.totalAmount, 0)
-  const freeEventsAttended = confirmed.filter((b) => b.event.isFree).length
-  const totalEventsAttended = confirmed.length
+  // BUG-2608-048 (15 Aug): "Events Attended" previously counted every
+  // CONFIRMED booking, including ones for events that haven't happened
+  // yet or that the person no-showed for - a paid/reserved seat, not an
+  // actual attendance. Scoped to real check-ins (checkedInAt set) so this
+  // reads as attendance history, not a booking count (that's what My
+  // Tickets is for).
+  const attended = confirmed.filter((b) => b.checkedInAt)
+  const freeEventsAttended = attended.filter((b) => b.event.isFree).length
+  const totalEventsAttended = attended.length
 
   return (
     <>
