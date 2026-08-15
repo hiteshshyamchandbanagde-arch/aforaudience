@@ -69,8 +69,8 @@ export default function BrowseSearchDropdown<T>({
         <div
           style={{
             position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0,
-            background: "white", borderRadius: "12px", boxShadow: "0 12px 40px rgba(0,0,0,0.16)",
-            border: "1px solid rgba(14,12,10,0.08)", zIndex: 50, maxHeight: "360px", overflowY: "auto",
+            background: "var(--afa-surface-raised)", borderRadius: "12px", boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+            border: "1px solid rgba(245,245,240,0.1)", zIndex: 50, maxHeight: "360px", overflowY: "auto",
             padding: visible.length ? "8px 0" : "16px 20px", textAlign: "left",
           }}
         >
@@ -96,7 +96,7 @@ export default function BrowseSearchDropdown<T>({
             ))
           )}
           {items.length > maxVisible && (
-            <div style={{ fontSize: "11.5px", color: "var(--afa-text-primary)", opacity: 0.45, padding: "6px 20px 2px", borderTop: "1px solid rgba(14,12,10,0.06)", marginTop: "4px" }}>
+            <div style={{ fontSize: "11.5px", color: "var(--afa-text-primary)", opacity: 0.45, padding: "6px 20px 2px", borderTop: "1px solid rgba(245,245,240,0.08)", marginTop: "4px" }}>
               +{items.length - maxVisible} more below
             </div>
           )}
