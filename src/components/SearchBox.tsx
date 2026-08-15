@@ -65,7 +65,7 @@ export default function SearchBox() {
         style={{
           width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
           border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "13px",
-          background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box",
+          background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box",
         }}
       />
       {open && query.trim().length >= 2 && (

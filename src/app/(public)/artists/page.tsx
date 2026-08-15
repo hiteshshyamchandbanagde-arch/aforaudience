@@ -166,7 +166,7 @@ export default function ArtistsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.artistsPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", fontFamily: "var(--font-sans)", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", fontFamily: "var(--font-sans)", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>

@@ -187,7 +187,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                     value={form[field.name as keyof typeof form]}
                     onChange={handleChange}
                     maxLength={FIELD_LIMITS[field.name]}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                   />
                 </div>
               ))}
@@ -207,7 +207,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={(city) => setForm((prev) => ({ ...prev, city: city.slice(0, FIELD_LIMITS.city) }))}
                   onResolved={(location) => setForm((prev) => ({ ...prev, city: location.city.slice(0, FIELD_LIMITS.city) }))}
                   placeholder="Pune"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
@@ -219,7 +219,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   type="date"
                   value={form.preferredDate}
                   onChange={handleChange}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
@@ -231,7 +231,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
                   presets={BUDGET_RANGE_PRESETS}
                   placeholder="e.g. ₹75,000 or 'flexible'"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
               <div>
@@ -245,7 +245,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={handleChange}
                   rows={3}
                   maxLength={MESSAGE_LIMIT}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
                 />
               </div>
             </div>
