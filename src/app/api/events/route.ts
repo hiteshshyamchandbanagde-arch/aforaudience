@@ -219,6 +219,27 @@ export async function POST(req: Request) {
       }
     }
 
+    // GEN-2608-040 (15 Aug) - a "paid" (isFree=false) event could
+    // previously be published with no ticketPrice and no ticketTiers at
+    // all: the block above only validated ticketPrice's *format* if
+    // provided, never required it. That silently broke Price sort
+    // (already patched separately, PR #430/#431) and left a real gap in
+    // the fee-calculation path this platform's revenue model runs on.
+    // Required at Publish only - a Draft in progress can still be saved
+    // with no price yet, same convention as Offer Amount/Fee-per-artist
+    // below.
+    const hasValidTierPricing = Array.isArray(ticketTiers) && ticketTiers.some(
+      (t: any) => t?.sectionName && t.price !== undefined && t.price !== null && t.price !== '' && Number.isFinite(Number(t.price))
+    )
+    if (publish === true && !isFree && !hasValidTierPricing) {
+      if (ticketPrice === undefined || ticketPrice === null || ticketPrice === '') {
+        return NextResponse.json(
+          { error: 'A ticket price is required before publishing a paid event. Set a price, add priced sections, or mark the event as free.' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Validation-gap cluster fix (design.md §9.2, 26 Jul): Offer Amount and
     // Paid-fee previously had no bound at all client- or server-side, and
     // could be submitted blank at Publish - inverting the negotiation flow
