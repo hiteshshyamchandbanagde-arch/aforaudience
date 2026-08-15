@@ -193,88 +193,12 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* --- Theme Phase 1: "Indigo" - one opt-in second theme ---
-   Overrides only the brand ACCENT colors (terracotta/gold family),
-   deliberately NOT the ink/cream pair. Audited before building: ink and
-   cream are both used in dual roles across the app (ink as body text on
-   a cream page, but also as a solid button/badge FILL with white or
-   cream text on top) - inverting their values directly would flip solid
-   buttons into a light fill with illegible light-on-light text in many
-   spots. Swapping only the accent keeps every existing text/background
-   contrast pair intact and just changes the brand mood - deep indigo +
-   gold, a classic festive/regal Indian-performance pairing - which is
-   also a safer, more honest scope for a first opt-in theme than a
-   half-correct light/dark inversion. Toggled via a small control in
-   SiteNav, persisted to localStorage('afa-theme'), applied instantly
-   pre-paint by the inline script in layout.tsx <head>. */
-[data-theme="indigo"] {
-  --afa-terracotta: #4B3F72;
-  --afa-terracotta-tint: #ECE9F5;
-  --afa-maroon-black: #180F2E;
-}
-
-/* --- Theme Phase 2: "Peacock" - first of 4 planned additional themes ---
-   Same scoped pattern as Indigo above: overrides only the three brand
-   ACCENT variables, never ink/cream/brand-mark. Deep jewel teal + the
-   existing warm cream, a classic Indian royal/peacock pairing - chosen
-   as the first of the batch because it's the most tonally distinct from
-   both Default (warm terracotta) and Indigo (cool violet), giving users
-   an actual third mood rather than a third hue near the other two.
-   Remaining planned themes (Vermilion/Sindoor, Royal Purple/Rajwada,
-   Midnight Sapphire, Noir) follow this exact same 3-variable formula -
-   see docs/design.md Theme Phase 2 entry for the full palette + hex
-   values, so adding each one going forward is a CSS block here plus one
-   entry in SiteNav's THEMES array, nothing else. */
-[data-theme="peacock"] {
-  --afa-terracotta: #0F6E5C;
-  --afa-terracotta-tint: #E6F5F1;
-  --afa-maroon-black: #06231D;
-}
-
-/* --- Theme Phase 2: "Vermilion" (Sindoor) - second of 4 planned themes.
-   Same 3-variable formula as Indigo/Peacock above. Deep auspicious red,
-   the most festive/bold of the batch - deliberately distinct from
-   Default's warm terracotta-orange rather than sitting near it on the
-   color wheel. See docs/design.md Theme Phase 2 entry for the full
-   remaining palette. */
-[data-theme="vermilion"] {
-  --afa-terracotta: #9E1B32;
-  --afa-terracotta-tint: #FDEEF0;
-  --afa-maroon-black: #2E0509;
-}
-
-/* --- Theme Phase 2: "Royal Purple" (Rajwada) - third of 4 planned themes.
-   Same 3-variable formula. Regal palace purple. Deliberately a distinct
-   hue from the existing --afa-purple (#7B4FA0, used by the Adbhuta mood
-   tag elsewhere in the app) so the two never read as the same color in
-   different contexts. See docs/design.md Theme Phase 2 entry. */
-[data-theme="royal-purple"] {
-  --afa-terracotta: #6A3B8C;
-  --afa-terracotta-tint: #F3ECF8;
-  --afa-maroon-black: #1F0A2E;
-}
-
-/* --- Theme Phase 2: "Midnight Sapphire" - fourth of 4 planned themes.
-   Same 3-variable formula. Modern/nightlife-concert feel, distinct hue
-   from existing --afa-blue (#4A6FA5) so the two never collide visually.
-   See docs/design.md Theme Phase 2 entry. */
-[data-theme="midnight-sapphire"] {
-  --afa-terracotta: #17407A;
-  --afa-terracotta-tint: #EAF1FA;
-  --afa-maroon-black: #071B33;
-}
-
-/* --- Theme Phase 2: "Noir" (Black Tie) - last of the 5 planned themes.
-   Same 3-variable formula, but the odd one out on purpose: a monochrome
-   graphite/charcoal accent rather than another hue, aimed at
-   organiser/venue-owner users who may want something less festive than
-   performers/audience get from the color themes. Closes out the Theme
-   Phase 2 batch - see docs/design.md. */
-[data-theme="noir"] {
-  --afa-terracotta: #2B2B2B;
-  --afa-terracotta-tint: #F4F3F1;
-  --afa-maroon-black: #0A0A0A;
-}
+/* Theme Phase 1/2 (opt-in accent picker: Indigo/Peacock/Vermilion/Royal
+   Purple/Midnight Sapphire/Noir) removed (GEN-2608-048, 15 Aug) - Hitesh's
+   call to lock the palette to a single identity rather than a
+   user-selectable picker, consistent with the Theme Phase 2c dark-reskin
+   decision below being "the" default look, not one option among seven.
+   See docs/design.md Theme Phase 1/2 entries for the removed history. */
 
 .dark {
   --background: oklch(0.145 0 0);

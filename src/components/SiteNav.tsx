@@ -235,50 +235,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       touchStartY.current = null
     }
   }
-  // Theme Phase 2 - was a binary default<->indigo toggle button (Phase 1).
-  // Widened to a picker backed by this array because 4 more themes are
-  // planned this batch (Vermilion, Royal Purple, Midnight Sapphire,
-  // Noir) - a toggle only ever handles 2 states, so it would have needed
-  // rebuilding into a picker anyway on the very next theme. Doing that
-  // rebuild now, on theme #3, means every theme after this one is just a
-  // CSS block in globals.css plus one entry in this array - no further
-  // SiteNav changes. Order here is also menu display order.
-  const THEMES = [
-    { id: 'default', label: 'Default', emoji: '🌙' },
-    { id: 'indigo', label: 'Indigo', emoji: '🪔' },
-    { id: 'peacock', label: 'Peacock', emoji: '🦚' },
-    { id: 'vermilion', label: 'Vermilion', emoji: '🔥' },
-    { id: 'royal-purple', label: 'Royal Purple', emoji: '👑' },
-    { id: 'midnight-sapphire', label: 'Midnight Sapphire', emoji: '🌌' },
-    { id: 'noir', label: 'Noir', emoji: '🎩' },
-  ] as const
-  type ThemeId = typeof THEMES[number]['id']
-
-  // Mirrors what layout.tsx's pre-paint script already applied to <html>,
-  // so this just reads it back for the picker's own state (never causes
-  // a flash - the attribute is already set by the time this hydrates).
-  const [theme, setThemeState] = useState<ThemeId>('default')
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const current = document.documentElement.getAttribute('data-theme')
-    const match = THEMES.find((th) => th.id === current)
-    if (match) setThemeState(match.id)
-  }, [])
-
-  const [themeMenuOpen, setThemeMenuOpen] = useState(false)
-  const themeMenuRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => {
-    if (!themeMenuOpen) return
-    const handleClick = (e: MouseEvent) => {
-      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
-        setThemeMenuOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [themeMenuOpen])
-
-  // Multi-language Phase 1 - same picker shape as the theme menu above
+  // Multi-language Phase 1 - same picker shape as the (now-removed) theme menu
   // (dropdown desktop, pill row mobile), backed by useLocale()'s
   // localStorage-persisted state instead of a data- attribute.
   const [langMenuOpen, setLangMenuOpen] = useState(false)
@@ -293,17 +250,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [langMenuOpen])
-
-  const applyTheme = (id: ThemeId) => {
-    setThemeState(id)
-    if (id === 'default') {
-      document.documentElement.removeAttribute('data-theme')
-    } else {
-      document.documentElement.setAttribute('data-theme', id)
-    }
-    try { localStorage.setItem('afa-theme', id) } catch (e) {}
-    setThemeMenuOpen(false)
-  }
 
   const { locale, setLocale, t } = useLocale()
 
@@ -323,7 +269,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   // information/options as before, just not force-displayed every time
   // the menu opens - mirrors the desktop icon-button-opens-dropdown
   // pattern instead of always-open.
-  const [mobileThemeExpanded, setMobileThemeExpanded] = useState(false)
   const [mobileLangExpanded, setMobileLangExpanded] = useState(false)
 
   const primaryLinks = backHref
@@ -435,32 +380,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
           {!backHref && <SearchBox />}
           {!backHref && <LocationChip />}
-
-          <div ref={themeMenuRef} style={{ position: 'relative' }}>
-            <button
-              onClick={() => setThemeMenuOpen((v) => !v)}
-              title="Change theme"
-              aria-label="Change theme"
-              aria-expanded={themeMenuOpen}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '15px', padding: 0 }}
-            >
-              {THEMES.find((th) => th.id === theme)?.emoji}
-            </button>
-            {themeMenuOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
-                {THEMES.map((th) => (
-                  <button
-                    key={th.id}
-                    onClick={() => applyTheme(th.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
-                  >
-                    <span>{th.emoji}</span>
-                    <span>{th.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
           <div ref={langMenuRef} style={{ position: 'relative' }}>
             <button
@@ -576,33 +495,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
       >
-        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
-          <button
-            onClick={() => setMobileThemeExpanded((v) => !v)}
-            aria-expanded={mobileThemeExpanded}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
-          >
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.themePicker.label}</span>
-              <span>{THEMES.find((th) => th.id === theme)?.emoji} {THEMES.find((th) => th.id === theme)?.label}</span>
-            </span>
-            <span style={{ opacity: 0.5, fontSize: '12px', transform: mobileThemeExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
-          </button>
-          {mobileThemeExpanded && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-              {THEMES.map((th) => (
-                <button
-                  key={th.id}
-                  onClick={() => { applyTheme(th.id); setMobileThemeExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: theme === th.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: theme === th.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: theme === th.id ? 700 : 500, cursor: 'pointer' }}
-                >
-                  <span>{th.emoji}</span>
-                  {th.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
         <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
           <button
             onClick={() => setMobileLangExpanded((v) => !v)}
