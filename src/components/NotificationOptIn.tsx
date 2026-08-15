@@ -118,8 +118,8 @@ export default function NotificationOptIn() {
       role="status"
       aria-label={tr.notificationOptIn.ariaLabel}
       style={{
-        background: 'var(--afa-ink)',
-        color: 'var(--afa-cream)',
+        background: 'var(--afa-fill-solid)',
+        color: 'var(--afa-on-fill-solid)',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
         display: 'flex',
         alignItems: 'center',

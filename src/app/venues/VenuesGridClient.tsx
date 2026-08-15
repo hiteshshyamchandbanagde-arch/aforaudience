@@ -82,7 +82,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={tr.venuesPage.searchPlaceholder}
-            style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", fontFamily: "var(--font-sans)", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+            style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", fontFamily: "var(--font-sans)", boxSizing: "border-box", background: "white", color: "var(--afa-text-primary)", outline: "none" }}
           />
         </BrowseSearchDropdown>
 
@@ -92,7 +92,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", fontFamily: "var(--font-sans)", color: "var(--afa-ink)", background: "white", cursor: "pointer", outline: "none" }}
+          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", background: "white", cursor: "pointer", outline: "none" }}
         >
           <option value="All Cities">{tr.venuesPage.filterAllCities}</option>
           {cityOptions.map((c) => (
@@ -198,7 +198,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             </div>
 
             <div style={{ padding: "6px 18px 20px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "6px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
                 {v.name}
               </h2>
               {v.priceRangeLabel && (

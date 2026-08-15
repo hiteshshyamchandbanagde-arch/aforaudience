@@ -133,10 +133,10 @@ export default function VenueDashboard() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
-            <p style={{ color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
             <BackLink href="/" label="Back to Home" />
           </div>
         </main>
@@ -148,11 +148,11 @@ export default function VenueDashboard() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>
-            <p style={{ color: 'var(--afa-ink)', opacity: 0.6 }}>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
             </p>
           </div>
@@ -164,53 +164,53 @@ export default function VenueDashboard() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Your Venues
               </h1>
-              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Manage your venue listings, seating, and pricing</p>
             </div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/venue/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Edit Profile
               </Link>
               <Link
                 href="/dashboard/venue/sales"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 📊 Revenue Overview
               </Link>
               <Link
                 href="/dashboard/venue/bookings"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Booking Requests
                 {pendingBookings > 0 && (
-                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--afa-terracotta)', color: 'var(--afa-cream)', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
+                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--afa-terracotta)', color: 'var(--afa-on-fill-solid)', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
                     {pendingBookings}
                   </span>
                 )}
               </Link>
               <Link
                 href="/dashboard/venue-requests"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-ink)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Flexible Requests
                 {pendingFlexRequests > 0 && (
-                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--afa-terracotta)', color: 'var(--afa-cream)', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
+                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--afa-terracotta)', color: 'var(--afa-on-fill-solid)', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
                     {pendingFlexRequests}
                   </span>
                 )}
               </Link>
               <Link
                 href="/dashboard/venue/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 + Register Venue
               </Link>
@@ -225,11 +225,11 @@ export default function VenueDashboard() {
 
           {venues.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '17px', color: 'var(--afa-ink)', marginBottom: '8px' }}>No venues yet</p>
-              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '20px' }}>Register your first venue to start hosting events</p>
+              <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No venues yet</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Register your first venue to start hosting events</p>
               <Link
                 href="/dashboard/venue/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
               >
                 Register Venue
               </Link>
@@ -244,8 +244,8 @@ export default function VenueDashboard() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>
-                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)' }}>{venue.name}</h3>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '2px' }}>{venue.address}, {venue.city}</p>
+                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{venue.name}</h3>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{venue.address}, {venue.city}</p>
                     </div>
                     <span
                       style={{
@@ -264,7 +264,7 @@ export default function VenueDashboard() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-ink)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '20px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                     <span><strong>{venue.capacity}</strong> seats</span>
                     <span><strong>{priceRange(venue)}</strong> per seat</span>
                     <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{rateLabel(venue)}</span>
@@ -273,20 +273,20 @@ export default function VenueDashboard() {
                   <div style={{ display: 'flex', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
                     <Link
                       href={`/dashboard/venue/${venue.id}`}
-                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                     >
                       View
                     </Link>
                     <Link
                       href={`/dashboard/venue/${venue.id}/edit`}
-                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-ink)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                      style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                     >
                       Edit
                     </Link>
                     {venue.seatingMode === 'NUMBERED' && (
                       <Link
                         href={`/dashboard/venue/${venue.id}/seat-map`}
-                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                       >
                         Seat Map
                       </Link>

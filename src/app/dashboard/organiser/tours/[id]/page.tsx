@@ -15,9 +15,9 @@ const inputStyle = {
   border: '1px solid rgba(14,12,10,0.15)',
   background: 'var(--afa-white)',
   fontSize: '14px',
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
-const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '6px' }
+const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
 
 interface Consent {
   id: string
@@ -228,8 +228,8 @@ export default function TourDetailPage() {
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <div style={{ marginTop: '20px', marginBottom: '28px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-ink)' }}>{tour.title}</h1>
-          {tour.subject && <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '6px' }}>{tour.subject}</p>}
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h1>
+          {tour.subject && <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '6px' }}>{tour.subject}</p>}
           {tour.status === 'LIVE' && (
             <a href={`/tours/${tour.slug}`} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: 'var(--afa-terracotta)', display: 'inline-block', marginTop: '8px' }}>
               View public page →
@@ -239,9 +239,9 @@ export default function TourDetailPage() {
 
         {/* Artist consent status */}
         <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '12px' }}>Artist consent</h2>
+          <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>Artist consent</h2>
           {tour.consents.length === 0 ? (
-            <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
+            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {tour.consents.map((c) => {
@@ -259,10 +259,10 @@ export default function TourDetailPage() {
 
         {/* Stops */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)' }}>Stops</h2>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Stops</h2>
           <button
             onClick={() => setShowAddStop((v) => !v)}
-            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}
+            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}
           >
             {showAddStop ? 'Cancel' : '+ Add Stop'}
           </button>
@@ -332,7 +332,7 @@ export default function TourDetailPage() {
               )}
             </div>
             <div style={{ borderTop: '1px solid rgba(14,12,10,0.08)', paddingTop: '14px', marginBottom: '14px' }}>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', marginBottom: '10px' }}>Open local/beginner slots (optional)</p>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Open local/beginner slots (optional)</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
                 <div>
                   <label style={labelStyle}>Number of open slots</label>
@@ -351,7 +351,7 @@ export default function TourDetailPage() {
             <button
               onClick={handleAddStop}
               disabled={savingStop}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', padding: '11px 22px', borderRadius: '8px', cursor: savingStop ? 'default' : 'pointer', opacity: savingStop ? 0.6 : 1 }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '11px 22px', borderRadius: '8px', cursor: savingStop ? 'default' : 'pointer', opacity: savingStop ? 0.6 : 1 }}
             >
               {savingStop ? 'Saving...' : 'Save Stop as Draft'}
             </button>
@@ -359,7 +359,7 @@ export default function TourDetailPage() {
         )}
 
         {tour.stops.length === 0 ? (
-          <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6 }}>No stops yet.</p>
+          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops yet.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {tour.stops.map((stop) => {
@@ -373,8 +373,8 @@ export default function TourDetailPage() {
                 <div key={stop.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', gap: '10px' }}>
                     <div>
-                      <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-ink)' }}>{stop.title}</h3>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6 }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                         {new Date(stop.date).toLocaleDateString()} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
                       </p>
                     </div>
@@ -384,9 +384,9 @@ export default function TourDetailPage() {
                   </div>
 
                   <div style={{ marginBottom: '10px' }}>
-                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '6px' }}>Fixed lineup</p>
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '6px' }}>Fixed lineup</p>
                     {stop.lineup.length === 0 ? (
-                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.5 }}>No artists yet.</p>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No artists yet.</p>
                     ) : (
                       stop.lineup.map((l) => (
                         <div key={l.artistId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', padding: '4px 0' }}>
@@ -416,7 +416,7 @@ export default function TourDetailPage() {
                         <button
                           onClick={() => handleAddArtist(stop.id, a.id)}
                           disabled={addingArtist === stop.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer' }}
+                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer' }}
                         >
                           Add
                         </button>
@@ -425,7 +425,7 @@ export default function TourDetailPage() {
                   </div>
 
                   {stop.openSlotCount ? (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '10px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                       {stop.openSlotCount} open slot{stop.openSlotCount > 1 ? 's' : ''} · {stop.slotDuration}min each
                       {stop.applicationDeadline && ` · applications close ${new Date(stop.applicationDeadline).toLocaleDateString()}`}
                     </p>
@@ -434,7 +434,7 @@ export default function TourDetailPage() {
                   {stop.status !== 'APPROVED' && (
                     <button
                       onClick={() => handlePublishStop(stop.id)}
-                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-sage)', border: 'none', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}
+                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}
                     >
                       Publish Stop
                     </button>

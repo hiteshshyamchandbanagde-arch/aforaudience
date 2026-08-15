@@ -77,7 +77,7 @@ export default async function VenuesPage() {
   const resolved = await resolveLocation({ profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore })
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'var(--font-sans)' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
       <SiteNav active="venues" />
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
         <VenuesHero />

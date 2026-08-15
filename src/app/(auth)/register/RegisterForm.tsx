@@ -12,13 +12,13 @@ const inputStyle = (hasError?: boolean) => ({
   borderRadius: "8px",
   border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
   fontSize: "14px",
-  color: "var(--afa-ink)",
+  color: "var(--afa-text-primary)",
   background: "white",
   outline: "none",
   boxSizing: "border-box" as const,
 })
 
-const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }
+const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -259,21 +259,21 @@ export default function RegisterForm() {
 
   if (stage === "otp") {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
+            <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
               <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               <EnvBadge />
             </Link>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "8px" }}>
               {tr.registerPage.verifyMobileSubtitle}
             </p>
           </div>
 
           <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
             {devOtp && (
-              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
+              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
@@ -313,14 +313,14 @@ export default function RegisterForm() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: "480px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", textDecoration: "none" }}>
+          <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             <EnvBadge />
           </Link>
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, marginTop: "8px" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "8px" }}>
             {intendedRoleLabel
               ? tr.registerPage.createAccountSubtitleForRoleTemplate.replace('{role}', intendedRoleLabel)
               : tr.registerPage.createAccountSubtitle}
@@ -359,7 +359,7 @@ export default function RegisterForm() {
               />
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
                 <div style={{ marginTop: "8px" }}>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
                     {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
@@ -389,7 +389,7 @@ export default function RegisterForm() {
                       title={tr.registerPage.tryMoreSuggestionsTitle}
                       style={{
                         fontSize: "12px",
-                        color: "var(--afa-ink)",
+                        color: "var(--afa-text-primary)",
                         opacity: initialsLoading ? 0.4 : 0.6,
                         background: "none",
                         border: "none",
@@ -403,7 +403,7 @@ export default function RegisterForm() {
                 </div>
               )}
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
               )}
               {usernameStatus === "available" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>{tr.registerPage.availableLabel}</p>
@@ -445,7 +445,7 @@ export default function RegisterForm() {
             <div>
               <label style={labelStyle}>{tr.registerPage.mobileNumberLabel}</label>
               <div style={{ display: "flex", gap: "8px" }}>
-                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "var(--afa-cream)" }}>
+                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-raised)" }}>
                   +91
                 </div>
                 <input
@@ -457,7 +457,7 @@ export default function RegisterForm() {
                   style={{ ...inputStyle(!!fieldErrors.phone), flex: 1 }}
                 />
               </div>
-              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45 }}>
+              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
@@ -519,7 +519,7 @@ export default function RegisterForm() {
               subtitle above (#415); only renders when a role param was
               recognized. */}
           {intendedRoleLabel && (
-            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65 }}>
+            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.65 }}>
               {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
             </p>
           )}
@@ -531,18 +531,18 @@ export default function RegisterForm() {
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
             {tr.registerPage.agreeToTermsPrefix}{" "}
             <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
             <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>
+        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
           {tr.registerPage.alreadyHaveAccountPrefix} {" "}
           <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
-        <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.45 }}>
+        <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
           {tr.registerPage.everyoneJoinsAsAudience}
         </p>
       </div>

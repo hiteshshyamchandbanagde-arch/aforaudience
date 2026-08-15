@@ -110,11 +110,11 @@ export default function AdminDiaryPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-cream)' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
       <SiteNav />
       <div style={{ maxWidth: '840px', margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: 0 }}>
             Admin Diary
           </h1>
           <button
@@ -124,7 +124,7 @@ export default function AdminDiaryPage() {
             {showForm ? 'Cancel' : '+ Add entry'}
           </button>
         </div>
-        <p style={{ color: 'var(--afa-ink)', opacity: 0.6, fontSize: '14px', marginBottom: '28px' }}>
+        <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontSize: '14px', marginBottom: '28px' }}>
           Company, legal, and administrative milestones — registration, PAN, GST, current account, CA sign-offs, and anything else worth tracking outside the product Feedback board.
         </p>
 
@@ -146,7 +146,7 @@ export default function AdminDiaryPage() {
             <button
               onClick={handleCreate}
               disabled={saving}
-              style={{ background: 'var(--afa-ink)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 22px', fontSize: '14px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+              style={{ background: 'var(--afa-fill-solid)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 22px', fontSize: '14px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
             >
               {saving ? 'Saving...' : 'Save entry'}
             </button>
@@ -162,13 +162,13 @@ export default function AdminDiaryPage() {
               return (
                 <div key={entry.id} style={{ background: 'white', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '12px', padding: '18px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '8px' : '0' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)' }}>{entry.title}</div>
+                    <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: meta.color, background: meta.bg, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap' }}>
                       {meta.label}
                     </span>
                   </div>
                   {entry.notes && (
-                    <div style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, lineHeight: 1.5, marginBottom: '12px' }}>{entry.notes}</div>
+                    <div style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5, marginBottom: '12px' }}>{entry.notes}</div>
                   )}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {STATUS_ORDER.map((s) => (
@@ -183,7 +183,7 @@ export default function AdminDiaryPage() {
                           borderRadius: '999px',
                           border: s === entry.status ? `1.5px solid ${STATUS_META[s].color}` : '1px solid rgba(14,12,10,0.15)',
                           background: s === entry.status ? STATUS_META[s].bg : 'transparent',
-                          color: s === entry.status ? STATUS_META[s].color : 'var(--afa-ink)',
+                          color: s === entry.status ? STATUS_META[s].color : 'var(--afa-text-primary)',
                           opacity: s === entry.status ? 1 : 0.55,
                           cursor: s === entry.status ? 'default' : 'pointer',
                         }}
@@ -191,7 +191,7 @@ export default function AdminDiaryPage() {
                         {STATUS_META[s].label}
                       </button>
                     ))}
-                    <span style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.4, marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.4, marginLeft: 'auto' }}>
                       Updated {new Date(entry.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
@@ -200,7 +200,7 @@ export default function AdminDiaryPage() {
             })}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '64px 20px', color: 'var(--afa-ink)', opacity: 0.5, fontSize: '15px' }}>
+          <div style={{ textAlign: 'center', padding: '64px 20px', color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: '15px' }}>
             No diary entries yet. Add the first one above.
           </div>
         )}

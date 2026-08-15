@@ -46,10 +46,10 @@ export default function VenueOwnersPage() {
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
 
-      <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
@@ -72,7 +72,7 @@ export default function VenueOwnersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.venueOwnersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -87,14 +87,14 @@ export default function VenueOwnersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏛️</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetTitle : tr.venueOwnersPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetSub : tr.venueOwnersPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -146,10 +146,10 @@ export default function VenueOwnersPage() {
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
                       {owner.bio || tr.venueOwnersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                       {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersPage.venueSingular : tr.venueOwnersPage.venuePlural}
                     </div>
                   </div>

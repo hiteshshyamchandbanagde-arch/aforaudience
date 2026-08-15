@@ -130,10 +130,10 @@ function getSection(b: BookingItem): TicketSection {
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)' },
+  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
   CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
-  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)' },
+  REFUNDED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
 }
 
 // A booking's display status can differ from its DB status: an expired
@@ -258,12 +258,12 @@ export default function MyTicketsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             {tr.ticketsPage.pageSubtitle}
           </p>
 
@@ -278,7 +278,7 @@ export default function MyTicketsPage() {
               response, unlike the tickets below which are just informational. */}
           {pendingTags.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
@@ -300,7 +300,7 @@ export default function MyTicketsPage() {
                     <button
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
+                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
                     >
                       {tr.ticketsPage.declineButton}
                     </button>
@@ -318,24 +318,24 @@ export default function MyTicketsPage() {
               to attend as someone else's guest. */}
           {acceptedTags.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
                 <div key={t.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', textDecoration: 'none' }}>
+                    <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
                     </Link>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', whiteSpace: 'nowrap' }}>
                       {tr.ticketsPage.companionConfirmedPill}
                     </span>
                   </div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 10px' }}>
                     {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {t.booking.event.startTime}
                     {t.booking.event.venue && <> · {t.booking.event.venue.name}, {t.booking.event.venue.city}</>}
                   </p>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.65, margin: 0 }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0 }}>
                     {tr.ticketsPage.guestOfTemplate.replace('{name}', t.taggedBy.displayName || t.taggedBy.name)}
                   </p>
                 </div>
@@ -344,7 +344,7 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-ink)', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
@@ -359,7 +359,7 @@ export default function MyTicketsPage() {
               }[section]
               return (
                 <div key={section} style={{ marginBottom: '24px' }}>
-                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '10px' }}>
+                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                     {heading}
                   </h2>
                   {items.map((b) => renderCard(b))}
@@ -382,7 +382,7 @@ export default function MyTicketsPage() {
               return (
                 <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-ink)', textDecoration: 'none' }}>
+                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {b.event.title}
                     </Link>
                     <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -393,18 +393,18 @@ export default function MyTicketsPage() {
                         <span style={{
                           fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
                           background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(14,12,10,0.08)',
-                          color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-ink)',
+                          color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)',
                         }}>
                           {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
                         </span>
                       )}
                     </span>
                   </div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, margin: '0 0 10px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 10px' }}>
                     {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
                     {b.event.venue && <> · {b.event.venue.name}, {b.event.venue.city}</>}
                   </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                     <span>
                       {b.seatLabels && b.seatLabels.length > 0
                         ? tr.ticketsPage.seatsListTemplate.replace('{labels}', b.seatLabels.join(', '))
@@ -413,7 +413,7 @@ export default function MyTicketsPage() {
                     <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}</span>
                   </div>
                   {b.companionTags && b.companionTags.length > 0 && (
-                    <p style={{ fontSize: '12.5px', color: 'var(--afa-ink)', opacity: 0.65, margin: '8px 0 0' }}>
+                    <p style={{ fontSize: '12.5px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: '8px 0 0' }}>
                       {tr.ticketsPage.goingWith}{' '}
                       {b.companionTags.map((t, i) => (
                         <span key={t.id}>
@@ -447,7 +447,7 @@ export default function MyTicketsPage() {
                     <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <a
                         href={`/api/bookings/${b.id}/ticket`}
-                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-ink)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                       >
                         {tr.checkoutPage.downloadTicketPdf}
                       </a>
@@ -465,7 +465,7 @@ export default function MyTicketsPage() {
                     </div>
                   )}
                   {(eff === 'CANCELLED' || eff === 'REFUNDED') && b.cancelledAt && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '10px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '10px' }}>
                       {eff === 'REFUNDED'
                         ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
                         : tr.ticketsPage.cancelledNoRefund}

@@ -19,11 +19,11 @@ interface TourItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Draft' },
+  DRAFT: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Draft' },
   PENDING_CONSENT: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Awaiting artist consent' },
   LIVE: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Live' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  COMPLETED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)', label: 'Completed' },
+  COMPLETED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 
 // Tour by Organiser (12 Aug) - management list. Distinct from the public
@@ -67,14 +67,14 @@ export default function OrganiserToursPage() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-ink)' }}>Tours</h1>
-            <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
+            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>
           </div>
           <Link
             href="/dashboard/organiser/tours/create"
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px', whiteSpace: 'nowrap' }}
+            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px', whiteSpace: 'nowrap' }}
           >
             + Create Tour
           </Link>
@@ -88,13 +88,13 @@ export default function OrganiserToursPage() {
 
         {tours.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <p style={{ fontSize: '17px', color: 'var(--afa-ink)', marginBottom: '8px' }}>No Tours yet</p>
-            <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '20px' }}>
+            <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No Tours yet</p>
+            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
               Create a Tour to group a series of stops under one shared page for your audience.
             </p>
             <Link
               href="/dashboard/organiser/tours/create"
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-cream)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               Create Tour
             </Link>
@@ -113,9 +113,9 @@ export default function OrganiserToursPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>
-                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-ink)' }}>{tour.title}</h3>
+                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h3>
                       {tour.subject && (
-                        <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
+                        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
                       )}
                     </div>
                     <span
@@ -128,7 +128,7 @@ export default function OrganiserToursPage() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--afa-ink)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                     <span><strong>{tour.stops.length}</strong> stop{tour.stops.length !== 1 ? 's' : ''}</span>
                     <span><strong>{liveStops}</strong> live</span>
                     {pendingConsents > 0 && (

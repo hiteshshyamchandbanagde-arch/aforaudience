@@ -333,7 +333,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
   if (!event) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px" }}>{tr.eventDetailPage.notFound}</div>
       </main>
@@ -345,7 +345,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const typeLabel = tr.eventTypes[typeKey]
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
 
       {/* HERO */}
@@ -394,7 +394,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "var(--afa-terracotta)" : "var(--afa-ink)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-terracotta)" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
+                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "var(--afa-terracotta)" : "var(--afa-text-primary)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-terracotta)" : "transparent"}`, marginBottom: "-2px", textTransform: "capitalize" }}
               >
                 {tab === "overview" ? tr.eventDetailPage.tabOverview : tab === "lineup" ? tr.eventDetailPage.tabLineup : tr.eventDetailPage.tabVenue}
               </button>
@@ -403,10 +403,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "overview" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>{tr.eventDetailPage.aboutEvent}</h2>
-              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "var(--afa-ink)", opacity: 0.75, marginBottom: "16px" }}>{event.description}</p>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>{tr.eventDetailPage.aboutEvent}</h2>
+              <p style={{ fontSize: "15px", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: 0.75, marginBottom: "16px" }}>{event.description}</p>
               {event.organiser && (
-                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "32px" }}>
+                <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "32px" }}>
                   {tr.eventDetailPage.organisedBy}{" "}
                   <Link href={`/organisers/${event.organiser.id}`} style={{ color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none" }}>
                     {event.organiser.orgName}
@@ -422,8 +422,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 ].filter((i) => i.value).map((item) => (
                   <div key={item.label} style={{ background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(14,12,10,0.08)" }}>
                     <div style={{ fontSize: "20px", marginBottom: "6px" }}>{item.icon}</div>
-                    <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>{item.label}</div>
-                    <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{item.value}</div>
+                    <div style={{ fontSize: "11px", color: "var(--afa-text-primary)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>{item.label}</div>
+                    <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{item.value}</div>
                   </div>
                 ))}
               </div>
@@ -440,7 +440,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   unreviewed content publicly. */}
               {(event.ageLimit || (event.termsChecklist && event.termsChecklist.length > 0) || (event.specialNotesStatus === 'APPROVED' && event.specialNotes)) && (
                 <div style={{ marginBottom: "32px" }}>
-                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "12px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
                     {tr.eventDetailPage.eventTermsHeading}
                   </h3>
                   {event.ageLimit && (
@@ -451,7 +451,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   {event.termsChecklist && event.termsChecklist.length > 0 && (
                     <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px", marginBottom: event.specialNotesStatus === 'APPROVED' && event.specialNotes ? "16px" : 0 }}>
                       {EVENT_TERMS_CHECKLIST.filter((t) => event.termsChecklist!.includes(t.key)).map((t) => (
-                        <li key={t.key} style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.8, display: "flex", gap: "8px" }}>
+                        <li key={t.key} style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.8, display: "flex", gap: "8px" }}>
                           <span style={{ color: "var(--afa-terracotta)" }}>•</span>
                           {tr.eventTermsChecklist[t.key as keyof typeof tr.eventTermsChecklist] || t.label}
                         </li>
@@ -460,11 +460,11 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   )}
                   {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
                     <div style={{ background: "white", borderRadius: "10px", padding: "14px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
-                      <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>{tr.eventDetailPage.specialNoteLabel}</div>
-                      <div style={{ fontSize: "14px", color: "var(--afa-ink)", lineHeight: 1.6 }}>{event.specialNotes}</div>
+                      <div style={{ fontSize: "11px", color: "var(--afa-text-primary)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>{tr.eventDetailPage.specialNoteLabel}</div>
+                      <div style={{ fontSize: "14px", color: "var(--afa-text-primary)", lineHeight: 1.6 }}>{event.specialNotes}</div>
                     </div>
                   )}
-                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginTop: "12px" }}>
+                  <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "12px" }}>
                     {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[0]}
                     <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.eventDetailPage.refundPolicyLinkLabel}</Link>
                     {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[1]}
@@ -474,7 +474,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
               {event.isCompetitionShow && (
                 <div style={{ marginBottom: "32px" }}>
-                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>
+                  <h3 style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
                     {tr.eventDetailPage.competitionShow}
                   </h3>
 
@@ -487,7 +487,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       ].filter((p) => p.value).map((p) => (
                         <div key={p.rank} style={{ background: "white", borderRadius: "10px", padding: "16px", border: "1px solid rgba(200,68,26,0.15)" }}>
                           <div style={{ fontSize: "11px", color: "var(--afa-terracotta)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>{p.rank}</div>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{p.value}</div>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.value}</div>
                         </div>
                       ))}
                     </div>
@@ -501,11 +501,11 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={c.photoUrl} alt={c.name} style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }} />
                           ) : (
-                            <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-cream)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
+                            <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px" }}>⭐</div>
                           )}
                           <div>
-                            <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>{tr.eventDetailPage.celebrityAttending}</div>
-                            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)" }}>{c.name}</div>
+                            <div style={{ fontSize: "11px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>{tr.eventDetailPage.celebrityAttending}</div>
+                            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{c.name}</div>
                           </div>
                         </div>
                       ))}
@@ -514,7 +514,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
                   {event.panelists && event.panelists.length > 0 && (
                     <div>
-                      <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>{tr.eventDetailPage.panelists}</div>
+                      <div style={{ fontSize: "11px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>{tr.eventDetailPage.panelists}</div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                         {event.panelists.map((p) => (
                           <div key={p.id} style={{ display: "flex", gap: "12px", background: "white", borderRadius: "10px", padding: "14px", border: "1px solid rgba(14,12,10,0.08)" }}>
@@ -522,11 +522,11 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={p.photoUrl} alt={p.name} style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                             ) : (
-                              <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "var(--afa-cream)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>🎙️</div>
+                              <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "var(--afa-surface-raised)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>🎙️</div>
                             )}
                             <div>
-                              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)" }}>{p.name}</div>
-                              {p.bio && <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6, marginTop: "2px" }}>{p.bio}</div>}
+                              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{p.name}</div>
+                              {p.bio && <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px" }}>{p.bio}</div>}
                             </div>
                           </div>
                         ))}
@@ -542,9 +542,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "lineup" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>{tr.eventDetailPage.lineupHeading}</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "20px" }}>{tr.eventDetailPage.lineupHeading}</h2>
               {event.lineup.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                   {event.lineup.map((p) => {
@@ -556,7 +556,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-ink)" }}>{performerName}</div>
+                          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--afa-text-primary)" }}>{performerName}</div>
                           {p.hypeScore != null && (
                             <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.1)", padding: "2px 8px", borderRadius: "999px" }}>
                               🔥 {p.hypeScore.toFixed(1)}
@@ -564,10 +564,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                           )}
                         </div>
                         {p.artist.genre.length > 0 && (
-                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55, marginBottom: "8px" }}>{p.artist.genre.join(", ")}</div>
                         )}
                         <div style={{ display: "flex", gap: "16px" }}>
-                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.eventDetailPage.slotDuration.replace("{n}", String(p.slot)).replace("{duration}", String(p.duration))}</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventDetailPage.slotDuration.replace("{n}", String(p.slot)).replace("{duration}", String(p.duration))}</span>
                         </div>
 
                         {event.plusOnesRequired > 0 && plusOneStatus[p.id] && (
@@ -577,7 +577,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 {tr.eventDetailPage.plusOneConfirmedAs.replace("{name}", performerName.split(" ")[0])}
                               </span>
                             ) : plusOneStatus[p.id].fulfilled ? (
-                              <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+                              <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                                 {tr.eventDetailPage.plusOneFullySupported.replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                               </span>
                             ) : (
@@ -603,19 +603,19 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         {(p.reviews.length > 0 || submittedReviews[p.id]) && (
                           <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
                             {submittedReviews[p.id] && !p.reviews.find((r) => r.id === submittedReviews[p.id].id) && (
-                              <div style={{ fontSize: "13px", color: "var(--afa-ink)" }}>
+                              <div style={{ fontSize: "13px", color: "var(--afa-text-primary)" }}>
                                 {"⭐".repeat(submittedReviews[p.id].rating)} <span style={{ opacity: 0.6 }}>— {tr.eventDetailPage.reviewYouSuffix}</span>
                                 {submittedReviews[p.id].comment && <span style={{ opacity: 0.7 }}> · {submittedReviews[p.id].comment}</span>}
                               </div>
                             )}
                             {p.reviews.slice(0, 3).map((r) => (
                               <div key={r.id}>
-                                <div style={{ fontSize: "13px", color: "var(--afa-ink)" }}>
+                                <div style={{ fontSize: "13px", color: "var(--afa-text-primary)" }}>
                                   {"⭐".repeat(r.rating)} <span style={{ opacity: 0.6 }}>— {r.user.displayName || r.user.name}</span>
                                   {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                                 </div>
                                 {r.reply && (
-                                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.75, marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(200,68,26,0.3)" }}>
+                                  <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.75, marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(200,68,26,0.3)" }}>
                                     <strong>{r.reply.author.displayName || r.reply.author.name}</strong> {tr.eventDetailPage.repliedLabel} {r.reply.text}
                                   </div>
                                 )}
@@ -645,7 +645,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                                 <button
                                   onClick={() => submitReview(p.id)}
                                   disabled={reviewSubmitting === p.id}
-                                  style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "var(--afa-cream)", background: "var(--afa-terracotta)", border: "none", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                  style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", border: "none", borderRadius: "6px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
                                 >
                                   {reviewSubmitting === p.id ? tr.eventDetailPage.ratingSubmitting : tr.eventDetailPage.ratePrompt}
                                 </button>
@@ -674,21 +674,21 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           {activeTab === "venue" && (
             <div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "20px" }}>{tr.eventDetailPage.venueDetailsHeading}</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "20px" }}>{tr.eventDetailPage.venueDetailsHeading}</h2>
               {event.venue ? (
                 <div style={{ background: "white", borderRadius: "12px", padding: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>{event.venue.name}</div>
-                  <div style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "16px" }}>📍 {event.venue.address}, {event.venue.city}</div>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>{event.venue.name}</div>
+                  <div style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "16px" }}>📍 {event.venue.address}, {event.venue.city}</div>
                   {event.venue.facilities.length > 0 && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "12px" }}>
                       {event.venue.facilities.map((f) => (
-                        <div key={f} style={{ background: "var(--afa-cream)", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-ink)" }}>✅ {f}</div>
+                        <div key={f} style={{ background: "var(--afa-surface-raised)", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)" }}>✅ {f}</div>
                       ))}
                     </div>
                   )}
                 </div>
               ) : (
-                <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.eventDetailPage.venueNotConfirmed}</p>
+                <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventDetailPage.venueNotConfirmed}</p>
               )}
             </div>
           )}
@@ -700,27 +700,27 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             {isPastEvent(event) ? (
               <div>
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>🎭</div>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
                   {tr.eventDetailPage.eventEnded}
                 </div>
-                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6 }}>
+                <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6 }}>
                   {tr.eventDetailPage.browseUpcoming}
                 </p>
               </div>
             ) : reservedMessage ? (
               <div>
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
                   {tr.eventDetailPage.seatsReserved}
                 </div>
-                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, lineHeight: 1.6 }}>{reservedMessage}</p>
+                <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, lineHeight: 1.6 }}>{reservedMessage}</p>
               </div>
             ) : (
               <>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "4px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
                   {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? tr.eventDetailPage.chooseSection : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
                 </div>
-                <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "10px" }}>
+                <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "10px" }}>
                   {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
                 </div>
                 {(() => {
@@ -757,8 +757,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       event.ticketTiers.map((t) => (
                         <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}>
                           <div>
-                            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>{t.sectionName}</div>
-                            <div style={{ fontSize: "11px", color: "var(--afa-ink)", opacity: 0.5 }}>₹{t.price}</div>
+                            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
+                            <div style={{ fontSize: "11px", color: "var(--afa-text-primary)", opacity: 0.5 }}>₹{t.price}</div>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                             <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
@@ -769,7 +769,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       ))
                     ) : (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>{tr.eventDetailPage.generalAdmission}</div>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.generalAdmission}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
                           <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
@@ -782,7 +782,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
                 {event.isFree && (
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>{tr.eventDetailPage.seatsLabel}</div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsLabel}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "6px", border: "1px solid rgba(14,12,10,0.2)", background: "var(--afa-white)", cursor: "pointer" }}>−</button>
                       <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px" }}>{selectedSeats['General'] || 0}</span>
@@ -798,16 +798,16 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 {totalAmount > 0 ? (
                   <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                      <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                      <span style={{ fontSize: "14px", color: "var(--afa-ink)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
+                      <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                      <span style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "12px" }}>
                       <div>
-                        <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.eventDetailPage.bookingFeeLabel}</div>
-                        <div style={{ fontSize: "10px", color: "var(--afa-ink)", opacity: 0.45, maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
+                        <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.eventDetailPage.bookingFeeLabel}</div>
+                        <div style={{ fontSize: "10px", color: "var(--afa-text-primary)", opacity: 0.45, maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-                        <span style={{ fontSize: "14px", color: "var(--afa-ink)" }}>₹</span>
+                        <span style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>₹</span>
                         <input
                           type="number"
                           min={minBookingFee}
@@ -825,14 +825,14 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       </div>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
-                      <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-ink)" }}>{tr.eventDetailPage.totalLabel}</span>
-                      <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
+                      <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
                     </div>
                   </div>
                 ) : (
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(14,12,10,0.08)" }}>
-                    <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                    <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)" }}>{tr.eventDetailPage.freeAmount}</span>
+                    <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                    <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
                   </div>
                 )}
 
@@ -850,7 +850,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     : tr.eventDetailPage.continueToCheckout}
                 </button>
 
-                <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textAlign: "center" }}>
+                <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45, textAlign: "center" }}>
                   {event.isFree
                     ? tr.eventDetailPage.freeEntryFooter
                     : tr.eventDetailPage.securePaymentFooter}

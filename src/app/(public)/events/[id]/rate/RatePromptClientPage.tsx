@@ -111,10 +111,10 @@ export default function RatePromptClientPage({
 
   if (!event) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <p style={{ color: "var(--afa-ink)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
+          <p style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
         </div>
       </main>
     )
@@ -122,11 +122,11 @@ export default function RatePromptClientPage({
 
   if (!canReview) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🎤</div>
-          <p style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+          <p style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
             {tr.ratePromptPage.checkInRequired}
           </p>
           <Link href={`/events/${event.id}`} style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>
@@ -139,15 +139,15 @@ export default function RatePromptClientPage({
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}>
-        <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "32px" }}>{event.title}</h1>
+        <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>
+        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
           <div style={{ background: "white", borderRadius: "16px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-            <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
+            <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
@@ -167,14 +167,14 @@ export default function RatePromptClientPage({
         ) : (
           <div style={{ background: "white", borderRadius: "16px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ fontSize: "24px" }}>✓</span>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)" }}>{tr.ratePromptPage.thanksForRating}</p>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
         )}
 
         {overallSubmitted && event.lineup.length > 0 && !showPerformers && (
           <button
             onClick={() => setShowPerformers(true)}
-            style={{ background: "none", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 20px", fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)", cursor: "pointer" }}
+            style={{ background: "none", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 20px", fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)", cursor: "pointer" }}
           >
             {tr.ratePromptPage.rateSpecificPerformers}
           </button>
@@ -182,14 +182,14 @@ export default function RatePromptClientPage({
 
         {showPerformers && (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>
+            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
               {tr.ratePromptPage.performersHint}
             </p>
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
               return (
                 <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "16px 20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
+                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
                     <span style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
                   ) : (
@@ -208,7 +208,7 @@ export default function RatePromptClientPage({
                       <button
                         onClick={() => submitPerformer(p.id)}
                         disabled={!perfDrafts[p.id] || perfSubmitting === p.id}
-                        style={{ fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-ink)", color: "white", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
+                        style={{ fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-fill-solid)", color: "white", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
                       >
                         {tr.ratePromptPage.rateBtn}
                       </button>
@@ -221,7 +221,7 @@ export default function RatePromptClientPage({
         )}
 
         <div style={{ marginTop: "32px", textAlign: "center" }}>
-          <Link href={`/events/${event.id}`} style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>
+          <Link href={`/events/${event.id}`} style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
             {tr.ratePromptPage.backToEvent}
           </Link>
         </div>

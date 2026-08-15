@@ -45,7 +45,7 @@ function VerifyEmailContent() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-ink)] no-underline">
+        <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline">
           <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
@@ -53,7 +53,7 @@ function VerifyEmailContent() {
 
       <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)] text-center">
         {status === "checking" && (
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
+          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
         )}
         {status === "ok" && (
           <>
@@ -75,7 +75,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <main className="min-h-screen bg-[var(--afa-cream)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+    <main className="min-h-screen bg-[var(--afa-surface-page)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
       <Suspense fallback={<BrandLoader />}>
         <VerifyEmailContent />
       </Suspense>

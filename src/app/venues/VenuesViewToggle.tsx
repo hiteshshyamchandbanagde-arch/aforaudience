@@ -19,7 +19,7 @@ const tabStyle = (active: boolean) => ({
   borderRadius: "999px",
   border: `1.5px solid ${active ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
   background: active ? "var(--afa-terracotta)" : "transparent",
-  color: active ? "white" : "var(--afa-ink)",
+  color: active ? "white" : "var(--afa-text-primary)",
   fontSize: "13px",
   fontWeight: 600,
   cursor: "pointer" as const,
@@ -42,7 +42,7 @@ export default function VenuesViewToggle({ venues, defaultCity }: { venues: Venu
 
       {view === "venues" ? (
         venues.length === 0 ? (
-          <p style={{ fontSize: "15px", color: "var(--afa-ink)", opacity: 0.6 }}>{tr.venuesPage.emptyNoVenues}</p>
+          <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venuesPage.emptyNoVenues}</p>
         ) : (
           <VenuesGridClient venues={venues} defaultCity={defaultCity} />
         )

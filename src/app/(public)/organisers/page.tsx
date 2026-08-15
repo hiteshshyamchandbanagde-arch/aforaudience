@@ -49,10 +49,10 @@ export default function OrganisersPage() {
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
 
-      <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.organisersPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.organisersPage.heroEmphasis}</em>{tr.organisersPage.heroSuffix}
@@ -75,7 +75,7 @@ export default function OrganisersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.organisersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -90,14 +90,14 @@ export default function OrganisersPage() {
         )}
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.organisersPage.loading}</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {organisers.length === 0 ? tr.organisersPage.emptyNoneYetTitle : tr.organisersPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {organisers.length === 0 ? tr.organisersPage.emptyNoneYetSub : tr.organisersPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -148,10 +148,10 @@ export default function OrganisersPage() {
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{org.orgName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
                       {org.bio || tr.organisersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                       {org._count.events} {org._count.events === 1 ? tr.organisersPage.eventSingular : tr.organisersPage.eventPlural}
                     </div>
                   </div>

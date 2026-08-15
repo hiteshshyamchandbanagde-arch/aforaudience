@@ -26,7 +26,7 @@ interface Inquiry {
 const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color: string }> = {
   NEW: { label: 'New', bg: 'rgba(200,68,26,0.12)', color: 'var(--afa-terracotta)' },
   CONTACTED: { label: 'Contacted', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  CLOSED: { label: 'Closed', bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-ink)' },
+  CLOSED: { label: 'Closed', bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
 }
 
 // FEAT-2608-046 - corporate show booking, inquiry-only. This is the
@@ -86,19 +86,19 @@ export default function CorporateInquiriesPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/artist" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-ink)', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
             Corporate Inquiries
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-ink)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             Direct booking inquiries from companies and private event organisers. Reach out to them directly - AforAudience doesn't handle payment for these.
           </p>
 
           {inquiries.length === 0 ? (
-            <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.5 }}>
+            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
               No inquiries yet. They'll show up here when a company sends you a booking request from your public profile.
             </p>
           ) : (
@@ -109,13 +109,13 @@ export default function CorporateInquiriesPage() {
                   <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-ink)' }}>{inq.companyName}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                       </div>
                       <span style={{ fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
 
-                    <div style={{ fontSize: '14px', color: 'var(--afa-ink)', lineHeight: 1.8, marginBottom: '10px' }}>
+                    <div style={{ fontSize: '14px', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: '10px' }}>
                       <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-terracotta)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
                       {inq.eventType && <div><strong>Event type:</strong> {inq.eventType}</div>}
                       {inq.city && <div><strong>City:</strong> {inq.city}</div>}
@@ -124,7 +124,7 @@ export default function CorporateInquiriesPage() {
                     </div>
 
                     {inq.message && (
-                      <p style={{ fontSize: '13px', color: 'var(--afa-ink)', opacity: 0.7, background: 'var(--afa-cream)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'var(--afa-surface-raised)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', whiteSpace: 'pre-wrap' }}>
                         {inq.message}
                       </p>
                     )}
@@ -143,7 +143,7 @@ export default function CorporateInquiriesPage() {
                         <button
                           onClick={() => updateStatus(inq.id, 'CLOSED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', opacity: updating === inq.id ? 0.5 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
+                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
                         >
                           Close
                         </button>

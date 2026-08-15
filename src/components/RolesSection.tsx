@@ -86,15 +86,15 @@ export default function RolesSection() {
   ]
 
   return (
-    <section style={{ padding: "96px 48px 108px", background: "var(--afa-cream)" }}>
+    <section style={{ padding: "96px 48px 108px", background: "var(--afa-surface-raised)" }}>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-terracotta)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
         <span style={{ width: "24px", height: "1px", background: "var(--afa-terracotta)", display: "inline-block" }}></span>
         {tr.homePage.rolesEyebrow}
       </div>
-      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-ink)", marginBottom: "16px" }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 3.5vw, 52px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-1px", color: "var(--afa-text-primary)", marginBottom: "16px" }}>
         {tr.homePage.rolesHeadingLine1}<br /><em style={{ color: "var(--afa-terracotta)" }}>{tr.homePage.rolesHeadingLine2Emphasis}</em>
       </h2>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", fontWeight: 300, color: "var(--afa-ink)", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
+      <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", fontWeight: 300, color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "560px", lineHeight: 1.7, marginBottom: "56px" }}>
         {tr.homePage.rolesSubtitle}
       </p>
 

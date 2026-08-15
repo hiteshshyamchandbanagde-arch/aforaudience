@@ -150,7 +150,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
                 background: 'transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
-                color: 'var(--afa-ink)',
+                color: 'var(--afa-text-primary)',
               }}
               onMouseDown={(e) => e.preventDefault()}
             >

@@ -112,11 +112,11 @@ export default function MessageThreadPage() {
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
         <div style={{ marginBottom: '12px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: 'var(--afa-ink)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: 'var(--afa-text-primary)', margin: 0 }}>
             {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
-            <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '4px' }}>
+            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '4px' }}>
               {tr.messageThreadPage.closedNotice}
             </p>
           )}
@@ -124,7 +124,7 @@ export default function MessageThreadPage() {
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
           {thread.messages.length === 0 && (
-            <p style={{ color: 'var(--afa-ink)', opacity: 0.5, fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>
               {tr.messageThreadPage.emptyMessages}
             </p>
           )}
@@ -137,7 +137,7 @@ export default function MessageThreadPage() {
                   alignSelf: mine ? 'flex-end' : 'flex-start',
                   maxWidth: '75%',
                   background: mine ? 'var(--afa-sage, #4a6741)' : 'rgba(14,12,10,0.06)',
-                  color: mine ? '#fff' : 'var(--afa-ink)',
+                  color: mine ? '#fff' : 'var(--afa-text-primary)',
                   borderRadius: '14px',
                   padding: '8px 12px',
                   fontFamily: 'system-ui, sans-serif',

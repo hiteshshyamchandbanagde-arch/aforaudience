@@ -68,7 +68,7 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
           borderRadius: "999px",
           border: following ? "1.5px solid rgba(14,12,10,0.2)" : "none",
           background: following ? "transparent" : "var(--afa-terracotta)",
-          color: following ? "var(--afa-ink)" : "white",
+          color: following ? "var(--afa-text-primary)" : "white",
           fontSize: "13px",
           fontWeight: 600,
           cursor: busy ? "default" : "pointer",

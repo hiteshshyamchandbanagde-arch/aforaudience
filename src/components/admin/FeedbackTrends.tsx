@@ -160,7 +160,7 @@ const kpiValue: React.CSSProperties = {
   fontFamily: 'Georgia, serif',
   fontSize: '24px',
   fontWeight: 700,
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
 
 const kpiLabel: React.CSSProperties = {
@@ -179,7 +179,7 @@ const chartCard: React.CSSProperties = {
 const chartTitle: React.CSSProperties = {
   fontSize: '13px',
   fontWeight: 700,
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
   marginBottom: '14px',
 }
 
@@ -275,8 +275,8 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                     padding: '4px 9px',
                     borderRadius: '999px',
                     border: granularity === g ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                    background: granularity === g ? 'var(--afa-ink)' : 'transparent',
-                    color: granularity === g ? 'var(--afa-cream)' : 'var(--afa-ink)',
+                    background: granularity === g ? 'var(--afa-fill-solid)' : 'transparent',
+                    color: granularity === g ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: 'pointer',
                   }}
                 >
@@ -316,7 +316,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         {categories.map((c) => (
           <div key={c.category} style={{ marginBottom: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
-              <span style={{ color: 'var(--afa-ink)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
+              <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
             <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(14,12,10,0.06)', overflow: 'hidden' }}>

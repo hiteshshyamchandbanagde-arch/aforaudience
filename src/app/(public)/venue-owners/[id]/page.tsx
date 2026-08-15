@@ -34,11 +34,11 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
 
   if (error || !owner) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-cream)" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)" }}>
         <SiteNav />
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏛️</div>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
           <Link href="/venue-owners" style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
         </div>
       </main>
@@ -48,7 +48,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
   const displayName = owner.user.displayName || owner.user.name
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
 
       <div style={{ background: "var(--afa-plum-black)", padding: "48px 24px" }}>
@@ -72,14 +72,14 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ background: "white", borderRadius: "12px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
             {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
         </div>
 
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
         {owner.venues.length === 0 ? (
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
+          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
             {owner.venues.map((v) => (
@@ -88,15 +88,15 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
                 href={`/venues/${v.id}`}
                 style={{ display: "block", background: "white", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", textDecoration: "none" }}
               >
-                <div style={{ height: "120px", background: "var(--afa-cream)" }}>
+                <div style={{ height: "120px", background: "var(--afa-surface-raised)" }}>
                   {v.photos?.[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={v.photos[0]} alt={v.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   )}
                 </div>
                 <div style={{ padding: "14px 16px" }}>
-                  <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
-                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
+                  <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
+                  <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
                 </div>
               </Link>
             ))}

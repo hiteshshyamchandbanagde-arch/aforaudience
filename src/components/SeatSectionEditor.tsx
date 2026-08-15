@@ -120,7 +120,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     border: "1px solid rgba(14,12,10,0.15)",
     background: "var(--afa-white)",
     fontSize: "14px",
-    color: "var(--afa-ink)",
+    color: "var(--afa-text-primary)",
   }
 
   const duplicateNames = new Set(findDuplicateSectionNames(sections))
@@ -129,7 +129,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {sections.length === 0 && (
-          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5, fontStyle: "italic" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
             No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
           </p>
         )}
@@ -158,7 +158,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               gap: "10px",
               alignItems: "center",
               padding: "12px",
-              background: "var(--afa-cream)",
+              background: "var(--afa-surface-raised)",
               borderRadius: "8px",
               border: `1px solid ${borderColor}`,
             }}
@@ -191,7 +191,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             />
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-ink)", opacity: 0.5, fontSize: "14px" }}>₹</span>
+                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "14px" }}>₹</span>
                 <input
                   type="number"
                   placeholder="Price"
@@ -209,7 +209,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   }}
                 />
               </div>
-              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
                 <input
                   type="checkbox"
                   checked={isFree}
@@ -269,7 +269,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           padding: "10px 18px",
           fontSize: "14px",
           fontWeight: 600,
-          color: "var(--afa-ink)",
+          color: "var(--afa-text-primary)",
           cursor: "pointer",
           width: "100%",
         }}
@@ -284,7 +284,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             display: "flex",
             gap: "24px",
             fontSize: "14px",
-            color: "var(--afa-ink)",
+            color: "var(--afa-text-primary)",
             padding: "12px 16px",
             background: "rgba(200,68,26,0.06)",
             borderRadius: "8px",

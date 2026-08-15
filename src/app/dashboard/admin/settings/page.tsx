@@ -482,7 +482,7 @@ export default function AdminSettingsPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-ink)' }}>
+        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
           Loading settings…
         </div>
       </>
@@ -517,7 +517,7 @@ export default function AdminSettingsPage() {
           maxWidth: 640,
           margin: '0 auto',
           fontFamily: 'system-ui, sans-serif',
-          color: 'var(--afa-ink)',
+          color: 'var(--afa-text-primary)',
         }}
       >
         <div style={{ fontSize: 12, color: 'var(--afa-taupe)', marginBottom: 6, letterSpacing: '0.04em' }}>
@@ -894,7 +894,7 @@ export default function AdminSettingsPage() {
               onChange={(e) => setDirectPayoutsEnabledState(e.target.checked)}
               style={{ width: 18, height: 18, cursor: 'pointer' }}
             />
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--afa-ink)' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--afa-text-primary)' }}>
               Enable direct payouts UI (dashboard link, linking form, API)
             </span>
           </label>
@@ -1080,7 +1080,7 @@ export default function AdminSettingsPage() {
         </div>
 
         <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-taupe)', lineHeight: 1.6 }}>
-          <strong style={{ color: 'var(--afa-ink)', fontWeight: 700 }}>Current behavior:</strong>{' '}
+          <strong style={{ color: 'var(--afa-text-primary)', fontWeight: 700 }}>Current behavior:</strong>{' '}
           {initialPaise === 0 && initialMinPaise === 0
             ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'
             : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is pre-filled on every paid booking, adjustable by the audience between ₹${(initialMinPaise / 100).toLocaleString('en-IN')} and ₹${(initialMaxPaise / 100).toLocaleString('en-IN')}, shown as a separate line item on the checkout page.`}

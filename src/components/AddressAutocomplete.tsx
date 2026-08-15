@@ -161,7 +161,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
                 background: 'transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
-                color: 'var(--afa-ink)',
+                color: 'var(--afa-text-primary)',
               }}
               onMouseDown={(e) => e.preventDefault()}
             >

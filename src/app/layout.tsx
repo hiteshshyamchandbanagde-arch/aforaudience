@@ -172,7 +172,7 @@ export default function RootLayout({
         <div
           dangerouslySetInnerHTML={{
             __html: `
-              <div id="intro-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:var(--afa-ink);display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
+              <div id="intro-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:var(--afa-surface-inverse);display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
                 <style>
                   @keyframes intro-bar-in { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
                   @keyframes intro-icon-shrink { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3); } }
@@ -186,9 +186,9 @@ export default function RootLayout({
                     height: clamp(240px, 68vw, 440px);
                     animation: intro-icon-shrink 350ms ease 750ms both;
                   }
-                  #intro-wordmark { font-family: Georgia, serif; font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-cream); }
+                  #intro-wordmark { font-family: Georgia, serif; font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-on-fill-solid); }
                   .intro-letter { opacity: 0; display: inline-block; }
-                  #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: var(--afa-cream); opacity: 0; }
+                  #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: var(--afa-surface-raised); opacity: 0; }
                   #intro-tagline { font-family: Georgia, serif; font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
                 </style>
                 <svg viewBox="0 0 64 64">

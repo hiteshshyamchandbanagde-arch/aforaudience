@@ -223,11 +223,11 @@ export default function EventsPage() {
   const filteredOrganisers = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-cream)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav active="events" />
 
       {/* HERO SEARCH */}
-      <div style={{ background: "var(--afa-ink)", padding: "56px 48px" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
             {contentMode === "organisers" ? (
@@ -262,7 +262,7 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.eventsPage.searchEventsPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -288,7 +288,7 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.eventsPage.searchOrganisersPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -313,7 +313,7 @@ export default function EventsPage() {
               padding: "8px 18px", borderRadius: "999px",
               border: `1.5px solid ${contentMode === "events" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
               background: contentMode === "events" ? "var(--afa-terracotta)" : "transparent",
-              color: contentMode === "events" ? "white" : "var(--afa-ink)",
+              color: contentMode === "events" ? "white" : "var(--afa-text-primary)",
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
             }}
           >
@@ -325,7 +325,7 @@ export default function EventsPage() {
               padding: "8px 18px", borderRadius: "999px",
               border: `1.5px solid ${contentMode === "organisers" ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
               background: contentMode === "organisers" ? "var(--afa-terracotta)" : "transparent",
-              color: contentMode === "organisers" ? "white" : "var(--afa-ink)",
+              color: contentMode === "organisers" ? "white" : "var(--afa-text-primary)",
               fontSize: "13px", fontWeight: 600, cursor: "pointer",
             }}
           >
@@ -353,7 +353,7 @@ export default function EventsPage() {
                 borderRadius: "8px",
                 border: `1.5px solid ${tab === t ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
                 background: tab === t ? "var(--afa-terracotta)" : "white",
-                color: tab === t ? "white" : "var(--afa-ink)",
+                color: tab === t ? "white" : "var(--afa-text-primary)",
                 fontSize: "14px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -368,7 +368,7 @@ export default function EventsPage() {
         <style>{`
           .events-filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
           .events-filters-divider { width: 1px; height: 32px; background: rgba(14,12,10,0.1); flex-shrink: 0; }
-          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(14,12,10,0.12); font-size: 13px; color: var(--afa-ink); background: white; cursor: pointer; outline: none; }
+          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(14,12,10,0.12); font-size: 13px; color: var(--afa-text-primary); background: white; cursor: pointer; outline: none; }
           .events-filters-view-toggle { margin-left: auto; display: flex; gap: 4px; }
           @media (max-width: 780px) {
             .events-filters-row { flex-direction: column; align-items: stretch; gap: 12px; }
@@ -388,7 +388,7 @@ export default function EventsPage() {
                     padding: "7px 14px", borderRadius: "99px",
                     border: `1.5px solid ${selectedType === type ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
                     background: selectedType === type ? "var(--afa-terracotta)" : "transparent",
-                    color: selectedType === type ? "white" : "var(--afa-ink)",
+                    color: selectedType === type ? "white" : "var(--afa-text-primary)",
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
                   }}
                 >
@@ -417,7 +417,7 @@ export default function EventsPage() {
                     padding: "7px 14px", borderRadius: "99px",
                     border: `1.5px solid ${priceFilter === p ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
                     background: priceFilter === p ? "var(--afa-terracotta-tint)" : "transparent",
-                    color: priceFilter === p ? "var(--afa-terracotta)" : "var(--afa-ink)",
+                    color: priceFilter === p ? "var(--afa-terracotta)" : "var(--afa-text-primary)",
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
                   }}
                 >
@@ -439,26 +439,26 @@ export default function EventsPage() {
             </select>
 
             <div className="events-filters-view-toggle">
-              <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "var(--afa-ink)" : "transparent", color: view === "grid" ? "white" : "var(--afa-ink)", cursor: "pointer", fontSize: "16px" }}>⊞</button>
-              <button onClick={() => setView("list")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "list" ? "var(--afa-ink)" : "transparent", color: view === "list" ? "white" : "var(--afa-ink)", cursor: "pointer", fontSize: "16px" }}>☰</button>
+              <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "var(--afa-fill-solid)" : "transparent", color: view === "grid" ? "white" : "var(--afa-text-primary)", cursor: "pointer", fontSize: "16px" }}>⊞</button>
+              <button onClick={() => setView("list")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "list" ? "var(--afa-fill-solid)" : "transparent", color: view === "list" ? "white" : "var(--afa-text-primary)", cursor: "pointer", fontSize: "16px" }}>☰</button>
             </div>
           </div>
         </div>
 
-        <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.6, marginBottom: "20px" }}>
-          {tr.eventsPage.showingCount.split("{n}")[0]}<strong style={{ color: "var(--afa-ink)", opacity: 1 }}>{filtered.length}</strong>{tr.eventsPage.showingCount.split("{n}")[1]}
+        <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "20px" }}>
+          {tr.eventsPage.showingCount.split("{n}")[0]}<strong style={{ color: "var(--afa-text-primary)", opacity: 1 }}>{filtered.length}</strong>{tr.eventsPage.showingCount.split("{n}")[1]}
         </p>
 
         {/* EVENTS GRID */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
+          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -564,17 +564,17 @@ export default function EventsPage() {
                       <div style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--afa-terracotta)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
                         {event.venue ? `${event.venue.name} · ${event.venue.city}` : tr.eventsPage.venueTBD}
                       </div>
-                      <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px", lineHeight: 1.2 }}>
+                      <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.2 }}>
                         {event.title}
                       </div>
                       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
-                        <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🕐 {event.startTime}</span>
+                        <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
+                        <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>🕐 {event.startTime}</span>
                         {isNightEvent(event.startTime) && (
                           <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title={tr.eventsPage.nightTitle}>🌙 {tr.eventsPage.nightLabel}</span>
                         )}
                         {event.lineup.length > 0 && (
-                          <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
+                          <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
                         )}
                       </div>
                       {view === "list" && (
@@ -582,15 +582,15 @@ export default function EventsPage() {
                           <span style={{ background: event.isFree ? "var(--afa-green-mid)" : "var(--afa-terracotta)", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
                             {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
                           </span>
-                          <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{typeLabel}</span>
+                          <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{typeLabel}</span>
                           {tab === "past" ? (
-                            <span style={{ fontSize: "12px", color: "var(--afa-ink)", fontWeight: 600, opacity: 0.6 }}>{tr.eventsPage.ended}</span>
+                            <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", fontWeight: 600, opacity: 0.6 }}>{tr.eventsPage.ended}</span>
                           ) : (() => {
                             const status = getAvailabilityStatus(event.totalSeats, event.availableSeats)
                             if (status === 'available') return null
                             const statusLabel = tr.availability[status]
                             return (
-                              <span style={{ fontSize: "12px", color: status === 'sold-out' ? "var(--afa-ink)" : "var(--afa-red-alt)", fontWeight: 600 }}>
+                              <span style={{ fontSize: "12px", color: status === 'sold-out' ? "var(--afa-text-primary)" : "var(--afa-red-alt)", fontWeight: 600 }}>
                                 {status === 'filling-fast' ? `🔥 ${statusLabel} · ${event.availableSeats}${tr.eventsPage.leftSuffix}` : statusLabel}
                               </span>
                             )
@@ -599,7 +599,7 @@ export default function EventsPage() {
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: view === "grid" ? "12px" : "0", flexShrink: 0 }}>
-                      <span style={{ background: "var(--afa-ink)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600 }}>
+                      <span style={{ background: "var(--afa-fill-solid)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600 }}>
                         {tr.eventsPage.viewEvent}
                       </span>
                     </div>

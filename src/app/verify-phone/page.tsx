@@ -16,7 +16,7 @@ const inputStyle = {
   fontSize: '18px',
   letterSpacing: '0.3em',
   textAlign: 'center' as const,
-  color: 'var(--afa-ink)',
+  color: 'var(--afa-text-primary)',
 }
 
 // Standalone "verify your phone" completion flow. Before this page existed,
@@ -123,15 +123,15 @@ function VerifyPhoneInner() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-cream)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-ink)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.verifyPhonePage.verifyYourPhoneHeading}
           </h1>
 
           {alreadyVerified ? (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '15px', color: 'var(--afa-ink)', marginBottom: '16px' }}>
+              <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
               <Link href={next} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
@@ -140,7 +140,7 @@ function VerifyPhoneInner() {
             </div>
           ) : (
             <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '14px', color: 'var(--afa-ink)', opacity: 0.7, marginBottom: '20px' }}>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
                 {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>
 
@@ -150,7 +150,7 @@ function VerifyPhoneInner() {
                 </div>
               )}
               {devOtp && (
-                <div style={{ background: 'var(--afa-amber-tint)', border: '1px solid var(--afa-terracotta)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-ink)' }}>
+                <div style={{ background: 'var(--afa-amber-tint)', border: '1px solid var(--afa-terracotta)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}
