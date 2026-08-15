@@ -187,7 +187,7 @@ export default function ArtistsPage() {
               <button
                 key={g}
                 onClick={() => setSelectedGenre(g)}
-                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-text-primary)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
+                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-ink)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
               >
                 {g === "All" ? tr.artistsPage.filterAll : g}
               </button>
@@ -347,7 +347,7 @@ export default function ArtistsPage() {
                   </div>
 
                   <div style={{ padding: "6px 18px 18px" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
                         <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>

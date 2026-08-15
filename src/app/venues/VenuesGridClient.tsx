@@ -198,7 +198,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             </div>
 
             <div style={{ padding: "6px 18px 20px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "6px" }}>
                 {v.name}
               </h2>
               {v.priceRangeLabel && (
