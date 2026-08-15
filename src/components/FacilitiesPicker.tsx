@@ -93,7 +93,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
                 fontWeight: 600,
                 padding: '7px 14px',
                 borderRadius: '999px',
-                border: selected ? '1px solid var(--afa-ink)' : '1px solid rgba(14,12,10,0.15)',
+                border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(14,12,10,0.15)',
                 background: selected ? 'var(--afa-fill-solid)' : 'transparent',
                 color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 cursor: 'pointer',
