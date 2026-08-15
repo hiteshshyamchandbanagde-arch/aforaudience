@@ -351,8 +351,8 @@ export default function EventsPage() {
               style={{
                 padding: "9px 20px",
                 borderRadius: "8px",
-                border: `1.5px solid ${tab === t ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
-                background: tab === t ? "var(--afa-terracotta)" : "white",
+                border: `1.5px solid ${tab === t ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
+                background: tab === t ? "var(--afa-terracotta)" : "var(--afa-surface-raised)",
                 color: tab === t ? "white" : "var(--afa-text-primary)",
                 fontSize: "14px",
                 fontWeight: 600,
