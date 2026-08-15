@@ -99,7 +99,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
           placeholder={tr.organisersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
         />
       </BrowseSearchDropdown>
       )}

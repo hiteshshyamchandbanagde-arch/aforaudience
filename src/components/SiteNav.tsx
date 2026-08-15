@@ -349,9 +349,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         left: isHome ? 0 : undefined,
         right: isHome ? 0 : undefined,
         zIndex: 100,
-        background: isHome ? "rgba(247,243,238,0.92)" : "rgba(247,243,238,0.95)",
+        background: isHome ? "rgba(20,20,20,0.92)" : "rgba(20,20,20,0.95)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(14,12,10,0.08)",
+        borderBottom: "1px solid rgba(245,245,240,0.08)",
       }}
     >
       <style>{`

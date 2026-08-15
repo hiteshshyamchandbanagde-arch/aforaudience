@@ -262,7 +262,7 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.eventsPage.searchEventsPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -288,7 +288,7 @@ export default function EventsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.eventsPage.searchOrganisersPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -367,8 +367,8 @@ export default function EventsPage() {
         {/* FILTERS */}
         <style>{`
           .events-filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-          .events-filters-divider { width: 1px; height: 32px; background: rgba(14,12,10,0.1); flex-shrink: 0; }
-          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(14,12,10,0.12); font-size: 13px; color: var(--afa-text-primary); background: white; cursor: pointer; outline: none; }
+          .events-filters-divider { width: 1px; height: 32px; background: rgba(245,245,240,0.12); flex-shrink: 0; }
+          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(245,245,240,0.15); font-size: 13px; color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
           .events-filters-view-toggle { margin-left: auto; display: flex; gap: 4px; }
           @media (max-width: 780px) {
             .events-filters-row { flex-direction: column; align-items: stretch; gap: 12px; }
@@ -377,7 +377,7 @@ export default function EventsPage() {
             .events-filters-view-toggle { display: none; }
           }
         `}</style>
-        <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
           <div className="events-filters-row">
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               {TYPE_OPTIONS.map((type) => (
@@ -386,7 +386,7 @@ export default function EventsPage() {
                   onClick={() => setSelectedType(type)}
                   style={{
                     padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${selectedType === type ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
+                    border: `1.5px solid ${selectedType === type ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
                     background: selectedType === type ? "var(--afa-terracotta)" : "transparent",
                     color: selectedType === type ? "white" : "var(--afa-text-primary)",
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
@@ -415,7 +415,7 @@ export default function EventsPage() {
                   onClick={() => setPriceFilter(p)}
                   style={{
                     padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${priceFilter === p ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`,
+                    border: `1.5px solid ${priceFilter === p ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
                     background: priceFilter === p ? "var(--afa-terracotta-tint)" : "transparent",
                     color: priceFilter === p ? "var(--afa-terracotta)" : "var(--afa-text-primary)",
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
