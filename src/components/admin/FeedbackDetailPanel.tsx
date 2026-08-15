@@ -180,8 +180,8 @@ export default function FeedbackDetailPanel({
       }}
     >
       <style>{`
-        .fb-detail-backdrop { position: absolute; inset: 0; background: rgba(14,12,10,0.35); }
-        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px rgba(14,12,10,0.12); overflow-y: auto; }
+        .fb-detail-backdrop { position: absolute; inset: 0; background: rgba(245,245,240,0.35); }
+        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px rgba(245,245,240,0.12); overflow-y: auto; }
         @media (max-width: 780px) {
           .fb-detail-panel { width: 100%; }
         }
@@ -218,7 +218,7 @@ export default function FeedbackDetailPanel({
                 aria-label="Previous"
                 style={{
                   background: 'var(--afa-surface-raised)',
-                  border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
+                  border: '1px solid rgba(245,245,240,0.13)',
                   borderRadius: '999px',
                   width: '32px',
                   height: '32px',
@@ -239,7 +239,7 @@ export default function FeedbackDetailPanel({
                 aria-label="Next"
                 style={{
                   background: 'var(--afa-surface-raised)',
-                  border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
+                  border: '1px solid rgba(245,245,240,0.13)',
                   borderRadius: '999px',
                   width: '32px',
                   height: '32px',
@@ -272,7 +272,7 @@ export default function FeedbackDetailPanel({
                   maxWidth: expandedImage ? '100%' : '220px',
                   maxHeight: expandedImage ? 'none' : '140px',
                   borderRadius: '8px',
-                  border: '1px solid rgba(14,12,10,0.1)',
+                  border: '1px solid rgba(245,245,240,0.1)',
                   cursor: 'pointer',
                   display: 'block',
                 }}
@@ -312,7 +312,7 @@ export default function FeedbackDetailPanel({
                     fontWeight: 600,
                     padding: '6px 12px',
                     borderRadius: '999px',
-                    border: item.status === s ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    border: item.status === s ? 'none' : '1px solid rgba(245,245,240,0.15)',
                     background: item.status === s ? 'var(--afa-fill-solid)' : 'transparent',
                     color: item.status === s ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
@@ -324,7 +324,7 @@ export default function FeedbackDetailPanel({
               ))}
             </div>
             {pendingNoteStatus && (
-              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.1)' }}>
+              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.1)' }}>
                 <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>
@@ -333,7 +333,7 @@ export default function FeedbackDetailPanel({
                   value={noteDraft}
                   onChange={(e) => setNoteDraft(e.target.value)}
                   rows={3}
-                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', resize: 'vertical', fontFamily: 'inherit' }}
+                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', resize: 'vertical', fontFamily: 'inherit' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                   <button
@@ -350,7 +350,7 @@ export default function FeedbackDetailPanel({
                   <button
                     disabled={busy}
                     onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
-                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
+                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
                   >
                     Cancel
                   </button>
@@ -370,7 +370,7 @@ export default function FeedbackDetailPanel({
                   onClick={() => onSetDeployStage(null)}
                   style={{
                     fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
-                    border: !item.deployStage ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    border: !item.deployStage ? 'none' : '1px solid rgba(245,245,240,0.15)',
                     background: !item.deployStage ? 'var(--afa-fill-solid)' : 'transparent',
                     color: !item.deployStage ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
@@ -385,7 +385,7 @@ export default function FeedbackDetailPanel({
                     onClick={() => onSetDeployStage(ds)}
                     style={{
                       fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
-                      border: item.deployStage === ds ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                      border: item.deployStage === ds ? 'none' : '1px solid rgba(245,245,240,0.15)',
                       background: item.deployStage === ds ? 'var(--afa-sage)' : 'transparent',
                       color: item.deployStage === ds ? 'white' : 'var(--afa-text-primary)',
                       cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
@@ -409,7 +409,7 @@ export default function FeedbackDetailPanel({
                   fontWeight: 600,
                   padding: '6px 12px',
                   borderRadius: '999px',
-                  border: !item.severity ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                  border: !item.severity ? 'none' : '1px solid rgba(245,245,240,0.15)',
                   background: !item.severity ? 'var(--afa-fill-solid)' : 'transparent',
                   color: !item.severity ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                   cursor: busy ? 'default' : 'pointer',
@@ -428,7 +428,7 @@ export default function FeedbackDetailPanel({
                     fontWeight: 600,
                     padding: '6px 12px',
                     borderRadius: '999px',
-                    border: item.severity === sev ? 'none' : '1px solid rgba(14,12,10,0.15)',
+                    border: item.severity === sev ? 'none' : '1px solid rgba(245,245,240,0.15)',
                     background: item.severity === sev ? SEVERITY_COLORS[sev] : 'transparent',
                     color: item.severity === sev ? 'white' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
@@ -456,7 +456,7 @@ export default function FeedbackDetailPanel({
                   color: 'var(--afa-text-primary)',
                   opacity: 0.75,
                   padding: '8px 0',
-                  borderTop: '1px solid rgba(14,12,10,0.06)',
+                  borderTop: '1px solid rgba(245,245,240,0.06)',
                 }}
               >
                 <span style={{ fontWeight: 600 }}>{labelize(entry.field)}</span>:{' '}

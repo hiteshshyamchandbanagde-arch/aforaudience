@@ -42,14 +42,14 @@ const CATEGORY_KEY: Record<FeedbackCategory, keyof Dictionary['myFeedbackPage']>
 // deployStage (computed below in statusStyleFor), since "fixed" reads
 // very differently depending on whether it's live yet.
 const STATUS_KEY: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { key: keyof Dictionary['myFeedbackPage']; bg: string; fg: string }> = {
-  NEW: { key: 'statusSubmitted', bg: 'rgba(14,12,10,0.08)', fg: '#0E0C0A' },
+  NEW: { key: 'statusSubmitted', bg: 'rgba(245,245,240,0.08)', fg: '#0E0C0A' },
   UNDER_REVIEW: { key: 'statusInReview', bg: '#FFF3E6', fg: '#C2410C' },
   BUILD_QUEUE: { key: 'statusQueuedToBuild', bg: '#FFF3E6', fg: '#C2410C' },
   IN_BUILD: { key: 'statusInProgress', bg: '#FFF3E6', fg: '#C2410C' },
   BUILD_COMPLETE: { key: 'statusInProgress', bg: '#FFF3E6', fg: '#C2410C' },
   IN_TEST: { key: 'statusBeingTested', bg: '#FFF3E6', fg: '#C2410C' },
   REOPENED: { key: 'statusReopened', bg: '#FFF3E6', fg: '#C2410C' },
-  REJECTED: { key: 'statusNotPlanned', bg: 'rgba(14,12,10,0.08)', fg: 'rgba(14,12,10,0.6)' },
+  REJECTED: { key: 'statusNotPlanned', bg: 'rgba(245,245,240,0.08)', fg: 'rgba(245,245,240,0.6)' },
 }
 
 function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string; bg: string; fg: string } {
@@ -160,7 +160,7 @@ function FeedbackDetailOverlay({
     >
       <div
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(14,12,10,0.45)' }}
+        style={{ position: 'absolute', inset: 0, background: 'rgba(245,245,240,0.45)' }}
       />
       <div
         onTouchStart={handleTouchStart}
@@ -176,7 +176,7 @@ function FeedbackDetailOverlay({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-          <div style={{ fontSize: '13px', color: 'rgba(14,12,10,0.5)' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(245,245,240,0.5)' }}>
             {tr.myFeedbackPage.ofTemplate.replace('{i}', String(index + 1)).replace('{n}', String(items.length))}
           </div>
           <button
@@ -188,7 +188,7 @@ function FeedbackDetailOverlay({
           </button>
         </div>
 
-        <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
           {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
           {item.displayId && <> · {item.displayId}</>}
         </div>
@@ -213,16 +213,16 @@ function FeedbackDetailOverlay({
         </p>
 
         {item.latestNote && (
-          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: '10px', border: '1px solid rgba(14,12,10,0.08)' }}>
-            <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(14,12,10,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
-            <p style={{ margin: 0, fontSize: '14px', fontStyle: 'italic', color: 'rgba(14,12,10,0.75)' }}>&quot;{item.latestNote}&quot;</p>
+            <p style={{ margin: 0, fontSize: '14px', fontStyle: 'italic', color: 'rgba(245,245,240,0.75)' }}>&quot;{item.latestNote}&quot;</p>
           </div>
         )}
 
         {item.resolvedAt && (
-          <div style={{ marginTop: '16px', fontSize: '13px', color: 'rgba(14,12,10,0.55)' }}>
+          <div style={{ marginTop: '16px', fontSize: '13px', color: 'rgba(245,245,240,0.55)' }}>
             {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDateTime(item.resolvedAt))}
           </div>
         )}
@@ -235,9 +235,9 @@ function FeedbackDetailOverlay({
               flex: 1,
               padding: '10px 16px',
               borderRadius: '10px',
-              border: '1px solid rgba(14,12,10,0.15)',
+              border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
-              color: hasPrev ? 'var(--afa-black, #0E0C0A)' : 'rgba(14,12,10,0.3)',
+              color: hasPrev ? 'var(--afa-black, #0E0C0A)' : 'rgba(245,245,240,0.3)',
               cursor: hasPrev ? 'pointer' : 'default',
               fontWeight: 600,
             }}
@@ -251,9 +251,9 @@ function FeedbackDetailOverlay({
               flex: 1,
               padding: '10px 16px',
               borderRadius: '10px',
-              border: '1px solid rgba(14,12,10,0.15)',
+              border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
-              color: hasNext ? 'var(--afa-black, #0E0C0A)' : 'rgba(14,12,10,0.3)',
+              color: hasNext ? 'var(--afa-black, #0E0C0A)' : 'rgba(245,245,240,0.3)',
               cursor: hasNext ? 'pointer' : 'default',
               fontWeight: 600,
             }}
@@ -324,7 +324,7 @@ export default function MyFeedbackPage() {
         <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-black, #0E0C0A)' }}>
           {tr.myFeedbackPage.heading}
         </h1>
-        <p style={{ color: 'rgba(14,12,10,0.6)', marginBottom: '28px' }}>
+        <p style={{ color: 'rgba(245,245,240,0.6)', marginBottom: '28px' }}>
           {tr.myFeedbackPage.subtitle}
         </p>
 
@@ -343,10 +343,10 @@ export default function MyFeedbackPage() {
               borderRadius: '12px',
               padding: '32px 24px',
               textAlign: 'center',
-              border: '1px solid rgba(14,12,10,0.08)',
+              border: '1px solid rgba(245,245,240,0.08)',
             }}
           >
-            <p style={{ color: 'rgba(14,12,10,0.6)', margin: 0 }}>
+            <p style={{ color: 'rgba(245,245,240,0.6)', margin: 0 }}>
               {tr.myFeedbackPage.emptyState}
             </p>
           </div>
@@ -364,7 +364,7 @@ export default function MyFeedbackPage() {
                     background: 'var(--afa-surface-raised)',
                     borderRadius: '12px',
                     padding: '18px 20px',
-                    border: '1px solid rgba(14,12,10,0.08)',
+                    border: '1px solid rgba(245,245,240,0.08)',
                     textAlign: 'left',
                     cursor: 'pointer',
                     width: '100%',
@@ -374,7 +374,7 @@ export default function MyFeedbackPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                         {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>
@@ -382,7 +382,7 @@ export default function MyFeedbackPage() {
                         {item.title || item.message}
                       </p>
                       {item.latestNote && (
-                        <p style={{ margin: '8px 0 0', fontSize: '13px', color: 'rgba(14,12,10,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                        <p style={{ margin: '8px 0 0', fontSize: '13px', color: 'rgba(245,245,240,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
                           &quot;{item.latestNote}&quot;
                         </p>
                       )}

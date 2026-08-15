@@ -71,7 +71,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ background: "white", borderRadius: "12px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(14,12,10,0.08)" }}>
+        <div style={{ background: "white", borderRadius: "12px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
           <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
             {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
@@ -86,7 +86,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
               <Link
                 key={v.id}
                 href={`/venues/${v.id}`}
-                style={{ display: "block", background: "white", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(14,12,10,0.08)", textDecoration: "none" }}
+                style={{ display: "block", background: "white", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(245,245,240,0.08)", textDecoration: "none" }}
               >
                 <div style={{ height: "120px", background: "var(--afa-surface-raised)" }}>
                   {v.photos?.[0] && (

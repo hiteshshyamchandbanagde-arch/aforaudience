@@ -12,7 +12,7 @@ const inputStyle = {
   width: '100%',
   padding: '14px 16px',
   borderRadius: '8px',
-  border: '1px solid rgba(14,12,10,0.15)',
+  border: '1px solid rgba(245,245,240,0.15)',
   fontSize: '18px',
   letterSpacing: '0.3em',
   textAlign: 'center' as const,
@@ -130,7 +130,7 @@ function VerifyPhoneInner() {
           </h1>
 
           {alreadyVerified ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
@@ -139,7 +139,7 @@ function VerifyPhoneInner() {
               </Link>
             </div>
           ) : (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
                 {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>

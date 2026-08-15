@@ -31,7 +31,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
   ACCEPTED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Accepted' },
   DECLINED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Declined' },
-  EXPIRED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Expired' },
+  EXPIRED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Expired' },
 }
 
 export default function VenueRequestsPage() {
@@ -136,7 +136,7 @@ export default function VenueRequestsPage() {
           )}
 
           {requests.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               No booking requests yet.
             </div>
           ) : (
@@ -147,7 +147,7 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(245,245,240,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                     <div>
                       <p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>
@@ -199,7 +199,7 @@ export default function VenueRequestsPage() {
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
                           min="1"
                           max="10000000"
-                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
                         />
                       </div>
                       <div style={{ marginBottom: '8px' }}>
@@ -209,7 +209,7 @@ export default function VenueRequestsPage() {
                           value={commentInputs[r.id] || ''}
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -225,7 +225,7 @@ export default function VenueRequestsPage() {
                         <button
                           onClick={() => act(r.id, 'counter')}
                           disabled={actingOn === r.id || roundsUsed >= 6}
-                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
+                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
                           {lastOffer ? 'Counter' : 'Send quote'}
                         </button>

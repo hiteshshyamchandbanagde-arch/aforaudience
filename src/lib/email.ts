@@ -137,7 +137,7 @@ export async function sendTicketEmail(input: TicketEmailInput) {
         </td>
       </tr>
       <tr>
-        <td style="padding: 8px 0; border-top: 1px solid rgba(14,12,10,0.08);">
+        <td style="padding: 8px 0; border-top: 1px solid rgba(245,245,240,0.08);">
           <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">TOTAL PAID</div>
           <div style="font-size: 14px; font-weight: 600;">₹${input.totalAmount.toLocaleString("en-IN")}</div>
         </td>

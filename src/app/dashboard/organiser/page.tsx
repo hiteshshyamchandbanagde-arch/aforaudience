@@ -26,7 +26,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Published' },
   PENDING_APPROVAL: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  COMPLETED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+  COMPLETED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 
 export default function OrganiserDashboard() {
@@ -158,19 +158,19 @@ export default function OrganiserDashboard() {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 href="/dashboard/organiser/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Edit Profile
               </Link>
               <Link
                 href="/dashboard/organiser/sales"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 📊 Sales Overview
               </Link>
               <Link
                 href="/dashboard/venue-requests"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 Flexible Requests
                 {pendingFlexRequests > 0 && (
@@ -181,7 +181,7 @@ export default function OrganiserDashboard() {
               </Link>
               <Link
                 href="/dashboard/organiser/tours"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
               >
                 🚌 Tours
               </Link>
@@ -201,7 +201,7 @@ export default function OrganiserDashboard() {
           )}
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No events yet</p>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Create your first event to start booking venues and artists</p>
               <Link
@@ -220,7 +220,7 @@ export default function OrganiserDashboard() {
                   <div
                     key={event.id}
                     onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
-                    style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                    style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245,245,240,0.08)', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                       <div>
@@ -251,7 +251,7 @@ export default function OrganiserDashboard() {
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(14,12,10,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.15)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
                       >
                         View
                       </Link>

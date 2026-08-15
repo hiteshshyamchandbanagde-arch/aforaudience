@@ -26,7 +26,7 @@ interface Inquiry {
 const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color: string }> = {
   NEW: { label: 'New', bg: 'rgba(200,68,26,0.12)', color: 'var(--afa-terracotta)' },
   CONTACTED: { label: 'Contacted', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  CLOSED: { label: 'Closed', bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)' },
+  CLOSED: { label: 'Closed', bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
 }
 
 // FEAT-2608-046 - corporate show booking, inquiry-only. This is the
@@ -106,7 +106,7 @@ export default function CorporateInquiriesPage() {
               {inquiries.map((inq) => {
                 const meta = STATUS_META[inq.status]
                 return (
-                  <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <div>
                         <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
@@ -143,7 +143,7 @@ export default function CorporateInquiriesPage() {
                         <button
                           onClick={() => updateStatus(inq.id, 'CLOSED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, background: 'transparent', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
+                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, background: 'transparent', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
                         >
                           Close
                         </button>

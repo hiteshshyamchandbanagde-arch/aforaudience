@@ -136,7 +136,7 @@ export default function MessageThreadPage() {
                 style={{
                   alignSelf: mine ? 'flex-end' : 'flex-start',
                   maxWidth: '75%',
-                  background: mine ? 'var(--afa-sage, #4a6741)' : 'rgba(14,12,10,0.06)',
+                  background: mine ? 'var(--afa-sage, #4a6741)' : 'rgba(245,245,240,0.06)',
                   color: mine ? '#fff' : 'var(--afa-text-primary)',
                   borderRadius: '14px',
                   padding: '8px 12px',
@@ -156,7 +156,7 @@ export default function MessageThreadPage() {
         </div>
 
         {thread.isActive ? (
-          <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(14,12,10,0.1)' }}>
+          <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(245,245,240,0.1)' }}>
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, 2000))}
@@ -171,7 +171,7 @@ export default function MessageThreadPage() {
                 flex: 1,
                 padding: '10px 12px',
                 borderRadius: '20px',
-                border: '1px solid rgba(14,12,10,0.2)',
+                border: '1px solid rgba(245,245,240,0.2)',
                 fontFamily: 'system-ui, sans-serif',
                 fontSize: '14px',
               }}

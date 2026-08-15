@@ -19,11 +19,11 @@ interface TourItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Draft' },
+  DRAFT: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Draft' },
   PENDING_CONSENT: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Awaiting artist consent' },
   LIVE: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Live' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  COMPLETED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+  COMPLETED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 
 // Tour by Organiser (12 Aug) - management list. Distinct from the public
@@ -87,7 +87,7 @@ export default function OrganiserToursPage() {
         )}
 
         {tours.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No Tours yet</p>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
               Create a Tour to group a series of stops under one shared page for your audience.
@@ -109,7 +109,7 @@ export default function OrganiserToursPage() {
                 <div
                   key={tour.id}
                   onClick={() => router.push(`/dashboard/organiser/tours/${tour.id}`)}
-                  style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                  style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245,245,240,0.08)', cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>

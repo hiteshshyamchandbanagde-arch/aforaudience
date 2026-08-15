@@ -87,7 +87,7 @@ export default function AuthPromptSheet({
       {/* Overlay — click to dismiss, resuming guest browsing (no forced login) */}
       <div
         onClick={onClose}
-        style={{ position: "absolute", inset: 0, background: "rgba(14,12,10,0.45)", animation: "authSheetFadeIn 0.15s ease-out" }}
+        style={{ position: "absolute", inset: 0, background: "rgba(245,245,240,0.45)", animation: "authSheetFadeIn 0.15s ease-out" }}
       />
 
       <div
@@ -112,7 +112,7 @@ export default function AuthPromptSheet({
 
         {/* Grab handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(14,12,10,0.15)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(245,245,240,0.15)" }} />
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
@@ -144,7 +144,7 @@ export default function AuthPromptSheet({
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}

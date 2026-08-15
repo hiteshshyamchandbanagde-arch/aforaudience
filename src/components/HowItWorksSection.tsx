@@ -126,7 +126,7 @@ export default function HowItWorksSection() {
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          box-shadow: 0 8px 20px rgba(14,12,10,0.14);
+          box-shadow: 0 8px 20px rgba(245,245,240,0.14);
         }
         .steps-rail-text { margin-top: 22px; }
 

@@ -67,7 +67,7 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
         style={{
           padding: "8px 18px",
           borderRadius: "999px",
-          border: following ? "1.5px solid rgba(14,12,10,0.2)" : "none",
+          border: following ? "1.5px solid rgba(245,245,240,0.2)" : "none",
           background: following ? "transparent" : "var(--afa-terracotta)",
           color: following ? "var(--afa-text-primary)" : "white",
           fontSize: "13px",
@@ -88,7 +88,7 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
             width: "34px",
             height: "34px",
             borderRadius: "50%",
-            border: "1.5px solid rgba(14,12,10,0.2)",
+            border: "1.5px solid rgba(245,245,240,0.2)",
             background: notifyEnabled ? "var(--afa-terracotta-tint)" : "transparent",
             fontSize: "15px",
             cursor: busy ? "default" : "pointer",

@@ -49,7 +49,7 @@ interface EventInfo {
 
 const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
   PAID: { label: 'Paid', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  FREE: { label: 'Free', bg: 'rgba(14,12,10,0.06)', color: 'var(--afa-text-primary)' },
+  FREE: { label: 'Free', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' },
   BUY_IN: { label: 'Buy-in', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
 }
 
@@ -82,7 +82,7 @@ function SortableRow({
         padding: '14px',
         background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
-        border: '1px solid rgba(14,12,10,0.08)',
+        border: '1px solid rgba(245,245,240,0.08)',
       }}
     >
       <button
@@ -94,7 +94,7 @@ function SortableRow({
           background: 'transparent',
           border: 'none',
           fontSize: '18px',
-          color: 'rgba(14,12,10,0.4)',
+          color: 'rgba(245,245,240,0.4)',
           padding: '4px 8px',
           touchAction: 'none',
         }}
@@ -111,7 +111,7 @@ function SortableRow({
           {item.artistName}
         </p>
         {item.startLabel && item.endLabel && (
-          <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
+          <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
         )}
       </div>
 
@@ -132,9 +132,9 @@ function SortableRow({
           fontWeight: 700,
           whiteSpace: 'nowrap',
           cursor: 'pointer',
-          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(14,12,10,0.15)',
+          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.15)',
           background: item.isFeaturedVouch ? 'rgba(201,151,58,0.15)' : 'transparent',
-          color: item.isFeaturedVouch ? 'var(--afa-gold)' : 'rgba(14,12,10,0.5)',
+          color: item.isFeaturedVouch ? 'var(--afa-gold)' : 'rgba(245,245,240,0.5)',
         }}
       >
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
@@ -151,9 +151,9 @@ function SortableRow({
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px', textAlign: 'center' }}
+          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', textAlign: 'center' }}
         />
-        <span style={{ fontSize: '12px', color: 'rgba(14,12,10,0.5)' }}>min</span>
+        <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>min</span>
       </div>
 
       <MessageButton contextType="PERFORMANCE" contextId={item.id} label="Message" />
@@ -294,7 +294,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(14,12,10,0.55)', marginBottom: '24px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.55)', marginBottom: '24px' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
             {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}
           </p>
@@ -304,8 +304,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
-              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.6)', marginBottom: '8px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -313,7 +313,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '13px' }}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
                 />
                 <button
                   onClick={handleBroadcast}
@@ -337,8 +337,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.06)' }}>
-              <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.6)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)' }}>
+              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.6)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>
             </div>
@@ -361,7 +361,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                 disabled={!dirty || saving}
                 style={{
                   fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)',
-                  background: dirty ? 'var(--afa-terracotta)' : 'rgba(14,12,10,0.3)',
+                  background: dirty ? 'var(--afa-terracotta)' : 'rgba(245,245,240,0.3)',
                   border: 'none', padding: '12px 28px', borderRadius: '8px',
                   cursor: dirty && !saving ? 'pointer' : 'not-allowed',
                 }}

@@ -116,7 +116,7 @@ export default function OrganiserPayoutsPage() {
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '20px' }}>
             {payout?.linked ? (
               <>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
@@ -137,7 +137,7 @@ export default function OrganiserPayoutsPage() {
 
                 <button
                   onClick={() => { setLoading(true); fetchPayout() }}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
                 >
                   Refresh status
                 </button>
@@ -167,7 +167,7 @@ export default function OrganiserPayoutsPage() {
                     value={accountIdInput}
                     onChange={(e) => setAccountIdInput(e.target.value)}
                     placeholder="acc_XXXXXXXXXXXXXX"
-                    style={{ flex: 1, fontSize: '14px', fontFamily: 'monospace', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)' }}
+                    style={{ flex: 1, fontSize: '14px', fontFamily: 'monospace', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)' }}
                   />
                   <button
                     onClick={linkAccount}

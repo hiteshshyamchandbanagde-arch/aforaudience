@@ -30,7 +30,7 @@ const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
   padding: '24px',
-  border: active ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',
+  border: active ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.08)',
   boxShadow: active ? '0 0 0 4px rgba(196,90,54,0.12)' : 'none',
   marginBottom: '16px',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
@@ -491,7 +491,7 @@ function ProfileContent() {
                 width: '100%',
                 padding: '10px 12px',
                 borderRadius: '6px',
-                border: '1px solid rgba(14,12,10,0.15)',
+                border: '1px solid rgba(245,245,240,0.15)',
                 fontSize: '14px',
                 marginBottom: '12px',
                 boxSizing: 'border-box' as const,
@@ -532,7 +532,7 @@ function ProfileContent() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
               {avatar && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(14,12,10,0.1)' }} />
+                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
               )}
               <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
@@ -545,7 +545,7 @@ function ProfileContent() {
               rows={3}
               maxLength={500}
               placeholder={tr.profilePage.bioPlaceholder}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit' }}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit' }}
             />
             <button
               onClick={saveAbout}
@@ -579,7 +579,7 @@ function ProfileContent() {
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'white' }}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'white' }}
             >
               {currencies.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -648,7 +648,7 @@ function ProfileContent() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder={tr.profilePage.orgNamePlaceholder}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
                 />
                 <button
                   onClick={applyOrganiser}

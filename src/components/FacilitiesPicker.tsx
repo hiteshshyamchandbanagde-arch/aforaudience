@@ -93,7 +93,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
                 fontWeight: 600,
                 padding: '7px 14px',
                 borderRadius: '999px',
-                border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(14,12,10,0.15)',
+                border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
                 background: selected ? 'var(--afa-fill-solid)' : 'transparent',
                 color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 cursor: 'pointer',
@@ -113,7 +113,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder="e.g., Rooftop seating, Valet"
-        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.15)', fontSize: '14px', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' }}
       />
     </div>
   )

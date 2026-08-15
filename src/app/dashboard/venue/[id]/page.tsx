@@ -181,7 +181,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
               <div>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
@@ -324,7 +324,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               📊 Revenue
             </Link>
@@ -336,7 +336,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 fontWeight: 600,
                 color: venue.isApproved ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                 background: venue.isApproved ? 'transparent' : 'var(--afa-terracotta)',
-                border: venue.isApproved ? '1px solid rgba(14,12,10,0.2)' : 'none',
+                border: venue.isApproved ? '1px solid rgba(245,245,240,0.2)' : 'none',
                 padding: '12px 24px',
                 borderRadius: '8px',
                 cursor: 'pointer',

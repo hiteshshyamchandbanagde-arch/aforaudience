@@ -10,7 +10,7 @@ const inputStyle = (hasError?: boolean) => ({
   width: "100%",
   padding: "12px 14px",
   borderRadius: "8px",
-  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(14,12,10,0.15)"}`,
+  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
   fontSize: "14px",
   color: "var(--afa-text-primary)",
   background: "white",
@@ -271,7 +271,7 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+          <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
             {devOtp && (
               <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
@@ -327,7 +327,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(14,12,10,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
           {error && (
             <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
               {error}
@@ -445,7 +445,7 @@ export default function RegisterForm() {
             <div>
               <label style={labelStyle}>{tr.registerPage.mobileNumberLabel}</label>
               <div style={{ display: "flex", gap: "8px" }}>
-                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-raised)" }}>
+                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-raised)" }}>
                   +91
                 </div>
                 <input

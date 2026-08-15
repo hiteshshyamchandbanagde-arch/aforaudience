@@ -62,7 +62,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Published' },
   PENDING_APPROVAL: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
   CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  COMPLETED: { bg: 'rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+  COMPLETED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
@@ -289,7 +289,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               // while pending). Before this fix the card rendered
               // anyway, showing a broken image and a Share button that
               // would always fail. Found via live device test 29 Jul.
-              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
                 <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                   Share Poster
                 </h3>
@@ -301,7 +301,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Overview */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: '20px', lineHeight: 1.6 }}>{event.description}</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -342,7 +342,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Venue booking */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>Venue</h2>
             {event.venue ? (
               <div>
@@ -361,7 +361,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       Booking {event.venueBooking.status.toLowerCase()}
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
-                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(14,12,10,0.06)' }}>
+                      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? '8px' : 0 }}>
                           Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
                         </p>
@@ -387,7 +387,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {event.lineup.some((p) => p.cancelledAt) && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
                 Cancelled Performances
               </h2>
@@ -411,7 +411,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                           <button
                             onClick={() => convertToWalletCredit(p.id)}
                             disabled={actingOn === p.id}
-                            style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
+                            style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
                           >
                             {actingOn === p.id ? 'Updating...' : 'Keep as wallet credit instead'}
                           </button>
@@ -425,7 +425,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           )}
 
           {/* Applications */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
               Artist Applications {event.applications.length > 0 && `(${event.applications.length})`}
             </h2>
@@ -486,19 +486,19 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/lineup`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               🎤 Lineup
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/checkin`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               🎟 Check-In
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/sales`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(14,12,10,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               📊 Sales
             </Link>
@@ -513,7 +513,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               style={{
                 fontSize: '14px', fontWeight: 600, color: event.status === 'APPROVED' ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                 background: event.status === 'APPROVED' ? 'transparent' : 'var(--afa-terracotta)',
-                border: event.status === 'APPROVED' ? '1px solid rgba(14,12,10,0.2)' : 'none',
+                border: event.status === 'APPROVED' ? '1px solid rgba(245,245,240,0.2)' : 'none',
                 padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', opacity: toggling ? 0.6 : 1,
               }}
             >

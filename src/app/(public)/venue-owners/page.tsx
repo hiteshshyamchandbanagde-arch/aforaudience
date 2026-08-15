@@ -121,7 +121,7 @@ export default function VenueOwnersPage() {
                     background: "white",
                     borderRadius: "16px",
                     overflow: "hidden",
-                    border: "1px solid rgba(14,12,10,0.08)",
+                    border: "1px solid rgba(245,245,240,0.08)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
@@ -130,7 +130,7 @@ export default function VenueOwnersPage() {
                 >
                   {isNavigatingThis && (
                     <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
                       <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   )}

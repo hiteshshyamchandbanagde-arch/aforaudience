@@ -387,12 +387,12 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               title={t.languagePicker.label}
               aria-label={t.languagePicker.label}
               aria-expanded={langMenuOpen}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(14,12,10,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
             >
               {locale.toUpperCase()}
             </button>
             {langMenuOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
                 {LOCALES.map((l) => (
                   <button
                     key={l.id}
@@ -487,7 +487,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         style={{
           flexDirection: "column",
           padding: "8px 24px 20px",
-          borderTop: "1px solid rgba(14,12,10,0.08)",
+          borderTop: "1px solid rgba(245,245,240,0.08)",
           maxHeight: panelMaxHeight ? `${panelMaxHeight}px` : "80vh",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
@@ -495,7 +495,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         onTouchStart={handlePanelTouchStart}
         onTouchMove={handlePanelTouchMove}
       >
-        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(14,12,10,0.06)' }}>
+        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
           <button
             onClick={() => setMobileLangExpanded((v) => !v)}
             aria-expanded={mobileLangExpanded}
@@ -513,7 +513,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 <button
                   key={l.id}
                   onClick={() => { setLocale(l.id); setMobileLangExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                 >
                   {l.nativeLabel}
                 </button>
@@ -526,7 +526,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             key={l.key}
             href={l.href}
             onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)" }}
+            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}
           >
             {l.label}
           </Link>
@@ -555,7 +555,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
                 aria-current={l.isActive ? "page" : undefined}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(14,12,10,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
                 {l.key === "dashboard" && pendingCount > 0 && (
@@ -587,7 +587,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)" }}
+              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)" }}
             >
               {t.nav.signIn}
             </Link>
