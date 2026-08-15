@@ -71,8 +71,8 @@ export default function SearchBox() {
       {open && query.trim().length >= 2 && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", right: 0, width: "320px",
-          background: "white", borderRadius: "12px", boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-          border: "1px solid rgba(14,12,10,0.08)", zIndex: 200, maxHeight: "420px", overflowY: "auto",
+          background: "var(--afa-surface-raised)", borderRadius: "12px", boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+          border: "1px solid rgba(245,245,240,0.1)", zIndex: 200, maxHeight: "420px", overflowY: "auto",
           padding: hasResults || loading ? "10px 0" : "16px",
         }}>
           {loading ? (
