@@ -514,8 +514,8 @@ export default function ArtistProfilePage({
             { num: upcomingShows.length, label: "Upcoming" },
           ].map((stat) => (
             <div key={stat.label} title={"title" in stat ? stat.title : undefined}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", lineHeight: 1 }}>{stat.num}</div>
-              <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", lineHeight: 1 }}>{stat.num}</div>
+              <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "4px" }}>
                 {stat.label}
                 {"extra" in stat && stat.extra && <span style={{ opacity: 0.7 }}> · {stat.extra}</span>}
               </div>
@@ -533,7 +533,7 @@ export default function ArtistProfilePage({
       <div className="artist-detail-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 48px", display: "grid", gap: "32px" }}>
         {/* LEFT */}
         <div>
-          <div style={{ display: "flex", gap: "0", marginBottom: "32px", borderBottom: "2px solid rgba(14,12,10,0.1)" }}>
+          <div style={{ display: "flex", gap: "0", marginBottom: "32px", borderBottom: "2px solid rgba(245,245,240,0.1)" }}>
             {(["about", "shows"] as const).map((tab) => (
               <button
                 key={tab}
@@ -587,10 +587,10 @@ export default function ArtistProfilePage({
                       >
                         <span style={{ fontSize: "18px" }}>🎟️</span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>
                             {stop.title}{stop.venue && ` — ${stop.venue.city}`}
                           </div>
-                          <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
+                          <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.55 }}>
                             {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                             {stop.tour && ` · Part of ${stop.tour.title}`}
                           </div>
@@ -616,9 +616,9 @@ export default function ArtistProfilePage({
                       <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", borderRadius: "10px", padding: "12px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
                         <span style={{ fontSize: "18px" }}>📍</span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
+                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{stop.city}, {stop.country}</div>
                           {stop.date && (
-                            <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
+                            <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.55 }}>
                               {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                             </div>
                           )}
@@ -657,9 +657,9 @@ export default function ArtistProfilePage({
                   {upcomingShows.map((p) => (
                     <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                       <div>
-                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>📍 {p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
-                        <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>📅 {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "6px" }}>{p.event.title}</div>
+                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>📍 {p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
+                        <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55 }}>📅 {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
                       <Link href={`/events/${p.event.id}`} style={{ background: "var(--afa-fill-solid)", color: "white", padding: "10px 20px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none" }}>View Event</Link>
                     </div>
@@ -672,13 +672,13 @@ export default function ArtistProfilePage({
                 <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>No past shows yet.</p>
               ) : (
                 <div style={{ position: "relative", paddingLeft: "24px" }}>
-                  <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "rgba(14,12,10,0.1)" }} />
+                  <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "rgba(245,245,240,0.1)" }} />
                   {pastShows.map((p, i) => (
                     <div key={p.id} style={{ position: "relative", marginBottom: "20px" }}>
-                      <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-terracotta)" : "rgba(14,12,10,0.2)" }} />
+                      <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-terracotta)" : "rgba(245,245,240,0.2)" }} />
                       <div style={{ background: "white", borderRadius: "10px", padding: "14px 16px", border: "1px solid rgba(14,12,10,0.08)" }}>
-                        <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--afa-text-primary)", marginBottom: "4px" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--afa-ink)", marginBottom: "4px" }}>{p.event.title}</div>
+                        <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
                     </div>
                   ))}
@@ -692,11 +692,11 @@ export default function ArtistProfilePage({
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {socialEntries.length > 0 && (
             <div style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)" }}>
-              <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>Connect</div>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}>
                   <span style={{ fontSize: "18px" }}>{SOCIAL_ICON[platform] || "🔗"}</span>
-                  <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
+                  <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
                 </a>
               ))}
             </div>
@@ -761,11 +761,11 @@ export default function ArtistProfilePage({
               Login required as of 11 Aug (Hitesh's rule) - same gate as
               Follow. */}
           <div style={{ background: "white", borderRadius: "12px", padding: "20px", border: "1px solid rgba(14,12,10,0.08)" }}>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
-            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry.</p>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
+            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry.</p>
             <button
               onClick={openCorporateInquiry}
-              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-text-primary)", border: "1.5px solid rgba(14,12,10,0.2)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
+              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-ink)", border: "1.5px solid rgba(14,12,10,0.2)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
             >
               Send Inquiry
             </button>
