@@ -27,7 +27,7 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
 // this is the specific application they came here for, not just wherever
 // scrollIntoView happened to land them.
 const cardStyle = (active?: boolean) => ({
-  background: 'var(--afa-white)',
+  background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
   padding: '24px',
   border: active ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',

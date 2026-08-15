@@ -201,7 +201,7 @@ export default function BrowseEventsToApplyPage() {
             onChange={(e) => setSelectedCity(e.target.value)}
             style={{
               fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)',
-              background: 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.15)',
+              background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.15)',
               borderRadius: '999px', padding: '8px 14px', marginBottom: '32px', cursor: 'pointer',
             }}
           >
@@ -212,7 +212,7 @@ export default function BrowseEventsToApplyPage() {
           </select>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
@@ -222,7 +222,7 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>

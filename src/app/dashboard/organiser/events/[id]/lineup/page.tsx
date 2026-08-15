@@ -80,7 +80,7 @@ function SortableRow({
         alignItems: 'center',
         gap: '12px',
         padding: '14px',
-        background: 'var(--afa-white)',
+        background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
         border: '1px solid rgba(14,12,10,0.08)',
       }}
@@ -304,7 +304,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(14,12,10,0.6)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
@@ -337,7 +337,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.06)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.06)' }}>
               <p style={{ fontSize: '14px', color: 'rgba(14,12,10,0.6)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>

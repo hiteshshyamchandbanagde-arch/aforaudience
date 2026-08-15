@@ -127,7 +127,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
             top: 'calc(100% + 4px)',
             left: 0,
             right: 0,
-            background: 'var(--afa-white, #fff)',
+            background: 'var(--afa-surface-raised)',
             border: '1px solid rgba(14,12,10,0.15)',
             borderRadius: '8px',
             boxShadow: '0 4px 16px rgba(14,12,10,0.12)',

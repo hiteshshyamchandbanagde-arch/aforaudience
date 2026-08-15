@@ -256,7 +256,7 @@ const inputStyle = {
   padding: '8px 10px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: 'var(--afa-white)',
+  background: 'var(--afa-surface-raised)',
   fontSize: '13px',
   color: 'var(--afa-text-primary)',
 }
@@ -1485,7 +1485,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startWizard}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '2px solid var(--afa-ink)', background: 'var(--afa-white)',
+                borderRadius: '12px', border: '2px solid var(--afa-ink)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-terracotta)', marginBottom: '6px' }}>Recommended</div>
@@ -1498,7 +1498,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startDrawMyself}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)',
+                borderRadius: '12px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '6px' }}>For hands-on control</div>
@@ -1520,10 +1520,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>What's your seating shape?</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Straight rows facing the stage
                   </button>
-                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
                     Curved rows, round tables, or a U-shape
                   </button>
                 </div>
@@ -1532,7 +1532,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. You can either draw that shape by hand, or start from straight rows here and adjust later.
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                       <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
-                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
+                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
                     </div>
                   </div>
                 )}
@@ -1624,7 +1624,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button
                     onClick={wizardNext}
                     disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0}
@@ -1672,7 +1672,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
                 </div>
               </div>
@@ -1701,7 +1701,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {gridConfig.rowAlignment === 'right' && 'Every row ends at the stage-right edge — wider rows only grow toward stage-left.'}
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
                 </div>
               </div>
@@ -1735,7 +1735,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 )}
 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={wizardNext} disabled={wizardHasAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasAisle === null ? 0.5 : 1 }}>Next: Preview</button>
                 </div>
               </div>
@@ -1765,7 +1765,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
+                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
                   <button onClick={finishWizard} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Looks good — continue to fine-tune</button>
                 </div>
               </div>
@@ -1804,7 +1804,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     </button>
                     <button
                       onClick={resetLayout}
-                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
+                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-surface-raised)', color: 'var(--afa-error)' }}
                     >
                       Reset Layout
                     </button>
@@ -1871,7 +1871,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <label
                   style={{
                     padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
-                    border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-text-primary)',
+                    border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
                     opacity: underlayUploading ? 0.6 : 1,
                   }}
                 >
@@ -1898,7 +1898,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     />
                     <button
                       onClick={removeUnderlay}
-                      style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-white)', color: 'var(--afa-error)' }}
+                      style={{ padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--afa-error)', background: 'var(--afa-surface-raised)', color: 'var(--afa-error)' }}
                     >
                       Remove image
                     </button>
@@ -2206,7 +2206,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <input style={inputStyle} value={selected.number} onChange={(e) => updateSelected('number', e.target.value.slice(0, 10))} />
                   <button
                     onClick={deleteSelected}
-                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Delete seat
                   </button>
@@ -2252,7 +2252,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   )}
                   <button
                     onClick={deleteSelectedMarker}
-                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ marginTop: '6px', padding: '8px 0', borderRadius: '6px', border: '1px solid var(--afa-error)', color: 'var(--afa-error)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                   >
                     Delete marker
                   </button>

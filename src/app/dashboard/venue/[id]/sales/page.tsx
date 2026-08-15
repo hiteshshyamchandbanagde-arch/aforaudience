@@ -179,7 +179,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-white)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
                     <span style={{ color: 'rgba(14,12,10,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
                     <span style={{ color: 'rgba(14,12,10,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
@@ -208,7 +208,7 @@ function SummaryCard({ label, value, sub, muted }: { label: string; value: strin
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

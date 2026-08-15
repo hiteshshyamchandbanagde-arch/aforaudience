@@ -230,7 +230,7 @@ export default function AdminArtistsPage() {
                 <div
                   key={a.id}
                   style={{
-                    background: 'var(--afa-white)', borderRadius: '10px', padding: '16px',
+                    background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
                     border: a.isSceneStatusHeadliner ? '1px solid var(--afa-gold)' : '1px solid rgba(14,12,10,0.08)',
                   }}
                 >
@@ -257,7 +257,7 @@ export default function AdminArtistsPage() {
                         <button
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--afa-terracotta)', background: 'var(--afa-white)', color: 'var(--afa-terracotta)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--afa-terracotta)', background: 'var(--afa-surface-raised)', color: 'var(--afa-terracotta)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
                         >
                           Remove Headliner
                         </button>

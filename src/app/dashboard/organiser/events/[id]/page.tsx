@@ -289,7 +289,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               // while pending). Before this fix the card rendered
               // anyway, showing a broken image and a Share button that
               // would always fail. Found via live device test 29 Jul.
-              <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                 <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                   Share Poster
                 </h3>
@@ -301,7 +301,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Overview */}
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: '20px', lineHeight: 1.6 }}>{event.description}</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -342,7 +342,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {/* Venue booking */}
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>Venue</h2>
             {event.venue ? (
               <div>
@@ -387,7 +387,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
 
           {event.lineup.some((p) => p.cancelledAt) && (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
                 Cancelled Performances
               </h2>
@@ -425,7 +425,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           )}
 
           {/* Applications */}
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
               Artist Applications {event.applications.length > 0 && `(${event.applications.length})`}
             </h2>

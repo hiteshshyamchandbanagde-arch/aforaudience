@@ -214,7 +214,7 @@ export default function AdminBookingsPage() {
                   <div
                     key={b.id}
                     style={{
-                      background: 'var(--afa-white)',
+                      background: 'var(--afa-surface-raised)',
                       borderRadius: '12px',
                       padding: '18px 20px',
                       border: CARD_BORDER,

@@ -201,7 +201,7 @@ export default function OrganiserDashboard() {
           )}
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-white)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No events yet</p>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Create your first event to start booking venues and artists</p>
               <Link
@@ -220,7 +220,7 @@ export default function OrganiserDashboard() {
                   <div
                     key={event.id}
                     onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
-                    style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
+                    style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(14,12,10,0.08)', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                       <div>

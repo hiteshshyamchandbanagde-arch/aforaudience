@@ -139,7 +139,7 @@ export default function VenueOwnerEditPage() {
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Profile Picture</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
