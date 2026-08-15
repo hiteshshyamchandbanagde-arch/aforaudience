@@ -59,7 +59,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         )}
 
         {tour.stops.length === 0 ? (
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)' }}>
             <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops are open for booking yet - check back soon.</p>
           </div>
         ) : (
@@ -68,7 +68,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
               <Link
                 key={stop.id}
                 href={`/events/${stop.id}`}
-                style={{ display: 'block', background: 'var(--afa-white)', borderRadius: '12px', padding: '22px 24px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
+                style={{ display: 'block', background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', border: '1px solid rgba(14,12,10,0.08)', textDecoration: 'none' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
                   <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>

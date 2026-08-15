@@ -213,7 +213,7 @@ function FeedbackDetailOverlay({
         </p>
 
         {item.latestNote && (
-          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-white)', borderRadius: '10px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: '10px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(14,12,10,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
@@ -236,7 +236,7 @@ function FeedbackDetailOverlay({
               padding: '10px 16px',
               borderRadius: '10px',
               border: '1px solid rgba(14,12,10,0.15)',
-              background: 'var(--afa-white)',
+              background: 'var(--afa-surface-raised)',
               color: hasPrev ? 'var(--afa-black, #0E0C0A)' : 'rgba(14,12,10,0.3)',
               cursor: hasPrev ? 'pointer' : 'default',
               fontWeight: 600,
@@ -252,7 +252,7 @@ function FeedbackDetailOverlay({
               padding: '10px 16px',
               borderRadius: '10px',
               border: '1px solid rgba(14,12,10,0.15)',
-              background: 'var(--afa-white)',
+              background: 'var(--afa-surface-raised)',
               color: hasNext ? 'var(--afa-black, #0E0C0A)' : 'rgba(14,12,10,0.3)',
               cursor: hasNext ? 'pointer' : 'default',
               fontWeight: 600,
@@ -339,7 +339,7 @@ export default function MyFeedbackPage() {
         {items !== null && items.length === 0 && (
           <div
             style={{
-              background: 'var(--afa-white)',
+              background: 'var(--afa-surface-raised)',
               borderRadius: '12px',
               padding: '32px 24px',
               textAlign: 'center',
@@ -361,7 +361,7 @@ export default function MyFeedbackPage() {
                   key={item.id}
                   onClick={() => setSelectedIndex(i)}
                   style={{
-                    background: 'var(--afa-white)',
+                    background: 'var(--afa-surface-raised)',
                     borderRadius: '12px',
                     padding: '18px 20px',
                     border: '1px solid rgba(14,12,10,0.08)',

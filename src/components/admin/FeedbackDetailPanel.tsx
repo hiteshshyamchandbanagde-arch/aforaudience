@@ -217,7 +217,7 @@ export default function FeedbackDetailPanel({
                 disabled={!hasPrev}
                 aria-label="Previous"
                 style={{
-                  background: 'var(--afa-white)',
+                  background: 'var(--afa-surface-raised)',
                   border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
                   borderRadius: '999px',
                   width: '32px',
@@ -238,7 +238,7 @@ export default function FeedbackDetailPanel({
                 disabled={!hasNext}
                 aria-label="Next"
                 style={{
-                  background: 'var(--afa-white)',
+                  background: 'var(--afa-surface-raised)',
                   border: '1px solid var(--afa-ink-a13, rgba(14,12,10,0.13))',
                   borderRadius: '999px',
                   width: '32px',
@@ -324,7 +324,7 @@ export default function FeedbackDetailPanel({
               ))}
             </div>
             {pendingNoteStatus && (
-              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-white)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.1)' }}>
+              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(14,12,10,0.1)' }}>
                 <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>

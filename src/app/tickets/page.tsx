@@ -282,7 +282,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-white)', border: '1px solid rgba(200,68,26,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(200,68,26,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
                   <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
@@ -322,7 +322,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
@@ -344,7 +344,7 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
@@ -380,7 +380,7 @@ export default function MyTicketsPage() {
               const isLivePending = eff === 'PENDING'
               const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
               return (
-                <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {b.event.title}

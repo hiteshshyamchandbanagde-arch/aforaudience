@@ -233,7 +233,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             onClick={() => zoomBy(1 / 1.5)}
             disabled={zoom <= MIN_ZOOM}
             aria-label="Zoom out"
-            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-text-primary)', fontSize: '16px', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: '16px', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             −
           </button>
@@ -242,7 +242,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             onClick={() => zoomBy(1.5)}
             disabled={zoom >= MAX_ZOOM}
             aria-label="Zoom in"
-            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-text-primary)', fontSize: '16px', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: '16px', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             +
           </button>
@@ -250,7 +250,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             <button
               type="button"
               onClick={resetView}
-              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-white)', color: 'var(--afa-text-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
             >
               Reset
             </button>

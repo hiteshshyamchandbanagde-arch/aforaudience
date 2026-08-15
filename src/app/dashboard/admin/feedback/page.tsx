@@ -481,12 +481,12 @@ function AdminFeedbackBoard() {
     padding: '7px 10px',
     borderRadius: '8px',
     border: '1px solid rgba(14,12,10,0.15)',
-    background: 'var(--afa-white)',
+    background: 'var(--afa-surface-raised)',
     color: 'var(--afa-text-primary)',
   }
 
   const cardStyle: React.CSSProperties = {
-    background: 'var(--afa-white)',
+    background: 'var(--afa-surface-raised)',
     borderRadius: '12px',
     padding: '16px',
     border: '1px solid rgba(14,12,10,0.08)',
@@ -598,11 +598,11 @@ function AdminFeedbackBoard() {
               Admin Dashboard
             </h1>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Platform Settings</a>
-              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Revenue</a>
-              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Accounts</a>
-              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Bookings</a>
-              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-white)' }}>Artist Roster</a>
+              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-surface-raised)' }}>Platform Settings</a>
+              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-surface-raised)' }}>Revenue</a>
+              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-surface-raised)' }}>Accounts</a>
+              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-surface-raised)' }}>Bookings</a>
+              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(14,12,10,0.15)', background: 'var(--afa-surface-raised)' }}>Artist Roster</a>
             </div>
           </div>
 
@@ -624,7 +624,7 @@ function AdminFeedbackBoard() {
               </h2>
               {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
               {organisers.map((o) => (
-                <div key={o.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                <div key={o.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{o.orgName}</div>
@@ -644,7 +644,7 @@ function AdminFeedbackBoard() {
               </h2>
               {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {venueOwners.map((v) => (
-                <div key={v.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                <div key={v.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{v.user.name}</div>
@@ -679,7 +679,7 @@ function AdminFeedbackBoard() {
               </p>
               {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {genreRequests.map((g) => (
-                <div key={g.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                <div key={g.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: '14px', fontWeight: 600 }}>{g.value}</div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
@@ -709,7 +709,7 @@ function AdminFeedbackBoard() {
               </p>
               {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {eventNotes.map((n) => (
-                <div key={n.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
+                <div key={n.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{n.title}</div>
@@ -775,7 +775,7 @@ function AdminFeedbackBoard() {
                   fontSize: '12px',
                   fontWeight: 600,
                   color: 'var(--afa-text-primary)',
-                  background: 'var(--afa-white)',
+                  background: 'var(--afa-surface-raised)',
                   border: '1px solid var(--afa-ink-a13)',
                   borderRadius: '999px',
                   padding: '5px 12px',

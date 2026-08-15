@@ -151,7 +151,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
     <div
       style={{
         position: 'relative',
-        background: 'var(--afa-white)',
+        background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
         border: '1px solid var(--afa-ink-a8)',
         display: 'flex',
@@ -217,7 +217,7 @@ function QuickLink({ href, icon, label, accent }: { href: string; icon: React.Re
         fontSize: '13px',
         fontWeight: 600,
         color: 'var(--afa-text-primary)',
-        background: 'var(--afa-white)',
+        background: 'var(--afa-surface-raised)',
         border: '1px solid var(--afa-ink-a8)',
         borderBottom: `2.5px solid ${accent}`,
         borderRadius: '10px',
@@ -311,7 +311,7 @@ export default function AdminCommandCenter() {
                   key={a.label}
                   href={a.href}
                   style={{
-                    background: 'var(--afa-white)',
+                    background: 'var(--afa-surface-raised)',
                     borderRadius: '10px',
                     border: '1px solid var(--afa-ink-a8)',
                     display: 'flex',
@@ -382,7 +382,7 @@ export default function AdminCommandCenter() {
         {/* 14-day daily trend */}
         <div
           style={{
-            background: 'var(--afa-white)',
+            background: 'var(--afa-surface-raised)',
             borderRadius: '14px',
             border: '1px solid var(--afa-ink-a8)',
             padding: '20px 22px',

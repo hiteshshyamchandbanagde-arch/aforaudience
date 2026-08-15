@@ -85,7 +85,7 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: 'var(--afa-white)',
+  background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
 }
@@ -654,7 +654,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                 Event Details
               </h2>
@@ -853,7 +853,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       Invited by AFA account — they'll only appear publicly once they accept.
                     </p>
                     {(event?.celebrities || []).map((c) => (
-                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-white)', borderRadius: '8px' }}>
+                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-surface-raised)', borderRadius: '8px' }}>
                         {c.photoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={c.photoUrl} alt={c.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -901,7 +901,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       Same as Celebrity — invited by account, only shown publicly once accepted.
                     </p>
                     {(event?.panelists || []).map((p) => (
-                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-white)', borderRadius: '8px' }}>
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-surface-raised)', borderRadius: '8px' }}>
                         {p.photoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={p.photoUrl} alt={p.name} style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
@@ -1015,7 +1015,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Seats & Ticket Price
               </h2>
@@ -1098,7 +1098,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Artist Payment Terms
               </h2>
@@ -1134,7 +1134,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Venue
               </h2>

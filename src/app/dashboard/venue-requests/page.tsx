@@ -136,7 +136,7 @@ export default function VenueRequestsPage() {
           )}
 
           {requests.length === 0 ? (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(14,12,10,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               No booking requests yet.
             </div>
           ) : (
@@ -147,7 +147,7 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <div key={r.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(14,12,10,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                     <div>
                       <p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>

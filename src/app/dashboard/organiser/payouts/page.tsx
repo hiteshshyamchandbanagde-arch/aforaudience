@@ -116,7 +116,7 @@ export default function OrganiserPayoutsPage() {
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '20px' }}>
             {payout?.linked ? (
               <>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>

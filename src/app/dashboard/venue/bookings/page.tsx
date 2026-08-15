@@ -158,7 +158,7 @@ export default function VenueBookingsPage() {
               { label: 'Total confirmed', value: totalRevenue },
               { label: 'Pending value', value: pendingValue },
             ].map((s) => (
-              <div key={s.label} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '18px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+              <div key={s.label} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '18px 20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 6px' }}>{s.label}</p>
                 <p style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
               </div>
@@ -166,7 +166,7 @@ export default function VenueBookingsPage() {
           </div>
 
           {/* F3 - Calendar */}
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '32px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(14,12,10,0.08)', marginBottom: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <button
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
@@ -241,7 +241,7 @@ export default function VenueBookingsPage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {pending.map((b) => (
-                  <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+                  <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
                       <div>
                         <p style={{ fontWeight: 700, fontSize: '16px', color: 'var(--afa-text-primary)' }}>{b.event?.title || 'Untitled event'}</p>
@@ -287,7 +287,7 @@ export default function VenueBookingsPage() {
                 {resolved.map((b) => {
                   const st = STATUS_STYLE[b.status] || STATUS_STYLE.PENDING
                   return (
-                    <div key={b.id} style={{ background: 'var(--afa-white)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(14,12,10,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--afa-text-primary)' }}>{b.event?.title || 'Untitled event'}</p>
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{b.venue.name} · {b.organiser.orgName} · ₹{b.amount}</p>

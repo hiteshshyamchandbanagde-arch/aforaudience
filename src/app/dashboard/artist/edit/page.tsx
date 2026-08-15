@@ -15,7 +15,7 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: 'var(--afa-white)',
+  background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
 }
@@ -202,7 +202,7 @@ export default function EditArtistProfilePage() {
             This is what organisers see when you apply to their events.
           </p>
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Profile Picture</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
@@ -250,7 +250,7 @@ export default function EditArtistProfilePage() {
 
           {/* Artist Background - a richer, entirely optional storytelling
               section beyond the short bio above. Nothing here is required. */}
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               Your Background
             </h2>

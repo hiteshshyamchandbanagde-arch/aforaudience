@@ -162,7 +162,7 @@ export default function AdminUsersPage() {
               <div
                 key={u.id}
                 style={{
-                  background: 'var(--afa-white)', borderRadius: '10px', padding: '16px',
+                  background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
                   border: u.isSuspended ? '1px solid var(--afa-terracotta)' : '1px solid rgba(14,12,10,0.08)',
                 }}
               >
@@ -185,7 +185,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-sage)', background: 'var(--afa-white)', color: 'var(--afa-sage)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-sage)', background: 'var(--afa-surface-raised)', color: 'var(--afa-sage)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
                       >
                         Unsuspend
                       </button>

@@ -74,7 +74,7 @@ export default function AudienceActivityPage() {
             {tr.audienceActivityPage.subtitle}
           </p>
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
               <div>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>{tr.audienceActivityPage.totalSpend}</p>
@@ -95,7 +95,7 @@ export default function AudienceActivityPage() {
           </div>
 
           {confirmed.length === 0 && (
-            <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', textAlign: 'center' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(14,12,10,0.08)', textAlign: 'center' }}>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
                 {tr.audienceActivityPage.noConfirmedBookings}
               </p>

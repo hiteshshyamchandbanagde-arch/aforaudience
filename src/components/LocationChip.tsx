@@ -101,7 +101,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             top: 'calc(100% + 6px)',
             left: variant === 'mobile' ? 0 : 'auto',
             right: variant === 'mobile' ? 0 : 0,
-            background: 'var(--afa-white, #fff)',
+            background: 'var(--afa-surface-raised)',
             border: '1px solid rgba(14,12,10,0.15)',
             borderRadius: '10px',
             boxShadow: '0 8px 24px rgba(14,12,10,0.15)',

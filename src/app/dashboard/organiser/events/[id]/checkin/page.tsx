@@ -252,7 +252,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </p>
           )}
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             {!cameraOn ? (
               <button
                 onClick={() => { setCameraError(''); setCameraOn(true) }}
@@ -282,7 +282,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             )}
           </div>
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--afa-text-primary)' }}>
               Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(booking ID printed on the ticket)</span>
             </label>
@@ -295,7 +295,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 placeholder="e.g., ckabc123..."
                 style={{
                   flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(14,12,10,0.15)',
-                  background: 'var(--afa-white)', fontSize: '14px', color: 'var(--afa-text-primary)',
+                  background: 'var(--afa-surface-raised)', fontSize: '14px', color: 'var(--afa-text-primary)',
                 }}
               />
               <button
@@ -312,7 +312,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
             <button
               onClick={() => {
                 const next = !listOpen

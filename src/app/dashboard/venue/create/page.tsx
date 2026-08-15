@@ -20,7 +20,7 @@ const inputStyle = {
   padding: '10px 12px',
   borderRadius: '6px',
   border: '1px solid rgba(14,12,10,0.15)',
-  background: 'var(--afa-white)',
+  background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
 }
@@ -284,7 +284,7 @@ export default function CreateVenuePage() {
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Basic details */}
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Basic Details
               </h2>
@@ -391,7 +391,7 @@ export default function CreateVenuePage() {
             </section>
 
             {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Rental Rate
               </h2>
@@ -482,7 +482,7 @@ export default function CreateVenuePage() {
             </section>
 
             {/* Seating & pricing */}
-            <section style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.08)' }}>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Seating & Pricing
               </h2>

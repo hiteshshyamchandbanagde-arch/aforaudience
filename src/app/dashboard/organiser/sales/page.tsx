@@ -169,7 +169,7 @@ export default function OrganiserSalesOverviewPage() {
                     href={`/dashboard/organiser/events/${e.id}/sales?range=${range}`}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: 'var(--afa-white)', borderRadius: '8px',
+                      fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
                       border: '1px solid rgba(14,12,10,0.06)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                     }}
                   >
@@ -190,7 +190,7 @@ export default function OrganiserSalesOverviewPage() {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ background: 'var(--afa-white)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(14,12,10,0.08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(14,12,10,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
     </div>
@@ -199,7 +199,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-white)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(14,12,10,0.06)' }}>
       <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
