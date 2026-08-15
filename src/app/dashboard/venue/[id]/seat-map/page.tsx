@@ -1355,11 +1355,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></main></>)
 
   return (
     <>
       <SiteNav />
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
         <BackLink href={`/dashboard/venue/${id}/edit`} label="Back to Venue" />
         <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
@@ -2306,6 +2307,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </button>
         )}
       </div>
+      </main>
     </>
   )
 }
