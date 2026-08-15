@@ -1,54 +1,49 @@
 # AforAudience — Session Handoff
 
-Written for whoever (human or Claude) picks this up next. Covers what changed, current state, and what's still open.
+Written for whoever (human or Claude) picks this up next. Covers what changed, current state, and what's still open. Replaces all prior content in this file - that content is stale (from an earlier, now-superseded stage of the project) and fully superseded by `docs/design.md` and Claude's memory for anything not repeated here.
 
-## Environment map
+## qa HEAD as of this handoff
 
-| | Branch | Domain | Vercel env | Supabase project |
-|---|---|---|---|---|
-| Prod | `main` | www.aforaudience.com | Production | `aforaudience-prod` (`cncumfwwnjcwacggrgsr`) |
-| QA | `qa` | qa.aforaudience.com | Preview | `aforaudience-qa` (`nqiyrypmjtogoocerxtu`) |
+`7973c580` - 11 PRs merged this session (#457-#466 + one earlier), all CI-green, all deployed with zero runtime errors.
 
-- Vercel project: `aforaudience`, team `hitesh-shyamchand-bangade-s-projects`
-- GitHub: `hiteshshyamchandbanagde-arch/aforaudience` (public repo)
-- Local clone: `C:\Users\hites\AforA\aforaudience` (Windows, git already authenticated for push/pull)
-- `qa.aforaudience.com` has Vercel Deployment Protection on — only Vercel-authenticated sessions (your browser, already logged in) can view it. Tools/testers without Vercel access can't reach it.
+## What this session did: Theme Phase 2 - full dark reskin (FEAT-2608-051)
 
-## What this session did
+Green-lit by Hitesh mid-session as its own real project (not a same-day token swap), after a scope audit found it was the exact thing `docs/design.md`'s Theme Phase 0/1 notes had already anticipated and deferred pending explicit go-ahead. Full plan and Phase 2a/2b/2c writeups are in `docs/design.md`.
 
-**1. Fixed the QA environment setup.** `qa.aforaudience.com` was 404ing because the `qa` branch was created via GitHub's UI (branch duplication), which fires a `create` event, not a `push` — so Vercel never built it. Fixed by pushing a real commit to `qa`.
+**Phase 2a (PR #459)** - additive semantic token layer in `globals.css` (`--afa-surface-page`, `-raised`, `-inverse`, `--afa-text-primary`, `-secondary`, `-muted`, `-inverse`, `--afa-fill-solid`, `--afa-on-fill-solid`). Zero visual change - every token aliased its Phase 0 source value.
 
-**2. Built multi-identifier login + OTP + account codes**, applied to QA only so far:
-- Login now accepts email, phone, username, or a generated code (`AFA`/`ART`/`ORG`/`VEN` + `YYMM` + 6-digit sequence) — see `resolveIdentifierToUser` in `src/lib/auth-helpers.ts`.
-- Every `User` gets an `AFA...` code at signup (DB trigger, not app code). Artist/Organiser/VenueOwner get their own role-specific code when a user upgrades into that role via the existing Profile page cards.
-- OTP login/signup added via NextAuth's `otp-login` CredentialsProvider (`src/lib/auth.ts`) — separate from the password `credentials` provider.
-- OTP sending is provider-swappable (`src/lib/otp.ts`): `OTP_PROVIDER=mock` (QA — shows the code on-screen, no real SMS) vs `OTP_PROVIDER=msg91` (prod, **not yet configured** — needs an MSG91 account + India DLT template registration, which takes 1-2 days to approve. Not started as of this handoff unless done separately.). Defaults to `msg91` if unset — fails safe, never silently falls back to mock.
-- Email verification is async/non-blocking (link via Resend, `sendEmailVerificationEmail` in `src/lib/email.ts`) — doesn't gate login, unlike phone OTP which does.
-- Full file list touched: `prisma/schema.prisma`, `src/lib/auth.ts`, `src/lib/auth-helpers.ts` (new), `src/lib/otp.ts` (new), `src/lib/email.ts`, `src/app/api/auth/register/route.ts`, `src/app/api/auth/otp/{request,verify}/route.ts` (new), `src/app/api/auth/username-check/route.ts` (new), `src/app/api/auth/verify-email/route.ts` (new), `src/app/(auth)/login/page.tsx`, `src/app/(auth)/register/RegisterForm.tsx`, `src/app/(auth)/verify-email/page.tsx` (new), `src/components/AuthPromptSheet.tsx`, `src/app/profile/page.tsx`.
+**Phase 2b (PR #460)** - reclassified ~1,147 `--afa-ink`/`--afa-cream` usages across 100 files onto the Phase 2a tokens. Still zero visual change, pure semantic rename. Verified structurally (insertions==deletions, brace/quote parity - same method as the original Phase 0 hex->var migration).
 
-**3. Enabled RLS on all tables in `aforaudience-qa`** (was disabled project-wide). Confirmed safe — the app connects via Prisma using a privileged pooler role that bypasses RLS entirely, and no code anywhere uses the Supabase JS client / anon key, so this closes a latent exposure risk at zero functional cost.
+**Phase 2c (PR #461)** - assigned real dark values. This is the first commit where anything actually looks different, and it's now the default (Hitesh's explicit call, not opt-in): `--afa-surface-page: #141414`, `-raised: #1F1F1F`, `-inverse: #0A0A0A` (deliberately darker, for footer/ticker/splash bands), `--afa-text-primary/-inverse: #F5F5F0`, `--afa-fill-solid: #FF5A36` (the signature accent), `--afa-on-fill-solid: var(--afa-brown-black)`. Also added Noto Sans Devanagari/Tamil/Telugu/Kannada/Malayalam/Gujarati/Bengali fonts (`layout.tsx`), chained into the real inherited font-family on `html` in `globals.css` - fixes the multi-script gap for the default/inherited text case (see open item below for what's not yet covered).
 
-**4. Fixed a pre-existing bug found while testing**: on `/profile`, "Visit your Artist/Organiser/Venue dashboard" was plain unclickable text, not a link. Now wired to `/dashboard/{artist,organiser,venue}`.
+**Bug-fix sweep (PRs #462-#466)**, found by actually loading the deployed qa preview in a browser and screenshotting - not by more regex:
+- `FacilitiesPicker.tsx`/`GenrePicker.tsx`: selected-chip border was raw `var(--afa-ink)` on transparent - invisible on the new dark page.
+- `SiteNav.tsx`: nav bar background was a hardcoded literal `rgba(247,243,238, alpha)` - never a token reference at all, so it escaped every regex pass. Nav was unreadable (light text on a leftover cream bar).
+- Events page filter bar + 22 form inputs sitewide (login, register, forgot-password, search boxes, etc.): literal `background: "white"` paired with `color: var(--afa-text-primary)` (now light) - invisible typed text in real inputs, not just labels.
+- Events page "Past" tab: same literal-white pattern.
+- Login/forgot-password/reset-password/verify-email: `bg-white` as a Tailwind class (a third, different escape pattern - not inline style, not a CSS var) - "Sign in" heading and field labels were invisible.
 
-**5. Created a QA admin account** — username `Admin`, email `hiteshshyamchandbanagde@gmail.com`, phone `+919890840084`, role `ADMIN`, code `AFA2607000004`. Password is a random unknown value by design — this account is OTP-login only, so no credential was ever shared in chat.
+## Confirmed working live (actually screenshotted, hard-reload to bypass Vercel's aggressive branch-alias caching)
 
-## Outstanding — promote to prod (task not started)
+Homepage hero, nav bar, events browse (hero/search/filter chips/city+sort dropdowns/Upcoming-Past tabs), and all 4 auth pages (login, forgot-password, reset-password, verify-email).
 
-1. Check `aforaudience-prod` for duplicate `User.name` values (would break the new unique constraint) and any existing Artist/Organiser/VenueOwner rows (would need a `code` backfill, since new rows get one via trigger but old ones wouldn't retroactively).
-2. Apply the same migration to `aforaudience-prod` (code columns/triggers, `Otp`, `CodeCounter`, `EmailVerificationToken`, `User.name` unique constraint).
-3. Enable RLS on `aforaudience-prod` tables (same rationale as QA).
-4. Merge `qa` → `main` on GitHub.
-5. Set Vercel **Production** env vars: `OTP_PROVIDER=msg91`, `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID` — blocked until MSG91 account + DLT registration is done.
+## NOT yet checked this session - start here
 
-## Other flagged-but-not-fixed items
+Same bug class (light text or invisible borders against the new dark default) is likely still present in pages nobody has loaded yet:
+- All 5 role dashboards (audience, artist, organiser, venue-owner, admin)
+- Checkout flow
+- Event detail page
+- Profile page
+- Seat-map builder
+- Venue pages
 
-- **`.env` defaults to the PROD database URL**, with `.env.local` (gitignored) overriding to localhost for dev. Works today but fragile — a missing `.env.local` anywhere would silently connect to prod. Not fixed, just flagged.
-- **Homepage hero section** (`src/app/page.tsx`) has an empty right-column void — no image element exists there at all. Pre-existing, unrelated to this session's work.
-- Considered adding the user's code to the top nav (not just Profile page) — decided against it, Profile placement was judged sufficient.
+Recommended method: don't blind-regex this. Load each page in a real browser, screenshot, zoom into anything that looks washed-out or low-contrast, grep for the specific broken pattern, fix, verify live, repeat. Three known escape patterns to grep for specifically: `rgba(14,12,10,` (dark-tinted, invisible on dark bg - ~300 unaudited spots estimated out of 561 total found), literal `background: "white"` (~57 of 79 total unaudited), and `bg-white` as a Tailwind className (only checked in `src/app/(auth)/` so far - needs a full-codebase grep).
 
-## Environment gotchas for next time
+## Also not done
 
-- **PowerShell breaks on unquoted parentheses** in paths like `src/app/(auth)/login/page.tsx` — always quote them, or run `git add` per-file rather than pasting multi-path commands.
-- **The Cowork sandbox's mount of this folder has shown stale/inconsistent reads multiple times** — false `git diff` (entire repo appeared modified when only ~13 files actually changed), false `tsc` errors in untouched files, and a `Glob` call that missed files that definitely exist. Any time a sandbox-run `git status`, `git diff`, `tsc`, or `Glob` result looks suspicious or too broad, verify via the user's own PowerShell terminal before trusting it or taking action based on it.
-- A GitHub fine-grained PAT was pasted into a prior chat session — it should have been revoked in GitHub settings. Confirm this happened before assuming it's safe to ignore.
-- Local git in PowerShell is already authenticated for both push and pull — no token needed for normal git operations.
+- Accent-theme picker (Indigo/Peacock/Vermilion/Royal Purple/Midnight Sapphire/Noir) - designed for the cream base, not yet reconciled against the new dark default. Needs a look once the base itself is confirmed stable.
+- Inline `fontFamily: "var(--font-sans)"` overrides (common pattern) still resolve Manrope-only, bypassing the Phase 2c multi-script fix which only fixed the inherited case.
+
+## Gotcha for next session
+
+Vercel's `aforaudience-git-qa-...vercel.app` branch-alias URL caches aggressively - a fix that's genuinely merged and deployed can still screenshot as broken. Hard-reload (Ctrl+Shift+R) before concluding a fix didn't work; confirm the deployment SHA via list_deployments/Contents API first if a screenshot looks wrong right after a merge.
