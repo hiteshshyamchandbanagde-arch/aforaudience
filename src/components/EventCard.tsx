@@ -2,6 +2,7 @@
 import { getAvailabilityStatus, AVAILABILITY_BADGE } from "@/lib/availability"
 import { isNightEvent } from "@/lib/eventTime"
 import { useLocale } from "@/lib/i18n/translate"
+import Photo from "@/components/Photo"
 
 export interface EventItem {
   id: string
@@ -16,8 +17,73 @@ export interface EventItem {
   availableSeats: number
   vibe?: string | null
   venue: { name: string; city: string } | null
-  lineup: { id: string }[]
+  posterImage: string | null
+  lineup: { id: string; artist: { id: string; user: { name: string; displayName: string | null } } }[]
   isCompetitionShow?: boolean
+}
+
+function initials(name: string): string {
+  return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('')
+}
+
+// Circular artist-initials chips for a multi-artist lineup, per the V2
+// spec (PM/AB/RD/NK style) - a cheap way to show a bill without needing a
+// real photo per performer. Caps at 4 visible + an overflow "+N" chip.
+function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]; size?: number }) {
+  if (lineup.length === 0) return null
+  const visible = lineup.slice(0, 4)
+  const overflow = lineup.length - visible.length
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      {visible.map((l, i) => {
+        const name = l.artist.user.displayName || l.artist.user.name
+        return (
+          <div
+            key={l.id}
+            title={name}
+            style={{
+              width: size,
+              height: size,
+              marginLeft: i === 0 ? 0 : -size * 0.28,
+              borderRadius: "50%",
+              background: "var(--afa-surface-raised, #1F1F1F)",
+              border: "1px solid rgba(245,245,240,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: size * 0.34,
+              fontFamily: "var(--font-mono)",
+              color: "var(--afa-amber)",
+              flexShrink: 0,
+            }}
+          >
+            {initials(name)}
+          </div>
+        )
+      })}
+      {overflow > 0 && (
+        <div
+          style={{
+            width: size,
+            height: size,
+            marginLeft: -size * 0.28,
+            borderRadius: "50%",
+            background: "var(--afa-surface-raised, #1F1F1F)",
+            border: "1px solid rgba(245,245,240,0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: size * 0.3,
+            fontFamily: "var(--font-mono)",
+            color: "rgba(245,245,240,0.6)",
+            flexShrink: 0,
+          }}
+        >
+          +{overflow}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export const TYPE_META: Record<string, { emoji: string; color: string; label: string }> = {
@@ -93,7 +159,7 @@ export function EventCard({
               height: "28px",
               borderRadius: "50%",
               border: "3px solid rgba(245,245,240,0.15)",
-              borderTopColor: "var(--afa-terracotta)",
+              borderTopColor: "var(--afa-amber)",
               animation: "afa-spin 0.7s linear infinite",
             }}
           />
@@ -102,8 +168,8 @@ export function EventCard({
       )}
       {view === "grid" && (
         <div style={{ height: "160px", background: meta.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "64px", position: "relative" }}>
-          {meta.emoji}
-          <span style={{ position: "absolute", top: "12px", left: "12px", background: "var(--afa-terracotta)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", letterSpacing: "0.05em" }}>
+          {event.posterImage ? <Photo src={event.posterImage} alt={event.title} /> : meta.emoji}
+          <span style={{ position: "absolute", top: "12px", left: "12px", background: "var(--afa-amber)", color: "white", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", letterSpacing: "0.05em" }}>
             {typeLabel.toUpperCase()}
           </span>
           <span style={{ position: "absolute", top: "12px", right: "12px", background: event.isFree ? "var(--afa-green-mid)" : "rgba(201,151,58,0.9)", color: "white", fontSize: "12px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px" }}>
@@ -134,30 +200,28 @@ export function EventCard({
 
       <div style={{ padding: "20px", display: view === "list" ? "flex" : "block", gap: "24px", alignItems: "center" }}>
         {view === "list" && (
-          <div style={{ width: "60px", height: "60px", background: meta.color, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", flexShrink: 0 }}>
-            {meta.emoji}
+          <div style={{ width: "60px", height: "60px", background: meta.color, borderRadius: "12px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", position: "relative", flexShrink: 0 }}>
+            {event.posterImage ? <Photo src={event.posterImage} alt={event.title} /> : meta.emoji}
           </div>
         )}
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--afa-terracotta)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div style={{ fontSize: "11px", fontFamily: "monospace", color: "var(--afa-amber)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
             {event.venue ? `${event.venue.name} · ${event.venue.city}` : tr.eventsPage.venueTBD}
           </div>
           <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "8px", lineHeight: 1.2 }}>
             {event.title}
           </div>
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
+          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center", marginBottom: "12px" }}>
             <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>📅 {new Date(event.date).toLocaleDateString()}</span>
             <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🕐 {event.startTime}</span>
             {isNightEvent(event.startTime) && (
               <span style={{ fontSize: "13px", color: "var(--afa-plum, #6B4E71)", opacity: 0.85 }} title={tr.eventsPage.nightTitle}>🌙 {tr.eventsPage.nightLabel}</span>
             )}
-            {event.lineup.length > 0 && (
-              <span style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>🎤 {tr.eventsPage.performingCount.replace("{n}", String(event.lineup.length))}</span>
-            )}
+            {event.lineup.length > 0 && <LineupChips lineup={event.lineup} />}
           </div>
           {view === "list" && (
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <span style={{ background: event.isFree ? "var(--afa-green-mid)" : "var(--afa-terracotta)", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
+              <span style={{ background: event.isFree ? "var(--afa-green-mid)" : "var(--afa-amber)", color: "white", fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px" }}>
                 {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `₹${event.ticketPrice}` : "—"}
               </span>
               <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{typeLabel}</span>
