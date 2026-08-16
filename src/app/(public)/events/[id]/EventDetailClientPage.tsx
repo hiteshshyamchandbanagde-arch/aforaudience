@@ -682,7 +682,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   {event.venue.facilities.length > 0 && (
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "12px" }}>
                       {event.venue.facilities.map((f) => (
-                        <div key={f} style={{ background: "var(--afa-surface-raised)", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-ink)" }}>✅ {f}</div>
+                        <div key={f} style={{ background: "var(--afa-surface-raised)", borderRadius: "8px", padding: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)" }}>✅ {f}</div>
                       ))}
                     </div>
                   )}
