@@ -27,7 +27,23 @@
  *   - Cross-origin: pass through untouched. Not our problem to cache.
  */
 
-const CACHE_VERSION = 'v1-2026-07-14';
+// BUG-2607-068/BUG-2608-021/GEN-2608-042 (16 Aug): this was still
+// 'v1-2026-07-14' - never bumped since the SW was created, despite a
+// month of deploys including the entire Theme Phase 2 dark reskin
+// (colors, card backgrounds, layout). The RUNTIME cache (which the
+// network-first navigation handler falls back to on any fetch
+// failure, and which cache-first /_next/static/** entries also live
+// in) had been silently accumulating without ever being purged -
+// the prime suspect across several sessions' worth of "stale
+// content on TWA/PWA" reports, though never confirmed on a physical
+// device from this environment. Bumping this forces every client to
+// drop its old cache on next SW activation (see the activate
+// handler below) and start clean. If stale-content reports persist
+// after this ships, the SW cache is NOT the cause and the next lead
+// should be device-storage-partition differences between the TWA
+// shell and a regular Chrome tab (see BUG-2607-068's Delete-and-
+// reset attempt, which didn't fix it either).
+const CACHE_VERSION = 'v2-2026-08-16';
 const PRECACHE = `afora-precache-${CACHE_VERSION}`;
 const RUNTIME = `afora-runtime-${CACHE_VERSION}`;
 
