@@ -603,7 +603,8 @@ export default function CheckoutPage() {
         <div
           style={{
             background: 'white',
-            border: '1px solid rgba(245,245,240,0.08)',
+            color: 'var(--afa-ink)',
+            border: '1px solid rgba(14,12,10,0.1)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -636,7 +637,7 @@ export default function CheckoutPage() {
 
           <div
             style={{
-              borderTop: '1px solid rgba(245,245,240,0.06)',
+              borderTop: '1px solid rgba(14,12,10,0.06)',
               paddingTop: 16,
               marginBottom: 12,
             }}
@@ -689,7 +690,7 @@ export default function CheckoutPage() {
                   padding: '10px 0 4px',
                   fontSize: 13,
                   opacity: 0.75,
-                  borderTop: '1px dashed rgba(245,245,240,0.08)',
+                  borderTop: '1px dashed rgba(14,12,10,0.1)',
                   marginTop: 6,
                 }}
               >
@@ -711,7 +712,7 @@ export default function CheckoutPage() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid rgba(245,245,240,0.08)',
+              borderTop: '1px solid rgba(14,12,10,0.1)',
               paddingTop: 16,
             }}
           >
@@ -728,7 +729,8 @@ export default function CheckoutPage() {
         <div
           style={{
             background: 'white',
-            border: '1px solid rgba(245,245,240,0.08)',
+            color: 'var(--afa-ink)',
+            border: '1px solid rgba(14,12,10,0.1)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -769,7 +771,7 @@ export default function CheckoutPage() {
                   key={t.id}
                   style={{
                     fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6,
-                    background: 'var(--afa-surface-raised)', borderRadius: 999, padding: '5px 6px 5px 12px',
+                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 999, padding: '5px 6px 5px 12px',
                   }}
                 >
                   {t.taggedUser.displayName || t.taggedUser.name}
@@ -806,7 +808,7 @@ export default function CheckoutPage() {
                 disabled={companionBusy}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
-                  border: '1px solid rgba(245,245,240,0.15)', boxSizing: 'border-box',
+                  border: '1px solid rgba(14,12,10,0.15)', boxSizing: 'border-box',
                 }}
               />
               {companionSearching && (
@@ -823,7 +825,7 @@ export default function CheckoutPage() {
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(245,245,240,0.08)',
+                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(14,12,10,0.1)',
                           background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
                         }}
                       >
