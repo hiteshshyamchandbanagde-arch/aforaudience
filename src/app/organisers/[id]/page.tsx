@@ -68,17 +68,17 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         )}
 
         <div style={{ background: "var(--afa-white)", borderRadius: "12px", padding: "28px", border: "1px solid rgba(14,12,10,0.08)" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>
             {tr.organiserDetailPage.eventsByTemplate.replace("{name}", organiser.orgName)}
           </h2>
 
           {organiser.events.length === 0 ? (
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organiserDetailPage.noPublishedEventsYet}</p>
+            <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.organiserDetailPage.noPublishedEventsYet}</p>
           ) : (
             <>
               {upcoming.length > 0 && (
                 <div style={{ marginBottom: past.length > 0 ? "24px" : 0 }}>
-                  <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-ink)", opacity: 0.5, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     {tr.organiserDetailPage.upcoming}
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -101,7 +101,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
 
               {past.length > 0 && (
                 <div>
-                  <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-ink)", opacity: 0.5, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                     {tr.organiserDetailPage.past}
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

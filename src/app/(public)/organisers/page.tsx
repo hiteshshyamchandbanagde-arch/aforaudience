@@ -148,10 +148,10 @@ export default function OrganisersPage() {
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{org.orgName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
                       {org.bio || tr.organisersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
                       {org._count.events} {org._count.events === 1 ? tr.organisersPage.eventSingular : tr.organisersPage.eventPlural}
                     </div>
                   </div>
