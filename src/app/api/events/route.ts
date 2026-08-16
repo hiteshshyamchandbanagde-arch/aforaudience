@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         organiser: { user: { isSuspended: false } },
         ...(city ? { venue: { city } } : {}),
       },
-      include: { venue: true, lineup: true },
+      include: { venue: true, lineup: { include: { artist: { select: { id: true, user: { select: { name: true, displayName: true } } } } } } },
       orderBy: { date: 'asc' },
     })
 
