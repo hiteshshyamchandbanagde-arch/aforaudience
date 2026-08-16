@@ -103,7 +103,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "white",
                 borderRadius: "16px",
-                border: "1px solid rgba(245,245,240,0.08)",
+                border: "1px solid rgba(14,12,10,0.1)",
                 overflow: "hidden",
                 cursor: data?.artistOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "artist-of-month" ? 0.5 : 1,
@@ -132,7 +132,7 @@ export default function WallOfFamePage() {
                 )}
               </div>
               <div style={{ padding: "20px 28px" }}>
-                <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
                   {data?.artistOfMonth
                     ? tr.wallOfFamePage.artistBlurbFilled.replace("{n}", String(data.minReviews))
                     : tr.wallOfFamePage.artistBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
@@ -161,7 +161,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "white",
                 borderRadius: "16px",
-                border: "1px solid rgba(245,245,240,0.08)",
+                border: "1px solid rgba(14,12,10,0.1)",
                 overflow: "hidden",
                 cursor: data?.eventOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "event-of-month" ? 0.5 : 1,
@@ -189,7 +189,7 @@ export default function WallOfFamePage() {
                 )}
               </div>
               <div style={{ padding: "20px 28px" }}>
-                <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.55, lineHeight: 1.6, margin: 0 }}>
                   {data?.eventOfMonth
                     ? tr.wallOfFamePage.eventBlurbFilled.replace("{n}", String(data.minReviews))
                     : tr.wallOfFamePage.eventBlurbEmpty.replace("{n}", String(data?.minReviews ?? 3))}
@@ -211,10 +211,10 @@ export default function WallOfFamePage() {
               {tr.wallOfFamePage.allTimeLeaderboard}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(245,245,240,0.08)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.wallOfFamePage.topOrganisers}</div>
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.1)", padding: "24px 28px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.wallOfFamePage.topOrganisers}</div>
                 {data.topOrganisers.length === 0 ? (
-                  <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
+                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {data.topOrganisers.map((o, i) => {
@@ -240,7 +240,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "6px",
-                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(245,245,240,0.06)" : "none",
+                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(14,12,10,0.08)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -273,8 +273,8 @@ export default function WallOfFamePage() {
                             </div>
                           )}
                           <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
-                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{o.name}</div>
-                          <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
+                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{o.name}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{o.avgRating.toFixed(1)}★ · {o.reviewCount}</div>
                         </div>
                       )
                     })}
@@ -282,10 +282,10 @@ export default function WallOfFamePage() {
                 )}
               </div>
 
-              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(245,245,240,0.08)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.wallOfFamePage.topVenues}</div>
+              <div style={{ background: "white", borderRadius: "16px", border: "1px solid rgba(14,12,10,0.1)", padding: "24px 28px" }}>
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "16px" }}>{tr.wallOfFamePage.topVenues}</div>
                 {data.topVenues.length === 0 ? (
-                  <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
+                  <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {data.topVenues.map((v, i) => {
@@ -311,7 +311,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "6px",
-                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(245,245,240,0.06)" : "none",
+                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(14,12,10,0.08)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -344,8 +344,8 @@ export default function WallOfFamePage() {
                             </div>
                           )}
                           <div style={{ fontFamily: "Georgia, serif", fontSize: "16px", fontWeight: 700, color: "var(--afa-terracotta)", width: "20px" }}>{i + 1}</div>
-                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
-                          <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
+                          <div style={{ flex: 1, fontSize: "14px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
+                          <div style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: 0.6 }}>{v.avgRating.toFixed(1)}★ · {v.reviewCount}</div>
                         </div>
                       )
                     })}
