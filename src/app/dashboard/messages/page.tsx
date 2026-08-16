@@ -66,7 +66,7 @@ export default function MessagesInboxPage() {
   }
 
   return (
-    <>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
@@ -94,7 +94,7 @@ export default function MessagesInboxPage() {
                 border: '1px solid rgba(245,245,240,0.1)',
                 background: t.unread ? 'rgba(212,163,60,0.08)' : 'var(--afa-cream, #fff)',
                 textDecoration: 'none',
-                color: 'var(--afa-text-primary)',
+                color: t.unread ? 'var(--afa-text-primary)' : 'var(--afa-ink)',
               }}
             >
               <div style={{ minWidth: 0, flex: 1 }}>
@@ -132,6 +132,6 @@ export default function MessagesInboxPage() {
           ))}
         </div>
       </div>
-    </>
+    </main>
   )
 }

@@ -108,7 +108,7 @@ export default function MessageThreadPage() {
   const myId = (session?.user as any)?.id as string
 
   return (
-    <>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
         <div style={{ marginBottom: '12px' }}>
@@ -195,6 +195,6 @@ export default function MessageThreadPage() {
           </div>
         ) : null}
       </div>
-    </>
+    </main>
   )
 }
