@@ -29,7 +29,7 @@ function initials(name: string): string {
 // Circular artist-initials chips for a multi-artist lineup, per the V2
 // spec (PM/AB/RD/NK style) - a cheap way to show a bill without needing a
 // real photo per performer. Caps at 4 visible + an overflow "+N" chip.
-function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]; size?: number }) {
+export function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]; size?: number }) {
   if (lineup.length === 0) return null
   const visible = lineup.slice(0, 4)
   const overflow = lineup.length - visible.length
