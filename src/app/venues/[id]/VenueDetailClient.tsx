@@ -65,18 +65,18 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
         <div style={{ background: "var(--afa-white)", borderRadius: "12px", padding: "28px", border: "1px solid rgba(14,12,10,0.08)" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
             <div>
-              <p style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
-              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{venue.capacity} {tr.venuesPage.seatsLabel}</p>
+              <p style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
+              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)" }}>{venue.capacity} {tr.venuesPage.seatsLabel}</p>
             </div>
             <div>
-              <p style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
-              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.notRatedYet}</p>
+              <p style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
+              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)" }}>{tr.venueDetailPage.notRatedYet}</p>
             </div>
           </div>
 
           {venue.facilities && venue.facilities.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
-              <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
+              <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {venue.facilities.map((facility) => (
                   <span key={facility} style={{ fontSize: "13px", padding: "5px 12px", background: "var(--afa-surface-raised)", borderRadius: "999px", color: "var(--afa-text-primary)" }}>
@@ -88,9 +88,9 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           )}
 
           <div>
-            <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{tr.venueDetailPage.seatingHeading}</h2>
+            <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{tr.venueDetailPage.seatingHeading}</h2>
             {venue.sections.length === 0 ? (
-              <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatingComingSoon}</p>
+              <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueDetailPage.seatingComingSoon}</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {venue.sections.map((s) => (
