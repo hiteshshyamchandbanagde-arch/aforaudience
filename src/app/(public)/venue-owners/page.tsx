@@ -146,10 +146,10 @@ export default function VenueOwnersPage() {
                     <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
                       {owner.bio || tr.venueOwnersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
                       {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersPage.venueSingular : tr.venueOwnersPage.venuePlural}
                     </div>
                   </div>

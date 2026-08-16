@@ -72,7 +72,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ background: "white", borderRadius: "12px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
-          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
+          <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
             {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
         </div>
@@ -95,8 +95,8 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
                   )}
                 </div>
                 <div style={{ padding: "14px 16px" }}>
-                  <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
-                  <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
+                  <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-ink)" }}>{v.name}</div>
+                  <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
                 </div>
               </Link>
             ))}

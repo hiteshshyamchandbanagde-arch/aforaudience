@@ -122,12 +122,12 @@ export default function VenueOwnersGridEmbed() {
                   displayName.charAt(0).toUpperCase()
                 )}
               </div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{displayName}</h2>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{displayName}</h2>
             </div>
-            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
+            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
               {owner.bio || tr.venueOwnersEmbed.noBioYet}
             </p>
-            <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
               {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersEmbed.venueSingular : tr.venueOwnersEmbed.venuePlural}
             </div>
           </div>
