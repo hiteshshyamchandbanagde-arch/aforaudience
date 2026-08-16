@@ -334,7 +334,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
           {tr.checkoutPage.loadingCheckout}
         </div>
       </>
@@ -345,7 +345,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 16 }}>
             {tr.checkoutPage.somethingWrongTitle}
           </h1>
@@ -403,6 +403,8 @@ export default function CheckoutPage() {
         <SiteNav />
         <main
           style={{
+            minHeight: '100vh',
+            background: 'var(--afa-surface-raised)',
             padding: '48px 24px',
             maxWidth: 560,
             margin: '0 auto',
@@ -504,7 +506,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.bookingCancelledTitle}
           </h1>
@@ -527,7 +529,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.reservationExpiredTitle}
           </h1>
@@ -558,7 +560,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.paymentsNotLiveTitle}
           </h1>
