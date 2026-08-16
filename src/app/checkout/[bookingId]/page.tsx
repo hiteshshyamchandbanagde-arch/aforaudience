@@ -584,6 +584,8 @@ export default function CheckoutPage() {
       <SiteNav backHref={`/events/${state.booking.event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
       <main
         style={{
+          minHeight: '100vh',
+          background: 'var(--afa-surface-raised)',
           padding: '32px 20px',
           maxWidth: 560,
           margin: '0 auto',
