@@ -710,6 +710,7 @@ const ta: Dictionary = {
     heroLine3: "தன் கூட்டத்தை",
     heroSubtitle: "உலகின் முதல் லைவ் கலை பிரபஞ்சம் — நகைச்சுவையாளர்கள், கவிஞர்கள், ஓபன் மைக் கலைஞர்கள், நிர்வாகிகள், மற்றும் இடங்களை ஒரே வாழும் சூழல் அமைப்பில் இணைக்கிறது.",
     ctaExploreEvents: "நிகழ்வுகளை ஆராயுங்கள்",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "நான் ஒரு கலைஞர் →",
     statArtists: "கலைஞர்கள்",
     statEventsMonthly: "மாதாந்திர நிகழ்வுகள்",

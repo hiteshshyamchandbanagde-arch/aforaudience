@@ -719,6 +719,7 @@ const de: Dictionary = {
     heroLine3: "Publikum findet",
     heroSubtitle: "Das weltweit erste Live-Kunst-Universum — vernetzt Comedians, Dichter, Open-Mic-Künstler, Veranstalter und Veranstaltungsorte in einem lebendigen Ökosystem.",
     ctaExploreEvents: "Events entdecken",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "Ich bin Künstler →",
     statArtists: "Künstler",
     statEventsMonthly: "Events pro Monat",
