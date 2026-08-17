@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import HomeHeader from "@/components/HomeHeader";
 import Hero from "@/components/Hero";
-import HowItWorksSection from "@/components/HowItWorksSection";
-import RolesSection from "@/components/RolesSection";
+import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
@@ -169,6 +168,8 @@ export default function Home() {
         </div>
       </section>
 
+      <FourRooms />
+
       <PlatformGrowthStrip />
 
       {/* TICKER */}
@@ -181,11 +182,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-      <HowItWorksSection />
-
-      <RolesSection />
-
 
       {/* FOOTER */}
       <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-inverse)", padding: "64px 48px 32px" }}>
