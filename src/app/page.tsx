@@ -1,9 +1,8 @@
 "use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import SiteNav from "@/components/SiteNav";
-import NearYouTabs from "@/components/NearYouTabs";
-import HeroRotator from "@/components/HeroRotator";
+import HomeHeader from "@/components/HomeHeader";
+import Hero from "@/components/Hero";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import RolesSection from "@/components/RolesSection";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
@@ -92,60 +91,15 @@ export default function Home() {
   return (
     <main className="min-h-screen" style={{ background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontFamily: "var(--font-display)" }}>
 
-      <SiteNav variant="home" />
+      <HomeHeader />
 
-      {/* HERO — Editorial Split, 3-up: headline + NearYouTabs + HeroRotator.
-          Third iteration this session (GEN-2608-032): started as headline +
-          TonightNearYou + static HeroRotator (PR #396/#400) -> swapped
-          HeroRotator for a data-driven ArtistsNearYou card (#405/#407/#408)
-          -> Hitesh then asked for events+artists combined into ONE panel
-          (this change), so TonightNearYou and ArtistsNearYou merged into
-          NearYouTabs (tabbed, full list per tab, not trimmed) and
-          HeroRotator moved back into the 3rd column as the visual media
-          showcase it always was - that's what "your performance, featured
-          here" actually meant (photos/video, not a text CTA - corrected
-          mid-session after initially misreading it as a link).
-          TonightNearYou.tsx and ArtistsNearYou.tsx left unused in the repo
-          rather than deleted, same as HeroRotator was earlier. */}
-      <section style={{ padding: "64px 0 0", position: "relative" }}>
-        {/* Subtle grain overlay - self-contained inline SVG noise, no
-            asset/network dependency. Flat color fields (even good ones)
-            read as "digital default" without any texture; a faint grain
-            is one of the cheapest ways to add tactile depth. Kept very
-            low-opacity so it's felt, not seen. */}
-        <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.035, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "multiply" }} />
-        <div style={{ maxWidth: "1360px", margin: "0 auto", display: "flex", alignItems: "stretch", flexWrap: "wrap" }}>
-          <div className="hero-fade-1" style={{ flex: "1.3 1 380px", padding: "40px 36px 56px", display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.12em", color: "var(--afa-gold, #8A5A1E)", textTransform: "uppercase", marginBottom: "20px" }}>
-              {tr.homePage.heroIssueTag}
-            </div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4.4vw, 60px)", fontWeight: 700, lineHeight: 0.98, letterSpacing: "-1px", color: "var(--afa-text-primary)", marginBottom: "10px" }}>
-              {tr.homePage.heroLine1Prefix}{tr.homePage.heroLine1Emphasis}<br />{tr.homePage.heroLine2}<em style={{ fontStyle: "italic", fontWeight: 500, color: "var(--afa-fill-solid)" }}>{tr.homePage.heroLine3}</em>
-            </h1>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.65, maxWidth: "340px", lineHeight: 1.65, margin: "22px 0", paddingLeft: "16px", borderLeft: "3px solid var(--afa-terracotta)", fontFamily: "var(--font-sans)" }}>
-              {tr.homePage.heroSubtitle}
-            </p>
-            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-              <Link href="/events" style={{ background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 700, textDecoration: "none", fontFamily: "var(--font-sans)" }}>
-                {tr.homePage.ctaExploreEvents}
-              </Link>
-              <Link href="/profile" style={{ background: "transparent", color: "var(--afa-text-primary)", padding: "14px 26px", borderRadius: "6px", fontSize: "14px", fontWeight: 500, textDecoration: "none", border: "1.5px solid rgba(245,245,240,0.2)", fontFamily: "var(--font-sans)" }}>
-                {tr.homePage.ctaImArtist}
-              </Link>
-            </div>
-          </div>
+      <Hero />
 
-          <div className="hero-fade-2" style={{ flex: "0.9 1 300px", padding: "40px 20px", display: "flex", alignItems: "stretch" }}>
-            <NearYouTabs />
-          </div>
-
-          <div className="hero-fade-3" style={{ flex: "0.9 1 300px", padding: "40px 20px" }}>
-            <HeroRotator />
-          </div>
-        </div>
-      </section>
-
-      {/* HAPPENING SOON — bento mosaic (V2 spec) */}
+      {/* HAPPENING SOON — bento mosaic (V2 spec). Sits directly below the
+          "Four rooms, one house" hero (design.md, 17 Aug) now instead of
+          the bento hero it used to pair with visually - kept in place per
+          brief (out of scope to redesign here), may read as a slightly
+          disconnected transition until it's folded into a later pass. */}
       {bentoEvents.length > 0 && (
         <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "24px 36px 56px" }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "20px" }}>
@@ -293,18 +247,6 @@ export default function Home() {
         @keyframes ticker {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-50%, 0, 0); }
-        }
-        @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(14px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .hero-fade-1, .hero-fade-2, .hero-fade-3 {
-          animation: heroFadeUp 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .hero-fade-2 { animation-delay: 120ms; }
-        .hero-fade-3 { animation-delay: 220ms; }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-fade-1, .hero-fade-2, .hero-fade-3 { animation: none; }
         }
       `}</style>
     </main>

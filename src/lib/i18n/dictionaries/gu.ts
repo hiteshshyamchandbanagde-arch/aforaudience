@@ -710,6 +710,7 @@ const gu: Dictionary = {
     heroLine3: "તેની ભીડ",
     heroSubtitle: "વિશ્વનું પ્રથમ લાઇવ આર્ટ યુનિવર્સ — કોમેડિયન્સ, કવિઓ, ઓપન માઇક કલાકારો, આયોજકો, અને સ્થળોને એક જીવંત ઇકોસિસ્ટમમાં જોડે છે.",
     ctaExploreEvents: "ઇવેન્ટ્સ અન્વેષણ કરો",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "હું એક કલાકાર છું →",
     statArtists: "કલાકારો",
     statEventsMonthly: "માસિક ઇવેન્ટ્સ",

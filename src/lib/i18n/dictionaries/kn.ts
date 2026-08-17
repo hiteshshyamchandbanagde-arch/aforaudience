@@ -710,6 +710,7 @@ const kn: Dictionary = {
     heroLine3: "ತನ್ನ ಗುಂಪನ್ನು",
     heroSubtitle: "ಪ್ರಪಂಚದ ಮೊದಲ ಲೈವ್ ಆರ್ಟ್ ಯೂನಿವರ್ಸ್ — ಹಾಸ್ಯ ಕಲಾವಿದರು, ಕವಿಗಳು, ಓಪನ್ ಮೈಕ್ ಕಲಾವಿದರು, ಆಯೋಜಕರು, ಮತ್ತು ಸ್ಥಳಗಳನ್ನು ಒಂದೇ ಜೀವಂತ ಪರಿಸರ ವ್ಯವಸ್ಥೆಯಲ್ಲಿ ಸಂಪರ್ಕಿಸುತ್ತದೆ.",
     ctaExploreEvents: "ಈವೆಂಟ್‌ಗಳನ್ನು ಅನ್ವೇಷಿಸಿ",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "ನಾನೊಬ್ಬ ಕಲಾವಿದ →",
     statArtists: "ಕಲಾವಿದರು",
     statEventsMonthly: "ಮಾಸಿಕ ಈವೆಂಟ್‌ಗಳು",

@@ -715,6 +715,7 @@ const fr: Dictionary = {
     heroLine3: "son public",
     heroSubtitle: "Le tout premier univers de l'art vivant au monde — connectant humoristes, poètes, artistes de scène ouverte, organisateurs et lieux dans un écosystème vivant unique.",
     ctaExploreEvents: "Explorer les événements",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "Je suis artiste →",
     statArtists: "Artistes",
     statEventsMonthly: "Événements par mois",

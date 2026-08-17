@@ -710,6 +710,7 @@ const te: Dictionary = {
     heroLine3: "తన సందడిని",
     heroSubtitle: "ప్రపంచంలోని మొట్టమొదటి లైవ్ ఆర్ట్ యూనివర్స్ — కమెడియన్లు, కవులు, ఓపెన్ మైక్ కళాకారులు, నిర్వాహకులు మరియు వేదికలను ఒకే జీవన పర్యావరణ వ్యవస్థలో కలుపుతుంది.",
     ctaExploreEvents: "ఈవెంట్‌లను అన్వేషించండి",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "నేను ఒక కళాకారుడిని →",
     statArtists: "కళాకారులు",
     statEventsMonthly: "నెలవారీ ఈవెంట్‌లు",

@@ -710,6 +710,7 @@ const bn: Dictionary = {
     heroLine3: "তার ভিড়",
     heroSubtitle: "বিশ্বের প্রথম লাইভ আর্ট ইউনিভার্স — কমেডিয়ান, কবি, ওপেন মাইক শিল্পী, আয়োজক এবং ভেন্যুগুলিকে একটি জীবন্ত ইকোসিস্টেমে সংযুক্ত করে।",
     ctaExploreEvents: "ইভেন্ট অন্বেষণ করুন",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "আমি একজন শিল্পী →",
     statArtists: "শিল্পী",
     statEventsMonthly: "মাসিক ইভেন্ট",

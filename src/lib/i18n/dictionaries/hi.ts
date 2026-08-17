@@ -709,6 +709,7 @@ const hi: Dictionary = {
     heroLine3: "अपनी भीड़",
     heroSubtitle: "यह दुनिया का पहला लाइव आर्ट यूनिवर्स है — जो कॉमेडियन, कवि, ओपन माइक कलाकार, आयोजकों और स्थलों को एक जीवंत इकोसिस्टम में जोड़ता है।",
     ctaExploreEvents: "इवेंट्स देखें",
+    ctaFindTonightsShow: "Find tonight's show",
     ctaImArtist: "मैं एक कलाकार हूं →",
     statArtists: "कलाकार",
     statEventsMonthly: "मासिक इवेंट्स",
