@@ -731,6 +731,7 @@ const es: Dictionary = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "Arte en vivo, momentos reales",
     heroInlineCtaPrefix: "Empieza con ",
     heroInlineCtaLink: "los espectáculos de esta noche →",

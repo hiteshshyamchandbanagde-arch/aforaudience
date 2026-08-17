@@ -727,6 +727,7 @@ const gu: Dictionary = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "લાઇવ કલા, વાસ્તવિક ક્ષણો",
     heroInlineCtaPrefix: "તેની સાથે શરૂ કરો ",
     heroInlineCtaLink: "આજ રાત્રિના શો →",

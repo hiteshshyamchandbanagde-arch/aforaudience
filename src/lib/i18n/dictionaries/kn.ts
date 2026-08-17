@@ -727,6 +727,7 @@ const kn: Dictionary = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "ಲೈವ್ ಕಲೆ, ನೈಜ ಕ್ಷಣಗಳು",
     heroInlineCtaPrefix: "ಇದರೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸಿ ",
     heroInlineCtaLink: "ಇಂದು ರಾತ್ರಿಯ ಶೋಗಳು →",

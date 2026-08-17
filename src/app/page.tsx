@@ -69,8 +69,6 @@ function FeeRow({ label, value, accent, muted, bold }: { label: string; value: s
 
 export default function Home() {
   const { t: tr } = useLocale()
-  const TICKER_UNIQUE_ITEMS = [tr.homePage.tickerOpenMicMumbai, tr.homePage.tickerPoetryDelhi, tr.homePage.tickerStandUpBangalore, tr.homePage.tickerTheaterPune, tr.homePage.tickerOpenMicHyderabad, tr.homePage.tickerComedyChennai, tr.homePage.tickerSpokenWordKolkata]
-  const tickerItems = [...TICKER_UNIQUE_ITEMS, ...TICKER_UNIQUE_ITEMS]
 
   // "Happening soon" bento mosaic (V2 spec) - top 4 upcoming events across
   // all cities. Same /api/events call the events listing page already
@@ -142,6 +140,9 @@ export default function Home() {
             <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "22px", lineHeight: 1.35, color: "var(--afa-text-primary)", margin: 0 }}>
               {tr.homePage.feePromiseHeadline}
             </p>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", lineHeight: 1.6, color: "rgba(245,245,240,0.5)", borderLeft: "2px solid rgba(201,151,58,0.5)", paddingLeft: "16px", marginTop: "20px", maxWidth: "420px" }}>
+              {tr.homePage.feeTaxDisclaimer}
+            </p>
             <div style={{ display: "flex", gap: "32px", marginTop: "24px" }}>
               <div>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "32px", color: "var(--afa-fill-solid)" }}>0%</div>
@@ -171,17 +172,6 @@ export default function Home() {
       <FourRooms />
 
       <PlatformGrowthStrip />
-
-      {/* TICKER */}
-      <div style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-inverse)", padding: "14px 0", overflow: "hidden", borderTop: "2px solid var(--afa-terracotta)" }}>
-        <div style={{ display: "flex", gap: "0", whiteSpace: "nowrap", animation: "ticker 28s linear infinite", willChange: "transform", backfaceVisibility: "hidden" }}>
-          {tickerItems.map((item, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "16px", padding: "0 32px", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
-              <span style={{ color: "var(--afa-terracotta)" }}>◆</span> {item}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* FOOTER */}
       <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-inverse)", padding: "64px 48px 32px" }}>
@@ -238,13 +228,6 @@ export default function Home() {
           <span>{tr.homePage.footerMadeWith}</span>
         </div>
       </footer>
-
-      <style>{`
-        @keyframes ticker {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(-50%, 0, 0); }
-        }
-      `}</style>
     </main>
   );
 }

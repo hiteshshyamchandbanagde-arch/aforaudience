@@ -727,6 +727,7 @@ const te: Dictionary = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "లైవ్ కళ, నిజమైన క్షణాలు",
     heroInlineCtaPrefix: "తో ప్రారంభించండి ",
     heroInlineCtaLink: "ఈరోజు రాత్రి షోలు →",
