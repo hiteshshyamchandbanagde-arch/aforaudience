@@ -727,6 +727,7 @@ const ml: Dictionary = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "ലൈവ് കല, യഥാർത്ഥ നിമിഷങ്ങൾ",
     heroInlineCtaPrefix: "ഇതിലൂടെ ആരംഭിക്കുക ",
     heroInlineCtaLink: "ഇന്നത്തെ രാത്രി ഷോകൾ →",

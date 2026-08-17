@@ -758,6 +758,7 @@ const en = {
     feeHiddenFeesLabel: "Hidden fees",
     feeBookingFeeLabel: "Booking fee",
     feeYouPayLabel: "You pay",
+    feeTaxDisclaimer: "AFA takes 0% commission. Government taxes, where applicable, are separate and shown before you pay.",
     heroIssueTag: "Live, right now — six cities and counting",
     heroInlineCtaPrefix: "Start with ",
     heroInlineCtaLink: "tonight's shows →",
