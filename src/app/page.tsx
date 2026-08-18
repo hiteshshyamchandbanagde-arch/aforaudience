@@ -5,6 +5,7 @@ import HomeHeader from "@/components/HomeHeader";
 import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
+import Ledger from "@/components/Ledger";
 import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
@@ -54,16 +55,6 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         </div>
       </div>
     </Link>
-  )
-}
-
-function FeeRow({ label, value, accent, muted, bold }: { label: string; value: string; accent?: boolean; muted?: boolean; bold?: boolean }) {
-  const color = accent ? "var(--afa-fill-solid)" : muted ? "rgba(245,245,240,0.5)" : "var(--afa-text-primary)"
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", gap: "24px", padding: "4px 0" }}>
-      <span style={{ color: "rgba(245,245,240,0.6)" }}>{label}</span>
-      <span style={{ color, fontWeight: bold ? 700 : 400 }}>{value}</span>
-    </div>
   )
 }
 
@@ -130,62 +121,12 @@ export default function Home() {
         </section>
       )}
 
-      {/* ZERO-COMMISSION PROMISE (V2 spec) */}
+      {/* ZERO-COMMISSION PROMISE (V2 spec) - Ledger extracted to
+          src/components/Ledger.tsx (GEN-2608-072) so the Artist landing
+          page's expanded "honest money" section reuses the same stat
+          cards/breakdown/disclaimer instead of a parallel copy. */}
       <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "0 36px 56px" }}>
-        <style>{`
-          .ledger-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
-          .ledger-stats { flex-wrap: wrap; }
-          @media (max-width: 700px) {
-            .ledger-grid { grid-template-columns: 1fr; }
-          }
-        `}</style>
-        {/* BUG-2608-070 fix: this was a CSS grid with two fixed fr-unit
-            columns and no mobile breakpoint at all - on narrow viewports
-            both columns squeezed side by side instead of stacking, and
-            the inner stat row (0%/Hidden fees/100%) didn't wrap either,
-            so it overflowed into the price-breakdown card's column,
-            reading as a broken overlap. The inline flexWrap:"wrap" that
-            used to sit on this grid container was always a no-op -
-            flex-wrap has no effect on a grid container - a leftover from
-            before this became a grid. Moved grid-template-columns and the
-            stat row's flex-wrap into a scoped class so a real media query
-            can stack them below 700px, matching the codebase's existing
-            @media (max-width: 900px) convention (HomeHeader.tsx). */}
-        <div className="ledger-grid" style={{ gap: "32px", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "36px" }}>
-          <div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "12px" }}>
-              {tr.homePage.feePromiseEyebrow}
-            </div>
-            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "22px", lineHeight: 1.35, color: "var(--afa-text-primary)", margin: 0 }}>
-              {tr.homePage.feePromiseHeadline}
-            </p>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", lineHeight: 1.6, color: "rgba(245,245,240,0.5)", borderLeft: "2px solid rgba(201,151,58,0.5)", paddingLeft: "16px", marginTop: "20px", maxWidth: "420px" }}>
-              {tr.homePage.feeTaxDisclaimer}
-            </p>
-            <div className="ledger-stats" style={{ display: "flex", gap: "32px", marginTop: "24px" }}>
-              <div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "32px", color: "var(--afa-fill-solid)" }}>0%</div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeCommissionLabel}</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "32px", color: "var(--afa-fill-solid)" }}>0%</div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeHiddenFeesLabel}</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "32px", color: "var(--afa-fill-solid)" }}>100%</div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeArtistVenueShareLabel}</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "12px", padding: "20px", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
-            <FeeRow label={tr.homePage.feeBaseLabel} value="₹500" />
-            <FeeRow label={tr.homePage.feeArtistVenueShareLabel} value="100%" accent />
-            <FeeRow label={tr.homePage.feeCommissionLabel} value="₹0" accent />
-            <div style={{ height: "1px", background: "rgba(245,245,240,0.1)", margin: "10px 0" }} />
-            <FeeRow label={tr.homePage.feeBookingFeeLabel} value="₹30" muted />
-            <FeeRow label={tr.homePage.feeYouPayLabel} value="₹530" bold />
-          </div>
-        </div>
+        <Ledger eyebrow={tr.homePage.feePromiseEyebrow} headline={tr.homePage.feePromiseHeadline} />
       </section>
 
       <FourRooms />

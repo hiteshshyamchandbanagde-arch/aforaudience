@@ -880,6 +880,36 @@ const en = {
     ctaJoinArtist: "Join as Artist",
   },
 
+  // GEN-2608-072 (18 Aug) - Artist landing page ("The Stage"), page 1 of 3
+  // in the role-landing-pages build (Artist / Organiser / Venue Owner).
+  // Reuses fourRoomsStage* (name/promise/steps/cta) for the hero and
+  // journey step titles rather than inventing new voice - only the
+  // page-specific expansion copy below is new.
+  forArtistsPage: {
+    moneyEyebrow: "Honest money, always",
+    moneyHeadline: "The base price you agree to with the organiser is exactly what lands in your account. AforAudience never takes a cut — not from your fee, not from your Buy-in, not ever.",
+    moneyPayoutTiming: "Payouts settle 7 days after your event date, straight to your account. Whether your slot is Free, Paid, or Buy-in, the same rule applies: 0% platform commission on the base amount, every time.",
+    journeyEyebrow: "How it works, in full",
+    journeyHeading: "Four steps, no surprises.",
+    journeyStep1Detail: "Browse open events across AforAudience's cities and apply to the nights that actually fit your act. The organiser sees your profile, genre, and any clips you've added before deciding.",
+    journeyStep2Detail: "Once the organiser approves your application, your slot is locked in — Free, Paid, or Buy-in, exactly as listed. You know the compensation before you ever say yes.",
+    journeyStep3Detail: "Show up, play your set, and let the room do the rest. What's listed is what happens — no clauses that surface after you've already committed.",
+    journeyStep4Detail: "Payouts settle 7 days after the event date, straight to your account. AforAudience takes 0% commission on your fee or Buy-in — the number you agreed to is the number you get.",
+    faqEyebrow: "Questions, answered",
+    faqHeading: "Before you apply",
+    faqQ1: "When do I actually get paid?",
+    faqA1: "7 days after your event date. Payouts go straight to your account — AforAudience never holds your fee past that window, and never takes a commission on the base amount.",
+    faqQ2: "What do I need before I can apply?",
+    faqA2: "A verified AforAudience account. Email verification is required before you can apply to perform or receive a payout — it's a quick one-time step, not a background check.",
+    faqQ3: "Can I set my own rate?",
+    faqA3: "The organiser sets the fee or Buy-in amount when they list the event, and you see the exact number before you apply — no negotiating blind, no surprise deduction after you've already said yes.",
+    faqQ4: "What happens if I need to cancel?",
+    faqA4: "Cancel any time up to 24 hours before the event, no penalty — a cancelled Buy-in is refunded automatically, so you're never punished for cancelling in time. Inside that 24-hour window, cancellation isn't allowed, no exceptions.",
+    finalCtaEyebrow: "Ready when you are",
+    finalCtaHeading: "Take the stage.",
+    finalCtaSubtitle: "Join the artists already performing, getting paid in full, on their own terms.",
+  },
+
   // FEAT-2608-045 (11 Aug) - checklist labels keyed to match
   // EVENT_TERMS_CHECKLIST in src/lib/event-terms.ts. Kept separate from
   // eventDetailPage since the same keys are also read on the organiser

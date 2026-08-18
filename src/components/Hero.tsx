@@ -1,60 +1,23 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
-import Photo from "@/components/Photo"
-import { type EventItem } from "@/components/EventCard"
+import PhotoCrossfadeBackdrop from "@/components/PhotoCrossfadeBackdrop"
+import PhotoRotationDots from "@/components/PhotoRotationDots"
+import { usePhotoRotation } from "@/hooks/usePhotoRotation"
 import { useLocale } from "@/lib/i18n/translate"
-
-const ROTATE_MS = 9000
-const MAX_HERO_PHOTOS = 6
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const onChange = () => setReduced(mq.matches)
-    onChange()
-    mq.addEventListener("change", onChange)
-    return () => mq.removeEventListener("change", onChange)
-  }, [])
-  return reduced
-}
 
 /**
  * Full-bleed hero, per design.md "Four rooms, one house" (17 Aug) -
  * replaces the "Homepage V2" bento hero from PR #488 entirely. Crossfades
  * through real upcoming-show photography (not the Figma reference's
  * hardcoded Unsplash placeholders) via the shared Photo duotone
- * component, same /api/events call + "still showing tonight" cutoff the
- * "Happening Soon" bento section below already uses.
+ * component. Rotation/fetch/pause logic lives in usePhotoRotation
+ * (extracted GEN-2608-072) so the Artist landing page's hero reuses it
+ * instead of duplicating the crossfade mechanics.
  */
 export default function Hero() {
   const { t: tr } = useLocale()
-  const reduced = usePrefersReducedMotion()
-  const [photos, setPhotos] = useState<{ src: string; alt: string }[]>([])
-  const [active, setActive] = useState(0)
-  const [paused, setPaused] = useState(false)
-
-  useEffect(() => {
-    fetch("/api/events")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: EventItem[]) => {
-        const now = Date.now() - 24 * 60 * 60 * 1000
-        const upcoming = data
-          .filter((e) => e.posterImage && new Date(e.date).getTime() >= now)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(0, MAX_HERO_PHOTOS)
-        setPhotos(upcoming.map((e) => ({ src: e.posterImage as string, alt: e.title })))
-      })
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    if (reduced || paused || photos.length < 2) return
-    const id = setInterval(() => setActive((a) => (a + 1) % photos.length), ROTATE_MS)
-    return () => clearInterval(id)
-  }, [reduced, paused, photos.length])
+  const { photos, active, setActive, paused, setPaused, reduced } = usePhotoRotation()
 
   return (
     <section
@@ -64,32 +27,7 @@ export default function Hero() {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div style={{ position: "absolute", inset: 0 }}>
-        {photos.length > 0 ? (
-          photos.map((photo, i) => (
-            <div key={photo.src} style={{ position: "absolute", inset: 0, opacity: i === active ? 1 : 0, transition: "opacity 1600ms ease-in-out" }}>
-              <Photo src={photo.src} alt={photo.alt} />
-            </div>
-          ))
-        ) : (
-          // No upcoming event has a posterImage yet (confirmed against live
-          // QA data) - a textured stand-in instead of flat
-          // --afa-surface-inverse, so the hero doesn't read as broken/empty
-          // while there's nothing to rotate. Palette-only: --afa-ink,
-          // --afa-surface-inverse, --afa-amber (#C9973A, same literal hex
-          // Photo.tsx already uses where an alpha-blended value is needed).
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "radial-gradient(140% 140% at 18% 0%, var(--afa-ink) 0%, var(--afa-surface-inverse) 60%), linear-gradient(135deg, rgba(201,151,58,0.08) 0%, rgba(201,151,58,0) 50%)",
-            }}
-          />
-        )}
-        <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, var(--afa-surface-inverse) 5%, rgba(10,10,10,0.45) 45%, rgba(10,10,10,0.7) 100%)" }} />
-        <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(10,10,10,0.85), rgba(10,10,10,0) 55%)" }} />
-      </div>
+      <PhotoCrossfadeBackdrop photos={photos} active={active} />
 
       <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "100svh", padding: "128px 24px 72px" }}>
         <div style={{ maxWidth: "760px" }}>
@@ -125,34 +63,12 @@ export default function Hero() {
           </div>
         </div>
 
-        {photos.length > 1 && (
-          <div style={{ marginTop: "56px", display: "flex", alignItems: "center", gap: "10px" }}>
-            {photos.map((photo, i) => (
-              <button
-                key={photo.src}
-                aria-label={`Photo ${i + 1} of ${photos.length}`}
-                onClick={() => setActive(i)}
-                style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "999px", overflow: "hidden", border: "none", padding: 0, cursor: "pointer", transition: "width 0.3s ease", background: "rgba(245,245,240,0.25)" }}
-              >
-                {i === active && !reduced && !paused && (
-                  <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />
-                )}
-                {i === active && (reduced || paused) && (
-                  <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)" }} />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+        <PhotoRotationDots photos={photos} active={active} setActive={setActive} paused={paused} reduced={reduced} />
       </div>
 
       <style>{`
         @keyframes heroPing {
           75%, 100% { transform: scale(2.4); opacity: 0; }
-        }
-        @keyframes heroDrawLine {
-          from { transform: scaleX(0); }
-          to { transform: scaleX(1); }
         }
       `}</style>
     </section>
