@@ -393,6 +393,7 @@ const gu: Dictionary = {
     emptyNoneFoundSub: "તમારા ફિલ્ટર્સ બદલીને પ્રયાસ કરો",
     genreNotSet: "શૈલી સેટ કરી નથી",
     showsLabel: "શો",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "સ્થળ મળ્યું નથી.",

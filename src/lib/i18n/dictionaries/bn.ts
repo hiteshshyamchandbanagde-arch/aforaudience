@@ -393,6 +393,7 @@ const bn: Dictionary = {
     emptyNoneFoundSub: "আপনার ফিল্টার পরিবর্তন করে চেষ্টা করুন",
     genreNotSet: "ধরন সেট করা হয়নি",
     showsLabel: "শো",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "ভেন্যু পাওয়া যায়নি।",

@@ -414,6 +414,7 @@ const en = {
     emptyNoneFoundSub: "Try adjusting your filters",
     genreNotSet: "Genre not set",
     showsLabel: "Shows",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "Venue not found.",

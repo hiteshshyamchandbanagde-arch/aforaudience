@@ -393,6 +393,7 @@ const kn: Dictionary = {
     emptyNoneFoundSub: "ನಿಮ್ಮ ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ ಪ್ರಯತ್ನಿಸಿ",
     genreNotSet: "ಪ್ರಕಾರ ಹೊಂದಿಸಲಾಗಿಲ್ಲ",
     showsLabel: "ಶೋಗಳು",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "ಸ್ಥಳ ಕಂಡುಬಂದಿಲ್ಲ.",

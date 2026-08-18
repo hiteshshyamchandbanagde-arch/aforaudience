@@ -392,6 +392,7 @@ const hi: Dictionary = {
     emptyNoneFoundSub: "अपने फ़िल्टर बदलकर देखें",
     genreNotSet: "शैली सेट नहीं है",
     showsLabel: "शो",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "स्थल नहीं मिला।",

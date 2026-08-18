@@ -3,8 +3,11 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
-import { isPlaceholderImageUrl, monogramTone } from "@/lib/placeholder-image"
+import Photo from "@/components/Photo"
+import ArtistNoPhoto from "@/components/ArtistNoPhoto"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
+import { SearchIcon, SparkIcon, ArrowIcon } from "@/components/icons/ArtistIcons"
 
 type SceneStatusTier = "NEW_EMERGING" | "RISING" | "FEATURED" | "HEADLINER"
 
@@ -24,9 +27,9 @@ interface ArtistItem {
 // when deciding who to book/see get a card indicator; RISING is a softer
 // signal that reads fine as a badge on one artist's own profile but as
 // noise across a whole grid, so it's intentionally left off cards.
-const CARD_BADGE: Partial<Record<SceneStatusTier, { label: string; bg: string; color: string }>> = {
-  HEADLINER: { label: "★ Headliner", bg: "var(--afa-gold)", color: "var(--afa-plum-black)" },
-  FEATURED: { label: "Featured", bg: "rgba(255,255,255,0.14)", color: "var(--afa-gold)" },
+const CARD_BADGE: Partial<Record<SceneStatusTier, { label: string; bg: string; color: string; border?: string }>> = {
+  HEADLINER: { label: "★ Headliner", bg: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)" },
+  FEATURED: { label: "Featured", bg: "rgba(201,151,58,0.18)", color: "var(--afa-amber)", border: "1px solid var(--afa-amber)" },
 }
 
 const SCENE_STATUS_RANK: Record<SceneStatusTier, number> = {
@@ -93,8 +96,8 @@ export default function ArtistsPage() {
         const data = await artistsRes.json()
         setArtists(data)
         if (genresRes.ok) setApprovedGenres((await genresRes.json()).genres)
-      } catch (err: any) {
-        setError(err.message)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load artists")
       } finally {
         setLoading(false)
       }
@@ -131,21 +134,32 @@ export default function ArtistsPage() {
         })[0]
       : null
 
+  const risingStarPortraitUrl =
+    risingStar?.user.avatar && !isPlaceholderImageUrl(risingStar.user.avatar) ? risingStar.user.avatar : null
+
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "var(--font-sans)" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        @keyframes afa-spin { to { transform: rotate(360deg); } }
+        .afa-artist-card { transition: transform 0.25s ease, border-color 0.25s ease; }
+        .afa-artist-card:hover, .afa-artist-card:focus-visible { transform: translateY(-3px); border-color: rgba(201,151,58,0.45) !important; outline: none; }
+        .afa-genre-filter { position: relative; padding-bottom: 4px; background: none; border: none; cursor: pointer; }
+        .afa-genre-filter::after { content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%; background: var(--afa-amber); opacity: 0.5; transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
+        .afa-genre-filter:hover::after { transform: scaleX(1); }
+        .afa-cta-solid { transition: filter 0.15s ease; }
+        .afa-cta-solid:hover { filter: brightness(1.1); }
+        .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
+      `}</style>
       <SiteNav active="artists" />
 
-      {/* HERO - font tokens brought in line with the homepage's actual
-          Newsreader/Manrope/IBM Plex Mono setup (FEAT-2608-044); this
-          page was still hardcoded to Georgia/system-ui, the exact
-          "inconsistent typography" gap named in BUG-2607-036. */}
+      {/* HERO */}
       <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px", position: "relative", overflow: "hidden" }}>
         <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.04, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", position: "relative" }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic", fontWeight: 500 }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "8px", lineHeight: 1.1 }}>
+            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 500 }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
           </div>
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "16px", color: "rgba(245,245,240,0.5)", marginBottom: "32px" }}>
             {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.countPerforming.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
@@ -162,55 +176,83 @@ export default function ArtistsPage() {
               </>
             )}
           >
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={tr.artistsPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", fontFamily: "var(--font-sans)", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
-            />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
+            <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "10px", boxSizing: "border-box" }}>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={tr.artistsPage.searchPlaceholder}
+                style={{ flex: 1, padding: "18px 12px 18px 20px", border: "none", background: "transparent", fontSize: "16px", fontFamily: "var(--font-sans)", color: "var(--afa-cream)", outline: "none" }}
+              />
+              <SearchIcon style={{ width: "18px", height: "18px", marginRight: "20px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
+            </div>
           </BrowseSearchDropdown>
         </div>
       </div>
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginBottom: "24px" }}>
             {error}
           </div>
         )}
 
-        {/* FILTERS */}
-        <div style={{ background: "white", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-            {["All", ...genres].map((g) => (
-              <button
-                key={g}
-                onClick={() => setSelectedGenre(g)}
-                style={{ padding: "7px 14px", borderRadius: "99px", border: `1.5px solid ${selectedGenre === g ? "var(--afa-terracotta)" : "rgba(14,12,10,0.12)"}`, background: selectedGenre === g ? "var(--afa-terracotta)" : "transparent", color: selectedGenre === g ? "white" : "var(--afa-ink)", fontSize: "13px", fontWeight: 500, fontFamily: "var(--font-sans)", cursor: "pointer" }}
-              >
-                {g === "All" ? tr.artistsPage.filterAll : g}
-              </button>
-            ))}
-          </div>
+        {/* FILTERS - editorial underline row, not pill-chip buttons */}
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "baseline", marginBottom: "24px", borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "18px" }}>
+          {["All", ...genres].map((g) => (
+            <button
+              key={g}
+              onClick={() => setSelectedGenre(g)}
+              className="afa-genre-filter"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontStyle: "italic",
+                fontSize: "16px",
+                color: selectedGenre === g ? "var(--afa-cream)" : "rgba(245,245,240,0.4)",
+              }}
+            >
+              {g === "All" ? tr.artistsPage.filterAll : g}
+              {selectedGenre === g && (
+                <span style={{ position: "absolute", left: 0, bottom: 0, height: "1px", width: "100%", background: "var(--afa-fill-solid)" }} />
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* RISING STAR */}
+        {/* FEATURED / RISING STAR */}
         {risingStar && (
-          <div style={{ background: "linear-gradient(135deg, var(--afa-maroon-black), var(--afa-terracotta))", borderRadius: "16px", padding: "24px 32px", marginBottom: "24px", display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "56px" }}>🌟</div>
-            <div style={{ flex: 1, minWidth: "200px" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "4px" }}>{tr.artistsPage.topArtistNow}</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "white", marginBottom: "4px" }}>{risingStar.user.displayName || risingStar.user.name}</div>
-              <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(255,255,255,0.65)" }}>{risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</div>
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
+            <div style={{ position: "relative", minHeight: "260px" }}>
+              {risingStarPortraitUrl ? (
+                <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} />
+              ) : (
+                <ArtistNoPhoto name={risingStar.user.displayName || risingStar.user.name} genres={risingStar.genre} size="card" />
+              )}
+              <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <SparkIcon style={{ width: "16px", height: "16px", color: "var(--afa-fill-solid)" }} />
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-cream)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
+                  {tr.artistsPage.topArtistNow}
+                </span>
+              </div>
             </div>
-            <button
-              onClick={() => goToArtist(risingStar.id)}
-              disabled={!!navigatingId}
-              style={{ background: "white", color: "var(--afa-terracotta)", padding: "12px 24px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-sans)", border: "none", cursor: navigatingId ? "default" : "pointer", whiteSpace: "nowrap", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
-            >
-              {navigatingId === risingStar.id ? tr.artistsPage.loadingEllipsis : tr.artistsPage.viewProfile}
-            </button>
+            <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "16px" }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-cream)", marginBottom: "6px" }}>
+                  {risingStar.user.displayName || risingStar.user.name}
+                </div>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(245,245,240,0.6)" }}>
+                  {risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}
+                </div>
+              </div>
+              <button
+                onClick={() => goToArtist(risingStar.id)}
+                disabled={!!navigatingId}
+                className="afa-cta-solid"
+                style={{ display: "inline-flex", alignItems: "center", gap: "8px", width: "fit-content", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "999px", fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-sans)", border: "none", cursor: navigatingId ? "default" : "pointer", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
+              >
+                {navigatingId === risingStar.id ? tr.artistsPage.loadingEllipsis : tr.artistsPage.viewProfile}
+                <ArrowIcon style={{ width: "14px", height: "14px" }} />
+              </button>
+            </div>
           </div>
         )}
 
@@ -219,7 +261,7 @@ export default function ArtistsPage() {
           <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5, fontFamily: "var(--font-sans)" }}>{tr.artistsPage.loadingArtists}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎤</div>
+            <SearchIcon style={{ width: "32px", height: "32px", color: "var(--afa-amber)", marginBottom: "16px" }} />
             <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
             </div>
@@ -236,7 +278,7 @@ export default function ArtistsPage() {
               // a GitHub avatars URL as their avatar (dev/test filler,
               // not a photo) - shown live as Sai Jain's "portrait" being
               // literally the GitHub mascot. isPlaceholderImageUrl treats
-              // these as no-photo so they fall through to the monogram.
+              // these as no-photo so they fall through to the fallback.
               const portraitUrl = artist.user.avatar && !isPlaceholderImageUrl(artist.user.avatar) ? artist.user.avatar : null
               return (
                 <div
@@ -251,16 +293,16 @@ export default function ArtistsPage() {
                       goToArtist(artist.id)
                     }
                   }}
-                  className="hover-lift-card afa-focusable"
+                  className="afa-artist-card"
                   style={{
-                    background: "white",
+                    background: "var(--afa-surface-raised)",
                     borderRadius: "10px",
                     overflow: "hidden",
-                    border: "1px solid rgba(245,245,240,0.08)",
+                    border: "1px solid rgba(245,245,240,0.1)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
-                    transition: "opacity 0.15s ease",
+                    transition: "opacity 0.15s ease, transform 0.25s ease, border-color 0.25s ease",
                   }}
                 >
                   {isNavigatingThis && (
@@ -269,7 +311,7 @@ export default function ArtistsPage() {
                         position: "absolute",
                         inset: 0,
                         zIndex: 2,
-                        background: "rgba(255,255,255,0.7)",
+                        background: "rgba(10,10,10,0.7)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -281,38 +323,31 @@ export default function ArtistsPage() {
                           height: "28px",
                           borderRadius: "50%",
                           border: "3px solid rgba(245,245,240,0.15)",
-                          borderTopColor: "var(--afa-terracotta)",
+                          borderTopColor: "var(--afa-fill-solid)",
                           animation: "afa-spin 0.7s linear infinite",
                         }}
                       />
-                      <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   )}
 
-                  {/* PORTRAIT - user.avatar was previously shrunk into a
-                      72px circle inside a plum-black header strip. 301 of
-                      401 QA avatars are real uploaded photos, promoted to
-                      a full portrait (same photo-first grammar as the
-                      redesigned venue card) with the badge overlaid via
-                      the photo instead of a header bar. The other 100 are
-                      a GitHub avatars URL (dev/test filler) -
-                      isPlaceholderImageUrl above filters those out so
-                      they fall back to the monogram rather than showing
-                      the GitHub mascot as someone's portrait. Also true
-                      for 100% of no-avatar artists in QA - monogramTone
-                      rotates through the same dark-tone palette as the
-                      venue card so a grid of fallbacks stays varied. */}
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: portraitUrl ? "var(--afa-plum-black)" : monogramTone(artist.id), overflow: "hidden" }}>
+                  {/* PORTRAIT - real photos go through Photo.tsx's amber
+                      duotone treatment; no-photo artists get the
+                      genre-relevant illustrated mark + large italic name
+                      (ArtistNoPhoto) instead of the old circular monogram
+                      letter. isPlaceholderImageUrl above filters GitHub
+                      avatars / picsum URLs (dev/test filler, not real
+                      photos - confirmed live by Hitesh, Sai Jain's
+                      "portrait" was literally the GitHub mascot) so they
+                      correctly fall through to the no-photo path too. */}
+                  <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
                     {portraitUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={portraitUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <Photo src={portraitUrl} alt={displayName} />
                     ) : (
-                      <>
-                        <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.06, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
-                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: "48px", fontStyle: "italic", color: "rgba(247,243,238,0.35)" }}>
-                          {displayName.charAt(0).toUpperCase()}
-                        </div>
-                      </>
+                      <ArtistNoPhoto
+                        name={displayName}
+                        genres={artist.genre}
+                        caption={`${artist.genre[0] ?? tr.artistsPage.genreNotSet} — ${tr.artistsPage.noPhotoCaption}`}
+                      />
                     )}
                     {artist.sceneStatus && CARD_BADGE[artist.sceneStatus] && (
                       <span
@@ -329,7 +364,7 @@ export default function ArtistsPage() {
                           textTransform: "uppercase",
                           background: CARD_BADGE[artist.sceneStatus]!.bg,
                           color: CARD_BADGE[artist.sceneStatus]!.color,
-                          border: artist.sceneStatus === "FEATURED" ? "1px solid var(--afa-gold)" : "none",
+                          border: CARD_BADGE[artist.sceneStatus]!.border ?? "none",
                         }}
                       >
                         {CARD_BADGE[artist.sceneStatus]!.label}
@@ -337,20 +372,19 @@ export default function ArtistsPage() {
                     )}
                   </div>
 
-                  {/* WALL-LABEL - same mono/gold/diamond caption device as
-                      the redesigned venue card, genre + shows count in
-                      place of city + capacity. */}
-                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-gold)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  {/* WALL-LABEL - mono/amber/diamond caption device,
+                      genre + shows count. */}
+                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", display: "flex", alignItems: "center", gap: "8px" }}>
                     <span>{artist.genre.length > 0 ? artist.genre.slice(0, 2).join(" / ") : tr.artistsPage.genreNotSet}</span>
-                    <span style={{ color: "var(--afa-terracotta)" }}>◆</span>
+                    <span>◆</span>
                     <span>{artist._count.performances} {artist._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</span>
                   </div>
 
                   <div style={{ padding: "6px 18px 18px" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{displayName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
                   </div>
