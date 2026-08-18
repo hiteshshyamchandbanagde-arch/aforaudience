@@ -135,57 +135,59 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer style={{ background: "var(--afa-surface-inverse)", color: "var(--afa-text-inverse)", padding: "64px 48px 32px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
-          <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "12px" }}>
-              <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
+        <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "12px" }}>
+                <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
+              </div>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
+                {tr.homePage.footerTagline}
+              </p>
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
-              {tr.homePage.footerTagline}
-            </p>
+            {[
+              {
+                title: tr.homePage.footerColPlatform,
+                links: [
+                  { label: tr.homePage.footerBrowseEvents, href: "/events" },
+                  { label: tr.homePage.footerFindArtists, href: "/artists" },
+                  { label: tr.homePage.footerExploreVenues, href: "/venues" },
+                  { label: tr.homePage.footerLivestreams, href: "/livestreams" },
+                ],
+              },
+              {
+                title: tr.homePage.footerColJoinAs,
+                links: [
+                  { label: tr.roles.ARTIST, href: "/register?role=artist" },
+                  { label: tr.roles.ORGANISER, href: "/register?role=organiser" },
+                  { label: tr.roles.VENUE_OWNER, href: "/register?role=venue" },
+                  { label: tr.roles.AUDIENCE, href: "/register" },
+                ],
+              },
+              {
+                title: tr.homePage.footerColCompany,
+                links: [
+                  { label: tr.homePage.footerAboutUs, href: "/about" },
+                  { label: tr.homePage.footerBlog, href: "/blog" },
+                  { label: tr.homePage.footerCareers, href: "/careers" },
+                  { label: tr.homePage.footerPrivacyPolicy, href: "/privacy" },
+                ],
+              },
+            ].map((col) => (
+              <div key={col.title}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "20px" }}>{col.title}</div>
+                <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {col.links.map((link) => (
+                    <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          {[
-            {
-              title: tr.homePage.footerColPlatform,
-              links: [
-                { label: tr.homePage.footerBrowseEvents, href: "/events" },
-                { label: tr.homePage.footerFindArtists, href: "/artists" },
-                { label: tr.homePage.footerExploreVenues, href: "/venues" },
-                { label: tr.homePage.footerLivestreams, href: "/livestreams" },
-              ],
-            },
-            {
-              title: tr.homePage.footerColJoinAs,
-              links: [
-                { label: tr.roles.ARTIST, href: "/register?role=artist" },
-                { label: tr.roles.ORGANISER, href: "/register?role=organiser" },
-                { label: tr.roles.VENUE_OWNER, href: "/register?role=venue" },
-                { label: tr.roles.AUDIENCE, href: "/register" },
-              ],
-            },
-            {
-              title: tr.homePage.footerColCompany,
-              links: [
-                { label: tr.homePage.footerAboutUs, href: "/about" },
-                { label: tr.homePage.footerBlog, href: "/blog" },
-                { label: tr.homePage.footerCareers, href: "/careers" },
-                { label: tr.homePage.footerPrivacyPolicy, href: "/privacy" },
-              ],
-            },
-          ].map((col) => (
-            <div key={col.title}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "20px" }}>{col.title}</div>
-              <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                {col.links.map((link) => (
-                  <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
-          <span>{tr.homePage.footerCopyright}</span>
-          <span>{tr.homePage.footerMadeWith}</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
+            <span>{tr.homePage.footerCopyright}</span>
+            <span>{tr.homePage.footerMadeWith}</span>
+          </div>
         </div>
       </footer>
     </main>
