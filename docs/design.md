@@ -1279,5 +1279,7 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 
   - **Not yet built.** Next step: Claude Code build brief for the Artist page, same pattern as prior homepage PR briefs (`git fetch/reset --hard origin/qa` first).
 
+- **Homepage hero top scrim — decision (18 Aug), logged as BUG-2608-071.** Hitesh flagged that the homepage hero has no visible gap between the header and hero content, unlike `/artists` (SiteNav pattern, solid header pushes content down with real spacing). Root cause confirmed via code review: this is **not a bug**, it's the full-bleed hero design already committed under "Four rooms, one house" (17 Aug) — `HomeHeader.tsx` is `position: absolute`, floating transparently over `Hero.tsx`'s edge-to-edge crossfading photo. **Decision: keep full-bleed, do not add spacing to match `/artists`.** The full-bleed treatment is the flagship visual choice of the homepage rebuild and shouldn't be pulled back to match a directory-listing page's conventions. Instead, fix the real underlying risk: a transparent header floating over a *rotating* photo can lose legibility depending on what's behind it at any given moment in the crossfade. Fix is a proper top scrim/gradient (dark, decreasing opacity, roughly top 15-20% of viewport) sitting between the photo layer and the header content, guaranteeing header contrast regardless of the active photo — same spirit as the existing bottom gradient that protects headline legibility, just applied to the top for nav legibility. Not yet built.
+
 *Confidential — Do not share*
 
