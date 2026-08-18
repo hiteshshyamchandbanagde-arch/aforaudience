@@ -29,7 +29,7 @@ export default function Hero() {
     >
       <PhotoCrossfadeBackdrop photos={photos} active={active} />
 
-      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "100svh", padding: "128px 24px 72px" }}>
+      <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100svh", padding: "128px 24px 72px" }}>
         <div style={{ maxWidth: "760px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
             <span style={{ position: "relative", display: "flex", width: "8px", height: "8px" }}>
