@@ -132,7 +132,26 @@ export default function Home() {
 
       {/* ZERO-COMMISSION PROMISE (V2 spec) */}
       <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "0 36px 56px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "32px", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "36px", flexWrap: "wrap" }}>
+        <style>{`
+          .ledger-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
+          .ledger-stats { flex-wrap: wrap; }
+          @media (max-width: 700px) {
+            .ledger-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
+        {/* BUG-2608-070 fix: this was a CSS grid with two fixed fr-unit
+            columns and no mobile breakpoint at all - on narrow viewports
+            both columns squeezed side by side instead of stacking, and
+            the inner stat row (0%/Hidden fees/100%) didn't wrap either,
+            so it overflowed into the price-breakdown card's column,
+            reading as a broken overlap. The inline flexWrap:"wrap" that
+            used to sit on this grid container was always a no-op -
+            flex-wrap has no effect on a grid container - a leftover from
+            before this became a grid. Moved grid-template-columns and the
+            stat row's flex-wrap into a scoped class so a real media query
+            can stack them below 700px, matching the codebase's existing
+            @media (max-width: 900px) convention (HomeHeader.tsx). */}
+        <div className="ledger-grid" style={{ gap: "32px", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "36px" }}>
           <div>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "12px" }}>
               {tr.homePage.feePromiseEyebrow}
@@ -143,7 +162,7 @@ export default function Home() {
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "12px", lineHeight: 1.6, color: "rgba(245,245,240,0.5)", borderLeft: "2px solid rgba(201,151,58,0.5)", paddingLeft: "16px", marginTop: "20px", maxWidth: "420px" }}>
               {tr.homePage.feeTaxDisclaimer}
             </p>
-            <div style={{ display: "flex", gap: "32px", marginTop: "24px" }}>
+            <div className="ledger-stats" style={{ display: "flex", gap: "32px", marginTop: "24px" }}>
               <div>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "32px", color: "var(--afa-fill-solid)" }}>0%</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeCommissionLabel}</div>
