@@ -402,6 +402,7 @@ const de: Dictionary = {
     emptyNoneFoundSub: "Versuche, deine Filter anzupassen",
     genreNotSet: "Genre nicht festgelegt",
     showsLabel: "Shows",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "Veranstaltungsort nicht gefunden.",

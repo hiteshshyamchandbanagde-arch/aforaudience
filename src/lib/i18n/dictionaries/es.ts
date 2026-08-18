@@ -397,6 +397,7 @@ const es: Dictionary = {
     emptyNoneFoundSub: "Intenta ajustar tus filtros",
     genreNotSet: "Género no establecido",
     showsLabel: "Espectáculos",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "Recinto no encontrado.",

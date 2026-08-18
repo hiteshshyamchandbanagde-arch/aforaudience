@@ -393,6 +393,7 @@ const ta: Dictionary = {
     emptyNoneFoundSub: "உங்கள் வடிகட்டிகளை மாற்றி முயற்சிக்கவும்",
     genreNotSet: "வகை அமைக்கப்படவில்லை",
     showsLabel: "நிகழ்ச்சிகள்",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "இடம் கிடைக்கவில்லை.",

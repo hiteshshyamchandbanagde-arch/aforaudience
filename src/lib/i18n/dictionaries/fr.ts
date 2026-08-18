@@ -398,6 +398,7 @@ const fr: Dictionary = {
     emptyNoneFoundSub: "Essayez d'ajuster vos filtres",
     genreNotSet: "Genre non défini",
     showsLabel: "Spectacles",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "Lieu introuvable.",

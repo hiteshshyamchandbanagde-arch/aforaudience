@@ -393,6 +393,7 @@ const te: Dictionary = {
     emptyNoneFoundSub: "మీ ఫిల్టర్‌లను మార్చి ప్రయత్నించండి",
     genreNotSet: "జానర్ సెట్ చేయలేదు",
     showsLabel: "షోలు",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "వేదిక కనుగొనబడలేదు.",

@@ -393,6 +393,7 @@ const ml: Dictionary = {
     emptyNoneFoundSub: "നിങ്ങളുടെ ഫിൽട്ടറുകൾ മാറ്റി ശ്രമിക്കുക",
     genreNotSet: "വിഭാഗം സജ്ജീകരിച്ചിട്ടില്ല",
     showsLabel: "ഷോകൾ",
+    noPhotoCaption: "no photo on file",
   },
   venueDetailPage: {
     notFound: "വേദി കണ്ടെത്തിയില്ല.",
