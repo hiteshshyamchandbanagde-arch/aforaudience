@@ -1265,4 +1265,19 @@ Full 40-item backlog (BUG/FEATURE_IDEA/QUESTION/GENERAL) was surfaced this sessi
 
   - **Open, parked (17 Aug): amber/sepia photo duotone execution.** Not the 4-color palette itself (Hitesh confirmed black/cream/orange/amber is fine) — specifically the current flat `mix-blend-mode: multiply` overlay at full strength, which floods every photo uniformly and reads as monotonous across 8-10 photos on one page. Four options were mocked up side-by-side for comparison: **A** current (flat multiply, full strength, what's bothering Hitesh), **B** same technique at ~35% opacity (recommended low-effort fix), **C** true duotone via gradient (shadows→ink, highlights→amber, not a flat wash — more designed, more work, likely strongest long-term), **D** mostly neutral grayscale with amber only as a bottom-edge gradient (safest for messy uploads, loses most of the signature look). No decision made yet — B is the starting recommendation for the next round unless Hitesh has reacted differently since.
 
+- **Role landing pages — Artist / Organiser / Venue Owner (approved 18 Aug), logged as GEN-2608-072.** Public marketing/landing pages, one per role, extending the homepage's "Four Rooms" concept into full standalone pages rather than leaving each Room as a homepage-only teaser. No new Figma Make round — the Figma Make loop stays closed (per the process lesson above); pages are built directly against the existing verified design system (palette, `Photo.tsx`, type system, Ledger transparency pattern) and reuse the real promise/journey copy already shipped in `en.ts` (`fourRoomsStage*`/`fourRoomsBooth*`/`fourRoomsVenue*` keys) rather than inventing new voice.
+
+  - **Template shape, shared across all three pages:**
+    1. **Hero** — Room name + promise as headline (e.g. "The Stage" / "Where you perform..."), full-bleed crossfading photo hero matching the homepage pattern, role-specific CTA reusing the existing Four Rooms CTA copy ("Take the stage" / "Run a night" / "List your space").
+    2. **Honest-money block** — expands the homepage's one-line 0%-commission promise into real detail (how payouts work, when the artist/venue gets paid), reusing the existing Ledger component pattern rather than building a new one.
+    3. **Expanded journey** — the same 4 steps already shipped on the homepage (e.g. Apply→Confirm→Perform→Get paid), each given a real paragraph of explanation instead of the homepage's terse label-only version.
+    4. **Proof section — deliberately deferred, not built now.** Would show real platform aggregate data (active artist/venue/organiser counts, average payout time, etc.) once real volume exists — explicitly no placeholder/fake stats, matching the "no stock photos, all real data" principle already established for Four Rooms. Revisit once real numbers are available.
+    5. **FAQ** — real, role-specific questions (payout timing, verification requirements, etc.), not generic.
+    6. **Final CTA** — registration with that role pre-selected (`/register?role=artist|organiser|venue`, matching Four Rooms' existing hrefs).
+
+  - **Sequencing (agreed 18 Aug):** one page fully built, reviewed, and iterated until genuinely convincing before starting the next — same lesson as the homepage rebuild, not three PRs in parallel. **Artist page first** (most emotionally distinct pitch of the three, most likely to surface design-system gaps early), then Organiser, then Venue Owner.
+
+  - **Not yet built.** Next step: Claude Code build brief for the Artist page, same pattern as prior homepage PR briefs (`git fetch/reset --hard origin/qa` first).
+
 *Confidential — Do not share*
+
