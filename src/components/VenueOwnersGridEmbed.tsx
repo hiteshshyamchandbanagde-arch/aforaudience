@@ -11,6 +11,15 @@ interface VenueOwnerItem {
   _count: { venues: number }
 }
 
+// BUG-2608-073 - card ported from the real Figma Make export
+// (VenuesDirectory.tsx lines ~119-132, Owners-tab branch), which was
+// never actually diffed against the export when this embed was first
+// built (GEN-2608-074, PR #502) - scoped then as "reskin only" and never
+// re-checked. No avatar in the export at all (replaces the circular
+// photo/monogram fallback - same pattern already rejected on Artist
+// cards), no bio on the card, sharp corners, and a real amber/40 hover
+// border (not the plain static border the live version had).
+
 // Session 65 - this used to be a lean grid with no search at all (see
 // history below); added search + BrowseSearchDropdown to match /events
 // and /artists, since this embed is what the Venues↔Owners toggle
@@ -84,6 +93,15 @@ export default function VenueOwnersGridEmbed() {
         @media (max-width: 700px) {
           .afa-owners-grid { grid-template-columns: 1fr; gap: 16px; }
         }
+        /* BUG-2608-073 (gap 4) - inline styles can't express :hover at
+           all, which is why the live card never showed a hover border
+           despite the export's border-ink-600 -> amber/40 shift. Border
+           set here (not inline) so the :hover rule can actually win - an
+           inline style's border always beats a stylesheet :hover rule
+           regardless of specificity (same bug BUG-2608-072 hit on the
+           venue card). */
+        .afa-owner-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.2s ease; }
+        .afa-owner-card:hover { border-color: rgba(201,151,58,0.4); }
       `}</style>
       <div className="afa-owners-grid">
       {filtered.map((owner) => {
@@ -102,38 +120,27 @@ export default function VenueOwnersGridEmbed() {
                 goToOwner(owner.id)
               }
             }}
+            className="afa-owner-card"
             style={{
               position: "relative",
               background: "var(--afa-surface-raised)",
-              borderRadius: "12px",
-              padding: "22px",
-              border: "1px solid rgba(245,245,240,0.1)",
+              padding: "24px",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
             }}
           >
             {isNavigatingThis && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 2, borderRadius: "12px", background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-fill-solid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "var(--afa-on-fill-solid)", flexShrink: 0, overflow: "hidden" }}>
-                {owner.user.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  displayName.charAt(0).toUpperCase()
-                )}
-              </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "17px", fontWeight: 600, color: "var(--afa-cream)" }}>{displayName}</h2>
-            </div>
-            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
-              {owner.bio || tr.venueOwnersEmbed.noBioYet}
-            </p>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.04em", color: "var(--afa-amber)", opacity: 0.8 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+              {tr.venueOwnersEmbed.ownerLabel}
+            </span>
+            <h2 style={{ marginTop: "10px", fontFamily: "var(--font-display)", fontSize: "24px", lineHeight: 1.2, color: "var(--afa-cream)" }}>{displayName}</h2>
+            <div style={{ marginTop: "20px", fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersEmbed.venueSingular : tr.venueOwnersEmbed.venuePlural}
             </div>
           </div>

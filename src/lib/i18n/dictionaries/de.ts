@@ -147,8 +147,9 @@ const de: Dictionary = {
     emptyNone: "Noch keine Standortbesitzer gefunden.",
     searchPlaceholder: "Standortbesitzer suchen...",
     noBioYet: "Noch keine Biografie",
-    venueSingular: "Veranstaltungsort",
-    venuePlural: "Veranstaltungsorte",
+    ownerLabel: "Besitzer",
+    venueSingular: "Veranstaltungsort verwaltet",
+    venuePlural: "Veranstaltungsorte verwaltet",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "Standortbesitzer nicht gefunden",

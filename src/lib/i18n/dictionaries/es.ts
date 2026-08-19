@@ -142,8 +142,9 @@ const es: Dictionary = {
     emptyNone: "Aún no se han encontrado propietarios de recintos.",
     searchPlaceholder: "Buscar propietarios de recintos...",
     noBioYet: "Aún no hay biografía",
-    venueSingular: "recinto",
-    venuePlural: "recintos",
+    ownerLabel: "Propietario",
+    venueSingular: "recinto gestionado",
+    venuePlural: "recintos gestionados",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "Propietario de recinto no encontrado",

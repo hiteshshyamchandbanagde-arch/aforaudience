@@ -138,8 +138,9 @@ const te: Dictionary = {
     emptyNone: "ఇంకా వేదిక యజమానులు కనుగొనబడలేదు.",
     searchPlaceholder: "వేదిక యజమానులను వెతకండి...",
     noBioYet: "ఇంకా బయో లేదు",
-    venueSingular: "వేదిక",
-    venuePlural: "వేదికలు",
+    ownerLabel: "యజమాని",
+    venueSingular: "వేదిక నిర్వహించబడుతోంది",
+    venuePlural: "వేదికలు నిర్వహించబడుతున్నాయి",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "వేదిక యజమాని కనుగొనబడలేదు",

@@ -137,8 +137,9 @@ const en = {
     emptyNone: "No venue owners found yet.",
     searchPlaceholder: "Search venue owners...",
     noBioYet: "No bio yet",
-    venueSingular: "venue",
-    venuePlural: "venues",
+    ownerLabel: "Owner",
+    venueSingular: "venue managed",
+    venuePlural: "venues managed",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "Venue owner not found",
