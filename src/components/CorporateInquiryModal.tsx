@@ -63,7 +63,7 @@ const FIELD_LIMITS: Record<string, number> = {
 const MESSAGE_LIMIT = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }
+const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }
 
 // Small shared field renderer so the row-pairing below (19 Aug) doesn't
 // repeat the label+input markup five times over. wrapperStyle is how a
@@ -81,7 +81,7 @@ function FormField({ label, name, type, placeholder, value, onChange, maxLength,
 }) {
   return (
     <div style={wrapperStyle}>
-      <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+      <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
         {label}
       </label>
       <input
@@ -164,7 +164,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
     <div role="dialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "rgba(245,245,240,0.45)" }} />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "88vh", overflowY: "auto", boxSizing: "border-box" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(245,245,240,0.15)" }} />
         </div>
@@ -202,33 +202,29 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               </div>
             )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
-              {/* Field-density pass (19 Aug) - every field was its own
-                  full-width row (9 rows before the submit button), which
-                  overflowed the modal's 88vh max-height at 100% zoom on
-                  shorter desktop viewports (fine on mobile, where the
-                  viewport is taller relative to the fixed 480px-wide
-                  sheet). Paired the naturally-short, unrelated-enough
-                  fields into rows - Company Name and Budget Range/Message
-                  stay full width since they're either the primary
-                  identifier or need room to type. Each paired field uses
-                  flex-basis 140px with wrap, so it degrades to stacked
-                  automatically on very narrow phones instead of clipping. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+              {/* Field-density pass, round 2 (19 Aug) - round 1 paired
+                  Name/Email into a row, which clipped longer email
+                  addresses in a ~200px column (caught live). Name and
+                  Email are unpredictable length and both matter for the
+                  artist to actually respond - kept full width. Instead
+                  paired the fields that are genuinely short and bounded:
+                  Phone+City (short tokens) and Preferred Date+Budget
+                  Range (a date input and a dropdown-style control,
+                  neither needs much horizontal room). Also tightened
+                  input padding/row gap and gave the sheet a bit more
+                  height (88vh -> 94vh) to close the rest of the gap.
+                  Each paired field uses flex-basis 140px with wrap, so
+                  it degrades to stacked automatically on narrow phones
+                  instead of clipping. */}
               <FormField label="Company Name *" name="companyName" type="text" placeholder="Acme Corp" value={form.companyName} onChange={handleChange} maxLength={FIELD_LIMITS.companyName} />
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                <FormField label="Your Name *" name="contactName" type="text" placeholder="Jane Doe" value={form.contactName} onChange={handleChange} maxLength={FIELD_LIMITS.contactName} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
-                <FormField label="Email *" name="contactEmail" type="email" placeholder="you@company.com" value={form.contactEmail} onChange={handleChange} maxLength={FIELD_LIMITS.contactEmail} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
-              </div>
+              <FormField label="Your Name *" name="contactName" type="text" placeholder="Jane Doe" value={form.contactName} onChange={handleChange} maxLength={FIELD_LIMITS.contactName} />
+              <FormField label="Email *" name="contactEmail" type="email" placeholder="you@company.com" value={form.contactEmail} onChange={handleChange} maxLength={FIELD_LIMITS.contactEmail} />
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 <FormField label="Phone" name="contactPhone" type="tel" placeholder="+91 98765 43210" value={form.contactPhone} onChange={handleChange} maxLength={FIELD_LIMITS.contactPhone} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
-                <FormField label="Event Type" name="eventType" type="text" placeholder="Annual day, product launch..." value={form.eventType} onChange={handleChange} maxLength={FIELD_LIMITS.eventType} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
-              </div>
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 <div style={{ flex: "1 1 140px", minWidth: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
                     City
                   </label>
                   {/* Real Google Places lookup (11 Aug) - safe to use now
@@ -246,23 +242,28 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                     inputStyle={INPUT_STYLE}
                   />
                 </div>
+              </div>
+
+              <FormField label="Event Type" name="eventType" type="text" placeholder="Annual day, product launch..." value={form.eventType} onChange={handleChange} maxLength={FIELD_LIMITS.eventType} />
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 <FormField label="Preferred Date" name="preferredDate" type="date" value={form.preferredDate} onChange={handleChange} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
+                <div style={{ flex: "1 1 140px", minWidth: 0 }}>
+                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
+                    Budget Range
+                  </label>
+                  <PresetSelectWithOther
+                    value={form.budgetRange}
+                    onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
+                    presets={BUDGET_RANGE_PRESETS}
+                    placeholder="e.g. ₹75,000 or 'flexible'"
+                    inputStyle={INPUT_STYLE}
+                  />
+                </div>
               </div>
 
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
-                  Budget Range
-                </label>
-                <PresetSelectWithOther
-                  value={form.budgetRange}
-                  onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
-                  presets={BUDGET_RANGE_PRESETS}
-                  placeholder="e.g. ₹75,000 or 'flexible'"
-                  inputStyle={INPUT_STYLE}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
                   Message
                 </label>
                 <textarea
