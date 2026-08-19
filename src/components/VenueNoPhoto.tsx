@@ -40,7 +40,14 @@ export default function VenueNoPhoto({ capacity, tierLabel, caption, size = "car
   const markWidth = size === "hero" ? "70%" : "82%"
 
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-page)" }}>
+    // BUG-2608-074 - this reused --afa-surface-page (the page background
+    // itself), giving the illustration panel zero visual distinction from
+    // the page behind it. With no visible card, the tierLabel badge below
+    // (meant to overlay the panel's top-left corner) read as a stray
+    // floating label between the header actions and the illustration
+    // instead of a badge sitting on a card. --afa-surface-raised is the
+    // locked palette's dedicated "elevated panel" token (docs/design.md).
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-raised)" }}>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Mark style={{ width: markWidth, maxWidth: size === "hero" ? "420px" : "220px", color: "var(--afa-amber)", opacity: 0.55 }} />
       </div>
