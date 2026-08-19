@@ -63,6 +63,40 @@ const FIELD_LIMITS: Record<string, number> = {
 const MESSAGE_LIMIT = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }
+
+// Small shared field renderer so the row-pairing below (19 Aug) doesn't
+// repeat the label+input markup five times over. wrapperStyle is how a
+// caller opts a field into a flex row (see usage below) vs. the default
+// full-width block.
+function FormField({ label, name, type, placeholder, value, onChange, maxLength, wrapperStyle }: {
+  label: string
+  name: string
+  type: string
+  placeholder?: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  maxLength?: number
+  wrapperStyle?: React.CSSProperties
+}) {
+  return (
+    <div style={wrapperStyle}>
+      <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+        {label}
+      </label>
+      <input
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        maxLength={maxLength}
+        style={INPUT_STYLE}
+      />
+    </div>
+  )
+}
+
 export default function CorporateInquiryModal({ open, onClose, artistId, artistName, prefillName, prefillEmail }: CorporateInquiryModalProps) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
@@ -169,59 +203,52 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             )}
 
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
-              {[
-                { label: "Company Name *", name: "companyName", type: "text", placeholder: "Acme Corp" },
-                { label: "Your Name *", name: "contactName", type: "text", placeholder: "Jane Doe" },
-                { label: "Email *", name: "contactEmail", type: "email", placeholder: "you@company.com" },
-                { label: "Phone", name: "contactPhone", type: "tel", placeholder: "+91 98765 43210" },
-                { label: "Event Type", name: "eventType", type: "text", placeholder: "Annual day, product launch..." },
-              ].map((field) => (
-                <div key={field.name}>
+              {/* Field-density pass (19 Aug) - every field was its own
+                  full-width row (9 rows before the submit button), which
+                  overflowed the modal's 88vh max-height at 100% zoom on
+                  shorter desktop viewports (fine on mobile, where the
+                  viewport is taller relative to the fixed 480px-wide
+                  sheet). Paired the naturally-short, unrelated-enough
+                  fields into rows - Company Name and Budget Range/Message
+                  stay full width since they're either the primary
+                  identifier or need room to type. Each paired field uses
+                  flex-basis 140px with wrap, so it degrades to stacked
+                  automatically on very narrow phones instead of clipping. */}
+              <FormField label="Company Name *" name="companyName" type="text" placeholder="Acme Corp" value={form.companyName} onChange={handleChange} maxLength={FIELD_LIMITS.companyName} />
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                <FormField label="Your Name *" name="contactName" type="text" placeholder="Jane Doe" value={form.contactName} onChange={handleChange} maxLength={FIELD_LIMITS.contactName} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
+                <FormField label="Email *" name="contactEmail" type="email" placeholder="you@company.com" value={form.contactEmail} onChange={handleChange} maxLength={FIELD_LIMITS.contactEmail} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                <FormField label="Phone" name="contactPhone" type="tel" placeholder="+91 98765 43210" value={form.contactPhone} onChange={handleChange} maxLength={FIELD_LIMITS.contactPhone} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
+                <FormField label="Event Type" name="eventType" type="text" placeholder="Annual day, product launch..." value={form.eventType} onChange={handleChange} maxLength={FIELD_LIMITS.eventType} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                <div style={{ flex: "1 1 140px", minWidth: 0 }}>
                   <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
-                    {field.label}
+                    City
                   </label>
-                  <input
-                    name={field.name}
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    value={form[field.name as keyof typeof form]}
-                    onChange={handleChange}
-                    maxLength={FIELD_LIMITS[field.name]}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  {/* Real Google Places lookup (11 Aug) - safe to use now
+                      that this modal only opens for a signed-in user, so
+                      the auth-gated /api/places/autocomplete endpoint (see
+                      that route's own comment on billed-quota protection)
+                      is no longer being asked to serve anonymous traffic.
+                      Full world coverage, not just cities we have venues
+                      in - free text still works if nothing resolves. */}
+                  <CityAutocomplete
+                    value={form.city}
+                    onChange={(city) => setForm((prev) => ({ ...prev, city: city.slice(0, FIELD_LIMITS.city) }))}
+                    onResolved={(location) => setForm((prev) => ({ ...prev, city: location.city.slice(0, FIELD_LIMITS.city) }))}
+                    placeholder="Pune"
+                    inputStyle={INPUT_STYLE}
                   />
                 </div>
-              ))}
-              <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
-                  City
-                </label>
-                {/* Real Google Places lookup (11 Aug) - safe to use now
-                    that this modal only opens for a signed-in user, so
-                    the auth-gated /api/places/autocomplete endpoint (see
-                    that route's own comment on billed-quota protection)
-                    is no longer being asked to serve anonymous traffic.
-                    Full world coverage, not just cities we have venues
-                    in - free text still works if nothing resolves. */}
-                <CityAutocomplete
-                  value={form.city}
-                  onChange={(city) => setForm((prev) => ({ ...prev, city: city.slice(0, FIELD_LIMITS.city) }))}
-                  onResolved={(location) => setForm((prev) => ({ ...prev, city: location.city.slice(0, FIELD_LIMITS.city) }))}
-                  placeholder="Pune"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
-                />
+                <FormField label="Preferred Date" name="preferredDate" type="date" value={form.preferredDate} onChange={handleChange} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
               </div>
-              <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
-                  Preferred Date
-                </label>
-                <input
-                  name="preferredDate"
-                  type="date"
-                  value={form.preferredDate}
-                  onChange={handleChange}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
-                />
-              </div>
+
               <div>
                 <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                   Budget Range
@@ -231,7 +258,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={(value) => setForm((prev) => ({ ...prev, budgetRange: value }))}
                   presets={BUDGET_RANGE_PRESETS}
                   placeholder="e.g. ₹75,000 or 'flexible'"
-                  inputStyle={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  inputStyle={INPUT_STYLE}
                 />
               </div>
               <div>
@@ -245,7 +272,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   onChange={handleChange}
                   rows={3}
                   maxLength={MESSAGE_LIMIT}
-                  style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
+                  style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
                 />
               </div>
             </div>
