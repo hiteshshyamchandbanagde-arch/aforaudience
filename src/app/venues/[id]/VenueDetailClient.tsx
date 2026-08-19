@@ -1,6 +1,10 @@
 "use client"
 import SiteNav from "@/components/SiteNav"
+import Photo from "@/components/Photo"
+import VenueNoPhoto, { capacityTier } from "@/components/VenueNoPhoto"
 import VenueFollowButton from "./VenueFollowButton"
+import { FacilityIcon, CapacityIcon, AcousticIcon, DirectionsIcon } from "@/components/icons/VenueIcons"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface SeatSection {
@@ -10,7 +14,7 @@ interface SeatSection {
   price: number
 }
 
-// Plain, minimal, JSON-serializable shape - deliberately not the full
+// Plain, JSON-serializable shape - deliberately not the full
 // Prisma Venue (Date fields etc.) passed straight through from the
 // server component, to keep the server/client prop boundary clean.
 export interface VenueDetailData {
@@ -23,84 +27,128 @@ export interface VenueDetailData {
   facilities: string[]
   sections: SeatSection[]
   directionsUrl: string
+  photos: string[]
+  acousticRating: number | null
 }
 
-// Split out of page.tsx (server component - direct prisma access, can't
-// call the client-only useLocale hook itself) so every string on this
-// page can pick up the active locale, same pattern as VenuesHero.tsx.
-// Facility names and seat-section names are venue-owner-entered content
-// (like genre names on /artists) - deliberately left untranslated.
+// GEN-2608-074 - migrated off Theme Phase 0 tokens onto the locked
+// ink/cream/amber/orange system, per the approved Figma Make export
+// (verified 19 Aug, see docs/design.md). Two real bugs fixed as part of
+// this build (not cosmetic-only, see page.tsx's comment): this page
+// previously rendered zero photos despite venue.photos existing, and
+// always showed "Not Rated Yet" regardless of a real acousticRating.
+// Facilities move from pill-chips to icon+label rows. Fixes
+// BUG-2608-074-class mobile clipping on the stat-pair grid (zero
+// @media breakpoints previously). No-photo fallback uses the
+// capacity-tier illustration (VenueNoPhoto) - see that component's
+// comment for why (no genre-equivalent category field on Venue).
 export default function VenueDetailClient({ venue }: { venue: VenueDetailData | null }) {
   const { t: tr } = useLocale()
 
   if (!venue) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav backHref="/venues" backLabel={tr.nav.backToVenues} />
-        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px" }}>{tr.venueDetailPage.notFound}</div>
+        <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px", color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.notFound}</div>
       </main>
     )
   }
 
+  const tier = capacityTier(venue.capacity)
+  const tierLabel = tier === "intimate" ? tr.venuesPage.tierIntimate : tier === "mid" ? tr.venuesPage.tierMidSize : tr.venuesPage.tierLarge
+  const realPhoto = venue.photos?.find((p) => !isPlaceholderImageUrl(p)) || null
+
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        .afa-venue-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .afa-venue-facilities { display: grid; grid-template-columns: 1fr; gap: 0; }
+        @media (min-width: 640px) {
+          .afa-venue-facilities { grid-template-columns: 1fr 1fr; column-gap: 40px; }
+        }
+      `}</style>
       <SiteNav backHref="/venues" backLabel={tr.nav.backToVenues} />
       <div style={{ maxWidth: "760px", margin: "0 auto", padding: "48px 24px" }}>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "32px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "32px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "6px" }}>
           {venue.name}
         </h1>
         <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "8px" }}>
           {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ""}
         </p>
-        <VenueFollowButton venueId={venue.id} /><br />
-        <a
-          href={venue.directionsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--afa-terracotta)", textDecoration: "none", marginBottom: "28px" }}
-        >
-          📍 {tr.venueDetailPage.getDirections}
-        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
+          <VenueFollowButton venueId={venue.id} />
+          <a
+            href={venue.directionsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+          >
+            <DirectionsIcon style={{ width: "14px", height: "14px" }} />
+            {tr.venueDetailPage.getDirections}
+          </a>
+        </div>
 
-        <div style={{ background: "var(--afa-white)", borderRadius: "12px", padding: "28px", border: "1px solid rgba(14,12,10,0.08)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
-            <div>
-              <p style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
-              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)" }}>{venue.capacity} {tr.venuesPage.seatsLabel}</p>
+        <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", borderRadius: "12px", overflow: "hidden", marginBottom: "8px" }}>
+          {realPhoto ? (
+            <Photo src={realPhoto} alt={venue.name} />
+          ) : (
+            <VenueNoPhoto capacity={venue.capacity} tierLabel={tierLabel} size="hero" />
+          )}
+        </div>
+        {!realPhoto && (
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "24px" }}>
+            {tr.venueDetailPage.noPhotosCaption}
+          </p>
+        )}
+
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "12px", padding: "28px", border: "1px solid rgba(245,245,240,0.1)", marginTop: realPhoto ? "24px" : 0 }}>
+          <div className="afa-venue-stats" style={{ marginBottom: "24px" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <CapacityIcon style={{ width: "18px", height: "18px", color: "var(--afa-amber)", marginTop: "2px", flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
+                <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)" }}>{venue.capacity} {tr.venuesPage.seatsLabel}</p>
+              </div>
             </div>
-            <div>
-              <p style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
-              <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)" }}>{tr.venueDetailPage.notRatedYet}</p>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <AcousticIcon style={{ width: "18px", height: "18px", color: "var(--afa-amber)", marginTop: "2px", flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
+                <p style={{ fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)" }}>
+                  {venue.acousticRating != null ? venue.acousticRating.toFixed(1) : tr.venueDetailPage.notRatedYet}
+                </p>
+              </div>
             </div>
           </div>
 
           {venue.facilities && venue.facilities.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
-              <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "4px", paddingBottom: "10px", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
+              <div className="afa-venue-facilities">
                 {venue.facilities.map((facility) => (
-                  <span key={facility} style={{ fontSize: "13px", padding: "5px 12px", background: "var(--afa-surface-raised)", borderRadius: "999px", color: "var(--afa-text-primary)" }}>
-                    {facility}
-                  </span>
+                  <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 0", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+                    <FacilityIcon label={facility} style={{ width: "16px", height: "16px", color: "var(--afa-amber)", flexShrink: 0 }} />
+                    <span style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>{facility}</span>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
           <div>
-            <h2 style={{ fontSize: "14px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "10px" }}>{tr.venueDetailPage.seatingHeading}</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "10px" }}>{tr.venueDetailPage.seatingHeading}</h2>
             {venue.sections.length === 0 ? (
-              <p style={{ fontSize: "14px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.venueDetailPage.seatingComingSoon}</p>
+              <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatingComingSoon}</p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {venue.sections.map((s) => (
                   <div
                     key={s.id}
-                    style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", background: "var(--afa-surface-raised)", borderRadius: "8px", fontSize: "14px" }}
+                    style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", background: "var(--afa-surface-page)", borderRadius: "8px", fontSize: "14px" }}
                   >
-                    <span style={{ fontWeight: 600, color: "var(--afa-text-primary)" }}>{s.name}</span>
+                    <span style={{ fontWeight: 600, color: "var(--afa-cream)" }}>{s.name}</span>
                     <span style={{ color: "var(--afa-text-primary)", opacity: 0.7 }}>{s.seats} {tr.venuesPage.seatsLabel}</span>
-                    <span style={{ fontWeight: 700, color: "var(--afa-terracotta)" }}>₹{s.price}</span>
+                    <span style={{ fontWeight: 700, color: "var(--afa-amber)" }}>₹{s.price}</span>
                   </div>
                 ))}
               </div>

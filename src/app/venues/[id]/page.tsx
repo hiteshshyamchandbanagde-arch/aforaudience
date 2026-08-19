@@ -33,6 +33,12 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
 
   // Plain, JSON-serializable subset only - keeps the server/client prop
   // boundary clean (no raw Prisma Date fields etc. crossing it).
+  //
+  // GEN-2608-074 - photos and acousticRating are both real columns on
+  // Venue that were never threaded through to the client at all (found
+  // during the redesign audit, not previously tracked as their own
+  // ticket): the detail page rendered zero photos and always showed
+  // "Not Rated Yet" regardless of whether a real rating existed.
   const venueData: VenueDetailData = {
     id: venue.id,
     name: venue.name,
@@ -43,6 +49,8 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
     facilities: venue.facilities,
     sections,
     directionsUrl: buildDirectionsUrl(venue),
+    photos: venue.photos,
+    acousticRating: venue.acousticRating,
   }
 
   return <VenueDetailClient venue={venueData} />
