@@ -138,8 +138,9 @@ const kn: Dictionary = {
     emptyNone: "ಇನ್ನೂ ಸ್ಥಳ ಮಾಲೀಕರು ಕಂಡುಬಂದಿಲ್ಲ.",
     searchPlaceholder: "ಸ್ಥಳ ಮಾಲೀಕರನ್ನು ಹುಡುಕಿ...",
     noBioYet: "ಇನ್ನೂ ಬಯೋ ಇಲ್ಲ",
-    venueSingular: "ಸ್ಥಳ",
-    venuePlural: "ಸ್ಥಳಗಳು",
+    ownerLabel: "ಮಾಲೀಕರು",
+    venueSingular: "ಸ್ಥಳ ನಿರ್ವಹಣೆಯಲ್ಲಿ",
+    venuePlural: "ಸ್ಥಳಗಳು ನಿರ್ವಹಣೆಯಲ್ಲಿ",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "ಸ್ಥಳ ಮಾಲೀಕರು ಕಂಡುಬಂದಿಲ್ಲ",

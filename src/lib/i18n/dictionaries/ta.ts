@@ -138,8 +138,9 @@ const ta: Dictionary = {
     emptyNone: "இதுவரை இட உரிமையாளர்கள் கிடைக்கவில்லை.",
     searchPlaceholder: "இட உரிமையாளர்களைத் தேடுங்கள்...",
     noBioYet: "இதுவரை பயோ இல்லை",
-    venueSingular: "இடம்",
-    venuePlural: "இடங்கள்",
+    ownerLabel: "உரிமையாளர்",
+    venueSingular: "இடம் நிர்வகிக்கப்படுகிறது",
+    venuePlural: "இடங்கள் நிர்வகிக்கப்படுகின்றன",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "இட உரிமையாளர் கிடைக்கவில்லை",

@@ -138,8 +138,9 @@ const bn: Dictionary = {
     emptyNone: "এখনও কোনো ভেন্যু মালিক পাওয়া যায়নি।",
     searchPlaceholder: "ভেন্যু মালিক খুঁজুন...",
     noBioYet: "এখনও কোনো বায়ো নেই",
-    venueSingular: "ভেন্যু",
-    venuePlural: "ভেন্যু",
+    ownerLabel: "মালিক",
+    venueSingular: "ভেন্যু পরিচালিত",
+    venuePlural: "ভেন্যু পরিচালিত",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "ভেন্যু মালিক পাওয়া যায়নি",

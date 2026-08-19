@@ -138,8 +138,9 @@ const gu: Dictionary = {
     emptyNone: "હજુ સુધી કોઈ સ્થળ માલિકો મળ્યા નથી.",
     searchPlaceholder: "સ્થળ માલિકોને શોધો...",
     noBioYet: "હજુ સુધી કોઈ બાયો નથી",
-    venueSingular: "સ્થળ",
-    venuePlural: "સ્થળો",
+    ownerLabel: "માલિક",
+    venueSingular: "સ્થળ સંચાલિત",
+    venuePlural: "સ્થળો સંચાલિત",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "સ્થળ માલિક મળ્યા નથી",

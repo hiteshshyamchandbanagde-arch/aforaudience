@@ -138,8 +138,9 @@ const ml: Dictionary = {
     emptyNone: "ഇതുവരെ വേദി ഉടമകളെ കണ്ടെത്തിയില്ല.",
     searchPlaceholder: "വേദി ഉടമകളെ തിരയുക...",
     noBioYet: "ഇതുവരെ ബയോ ഇല്ല",
-    venueSingular: "വേദി",
-    venuePlural: "വേദികൾ",
+    ownerLabel: "ഉടമ",
+    venueSingular: "വേദി കൈകാര്യം ചെയ്യുന്നു",
+    venuePlural: "വേദികൾ കൈകാര്യം ചെയ്യുന്നു",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "വേദി ഉടമയെ കണ്ടെത്തിയില്ല",

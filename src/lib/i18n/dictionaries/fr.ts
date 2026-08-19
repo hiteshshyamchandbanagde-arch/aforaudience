@@ -143,8 +143,9 @@ const fr: Dictionary = {
     emptyNone: "Aucun propriétaire de lieu trouvé pour l'instant.",
     searchPlaceholder: "Rechercher des propriétaires de lieux...",
     noBioYet: "Pas encore de biographie",
-    venueSingular: "lieu",
-    venuePlural: "lieux",
+    ownerLabel: "Propriétaire",
+    venueSingular: "lieu géré",
+    venuePlural: "lieux gérés",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "Propriétaire de lieu introuvable",

@@ -137,8 +137,9 @@ const hi: Dictionary = {
     emptyNone: "अभी तक कोई स्थल मालिक नहीं मिला।",
     searchPlaceholder: "स्थल मालिक खोजें...",
     noBioYet: "अभी तक कोई परिचय नहीं",
-    venueSingular: "स्थल",
-    venuePlural: "स्थल",
+    ownerLabel: "मालिक",
+    venueSingular: "स्थल प्रबंधित",
+    venuePlural: "स्थल प्रबंधित",
   },
   venueOwnerDetailPage: {
     notFoundHeading: "स्थल मालिक नहीं मिला",
