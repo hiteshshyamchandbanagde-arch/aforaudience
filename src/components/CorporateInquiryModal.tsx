@@ -165,7 +165,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
       <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "rgba(245,245,240,0.45)" }} />
 
       <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "6px 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(245,245,240,0.15)" }} />
         </div>
 
@@ -187,11 +187,11 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
           </div>
         ) : (
           <>
-            <div style={{ textAlign: "center", marginBottom: "18px" }}>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
+            <div style={{ textAlign: "center", marginBottom: "12px" }}>
+              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
                 Book {artistName} for your event
               </h2>
-              <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
+              <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.4 }}>
                 For corporate or private events. Sends directly to the artist - no payment happens here.
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               </div>
             )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
               {/* Field-density pass, round 2 (19 Aug) - round 1 paired
                   Name/Email into a row, which clipped longer email
                   addresses in a ~200px column (caught live). Name and
@@ -271,7 +271,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
                   placeholder="Tell them a bit about the event..."
                   value={form.message}
                   onChange={handleChange}
-                  rows={3}
+                  rows={2}
                   maxLength={MESSAGE_LIMIT}
                   style={{ ...INPUT_STYLE, resize: "vertical", fontFamily: "inherit" }}
                 />
