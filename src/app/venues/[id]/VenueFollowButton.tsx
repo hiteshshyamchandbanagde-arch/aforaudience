@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useLocale } from "@/lib/i18n/translate"
-import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
+import { BellIcon, BellOffIcon, PlusIcon } from "@/components/icons/VenueIcons"
 
 // Small, self-contained island of interactivity - the venue detail page
 // itself is a server component with no other client-side state, so this
@@ -11,14 +11,28 @@ import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
 // system, and replaced the 🔔/🔕 emoji notify-toggle icon with real
 // line-art (BellIcon/BellOffIcon) - caught during the redesign audit,
 // not previously flagged as its own bug.
-export default function VenueFollowButton({ venueId }: { venueId: string }) {
-  const { t: tr } = useLocale()
+//
+// BUG-2608-072 (gap 5) - the export has a SECOND, full-width "Follow this
+// venue" CTA in the detail page's sidebar, distinct from this compact
+// header button but controlling the exact same follow relationship. The
+// fetch/toggle logic used to live entirely inside this component with its
+// own local state; if it stayed that way with a second self-contained
+// instance in the sidebar, clicking one button wouldn't update the other
+// until a full page reload (each has its own state, both hit the same
+// API, but neither refetches after the other's toggle). Pulled the
+// fetch/toggle logic out into useVenueFollow so VenueDetailClient can call
+// it once and hand the shared state down to both button instances.
+// venueId is nullable so VenueDetailClient can call this hook
+// unconditionally (Rules of Hooks) even before it knows whether the venue
+// prop is null - the effect/toggles just no-op until a real id shows up.
+export function useVenueFollow(venueId: string | null) {
   const [following, setFollowing] = useState(false)
   const [notifyEnabled, setNotifyEnabledState] = useState(true)
   const [busy, setBusy] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (!venueId) return
     fetch(`/api/venues/${venueId}/follow`)
       .then((res) => res.json())
       .then((data) => {
@@ -30,7 +44,7 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
   }, [venueId])
 
   const toggleFollow = async () => {
-    if (busy) return
+    if (busy || !venueId) return
     setBusy(true)
     try {
       const res = await fetch(`/api/venues/${venueId}/follow`, { method: "POST" })
@@ -47,7 +61,7 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
   }
 
   const toggleNotify = async () => {
-    if (busy) return
+    if (busy || !venueId) return
     setBusy(true)
     try {
       const next = !notifyEnabled
@@ -63,6 +77,18 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
     }
   }
 
+  return { following, notifyEnabled, busy, loaded, toggleFollow, toggleNotify }
+}
+
+export type VenueFollowState = ReturnType<typeof useVenueFollow>
+
+// Compact header button (unchanged behavior/copy - only the corner radius
+// changed, see gap 7: export's Follow buttons are sharp-edged, this used
+// to be a rounded-999px pill).
+export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) {
+  const { t: tr } = useLocale()
+  const { following, notifyEnabled, busy, loaded, toggleFollow, toggleNotify } = state
+
   if (!loaded) return null
 
   return (
@@ -73,11 +99,10 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
         disabled={busy}
         className="afa-follow-cta"
         style={{
-          padding: "8px 18px",
-          borderRadius: "999px",
-          border: following ? "1.5px solid rgba(245,245,240,0.2)" : "none",
+          padding: "10px 20px",
+          border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
           background: following ? "transparent" : "var(--afa-fill-solid)",
-          color: following ? "var(--afa-text-primary)" : "var(--afa-on-fill-solid)",
+          color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
           fontSize: "13px",
           fontWeight: 600,
           cursor: busy ? "default" : "pointer",
@@ -112,6 +137,49 @@ export default function VenueFollowButton({ venueId }: { venueId: string }) {
           )}
         </button>
       )}
+    </div>
+  )
+}
+
+// Sidebar CTA (BUG-2608-072 gap 5, new) - VenueDetail.tsx lines ~169-180:
+// full-width, plus-icon before the label when not following, caption
+// underneath. Shares state with the header button via useVenueFollow so
+// the two never show conflicting follow state.
+export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
+  const { t: tr } = useLocale()
+  const { following, busy, loaded, toggleFollow } = state
+
+  if (!loaded) return null
+
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <style>{`.afa-follow-cta-sidebar:hover { filter: brightness(1.1); }`}</style>
+      <button
+        onClick={toggleFollow}
+        disabled={busy}
+        className="afa-follow-cta-sidebar"
+        style={{
+          display: "flex",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          padding: "14px",
+          border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
+          background: following ? "transparent" : "var(--afa-fill-solid)",
+          color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
+          fontSize: "14px",
+          fontWeight: 600,
+          cursor: busy ? "default" : "pointer",
+          opacity: busy ? 0.6 : 1,
+        }}
+      >
+        {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
+        {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}
+      </button>
+      <p style={{ marginTop: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+        {tr.venueDetailPage.followCaption}
+      </p>
     </div>
   )
 }

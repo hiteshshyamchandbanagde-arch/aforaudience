@@ -34,6 +34,20 @@ async function getVenues() {
   }
 }
 
+// BUG-2608-072 (gap 3) - the Owners tab count needs to be known before the
+// Owners tab is ever opened (VenueOwnersGridEmbed only fetches its list on
+// demand, client-side, when that tab is actually clicked). Fetched here,
+// server-side, alongside venues so the tab label can show a real count from
+// first paint instead of a placeholder.
+async function getOwnerCount() {
+  try {
+    return await prisma.venueOwner.count({ where: { isApproved: true } })
+  } catch (err) {
+    console.error('Failed to count venue owners:', err)
+    return 0
+  }
+}
+
 function priceRange(venue: { seatingMode?: string; seatMap: unknown; zonePrices?: { suggestedPrice: number | null }[] }) {
   const prices =
     venue.seatingMode === 'NUMBERED'
@@ -49,6 +63,7 @@ function priceRange(venue: { seatingMode?: string; seatMap: unknown; zonePrices?
 
 export default async function VenuesPage() {
   const venues = await getVenues()
+  const ownerCount = await getOwnerCount()
 
   // FEAT-2608-036 - resolved server-side (profile choice / cookie /
   // this-request IP-geo guess) and passed down as the initial city
@@ -80,7 +95,7 @@ export default async function VenuesPage() {
     <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
       <SiteNav active="venues" />
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
-        <VenuesHero />
+        <VenuesHero count={venues.length} />
 
         <VenuesViewToggle
           venues={venues.map((v) => ({
@@ -96,6 +111,7 @@ export default async function VenuesPage() {
             // first thing on this page to actually render it.
             photos: v.photos,
           }))}
+          ownerCount={ownerCount}
           defaultCity={resolved.city}
         />
       </div>

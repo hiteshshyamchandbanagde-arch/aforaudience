@@ -8,6 +8,7 @@ import { cityLabel } from "@/lib/country-codes"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 import { SearchIcon } from "@/components/icons/ArtistIcons"
+import { ArrowUpRightIcon } from "@/components/icons/VenueIcons"
 
 interface VenueItem {
   id: string
@@ -69,6 +70,18 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         @media (max-width: 700px) {
           .afa-venues-grid { grid-template-columns: 1fr; gap: 20px; }
         }
+        /* BUG-2608-072 (gap 4) - export uses group-hover:border-amber/60
+           on the card border and group-hover:text-amber on the title,
+           plus a fade-in arrow button - none of that was wired up.
+           Border set here (not inline) so the :hover rule can actually
+           win - an inline style's border would always beat a stylesheet
+           :hover rule regardless of specificity tricks. */
+        .afa-venue-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
+        .afa-venue-card:hover { border-color: rgba(201,151,58,0.6); }
+        .afa-venue-card-title { color: var(--afa-cream); transition: color 0.3s ease; }
+        .afa-venue-card:hover .afa-venue-card-title { color: var(--afa-amber); }
+        .afa-venue-card-arrow { opacity: 0; }
+        .afa-venue-card:hover .afa-venue-card-arrow { opacity: 1; }
       `}</style>
 
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "20px" }}>
@@ -126,14 +139,12 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                 goToVenue(v.id)
               }
             }}
-            className="hover-lift-card afa-focusable"
+            className="hover-lift-card afa-focusable afa-venue-card"
             style={{
               position: "relative",
               display: "block",
               background: "var(--afa-surface-raised)",
-              borderRadius: "10px",
               overflow: "hidden",
-              border: "1px solid rgba(245,245,240,0.1)",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
@@ -171,10 +182,31 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               ) : (
                 <VenueNoPhoto capacity={v.capacity} tierLabel={tierLabel(v.capacity)} />
               )}
+              <span
+                className="afa-venue-card-arrow"
+                style={{
+                  position: "absolute",
+                  top: "12px",
+                  right: "12px",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid rgba(245,245,240,0.2)",
+                  background: "rgba(10,10,10,0.4)",
+                  backdropFilter: "blur(4px)",
+                  color: "var(--afa-cream)",
+                  transition: "opacity 0.3s ease",
+                }}
+              >
+                <ArrowUpRightIcon style={{ width: "16px", height: "16px" }} />
+              </span>
             </div>
 
             <div style={{ padding: "14px 18px 20px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "20px", fontWeight: 600, color: "var(--afa-cream)", marginBottom: "6px" }}>
+              <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "26px", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
                 {v.name}
               </h2>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)" }}>
@@ -183,7 +215,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                 <span>{v.capacity.toLocaleString("en-IN")} {tr.venuesPage.seatsLabel}</span>
               </div>
               {v.priceRangeLabel && (
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--afa-amber)", marginTop: "8px" }}>{v.priceRangeLabel}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "10px" }}>{v.priceRangeLabel}</div>
               )}
             </div>
           </div>
