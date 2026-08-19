@@ -131,6 +131,9 @@ const fr: Dictionary = {
     searchPlaceholder: "Rechercher lieux, villes...",
     filterAllCities: "Toutes les villes",
     seatsLabel: "places",
+    tierIntimate: "Intime",
+    tierMidSize: "Taille moyenne",
+    tierLarge: "Grand",
   },
   venueOwnersEmbed: {
     loading: "Chargement des propriétaires de lieux...",
@@ -407,6 +410,7 @@ const fr: Dictionary = {
     acousticRating: "Note acoustique",
     notRatedYet: "Pas encore noté",
     facilitiesHeading: "Équipements",
+    noPhotosCaption: "Aucune photo vérifiée pour le moment - illustration à titre indicatif uniquement.",
     seatingHeading: "Places assises et tarifs",
     seatingComingSoon: "Les détails des places arrivent bientôt.",
     following: "✓ Abonné",

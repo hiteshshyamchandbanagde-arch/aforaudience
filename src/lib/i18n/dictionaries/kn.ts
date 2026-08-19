@@ -126,6 +126,9 @@ const kn: Dictionary = {
     searchPlaceholder: "ಸ್ಥಳಗಳು, ನಗರಗಳನ್ನು ಹುಡುಕಿ...",
     filterAllCities: "ಎಲ್ಲಾ ನಗರಗಳು",
     seatsLabel: "ಸೀಟುಗಳು",
+    tierIntimate: "ಆಪ್ತ",
+    tierMidSize: "ಮಧ್ಯಮ ಗಾತ್ರ",
+    tierLarge: "ದೊಡ್ಡ",
   },
   venueOwnersEmbed: {
     loading: "ಸ್ಥಳ ಮಾಲೀಕರು ಲೋಡ್ ಆಗುತ್ತಿದ್ದಾರೆ...",
@@ -402,6 +405,7 @@ const kn: Dictionary = {
     acousticRating: "ಅಕೌಸ್ಟಿಕ್ ರೇಟಿಂಗ್",
     notRatedYet: "ಇನ್ನೂ ರೇಟ್ ಮಾಡಿಲ್ಲ",
     facilitiesHeading: "ಸೌಲಭ್ಯಗಳು",
+    noPhotosCaption: "ಇನ್ನೂ ಪರಿಶೀಲಿತ ಫೋಟೋಗಳಿಲ್ಲ - ಚಿತ್ರಣ ಕೇವಲ ಉಲ್ಲೇಖಕ್ಕಾಗಿ ಮಾತ್ರ.",
     seatingHeading: "ಆಸನ ವ್ಯವಸ್ಥೆ ಮತ್ತು ಬೆಲೆ",
     seatingComingSoon: "ಆಸನ ವಿವರಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರುತ್ತವೆ.",
     following: "✓ ಅನುಸರಿಸುತ್ತಿದ್ದೀರಿ",

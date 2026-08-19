@@ -125,6 +125,9 @@ const hi: Dictionary = {
     searchPlaceholder: "स्थल, शहर खोजें...",
     filterAllCities: "सभी शहर",
     seatsLabel: "सीटें",
+    tierIntimate: "अंतरंग",
+    tierMidSize: "मध्यम आकार",
+    tierLarge: "बड़ा",
   },
   venueOwnersEmbed: {
     loading: "स्थल मालिक लोड हो रहे हैं...",
@@ -401,6 +404,7 @@ const hi: Dictionary = {
     acousticRating: "ध्वनिक रेटिंग",
     notRatedYet: "अभी रेटेड नहीं",
     facilitiesHeading: "सुविधाएं",
+    noPhotosCaption: "अभी कोई सत्यापित फ़ोटो नहीं - चित्रण केवल संदर्भ के लिए है।",
     seatingHeading: "सीटिंग और मूल्य",
     seatingComingSoon: "सीटिंग विवरण जल्द आ रहे हैं।",
     following: "✓ फ़ॉलो कर रहे हैं",

@@ -126,6 +126,9 @@ const bn: Dictionary = {
     searchPlaceholder: "ভেন্যু, শহর খুঁজুন...",
     filterAllCities: "সব শহর",
     seatsLabel: "সিট",
+    tierIntimate: "অন্তরঙ্গ",
+    tierMidSize: "মাঝারি আকার",
+    tierLarge: "বড়",
   },
   venueOwnersEmbed: {
     loading: "ভেন্যু মালিকরা লোড হচ্ছেন...",
@@ -402,6 +405,7 @@ const bn: Dictionary = {
     acousticRating: "অ্যাকোস্টিক রেটিং",
     notRatedYet: "এখনও রেট করা হয়নি",
     facilitiesHeading: "সুবিধা",
+    noPhotosCaption: "এখনও কোনো যাচাইকৃত ছবি নেই - চিত্রণ শুধুমাত্র রেফারেন্সের জন্য।",
     seatingHeading: "সিটিং এবং দাম",
     seatingComingSoon: "সিটিং বিবরণ শীঘ্রই আসছে।",
     following: "✓ অনুসরণ করছেন",

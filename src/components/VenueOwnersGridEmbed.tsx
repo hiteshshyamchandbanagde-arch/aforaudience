@@ -75,11 +75,17 @@ export default function VenueOwnersGridEmbed() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={tr.venueOwnersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
+      <style>{`
+        .afa-owners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        @media (max-width: 700px) {
+          .afa-owners-grid { grid-template-columns: 1fr; gap: 16px; }
+        }
+      `}</style>
+      <div className="afa-owners-grid">
       {filtered.map((owner) => {
         const isNavigatingThis = navigatingId === owner.id
         const displayName = owner.user.displayName || owner.user.name
@@ -98,23 +104,23 @@ export default function VenueOwnersGridEmbed() {
             }}
             style={{
               position: "relative",
-              background: "var(--afa-white)",
+              background: "var(--afa-surface-raised)",
               borderRadius: "12px",
               padding: "22px",
-              border: "1px solid rgba(14,12,10,0.08)",
+              border: "1px solid rgba(245,245,240,0.1)",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
             }}
           >
             {isNavigatingThis && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 2, borderRadius: "12px", background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+              <div style={{ position: "absolute", inset: 0, zIndex: 2, borderRadius: "12px", background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-fill-solid)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "var(--afa-on-fill-solid)", flexShrink: 0, overflow: "hidden" }}>
                 {owner.user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -122,12 +128,12 @@ export default function VenueOwnersGridEmbed() {
                   displayName.charAt(0).toUpperCase()
                 )}
               </div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{displayName}</h2>
+              <h2 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "17px", fontWeight: 600, color: "var(--afa-cream)" }}>{displayName}</h2>
             </div>
-            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
+            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: owner.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: owner.bio ? "normal" : "italic" }}>
               {owner.bio || tr.venueOwnersEmbed.noBioYet}
             </p>
-            <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.04em", color: "var(--afa-amber)", opacity: 0.8 }}>
               {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersEmbed.venueSingular : tr.venueOwnersEmbed.venuePlural}
             </div>
           </div>

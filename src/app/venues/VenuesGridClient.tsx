@@ -2,9 +2,12 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import Photo from "@/components/Photo"
+import VenueNoPhoto, { capacityTier } from "@/components/VenueNoPhoto"
 import { cityLabel } from "@/lib/country-codes"
-import { isPlaceholderImageUrl, monogramTone } from "@/lib/placeholder-image"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
+import { SearchIcon } from "@/components/icons/ArtistIcons"
 
 interface VenueItem {
   id: string
@@ -16,18 +19,21 @@ interface VenueItem {
   photos: string[]
 }
 
+// GEN-2608-074 - migrated off Theme Phase 0 tokens (--afa-plum-black/
+// --afa-terracotta/--afa-gold, literal white cards) onto the locked
+// ink/cream/amber/orange system, per the approved Figma Make export
+// ("Venues Directory + Detail", verified against real schema 19 Aug -
+// see docs/design.md). Replaces the old circular-monogram fallback
+// (monogramTone) with the capacity-tier illustrated panel (VenueNoPhoto)
+// since Venue has no genre-equivalent category field. Also fixes
+// BUG-2608-074-class mobile clipping - the grid previously had zero
+// @media breakpoints.
 export default function VenuesGridClient({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
   const { t: tr } = useLocale()
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
-  // FEAT-2608-036 - pre-fill with the resolved location if it's actually
-  // one of the cities we have venues in, same "pre-filled, removable"
-  // pattern as the Events page filter. "All Cities" always available.
-  // Filter value stays the bare city string (not city+country) - see
-  // comment in api/venues/cities/route.ts on why a genuine city-name
-  // collision across countries isn't fully disambiguated yet.
   const cityOptions = Array.from(new Map(venues.map((v) => [v.city, v.country])).entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([city, country]) => ({ city, label: cityLabel(city, country) }))
@@ -36,12 +42,6 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
     defaultCity && cities.includes(defaultCity) ? defaultCity : "All Cities"
   )
 
-  // Same click-guard as /events (PR #261) and /artists (PR #312) - a
-  // plain Link gives no click feedback, so a click that doesn't render
-  // anything right away reads as "nothing happened" and invites repeat
-  // clicks, each firing a fresh un-deduped navigation. Standing rule (1
-  // Aug): every tile/card must open in a single click - this closes the
-  // same gap here proactively rather than waiting for a live report.
   const goToVenue = (id: string) => {
     if (navigatingId) return
     setNavigatingId(id)
@@ -50,10 +50,6 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
     })
   }
 
-  // Session 65 - this embed had no search at all (only the standalone
-  // /venue-owners-style full pages did). Adding it here too so the tab
-  // reached via the actual nav link behaves the same as /events /
-  // /artists, not just the orphaned standalone route.
   const filtered = venues.filter((v) => {
     const matchSearch =
       v.name.toLowerCase().includes(search.toLowerCase()) || v.city.toLowerCase().includes(search.toLowerCase())
@@ -61,8 +57,20 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
     return matchSearch && matchCity
   })
 
+  const tierLabel = (capacity: number) => {
+    const tier = capacityTier(capacity)
+    return tier === "intimate" ? tr.venuesPage.tierIntimate : tier === "mid" ? tr.venuesPage.tierMidSize : tr.venuesPage.tierLarge
+  }
+
   return (
     <div>
+      <style>{`
+        .afa-venues-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        @media (max-width: 700px) {
+          .afa-venues-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
+      `}</style>
+
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "20px" }}>
         <BrowseSearchDropdown
           query={search}
@@ -78,21 +86,21 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             </>
           )}
         >
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={tr.venuesPage.searchPlaceholder}
-            style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", fontFamily: "var(--font-sans)", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
-          />
+          <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", maxWidth: "360px", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "8px", boxSizing: "border-box" }}>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={tr.venuesPage.searchPlaceholder}
+              style={{ flex: 1, padding: "10px 4px 10px 14px", border: "none", background: "transparent", fontSize: "14px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
+            />
+            <SearchIcon style={{ width: "16px", height: "16px", marginRight: "14px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
+          </div>
         </BrowseSearchDropdown>
 
-        {/* FEAT-2608-036 - this select existed only as state/filter logic
-            with no way to actually change it until now; adding the
-            control itself alongside the city+country label work. */}
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.12)", fontSize: "13px", fontFamily: "var(--font-sans)", color: "var(--afa-ink)", background: "white", cursor: "pointer", outline: "none" }}
+          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "13px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", cursor: "pointer", outline: "none" }}
         >
           <option value="All Cities">{tr.venuesPage.filterAllCities}</option>
           {cityOptions.map((c) => (
@@ -101,7 +109,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         </select>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px" }}>
+      <div className="afa-venues-grid">
       {filtered.map((v) => {
         const isNavigatingThis = navigatingId === v.id
         const photo = v.photos?.find((p) => !isPlaceholderImageUrl(p)) || null
@@ -122,10 +130,10 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             style={{
               position: "relative",
               display: "block",
-              background: "var(--afa-white)",
+              background: "var(--afa-surface-raised)",
               borderRadius: "10px",
               overflow: "hidden",
-              border: "1px solid rgba(14,12,10,0.08)",
+              border: "1px solid rgba(245,245,240,0.1)",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
@@ -137,7 +145,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   position: "absolute",
                   inset: 0,
                   zIndex: 2,
-                  background: "rgba(255,255,255,0.7)",
+                  background: "rgba(20,20,20,0.7)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -148,8 +156,8 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                     width: "24px",
                     height: "24px",
                     borderRadius: "50%",
-                    border: "3px solid rgba(14,12,10,0.15)",
-                    borderTopColor: "var(--afa-terracotta)",
+                    border: "3px solid rgba(245,245,240,0.15)",
+                    borderTopColor: "var(--afa-fill-solid)",
                     animation: "afa-spin 0.7s linear infinite",
                   }}
                 />
@@ -157,52 +165,25 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               </div>
             )}
 
-            {/* PHOTOGRAPH - venue.photos was fetched but never rendered
-                anywhere on this grid (BUG-2607-036 / FEAT-2608-044). Most
-                QA "photos" (1118/1132) turned out to be picsum.photos
-                random-seed placeholders, not real venue photography -
-                caught live (11 Aug) when a Pune convention centre
-                rendered as a New York taxi street. isPlaceholderImageUrl
-                filters those out at the `photo` computation above, so
-                this falls back to the monogram-on-grain panel (same
-                grain texture as the homepage hero) for placeholder or
-                genuinely absent photos alike, rather than showing
-                content that misrepresents the venue. With near-total
-                placeholder coverage in QA (1118/1132), almost every card
-                landed on this fallback at once - monogramTone(v.id)
-                rotates deterministically through the existing dark-tone
-                design tokens so a full grid of fallbacks doesn't read as
-                one flat monotonous block. */}
-            <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", background: photo ? "var(--afa-maroon-black)" : monogramTone(v.id), overflow: "hidden" }}>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
               {photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <Photo src={photo} alt={v.name} />
               ) : (
-                <>
-                  <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.06, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: "48px", fontStyle: "italic", color: "rgba(247,243,238,0.35)" }}>
-                    {v.name.charAt(0).toUpperCase()}
-                  </div>
-                </>
+                <VenueNoPhoto capacity={v.capacity} tierLabel={tierLabel(v.capacity)} />
               )}
             </div>
 
-            {/* WALL-LABEL - the mono, uppercase, diamond-separated caption
-                strip already used for the homepage's issue tag and ticker
-                (var(--font-mono), var(--afa-gold)) reused here as a
-                museum-label device under each photo. */}
-            <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-gold)", display: "flex", alignItems: "center", gap: "8px" }}>
-              <span>{cityLabel(v.city, v.country)}</span>
-              <span style={{ color: "var(--afa-terracotta)" }}>◆</span>
-              <span>{v.capacity} {tr.venuesPage.seatsLabel}</span>
-            </div>
-
-            <div style={{ padding: "6px 18px 20px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "6px" }}>
+            <div style={{ padding: "14px 18px 20px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "20px", fontWeight: 600, color: "var(--afa-cream)", marginBottom: "6px" }}>
                 {v.name}
               </h2>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)" }}>
+                <span>{cityLabel(v.city, v.country)}</span>
+                <span style={{ opacity: 0.5 }}>·</span>
+                <span>{v.capacity.toLocaleString("en-IN")} {tr.venuesPage.seatsLabel}</span>
+              </div>
               {v.priceRangeLabel && (
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 700 }}>{v.priceRangeLabel}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--afa-amber)", marginTop: "8px" }}>{v.priceRangeLabel}</div>
               )}
             </div>
           </div>
