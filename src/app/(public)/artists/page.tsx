@@ -149,6 +149,16 @@ export default function ArtistsPage() {
         .afa-cta-solid { transition: filter 0.15s ease; }
         .afa-cta-solid:hover { filter: brightness(1.1); }
         .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
+        /* BUG-2608-074: featured artist card was a fixed 2-column grid
+           (photo | name+button) with no mobile breakpoint - on phone
+           widths the 240px-min photo column left almost no room for the
+           text column, clipping the name and "View Profile" button.
+           Same root-cause pattern as BUG-2608-070's Ledger grid. */
+        @media (max-width: 700px) {
+          .afa-featured-artist-card { grid-template-columns: 1fr !important; }
+          .afa-featured-artist-card .afa-featured-artist-photo { min-height: 200px !important; }
+          .afa-featured-artist-card .afa-featured-artist-content { padding: 20px 20px 24px !important; }
+        }
       `}</style>
       <SiteNav active="artists" />
 
@@ -220,8 +230,8 @@ export default function ArtistsPage() {
 
         {/* FEATURED / RISING STAR */}
         {risingStar && (
-          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
-            <div style={{ position: "relative", minHeight: "260px" }}>
+          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
+            <div className="afa-featured-artist-photo" style={{ position: "relative", minHeight: "260px" }}>
               {risingStarPortraitUrl ? (
                 <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} />
               ) : (
@@ -234,7 +244,7 @@ export default function ArtistsPage() {
                 </span>
               </div>
             </div>
-            <div style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "16px" }}>
+            <div className="afa-featured-artist-content" style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "16px" }}>
               <div>
                 <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-cream)", marginBottom: "6px" }}>
                   {risingStar.user.displayName || risingStar.user.name}
