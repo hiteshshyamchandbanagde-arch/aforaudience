@@ -23,6 +23,26 @@ export function DirectionsIcon({ className, style }: IconProps) {
   )
 }
 
+// Card hover-reveal mark (BUG-2608-072 gap 4) - VenueCard.tsx's circular
+// arrow-up-right button that fades in top-right of the photo on hover.
+export function ArrowUpRightIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M7 17 17 7M8 7h9v9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+// Sidebar "Follow this venue" CTA (BUG-2608-072 gap 5) - matches the
+// export's IconPlus shown before the label when not yet following.
+export function PlusIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 // Replaces the 🔔/🔕 emoji previously used for the follow-notify toggle
 // (VenueFollowButton.tsx, caught during this redesign).
 export function BellIcon({ className, style }: IconProps) {

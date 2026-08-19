@@ -14,30 +14,62 @@ interface VenueItem {
   photos: string[]
 }
 
-const tabStyle = (active: boolean) => ({
-  padding: "8px 18px",
-  borderRadius: "999px",
-  border: `1.5px solid ${active ? "var(--afa-fill-solid)" : "rgba(245,245,240,0.15)"}`,
-  background: active ? "var(--afa-fill-solid)" : "transparent",
-  color: active ? "var(--afa-on-fill-solid)" : "var(--afa-text-primary)",
-  fontSize: "13px",
-  fontWeight: 600,
-  cursor: "pointer" as const,
-})
-
-// Toggle-based discovery entry point (session 62, design.md §9.5) -
-// deliberately not a new top-level nav route. Venues stay server-fetched
-// (unchanged default view); Owners is fetched client-side on demand only
-// when that tab is actually opened.
-export default function VenuesViewToggle({ venues, defaultCity }: { venues: VenueItem[]; defaultCity?: string | null }) {
+// BUG-2608-072 (gap 3) - the original pill-button toggle didn't match the
+// Figma Make export (VenuesDirectory.tsx lines ~34-48) at all: underline
+// tabs, not pills, each with a small superscript count next to the label.
+// ownerCount is fetched server-side (see page.tsx) rather than read off
+// VenueOwnersGridEmbed's own client-side fetch, since the tab label needs
+// a real count before the Owners tab has ever been opened.
+export default function VenuesViewToggle({
+  venues,
+  ownerCount,
+  defaultCity,
+}: {
+  venues: VenueItem[]
+  ownerCount: number
+  defaultCity?: string | null
+}) {
   const { t: tr } = useLocale()
   const [view, setView] = useState<"venues" | "owners">("venues")
 
+  const tabs: { key: "venues" | "owners"; label: string; count: number }[] = [
+    { key: "venues", label: tr.venuesPage.tabVenues, count: venues.length },
+    { key: "owners", label: tr.venuesPage.tabOwners, count: ownerCount },
+  ]
+
   return (
     <div>
-      <div style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
-        <button style={tabStyle(view === "venues")} onClick={() => setView("venues")}>{tr.venuesPage.tabVenues}</button>
-        <button style={tabStyle(view === "owners")} onClick={() => setView("owners")}>{tr.venuesPage.tabOwners}</button>
+      <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid rgba(245,245,240,0.15)", marginBottom: "24px" }}>
+        {tabs.map((t) => {
+          const active = view === t.key
+          return (
+            <button
+              key={t.key}
+              onClick={() => setView(t.key)}
+              style={{
+                position: "relative",
+                paddingBottom: "14px",
+                marginBottom: "-1px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-display)",
+                fontSize: "20px",
+                letterSpacing: "-0.01em",
+                color: active ? "var(--afa-cream)" : "rgba(245,245,240,0.45)",
+                transition: "color 0.2s ease",
+              }}
+            >
+              {t.label}
+              <span style={{ marginLeft: "8px", verticalAlign: "super", fontSize: "11px", fontWeight: 400, fontFamily: "var(--font-mono)", color: "rgba(245,245,240,0.45)" }}>
+                {t.count}
+              </span>
+              {active && (
+                <span style={{ position: "absolute", left: 0, right: 0, bottom: "-1px", height: "2px", background: "var(--afa-fill-solid)" }} />
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {view === "venues" ? (
