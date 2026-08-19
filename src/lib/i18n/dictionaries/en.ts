@@ -125,6 +125,9 @@ const en = {
     searchPlaceholder: "Search venues, cities...",
     filterAllCities: "All Cities",
     seatsLabel: "seats",
+    tierIntimate: "Intimate",
+    tierMidSize: "Mid-size",
+    tierLarge: "Large",
   },
   venueOwnersEmbed: {
     loading: "Loading venue owners...",
@@ -423,6 +426,7 @@ const en = {
     acousticRating: "Acoustic Rating",
     notRatedYet: "Not Rated Yet",
     facilitiesHeading: "Facilities",
+    noPhotosCaption: "No verified photos yet - illustration shown for reference only.",
     seatingHeading: "Seating & Pricing",
     seatingComingSoon: "Seating details coming soon.",
     following: "✓ Following",

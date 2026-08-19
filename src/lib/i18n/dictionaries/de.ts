@@ -135,6 +135,9 @@ const de: Dictionary = {
     searchPlaceholder: "Veranstaltungsorte, Städte suchen...",
     filterAllCities: "Alle Städte",
     seatsLabel: "Plätze",
+    tierIntimate: "Intim",
+    tierMidSize: "Mittelgroß",
+    tierLarge: "Groß",
   },
   venueOwnersEmbed: {
     loading: "Standortbesitzer werden geladen...",
@@ -411,6 +414,7 @@ const de: Dictionary = {
     acousticRating: "Akustikbewertung",
     notRatedYet: "Noch nicht bewertet",
     facilitiesHeading: "Einrichtungen",
+    noPhotosCaption: "Noch keine verifizierten Fotos - Illustration dient nur zur Orientierung.",
     seatingHeading: "Bestuhlung & Preise",
     seatingComingSoon: "Details zur Bestuhlung folgen in Kürze.",
     following: "✓ Gefolgt",

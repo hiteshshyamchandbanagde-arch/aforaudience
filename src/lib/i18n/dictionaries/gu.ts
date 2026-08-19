@@ -126,6 +126,9 @@ const gu: Dictionary = {
     searchPlaceholder: "સ્થળો, શહેરો શોધો...",
     filterAllCities: "બધા શહેરો",
     seatsLabel: "સીટો",
+    tierIntimate: "આત્મીય",
+    tierMidSize: "મધ્યમ કદ",
+    tierLarge: "મોટું",
   },
   venueOwnersEmbed: {
     loading: "સ્થળ માલિકો લોડ થઈ રહ્યા છે...",
@@ -402,6 +405,7 @@ const gu: Dictionary = {
     acousticRating: "એકોસ્ટિક રેટિંગ",
     notRatedYet: "હજુ સુધી રેટ કર્યું નથી",
     facilitiesHeading: "સુવિધાઓ",
+    noPhotosCaption: "હજુ સુધી કોઈ ચકાસાયેલ ફોટા નથી - ચિત્રણ ફક્ત સંદર્ભ માટે છે.",
     seatingHeading: "બેઠક વ્યવસ્થા અને કિંમત",
     seatingComingSoon: "બેઠક વિગતો ટૂંક સમયમાં આવે છે.",
     following: "✓ અનુસરી રહ્યા છો",

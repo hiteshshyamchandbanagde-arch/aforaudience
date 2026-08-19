@@ -126,6 +126,9 @@ const ta: Dictionary = {
     searchPlaceholder: "இடங்கள், நகரங்களைத் தேடுங்கள்...",
     filterAllCities: "அனைத்து நகரங்கள்",
     seatsLabel: "இருக்கைகள்",
+    tierIntimate: "நெருக்கமான",
+    tierMidSize: "நடுத்தர அளவு",
+    tierLarge: "பெரிய",
   },
   venueOwnersEmbed: {
     loading: "இட உரிமையாளர்கள் ஏற்றப்படுகிறார்கள்...",
@@ -402,6 +405,7 @@ const ta: Dictionary = {
     acousticRating: "ஒலி தர மதிப்பீடு",
     notRatedYet: "இதுவரை மதிப்பிடப்படவில்லை",
     facilitiesHeading: "வசதிகள்",
+    noPhotosCaption: "இன்னும் சரிபார்க்கப்பட்ட புகைப்படங்கள் இல்லை - படம் குறிப்புக்காக மட்டுமே.",
     seatingHeading: "இருக்கை & விலை",
     seatingComingSoon: "இருக்கை விவரங்கள் விரைவில் வரும்.",
     following: "✓ பின்தொடர்கிறீர்கள்",

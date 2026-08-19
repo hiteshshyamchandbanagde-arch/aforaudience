@@ -126,6 +126,9 @@ const te: Dictionary = {
     searchPlaceholder: "వేదికలు, నగరాలు వెతకండి...",
     filterAllCities: "అన్ని నగరాలు",
     seatsLabel: "సీట్లు",
+    tierIntimate: "సన్నిహిత",
+    tierMidSize: "మధ్యస్థ పరిమాణం",
+    tierLarge: "పెద్ద",
   },
   venueOwnersEmbed: {
     loading: "వేదిక యజమానులు లోడ్ అవుతున్నారు...",
@@ -402,6 +405,7 @@ const te: Dictionary = {
     acousticRating: "అకౌస్టిక్ రేటింగ్",
     notRatedYet: "ఇంకా రేట్ చేయలేదు",
     facilitiesHeading: "సౌకర్యాలు",
+    noPhotosCaption: "ఇంకా ధృవీకరించిన ఫోటోలు లేవు - చిత్రణ కేవలం సూచన కోసం మాత్రమే.",
     seatingHeading: "సీటింగ్ & ధర",
     seatingComingSoon: "సీటింగ్ వివరాలు త్వరలో వస్తాయి.",
     following: "✓ అనుసరిస్తున్నారు",

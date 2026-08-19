@@ -126,6 +126,9 @@ const ml: Dictionary = {
     searchPlaceholder: "വേദികൾ, നഗരങ്ങൾ തിരയുക...",
     filterAllCities: "എല്ലാ നഗരങ്ങളും",
     seatsLabel: "സീറ്റുകൾ",
+    tierIntimate: "ഇന്റിമേറ്റ്",
+    tierMidSize: "ഇടത്തരം വലുപ്പം",
+    tierLarge: "വലുത്",
   },
   venueOwnersEmbed: {
     loading: "വേദി ഉടമകൾ ലോഡ് ചെയ്യുന്നു...",
@@ -402,6 +405,7 @@ const ml: Dictionary = {
     acousticRating: "അക്കൗസ്റ്റിക് റേറ്റിംഗ്",
     notRatedYet: "ഇതുവരെ റേറ്റ് ചെയ്തിട്ടില്ല",
     facilitiesHeading: "സൗകര്യങ്ങൾ",
+    noPhotosCaption: "ഇതുവരെ പരിശോധിച്ച ഫോട്ടോകൾ ഇല്ല - ചിത്രീകരണം റഫറൻസിന് മാത്രം.",
     seatingHeading: "സീറ്റിംഗ് & വില",
     seatingComingSoon: "സീറ്റിംഗ് വിശദാംശങ്ങൾ ഉടൻ വരും.",
     following: "✓ പിന്തുടരുന്നു",

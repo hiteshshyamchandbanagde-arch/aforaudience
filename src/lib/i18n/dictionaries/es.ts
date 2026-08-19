@@ -130,6 +130,9 @@ const es: Dictionary = {
     searchPlaceholder: "Buscar recintos, ciudades...",
     filterAllCities: "Todas las ciudades",
     seatsLabel: "asientos",
+    tierIntimate: "Íntimo",
+    tierMidSize: "Tamaño medio",
+    tierLarge: "Grande",
   },
   venueOwnersEmbed: {
     loading: "Cargando propietarios de recintos...",
@@ -406,6 +409,7 @@ const es: Dictionary = {
     acousticRating: "Calificación acústica",
     notRatedYet: "Aún no calificado",
     facilitiesHeading: "Instalaciones",
+    noPhotosCaption: "Aún no hay fotos verificadas - la ilustración es solo de referencia.",
     seatingHeading: "Asientos y precios",
     seatingComingSoon: "Los detalles de los asientos llegarán pronto.",
     following: "✓ Siguiendo",
