@@ -1,5 +1,5 @@
 import type { CSSProperties, ComponentType } from "react"
-import { IntimateRoomMark, MidHallMark, LargeArenaMark } from "@/components/icons/VenueIcons"
+import { IntimateRoomMark, MidHallMark, LargeArenaMark, seedFromVenueId } from "@/components/icons/VenueIcons"
 
 // No-photo fallback for venue cards/hero (GEN-2608-074). Replaces the old
 // circular-monogram-letter treatment (monogramTone, src/lib/placeholder-image.ts)
@@ -21,7 +21,7 @@ export function capacityTier(capacity: number): CapacityTier {
   return "large"
 }
 
-const TIER_MARK: Record<CapacityTier, ComponentType<{ style?: CSSProperties }>> = {
+const TIER_MARK: Record<CapacityTier, ComponentType<{ v: number; style?: CSSProperties }>> = {
   intimate: IntimateRoomMark,
   mid: MidHallMark,
   large: LargeArenaMark,
@@ -29,6 +29,13 @@ const TIER_MARK: Record<CapacityTier, ComponentType<{ style?: CSSProperties }>> 
 
 interface VenueNoPhotoProps {
   capacity: number
+  // Venue id, hashed into the `v` seed that drives the export's
+  // per-instance variation (lamp vs. spotlight, chair/row/tier counts -
+  // see seedFromVenueId in VenueIcons.tsx). Optional only so existing
+  // callers don't break at the type level while being migrated; falls
+  // back to a fixed seed (matches export behavior for an empty seed
+  // string, since seedFromVenueId("") === 0).
+  seed?: string
   caption?: string
   size?: "card" | "hero"
 }
@@ -41,9 +48,10 @@ interface VenueNoPhotoProps {
 // instead, so it (a) also shows over real photos, which this component
 // can't do since it only renders for the no-photo case, and (b) stops
 // incorrectly appearing on the detail hero.
-export default function VenueNoPhoto({ capacity, caption, size = "card" }: VenueNoPhotoProps) {
+export default function VenueNoPhoto({ capacity, seed, caption, size = "card" }: VenueNoPhotoProps) {
   const tier = capacityTier(capacity)
   const Mark = TIER_MARK[tier]
+  const v = seedFromVenueId(seed ?? "")
   // Card variant matches the export's VenueFallback exactly - the SVG is
   // `absolute inset-0 h-full w-full`, full-bleed with zero container
   // padding; whatever breathing room the artwork has comes from empty
@@ -79,10 +87,10 @@ export default function VenueNoPhoto({ capacity, caption, size = "card" }: Venue
         }}
       />
       {size === "card" ? (
-        <Mark style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
+        <Mark v={v} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
       ) : (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Mark style={{ width: "70%", maxWidth: "420px", color: "var(--afa-amber)", opacity: 0.55 }} />
+          <Mark v={v} style={{ width: "70%", maxWidth: "420px", color: "var(--afa-amber)", opacity: 0.55 }} />
         </div>
       )}
 

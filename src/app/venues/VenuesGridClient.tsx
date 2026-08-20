@@ -236,7 +236,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               {photo ? (
                 <Photo src={photo} alt={v.name} />
               ) : (
-                <VenueNoPhoto capacity={v.capacity} />
+                <VenueNoPhoto capacity={v.capacity} seed={v.id} />
               )}
               {/* BUG-2608-072 gap 4 baked this badge into VenueNoPhoto,
                   so it only ever showed on no-photo fallback cards -
