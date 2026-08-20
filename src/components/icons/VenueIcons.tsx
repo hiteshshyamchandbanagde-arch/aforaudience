@@ -15,6 +15,17 @@ import type { CSSProperties, ComponentType } from "react"
 
 type IconProps = { className?: string; style?: CSSProperties }
 
+// City-filter dropdown chevron (BUG-2608-072-class gap, this audit) -
+// matches the export's IconChevronDown (icons.tsx), rotated open/closed
+// by the caller.
+export function ChevronDownIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function DirectionsIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">

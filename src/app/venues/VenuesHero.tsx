@@ -19,16 +19,16 @@ import { useLocale } from "@/lib/i18n/translate"
 export default function VenuesHero({ count }: { count: number }) {
   const { t: tr } = useLocale()
   return (
-    <header style={{ borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "32px", marginBottom: "32px" }}>
+    <header style={{ borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "40px", marginBottom: "40px" }}>
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
         {tr.venuesPage.eyebrowDirectory.replace("{count}", String(count))}
       </span>
-      <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(28px, 3.6vw, 40px)", fontWeight: 700, letterSpacing: "-0.5px", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
+      <h1 style={{ marginTop: "20px", fontFamily: "var(--font-display)", fontSize: "clamp(44px, 7vw, 80px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
         {tr.venuesPage.headingPrefix}
-        <em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 500 }}>{tr.venuesPage.headingEmphasis}</em>
+        <em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.venuesPage.headingEmphasis}</em>
         {tr.venuesPage.headingSuffix}
       </h1>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "16px", maxWidth: "420px", lineHeight: 1.6 }}>
+      <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "20px", maxWidth: "420px", lineHeight: 1.6 }}>
         {tr.venuesPage.subtitle}
       </p>
     </header>
