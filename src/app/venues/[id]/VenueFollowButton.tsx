@@ -92,7 +92,7 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
   if (!loaded) return null
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "28px" }}>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
       <style>{`.afa-follow-cta:hover { filter: brightness(1.1); }`}</style>
       <button
         onClick={toggleFollow}

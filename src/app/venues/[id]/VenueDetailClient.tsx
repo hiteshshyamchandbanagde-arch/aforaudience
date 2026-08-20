@@ -113,11 +113,15 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
             <VenueFollowHeaderButton state={follow} />
+            {/* BUG-2608-076 - this was a bare text link (no border/padding/
+                button shape at all). Figma export gives Get Directions the
+                same button chrome as Follow - bordered box, same padding,
+                sharp corners - sitting next to it, not a plain inline link. */}
             <a
               href={venue.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid rgba(201,151,58,0.5)", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
             >
               <DirectionsIcon style={{ width: "14px", height: "14px" }} />
               {tr.venueDetailPage.getDirections}
