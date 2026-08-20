@@ -5,6 +5,8 @@ import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
+import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
+import { SearchIcon } from "@/components/icons/ArtistIcons"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -18,7 +20,7 @@ interface OrganiserItem {
   _count: { events: number }
 }
 
-const TYPE_OPTIONS = ["All", ...Object.keys(TYPE_META)]
+const TYPE_OPTIONS = Object.keys(TYPE_META)
 
 // Same date+startTime instant-comparison pattern as the booking guard
 // (POST /api/bookings) and cancellation routes - kept consistent so
@@ -64,7 +66,7 @@ export default function EventsPage() {
   const [error, setError] = useState("")
 
   const [search, setSearch] = useState("")
-  const [selectedType, setSelectedType] = useState("All")
+  const [selectedType, setSelectedType] = useState<string | null>(null)
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
   // OTH-2608-009: sort control for the events list. "date" preserves the
@@ -144,7 +146,7 @@ export default function EventsPage() {
     const matchSearch =
       e.title.toLowerCase().includes(search.toLowerCase()) ||
       (e.venue?.name || "").toLowerCase().includes(search.toLowerCase())
-    const matchType = selectedType === "All" || e.type === selectedType
+    const matchType = selectedType === null || e.type === selectedType
     const matchCity = selectedCity === "All Cities" || e.venue?.city === selectedCity
     const matchPrice =
       priceFilter === "All" || (priceFilter === "Free" && e.isFree) || (priceFilter === "Paid" && !e.isFree)
@@ -173,8 +175,8 @@ export default function EventsPage() {
     // undefined trigger a `??` fallback, so a real zero sailed straight
     // through as if it were a genuine ₹0 price. Any non-free event with
     // no truthy price (null OR 0) is equally "no real price to show" -
-    // its own badge already renders "—" either way (line ~510/561) - so
-    // both must be treated the same here.
+    // its own badge already renders "—" either way - so both must be
+    // treated the same here.
     const price = (e: EventItem) => (e.isFree ? 0 : e.ticketPrice ? e.ticketPrice : Infinity)
     filtered.sort((a, b) => {
       const pa = price(a), pb = price(b)
@@ -197,260 +199,274 @@ export default function EventsPage() {
   const filteredOrganisers = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: 56px 24px 112px; }
+        @media (min-width: 640px) { .afa-events-page-container { padding: 80px 32px 112px; } }
+        .afa-event-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.2s ease, opacity 0.15s ease; }
+        .afa-event-card:hover { border-color: rgba(201,151,58,0.3); }
+        .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
+        .afa-event-card-list .afa-event-card-poster { width: 9rem; aspect-ratio: 3 / 4; }
+        @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
+        @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+        @keyframes afa-spin { to { transform: rotate(360deg); } }
+        .afa-events-search-box { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(245,245,240,0.2); padding-bottom: 8px; flex: 1; min-width: 220px; }
+        .afa-events-search-box:focus-within { border-color: var(--afa-amber); }
+        .afa-events-type-filter { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(245,245,240,0.4); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
+        .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
+        .afa-events-type-filter.active { color: var(--afa-amber); }
+        .afa-events-mode-tab { font-family: var(--font-display); font-size: 18px; background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
+        .afa-events-mode-tab:hover { color: rgba(245,245,240,0.7); }
+        .afa-events-mode-tab.active { color: var(--afa-cream); }
+        .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-fill-solid); }
+        .afa-events-price-filter { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: rgba(245,245,240,0.4); padding: 0; transition: color 0.2s ease; }
+        .afa-events-price-filter:hover { color: rgba(245,245,240,0.7); }
+        .afa-events-price-filter.active { color: var(--afa-amber); }
+        .afa-events-select { padding: 8px 12px; border-radius: 3px; border: 1px solid rgba(245,245,240,0.15); font-size: 13px; color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
+        .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 2px; border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
+        .afa-events-view-btn:hover { color: var(--afa-cream); }
+        .afa-events-view-btn.active { background: var(--afa-cream); color: var(--afa-surface-inverse); }
+      `}</style>
       <SiteNav active="events" />
 
-      {/* HERO SEARCH */}
-      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            {contentMode === "organisers" ? (
-              <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
-            ) : (
-              <>{tr.eventsPage.heroPrefixEvents}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.eventsPage.heroEmphasisEvents}</em>{tr.eventsPage.heroSuffixEvents}</>
-            )}
-          </div>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+      <div className="afa-events-page-container">
+        {/* HERO - export EventsDirectory.tsx: eyebrow, display headline with
+            an italic amber emphasis word, static evocative subtitle. No
+            separate boxed/inverse hero background in the export - the hero
+            sits directly on the page. */}
+        <header style={{ maxWidth: "760px" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {contentMode === "organisers"
               ? tr.eventsPage.heroSubtitleOrganisers
               : loading ? tr.eventsPage.loadingEvents : tab === "upcoming" ? tr.eventsPage.countNear.replace("{n}", String(filtered.length)) : tr.eventsPage.countPast.replace("{n}", String(filtered.length))}
-          </p>
-          {contentMode === "events" ? (
-          <BrowseSearchDropdown
-            query={search}
-            items={filtered}
-            getId={(e) => e.id}
-            emptyLabel={tr.common.nounEvents}
-            translate
-            onSelect={(e) => goToEvent(e.id)}
-            renderRow={(e) => (
-              <>
-                <span style={{ fontWeight: 600 }}>{e.title}</span>
-                <span style={{ opacity: 0.5, marginLeft: "8px" }}>
-                  {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
-                </span>
-              </>
+          </span>
+          <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.02, color: "var(--afa-text-primary)" }}>
+            {contentMode === "organisers" ? (
+              <>{tr.eventsPage.heroPrefixOrganisers}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisOrganisers}</em>{tr.eventsPage.heroSuffixOrganisers}</>
+            ) : (
+              <>{tr.eventsPage.heroPrefixEvents}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.eventsPage.heroEmphasisEvents}</em>{tr.eventsPage.heroSuffixEvents}</>
             )}
-          >
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={tr.eventsPage.searchEventsPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
-            />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
-          </BrowseSearchDropdown>
-          ) : (
-          // Session 65 fix: same hero search box, same position and
-          // styling as the Events mode above - just pointed at organisers
-          // instead. Previously Organisers mode had no search here at all
-          // and a visually different small input further down inside
-          // OrganisersGridEmbed, which read as inconsistent/broken when
-          // switching tabs (Hitesh feedback).
-          <BrowseSearchDropdown
-            query={search}
-            items={filteredOrganisers}
-            getId={(o) => o.id}
-            emptyLabel={tr.common.nounOrganisers}
-            translate
-            onSelect={(o) => goToOrganiser(o.id)}
-            renderRow={(o) => (
-              <span style={{ fontWeight: 600 }}>{o.orgName}</span>
-            )}
-          >
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={tr.eventsPage.searchOrganisersPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "white", color: "var(--afa-ink)", outline: "none", boxSizing: "border-box" }}
-            />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
-          </BrowseSearchDropdown>
+          </h1>
+          {contentMode === "events" && (
+            <p style={{ marginTop: "20px", maxWidth: "560px", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
+              {tr.eventsPage.heroSubtitleEvents}
+            </p>
           )}
-        </div>
-      </div>
+        </header>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginTop: "24px" }}>
             {error}
           </div>
         )}
 
         {/* EVENTS / ORGANISERS TOGGLE - discovery entry point for the
             public Organiser bio profiles (session 62, design.md §9.5),
-            deliberately not a new top-level nav route. */}
-        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-          <button
-            onClick={() => setContentMode("events")}
-            style={{
-              padding: "8px 18px", borderRadius: "999px",
-              border: `1.5px solid ${contentMode === "events" ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
-              background: contentMode === "events" ? "var(--afa-terracotta)" : "transparent",
-              color: contentMode === "events" ? "white" : "var(--afa-text-primary)",
-              fontSize: "13px", fontWeight: 600, cursor: "pointer",
-            }}
-          >
+            deliberately not a new top-level nav route. Underline-tab
+            treatment (not pills) matching the Venues/Owners toggle
+            convention elsewhere in the app. */}
+        <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+          <button className={`afa-events-mode-tab${contentMode === "events" ? " active" : ""}`} onClick={() => setContentMode("events")}>
             {tr.eventsPage.toggleEvents}
           </button>
-          <button
-            onClick={() => setContentMode("organisers")}
-            style={{
-              padding: "8px 18px", borderRadius: "999px",
-              border: `1.5px solid ${contentMode === "organisers" ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
-              background: contentMode === "organisers" ? "var(--afa-terracotta)" : "transparent",
-              color: contentMode === "organisers" ? "white" : "var(--afa-text-primary)",
-              fontSize: "13px", fontWeight: 600, cursor: "pointer",
-            }}
-          >
+          <button className={`afa-events-mode-tab${contentMode === "organisers" ? " active" : ""}`} onClick={() => setContentMode("organisers")}>
             {tr.eventsPage.toggleOrganisers}
           </button>
         </div>
 
-        {contentMode === "organisers" ? (
-          <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
-        ) : (
-          <>
-        {/* UPCOMING / PAST TAB - Hitesh (31 Jul): keep upcoming as the
-            default listing, but let people browse past events as a
-            separate reference section rather than mixing them together
-            or hiding them entirely. Deliberately one page with a tab,
-            not a separate route/URL - reuses the same filters/search
-            instead of a near-duplicate page. */}
-        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-          {(["upcoming", "past"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={{
-                padding: "9px 20px",
-                borderRadius: "8px",
-                border: `1.5px solid ${tab === t ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
-                background: tab === t ? "var(--afa-terracotta)" : "var(--afa-surface-raised)",
-                color: tab === t ? "white" : "var(--afa-text-primary)",
-                fontSize: "14px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+        {contentMode === "events" && (
+          <div style={{ marginTop: "24px" }}>
+            <BrowseSearchDropdown
+              query={search}
+              items={filtered}
+              getId={(e) => e.id}
+              emptyLabel={tr.common.nounEvents}
+              translate
+              onSelect={(e) => goToEvent(e.id)}
+              renderRow={(e) => (
+                <>
+                  <span style={{ fontWeight: 600 }}>{e.title}</span>
+                  <span style={{ opacity: 0.5, marginLeft: "8px" }}>
+                    {new Date(e.date).toLocaleDateString()}{e.venue?.name ? ` · ${e.venue.name}` : ""}
+                  </span>
+                </>
+              )}
             >
-              {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
-            </button>
-          ))}
-        </div>
-
-        {/* FILTERS */}
-        <style>{`
-          .events-filters-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-          .events-filters-divider { width: 1px; height: 32px; background: rgba(245,245,240,0.12); flex-shrink: 0; }
-          .events-filters-select { padding: 8px 14px; border-radius: 8px; border: 1.5px solid rgba(245,245,240,0.15); font-size: 13px; color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
-          .events-filters-view-toggle { margin-left: auto; display: flex; gap: 4px; }
-          @media (max-width: 780px) {
-            .events-filters-row { flex-direction: column; align-items: stretch; gap: 12px; }
-            .events-filters-divider { display: none; }
-            .events-filters-select { width: 100%; box-sizing: border-box; }
-            .events-filters-view-toggle { display: none; }
-          }
-        `}</style>
-        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "12px", padding: "20px 24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
-          <div className="events-filters-row">
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-              {TYPE_OPTIONS.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  style={{
-                    padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${selectedType === type ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
-                    background: selectedType === type ? "var(--afa-terracotta)" : "transparent",
-                    color: selectedType === type ? "white" : "var(--afa-text-primary)",
-                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                  }}
-                >
-                  {type === "All" ? tr.eventsPage.filterAll : tr.eventTypes[type as keyof typeof tr.eventTypes]}
-                </button>
-              ))}
-            </div>
-
-            <div className="events-filters-divider" />
-
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="events-filters-select"
-            >
-              <option value="All Cities">{tr.eventsPage.filterAllCities}</option>
-              {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
-            </select>
-
-            <div style={{ display: "flex", gap: "6px" }}>
-              {["All", "Free", "Paid"].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPriceFilter(p)}
-                  style={{
-                    padding: "7px 14px", borderRadius: "99px",
-                    border: `1.5px solid ${priceFilter === p ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
-                    background: priceFilter === p ? "var(--afa-terracotta-tint)" : "transparent",
-                    color: priceFilter === p ? "var(--afa-terracotta)" : "var(--afa-text-primary)",
-                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                  }}
-                >
-                  {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
-                </button>
-              ))}
-            </div>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="events-filters-select"
-              aria-label={tr.eventsPage.sortLabel}
-            >
-              <option value="date">{tr.eventsPage.sortDate}</option>
-              <option value="priceLowHigh">{tr.eventsPage.sortPriceLowHigh}</option>
-              <option value="priceHighLow">{tr.eventsPage.sortPriceHighLow}</option>
-              <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
-            </select>
-
-            <div className="events-filters-view-toggle">
-              <button onClick={() => setView("grid")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "grid" ? "var(--afa-fill-solid)" : "transparent", color: view === "grid" ? "white" : "var(--afa-text-primary)", cursor: "pointer", fontSize: "16px" }}>⊞</button>
-              <button onClick={() => setView("list")} style={{ padding: "8px 12px", borderRadius: "6px", border: "none", background: view === "list" ? "var(--afa-fill-solid)" : "transparent", color: view === "list" ? "white" : "var(--afa-text-primary)", cursor: "pointer", fontSize: "16px" }}>☰</button>
-            </div>
-          </div>
-        </div>
-
-        <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "20px" }}>
-          {tr.eventsPage.showingCount.split("{n}")[0]}<strong style={{ color: "var(--afa-text-primary)", opacity: 1 }}>{filtered.length}</strong>{tr.eventsPage.showingCount.split("{n}")[1]}
-        </p>
-
-        {/* EVENTS GRID */}
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎭</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
-              {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
-            </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
-              {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: view === "grid" ? "repeat(auto-fill, minmax(340px, 1fr))" : "1fr", gap: "20px" }}>
-            {filtered.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                view={view}
-                tab={tab}
-                isNavigating={navigatingId === event.id}
-                disabled={navigatingId !== null}
-                onOpen={() => goToEvent(event.id)}
-              />
-            ))}
+              <label className="afa-events-search-box">
+                <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={tr.eventsPage.searchEventsPlaceholder}
+                  style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", color: "var(--afa-text-primary)", outline: "none" }}
+                />
+              </label>
+            </BrowseSearchDropdown>
           </div>
         )}
+
+        {contentMode === "organisers" ? (
+          <div style={{ marginTop: "32px" }}>
+            {/* Session 65 fix: same hero search box position/styling as
+                Events mode - just pointed at organisers. */}
+            <BrowseSearchDropdown
+              query={search}
+              items={filteredOrganisers}
+              getId={(o) => o.id}
+              emptyLabel={tr.common.nounOrganisers}
+              translate
+              onSelect={(o) => goToOrganiser(o.id)}
+              renderRow={(o) => <span style={{ fontWeight: 600 }}>{o.orgName}</span>}
+            >
+              <label className="afa-events-search-box" style={{ maxWidth: "420px", marginBottom: "24px" }}>
+                <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={tr.eventsPage.searchOrganisersPlaceholder}
+                  style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", color: "var(--afa-text-primary)", outline: "none" }}
+                />
+              </label>
+            </BrowseSearchDropdown>
+            <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
+          </div>
+        ) : (
+          <>
+            {/* UPCOMING / PAST TAB */}
+            <div style={{ display: "flex", gap: "24px", marginTop: "28px" }}>
+              {(["upcoming", "past"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className="afa-events-price-filter"
+                  style={{ fontSize: "13px", color: tab === t ? "var(--afa-amber)" : "rgba(245,245,240,0.4)" }}
+                >
+                  {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
+                </button>
+              ))}
+            </div>
+
+            {/* FILTERS */}
+            <style>{`
+              .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+              .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+              @media (max-width: 780px) {
+                .events-filters-row { flex-direction: column; align-items: stretch; }
+                .afa-events-select { width: 100%; box-sizing: border-box; }
+                .afa-events-view-toggle { display: none; }
+              }
+            `}</style>
+            <div style={{ marginTop: "20px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px" }}>
+              <div className="events-type-row" style={{ marginBottom: "16px" }}>
+                <button
+                  onClick={() => setSelectedType(null)}
+                  className={`afa-events-type-filter${selectedType === null ? " active" : ""}`}
+                >
+                  {tr.eventsPage.filterAllNights}
+                </button>
+                {TYPE_OPTIONS.map((type) => {
+                  const typeKey = type as keyof typeof tr.eventTypes
+                  const on = selectedType === type
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => setSelectedType(on ? null : type)}
+                      className={`afa-events-type-filter${on ? " active" : ""}`}
+                    >
+                      <EventTypeIcon type={type} style={{ width: "14px", height: "14px", color: "currentColor" }} />
+                      {tr.eventTypes[typeKey]}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="events-filters-row">
+                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="afa-events-select">
+                  <option value="All Cities">{tr.eventsPage.filterAllCities}</option>
+                  {cities.map((c) => <option key={c.city} value={c.city}>{c.label}</option>)}
+                </select>
+
+                <div style={{ display: "flex", gap: "16px" }}>
+                  {["All", "Free", "Paid"].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPriceFilter(p)}
+                      className={`afa-events-price-filter${priceFilter === p ? " active" : ""}`}
+                    >
+                      {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
+                    </button>
+                  ))}
+                </div>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="afa-events-select"
+                  aria-label={tr.eventsPage.sortLabel}
+                >
+                  <option value="date">{tr.eventsPage.sortDate}</option>
+                  <option value="priceLowHigh">{tr.eventsPage.sortPriceLowHigh}</option>
+                  <option value="priceHighLow">{tr.eventsPage.sortPriceHighLow}</option>
+                  <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
+                </select>
+
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "3px", padding: "3px" }}>
+                  <button onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`}>
+                    <GridViewIcon style={{ width: "16px", height: "16px" }} />
+                  </button>
+                  <button onClick={() => setView("list")} aria-pressed={view === "list"} aria-label={tr.eventsPage.listViewLabel} className={`afa-events-view-btn${view === "list" ? " active" : ""}`}>
+                    <ListViewIcon style={{ width: "16px", height: "16px" }} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "16px", marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>
+              {tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
+            </div>
+
+            {/* EVENTS GRID */}
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
+            ) : filtered.length === 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed rgba(245,245,240,0.15)", borderRadius: "3px", padding: "96px 20px", textAlign: "center" }}>
+                <TheaterMark style={{ width: "40px", height: "40px", color: "rgba(201,151,58,0.6)" }} />
+                <p style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "var(--afa-cream)", margin: 0 }}>
+                  {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
+                </p>
+                <p style={{ maxWidth: "360px", fontSize: "13px", color: "rgba(245,245,240,0.5)", margin: 0 }}>
+                  {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
+                </p>
+              </div>
+            ) : view === "grid" ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
+                {filtered.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    view="grid"
+                    tab={tab}
+                    isNavigating={navigatingId === event.id}
+                    disabled={navigatingId !== null}
+                    onOpen={() => goToEvent(event.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {filtered.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    view="list"
+                    tab={tab}
+                    isNavigating={navigatingId === event.id}
+                    disabled={navigatingId !== null}
+                    onOpen={() => goToEvent(event.id)}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
