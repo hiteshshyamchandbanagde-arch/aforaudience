@@ -22,6 +22,11 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
   const typeLabel = tr.eventTypes[typeKey]
   const height = size === "large" ? "440px" : size === "medium" ? "210px" : "220px";
   const titleSize = size === "large" ? "28px" : size === "strip" ? "24px" : "18px";
+  // BUG-2608-079 - a dead posterImage URL previously left Photo rendering
+  // a broken <img>. Falls back to this tile's existing no-photo state
+  // (the same TYPE_META emoji already shown when posterImage is null),
+  // not a new pattern.
+  const [photoFailed, setPhotoFailed] = useState(false)
 
   return (
     <Link
@@ -36,7 +41,9 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         textDecoration: "none",
       }}
     >
-      {event.posterImage ? <Photo src={event.posterImage} alt={event.title} /> : (
+      {event.posterImage && !photoFailed ? (
+        <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
+      ) : (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "72px" }}>{meta.emoji}</div>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />

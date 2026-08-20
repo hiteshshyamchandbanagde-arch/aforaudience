@@ -1,3 +1,5 @@
+"use client"
+import { useState } from "react"
 import Photo from "@/components/Photo"
 
 /**
@@ -15,13 +17,25 @@ export default function PhotoCrossfadeBackdrop({
   photos: { src: string; alt: string }[]
   active: number
 }) {
+  // BUG-2608-079 - a photo in the rotation that 404s/times out previously
+  // left Photo rendering a broken <img> for that slide once it became
+  // active. Tracked by src (not index) so a reordered/refetched `photos`
+  // array doesn't misattribute an old failure to a different photo now
+  // sitting at the same index. Falls back to the exact same empty-state
+  // gradient already used when there are no photos at all - this
+  // component has no per-photo illustrated fallback of its own to swap
+  // to, same as every other "no genuine content" case here.
+  const [failedSrcs, setFailedSrcs] = useState<Set<string>>(new Set())
+  const visiblePhotos = photos.filter((p) => !failedSrcs.has(p.src))
   return (
     <div style={{ position: "absolute", inset: 0 }}>
-      {photos.length > 0 ? (
+      {visiblePhotos.length > 0 ? (
         photos.map((photo, i) => (
-          <div key={photo.src} style={{ position: "absolute", inset: 0, opacity: i === active ? 1 : 0, transition: "opacity 1600ms ease-in-out" }}>
-            <Photo src={photo.src} alt={photo.alt} />
-          </div>
+          failedSrcs.has(photo.src) ? null : (
+            <div key={photo.src} style={{ position: "absolute", inset: 0, opacity: i === active ? 1 : 0, transition: "opacity 1600ms ease-in-out" }}>
+              <Photo src={photo.src} alt={photo.alt} onError={() => setFailedSrcs((prev) => new Set(prev).add(photo.src))} />
+            </div>
+          )
         ))
       ) : (
         <div

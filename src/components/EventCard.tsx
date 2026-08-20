@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { getAvailabilityStatus } from "@/lib/availability"
 import { useLocale } from "@/lib/i18n/translate"
 import Photo from "@/components/Photo"
@@ -155,7 +156,18 @@ export function IllustratedEventFallback({ type, typeLabel }: { type: string; ty
 // recipe (see docs/venues-full-fidelity-audit-2026-08-20.md's
 // "Re-checked, no action needed" section).
 export function EventPoster({ posterImage, title, type, typeLabel }: { posterImage: string | null; title: string; type: string; typeLabel: string }) {
-  return posterImage ? <Photo src={posterImage} alt={title} /> : <IllustratedEventFallback type={type} typeLabel={typeLabel} />
+  // BUG-2608-079 - a stored posterImage that 404s/times out (confirmed
+  // live: qa-general-event-04's Unsplash URL) previously left Photo
+  // rendering a broken <img> with the amber overlay still multiplied on
+  // top. Photo now hides itself on error; this local flag is what
+  // actually swaps to the illustrated fallback instead of leaving blank
+  // space where the broken image was.
+  const [failed, setFailed] = useState(false)
+  return posterImage && !failed ? (
+    <Photo src={posterImage} alt={title} onError={() => setFailed(true)} />
+  ) : (
+    <IllustratedEventFallback type={type} typeLabel={typeLabel} />
+  )
 }
 
 // Export's SeatState (bits.tsx) - a small colored dot + label, not a

@@ -35,6 +35,11 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
+  // BUG-2608-079 - a dead venue.photos[0] URL previously left Photo
+  // rendering a broken card image. Cards are rendered inline in this
+  // .map() rather than as their own component, so failures are tracked
+  // per venue id in one Set here instead of per-card local state.
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<string>>(new Set())
   const cityOptions = Array.from(new Map(venues.map((v) => [v.city, v.country])).entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([city, country]) => ({ city, label: cityLabel(city, country) }))
@@ -181,7 +186,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
       <div className="afa-venues-grid">
       {filtered.map((v) => {
         const isNavigatingThis = navigatingId === v.id
-        const photo = v.photos?.find((p) => !isPlaceholderImageUrl(p)) || null
+        const photo = failedPhotoIds.has(v.id) ? null : v.photos?.find((p) => !isPlaceholderImageUrl(p)) || null
         return (
           <div
             key={v.id}
@@ -234,7 +239,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
 
             <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
               {photo ? (
-                <Photo src={photo} alt={v.name} />
+                <Photo src={photo} alt={v.name} onError={() => setFailedPhotoIds((prev) => new Set(prev).add(v.id))} />
               ) : (
                 <VenueNoPhoto capacity={v.capacity} seed={v.id} />
               )}
