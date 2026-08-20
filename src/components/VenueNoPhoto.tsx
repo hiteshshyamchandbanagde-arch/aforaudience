@@ -52,13 +52,17 @@ export default function VenueNoPhoto({ capacity, seed, caption, size = "card" }:
   const tier = capacityTier(capacity)
   const Mark = TIER_MARK[tier]
   const v = seedFromVenueId(seed ?? "")
-  // Card variant matches the export's VenueFallback exactly - the SVG is
-  // `absolute inset-0 h-full w-full`, full-bleed with zero container
-  // padding; whatever breathing room the artwork has comes from empty
-  // space drawn inside each Mark's own viewBox coordinates, not a shrink
-  // here. Hero sizing is left as the pre-existing 70%/420px, flex-centered
-  // - unverified against the export's detail-page fallback specifically,
-  // so not changed on the strength of the card-only finding this covers.
+  // Full-bleed for both card AND hero - confirmed against the export
+  // (VenueDetail.tsx line 79-83, the detail page's own no-photo branch):
+  // `<VenueFallback capacity={venue.capacity} seed={venue.id} />`, no
+  // className override, the exact same call as VenueCard.tsx's card
+  // usage. VenueFallback's SVG is unconditionally `absolute inset-0
+  // h-full w-full` regardless of context - there's no smaller/centered
+  // hero variant anywhere in the export. The previous 70%/420px,
+  // flex-centered hero treatment here was never actually checked against
+  // that line and didn't match it. Whatever breathing room the artwork
+  // has comes from empty space drawn inside each Mark's own viewBox
+  // coordinates, not a shrink at this layer.
 
   return (
     // BUG-2608-074 - this reused --afa-surface-page (the page background
@@ -86,13 +90,7 @@ export default function VenueNoPhoto({ capacity, seed, caption, size = "card" }:
           backgroundSize: "22px 22px",
         }}
       />
-      {size === "card" ? (
-        <Mark v={v} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
-      ) : (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Mark v={v} style={{ width: "70%", maxWidth: "420px", color: "var(--afa-amber)", opacity: 0.55 }} />
-        </div>
-      )}
+      <Mark v={v} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
 
       {caption && (
         <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "9px", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>
