@@ -44,7 +44,13 @@ interface VenueNoPhotoProps {
 export default function VenueNoPhoto({ capacity, caption, size = "card" }: VenueNoPhotoProps) {
   const tier = capacityTier(capacity)
   const Mark = TIER_MARK[tier]
-  const markWidth = size === "hero" ? "70%" : "82%"
+  // Card variant matches the export's VenueFallback exactly - the SVG is
+  // `absolute inset-0 h-full w-full`, full-bleed with zero container
+  // padding; whatever breathing room the artwork has comes from empty
+  // space drawn inside each Mark's own viewBox coordinates, not a shrink
+  // here. Hero sizing is left as the pre-existing 70%/420px, flex-centered
+  // - unverified against the export's detail-page fallback specifically,
+  // so not changed on the strength of the card-only finding this covers.
 
   return (
     // BUG-2608-074 - this reused --afa-surface-page (the page background
@@ -55,9 +61,30 @@ export default function VenueNoPhoto({ capacity, caption, size = "card" }: Venue
     // instead of a badge sitting on a card. --afa-surface-raised is the
     // locked palette's dedicated "elevated panel" token (docs/design.md).
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-raised)" }}>
-      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Mark style={{ width: markWidth, maxWidth: size === "hero" ? "420px" : "220px", color: "var(--afa-amber)", opacity: 0.55 }} />
-      </div>
+      {/* Grid/graph-paper texture (export: VenueMedia.tsx line 115-123,
+          quoted via Claude Code). Two 1px cream linear-gradients (one
+          vertical, one horizontal) on a 22x22px cell, 4% opacity - a
+          crosshatch, not a single pattern image or Tailwind bg-grid
+          utility. Sits behind the Mark SVG, same relative parent. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          opacity: 0.04,
+          backgroundImage:
+            "linear-gradient(var(--afa-cream) 1px, transparent 1px), linear-gradient(90deg, var(--afa-cream) 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
+        }}
+      />
+      {size === "card" ? (
+        <Mark style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
+      ) : (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Mark style={{ width: "70%", maxWidth: "420px", color: "var(--afa-amber)", opacity: 0.55 }} />
+        </div>
+      )}
 
       {caption && (
         <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "9px", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>
