@@ -206,41 +206,134 @@ export function FacilityIcon({ label, className, style }: IconProps & { label: s
 }
 
 // --- Capacity-tier illustrated fallback marks (VenueNoPhoto.tsx) ---
-// Intimate: a small stage arc facing a close semicircle of seating rows.
-export function IntimateRoomMark({ className, style }: IconProps) {
+//
+// Wholesale port from the export (VenueMedia.tsx IntimateRoom/MidHall/
+// LargeArena) - the previous IntimateRoomMark/MidHallMark/LargeArenaMark
+// were a hand-drawn "interpretation" (different viewBox, different scene
+// entirely), not a copy of the export's actual path data. Every
+// coordinate below is copied verbatim from the export, including the
+// `v`-seeded variation (lamp vs. floor spotlight, chair/row/tier counts)
+// - the export's fallback isn't one fixed illustration per tier, it's
+// parameterized by a hash of the venue id (see seedFromVenueId below,
+// port of the export's seedFrom), so a real port has to carry that
+// variation logic too, not just one frozen snapshot of the geometry.
+// viewBox is 0 0 400 300 (was 0 0 200 140) to match the export exactly -
+// this also happens to equal the card media wrapper's own 4:3 aspect
+// ratio, whereas the old 200x140 (10:7) didn't.
+
+// Port of the export's seedFrom (VenueMedia.tsx line 10-14) - same djb2-
+// style hash, used to derive the `v` variation seed from the venue id.
+export function seedFromVenueId(key: string): number {
+  let h = 0
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0
+  return h
+}
+
+type MarkProps = IconProps & { v: number }
+
+// Intimate: low stage with a stool+mic, two rows of chairs, a pendant
+// lamp or floor spotlight (alternates on v % 2).
+export function IntimateRoomMark({ v, className, style }: MarkProps) {
+  const lamp = v % 2 === 0 // pendant lamp vs. floor spotlight
   return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} style={style} aria-hidden="true">
-      <path d="M70 55 V25 h60 V55" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
-      <path d="M55 90a45 45 0 0 1 90 0" stroke="currentColor" strokeWidth="2" />
-      <path d="M45 108a55 55 0 0 1 110 0" stroke="currentColor" strokeWidth="2" />
-      <line x1="100" y1="55" x2="100" y2="108" stroke="currentColor" strokeWidth="1.4" strokeDasharray="2 4" />
+    <svg viewBox="0 0 400 300" fill="none" className={className} style={style} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* room walls */}
+        <path d="M70 60v130h260V60" opacity="0.55" />
+        <path d="M40 190h320" />
+        {/* low stage */}
+        <path d="M150 190v-26h100v26" />
+        <path d="M150 164h100" />
+        {/* stool + mic on stage */}
+        <path d="M196 164v-22m0-22a5 5 0 0 1 0 10m0-10a5 5 0 0 0 0 10m0 0v10" opacity="0.9" />
+        <path d="M188 142h16" opacity="0.5" />
+        {/* two intimate rows of chairs */}
+        {[210, 232].map((y, r) => (
+          <g key={y} opacity={0.9 - r * 0.15}>
+            {Array.from({ length: 6 + (v % 2) }).map((_, i) => (
+              <path key={i} d={`M${110 + i * 30} ${y}v-12h10v12`} transform={r ? `translate(${8},0)` : ""} />
+            ))}
+          </g>
+        ))}
+        {lamp ? (
+          <g opacity="0.8">
+            <path d="M200 60v18" />
+            <path d="M188 78h24l-6 12h-12z" />
+          </g>
+        ) : (
+          <g opacity="0.8">
+            <path d="M96 190v-40l14-14" />
+            <path d="M104 132a7 7 0 1 1 14 0l-8 8h-8z" />
+            <path d="M114 140 150 178" strokeDasharray="2 6" opacity="0.6" />
+          </g>
+        )}
+      </g>
     </svg>
   )
 }
 
-// Mid-size: a wider proscenium stage with three concentric seating rows.
-export function MidHallMark({ className, style }: IconProps) {
+// Mid-size: proscenium arch + curtains, raked seating fanning outward
+// (row count alternates 4-5 on v % 2).
+export function MidHallMark({ v, className, style }: MarkProps) {
+  const rows = 4 + (v % 2)
   return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} style={style} aria-hidden="true">
-      <path d="M60 60 V22 h20 V60 M120 60 V22 h20 V60" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
-      <line x1="60" y1="60" x2="140" y2="60" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M45 88a55 55 0 0 1 110 0" stroke="currentColor" strokeWidth="2" />
-      <path d="M35 106a65 65 0 0 1 130 0" stroke="currentColor" strokeWidth="2" />
-      <path d="M25 122a75 75 0 0 1 150 0" stroke="currentColor" strokeWidth="2" />
-      <line x1="100" y1="60" x2="100" y2="122" stroke="currentColor" strokeWidth="1.4" strokeDasharray="2 4" />
+    <svg viewBox="0 0 400 300" fill="none" className={className} style={style} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* proscenium arch */}
+        <path d="M120 44h160v96H120z" opacity="0.5" />
+        <path d="M120 44c0 40-24 60-56 60m216-60c0 40 24 60 56 60" opacity="0.35" />
+        {/* stage curtains */}
+        <path d="M120 44v72m20-72v58m140-58v72m-20-72v58" opacity="0.45" />
+        {/* stage lip */}
+        <path d="M96 140h208" />
+        {/* raked seating fanning outward */}
+        {Array.from({ length: rows }).map((_, r) => {
+          const y = 168 + r * 20
+          const spread = 120 + r * 34
+          return (
+            <path key={r} d={`M${200 - spread} ${y}q${spread} ${16 + r * 4} ${spread * 2} 0`} opacity={0.85 - r * 0.12} />
+          )
+        })}
+        {/* aisle */}
+        <path d="M200 156v96" strokeDasharray="3 7" opacity="0.4" />
+      </g>
     </svg>
   )
 }
 
-// Large: overhead arena rings with radiating rigging/light lines at top.
-export function LargeArenaMark({ className, style }: IconProps) {
+// Large: concentric arena bowl tiers around a center stage, radial
+// section dividers, roof trusses/floodlights (tier count alternates 3-4
+// on v % 2).
+export function LargeArenaMark({ v, className, style }: MarkProps) {
+  const tiers = 3 + (v % 2)
   return (
-    <svg viewBox="0 0 200 140" fill="none" className={className} style={style} aria-hidden="true">
-      <path d="M100 8 90 28M100 8v22M100 8l10 20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <ellipse cx="100" cy="90" rx="26" ry="16" stroke="currentColor" strokeWidth="1.8" />
-      <ellipse cx="100" cy="90" rx="46" ry="30" stroke="currentColor" strokeWidth="1.8" />
-      <ellipse cx="100" cy="90" rx="66" ry="44" stroke="currentColor" strokeWidth="1.8" />
-      <ellipse cx="100" cy="90" rx="86" ry="58" stroke="currentColor" strokeWidth="1.8" />
+    <svg viewBox="0 0 400 300" fill="none" className={className} style={style} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* stage / field at center */}
+        <ellipse cx="200" cy="196" rx="60" ry="20" opacity="0.9" />
+        <path d="M180 196h40M200 176v40" opacity="0.4" />
+        {/* concentric arena bowl tiers */}
+        {Array.from({ length: tiers }).map((_, t) => {
+          const rx = 92 + t * 34
+          const ry = 30 + t * 12
+          return <ellipse key={t} cx="200" cy="196" rx={rx} ry={ry} opacity={0.7 - t * 0.14} />
+        })}
+        {/* radial section dividers */}
+        {Array.from({ length: 8 }).map((_, i) => {
+          const a = (Math.PI * 2 * i) / 8
+          const outR = 92 + (tiers - 1) * 34
+          return (
+            <path
+              key={i}
+              d={`M${200 + Math.cos(a) * 92} ${196 + Math.sin(a) * 30}L${200 + Math.cos(a) * outR} ${196 + Math.sin(a) * (30 + (tiers - 1) * 12)}`}
+              opacity="0.22"
+            />
+          )
+        })}
+        {/* roof trusses / floodlights */}
+        <path d="M60 70l40 40M340 70l-40 40M200 54v22" opacity="0.5" />
+        <path d="M54 64h12M334 64h12M194 48h12" opacity="0.7" />
+      </g>
     </svg>
   )
 }
