@@ -94,26 +94,35 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
       `}</style>
       <SiteNav backHref="/venues" backLabel={tr.nav.backToVenues} />
       <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "48px 24px" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
-          {venue.city}{venue.state ? `, ${venue.state}` : ""} · {tierLabel}
-        </span>
-        <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "32px", fontWeight: 700, color: "var(--afa-cream)", marginTop: "10px", marginBottom: "6px" }}>
-          {venue.name}
-        </h1>
-        <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "8px" }}>
-          {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ""}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
-          <VenueFollowHeaderButton state={follow} />
-          <a
-            href={venue.directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
-          >
-            <DirectionsIcon style={{ width: "14px", height: "14px" }} />
-            {tr.venueDetailPage.getDirections}
-          </a>
+        {/* BUG-2608-075 - title/address and the Follow/Get Directions actions
+            were stacked in one left-aligned column. Figma export puts the
+            actions on the right, level with the title block, not stacked
+            below the address. flex-wrap so it still stacks cleanly on
+            narrow viewports instead of forcing the row. */}
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", marginBottom: "28px" }}>
+          <div>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+              {venue.city}{venue.state ? `, ${venue.state}` : ""} · {tierLabel}
+            </span>
+            <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "32px", fontWeight: 700, color: "var(--afa-cream)", marginTop: "10px", marginBottom: "6px" }}>
+              {venue.name}
+            </h1>
+            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
+              {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ""}
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+            <VenueFollowHeaderButton state={follow} />
+            <a
+              href={venue.directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+            >
+              <DirectionsIcon style={{ width: "14px", height: "14px" }} />
+              {tr.venueDetailPage.getDirections}
+            </a>
+          </div>
         </div>
 
         <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", overflow: "hidden", marginBottom: "8px" }}>
