@@ -159,7 +159,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             ))}
           </div>
         ) : (
-          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", overflow: "hidden", marginBottom: "8px" }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 7", overflow: "hidden", marginBottom: "8px" }}>
             <VenueNoPhoto capacity={venue.capacity} seed={venue.id} size="hero" />
           </div>
         )}
