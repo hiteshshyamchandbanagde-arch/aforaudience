@@ -29,12 +29,19 @@ const TIER_MARK: Record<CapacityTier, ComponentType<{ style?: CSSProperties }>> 
 
 interface VenueNoPhotoProps {
   capacity: number
-  tierLabel: string
   caption?: string
   size?: "card" | "hero"
 }
 
-export default function VenueNoPhoto({ capacity, tierLabel, caption, size = "card" }: VenueNoPhotoProps) {
+// BUG-2608-072 gap 4 originally baked the tier-label badge into this
+// component. Export (VenueCard.tsx) only ever shows that badge as a
+// card-level overlay sibling to the media (real photo OR fallback) - the
+// detail-page hero's fallback (VenueDetail.tsx) has no badge at all, only
+// the caption text below it. Badge now lives at the call site (card grid)
+// instead, so it (a) also shows over real photos, which this component
+// can't do since it only renders for the no-photo case, and (b) stops
+// incorrectly appearing on the detail hero.
+export default function VenueNoPhoto({ capacity, caption, size = "card" }: VenueNoPhotoProps) {
   const tier = capacityTier(capacity)
   const Mark = TIER_MARK[tier]
   const markWidth = size === "hero" ? "70%" : "82%"
@@ -51,10 +58,6 @@ export default function VenueNoPhoto({ capacity, tierLabel, caption, size = "car
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Mark style={{ width: markWidth, maxWidth: size === "hero" ? "420px" : "220px", color: "var(--afa-amber)", opacity: 0.55 }} />
       </div>
-
-      <span style={{ position: "absolute", top: size === "hero" ? "16px" : "10px", left: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-cream)", opacity: 0.6 }}>
-        {tierLabel}
-      </span>
 
       {caption && (
         <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "9px", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>

@@ -92,9 +92,13 @@ export default async function VenuesPage() {
   const resolved = await resolveLocation({ profileCity, profileLat, profileLng, profileCountry, cookieStore, headerStore })
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+      <style>{`
+        .afa-venues-page-container { max-width: 1240px; margin: 0 auto; padding: 48px 24px; }
+        @media (min-width: 768px) { .afa-venues-page-container { padding: 48px 40px; } }
+      `}</style>
       <SiteNav active="venues" />
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
+      <div className="afa-venues-page-container">
         <VenuesHero count={venues.length} />
 
         <VenuesViewToggle

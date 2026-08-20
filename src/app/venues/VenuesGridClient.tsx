@@ -1,5 +1,5 @@
 "use client"
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import Photo from "@/components/Photo"
@@ -8,7 +8,7 @@ import { cityLabel } from "@/lib/country-codes"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 import { SearchIcon } from "@/components/icons/ArtistIcons"
-import { ArrowUpRightIcon } from "@/components/icons/VenueIcons"
+import { ArrowUpRightIcon, ChevronDownIcon } from "@/components/icons/VenueIcons"
 
 interface VenueItem {
   id: string
@@ -42,6 +42,16 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
   const [selectedCity, setSelectedCity] = useState(
     defaultCity && cities.includes(defaultCity) ? defaultCity : "All Cities"
   )
+  const [cityOpen, setCityOpen] = useState(false)
+  const cityRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (cityRef.current && !cityRef.current.contains(e.target as Node)) setCityOpen(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const goToVenue = (id: string) => {
     if (navigatingId) return
@@ -82,44 +92,90 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         .afa-venue-card:hover .afa-venue-card-title { color: var(--afa-amber); }
         .afa-venue-card-arrow { opacity: 0; }
         .afa-venue-card:hover .afa-venue-card-arrow { opacity: 1; }
+        /* City filter (Gap 7, full-fidelity audit) - export's custom
+           listbox trigger/option hover states, same inline-style-can't-
+           :hover reasoning as the card border above. */
+        .afa-city-filter-trigger { border-color: rgba(245,245,240,0.15); }
+        .afa-city-filter-trigger:hover { border-color: rgba(201,151,58,0.4); }
+        .afa-city-filter-option { background: transparent; }
+        .afa-city-filter-option:hover { background: rgba(245,245,240,0.06); }
       `}</style>
 
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "20px" }}>
-        <BrowseSearchDropdown
-          query={search}
-          items={filtered}
-          getId={(v) => v.id}
-          emptyLabel={tr.common.nounVenues}
-          translate
-          onSelect={(v) => goToVenue(v.id)}
-          renderRow={(v) => (
-            <>
-              <span style={{ fontWeight: 600 }}>{v.name}</span>
-              <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
-            </>
-          )}
-        >
-          <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", maxWidth: "360px", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "8px", boxSizing: "border-box" }}>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={tr.venuesPage.searchPlaceholder}
-              style={{ flex: 1, padding: "10px 4px 10px 14px", border: "none", background: "transparent", fontSize: "14px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
-            />
-            <SearchIcon style={{ width: "16px", height: "16px", marginRight: "14px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
-          </div>
-        </BrowseSearchDropdown>
+      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-start" }}>
+        <div style={{ flex: "1 1 280px" }}>
+          <BrowseSearchDropdown
+            query={search}
+            items={filtered}
+            getId={(v) => v.id}
+            emptyLabel={tr.common.nounVenues}
+            translate
+            onSelect={(v) => goToVenue(v.id)}
+            renderRow={(v) => (
+              <>
+                <span style={{ fontWeight: 600 }}>{v.name}</span>
+                <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
+              </>
+            )}
+          >
+            <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", boxSizing: "border-box" }}>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={tr.venuesPage.searchPlaceholder}
+                style={{ flex: 1, padding: "14px 4px 14px 16px", border: "none", background: "transparent", fontSize: "15px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
+              />
+              <SearchIcon style={{ width: "18px", height: "18px", marginRight: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
+            </div>
+          </BrowseSearchDropdown>
+        </div>
 
-        <select
-          value={selectedCity}
-          onChange={(e) => setSelectedCity(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "13px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", cursor: "pointer", outline: "none" }}
-        >
-          <option value="All Cities">{tr.venuesPage.filterAllCities}</option>
-          {cityOptions.map((c) => (
-            <option key={c.city} value={c.city}>{c.label}</option>
-          ))}
-        </select>
+        <div ref={cityRef} style={{ position: "relative", width: "256px", flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => setCityOpen((o) => !o)}
+            className="afa-city-filter-trigger"
+            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "15px", fontFamily: "var(--font-sans)", cursor: "pointer", textAlign: "left" }}
+          >
+            <span style={{ opacity: selectedCity === "All Cities" ? 0.65 : 1 }}>
+              {selectedCity === "All Cities" ? tr.venuesPage.filterAllCities : cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity}
+            </span>
+            <ChevronDownIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
+          </button>
+          {cityOpen && (
+            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedCity("All Cities"); setCityOpen(false) }}
+                  className="afa-city-filter-option"
+                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                >
+                  {tr.venuesPage.filterAllCities}
+                </button>
+              </li>
+              {cityOptions.map((c) => (
+                <li key={c.city}>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedCity(c.city); setCityOpen(false) }}
+                    className="afa-city-filter-option"
+                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                  >
+                    {c.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Export (VenuesDirectory.tsx line 99-102) shows a live results
+          count between the controls and the grid - missing entirely from
+          the live build until this audit. */}
+      <div style={{ marginTop: "24px", marginBottom: "24px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+        {filtered.length} {filtered.length === 1 ? tr.venuesPage.resultsCountSingular : tr.venuesPage.resultsCountPlural}
+        {selectedCity !== "All Cities" && tr.venuesPage.resultsCountInCity.replace("{city}", cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity)}
       </div>
 
       <div className="afa-venues-grid">
@@ -180,8 +236,16 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               {photo ? (
                 <Photo src={photo} alt={v.name} />
               ) : (
-                <VenueNoPhoto capacity={v.capacity} tierLabel={tierLabel(v.capacity)} />
+                <VenueNoPhoto capacity={v.capacity} />
               )}
+              {/* BUG-2608-072 gap 4 baked this badge into VenueNoPhoto,
+                  so it only ever showed on no-photo fallback cards -
+                  export (VenueCard.tsx) overlays it on the media wrapper
+                  regardless of whether a real photo or the fallback is
+                  showing underneath. */}
+              <span style={{ position: "absolute", top: "10px", left: "10px", fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-cream)", opacity: 0.6 }}>
+                {tierLabel(v.capacity)}
+              </span>
               <span
                 className="afa-venue-card-arrow"
                 style={{
