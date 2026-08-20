@@ -73,6 +73,9 @@ export default function ArtistProfilePage({
   realTourStops?: { id: string; title: string; date: string; startTime: string; venue: { name: string; city: string } | null; tour: { title: string; slug: string } | null }[]
 }) {
   const [activeTab, setActiveTab] = useState<"about" | "shows">("about")
+  // BUG-2608-079 - a dead portrait URL previously left Photo rendering a
+  // broken hero image instead of falling back to ArtistNoPhoto.
+  const [portraitFailed, setPortraitFailed] = useState(false)
   const { data: session, status: sessionStatus } = useSession()
   const [following, setFollowing] = useState(false)
   const [notifyEnabled, setNotifyEnabledState] = useState(true)
@@ -427,8 +430,8 @@ export default function ArtistProfilePage({
       <div style={{ padding: "40px 48px 0" }}>
         <div className="artist-hero-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gap: "40px" }}>
           <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(245,245,240,0.1)" }}>
-            {portraitUrl ? (
-              <Photo src={portraitUrl} alt={displayName} />
+            {portraitUrl && !portraitFailed ? (
+              <Photo src={portraitUrl} alt={displayName} onError={() => setPortraitFailed(true)} />
             ) : (
               <ArtistNoPhoto name={displayName} genres={artist.genre} size="hero" />
             )}

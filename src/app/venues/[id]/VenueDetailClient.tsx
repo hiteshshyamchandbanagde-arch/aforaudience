@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import SiteNav from "@/components/SiteNav"
 import Photo from "@/components/Photo"
 import VenueNoPhoto, { capacityTier } from "@/components/VenueNoPhoto"
@@ -47,6 +48,14 @@ export interface VenueDetailData {
 export default function VenueDetailClient({ venue }: { venue: VenueDetailData | null }) {
   const { t: tr } = useLocale()
   const follow = useVenueFollow(venue?.id ?? null)
+  // BUG-2608-079 - a dead venue.photos[0] URL previously left Photo
+  // rendering a broken main gallery image. Only tracked for the MAIN
+  // photo: if it fails, the whole gallery swaps to VenueNoPhoto (a
+  // broken hero image is worse than the illustrated fallback even if
+  // thumbnails are fine); a failed thumbnail just disappears via
+  // Photo's own default (no onError needed there) since the grid
+  // already tolerates fewer thumbnails than the max of 4.
+  const [mainPhotoFailed, setMainPhotoFailed] = useState(false)
 
   if (!venue) {
     return (
@@ -67,6 +76,10 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
   // just the first one.
   const realPhotos = (venue.photos || []).filter((p) => !isPlaceholderImageUrl(p))
   const hasRealPhoto = realPhotos.length > 0
+  // Drives the caption/spacing below too, not just which element renders -
+  // a failed main photo should read exactly like "no real photo" (BUG-
+  // 2608-079), not like a successful gallery with different spacing.
+  const showGallery = hasRealPhoto && !mainPhotoFailed
 
   // BUG-2608-072 (gap 5) - the export's Total row (VenueDetail.tsx line
   // ~122) shows the venue's overall price RANGE (min-max across sections),
@@ -147,10 +160,10 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           </div>
         </div>
 
-        {hasRealPhoto ? (
+        {showGallery ? (
           <div className="afa-venue-gallery" style={{ marginBottom: "8px" }}>
             <div className="afa-venue-gallery-main">
-              <Photo src={realPhotos[0]} alt={venue.name} />
+              <Photo src={realPhotos[0]} alt={venue.name} onError={() => setMainPhotoFailed(true)} />
             </div>
             {realPhotos.slice(1, 5).map((p, i) => (
               <div key={i} className="afa-venue-gallery-thumb">
@@ -163,13 +176,13 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             <VenueNoPhoto capacity={venue.capacity} seed={venue.id} size="hero" />
           </div>
         )}
-        {!hasRealPhoto && (
+        {!showGallery && (
           <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "24px" }}>
             {noPhotosCaption}
           </p>
         )}
 
-        <div className="afa-venue-content-grid" style={{ marginTop: hasRealPhoto ? "40px" : "16px" }}>
+        <div className="afa-venue-content-grid" style={{ marginTop: showGallery ? "40px" : "16px" }}>
           {/* main column */}
           <div>
             <section>

@@ -84,6 +84,13 @@ export default function ArtistsPage() {
 
   const [search, setSearch] = useState("")
   const [selectedGenre, setSelectedGenre] = useState("All")
+  // BUG-2608-079 - a dead portrait URL previously left Photo rendering a
+  // broken image instead of falling back to ArtistNoPhoto. Grid cards are
+  // rendered inline in a .map() rather than as their own component, so
+  // failures there are tracked per artist id in one Set; the featured
+  // "rising star" card is a single item, so a plain boolean is enough.
+  const [risingStarPhotoFailed, setRisingStarPhotoFailed] = useState(false)
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -232,8 +239,8 @@ export default function ArtistsPage() {
         {risingStar && (
           <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
             <div className="afa-featured-artist-photo" style={{ position: "relative", minHeight: "260px" }}>
-              {risingStarPortraitUrl ? (
-                <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} />
+              {risingStarPortraitUrl && !risingStarPhotoFailed ? (
+                <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} onError={() => setRisingStarPhotoFailed(true)} />
               ) : (
                 <ArtistNoPhoto name={risingStar.user.displayName || risingStar.user.name} genres={risingStar.genre} size="card" />
               )}
@@ -289,7 +296,7 @@ export default function ArtistsPage() {
               // not a photo) - shown live as Sai Jain's "portrait" being
               // literally the GitHub mascot. isPlaceholderImageUrl treats
               // these as no-photo so they fall through to the fallback.
-              const portraitUrl = artist.user.avatar && !isPlaceholderImageUrl(artist.user.avatar) ? artist.user.avatar : null
+              const portraitUrl = failedPhotoIds.has(artist.id) ? null : artist.user.avatar && !isPlaceholderImageUrl(artist.user.avatar) ? artist.user.avatar : null
               return (
                 <div
                   key={artist.id}
@@ -351,7 +358,7 @@ export default function ArtistsPage() {
                       correctly fall through to the no-photo path too. */}
                   <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
                     {portraitUrl ? (
-                      <Photo src={portraitUrl} alt={displayName} />
+                      <Photo src={portraitUrl} alt={displayName} onError={() => setFailedPhotoIds((prev) => new Set(prev).add(artist.id))} />
                     ) : (
                       <ArtistNoPhoto
                         name={displayName}
