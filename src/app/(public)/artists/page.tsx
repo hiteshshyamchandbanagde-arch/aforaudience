@@ -156,6 +156,19 @@ export default function ArtistsPage() {
         .afa-cta-solid { transition: filter 0.15s ease; }
         .afa-cta-solid:hover { filter: brightness(1.1); }
         .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
+        /* HERO (BUG-2608-080) - export App.tsx Directory component lines
+           478-509: left-aligned eyebrow/headline/subtitle grid
+           (items-end, lg:grid-cols-[1fr_auto]), then a separate
+           border-y stat+search row below - matches the shape already
+           established for Venues (VenuesHero.tsx + VenuesGridClient.tsx's
+           search box), not the old centered/boxed treatment. */
+        .afa-artists-hero-grid { display: flex; flex-direction: column; gap: 24px; }
+        @media (min-width: 1024px) { .afa-artists-hero-grid { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 32px; } }
+        .afa-artists-hero-subtitle { max-width: 340px; }
+        .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+        @media (min-width: 768px) { .afa-artists-stat-row { flex-direction: row; align-items: center; justify-content: space-between; } }
+        .afa-artists-search-box { width: 100%; }
+        @media (min-width: 768px) { .afa-artists-search-box { width: 320px; flex-shrink: 0; } }
         /* BUG-2608-074: featured artist card was a fixed 2-column grid
            (photo | name+button) with no mobile breakpoint - on phone
            widths the 240px-min photo column left almost no room for the
@@ -170,15 +183,32 @@ export default function ArtistsPage() {
       <SiteNav active="artists" />
 
       {/* HERO */}
-      <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px", position: "relative", overflow: "hidden" }}>
-        <div aria-hidden="true" style={{ position: "absolute", inset: 0, opacity: 0.04, pointerEvents: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", mixBlendMode: "screen" }} />
-        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center", position: "relative" }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "8px", lineHeight: 1.1 }}>
-            {tr.artistsPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 500 }}>{tr.artistsPage.heroEmphasis}</em>{tr.artistsPage.heroSuffix}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px 0" }}>
+        <div className="afa-artists-hero-grid">
+          <div>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+              {tr.artistsPage.eyebrowDirectory}
+            </span>
+            <h1 style={{ marginTop: "16px", maxWidth: "560px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 9vw, 112px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
+              {tr.artistsPage.heroPrefix}{tr.artistsPage.heroEmphasis}{tr.artistsPage.heroSuffix}
+            </h1>
           </div>
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "16px", color: "rgba(245,245,240,0.5)", marginBottom: "32px" }}>
-            {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.countPerforming.replace("{n}", String(filtered.length))}
+          <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.65)" }}>
+            {tr.artistsPage.heroSubtitle}{" "}
+            <span style={{ color: "var(--afa-cream)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
           </p>
+        </div>
+
+        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid rgba(245,245,240,0.1)", borderBottom: "1px solid rgba(245,245,240,0.1)", padding: "20px 0" }}>
+          {loading ? (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "rgba(245,245,240,0.55)" }}>{tr.artistsPage.loadingArtists}</span>
+          ) : (
+            <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "36px", color: "var(--afa-cream)" }}>{filtered.length}</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(245,245,240,0.55)" }}>{tr.artistsPage.statLabel}</span>
+            </div>
+          )}
+
           <BrowseSearchDropdown
             query={search}
             items={filtered}
@@ -193,15 +223,15 @@ export default function ArtistsPage() {
               </>
             )}
           >
-            <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "10px", boxSizing: "border-box" }}>
+            <label className="afa-search-box afa-artists-search-box" style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", padding: "12px 16px", boxSizing: "border-box" }}>
+              <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={tr.artistsPage.searchPlaceholder}
-                style={{ flex: 1, padding: "18px 12px 18px 20px", border: "none", background: "transparent", fontSize: "16px", fontFamily: "var(--font-sans)", color: "var(--afa-cream)", outline: "none" }}
+                style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", fontFamily: "var(--font-sans)", color: "var(--afa-cream)", outline: "none" }}
               />
-              <SearchIcon style={{ width: "18px", height: "18px", marginRight: "20px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
-            </div>
+            </label>
           </BrowseSearchDropdown>
         </div>
       </div>
