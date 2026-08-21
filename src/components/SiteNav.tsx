@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, type CSSProperties } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
@@ -52,6 +52,39 @@ function getDashboardLink(role?: string) {
 // badge next to the greeting makes it explicit at a glance.
 // Takes the translated roles dict (t.roles) rather than hardcoding English
 // - Multi-language Phase 1 deepening.
+//
+// BUG-2608-081: this badge used to reuse var(--afa-terracotta) on
+// rgba(200,68,26,0.08) - the exact same color the active nav link uses
+// (see primaryLinks' isActive styling below) - so it read as a live,
+// clickable nav state ("Hi, Nikita  Venue Owner" looked like "Venue
+// Owner" was itself a link) when it's actually a static identity label.
+// Restyled as a quiet badge instead, borrowing the size/weight/uppercase/
+// letter-spacing/radius from the real "Published" status badge already
+// shipped on venue cards (src/app/dashboard/venue/page.tsx and
+// src/app/dashboard/venue/[id]/page.tsx: fontSize 11px, fontWeight 700,
+// textTransform uppercase, letterSpacing 0.05em, padding 5px 10px,
+// borderRadius 999px) - that badge's own color pairs (sage/gold) are
+// semantic to publish-state though, so wrong to reuse verbatim on a role
+// label; here the color is neutral/muted (rgba(245,245,240,0.6) text on
+// a subtle rgba(245,245,240,0.15) border, transparent fill) rather than
+// venue-status green, and a border was added (the source badge has none)
+// specifically to read as inert chrome, not nav. One shared style object
+// used by both the desktop and mobile "signed in as" rows below, so this
+// fixes every role (Venue Owner, Artist, Organiser, Admin, Audience) in
+// one place, not just the Venue Owner case.
+const ROLE_BADGE_STYLE: CSSProperties = {
+  fontSize: "11px",
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  padding: "3px 9px",
+  borderRadius: "999px",
+  border: "1px solid rgba(245,245,240,0.15)",
+  background: "transparent",
+  color: "rgba(245,245,240,0.6)",
+  whiteSpace: "nowrap",
+}
+
 function getRoleLabel(role: string | undefined, roles: Dictionary["roles"]) {
   switch (role) {
     case "VENUE_OWNER":
@@ -415,7 +448,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
               </span>
               {getRoleLabel(user.role, t.roles) && (
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
+                <span style={ROLE_BADGE_STYLE}>
                   {getRoleLabel(user.role, t.roles)}
                 </span>
               )}
@@ -544,7 +577,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span>{t.nav.signedInAs} {user.displayName || user.name || user.email}</span>
               {getRoleLabel(user.role, t.roles) && (
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-terracotta)", background: "rgba(200,68,26,0.08)", padding: "3px 9px", borderRadius: "999px" }}>
+                <span style={ROLE_BADGE_STYLE}>
                   {getRoleLabel(user.role, t.roles)}
                 </span>
               )}
