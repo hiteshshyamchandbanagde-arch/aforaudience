@@ -93,6 +93,15 @@ merges are landing mid-session now that the pace has picked up.
 5. 🔴 Razorpay and Google Maps/Places API billing dashboards —
    unconfirmed across many sessions now, this one included.
 
+6. **Local dev DB unreachable this session** — `npm run dev` hit
+   `PrismaClientKnownRequestError P1001: Can't reach database server`
+   on every `/api/artists`, `/api/genres/approved` call, which also
+   blocked a real NextAuth login (needed for BUG-2608-081's role-badge
+   screenshot, so intercepted `/api/auth/session` with a mocked
+   Playwright response instead of skipping verification). Not
+   mentioned in any earlier handoff — worth confirming whether this is
+   expected local-sandbox state or an actual regression to fix.
+
 ---
 
 ## New this session — Venue Owner Portal (not started, ready to kick off)
