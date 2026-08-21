@@ -156,28 +156,49 @@ export default function ArtistsPage() {
         .afa-cta-solid { transition: filter 0.15s ease; }
         .afa-cta-solid:hover { filter: brightness(1.1); }
         .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
-        /* HERO (BUG-2608-080, then GEN-2608-078) - export App.tsx Directory
-           component lines 478-509 has a left-aligned two-column grid
-           (items-end, lg:grid-cols-[1fr_auto]) with the subtitle beside
-           the headline and a static "The directory" eyebrow, then a
-           separate border-y stat+search row below with its own live
-           count. GEN-2608-078 deliberately diverges from that export
-           structure for cross-page consistency with Events/Venues, which
-           lead their hero with a stat-forward eyebrow ("0 EVENTS HAPPENING
-           NEAR YOU", "Directory · 1140 spaces") and stack the subtitle
-           full-width below the headline rather than beside it. The eyebrow
-           now carries the live artist count (tr.artistsPage.eyebrowDirectory,
-           was static "The directory"); the subtitle moved out of the grid to
-           sit under the headline; and the lower stat+search row dropped its
-           now-duplicate count, keeping only the search box - repeating the
-           same number twice in one hero read as the page not being sure
-           which one was authoritative, and Events/Venues don't repeat their
-           headline count elsewhere either. This is a source-checked, source-
-           deviating choice (like BUG-2608-080's no-forced-<br/> call), not a
-           fidelity fix - the export's two-column grid and static eyebrow are
-           left as-is in the reference file. Headline color/style is
-           untouched: the export's h1 is uniform #f5f5f0 with no span/em, no
-           amber, and stays that way here. */
+        /* HERO (BUG-2608-080, then GEN-2608-078, then GEN-2608-079) - export
+           App.tsx Directory component lines 478-509 has a left-aligned
+           two-column grid (items-end, lg:grid-cols-[1fr_auto]) with the
+           subtitle beside the headline and a static "The directory"
+           eyebrow, then a separate border-y stat+search row below with its
+           own live count. GEN-2608-078 deliberately diverges from that
+           export structure for cross-page consistency with Events/Venues,
+           which lead their hero with a stat-forward eyebrow ("0 EVENTS
+           HAPPENING NEAR YOU", "Directory · 1140 spaces") and stack the
+           subtitle full-width below the headline rather than beside it.
+           The eyebrow now carries the live artist count
+           (tr.artistsPage.eyebrowDirectory, was static "The directory");
+           the subtitle moved out of the grid to sit under the headline;
+           and the lower stat+search row dropped its now-duplicate count,
+           keeping only the search box - repeating the same number twice in
+           one hero read as the page not being sure which one was
+           authoritative, and Events/Venues don't repeat their headline
+           count elsewhere either. This is a source-checked, source-
+           deviating choice (like BUG-2608-080's no-forced-<br/> call), not
+           a fidelity fix - the export's two-column grid and static eyebrow
+           are left as-is in the reference file.
+
+           GEN-2608-079 REVERSES part of GEN-2608-078's own finding, at
+           Hitesh's explicit direction - not a fidelity correction.
+           GEN-2608-078's source check was correct (the export's h1 is
+           uniform #f5f5f0, no span/em, no amber) and concluded there was
+           no source backing to add amber to the headline. Hitesh has since
+           directed a deliberate deviation from the export on exactly that
+           point: heroEmphasis ("Artists") is now colored var(--afa-amber),
+           matching the payoff-word-gets-amber pattern Events ("Nights
+           worth showing up for") and Venues ("Where the show happens")
+           both use - amber on the middle/payoff word, never the lead word,
+           which is why heroPrefix ("Discover ") stays plain cream. Also
+           removed the h1's own maxWidth: 560px, which (combined with the
+           clamp(48px,9vw,112px) sizing) was forcing "Discover"/"Artists"
+           onto two lines even without a literal <br/> - Events/Venues both
+           render their headline on one line. Verified via real screenshots
+           at 390/768/1024/1280/1440px that clamp(48px,8vw,96px) - reduced
+           from the original 112px upper bound - stays single-line at every
+           one of those widths with no awkward tablet/narrow-desktop break,
+           including locales where heroPrefix is empty and heroEmphasis
+           leads the phrase (e.g. Hindi "कलाकारों को खोजें" - amber noun,
+           cream trailing verb). */
         .afa-artists-hero-grid { display: flex; flex-direction: column; gap: 16px; }
         .afa-artists-hero-subtitle { max-width: 560px; }
         .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
@@ -203,8 +224,10 @@ export default function ArtistsPage() {
           <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.eyebrowDirectory.replace("{n}", String(filtered.length))}
           </span>
-          <h1 style={{ maxWidth: "560px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 9vw, 112px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
-            {tr.artistsPage.heroPrefix}{tr.artistsPage.heroEmphasis}{tr.artistsPage.heroSuffix}
+          <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 8vw, 96px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
+            {tr.artistsPage.heroPrefix}
+            <span style={{ color: "var(--afa-amber)" }}>{tr.artistsPage.heroEmphasis}</span>
+            {tr.artistsPage.heroSuffix}
           </h1>
           <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.65)" }}>
             {tr.artistsPage.heroSubtitle}{" "}
