@@ -1,32 +1,165 @@
-SESSION HANDOFF — 20–22 Aug
+# AFA Handoff — 22 Aug 2026 session
 
-qa HEAD: 59317b207841592b68b80edfa09a6fbffbebb85b. Re-verify fresh at session start.
+**qa HEAD: `cdffa53a3f1bf3bc1a9b3ea13e9e83e8ded0399f`**
+(verify fresh at next session start — do not trust this blindly)
 
-This continues directly from the 20 Aug handoff (qa HEAD 3885b34 at that point). One item was left "prompt sent, no response yet" — it has since completed and merged. Correcting that here rather than leaving it stale.
+🔴 **Razorpay and Google Maps/Places billing dashboards remain unchecked
+across many sessions now, including this one.** First thing to do next
+session, before anything else.
 
-BUG-2608-080: Artists directory hero left-align — DONE, merged (PR #516). The 20 Aug handoff's own root-cause note held up: GEN-2608-073's original approval was screenshot-only, the raw "Discover Artists Directory Page" export was never pulled, so the hero drifted into a centered/boxed layout (surface-inverse background, noise texture, maxWidth 800px, rounded-10px search box) that didn't match the export at all. This round pulled the real export directly (src/App.tsx's Directory component, lines 464-510) and rebuilt against it: left-aligned eyebrow ("The directory") + large italic serif headline in a two-column grid (items-end, subtitle pinned right/bottom), then a separate bordered stat+search row below — sharp corners confirmed by grepping the whole export file for "rounded" (zero matches), matching the Venues/Events precedent for this shape rather than the page's old one-off centered treatment.
+---
 
-One deliberate, flagged deviation from a literal port: the export hardcodes a `<br/>` between "Discover" and "Artists" for its two-line headline. Forcing that same hard break across all 11 locales breaks down for languages with different word order — Bengali's existing translation puts the whole phrase in heroEmphasis+heroSuffix with heroPrefix empty, so a fixed break point between prefix and emphasis would just insert a blank leading line. Let the headline wrap naturally in a max-width column instead of forcing the export's literal line break — English still reads as two lines at this size without forcing it, and it's now safe for every locale's actual word order rather than assuming English's.
+## Shipped this session (all merged to qa, Vercel READY, zero runtime errors)
 
-Preserved, not rebuilt: BrowseSearchDropdown's real dropdown-results mechanism (only its trigger box was restyled — sharp corners, SearchIcon moved to the left side matching the export exactly); the live artist count + loading state (repositioned into the export's large-serif-number + mono-label shape, not dropped); the existing `.afa-search-box:focus-within` amber-border rule (reused, not redefined). Genre filter row and everything below the hero were explicitly out of scope and untouched — it already uses an underline treatment, not pills, matching the export's own philosophy for that row.
+1. **PR #516 — BUG-2608-080**: Artists hero rebuilt against the real
+   Figma Make export (was screenshot-only approved originally, drifted
+   into a centered/boxed layout instead of the export's left-aligned
+   grid). Sharp corners, search icon moved to left of input,
+   `BrowseSearchDropdown` mechanism untouched. Deliberate deviation: no
+   forced `<br/>` in the headline (breaks for locales like Bengali
+   where `heroPrefix` is empty).
 
-i18n: added eyebrowDirectory/heroSubtitle/heroSubtitleEmphasis/statLabel and updated searchPlaceholder's copy — real translations across all 11 locale dictionaries. heroPrefix/heroEmphasis/heroSuffix values were left untouched everywhere; only their styling changed (uniform italic cream, no amber emphasis — the export's headline is single-tone, unlike Venues/Events).
+2. **PR #517 — GEN-2608-078**: Artists hero eyebrow/subtitle
+   restructured for cross-page consistency with Events/Venues —
+   eyebrow changed from static "The directory" to a stat-forward
+   `"{n} artists live now"`, subtitle moved full-width below the
+   headline, redundant count removed from the lower stat+search row.
+   Deliberately deviates from the export's two-column grid structure.
+   Source check (Part 1 of this task) confirmed the export's headline
+   itself has no amber/span treatment — correctly concluded not to add
+   amber to the headline at that point.
 
-Verified for real: rendered the actual live /artists route directly (it fetches its own data client-side, so no throwaway route was needed) and screenshotted the settled hero, the search dropdown mid-interaction (typed a query, confirmed the empty-results message renders and the box border goes amber on focus), and a mobile viewport — grid correctly collapses to one column below 1024px, stat+search row stacks below 768px. Zero page errors.
+3. **PR #518 — GEN-2608-079**: That "no amber on headline" conclusion
+   was explicitly reversed by Hitesh's direct call. Headline collapsed
+   to one line (removed a `maxWidth: 560px` that was force-wrapping it
+   even without a literal `<br/>`; clamp reduced from
+   `(48px,9vw,112px)` to `(48px,8vw,96px)`), and `heroEmphasis`
+   ("Artists") colored `var(--afa-amber)` while `heroPrefix`
+   ("Discover ") stays plain cream — matching the payoff-word-gets-
+   amber convention Events/Venues both use (amber never on the lead
+   word). Verified single-line at 390/768/1024/1280/1440px.
 
-tsc note, worth carrying forward: could not reproduce this session's repeatedly-stated "79 pre-existing errors" baseline (also framed elsewhere this session as "all Prisma-generate sandbox noise") from any actual tsc invocation. What's actually there, consistently, before and after every change this session: 0 errors in src/, 120 total `Cannot find module` errors all from the six untracked Figma/ reference folders' own vite.config.ts files (no node_modules installed for those standalone Vite projects — unrelated to Prisma, unrelated to src/). Used a direct before/after diff of that real measurement as the correctness bar instead each time. If "79" is a real number from somewhere, it's not reproducible via `npx tsc --noEmit -p tsconfig.json` in this sandbox as configured — worth either correcting the stated baseline or figuring out what command actually produces 79, so future sessions aren't chasing a number that doesn't exist.
+4. **PR #519 — BUG-2608-081**: SiteNav's role badge ("Venue Owner" /
+   "Artist" / "Organiser" / etc., next to the signed-in greeting) used
+   the exact same color as the active nav-link state
+   (`var(--afa-terracotta)` on `rgba(200,68,26,0.08)`), creating a
+   false affordance — it looked clickable, wasn't. Restyled to a quiet
+   badge borrowing structure (not color) from the real Published
+   status badge — deliberately NOT reusing that badge's sage/gold,
+   since those are semantic to publish-state elsewhere. Fixed via one
+   shared `ROLE_BADGE_STYLE` constant, so it covers every role in one
+   place.
 
-PRs merged across 20–22 Aug: #506–#516 (11 PRs). qa HEAD progressed 8158f97 → 59317b2.
+**Artists hero is now fully done** — three rounds, source-verified,
+fully documented decision trail including the explicit GEN-2608-079
+override of GEN-2608-078.
 
-Not done, carry forward:
+### Process note for next session
+Two of the four PRs this session (#518, #519) hit the same issue:
+Claude Code branched off a feature branch that got merged and deleted
+mid-session, leaving the pushed branch with a diverged git graph
+against `qa` (harmless in content, but a messy raw diff). Both times
+this was fixed by isolating the single real commit and cherry-picking
+it onto a fresh branch off current `origin/qa`, then running the
+normal PR pipeline. **Ask Claude Code to branch fresh off `qa` at the
+start of each new task**, rather than assuming local `qa` is current —
+merges are landing mid-session now that the pace has picked up.
 
-GEN-2608-073 — Artist directory cards (real-photo ones) read as too basic/ordinary. Still NEW, no design direction agreed yet. Needs a real conversation before building, not another guess.
-The empty-state design gap surfaced mid-session on 20 Aug (queried, never resolved): 1,140 approved venues in QA, only 22 have facilities data, only 1 has a seat map. The "sparse" view is the default 99% of real venues will show, and it was never designed or Figma-audited — the whole Venues fidelity round matched Prithvi Theatre's fully-populated mock data. Hitesh hasn't picked a direction yet: (a) design a real empty/sparse state as its own small round, or (b) treat it as a data problem and push on owner-side facility/seatmap entry. Raise again at session start.
-Owner card city field — export shows a city row with no backing data anywhere (VenueOwner has no city field in schema or API). Needs Hitesh's call: add the real field, or confirm permanently out of scope. Carried from before 20 Aug, still untouched.
-Figma MCP could not pull raw source for any Make-mode file across this whole 20–22 Aug run (Venues, Events, Artists all failed identically — connector returns a manifest of resource links, not fetchable content in this environment). Every real fix across all three rounds came from Claude Code's local file access to the exported zips instead. Still worth flagging to Anthropic/checking if this is fixable, since it's now a load-bearing gap in the chat-side workflow.
-Whether the Shegaon Mic Night Unsplash posterImage URL (qa-general-event-04) is genuinely dead vs. just blocked in these sandboxes was flagged on 20 Aug but still not checked — non-urgent now that BUG-2608-079's fallback handles it either way, but worth a real look eventually.
-Fresh GitHub PAT will not persist — request new one next session if pushes start failing. (Push access worked fine for every branch across 20–22 Aug, including this handoff's own BUG-2608-080 branch — no fresh PAT was needed this stretch, but the standing warning from 20 Aug is repeated here since credential expiry is inherently session-boundary-timed and unverifiable in advance.)
-Razorpay / Google Maps billing dashboards — flagged repeatedly across many sessions now, still unconfirmed. Raising again, bold, at next session start per protocol.
-Standing untouched items carried from before 20 Aug, no new info: seat-map narrower gaps, TWA/mobile redesign, K2 payout ledger, Admin Dashboard UI, BUG-2608-055, CA/TDS gate, language click-testing, GEN-2608-040, Artist Reputation epic click-testing, QST-2607-009 Google Sign-In, seed59-prod-tls-risk.
+---
 
-The recurring lesson from 20 Aug held again on the Artists hero, in the opposite direction this time: this round went straight to pulling the real export on the FIRST attempt (because the 20 Aug root-cause note already named "screenshot-only approval, raw export never pulled" as the exact failure mode to avoid) rather than iterating on a guess from screenshots again. Zero patch-and-recheck rounds needed — one source-verified build, one PR, done. Same lesson as 20 Aug's close: when a page "looks off" relative to sibling pages that already went through a real source-verified pass, check whether THIS page ever actually had one before touching a single style value.
+## Open items, carried forward
+
+1. **GEN-2608-073** — Artist directory cards (real-photo ones) still
+   read as "too basic/ordinary." Still NEW. No design direction agreed
+   — needs a real conversation with Hitesh before building anything.
+
+2. **Empty-state design gap** — 1,140 approved QA venues, only 22 have
+   facilities data, only 1 has a seat map. The sparse view is what 99%
+   of real venues will actually show, and it's never been designed —
+   the Venues fidelity round used Prithvi Theatre's fully-populated
+   mock data throughout. Hitesh hasn't picked a direction: (a) design
+   a real sparse/empty state, or (b) treat it as a data problem and
+   push owner-side facility/seatmap entry instead.
+
+3. **Owner card city field** — export shows a city row with no backing
+   schema/API field. Needs Hitesh's call: add it for real, or rule it
+   out of scope.
+
+4. Figma MCP still cannot pull raw source for Figma Make files
+   (confirmed failing again this session on the amber source check).
+   Claude Code local file reads remain the only workaround. Worth
+   flagging to Anthropic at some point.
+
+5. 🔴 Razorpay and Google Maps/Places API billing dashboards —
+   unconfirmed across many sessions now, this one included.
+
+---
+
+## New this session — Venue Owner Portal (not started, ready to kick off)
+
+Hitesh shared 6 screenshots of the live Venue Owner dashboard (Your
+Venues, Edit Profile, Revenue Overview, Booking Requests calendar,
+Flexible Requests, Register Venue form) — flagged as visually the odd
+one out on the whole platform: plain white calendar grid, default form
+styling, an almost-empty revenue chart, no illustration/duotone
+treatment anywhere. Functionally solid, never had a design pass.
+
+**Sequencing note:** memory had "dashboards" queued as a *possible*
+future Figma Make round, explicitly *after* the homepage ships and is
+seen live. Hitesh chose to move on it now instead — flagged that
+change out loud at the time, not blocking, his call to make.
+
+A two-step design brief is written and ready in this conversation's
+artifacts (`venue-owner-portal-design-brief.md`):
+
+1. **Step 1 (send to Claude Code first, read-only)**: extract a real
+   design-token/pattern reference from the shipped codebase — colors,
+   fonts, spacing, existing card/button/badge conventions — so the
+   Figma Make prompt is grounded in what's actually real, not guessed.
+2. **Step 2**: paste that output into the Figma Make prompt (already
+   drafted, covers all 6 screens as one cohesive portal) and run it.
+
+**Not yet sent to Claude Code — this is the next thing to do**, once
+the 🔴 billing dashboard check is out of the way.
+
+---
+
+## Still on the horizon (unchanged from prior sessions)
+
+- Port Figma Make designs into the actual codebase (website "AFA
+  Website V1" dark editorial bento, mobile "AFA Mobile App" original
+  tab) — not started for either.
+- Four Rooms icon/typography treatment (GEN-2608-071) — deferred.
+- Organiser and Venue Owner landing pages — queued after artist pages
+  confirmed (artist pages themselves still mid-fidelity-review per
+  GEN-2608-073 above).
+- Seat-map remaining open items (architecture already shipped, PRs
+  #147–#151, #193) — per-zone price input on Manual Canvas, grid-
+  generator vs. draw-it-myself redundancy, cross-level zone pricing
+  aggregation bug, no visual layout preview at event creation,
+  curved/angled rows + balcony-as-distinct-tier not built, full venue
+  snapshot/lock deferred.
+
+---
+
+## Reminders that don't change session to session
+
+- Session-start: verify qa HEAD fresh (don't trust this doc's SHA
+  blindly), query Feedback table (NEW/REVIEWED, esp. BUG), cross-check
+  against `docs/design.md` before treating anything as open.
+- Brief and build stay separate steps for design-fidelity-sensitive
+  work — quote exact export values before building.
+- PR workflow: feature branch off fresh `origin/qa` → push → PR → CI
+  poll → re-fetch head SHA immediately before squash-merge → delete
+  branch → Contents API verify → Vercel READY confirm → runtime errors
+  check → Feedback table update. All PRs target `qa`.
+- `CodeCounter` has drifted from real max displayId at least twice now
+  (BUG counter was 5 behind, GEN counter was 4 behind, both corrected
+  this session) — worth a quick sanity check each time before using it
+  rather than assuming it's in sync.
+- No GitHub Copilot on this project at all. Only Claude (chat) and
+  Claude Code.
+- HARD PRODUCTION FREEZE still in effect — no qa→main merges, no prod
+  Supabase touches, no Razorpay live keys, until Hitesh's explicit
+  "company registered" signal. Company registration is complete, PAN
+  received; current account and GST still pending.
