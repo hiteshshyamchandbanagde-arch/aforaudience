@@ -156,15 +156,30 @@ export default function ArtistsPage() {
         .afa-cta-solid { transition: filter 0.15s ease; }
         .afa-cta-solid:hover { filter: brightness(1.1); }
         .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
-        /* HERO (BUG-2608-080) - export App.tsx Directory component lines
-           478-509: left-aligned eyebrow/headline/subtitle grid
-           (items-end, lg:grid-cols-[1fr_auto]), then a separate
-           border-y stat+search row below - matches the shape already
-           established for Venues (VenuesHero.tsx + VenuesGridClient.tsx's
-           search box), not the old centered/boxed treatment. */
-        .afa-artists-hero-grid { display: flex; flex-direction: column; gap: 24px; }
-        @media (min-width: 1024px) { .afa-artists-hero-grid { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 32px; } }
-        .afa-artists-hero-subtitle { max-width: 340px; }
+        /* HERO (BUG-2608-080, then GEN-2608-078) - export App.tsx Directory
+           component lines 478-509 has a left-aligned two-column grid
+           (items-end, lg:grid-cols-[1fr_auto]) with the subtitle beside
+           the headline and a static "The directory" eyebrow, then a
+           separate border-y stat+search row below with its own live
+           count. GEN-2608-078 deliberately diverges from that export
+           structure for cross-page consistency with Events/Venues, which
+           lead their hero with a stat-forward eyebrow ("0 EVENTS HAPPENING
+           NEAR YOU", "Directory · 1140 spaces") and stack the subtitle
+           full-width below the headline rather than beside it. The eyebrow
+           now carries the live artist count (tr.artistsPage.eyebrowDirectory,
+           was static "The directory"); the subtitle moved out of the grid to
+           sit under the headline; and the lower stat+search row dropped its
+           now-duplicate count, keeping only the search box - repeating the
+           same number twice in one hero read as the page not being sure
+           which one was authoritative, and Events/Venues don't repeat their
+           headline count elsewhere either. This is a source-checked, source-
+           deviating choice (like BUG-2608-080's no-forced-<br/> call), not a
+           fidelity fix - the export's two-column grid and static eyebrow are
+           left as-is in the reference file. Headline color/style is
+           untouched: the export's h1 is uniform #f5f5f0 with no span/em, no
+           amber, and stays that way here. */
+        .afa-artists-hero-grid { display: flex; flex-direction: column; gap: 16px; }
+        .afa-artists-hero-subtitle { max-width: 560px; }
         .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
         @media (min-width: 768px) { .afa-artists-stat-row { flex-direction: row; align-items: center; justify-content: space-between; } }
         .afa-artists-search-box { width: 100%; }
@@ -185,14 +200,12 @@ export default function ArtistsPage() {
       {/* HERO */}
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px 0" }}>
         <div className="afa-artists-hero-grid">
-          <div>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
-              {tr.artistsPage.eyebrowDirectory}
-            </span>
-            <h1 style={{ marginTop: "16px", maxWidth: "560px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 9vw, 112px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
-              {tr.artistsPage.heroPrefix}{tr.artistsPage.heroEmphasis}{tr.artistsPage.heroSuffix}
-            </h1>
-          </div>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+            {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.eyebrowDirectory.replace("{n}", String(filtered.length))}
+          </span>
+          <h1 style={{ maxWidth: "560px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 9vw, 112px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
+            {tr.artistsPage.heroPrefix}{tr.artistsPage.heroEmphasis}{tr.artistsPage.heroSuffix}
+          </h1>
           <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.65)" }}>
             {tr.artistsPage.heroSubtitle}{" "}
             <span style={{ color: "var(--afa-cream)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
@@ -200,15 +213,6 @@ export default function ArtistsPage() {
         </div>
 
         <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid rgba(245,245,240,0.1)", borderBottom: "1px solid rgba(245,245,240,0.1)", padding: "20px 0" }}>
-          {loading ? (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "rgba(245,245,240,0.55)" }}>{tr.artistsPage.loadingArtists}</span>
-          ) : (
-            <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: "36px", color: "var(--afa-cream)" }}>{filtered.length}</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(245,245,240,0.55)" }}>{tr.artistsPage.statLabel}</span>
-            </div>
-          )}
-
           <BrowseSearchDropdown
             query={search}
             items={filtered}
