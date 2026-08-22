@@ -319,7 +319,7 @@ export default function EventsPage() {
                 onChange={setSearch}
                 placeholder={tr.eventsPage.searchOrganisersPlaceholder}
                 className="afa-events-search-box"
-                style={{ maxWidth: "420px", marginBottom: "24px" }}
+                style={{ marginBottom: "24px" }}
               />
             </BrowseSearchDropdown>
             <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
