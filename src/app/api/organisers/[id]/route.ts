@@ -11,9 +11,41 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       include: {
         user: { select: { name: true, avatar: true } },
+        // Explicit select (not include) - the previous `include` pulled
+        // every Event column (description, food, dresscode, etc.) into
+        // the raw object this route then spread straight into the public
+        // JSON response, undercutting the "explicit projection, not the
+        // raw Prisma object" intent already stated below for the
+        // Organiser fields themselves. Only the fields the profile page
+        // rebuild actually renders.
         events: {
           where: { status: { in: ['APPROVED', 'COMPLETED'] } },
-          include: { venue: { select: { name: true, city: true } } },
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            startTime: true,
+            status: true,
+            venue: { select: { name: true, city: true } },
+          },
+          orderBy: { date: 'asc' },
+        },
+        // Public profile only ever shows a bookable or wrapped tour - DRAFT
+        // (still being built) and PENDING_CONSENT (artists haven't
+        // accepted yet) are organiser-internal states, same reasoning as
+        // the events filter above. CANCELLED is excluded too - nothing
+        // for a visitor to act on.
+        tours: {
+          where: { status: { in: ['LIVE', 'COMPLETED'] } },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            stops: {
+              select: { id: true, date: true, venue: { select: { city: true } } },
+              orderBy: { date: 'asc' },
+            },
+          },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -28,14 +60,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     })
 
     // Never expose payout/tax-compliance internals on a public route -
-    // explicit projection, not the raw Prisma object.
+    // explicit projection, not the raw Prisma object. followerCount is
+    // computed and returned here for any future consumer, but the
+    // profile page rebuild deliberately doesn't render it anywhere
+    // (not a real, product-decided metric yet - see
+    // docs/organisers-grid-embed-audit.md).
     return NextResponse.json({
       id: organiser.id,
       orgName: organiser.orgName,
       code: organiser.code,
       bio: organiser.bio,
+      createdAt: organiser.createdAt,
       user: organiser.user,
       events: organiser.events,
+      tours: organiser.tours,
       followerCount,
     })
   } catch (err) {
