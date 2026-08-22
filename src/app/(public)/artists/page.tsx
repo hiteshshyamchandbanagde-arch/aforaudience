@@ -203,7 +203,6 @@ export default function ArtistsPage() {
         .afa-artists-hero-subtitle { max-width: 560px; }
         .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
         @media (min-width: 768px) { .afa-artists-stat-row { flex-direction: row; align-items: center; justify-content: space-between; } }
-        .afa-artists-search-box { width: 100%; }
         /* BUG-2608-074: featured artist card was a fixed 2-column grid
            (photo | name+button) with no mobile breakpoint - on phone
            widths the 240px-min photo column left almost no room for the
@@ -235,27 +234,29 @@ export default function ArtistsPage() {
         </div>
 
         <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid rgba(245,245,240,0.1)", borderBottom: "1px solid rgba(245,245,240,0.1)", padding: "20px 0" }}>
-          <BrowseSearchDropdown
-            query={search}
-            items={filtered}
-            getId={(a) => a.id}
-            emptyLabel={tr.common.nounArtists}
-            translate
-            onSelect={(a) => goToArtist(a.id)}
-            renderRow={(a) => (
-              <>
-                <span style={{ fontWeight: 600 }}>{a.user.displayName || a.user.name}</span>
-                {a.genre.length > 0 && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre.join(", ")}</span>}
-              </>
-            )}
-          >
-            <SearchInputBox
-              value={search}
-              onChange={setSearch}
-              placeholder={tr.artistsPage.searchPlaceholder}
-              className="afa-artists-search-box"
-            />
-          </BrowseSearchDropdown>
+          <div style={{ flex: "1 1 280px" }}>
+            <BrowseSearchDropdown
+              query={search}
+              items={filtered}
+              getId={(a) => a.id}
+              emptyLabel={tr.common.nounArtists}
+              translate
+              onSelect={(a) => goToArtist(a.id)}
+              renderRow={(a) => (
+                <>
+                  <span style={{ fontWeight: 600 }}>{a.user.displayName || a.user.name}</span>
+                  {a.genre.length > 0 && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre.join(", ")}</span>}
+                </>
+              )}
+            >
+              <SearchInputBox
+                value={search}
+                onChange={setSearch}
+                placeholder={tr.artistsPage.searchPlaceholder}
+                style={{ width: "100%" }}
+              />
+            </BrowseSearchDropdown>
+          </div>
         </div>
       </div>
 
