@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import Photo from "@/components/Photo"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface OrganiserItem {
@@ -34,6 +35,17 @@ interface OrganiserItem {
 // discovery entry point). The full standalone page at /organisers has
 // its own hero/search version; this is the embeddable variant for a tab
 // context."
+//
+// Fidelity rebuild (docs/organisers-grid-embed-brief.md, this session) -
+// card shell/typography/avatar were still on the pre-Phase-2c stale
+// token family (docs/organisers-grid-embed-audit.md documented every
+// divergence). Restyled onto the same dark/sharp-corner convention and
+// `.afa-venue-card` hover pattern already shipped on VenuesGridClient -
+// values copied verbatim from there, not reinvented. The internal
+// search <input>/BrowseSearchDropdown branch below is left unstyled on
+// purpose: it's dead code at the one real call site (hideSearchBar is
+// always true from events/page.tsx) and the brief explicitly scopes
+// out un-hiding or restyling it.
 interface OrganisersGridEmbedProps {
   search?: string
   hideSearchBar?: boolean
@@ -83,6 +95,15 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
 
   return (
     <div>
+      {/* Card shell hover state (border-color, amber on hover) has to live
+          in a stylesheet rule, not inline styles - an inline border always
+          wins over a stylesheet :hover rule regardless of specificity.
+          Values copied verbatim from VenuesGridClient's .afa-venue-card. */}
+      <style>{`
+        .afa-organisers-embed-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
+        .afa-organisers-embed-card:hover { border-color: rgba(201,151,58,0.6); }
+      `}</style>
+
       {!hideSearchBar && (
       <BrowseSearchDropdown
         query={search}
@@ -120,38 +141,36 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
                 goToOrganiser(org.id)
               }
             }}
+            className="hover-lift-card afa-focusable afa-organisers-embed-card"
             style={{
               position: "relative",
-              background: "var(--afa-white)",
-              borderRadius: "12px",
+              background: "var(--afa-surface-raised)",
               padding: "22px",
-              border: "1px solid rgba(14,12,10,0.08)",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
             }}
           >
             {isNavigatingThis && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 2, borderRadius: "12px", background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(14,12,10,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+              <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-plum-black)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
+              <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                 {org.user.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={org.user.avatar} alt={org.orgName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <Photo src={org.user.avatar} alt={org.orgName} />
                 ) : (
                   org.orgName.charAt(0).toUpperCase()
                 )}
               </div>
-              <h2 style={{ fontFamily: "Georgia, serif", fontSize: "17px", fontWeight: 700, color: "var(--afa-ink)" }}>{org.orgName}</h2>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
             </div>
-            <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: org.bio ? 0.65 : 0.4, marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: org.bio ? "var(--afa-text-secondary)" : "var(--afa-text-muted)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}
             </p>
-            <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>
               {org._count.events} {org._count.events === 1 ? tr.organisersEmbed.eventSingular : tr.organisersEmbed.eventPlural}
             </div>
           </div>
