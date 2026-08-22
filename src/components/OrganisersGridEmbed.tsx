@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import Photo from "@/components/Photo"
+import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface OrganiserItem {
@@ -46,6 +47,17 @@ interface OrganiserItem {
 // purpose: it's dead code at the one real call site (hideSearchBar is
 // always true from events/page.tsx) and the brief explicitly scopes
 // out un-hiding or restyling it.
+//
+// Placeholder-avatar fallback fix (this session) - 10/15 approved QA
+// organisers seed avatarUrl to avatars.githubusercontent.com filler
+// (confirmed live via Supabase), the same placeholder host
+// isPlaceholderImageUrl() already exists to catch (see its own comment -
+// this is the identical Artists "Sai Jain / GitHub mascot" problem).
+// This component never imported that guard, so those placeholder URLs
+// were treated as real photos and run through Photo's duotone filter,
+// rendering as a muddy amber-on-black texture instead of the clean
+// letter fallback null avatars already get correctly. Gate on the same
+// util Venues/Artists use rather than inventing a second check.
 interface OrganisersGridEmbedProps {
   search?: string
   hideSearchBar?: boolean
@@ -159,7 +171,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
               <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
-                {org.user.avatar ? (
+                {org.user.avatar && !isPlaceholderImageUrl(org.user.avatar) ? (
                   <Photo src={org.user.avatar} alt={org.orgName} />
                 ) : (
                   org.orgName.charAt(0).toUpperCase()
