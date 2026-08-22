@@ -1,7 +1,56 @@
 # AFA Handoff — 22 Aug 2026 session (Organisers round)
 
-**qa HEAD: `1ea773cd8d831e0d49df75b5d04a8e6d05b5cbd8`**
+**qa HEAD: `ab43e16bc06231634316e93f3c01701a8ee9116f`** (this handoff commit
+itself; last code commit is `1ea773cd8d831e0d49df75b5d04a8e6d05b5cbd8`,
+PR #526)
 (verify fresh at next session start — do not trust this blindly)
+
+---
+
+## NEXT SESSION — priority order (set explicitly by Hitesh at end of this session)
+
+1. 🔴 Razorpay / Google Maps billing dashboards (manual, Hitesh)
+2. Confirm local dev DB (P1001) status — see below, now 2+ sessions
+3. **Unfinished from this session** — Organiser Profile event card
+   click-target issue (see new section directly below). A diagnostic
+   prompt was sent to Claude Code; results were NOT returned before
+   this session ended. Get that result first, then fix.
+4. **Venue Owner Portal — Hitesh explicitly prioritized this for next
+   session.** Brief is already written and ready
+   (`venue-owner-portal-design-brief.md`), Step 1 token-extraction is
+   superseded by `docs/afa-design-tokens-reference.md` (already exists
+   from this session — reuse it, don't redo Step 1). Go straight to
+   Step 2: run the Figma Make prompt. See full section further down
+   this doc for details.
+
+---
+
+## Unfinished at session end — Organiser Profile event card click target
+
+On the just-shipped Organiser Profile page (`/organisers/[id]`, PR
+#526), Hitesh flagged via screenshot that the "DETAILS →" label on
+Upcoming/Past Events cards reads as the only clickable element — small,
+muted-gray text in the corner of an otherwise large card — rather than
+the whole card being clickable. Two distinct concerns raised:
+
+1. Likely violates this project's standing rule that every tile/card
+   opens in a single click via the click-guarded pattern
+   (navigatingId-style state, spinner overlay, other cards dim) already
+   used on `OrganisersGridEmbed.tsx` / `VenuesGridClient.tsx`. Unclear
+   whether this event card follows that pattern or has a narrower
+   click target.
+2. Independent of (1) — even if the whole card *is* already clickable,
+   "DETAILS →" doesn't visually read as actionable (muted gray, no
+   amber/hover distinction, blends into secondary text).
+
+A diagnostic-only prompt was sent to Claude Code (findings before any
+fix, per this session's established discipline) asking it to: quote
+the card's click handler(s) and confirm what element they're attached
+to; compare against the `OrganisersGridEmbed`/`VenuesGridClient`
+click-guard pattern; and check whether "DETAILS →" is styled distinctly
+from static secondary text elsewhere on the page. **Result not received
+before session end — this is the first real task for next session,
+ahead of Venue Owner Portal.**
 
 🔴 **Razorpay and Google Maps/Places billing dashboards remain unchecked
 across many sessions now, including this one.** Carried forward again —
