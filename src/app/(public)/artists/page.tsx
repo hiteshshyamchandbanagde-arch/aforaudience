@@ -204,7 +204,6 @@ export default function ArtistsPage() {
         .afa-artists-stat-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
         @media (min-width: 768px) { .afa-artists-stat-row { flex-direction: row; align-items: center; justify-content: space-between; } }
         .afa-artists-search-box { width: 100%; }
-        @media (min-width: 768px) { .afa-artists-search-box { width: 320px; flex-shrink: 0; } }
         /* BUG-2608-074: featured artist card was a fixed 2-column grid
            (photo | name+button) with no mobile breakpoint - on phone
            widths the 240px-min photo column left almost no room for the
