@@ -288,6 +288,15 @@ html {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
 
+/* Shared directory-page search input chrome (Venues/Artists/Events hero) -
+   was three independently hand-rolled boxes (two under this same class
+   name with different padding/icon-side choices, one border-bottom-only
+   on Events). One definition here so the box and its focus state can't
+   drift apart per-page again. See src/components/SearchInputBox.tsx for
+   the markup this class is applied to. */
+.afa-search-box { display: flex; align-items: center; gap: 12px; background: var(--afa-surface-page); border: 1px solid rgba(245,245,240,0.15); padding: 12px 16px; box-sizing: border-box; }
+.afa-search-box:focus-within { border-color: var(--afa-amber); }
+
 /* FEAT-2608-044 - the Venues/Artists card grids use role="link" divs for
    the click-guard pattern (PR #261/#312), which get no visible focus ring
    by default the way a real <a> would. Scoped to .afa-focusable rather

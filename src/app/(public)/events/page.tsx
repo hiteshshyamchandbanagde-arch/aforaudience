@@ -6,7 +6,7 @@ import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
 import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
-import { SearchIcon } from "@/components/icons/ArtistIcons"
+import SearchInputBox from "@/components/SearchInputBox"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -210,8 +210,7 @@ export default function EventsPage() {
         @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
         @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
         @keyframes afa-spin { to { transform: rotate(360deg); } }
-        .afa-events-search-box { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(245,245,240,0.2); padding-bottom: 8px; flex: 1; min-width: 220px; }
-        .afa-events-search-box:focus-within { border-color: var(--afa-amber); }
+        .afa-events-search-box { flex: 1; min-width: 220px; }
         .afa-events-type-filter { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(245,245,240,0.4); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
         .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-type-filter.active { color: var(--afa-amber); }
@@ -292,15 +291,12 @@ export default function EventsPage() {
                 </>
               )}
             >
-              <label className="afa-events-search-box">
-                <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={tr.eventsPage.searchEventsPlaceholder}
-                  style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", color: "var(--afa-text-primary)", outline: "none" }}
-                />
-              </label>
+              <SearchInputBox
+                value={search}
+                onChange={setSearch}
+                placeholder={tr.eventsPage.searchEventsPlaceholder}
+                className="afa-events-search-box"
+              />
             </BrowseSearchDropdown>
           </div>
         )}
@@ -318,15 +314,13 @@ export default function EventsPage() {
               onSelect={(o) => goToOrganiser(o.id)}
               renderRow={(o) => <span style={{ fontWeight: 600 }}>{o.orgName}</span>}
             >
-              <label className="afa-events-search-box" style={{ maxWidth: "420px", marginBottom: "24px" }}>
-                <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={tr.eventsPage.searchOrganisersPlaceholder}
-                  style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", color: "var(--afa-text-primary)", outline: "none" }}
-                />
-              </label>
+              <SearchInputBox
+                value={search}
+                onChange={setSearch}
+                placeholder={tr.eventsPage.searchOrganisersPlaceholder}
+                className="afa-events-search-box"
+                style={{ maxWidth: "420px", marginBottom: "24px" }}
+              />
             </BrowseSearchDropdown>
             <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
           </div>
