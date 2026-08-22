@@ -139,16 +139,52 @@ function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: strin
   )
 }
 
-function EventDateCard({ event, tr }: { event: OrganiserEvent; tr: Dictionary }) {
+// BUG-2608-082 - the whole card already navigated via the outer <Link>
+// (confirmed by diagnostic, not a broken-navigation bug), but it had
+// none of the click-guard affordances (navigatingId/spinner/dim) that
+// OrganisersGridEmbed/VenuesGridClient give their tiles, and DETAILS→
+// read as static secondary text rather than a CTA. navigatingId/
+// onNavigate are lifted to OrganiserPage so Upcoming+Past cards dim as
+// one group, matching "other cards dim" on the reference grids. Kept
+// the real <Link> (not a div role="link") so prefetch/right-click/
+// middle-click-new-tab keep working - the guard only intercepts plain
+// left-clicks via the modifier/button check below.
+function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: OrganiserEvent; tr: Dictionary; navigatingId: string | null; onNavigate: (id: string) => void }) {
   const d = new Date(event.date)
   const month = d.toLocaleDateString("en-IN", { month: "short" }).toUpperCase()
   const day = d.getDate()
+  const isNavigatingThis = navigatingId === event.id
   return (
     <Link
       href={`/events/${event.id}`}
+      aria-busy={isNavigatingThis}
+      onClick={(e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        if (navigatingId) {
+          e.preventDefault()
+          return
+        }
+        onNavigate(event.id)
+      }}
       className="hover-lift-card afa-focusable afa-organiser-event-card"
-      style={{ display: "flex", alignItems: "flex-start", gap: "20px", background: "var(--afa-surface-raised)", padding: "24px", textDecoration: "none" }}
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "20px",
+        background: "var(--afa-surface-raised)",
+        padding: "24px",
+        textDecoration: "none",
+        opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
+        pointerEvents: navigatingId && !isNavigatingThis ? "none" : undefined,
+        transition: "opacity 0.15s ease",
+      }}
     >
+      {isNavigatingThis && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+        </div>
+      )}
       <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid rgba(245,245,240,0.1)", padding: "8px 0" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
         <span style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 500, color: "var(--afa-text-primary)" }}>{day}</span>
@@ -172,7 +208,7 @@ function EventDateCard({ event, tr }: { event: OrganiserEvent; tr: Dictionary })
       </div>
       <span
         className="afa-organiser-event-details"
-        style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(245,245,240,0.4)", transition: "color 0.3s ease" }}
+        style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)", transition: "opacity 0.2s ease" }}
       >
         {tr.organiserDetailPage.detailsLink}
         <ArrowIcon style={{ width: "14px", height: "14px" }} />
@@ -252,6 +288,10 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [pastExpanded, setPastExpanded] = useState(false)
+  // Shared across Upcoming + Past so any in-flight card navigation dims/
+  // disables every other event card on the page as one group, matching
+  // the click-guard pattern on OrganisersGridEmbed/VenuesGridClient.
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/organisers/${id}`)
@@ -299,9 +339,10 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         .afa-organiser-breadcrumb-link:hover { color: var(--afa-amber) !important; }
         .afa-organiser-event-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
         .afa-organiser-event-card:hover { border-color: rgba(201,151,58,0.6); }
-        .afa-organiser-event-card:hover .afa-organiser-event-title,
-        .afa-organiser-event-card:hover .afa-organiser-event-details { color: var(--afa-amber); }
+        .afa-organiser-event-card:hover .afa-organiser-event-title { color: var(--afa-amber); }
+        .afa-organiser-event-card:hover .afa-organiser-event-details { text-decoration: underline; text-underline-offset: 3px; }
         .afa-organiser-view-all:hover { opacity: 0.8; }
+        @keyframes afa-spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <SiteNav backHref="/events" backLabel={tr.organiserDetailPage.backToEvents} />
@@ -359,7 +400,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           <SectionHeader eyebrow={tr.organiserDetailPage.upcomingEventsHeading} count={upcoming.length} />
           <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
             {upcoming.length > 0 ? (
-              upcoming.map((e) => <EventDateCard key={e.id} event={e} tr={tr} />)
+              upcoming.map((e) => <EventDateCard key={e.id} event={e} tr={tr} navigatingId={navigatingId} onNavigate={setNavigatingId} />)
             ) : (
               <EmptyState icon={<CalendarIcon style={{ width: "26px", height: "26px" }} />} title={tr.organiserDetailPage.noUpcomingTitle} body={tr.organiserDetailPage.noUpcomingBody} />
             )}
@@ -369,7 +410,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
             <SectionHeader eyebrow={tr.organiserDetailPage.pastEventsHeading} count={past.length} />
             <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px", opacity: past.length > 0 ? 0.85 : 1 }}>
               {past.length > 0 ? (
-                visiblePast.map((e) => <EventDateCard key={e.id} event={e} tr={tr} />)
+                visiblePast.map((e) => <EventDateCard key={e.id} event={e} tr={tr} navigatingId={navigatingId} onNavigate={setNavigatingId} />)
               ) : (
                 <EmptyState icon={<CalendarIcon style={{ width: "26px", height: "26px" }} />} title={tr.organiserDetailPage.noPastTitle} body={tr.organiserDetailPage.noPastBody} />
               )}
