@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import SearchInputBox from "@/components/SearchInputBox"
 import Photo from "@/components/Photo"
 import ArtistNoPhoto from "@/components/ArtistNoPhoto"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
@@ -155,7 +156,6 @@ export default function ArtistsPage() {
         .afa-genre-filter:hover::after { transform: scaleX(1); }
         .afa-cta-solid { transition: filter 0.15s ease; }
         .afa-cta-solid:hover { filter: brightness(1.1); }
-        .afa-search-box:focus-within { border-color: var(--afa-amber) !important; }
         /* HERO (BUG-2608-080, then GEN-2608-078, then GEN-2608-079) - export
            App.tsx Directory component lines 478-509 has a left-aligned
            two-column grid (items-end, lg:grid-cols-[1fr_auto]) with the
@@ -250,15 +250,12 @@ export default function ArtistsPage() {
               </>
             )}
           >
-            <label className="afa-search-box afa-artists-search-box" style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", padding: "12px 16px", boxSizing: "border-box" }}>
-              <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={tr.artistsPage.searchPlaceholder}
-                style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", fontFamily: "var(--font-sans)", color: "var(--afa-cream)", outline: "none" }}
-              />
-            </label>
+            <SearchInputBox
+              value={search}
+              onChange={setSearch}
+              placeholder={tr.artistsPage.searchPlaceholder}
+              className="afa-artists-search-box"
+            />
           </BrowseSearchDropdown>
         </div>
       </div>

@@ -7,8 +7,8 @@ import VenueNoPhoto, { capacityTier } from "@/components/VenueNoPhoto"
 import { cityLabel } from "@/lib/country-codes"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
-import { SearchIcon } from "@/components/icons/ArtistIcons"
 import { ArrowUpRightIcon, ChevronDownIcon } from "@/components/icons/VenueIcons"
+import SearchInputBox from "@/components/SearchInputBox"
 
 interface VenueItem {
   id: string
@@ -122,15 +122,12 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               </>
             )}
           >
-            <div className="afa-search-box" style={{ display: "flex", alignItems: "center", width: "100%", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", boxSizing: "border-box" }}>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={tr.venuesPage.searchPlaceholder}
-                style={{ flex: 1, padding: "14px 4px 14px 16px", border: "none", background: "transparent", fontSize: "15px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
-              />
-              <SearchIcon style={{ width: "18px", height: "18px", marginRight: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
-            </div>
+            <SearchInputBox
+              value={search}
+              onChange={setSearch}
+              placeholder={tr.venuesPage.searchPlaceholder}
+              style={{ width: "100%" }}
+            />
           </BrowseSearchDropdown>
         </div>
 
