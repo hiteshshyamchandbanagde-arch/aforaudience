@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import { ErrorBanner } from '@/components/ErrorBanner'
 
 // /dashboard/admin/settings
 //
@@ -535,19 +536,7 @@ export default function AdminSettingsPage() {
         </p>
 
         {loadError && (
-          <div
-            style={{
-              padding: '12px 14px',
-              background: 'var(--afa-error-bg)',
-              border: '1px solid var(--afa-error-border)',
-              borderRadius: 8,
-              color: 'var(--afa-error)',
-              fontSize: 13,
-              marginBottom: 20,
-            }}
-          >
-            {loadError}
-          </div>
+          <ErrorBanner style={{ padding: '12px 14px', fontSize: 13, marginBottom: 20 }}>{loadError}</ErrorBanner>
         )}
 
         <div

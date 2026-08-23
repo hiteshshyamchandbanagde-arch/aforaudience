@@ -7,6 +7,7 @@ import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
 import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
+import { ErrorBanner } from "@/components/ErrorBanner"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -254,9 +255,7 @@ export default function EventsPage() {
         </header>
 
         {error && (
-          <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginTop: "24px" }}>
-            {error}
-          </div>
+          <ErrorBanner style={{ marginTop: "24px" }}>{error}</ErrorBanner>
         )}
 
         {/* EVENTS / ORGANISERS TOGGLE - discovery entry point for the

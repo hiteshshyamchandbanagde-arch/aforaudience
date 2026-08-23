@@ -790,10 +790,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         borderRadius: '999px',
                         marginBottom: '8px',
                         ...(specialNotesStatus === 'APPROVED'
-                          ? { background: 'var(--afa-success-bg)', color: 'var(--afa-green-deep)' }
+                          ? { background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' }
                           : specialNotesStatus === 'REJECTED'
-                            ? { background: 'var(--afa-error-bg)', color: 'var(--afa-error)' }
-                            : { background: 'var(--afa-amber-tint)', color: 'var(--afa-brown-gold)' }),
+                            ? { background: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' }
+                            : { background: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' }),
                       }}
                     >
                       {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : '⏳ Pending review'}

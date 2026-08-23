@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import { ErrorBanner } from '@/components/ErrorBanner'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -552,9 +553,7 @@ export default function CreateEventPage() {
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>

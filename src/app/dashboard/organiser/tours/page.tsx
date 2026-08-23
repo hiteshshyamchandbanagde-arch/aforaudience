@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import { ErrorBanner } from '@/components/ErrorBanner'
 
 interface TourItem {
   id: string
@@ -81,9 +82,7 @@ export default function OrganiserToursPage() {
         </div>
 
         {error && (
-          <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
-            {error}
-          </div>
+          <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
         )}
 
         {tours.length === 0 ? (

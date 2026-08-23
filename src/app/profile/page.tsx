@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import GenrePicker from '@/components/GenrePicker'
+import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
 
 type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
@@ -460,14 +461,10 @@ function ProfileContent() {
           )}
 
           {message && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-success-bg)', border: '1px solid #68D391', borderRadius: '8px', color: 'var(--afa-green-dark)', fontSize: '14px', marginBottom: '20px' }}>
-              {message}
-            </div>
+            <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           {/* Display name — separate from the login username. Shows on

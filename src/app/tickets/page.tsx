@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
+import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 
 // Companion Tagging Phase 1 (reputation epic §7) - tags where the
@@ -268,9 +269,7 @@ export default function MyTicketsPage() {
           </p>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been
