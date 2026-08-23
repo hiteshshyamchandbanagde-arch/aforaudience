@@ -309,3 +309,20 @@ html {
   .hover-lift-card { transition: none; }
   .hover-lift-card:hover { transform: none; }
 }
+
+/* Venue Owner Portal shared UI (src/components/dashboard/VenuePortalUI.tsx) -
+   ported from the approved Figma Make export. Scoped under .avp- so these
+   hover/focus rules (impossible to express as inline styles) can't drift
+   into unrelated dashboard surfaces. */
+.avp-crosshatch {
+  background-image:
+    linear-gradient(rgba(245, 245, 240, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 245, 240, 0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.avp-btn-primary:hover { filter: brightness(1.1); }
+.avp-btn-primary:active { filter: brightness(0.95); }
+.avp-btn-outline:hover { border-color: rgba(245, 245, 240, 0.4); background: rgba(245, 245, 240, 0.03); }
+.avp-btn-ghost:hover { color: var(--afa-text-primary); background: rgba(245, 245, 240, 0.04); }
+.avp-hover-border:hover { border-color: rgba(245, 245, 240, 0.2); color: var(--afa-text-primary); }
+.avp-field:focus { border-color: rgba(201, 151, 58, 0.5); outline: none; box-shadow: 0 0 0 1px rgba(201, 151, 58, 0.35); }

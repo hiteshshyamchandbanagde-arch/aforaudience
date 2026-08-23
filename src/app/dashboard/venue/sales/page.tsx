@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
+import { PageHead, Card } from '@/components/dashboard/VenuePortalUI'
 
 interface VenueRow {
   id: string
@@ -113,28 +114,25 @@ export default function VenueOwnerSalesOverviewPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Dashboard" />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
-              📊 Revenue Overview
-            </h1>
-            <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>
-              {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
-            </span>
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <RangePicker value={range} onChange={setRange} />
+          <div style={{ marginTop: '20px' }}>
+            <PageHead
+              eyebrow="Analytics"
+              title="Revenue Overview"
+              description={refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : undefined}
+            >
+              <RangePicker value={range} onChange={setRange} />
+            </PageHead>
           </div>
 
           {error && (
             <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
             <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub="no platform cut" />
             <SummaryCard label="Venues" value={String(totals.venuesCount)} />
             <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
@@ -142,13 +140,13 @@ export default function VenueOwnerSalesOverviewPage() {
 
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-sage)', borderRadius: '3px 3px 0 0' }} />
-                    <span style={{ fontSize: '9px', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px 0 0' }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-text-muted)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -159,10 +157,10 @@ export default function VenueOwnerSalesOverviewPage() {
 
           <Section title="By venue">
             {venues.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No venues yet.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No venues yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(245,245,240,0.5)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
                   <span>Venue</span>
                   <span>City</span>
                   <span>Revenue</span>
@@ -172,16 +170,17 @@ export default function VenueOwnerSalesOverviewPage() {
                   <Link
                     key={v.id}
                     href={`/dashboard/venue/${v.id}/sales?range=${range}`}
+                    className="avp-hover-border"
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
-                      border: '1px solid rgba(245,245,240,0.06)', textDecoration: 'none', color: 'var(--afa-text-primary)',
+                      fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
+                      border: '1px solid rgba(245,245,240,0.08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{v.name}</span>
-                    <span style={{ color: 'rgba(245,245,240,0.6)' }}>{v.city}</span>
-                    <span>{money(v.revenue)}</span>
-                    <span>{v.bookings}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{v.city}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{money(v.revenue)}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{v.bookings}</span>
                   </Link>
                 ))}
               </div>
@@ -190,10 +189,10 @@ export default function VenueOwnerSalesOverviewPage() {
 
           <Section title="By organiser">
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(245,245,240,0.5)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
                   <span>Organiser</span>
                   <span>Revenue</span>
                   <span>Bookings</span>
@@ -203,13 +202,13 @@ export default function VenueOwnerSalesOverviewPage() {
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
-                      border: '1px solid rgba(245,245,240,0.06)',
+                      fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
+                      border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{o.orgName}</span>
-                    <span>{money(o.revenue)}</span>
-                    <span>{o.bookings}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{money(o.revenue)}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{o.bookings}</span>
                   </div>
                 ))}
               </div>
@@ -223,19 +222,19 @@ export default function VenueOwnerSalesOverviewPage() {
 
 function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '16px' }}>
-      <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
-      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
-    </div>
+    <Card style={{ padding: '18px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
+      {sub && <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>}
+    </Card>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
+    <Card style={{ padding: '20px', marginBottom: '20px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
       {children}
-    </div>
+    </Card>
   )
 }
