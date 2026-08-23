@@ -6,9 +6,7 @@ import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
-
-const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit' }
+import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle } from '@/components/dashboard/VenuePortalUI'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
 // had no editable fields of its own at all until bio was added this
@@ -117,16 +115,13 @@ export default function VenueOwnerEditPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Dashboard" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
-            Edit Your Profile
-          </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
-            This is what people see on your public Venue Owner page.
-          </p>
+          <div style={{ marginTop: '20px' }}>
+            <PageHead eyebrow="Public profile" title="Edit Your Profile" description="This is what people see on your public Venue Owner page." />
+          </div>
 
           {message && (
             <div style={{ padding: '14px 16px', background: 'var(--afa-success-bg)', border: '1px solid #68D391', borderRadius: '8px', color: 'var(--afa-green-dark)', fontSize: '14px', marginBottom: '20px' }}>
@@ -139,15 +134,16 @@ export default function VenueOwnerEditPage() {
             </div>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-            <div style={{ marginBottom: '18px' }}>
-              <label style={labelStyle}>Profile Picture</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
+          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <SectionTitle n="01" title="Basic Info" />
+            <div style={{ marginBottom: '20px' }}>
+              <Label>Profile Picture</Label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
                 )}
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label className="avp-btn-primary" style={{ ...primaryLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
@@ -155,15 +151,16 @@ export default function VenueOwnerEditPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Bio</label>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder="Tell people about your venues" style={{ ...inputStyle, resize: 'vertical' as const }} />
+              <Label>Bio</Label>
+              <Field as="textarea" value={bio} onChange={(e) => setBio(e.target.value)} rows={4} maxLength={1000} placeholder="Tell people about your venues" />
             </div>
-          </div>
+          </Card>
 
           <button
             onClick={save}
             disabled={saving}
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 24px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            className="avp-btn-primary"
+            style={{ ...primaryLinkStyle, border: 'none', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Saving...' : 'Save Profile'}
           </button>

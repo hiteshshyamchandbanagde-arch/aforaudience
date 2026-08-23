@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 
 interface Offer {
   id: string
@@ -27,11 +28,11 @@ interface RequestItem {
   offers: Offer[]
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
-  ACCEPTED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Accepted' },
-  DECLINED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Declined' },
-  EXPIRED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Expired' },
+const STATUS_STYLE: Record<string, { tone: StatusPillTone; label: string }> = {
+  PENDING: { tone: 'gold', label: 'Pending' },
+  ACCEPTED: { tone: 'sage', label: 'Accepted' },
+  DECLINED: { tone: 'error', label: 'Declined' },
+  EXPIRED: { tone: 'muted', label: 'Expired' },
 }
 
 export default function VenueRequestsPage() {
@@ -116,18 +117,21 @@ export default function VenueRequestsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : callerSide === 'ORGANISER' ? '/dashboard/organiser' : '/'} label="Back to Dashboard" />
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
-            Venue Booking Requests
-          </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
-            Flexible-rate venue negotiations
-            {callerSide === 'VENUE_OWNER' ? ' — requests against your venues.'
-              : callerSide === 'ORGANISER' ? ' — your outstanding requests.'
-              : '.'}
-          </p>
+
+          <div style={{ marginTop: '20px' }}>
+            <PageHead
+              eyebrow="Flexible-rate negotiations"
+              title="Venue Booking Requests"
+              description={
+                callerSide === 'VENUE_OWNER' ? 'Requests against your venues.'
+                  : callerSide === 'ORGANISER' ? 'Your outstanding requests.'
+                  : undefined
+              }
+            />
+          </div>
 
           {loadError && (
             <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
@@ -136,9 +140,7 @@ export default function VenueRequestsPage() {
           )}
 
           {requests.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-              No booking requests yet.
-            </div>
+            <EmptyState icon={<IconTag size={56} strokeWidth={1} />} caption="No booking requests yet" />
           ) : (
             requests.map((r) => {
               const lastOffer = r.offers[r.offers.length - 1]
@@ -147,34 +149,32 @@ export default function VenueRequestsPage() {
               const statusStyle = STATUS_STYLE[r.status]
 
               return (
-                <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', marginBottom: '16px', border: '1px solid rgba(245,245,240,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                <Card key={r.id} style={{ padding: '22px 24px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px', gap: '10px' }}>
                     <div>
                       <p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', margin: 0 }}>
                         {r.event?.title || 'Untitled event'}
                       </p>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '2px 0 0' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', margin: '2px 0 0' }}>
                         {r.venue.name}, {r.venue.city} · {new Date(r.requestedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {r.durationHours}hr
                         {callerSide === 'VENUE_OWNER' && <> · {r.organiser.orgName} ({r.organiser.user.email})</>}
                       </p>
                     </div>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap' }}>
-                      {statusStyle.label}
-                    </span>
+                    <StatusPill tone={statusStyle.tone}>{statusStyle.label}</StatusPill>
                   </div>
 
                   {r.offers.length > 0 && (
-                    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '8px', padding: '10px 12px', margin: '14px 0' }}>
+                    <div style={{ background: '#171717', borderRadius: '8px', padding: '10px 14px', margin: '16px 0' }}>
                       {r.offers.map((o) => (
                         <div key={o.id} style={{ padding: '4px 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                            <span style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+                            <span style={{ color: 'var(--afa-text-secondary)' }}>
                               {o.proposedBy === callerSide ? 'You' : o.proposedBy === 'ORGANISER' ? 'Organiser' : 'Venue'} proposed
                             </span>
-                            <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{o.amount.toLocaleString('en-IN')}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--afa-amber)' }}>₹{o.amount.toLocaleString('en-IN')}</span>
                           </div>
                           {o.comment && (
-                            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.65, fontStyle: 'italic', margin: '2px 0 0' }}>
+                            <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: '2px 0 0' }}>
                               "{o.comment}"
                             </p>
                           )}
@@ -184,7 +184,7 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && (
-                    <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, margin: '0 0 12px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 14px' }}>
                       Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
                     </p>
                   )}
@@ -199,53 +199,53 @@ export default function VenueRequestsPage() {
                           onChange={(e) => setCounterInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
                           min="1"
                           max="10000000"
-                          style={{ flex: 1, padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
+                          className="avp-field"
+                          style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
-                      <div style={{ marginBottom: '8px' }}>
+                      <div style={{ marginBottom: '12px' }}>
                         <input
                           type="text"
                           placeholder="Add a note (optional) — e.g. can do ₹4000 but need load-in by 6pm"
                           value={commentInputs[r.id] || ''}
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', boxSizing: 'border-box' }}
+                          className="avp-field"
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         {lastOffer && (
-                          <button
-                            onClick={() => act(r.id, 'accept')}
-                            disabled={actingOn === r.id}
-                            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
-                          >
-                            Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
-                          </button>
+                          <Button onClick={() => act(r.id, 'accept')} disabled={actingOn === r.id} style={{ padding: '8px 16px', fontSize: '13px', opacity: actingOn === r.id ? 0.6 : 1 }}>
+                            <IconCheck /> Accept ₹{lastOffer.amount.toLocaleString('en-IN')}
+                          </Button>
                         )}
-                        <button
+                        <Button
+                          variant="outline"
                           onClick={() => act(r.id, 'counter')}
                           disabled={actingOn === r.id || roundsUsed >= 6}
-                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
+                          style={{ padding: '8px 16px', fontSize: '13px', opacity: actingOn === r.id || roundsUsed >= 6 ? 0.5 : 1 }}
                         >
                           {lastOffer ? 'Counter' : 'Send quote'}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '8px 16px', cursor: 'pointer', opacity: actingOn === r.id ? 0.6 : 1 }}
+                          style={{ padding: '8px 16px', fontSize: '13px', color: 'var(--afa-error)', opacity: actingOn === r.id ? 0.6 : 1 }}
                         >
                           Decline
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}
 
                   {r.status === 'PENDING' && !canRespond && (
-                    <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, fontStyle: 'italic' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-text-muted)', fontStyle: 'italic', margin: 0 }}>
                       Waiting on the other side to respond.
                     </p>
                   )}
-                </div>
+                </Card>
               )
             })
           )}
