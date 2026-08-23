@@ -25,6 +25,7 @@ interface Venue {
   name: string
   address: string
   city: string
+  country?: string | null
   capacity: number
   isApproved: boolean
   createdAt: string
@@ -67,6 +68,26 @@ function rateTypeLabel(venue: Venue) {
   if (venue.rateType === 'HOURLY') return 'Hourly'
   if (venue.rateType === 'DAILY') return 'Daily'
   return 'Flexible'
+}
+
+// Hitesh's call (23 Aug): every venue card gets a flag next to city,
+// including India - not just non-India ones. venue.country is already
+// present on every real venue via the Places-autocomplete-populated
+// field (confirmed 100% coverage across current QA data: India 933,
+// Australia/Japan/Singapore/Canada/US/UK ~30 each, UAE 29 - see
+// GEN-2608-081's correction). Explicit map, not a library, since the
+// known country set is small and fixed for now; falls back to no flag
+// (not a placeholder guess) for any value outside this set so a typo'd
+// or future-added country doesn't render a wrong flag.
+const COUNTRY_FLAGS: Record<string, string> = {
+  'India': '🇮🇳',
+  'Australia': '🇦🇺',
+  'Japan': '🇯🇵',
+  'Singapore': '🇸🇬',
+  'Canada': '🇨🇦',
+  'United States': '🇺🇸',
+  'United Kingdom': '🇬🇧',
+  'United Arab Emirates': '🇦🇪',
 }
 
 export default function VenueDashboard() {
@@ -228,12 +249,23 @@ export default function VenueDashboard() {
                   style={{ display: 'flex', flexDirection: 'column', padding: '20px', cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '10px' }}>
-                    {/* BUG-2608-085: fixed minHeight + line-clamped title/
-                        truncated address so cards in the same grid row
-                        start their stats/actions rows at the same Y
-                        position regardless of name/address length. */}
-                    <div style={{ minHeight: '92px', minWidth: 0 }}>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px' }}>
+                    {/* BUG-2608-085/087/088: fixed minHeight + line-clamped
+                        title + 2-line-clamped (not 1-line-truncated)
+                        address so cards in the same grid row start their
+                        stats/actions rows at the same Y position
+                        regardless of name/address length, while the full
+                        address stays readable (Hitesh's call 23 Aug -
+                        okay to wrap to 2 lines, not okay to hide it).
+                        minWidth:0 required (BUG-2608-087) - flex items
+                        default to min-width:auto and won't shrink below
+                        content width otherwise, which silently defeats
+                        the line-clamp/ellipsis below it. minHeight raised
+                        92->118px to fit the address's 2nd line. */}
+                    <div style={{ minHeight: '118px', minWidth: 0 }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        {venue.country && COUNTRY_FLAGS[venue.country] && (
+                          <span aria-label={venue.country} title={venue.country}>{COUNTRY_FLAGS[venue.country]}</span>
+                        )}
                         {venue.city}
                       </p>
                       <h3
@@ -244,7 +276,14 @@ export default function VenueDashboard() {
                       >
                         {venue.name}
                       </h3>
-                      <p style={{ fontSize: '12.5px', color: 'var(--afa-text-muted)', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{venue.address}</p>
+                      <p
+                        style={{
+                          fontSize: '12.5px', color: 'var(--afa-text-muted)', marginTop: '4px', lineHeight: 1.35,
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        }}
+                      >
+                        {venue.address}
+                      </p>
                     </div>
                     <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? 'Published' : 'Draft'}</StatusPill>
                   </div>
@@ -300,3 +339,4 @@ export default function VenueDashboard() {
     </>
   )
 }
+
