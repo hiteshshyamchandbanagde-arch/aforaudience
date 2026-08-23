@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import { ErrorBanner } from "@/components/ErrorBanner"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface VenueOwnerItem {
@@ -81,9 +82,7 @@ export default function VenueOwnersPage() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginBottom: "24px" }}>
-            {error}
-          </div>
+          <ErrorBanner style={{ marginBottom: "24px" }}>{error}</ErrorBanner>
         )}
 
         {loading ? (

@@ -117,8 +117,8 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     width: "100%",
     padding: "10px 12px",
     borderRadius: "6px",
-    border: "1px solid rgba(14,12,10,0.15)",
-    background: "var(--afa-white)",
+    border: "1px solid rgba(245,245,240,0.15)",
+    background: "var(--afa-surface-raised)",
     fontSize: "14px",
     color: "var(--afa-text-primary)",
   }
@@ -204,7 +204,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   style={{
                     ...inputStyle,
                     paddingLeft: "26px",
-                    ...(isFree ? { opacity: 0.5, background: "rgba(14,12,10,0.04)" } : {}),
+                    ...(isFree ? { opacity: 0.5, background: "rgba(245,245,240,0.04)" } : {}),
                     ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}),
                   }}
                 />
