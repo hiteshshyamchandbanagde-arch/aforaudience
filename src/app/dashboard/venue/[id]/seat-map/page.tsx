@@ -48,7 +48,7 @@ type MarkerDraft = {
 const MARKER_META: Record<MarkerType, { glyph: string; color: string; name: string }> = {
   GATE: { glyph: 'G', color: 'var(--afa-blue-dark)', name: 'Gate' },
   FIRE_EXTINGUISHER: { glyph: 'F', color: 'var(--afa-error, #b3261e)', name: 'Fire Extinguisher' },
-  STAGE_DISTANCE_REF: { glyph: 'S', color: 'var(--afa-text-primary)', name: 'Stage-Distance Reference' },
+  STAGE_DISTANCE_REF: { glyph: 'S', color: 'var(--afa-plum)', name: 'Stage-Distance Reference' },
 }
 
 // Local-draft persistence (autosave) - a manual-canvas layout previously
@@ -1360,7 +1360,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
         <BackLink href={`/dashboard/venue/${id}/edit`} label="Back to Venue" />
         <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
@@ -1398,11 +1398,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
               padding: '12px 16px', borderRadius: '10px', marginBottom: '18px',
-              background: seatMapFrozen ? 'var(--afa-cream-tint-1)' : 'var(--afa-white)',
-              border: seatMapFrozen ? '1px solid var(--afa-terracotta)' : '1px dashed rgba(14,12,10,0.2)',
+              background: seatMapFrozen ? 'rgba(200,68,26,0.08)' : 'rgba(245,245,240,0.03)',
+              border: seatMapFrozen ? '1px solid var(--afa-terracotta)' : '1px dashed rgba(245,245,240,0.2)',
             }}
           >
-            <div style={{ fontSize: '13px', color: 'var(--afa-ink)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>
               {seatMapFrozen ? (
                 <><strong>🔒 Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
               ) : (
@@ -1415,9 +1415,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               style={{
                 padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: freezing ? 'default' : 'pointer',
                 border: 'none', opacity: freezing ? 0.6 : 1,
-                background: seatMapFrozen ? 'var(--afa-white)' : 'var(--afa-terracotta)',
-                color: seatMapFrozen ? 'var(--afa-ink)' : 'var(--afa-white)',
-                ...(seatMapFrozen ? { border: '1px solid rgba(14,12,10,0.2)' } : {}),
+                background: seatMapFrozen ? 'var(--afa-surface-raised)' : 'var(--afa-terracotta)',
+                color: seatMapFrozen ? 'var(--afa-text-primary)' : 'var(--afa-white)',
+                ...(seatMapFrozen ? { border: '1px solid rgba(245,245,240,0.2)' } : {}),
               }}
             >
               {freezing ? 'Working…' : seatMapFrozen ? 'Unfreeze' : 'Freeze this seat map'}
@@ -1486,7 +1486,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startWizard}
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '2px solid var(--afa-ink)', background: 'var(--afa-surface-raised)',
+                borderRadius: '12px', border: '2px solid var(--afa-terracotta)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-terracotta)', marginBottom: '6px' }}>Recommended</div>
@@ -1529,7 +1529,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   </button>
                 </div>
                 {wizardShape === 'other' && (
-                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'var(--afa-cream-tint-1)', fontSize: '13px', color: 'var(--afa-ink)' }}>
+                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                     Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. You can either draw that shape by hand, or start from straight rows here and adjust later.
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                       <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
@@ -1574,7 +1574,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <input
                           type="number"
-                          style={{ ...inputStyle, width: '120px', ...(gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                          style={{ ...inputStyle, width: '120px', ...(gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
                           placeholder="₹"
                           disabled={!!gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName)}
                           value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
@@ -1603,7 +1603,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Price:</label>
                         <input
                           type="number"
-                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
                           placeholder="₹"
                           disabled={zoneIsFree(rg.zoneName)}
                           value={zonePrices[rg.zoneName] || ''}
@@ -1785,11 +1785,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
 
               {isMobile ? (
-                <div style={{ padding: '14px 16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', marginBottom: '14px' }}>
-                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-ink)', margin: '0 0 4px' }}>
+                <div style={{ padding: '14px 16px', borderRadius: '10px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', margin: '0 0 4px' }}>
                     Viewing only on this screen
                   </p>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.7, margin: 0 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, margin: 0 }}>
                     Placing, moving, and generating seats needs more room than a phone gives you. Pinch or scroll below to check the current layout, and switch to a tablet or desktop to make changes.
                   </p>
                 </div>
@@ -1911,8 +1911,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </p>
 
               {showGenerator && !isMobile && (
-                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.1)' }}>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
+                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
                     This is a starting point, not a final layout. Set the shape below and it drops seats onto the canvas above - then hand-edit anything (move, add, delete) just like a manually placed seat.
                   </p>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1922,7 +1922,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
                     <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
                   </div>
-                  <p style={{ fontSize: '11px', color: 'var(--afa-ink)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
                     These are canvas units, not a real-world measurement - bigger number means more empty space. Adjust and watch the preview above; there's no need to know exactly what "px" means.
                   </p>
 
@@ -1936,16 +1936,16 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
                         style={{
                           padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
-                          border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(14,12,10,0.15)',
-                          background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
-                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-ink)',
+                          border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                          background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
+                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)',
                         }}
                       >
                         {opt}
                       </button>
                     ))}
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-ink)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
                     {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides, so every row shares one central aisle — the shape of a real fan-style hall.'}
                     {gridConfig.rowAlignment === 'left' && 'Every row starts at the same left edge — wider rows only grow to the right. Use this if one side of your venue is against a wall.'}
                     {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
@@ -1953,7 +1953,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
                   <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Sections / row groups (rows can taper — different column counts per range, counted across the whole row)</div>
                   {gridConfig.rowGroups.map((rg, i) => (
-                    <div key={rg.id} style={{ border: '1px solid rgba(14,12,10,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
+                    <div key={rg.id} style={{ border: '1px solid rgba(245,245,240,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Section {i + 1}:</span>
                         <label style={{ fontSize: '12px' }}>Rows:</label>
@@ -1965,7 +1965,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <label style={{ fontSize: '12px' }}>Price:</label>
                         <input
                           type="number"
-                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
                           placeholder="₹"
                           disabled={zoneIsFree(rg.zoneName)}
                           value={zonePrices[rg.zoneName] || ''}
@@ -1974,7 +1974,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
                         {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                       </div>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-ink)', opacity: 0.55, marginBottom: '4px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '4px' }}>
                         Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat. The scale already runs the full width, so a position near the right edge just means a number close to 100 - there's no separate "from the right" field needed.
                       </div>
                       {rg.verticalAisles.map((a) => (
@@ -1992,12 +1992,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         </div>
                       ))}
-                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
+                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
                         + Add vertical aisle to this zone
                       </button>
                     </div>
                   ))}
-                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
+                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
                     + Add row group / zone
                   </button>
 
@@ -2011,7 +2011,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                     </div>
                   ))}
-                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-ink)', background: 'none', border: '1px dashed rgba(14,12,10,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
+                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
                     + Add horizontal aisle
                   </button>
 
@@ -2043,7 +2043,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <label style={{ fontSize: '13px', fontWeight: 600 }}>Price:</label>
                     <input
                       type="number"
-                      style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                      style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
                       placeholder="₹"
                       disabled={zoneIsFree(activeTier)}
                       value={zonePrices[activeTier] || ''}
@@ -2278,7 +2278,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <span style={{ fontSize: '13px' }}>{t}: {seats.filter((s) => s.tierLabel === t).length}</span>
                     <input
                       type="number"
-                      style={{ ...inputStyle, width: '80px', ...(zoneIsFree(t) ? { opacity: 0.5, background: 'rgba(14,12,10,0.04)' } : {}) }}
+                      style={{ ...inputStyle, width: '80px', ...(zoneIsFree(t) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
                       placeholder="₹"
                       disabled={zoneIsFree(t)}
                       value={raw || ''}
