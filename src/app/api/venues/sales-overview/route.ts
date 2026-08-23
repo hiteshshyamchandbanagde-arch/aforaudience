@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { parseRange, getRangeStart, bucketKeyFor } from '@/lib/sales-range'
+import { parseRange, getRangeStart, getPreviousRangeBounds, bucketKeyFor } from '@/lib/sales-range'
+
+function avgBookingValue(grossRevenue: number, confirmedBookingsCount: number) {
+  return confirmedBookingsCount > 0 ? grossRevenue / confirmedBookingsCount : 0
+}
 
 // GET /api/venues/sales-overview?range=week|month|quarter|year|all
 //
@@ -112,12 +116,39 @@ export async function GET(req: Request) {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, revenue]) => ({ date, revenue }))
 
+    // BUG-2608-086: previous-period comparison for the stat card deltas.
+    // 'all' has no bounded previous period (getPreviousRangeBounds
+    // returns null) - previousTotals stays zeroed, and the frontend's
+    // zero-guard already skips rendering a delta in that case.
+    const previousBounds = getPreviousRangeBounds(range, now)
+    let previousGrossRevenue = 0
+    let previousConfirmedBookingsCount = 0
+    if (previousBounds && venueIds.length) {
+      const previousAgg = await prisma.venueBooking.aggregate({
+        where: {
+          venueId: { in: venueIds },
+          status: 'CONFIRMED',
+          createdAt: { gte: previousBounds.start, lt: previousBounds.end },
+        },
+        _sum: { amount: true },
+        _count: true,
+      })
+      previousGrossRevenue = previousAgg._sum.amount || 0
+      previousConfirmedBookingsCount = previousAgg._count
+    }
+
     return NextResponse.json({
       range,
       totals: {
         grossRevenue,
         venuesCount: venues.length,
         confirmedBookingsCount: confirmedBookings.length,
+        avgBookingValue: avgBookingValue(grossRevenue, confirmedBookings.length),
+      },
+      previousTotals: {
+        grossRevenue: previousGrossRevenue,
+        confirmedBookingsCount: previousConfirmedBookingsCount,
+        avgBookingValue: avgBookingValue(previousGrossRevenue, previousConfirmedBookingsCount),
       },
       venues: venueBreakdown,
       organisers: organiserBreakdown,

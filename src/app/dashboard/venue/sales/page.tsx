@@ -4,11 +4,14 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import Link from 'next/link'
+import {
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
-import { PageHead, Card } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
 
 interface VenueRow {
   id: string
@@ -31,13 +34,23 @@ interface TimelinePoint {
   revenue: number
 }
 
+interface Totals {
+  grossRevenue: number
+  venuesCount: number
+  confirmedBookingsCount: number
+  avgBookingValue: number
+}
+
+interface PreviousTotals {
+  grossRevenue: number
+  confirmedBookingsCount: number
+  avgBookingValue: number
+}
+
 interface OverviewData {
   range: string
-  totals: {
-    grossRevenue: number
-    venuesCount: number
-    confirmedBookingsCount: number
-  }
+  totals: Totals
+  previousTotals: PreviousTotals
   venues: VenueRow[]
   organisers: OrganiserRow[]
   timeline: TimelinePoint[]
@@ -45,8 +58,30 @@ interface OverviewData {
 }
 
 const POLL_MS = 30000
+const TOP_VENUES_SHOWN = 5
 
 const money = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+
+// Compact axis/bar-label form (₹73.4L, not ₹73,40,000) - full precision in
+// the stat cards, compact here since chart labels have little room.
+function compactMoney(n: number) {
+  if (n >= 1e7) return `₹${(n / 1e7).toFixed(1)}Cr`
+  if (n >= 1e5) return `₹${(n / 1e5).toFixed(1)}L`
+  if (n >= 1e3) return `₹${(n / 1e3).toFixed(0)}K`
+  return `₹${n}`
+}
+
+// bucketKeyFor() produces "YYYY-MM" (year/all ranges), a Monday-anchored
+// "YYYY-MM-DD" (quarter), or a daily "YYYY-MM-DD" (week/month) - format
+// each into a short axis label rather than showing the raw ISO key.
+function formatBucketLabel(key: string) {
+  if (key.length === 7) {
+    const [y, m] = key.split('-')
+    return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
+  }
+  const d = new Date(key)
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+}
 
 function timeAgo(iso: string) {
   const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
@@ -58,6 +93,14 @@ function timeAgo(iso: string) {
   return `${hrs}h ago`
 }
 
+// Guards the "0 -> any value reads as +Infinity%" case - both a genuinely
+// empty previous period and the unbounded 'all' range (which never has a
+// previous period at all) land here as "no previous data", not a bogus %.
+function delta(current: number, previous: number): number | null {
+  if (previous <= 0) return null
+  return ((current - previous) / previous) * 100
+}
+
 export default function VenueOwnerSalesOverviewPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -66,6 +109,7 @@ export default function VenueOwnerSalesOverviewPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null)
+  const [showAllVenues, setShowAllVenues] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -103,13 +147,16 @@ export default function VenueOwnerSalesOverviewPage() {
     }
   }, [status, range, fetchOverview])
 
+  useEffect(() => { setShowAllVenues(false) }, [range])
+
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
   if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
-  const { totals, venues, organisers, timeline } = data
-  const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
+  const { totals, previousTotals, venues, organisers, timeline } = data
+  const topVenues = venues.slice(0, TOP_VENUES_SHOWN)
+  const hasMoreVenues = venues.length > TOP_VENUES_SHOWN
 
   return (
     <>
@@ -133,24 +180,51 @@ export default function VenueOwnerSalesOverviewPage() {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-            <SummaryCard label="Gross Revenue" value={money(totals.grossRevenue)} sub="no platform cut" />
-            <SummaryCard label="Venues" value={String(totals.venuesCount)} />
-            <SummaryCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} />
+            <StatCard label="Total Revenue" value={money(totals.grossRevenue)} delta={delta(totals.grossRevenue, previousTotals.grossRevenue)} />
+            <StatCard label="Confirmed Bookings" value={String(totals.confirmedBookingsCount)} delta={delta(totals.confirmedBookingsCount, previousTotals.confirmedBookingsCount)} />
+            <StatCard label="Avg. Booking Value" value={money(Math.round(totals.avgBookingValue))} delta={delta(totals.avgBookingValue, previousTotals.avgBookingValue)} />
+            <StatCard label="Venues" value={String(totals.venuesCount)} sub="no platform cut on rentals" />
           </div>
 
           <Section title="Revenue over time">
-            {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No confirmed bookings in this range.</p>
+            {timeline.length < 3 ? (
+              <EmptyState icon={<IconChart size={48} strokeWidth={1} />} caption="Not enough bookings yet to show a trend" />
             ) : (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {timeline.map((t) => (
-                  <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px 0 0' }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-text-muted)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                      {t.date.slice(5)}
-                    </span>
-                  </div>
-                ))}
+              <div style={{ height: '260px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={timeline} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#c9973a" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="#c9973a" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="rgba(245,245,240,0.06)" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={formatBucketLabel}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                    />
+                    <YAxis
+                      tickFormatter={compactMoney}
+                      tickLine={false}
+                      axisLine={false}
+                      width={56}
+                      tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                    />
+                    <Tooltip
+                      cursor={{ stroke: 'rgba(201,151,58,0.4)', strokeDasharray: '3 3' }}
+                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12 }}
+                      labelStyle={{ color: 'rgba(245,245,240,0.5)' }}
+                      labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
+                      itemStyle={{ color: '#c9973a' }}
+                      formatter={(v: any) => [money(Number(v)), 'Revenue']}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#c9973a" strokeWidth={2} fill="url(#revFill)" dot={false} activeDot={{ r: 4, fill: '#c9973a' }} />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             )}
           </Section>
@@ -159,73 +233,120 @@ export default function VenueOwnerSalesOverviewPage() {
             {venues.length === 0 ? (
               <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No venues yet.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
-                  <span>Venue</span>
-                  <span>City</span>
-                  <span>Revenue</span>
-                  <span>Bookings</span>
+              <>
+                <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: '20px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
+                      <CartesianGrid stroke="rgba(245,245,240,0.06)" horizontal={false} />
+                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
+                      <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'rgba(245,245,240,0.65)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(245,245,240,0.03)' }}
+                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12 }}
+                        formatter={(v: any) => [money(Number(v)), 'Revenue']}
+                      />
+                      <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
+                        {topVenues.map((v, i) => (
+                          <Cell key={v.id} fill={i === 0 ? '#c9973a' : 'rgba(201,151,58,0.45)'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-                {venues.map((v) => (
-                  <Link
-                    key={v.id}
-                    href={`/dashboard/venue/${v.id}/sales?range=${range}`}
+
+                {hasMoreVenues && !showAllVenues && (
+                  <button
+                    onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{
-                      display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
-                      border: '1px solid rgba(245,245,240,0.08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
-                    }}
+                    style={{ background: 'transparent', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '8px', padding: '9px 14px', fontSize: '12.5px', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
                   >
-                    <span style={{ fontWeight: 600 }}>{v.name}</span>
-                    <span style={{ color: 'var(--afa-text-secondary)' }}>{v.city}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{money(v.revenue)}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{v.bookings}</span>
-                  </Link>
-                ))}
-              </div>
+                    View all {venues.length} venues
+                  </button>
+                )}
+
+                {(showAllVenues || !hasMoreVenues) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: hasMoreVenues ? '16px' : 0 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
+                      <span>Venue</span>
+                      <span>City</span>
+                      <span>Revenue</span>
+                      <span>Bookings</span>
+                    </div>
+                    {venues.map((v) => (
+                      <Link
+                        key={v.id}
+                        href={`/dashboard/venue/${v.id}/sales?range=${range}`}
+                        className="avp-hover-border"
+                        style={{
+                          display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
+                          fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
+                          border: '1px solid rgba(245,245,240,0.08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
+                        }}
+                      >
+                        <span style={{ fontWeight: 600 }}>{v.name}</span>
+                        <span style={{ color: 'var(--afa-text-secondary)' }}>{v.city}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)' }}>{money(v.revenue)}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)' }}>{v.bookings}</span>
+                      </Link>
+                    ))}
+                    {showAllVenues && (
+                      <button
+                        onClick={() => setShowAllVenues(false)}
+                        style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', padding: '4px 12px', fontSize: '12px', color: 'var(--afa-text-muted)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                      >
+                        Show top {TOP_VENUES_SHOWN} only
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </Section>
 
-          <Section title="By organiser">
+          {/* Demoted relative to "By venue" - secondary context for a
+              venue owner (who they're renting to), not a primary metric. */}
+          <div style={{ padding: '4px 4px 40px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 10px' }}>
+              By organiser
+            </p>
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '13px', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
-                  <span>Organiser</span>
-                  <span>Revenue</span>
-                  <span>Bookings</span>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
                 {organisers.map((o) => (
                   <div
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
-                      border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)',
+                      fontSize: '12.5px', padding: '9px 12px', background: 'rgba(245,245,240,0.02)', color: 'var(--afa-text-secondary)',
                     }}
                   >
-                    <span style={{ fontWeight: 600 }}>{o.orgName}</span>
+                    <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
                     <span style={{ fontFamily: 'var(--font-mono)' }}>{money(o.revenue)}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)' }}>{o.bookings}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{o.bookings} bookings</span>
                   </div>
                 ))}
               </div>
             )}
-          </Section>
+          </div>
         </div>
       </main>
     </>
   )
 }
 
-function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
   return (
     <Card style={{ padding: '18px' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>}
+      {delta != null ? (
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error)', marginTop: '6px', marginBottom: 0 }}>
+          {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
+        </p>
+      ) : sub ? (
+        <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>
+      ) : null}
     </Card>
   )
 }
