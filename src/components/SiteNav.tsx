@@ -85,6 +85,10 @@ const ROLE_BADGE_STYLE: CSSProperties = {
   whiteSpace: "nowrap",
 }
 
+function initials(name: string) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("") || "?"
+}
+
 function getRoleLabel(role: string | undefined, roles: Dictionary["roles"]) {
   switch (role) {
     case "VENUE_OWNER":
@@ -284,6 +288,24 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     return () => document.removeEventListener('mousedown', handleClick)
   }, [langMenuOpen])
 
+  // GEN-2608-015: "page" variant (!isHome) only - collapses the desktop
+  // account row (search/location/language/greeting/role/icon-links/sign
+  // out) into one profile-menu dropdown, matching HomeHeader's approved
+  // avatar-circle + dropdown-panel pattern exactly. The `isHome` branch
+  // below is untouched and keeps using langMenuOpen/langMenuRef above -
+  // this state is separate and only drives the new page-variant menu.
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!menuOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [menuOpen])
+
   const { locale, setLocale, t } = useLocale()
 
   const navLabelFor: Record<NavLinkKey, string> = {
@@ -312,10 +334,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   // translated display text - kept separate since Multi-language Phase 1.
   const accountLinks = user
     ? [
-        ...(dashboardLink ? [{ key: "dashboard", href: dashboardLink, label: t.nav.dashboard, accent: true }] : []),
-        { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false },
-        { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false },
-        { key: "profile", href: "/profile", label: t.nav.profile, accent: false },
+        ...(dashboardLink ? [{ key: "dashboard", href: dashboardLink, label: t.nav.dashboard, accent: true, badge: pendingCount }] : []),
+        { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false, badge: unreadCount },
+        { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false, badge: pendingCompanionCount },
+        { key: "profile", href: "/profile", label: t.nav.profile, accent: false, badge: 0 },
       ].map((l) => ({ ...l, isActive: pathname === l.href || pathname?.startsWith(l.href + "/") || false }))
     : []
 
@@ -358,7 +380,18 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
            Belt-and-braces on top of both: .sitenav-desktop is nowrap (was
            wrap) and the greeting name is hard max-width + ellipsis - so a
            long display name or in-between zoom level can never reintroduce
-           a second line; worst case is a tighter row, never a wrap. */
+           a second line; worst case is a tighter row, never a wrap.
+
+           GEN-2608-015: this whole band-aid is now isHome-only chrome -
+           the "page" variant's account row no longer has a greeting,
+           4 icon-links, or an always-visible search box to wrap in the
+           first place (all folded into one profile-menu dropdown), so it
+           doesn't need width-band tightening to stay on one line anymore.
+           .sitenav-account-row/.sitenav-greeting/.afa-search-input below
+           are still real classes used by the untouched isHome path (and
+           the search input inside the page variant's dropdown trigger),
+           left in place for that reason, not because the page variant
+           still relies on them. */
         @media (min-width: 901px) and (max-width: 1500px) {
           .sitenav-row { padding: 16px 20px !important; }
           .sitenav-logo { font-size: 20px !important; }
@@ -403,7 +436,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           <EnvBadge />
         </Link>
 
-        {/* Desktop: full row, unchanged from before */}
+        {/* Desktop: primary links always render the same way; the account
+            area below branches on isHome (untouched legacy row) vs the
+            page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
             <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
@@ -411,91 +446,220 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             </Link>
           ))}
 
-          {!backHref && <SearchBox />}
-          {!backHref && <LocationChip />}
+          {isHome ? (
+            <>
+              {/* variant="home" - explicitly out of scope for GEN-2608-015,
+                  left exactly as it was before that change. */}
+              {!backHref && <SearchBox />}
+              {!backHref && <LocationChip />}
 
-          <div ref={langMenuRef} style={{ position: 'relative' }}>
-            <button
-              onClick={() => setLangMenuOpen((v) => !v)}
-              title={t.languagePicker.label}
-              aria-label={t.languagePicker.label}
-              aria-expanded={langMenuOpen}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
-            >
-              {locale.toUpperCase()}
-            </button>
-            {langMenuOpen && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
-                {LOCALES.map((l) => (
-                  <button
-                    key={l.id}
-                    onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
-                  >
-                    {l.nativeLabel}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {status === "loading" ? null : user ? (
-            <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <span
-                className="sitenav-greeting"
-                style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
-              >
-                {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
-              </span>
-              {getRoleLabel(user.role, t.roles) && (
-                <span style={ROLE_BADGE_STYLE}>
-                  {getRoleLabel(user.role, t.roles)}
-                </span>
-              )}
-              {accountLinks.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  aria-label={l.label}
-                  aria-current={l.isActive ? "page" : undefined}
-                  className="sitenav-icon-link"
-                  style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+              <div ref={langMenuRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setLangMenuOpen((v) => !v)}
+                  title={t.languagePicker.label}
+                  aria-label={t.languagePicker.label}
+                  aria-expanded={langMenuOpen}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
                 >
-                  <NavIcon navKey={l.key} />
-                  {l.key === "dashboard" && pendingCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
-                      {pendingCount}
+                  {locale.toUpperCase()}
+                </button>
+                {langMenuOpen && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+                    {LOCALES.map((l) => (
+                      <button
+                        key={l.id}
+                        onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                      >
+                        {l.nativeLabel}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {status === "loading" ? null : user ? (
+                <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <span
+                    className="sitenav-greeting"
+                    style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
+                  >
+                    {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                  </span>
+                  {getRoleLabel(user.role, t.roles) && (
+                    <span style={ROLE_BADGE_STYLE}>
+                      {getRoleLabel(user.role, t.roles)}
                     </span>
                   )}
-                  {l.key === "messages" && unreadCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
-                      {unreadCount}
-                    </span>
-                  )}
-                  {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                    <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
-                      {pendingCompanionCount}
-                    </span>
-                  )}
-                  <span className="sitenav-tooltip">{l.label}</span>
-                </Link>
-              ))}
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}
-              >
-                {t.nav.signOut}
-              </button>
-            </div>
+                  {accountLinks.map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      aria-label={l.label}
+                      aria-current={l.isActive ? "page" : undefined}
+                      className="sitenav-icon-link"
+                      style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+                    >
+                      <NavIcon navKey={l.key} />
+                      {l.key === "dashboard" && pendingCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                          {pendingCount}
+                        </span>
+                      )}
+                      {l.key === "messages" && unreadCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                          {unreadCount}
+                        </span>
+                      )}
+                      {l.key === "myTickets" && pendingCompanionCount > 0 && (
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                          {pendingCompanionCount}
+                        </span>
+                      )}
+                      <span className="sitenav-tooltip">{l.label}</span>
+                    </Link>
+                  ))}
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "10px 22px", borderRadius: "6px" }}
+                  >
+                    {t.nav.signOut}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
+                    {t.nav.signIn}
+                  </Link>
+                  <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "10px 22px", borderRadius: "6px" }}>
+                    {t.nav.signUp}
+                  </Link>
+                </div>
+              )}
+            </>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
-                {t.nav.signIn}
-              </Link>
-              <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: isHome ? "10px 22px" : "8px 20px", borderRadius: "6px" }}>
-                {t.nav.signUp}
-              </Link>
-            </div>
+            <>
+              {/* GEN-2608-015: desktop "page" variant - search/location/
+                  language/greeting/role-badge/icon-links/sign-out collapsed
+                  into one profile-menu dropdown, matching HomeHeader's
+                  approved avatar-circle + dropdown-panel pattern. */}
+              {!backHref && (
+                <div style={{ overflow: "hidden", transition: "width 0.25s ease, opacity 0.25s ease", width: searchOpen ? "220px" : 0, opacity: searchOpen ? 1 : 0 }}>
+                  {searchOpen && <SearchBox />}
+                </div>
+              )}
+              {!backHref && (
+                <button
+                  aria-label={t.search.placeholder}
+                  onClick={() => setSearchOpen((v) => !v)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "50%", border: "none", background: "transparent", cursor: "pointer", color: "var(--afa-text-primary)", opacity: 0.7, flexShrink: 0 }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.2-3.2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              )}
+
+              <div ref={menuRef} style={{ position: "relative" }}>
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}
+                >
+                  {user ? (
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700 }}>
+                      {initials(user.displayName || user.name || user.email || "?")}
+                    </span>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "var(--afa-text-primary)" }}>
+                      <circle cx="12" cy="8.5" r="3.2" />
+                      <path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2" />
+                    </svg>
+                  )}
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {menuOpen && (
+                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "8px 0", zIndex: 20 }}>
+                    {user ? (
+                      <>
+                        <div style={{ padding: "6px 16px 10px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                            {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
+                          </span>
+                          {getRoleLabel(user.role, t.roles) && (
+                            <span style={ROLE_BADGE_STYLE}>
+                              {getRoleLabel(user.role, t.roles)}
+                            </span>
+                          )}
+                        </div>
+                        {accountLinks.map((l) => (
+                          <Link
+                            key={l.href}
+                            href={l.href}
+                            onClick={() => setMenuOpen(false)}
+                            aria-current={l.isActive ? "page" : undefined}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "14px", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.08)" : "transparent", textDecoration: "none" }}
+                          >
+                            {l.label}
+                            {l.badge > 0 && (
+                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 7px" }}>
+                                {l.badge}
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 16px", fontSize: "14px", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                          {t.nav.signIn}
+                        </Link>
+                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                      </>
+                    )}
+                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
+                      {LOCALES.map((l) => (
+                        <button
+                          key={l.id}
+                          onClick={() => setLocale(l.id)}
+                          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, background: "transparent", border: "none", cursor: "pointer", padding: "2px 4px" }}
+                        >
+                          {l.id.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                    {!backHref && (
+                      <div style={{ padding: "0 12px 4px" }}>
+                        <LocationChip />
+                      </div>
+                    )}
+                    {user && (
+                      <>
+                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <button
+                          onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}
+                        >
+                          {t.nav.signOut}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {!user && status !== "loading" && (
+                <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "8px 20px", borderRadius: "6px", flexShrink: 0 }}>
+                  {t.nav.signUp}
+                </Link>
+              )}
+            </>
           )}
         </div>
 
