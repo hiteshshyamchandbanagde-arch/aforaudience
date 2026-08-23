@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import { ErrorBanner } from '@/components/dashboard/VenuePortalUI'
 
 interface SeatSection {
   id: string
@@ -176,9 +177,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
@@ -251,8 +250,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               style={{
                                 fontSize: '11px',
                                 fontWeight: 700,
-                                color: 'var(--afa-amber)',
-                                background: 'var(--afa-amber-tint)',
+                                color: 'var(--afa-gold)',
+                                background: 'rgba(201,151,58,0.15)',
                                 padding: '3px 8px',
                                 borderRadius: '4px',
                                 letterSpacing: '0.02em',
@@ -297,8 +296,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                             style={{
                               fontSize: '11px',
                               fontWeight: 700,
-                              color: 'var(--afa-amber)',
-                              background: 'var(--afa-amber-tint)',
+                              color: 'var(--afa-gold)',
+                              background: 'rgba(201,151,58,0.15)',
                               padding: '3px 8px',
                               borderRadius: '4px',
                               letterSpacing: '0.02em',

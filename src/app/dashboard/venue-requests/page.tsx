@@ -7,7 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
-import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 
 interface Offer {
   id: string
@@ -134,9 +134,7 @@ export default function VenueRequestsPage() {
           </div>
 
           {loadError && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
-              {loadError}
-            </div>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{loadError}</ErrorBanner>
           )}
 
           {requests.length === 0 ? (

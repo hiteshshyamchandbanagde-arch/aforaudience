@@ -8,7 +8,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
-import { PageHead, Card, StatusPill, Button, IconCheck, IconX, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 
 interface BookingRequest {
   id: string
@@ -148,9 +148,7 @@ export default function VenueBookingsPage() {
           </div>
 
           {loadError && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
-              {loadError}
-            </div>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{loadError}</ErrorBanner>
           )}
 
           {/* F3 - Revenue summary */}

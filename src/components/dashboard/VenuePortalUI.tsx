@@ -146,6 +146,50 @@ export function StatusPill({ tone, children }: { tone: StatusPillTone; children:
   )
 }
 
+/* ---------------- Banners ---------------- */
+// BUG-2608-092: these two were previously copy-pasted inline in 7+ pages
+// using pre-dark-redesign light tokens (--afa-error-bg #FDECEA,
+// --afa-success-bg #F0FFF4, --afa-error-border #F5C2C0) - near-white boxes
+// on the dark page background, only visible when a real error/success
+// actually fired. Consolidated here, reusing StatusPill's already-correct
+// translucent-on-dark tone pairs instead of inventing new colors.
+
+export function ErrorBanner({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div
+      style={{
+        padding: '14px 16px',
+        background: 'rgba(179,38,30,0.1)',
+        border: '1px solid rgba(179,38,30,0.3)',
+        borderRadius: '8px',
+        color: 'var(--afa-error)',
+        fontSize: '14px',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+export function SuccessBanner({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return (
+    <div
+      style={{
+        padding: '14px 16px',
+        background: 'rgba(74,103,65,0.12)',
+        border: '1px solid rgba(74,103,65,0.3)',
+        borderRadius: '8px',
+        color: 'var(--afa-sage)',
+        fontSize: '14px',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 /* ---------------- Buttons ---------------- */
 
 type ButtonVariant = 'primary' | 'outline' | 'ghost'

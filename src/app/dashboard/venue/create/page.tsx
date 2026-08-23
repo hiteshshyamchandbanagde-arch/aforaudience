@@ -14,7 +14,7 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
-import { PageHead, Card, SectionTitle, Button } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, SectionTitle, Button, ErrorBanner } from '@/components/dashboard/VenuePortalUI'
 
 const inputStyle = {
   width: '100%',
@@ -277,9 +277,7 @@ export default function CreateVenuePage() {
           </div>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
-import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
 // had no editable fields of its own at all until bio was added this
@@ -124,14 +124,10 @@ export default function VenueOwnerEditPage() {
           </div>
 
           {message && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-success-bg)', border: '1px solid #68D391', borderRadius: '8px', color: 'var(--afa-green-dark)', fontSize: '14px', marginBottom: '20px' }}>
-              {message}
-            </div>
+            <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           <Card style={{ padding: '28px', marginBottom: '20px' }}>
