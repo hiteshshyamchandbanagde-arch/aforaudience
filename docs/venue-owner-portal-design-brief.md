@@ -10,8 +10,10 @@ Hitesh flagged the live Venue Owner dashboard as the visual odd-one-out on the p
 2. **Edit Profile** — `src/app/dashboard/venue/edit/page.tsx`
 3. **Revenue Overview** — `src/app/dashboard/venue/sales/page.tsx`
 4. **Booking Requests (calendar)** — `src/app/dashboard/venue/bookings/page.tsx`
-5. **Flexible Requests** — likely a tab/section within `bookings/page.tsx` (confirm exact location before build; not a separate route in the directory listing)
+5. **Flexible Requests** — `src/app/dashboard/venue-requests/page.tsx` — **its own top-level route**, not nested under `dashboard/venue/`. Confirmed by grep: `dashboard/venue/page.tsx` links to it at `href="/dashboard/venue-requests"` with a `pendingFlexRequests` count badge (line ~203-208).
 6. **Register Venue form** — `src/app/dashboard/venue/create/page.tsx`
+
+**Additional finding from confirming the above:** `dashboard/venue/page.tsx`'s pending-count badges (Booking Requests, Flexible Requests) and the "+ Register Venue" CTA are hardcoded to `background: 'var(--afa-terracotta)'` — a **stale pre-Phase-2c token** per `docs/afa-design-tokens-reference.md`, the same class of leftover that had to be removed from `OrganisersGridEmbed` this session. This isn't just "needs polish," it's running partially on retired tokens. Swap to `--afa-fill-solid`/current token family as part of this pass, not just the illustration/layout work.
 
 ## Critical constraint — dashboards are NOT the public sharp-corner system
 
