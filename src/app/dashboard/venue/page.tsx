@@ -10,7 +10,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { IN, AU, JP, SG, CA, US, GB, AE } from 'country-flag-icons/react/3x2'
 import {
-  PageHead, Card, StatusPill, EmptyState,
+  PageHead, Card, StatusPill, EmptyState, ErrorBanner,
   IconVenue, IconEdit, IconChart, IconCalendar, IconTag, IconPlus, IconUsers, IconMap,
   primaryLinkStyle, outlineLinkStyle, navPillStyle, NavBadge,
 } from '@/components/dashboard/VenuePortalUI'
@@ -233,9 +233,7 @@ export default function VenueDashboard() {
           </PageHead>
 
           {error && (
-            <div style={{ padding: '14px 16px', background: 'var(--afa-error-bg)', border: '1px solid var(--afa-error-border)', borderRadius: '8px', color: 'var(--afa-error)', fontSize: '14px', marginBottom: '24px' }}>
-              {error}
-            </div>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
           )}
 
           {venues.length === 0 ? (

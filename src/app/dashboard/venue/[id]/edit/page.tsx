@@ -454,7 +454,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
-                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '10px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Have real numbered seats instead?</div>
                       <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -472,7 +472,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {venue.seatingMode === 'NUMBERED' && (
-                <div style={{ padding: '16px', borderRadius: '10px', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>This venue uses Numbered Seating</div>
                     <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
