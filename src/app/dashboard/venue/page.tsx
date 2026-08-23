@@ -3,10 +3,12 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import type { ComponentType, CSSProperties } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import { IN, AU, JP, SG, CA, US, GB, AE } from 'country-flag-icons/react/3x2'
 import {
   PageHead, Card, StatusPill, EmptyState,
   IconVenue, IconEdit, IconChart, IconCalendar, IconTag, IconPlus, IconUsers, IconMap,
@@ -75,19 +77,25 @@ function rateTypeLabel(venue: Venue) {
 // present on every real venue via the Places-autocomplete-populated
 // field (confirmed 100% coverage across current QA data: India 933,
 // Australia/Japan/Singapore/Canada/US/UK ~30 each, UAE 29 - see
-// GEN-2608-081's correction). Explicit map, not a library, since the
-// known country set is small and fixed for now; falls back to no flag
-// (not a placeholder guess) for any value outside this set so a typo'd
-// or future-added country doesn't render a wrong flag.
-const COUNTRY_FLAGS: Record<string, string> = {
-  'India': '🇮🇳',
-  'Australia': '🇦🇺',
-  'Japan': '🇯🇵',
-  'Singapore': '🇸🇬',
-  'Canada': '🇨🇦',
-  'United States': '🇺🇸',
-  'United Kingdom': '🇬🇧',
-  'United Arab Emirates': '🇦🇪',
+// GEN-2608-081's correction). Real SVG components (country-flag-icons),
+// not Unicode emoji flags - emoji flags render as plain two-letter text
+// (e.g. "JP") on Windows since merging the regional-indicator character
+// pair into a flag glyph depends on OS font support, which Windows
+// historically lacks/inconsistently provides (confirmed via Hitesh's
+// live screenshot, BUG-2608-089). SVG guarantees identical rendering
+// everywhere. Explicit map, not a lookup over the full 250+-country
+// export, since the known country set is small and fixed for now;
+// falls back to no flag (not a placeholder guess) for any value outside
+// this set so a typo'd or future-added country doesn't render wrong.
+const COUNTRY_FLAGS: Record<string, ComponentType<{ title?: string; className?: string; style?: CSSProperties }>> = {
+  'India': IN,
+  'Australia': AU,
+  'Japan': JP,
+  'Singapore': SG,
+  'Canada': CA,
+  'United States': US,
+  'United Kingdom': GB,
+  'United Arab Emirates': AE,
 }
 
 export default function VenueDashboard() {
@@ -262,10 +270,11 @@ export default function VenueDashboard() {
                         the line-clamp/ellipsis below it. minHeight raised
                         92->118px to fit the address's 2nd line. */}
                     <div style={{ minHeight: '118px', minWidth: 0 }}>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        {venue.country && COUNTRY_FLAGS[venue.country] && (
-                          <span aria-label={venue.country} title={venue.country}>{COUNTRY_FLAGS[venue.country]}</span>
-                        )}
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {venue.country && COUNTRY_FLAGS[venue.country] && (() => {
+                          const Flag = COUNTRY_FLAGS[venue.country]
+                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: '2px', flexShrink: 0, boxShadow: '0 0 0 1px rgba(245,245,240,0.1)' }} />
+                        })()}
                         {venue.city}
                       </p>
                       <h3
@@ -339,4 +348,5 @@ export default function VenueDashboard() {
     </>
   )
 }
+
 
