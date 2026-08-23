@@ -56,6 +56,20 @@ export function getRangeStart(range: SalesRange, now: Date = new Date()): Date |
   }
 }
 
+// For delta indicators ("▲ 12% vs last period"): the equivalent prior
+// period, same length, immediately preceding rangeStart. Deliberately NOT
+// "the whole previous calendar month/quarter/etc." - if `now` is partway
+// through the current period, comparing against a full prior period would
+// be apples-to-oranges (e.g. 12 days into this month vs. all 31 days of
+// last month always reads as a decline). 'all' has no bounded start, so
+// there's no meaningful "previous" period - returns null.
+export function getPreviousRangeBounds(range: SalesRange, now: Date = new Date()): { start: Date; end: Date } | null {
+  const rangeStart = getRangeStart(range, now)
+  if (!rangeStart) return null
+  const durationMs = now.getTime() - rangeStart.getTime()
+  return { start: new Date(rangeStart.getTime() - durationMs), end: rangeStart }
+}
+
 // Bucket granularity for timeline charts scales with range so a Year
 // view isn't 365 one-pixel bars.
 export function bucketKeyFor(range: SalesRange, date: Date): string {
