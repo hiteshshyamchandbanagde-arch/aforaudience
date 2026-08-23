@@ -57,6 +57,18 @@ function rateLabel(venue: Venue) {
   return 'Flexible rate'
 }
 
+// BUG-2608-083: priceRange() is only meaningful for NUMBERED venues (real
+// per-seat pricing lives in VenueZonePrice/seatMap.sections) - GA/Hourly/
+// Daily/Flexible venues have no per-seat price at all, so this tile
+// always showed a bare "—" for them. The actual rate for those venues is
+// already surfaced below via rateLabel(); this tile just needs to show
+// something venue-type-appropriate instead of a dash with no context.
+function rateTypeLabel(venue: Venue) {
+  if (venue.rateType === 'HOURLY') return 'Hourly'
+  if (venue.rateType === 'DAILY') return 'Daily'
+  return 'Flexible'
+}
+
 export default function VenueDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -173,7 +185,7 @@ export default function VenueDashboard() {
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <PageHead eyebrow="Portfolio" title="Your Venues">
             <Link href="/dashboard/venue/edit" className="avp-hover-border" style={navPillStyle}>
-              <IconEdit size={16} /> Edit Profile
+              <IconEdit size={16} /> Account Settings
             </Link>
             <Link href="/dashboard/venue/sales" className="avp-hover-border" style={navPillStyle}>
               <IconChart size={16} /> Revenue Overview
@@ -216,12 +228,23 @@ export default function VenueDashboard() {
                   style={{ display: 'flex', flexDirection: 'column', padding: '20px', cursor: 'pointer' }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '10px' }}>
-                    <div>
+                    {/* BUG-2608-085: fixed minHeight + line-clamped title/
+                        truncated address so cards in the same grid row
+                        start their stats/actions rows at the same Y
+                        position regardless of name/address length. */}
+                    <div style={{ minHeight: '92px' }}>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px' }}>
                         {venue.city}
                       </p>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '21px', fontWeight: 500, lineHeight: 1.2, color: 'var(--afa-text-primary)', margin: 0 }}>{venue.name}</h3>
-                      <p style={{ fontSize: '12.5px', color: 'var(--afa-text-muted)', marginTop: '4px' }}>{venue.address}</p>
+                      <h3
+                        style={{
+                          fontFamily: 'var(--font-display)', fontSize: '21px', fontWeight: 500, lineHeight: 1.2, color: 'var(--afa-text-primary)', margin: 0,
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        }}
+                      >
+                        {venue.name}
+                      </h3>
+                      <p style={{ fontSize: '12.5px', color: 'var(--afa-text-muted)', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{venue.address}</p>
                     </div>
                     <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? 'Published' : 'Draft'}</StatusPill>
                   </div>
@@ -234,13 +257,23 @@ export default function VenueDashboard() {
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
-                      <div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
+                    {venue.seatingMode === 'NUMBERED' ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
+                        <div>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
+                        <div>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <p style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--afa-amber)', marginTop: '14px', marginBottom: 0 }}>{rateLabel(venue)}</p>
