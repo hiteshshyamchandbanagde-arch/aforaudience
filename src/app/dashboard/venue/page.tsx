@@ -232,7 +232,7 @@ export default function VenueDashboard() {
                         truncated address so cards in the same grid row
                         start their stats/actions rows at the same Y
                         position regardless of name/address length. */}
-                    <div style={{ minHeight: '92px' }}>
+                    <div style={{ minHeight: '92px', minWidth: 0 }}>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px' }}>
                         {venue.city}
                       </p>
