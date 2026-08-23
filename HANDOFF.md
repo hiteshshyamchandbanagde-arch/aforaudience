@@ -1,194 +1,140 @@
-# AFA Handoff — 22 Aug 2026 session (Organisers round)
+# AFA Handoff — 23 Aug 2026 session (BUG-2608-082 close-out)
 
-**qa HEAD: `ab43e16bc06231634316e93f3c01701a8ee9116f`** (this handoff commit
-itself; last code commit is `1ea773cd8d831e0d49df75b5d04a8e6d05b5cbd8`,
-PR #526)
+**qa HEAD: `5c158af5643252c93343578ab729aa23b85a62cc`** (PR #527, squash-merged)
 (verify fresh at next session start — do not trust this blindly)
 
 ---
 
-## NEXT SESSION — priority order (set explicitly by Hitesh at end of this session)
+## NEXT SESSION — priority order
 
-1. 🔴 Razorpay / Google Maps billing dashboards (manual, Hitesh)
-2. Confirm local dev DB (P1001) status — see below, now 2+ sessions
-3. **Unfinished from this session** — Organiser Profile event card
-   click-target issue (see new section directly below). A diagnostic
-   prompt was sent to Claude Code; results were NOT returned before
-   this session ended. Get that result first, then fix.
-4. **Venue Owner Portal — Hitesh explicitly prioritized this for next
-   session.** Brief is already written and ready
-   (`venue-owner-portal-design-brief.md`), Step 1 token-extraction is
-   superseded by `docs/afa-design-tokens-reference.md` (already exists
-   from this session — reuse it, don't redo Step 1). Go straight to
-   Step 2: run the Figma Make prompt. See full section further down
-   this doc for details.
+1. 🔴 Razorpay / Google Maps billing dashboards (manual, Hitesh) — still unconfirmed across many sessions.
+2. Confirm local dev DB (P1001) status — see below, now confirmed recurring across 3+ sessions.
+3. **Venue Owner Portal — next real task, nothing blocking it now.** Brief
+   is already written and ready (`venue-owner-portal-design-brief.md`).
+   Step 1 token-extraction is superseded by
+   `docs/afa-design-tokens-reference.md` (still local-only, see below —
+   reuse it, don't redo Step 1). Go straight to Step 2: run the Figma
+   Make prompt. See full section further down this doc for details.
 
 ---
 
-## Unfinished at session end — Organiser Profile event card click target
+## Shipped this session — BUG-2608-082 (Organiser Profile event cards)
 
-On the just-shipped Organiser Profile page (`/organisers/[id]`, PR
-#526), Hitesh flagged via screenshot that the "DETAILS →" label on
-Upcoming/Past Events cards reads as the only clickable element — small,
-muted-gray text in the corner of an otherwise large card — rather than
-the whole card being clickable. Two distinct concerns raised:
+Picked up the diagnostic the prior session queued (Hitesh's screenshot
+flag: "DETAILS →" reads as the only clickable element on Upcoming/Past
+event cards on `/organisers/[id]`). Two-step flow, diagnosis before fix:
 
-1. Likely violates this project's standing rule that every tile/card
-   opens in a single click via the click-guarded pattern
-   (navigatingId-style state, spinner overlay, other cards dim) already
-   used on `OrganisersGridEmbed.tsx` / `VenuesGridClient.tsx`. Unclear
-   whether this event card follows that pattern or has a narrower
-   click target.
-2. Independent of (1) — even if the whole card *is* already clickable,
-   "DETAILS →" doesn't visually read as actionable (muted gray, no
-   amber/hover distinction, blends into secondary text).
+1. **Diagnosis (findings only, no fix)**: quoted `EventDateCard`'s JSX —
+   the whole card was already wrapped in one outer `<Link>`, so it *was*
+   already single-click-navigable end to end (not a broken-navigation
+   bug, contrary to what the screenshot suggested). Two real gaps
+   confirmed instead: (a) the card had none of the
+   `navigatingId`/spinner/dim click-guard affordances that
+   `OrganisersGridEmbed.tsx`/`VenuesGridClient.tsx` give their tiles —
+   different, simpler implementation, not the same pattern; (b)
+   "DETAILS →" was `rgba(245,245,240,0.4)` (dim gray, same shade as
+   muted secondary text) and only turned amber on whole-card hover
+   alongside the title — no distinct actionable-text cue at rest.
 
-A diagnostic-only prompt was sent to Claude Code (findings before any
-fix, per this session's established discipline) asking it to: quote
-the card's click handler(s) and confirm what element they're attached
-to; compare against the `OrganisersGridEmbed`/`VenuesGridClient`
-click-guard pattern; and check whether "DETAILS →" is styled distinctly
-from static secondary text elsewhere on the page. **Result not received
-before session end — this is the first real task for next session,
-ahead of Venue Owner Portal.**
+2. **Fix — PR #527 (`1cddcc8` → squash-merged as `5c158af`)**:
+   - Lifted `navigatingId` state to `OrganiserPage` (shared across
+     Upcoming + Past so any in-flight card navigation dims/disables
+     every other card as one group, matching the reference grids).
+   - Added a spinner overlay + double-click guard on the clicked card.
+     Kept the real `<Link>` (not a `div role="link"` rebuild) — the new
+     `onClick` only intercepts plain left-clicks (checks
+     button/ctrl/meta/shift/alt) so prefetch, right-click, and
+     middle-click-new-tab all still work unmodified.
+   - "DETAILS →" is now permanently `var(--afa-amber)` (matching the
+     page's own "View all N" button, which was already unconditionally
+     amber) instead of hover-gated gray; hover now adds an underline
+     instead of relying on color alone.
 
-🔴 **Razorpay and Google Maps/Places billing dashboards remain unchecked
-across many sessions now, including this one.** Carried forward again —
-see "Open items" below. First thing to do next session, before anything
-else.
+**Verification** (local dev DB is still down — see 🔴 below — so this
+followed the same mocked-API Playwright workaround as BUG-2608-081):
+`npx tsc --noEmit` clean (0 new errors — the raw run shows ~160 lines
+but all of them are pre-existing noise from the untracked `Figma/`
+export directory, see below, confirmed by re-running with it excluded);
+live screenshots of default state (amber DETAILS→), hover (underline),
+and a network-throttled mid-navigation capture showing the spinner
+overlay + dimmed sibling card; rapid double-click produced no
+console/page errors and no double-navigation; ctrl-click opened a new
+tab to the correct URL while the origin tab stayed put.
 
-🔴 **Local dev DB unreachable, now confirmed across at least two
+**Note on this machine specifically**: no `gh` CLI and no
+`GITHUB_TOKEN`/`GH_TOKEN` available here, so the branch was pushed and
+handed off as a pre-filled `compare/qa...branch?expand=1` URL rather
+than opened via `gh pr create` — Hitesh opened and merged PR #527
+manually. If a future session runs on a machine with `gh` available,
+prefer that; this is a per-machine constraint, not a repo-wide one.
+
+---
+
+## 🔴 Carried-forward blockers
+
+**Razorpay and Google Maps/Places billing dashboards** remain unchecked
+across many sessions now, including this one (not touched — outside
+Claude Code's access, needs Hitesh directly). First thing to do next
+session, before anything else.
+
+**Local dev DB unreachable, now confirmed across at least three
 sessions.** `npm run dev` hits Prisma `P1001: Can't reach database
 server` on every DB-backed route (`/api/artists`, `/api/organisers`,
-`/api/events`, NextAuth login, etc.) — reconfirmed again at the end of
-this session via a live `curl`. This is no longer a one-off: worth
-treating as a real environment issue to fix, not something to keep
-working around with Playwright network mocks every session.
+`/api/events`, NextAuth login, etc.) — reconfirmed again this session
+via live `curl` against `/api/organisers/`. This is a standing
+environment issue at this point, not a fluke — worth actually
+diagnosing (DB service state / connection string / network) rather
+than continuing to route around it with Playwright API mocks every
+session.
 
 ---
 
-## Shipped this session (all merged to qa)
+## New this session — `Figma/` export directory pollutes `tsc --noEmit`
 
-This session was a single continuous thread on the **Organisers**
-surface (embed grid, its search box, and the profile page) — from audit
-through four separate PRs, in order:
+The untracked `Figma/` directory at the repo root (multiple Figma Make
+export folders, each with their own unbuilt `vite.config.ts` and no
+local `vite`/`@vitejs/plugin-react`/`@tailwindcss/vite` installed)
+falls inside `tsconfig.json`'s `**/*.ts`/`**/*.tsx` include with no
+matching exclude, so a plain `npx tsc --noEmit` picks up ~160 lines of
+unrelated `Cannot find module 'vite'` / implicit-`any` errors from
+files that were never meant to be type-checked as part of this app.
+Confirmed this session by re-running with a scoped tsconfig excluding
+`Figma/`+`docs/` → 0 errors (and no Prisma-noise baseline either,
+contrary to what an earlier handoff described — that baseline may have
+predated `Figma/` existing, or predated a Prisma client regen).
+**Worth either `.gitignore`-ing `Figma/` for real or adding it to
+`tsconfig.json`'s `exclude`** so future sessions' `tsc --noEmit` runs
+aren't muddied by it — did not do this myself since it's a repo-hygiene
+change outside this bug's scope, flagging instead.
 
-1. **PR #520 — `c345e1a`**: Consolidated Venues/Artists/Events search
-   inputs onto one shared `SearchInputBox` component. Groundwork PR,
-   not itself part of the Organisers work but merged first in this
-   session's chain.
+---
 
-2. **PR #521/#522 — `70ca872`/`a2b5e5d`**: Artists search box fixes
-   (320px desktop cap removed, then the real root cause — missing
-   `flex-grow` on the parent wrapper — fixed to match Venues' pattern).
-   Verified via Playwright: 223px → 1152px.
+## Local-only docs — still not committed anywhere
 
-3. **Audit round (no code, findings only)** — three docs written this
-   session, none yet committed to git (see "Local-only docs" below):
-   - `docs/organisers-grid-embed-audit.md` (**committed to qa**, `b6cdb7a`) —
-     full audit of `OrganisersGridEmbed.tsx`: confirmed it's the *only*
-     real in-app entry point to organiser browsing (2 clicks from
-     Events; the standalone `/organisers` directory has zero inbound
-     nav/footer links), and that it was still on the pre-Phase-2c stale
-     token family (white cards, `Georgia, serif`, `--afa-terracotta`,
-     rounded corners) — same family as the standalone directory page,
-     not a third treatment.
-   - `docs/afa-design-tokens-reference.md` (local-only, not committed) —
-     reference doc for real `--afa-*` tokens/patterns, built from
-     reading the shipped codebase. Used as the source of truth for
-     every restyle this session.
-   - `docs/event-detail-organiser-tab-audit.md` (local-only) — confirmed
-     there's no "Organiser tab" on Event Detail (removed in the
-     Events rebuild); it's a one-line "Organised by {name}" credit that
-     links to `/organisers/[id]`.
-
-4. **PR #523 — `99c40dc`**: Rebuilt `OrganisersGridEmbed.tsx` onto the
-   Phase 2c dark/sharp-corner convention (verbatim values copied from
-   `VenuesGridClient.tsx`'s `.afa-venue-card`/hover pattern) + swapped
-   avatars onto the shared `Photo` component for the amber/sepia
-   duotone treatment already shipped on Venues/Artists/Events.
-
-5. **PR #524 — `aa55b3e`**: Follow-up bug found via a live Supabase
-   query against `aforaudience-qa` — 10/15 approved QA organisers seed
-   `avatarUrl` to `avatars.githubusercontent.com` filler (same class of
-   problem as the documented Artists "Sai Jain / GitHub mascot"
-   incident), and the embed never gated on the existing
-   `isPlaceholderImageUrl()` util the way Venues/Artists already do —
-   so placeholder avatars were rendered through the duotone filter as
-   if real, producing a muddy amber-on-black texture. Fixed by adding
-   the same guard.
-
-6. **PR #525 — `b31a0d6`**: The Organisers-tab search box on
-   `/events` had a stray `maxWidth: "420px"` inline cap (traced via
-   `git log -S` to the original Events rebuild, #514 — pre-dates the
-   shared-search-box consolidation and was never removed). Removed;
-   confirmed live on `qa.aforaudience.com` before/after — 420px → 1088px,
-   matching the Events-mode instance exactly.
-
-7. **PR #526 — `1ea773c`**: Full rebuild of the Organiser Profile page
-   (`src/app/organisers/[id]/page.tsx`) against the approved Figma Make
-   export ("Organiser Profile Page Design") — replaced the old white
-   "Events by {name}" panel with the Phase 2c dark/sharp-corner system.
-   Added `createdAt` (member since) and `tours` (LIVE/COMPLETED stops
-   only) to the API response; tightened that route's events query from
-   `include` to an explicit `select` (was pulling every Event column
-   into a response that's supposed to be an explicit public projection).
-   Restyled `OrganiserFollowButton` onto `VenueFollowHeaderButton`'s
-   exact chrome. Added ~23 new i18n keys across all 11 dictionaries
-   (real translations, not placeholders). Deliberate deviations from
-   the export, all called out in the commit message: Past Events capped
-   at 5 with a "View all N" expand (export's own mock never needed
-   this), section count badges always show the true total not the
-   capped subset, Past Events gets a real empty state instead of being
-   hidden when zero, Tour cards aren't links (no `/tours/[id]` route
-   exists in this app).
-
-**Net result**: every real touchpoint for organiser data on the public
-site — the Events↔Organisers toggle, its search box, and the profile
-page it links to — is now on the current dark design system. The one
-deliberately out-of-scope piece is the **standalone `/organisers`
-directory page** (`src/app/(public)/organisers/page.tsx`) — still
-`Georgia, serif`/`--afa-terracotta`/light-panel/rounded-corner, and
-still has zero inbound links from `SiteNav`, the homepage footer, or
-`Hero.tsx`. Explicitly deprioritized in `docs/organisers-grid-embed-brief.md`
-pending a product decision on whether it needs a nav entry point at all.
-
-### Local-only docs — not committed anywhere
-`docs/afa-design-tokens-reference.md` and
-`docs/event-detail-organiser-tab-audit.md` are real, useful reference
-docs written this session but still sitting untracked in the local
-working directory (same sandbox this session ran in) — never
-committed, never pushed. They'll survive as long as the next session
-runs in this same local checkout, but won't exist if a fresh clone is
-used. `docs/search-input-audit.md` is also untracked/uncommitted (older,
-predates this session's own work per its content, provenance unclear —
-worth checking before deciding whether to commit it too). Worth
-committing at least the tokens-reference doc somewhere durable
-(`qa` directly, or its own small PR) since it's now the de facto
-styling reference this session leaned on repeatedly.
-
-### Process note carried forward from the prior handoff, reconfirmed
-This session deliberately branched fresh off `origin/qa` (via
-`git fetch origin qa` first) for every one of PRs #523 through #526,
-specifically because the prior handoff flagged mid-session merges
-causing diverged git graphs. That discipline held up cleanly this
-time — no branch-divergence issues this session. Keep doing this.
+Unchanged from the prior handoff: `docs/afa-design-tokens-reference.md`
+and `docs/event-detail-organiser-tab-audit.md` are real reference docs,
+still untracked in the local working directory, never committed or
+pushed. `docs/search-input-audit.md` is also still untracked
+(provenance still unclear). All three survived this session's checkout
+resets untouched. Worth committing at least the tokens-reference doc
+somewhere durable, since it's now been reused as the styling source of
+truth across two sessions running.
 
 ---
 
 ## Open items, carried forward
 
-1. 🔴 **Razorpay and Google Maps/Places API billing dashboards** —
-   unconfirmed across many sessions now, this one included. Still
-   first-thing-next-session.
+1. 🔴 **Razorpay and Google Maps/Places API billing dashboards** — see above.
 
-2. 🔴 **Local dev DB (P1001)** — see top of doc. Now spans 2+ sessions;
-   worth actually diagnosing rather than mocking around again.
+2. 🔴 **Local dev DB (P1001)** — see above. Now 3+ sessions; worth
+   actually diagnosing.
 
-3. **Standalone `/organisers` directory page** (new this session, see
-   above) — still fully stale/pre-Phase-2c, still orphaned from real
-   nav. Needs Hitesh's call: give it a nav entry point and redesign it,
-   or leave it as dead weight the way it's been treated so far.
+3. **Standalone `/organisers` directory page** — still fully
+   stale/pre-Phase-2c, still orphaned from real nav (zero inbound
+   links). Needs Hitesh's call: give it a nav entry point and redesign
+   it, or leave it as dead weight the way it's been treated so far.
+   Untouched again this session (deliberately out of scope for
+   BUG-2608-082).
 
 4. **GEN-2608-073** — Artist directory cards (real-photo ones) still
    read as "too basic/ordinary." Still NEW. No design direction agreed
@@ -204,24 +150,35 @@ time — no branch-divergence issues this session. Keep doing this.
    schema/API field. Needs Hitesh's call: add it for real, or rule it
    out of scope.
 
-7. Figma MCP still cannot pull raw source for Figma Make files
-   (unconfirmed again this session — not re-tested, but no reason to
-   think it's fixed). Claude Code local file reads remain the workaround.
+7. Figma MCP raw-source access for Figma Make files — unconfirmed again
+   this session (the Figma MCP connection dropped mid-session before it
+   was tested either way). Claude Code local file reads remain the
+   workaround regardless.
 
 8. **A pre-existing `git stash` on `qa`** (`WIP on qa: bb8613e Merge
-   pull request #50...`) — not created this session, not touched this
-   session either (left alone deliberately since its contents/owner are
-   unknown). Worth asking whoever created it whether it's still needed
-   before it gets forgotten.
+   pull request #50...`) — still present, still untouched, contents/
+   owner still unknown. Worth asking whoever created it whether it's
+   still needed before it gets forgotten.
 
-9. **Leftover remote branch** `fix/artists-search-flex-grow` — its
-   commit landed via PR #522 but the branch itself is still on origin
-   (GitHub's auto-delete-on-merge didn't fire for it, unlike #523–#526's
-   branches which are gone). Harmless, safe to delete manually.
+9. ~~Leftover remote branch `fix/artists-search-flex-grow`~~ — **resolved**,
+   confirmed gone from `origin` this session (along with
+   `fix/organiser-event-card-click-guard-BUG-2608-082`, this session's
+   own branch, auto-deleted on merge as expected).
+
+10. **A large number of `origin` branches unrelated to this thread's own
+    work** (~70+, spanning `feat/`, `fix/`, `docs/`, `toast-rollout/`
+    prefixes — payments, seat-map, push notifications, admin, intro
+    splash, toast rollouts, etc.) were visible via `git ls-remote` this
+    session. None of this thread's sessions touched or tracked them —
+    consistent with the known parallel chat-based Claude workflow
+    operating on this same repo (see the handoff-collision note from
+    22 Aug). Not investigated further this session; flagging only so
+    the next session doesn't mistake this doc for full repo awareness —
+    it only covers the Organisers-round thread's own continuity.
 
 ---
 
-## New from prior session — Venue Owner Portal (not started, ready to kick off)
+## Venue Owner Portal (not started, ready to kick off — now top priority)
 
 Hitesh shared 6 screenshots of the live Venue Owner dashboard (Your
 Venues, Edit Profile, Revenue Overview, Booking Requests calendar,
@@ -230,20 +187,20 @@ one out on the whole platform: plain white calendar grid, default form
 styling, an almost-empty revenue chart, no illustration/duotone
 treatment anywhere. Functionally solid, never had a design pass.
 
-A two-step design brief was written last session and is ready
-(`venue-owner-portal-design-brief.md`):
+A two-step design brief is ready (`venue-owner-portal-design-brief.md`):
 
-1. **Step 1 (send to Claude Code first, read-only)**: extract a real
-   design-token/pattern reference from the shipped codebase — this is
-   now effectively superseded by `docs/afa-design-tokens-reference.md`
-   written this session (see "Local-only docs" above) — reuse that
-   instead of redoing this step from scratch.
+1. **Step 1 (would normally be sent to Claude Code first, read-only)**:
+   extract a real design-token/pattern reference from the shipped
+   codebase — already done, superseded by
+   `docs/afa-design-tokens-reference.md` (see "Local-only docs" above)
+   — reuse that instead of redoing this step from scratch.
 2. **Step 2**: paste that output into the Figma Make prompt (already
    drafted, covers all 6 screens as one cohesive portal) and run it.
 
-**Not yet sent to Claude Code — still the next thing to do**, once the
-🔴 billing dashboard check is out of the way. Untouched this session —
-the Organisers thread took the whole session instead.
+**Still not sent to Claude Code — still the next thing to do**, once
+the 🔴 billing dashboard check and DB status are out of the way. Two
+sessions running now where this got bumped by other work (Organisers
+round, then this session's BUG-2608-082 close-out).
 
 ---
 
@@ -255,9 +212,8 @@ the Organisers thread took the whole session instead.
 - Four Rooms icon/typography treatment (GEN-2608-071) — deferred.
 - Venue Owner landing page — queued after artist pages confirmed
   (still mid-fidelity-review per GEN-2608-073 above). Organiser landing
-  page (the standalone `/organisers` directory) moved from "queued" to
-  its own open item (#3 above) now that the profile page it links to
-  is done.
+  page (the standalone `/organisers` directory) is its own open item
+  (#3 above).
 - Seat-map remaining open items (architecture already shipped, PRs
   #147–#151, #193) — per-zone price input on Manual Canvas, grid-
   generator vs. draw-it-myself redundancy, cross-level zone pricing
@@ -271,18 +227,19 @@ the Organisers thread took the whole session instead.
 
 - Session-start: verify qa HEAD fresh (don't trust this doc's SHA
   blindly), query Feedback table (NEW/REVIEWED, esp. BUG) — **not done
-  this session** (no DB/Supabase access available at the point this
-  doc was written), cross-check against `docs/design.md` before
-  treating anything as open.
+  this session** (no DB/Supabase access available — same P1001 issue),
+  cross-check against `docs/design.md` before treating anything as
+  open.
 - Brief and build stay separate steps for design-fidelity-sensitive
-  work — quote exact export values before building. This session
-  additionally wrote a real audit doc before each restyle (see
-  `docs/organisers-grid-embed-audit.md`) — worth keeping as the pattern
-  for future design-fidelity work, not just this once.
-- PR workflow: feature branch off fresh `origin/qa` → push → PR → CI
-  poll → re-fetch head SHA immediately before squash-merge → delete
-  branch → Contents API verify → Vercel READY confirm → runtime errors
-  check → Feedback table update. All PRs target `qa`.
+  work — quote exact export values / diagnose before building. This
+  session again did diagnosis-then-fix as two explicit steps
+  (BUG-2608-082) — keep doing that for anything design/UX-flagged.
+- PR workflow: feature branch off fresh `origin/qa` → push → PR → CI →
+  squash-merge → delete branch, all targeting `qa`. **On this specific
+  machine, `gh` CLI and any GitHub token are unavailable** — Claude
+  Code can push a branch and hand over a pre-filled compare URL, but
+  cannot open/merge the PR itself here; Hitesh does that step manually
+  until/unless a session runs somewhere `gh` is installed.
 - `CodeCounter` has drifted from real max displayId at least twice
   before — worth a quick sanity check each time before using it rather
   than assuming it's in sync (not re-checked this session).
