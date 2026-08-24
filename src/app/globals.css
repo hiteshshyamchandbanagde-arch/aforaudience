@@ -326,3 +326,44 @@ html {
 .avp-btn-ghost:hover { color: var(--afa-text-primary); background: rgba(245, 245, 240, 0.04); }
 .avp-hover-border:hover { border-color: rgba(245, 245, 240, 0.2); color: var(--afa-text-primary); }
 .avp-field:focus { border-color: rgba(201, 151, 58, 0.5); outline: none; box-shadow: 0 0 0 1px rgba(201, 151, 58, 0.35); }
+
+/* GEN-2608-082 - Venue Creation + Seat Arrangement redesign (Figma Make
+   export round 2, docs/venue-seating-redesign + seating-visual-polish).
+   Warm radial depth reused behind key moments (the Seating & Pricing fork,
+   the seat-map Preview) so those surfaces aren't flat - ported from the
+   export's .afa-glow-orange/.afa-glow-amber/.afa-card-lift, retargeted onto
+   this app's --afa-surface-page/--afa-surface-raised instead of Figma's own
+   hardcoded --color-ink/--color-raised. */
+.afa-glow-orange {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255, 90, 54, 0.08), transparent 62%),
+    var(--afa-surface-page);
+}
+.afa-glow-amber {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(201, 151, 58, 0.07), transparent 62%),
+    var(--afa-surface-page);
+}
+.afa-card-lift {
+  background:
+    radial-gradient(140% 120% at 50% 0%, rgba(255, 90, 54, 0.06), transparent 55%),
+    var(--afa-surface-raised);
+  box-shadow: 0 1px 0 rgba(245, 245, 240, 0.04) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+/* Structural seat-count/layout changes fade+scale a seat in so the change
+   reads as legible; position-only changes (aisle width, alignment) apply
+   with no animation - see the Terminology panel's "Live-preview behaviour"
+   copy for the full rule this timing implements. */
+@keyframes seatIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+.afa-seat-anim { animation: seatIn 0.18s ease-out both; }
+
+/* SeatSectionEditor.tsx (GA section-row builder) + the Seating & Pricing
+   fork's PathCards - real :hover, not JS mouse handlers (see the
+   hover-lift-card note above re: the phantom-tap issue on touchscreens). */
+.ga-remove-btn:hover { color: var(--afa-fill-solid) !important; }
+.ga-add-row:hover { border-color: rgba(255, 90, 54, 0.5) !important; color: var(--afa-text-primary) !important; }
+.afa-path-card:hover { transform: translateY(-2px); }
+.afa-path-card:not(.afa-path-card-active):hover { border-color: rgba(245, 245, 240, 0.3); }

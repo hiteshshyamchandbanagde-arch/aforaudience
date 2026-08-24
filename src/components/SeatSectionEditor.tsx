@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react"
 import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
+import { IconSection } from "@/components/dashboard/VenuePortalUI"
 
 export type SeatSection = {
   id: string
@@ -113,12 +114,15 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
   const minPrice = prices.length ? Math.min(...prices) : 0
   const maxPrice = prices.length ? Math.max(...prices) : 0
 
+  // Field bg is a shade darker than the row card (--afa-surface-page vs
+  // -raised) so fields read as recessed inputs against the row, matching
+  // the Figma export's ga-input treatment (GEN-2608-082).
   const inputStyle: CSSProperties = {
     width: "100%",
     padding: "10px 12px",
-    borderRadius: "6px",
+    borderRadius: "10px",
     border: "1px solid rgba(245,245,240,0.15)",
-    background: "var(--afa-surface-raised)",
+    background: "var(--afa-surface-page)",
     fontSize: "14px",
     color: "var(--afa-text-primary)",
   }
@@ -223,10 +227,11 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               type="button"
               onClick={() => removeSection(section.id)}
               aria-label="Remove section"
+              className="ga-remove-btn"
               style={{
                 background: "none",
                 border: "none",
-                color: "var(--afa-terracotta)",
+                color: "var(--afa-text-muted)",
                 cursor: "pointer",
                 fontSize: "14px",
                 fontWeight: 600,
@@ -261,20 +266,25 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       <button
         type="button"
         onClick={addSection}
+        className="ga-add-row"
         style={{
           marginTop: "14px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
           background: "none",
           border: "1px dashed rgba(245,245,240,0.3)",
-          borderRadius: "8px",
+          borderRadius: "10px",
           padding: "10px 18px",
           fontSize: "14px",
           fontWeight: 600,
-          color: "var(--afa-text-primary)",
+          color: "var(--afa-text-secondary)",
           cursor: "pointer",
           width: "100%",
         }}
       >
-        + Add Seating Section
+        <IconSection size={16} /> Add another section
       </button>
 
       {sections.length > 0 && (
@@ -282,21 +292,24 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           style={{
             marginTop: "16px",
             display: "flex",
-            gap: "24px",
-            fontSize: "14px",
-            color: "var(--afa-text-primary)",
-            padding: "12px 16px",
-            background: "rgba(200,68,26,0.06)",
-            borderRadius: "8px",
+            gap: "28px",
+            padding: "14px 18px",
+            background: "var(--afa-surface-page)",
+            border: "1px solid rgba(255,90,54,0.2)",
+            borderRadius: "10px",
           }}
         >
-          <span><strong>{totalSeats}</strong> total seats</span>
-          <span>
-            <strong>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
+            <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
+          </div>
+          <div style={{ width: "1px", background: "rgba(245,245,240,0.12)" }} />
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
-            </strong>{" "}
-            per seat
-          </span>
+            </div>
+            <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>per-seat range</div>
+          </div>
         </div>
       )}
     </div>
