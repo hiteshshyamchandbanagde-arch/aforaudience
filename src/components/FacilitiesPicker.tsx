@@ -113,7 +113,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder="e.g., Rooftop seating, Valet"
-        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '14px', boxSizing: 'border-box' }}
       />
     </div>
   )
