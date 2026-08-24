@@ -113,12 +113,7 @@ export function IconMap({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
    throughout the Seating & Pricing fork and the seat-map builder, not as
    standalone nav/action icons. One word per concept (Section/Aisle/Level/
    Seat) always pairs with the matching glyph here - see the Terminology
-   panel.
-   NOTE: also added on feat/venue-register-ga-figma-redesign (PR #1),
-   which branched off qa before this PR - both branches cut independently
-   per the "always branch fresh off qa" rule, so this block is duplicated
-   until one of the two PRs merges first; whichever merges second will
-   see a trivial identical-hunk conflict here, not a real one. */
+   panel. */
 type GlyphProps = { size?: number; style?: CSSProperties }
 const glyphProps = { viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
 

@@ -14,7 +14,7 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
-import { PageHead, Card, SectionTitle, Button, ErrorBanner } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, SectionTitle, Button, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
 
 const inputStyle = {
   width: '100%',
@@ -478,51 +478,65 @@ export default function CreateVenuePage() {
             {/* Seating & pricing */}
             <Card style={{ padding: '28px', marginBottom: '20px' }}>
               <SectionTitle n="03" title="Seating & Pricing" />
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginTop: '-8px', marginBottom: '14px' }}>
-                How is this venue's seating arranged?
-              </p>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '18px' }}>
-                <button
-                  type="button"
-                  onClick={() => setSeatingChoice('GENERAL_ADMISSION')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.08)', background: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : '#171717', color: seatingChoice === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
-                >
-                  Section-based (General Admission)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSeatingChoice('NUMBERED')}
-                  style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: seatingChoice === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.08)', background: seatingChoice === 'NUMBERED' ? 'var(--afa-fill-solid)' : '#171717', color: seatingChoice === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}
-                >
-                  Numbered seats — I'll build this after
-                </button>
-              </div>
 
-              {seatingChoice === 'GENERAL_ADMISSION' && (
-                <>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '18px' }}>
-                    Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
-                  </p>
-                  <SeatSectionEditor sections={sections} onChange={setSections} />
-                </>
-              )}
+              {/* Warm radial glow behind this key moment - matches the
+                  entry-choice treatment on the Figma export's Seating &
+                  Pricing fork (GEN-2608-082). Negative side/bottom margin
+                  bleeds it to the card's own edges; top stays flush under
+                  SectionTitle. */}
+              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: '4px 28px 28px', borderRadius: '0 0 12px 12px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '2px' }}>
+                  How is this venue's seating arranged? Pick how your audience will choose where to sit.
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '15px', color: 'var(--afa-amber)', marginTop: '6px', marginBottom: '20px' }}>
+                  &ldquo;every seat is a decision about the room&rdquo;
+                </p>
 
-              {seatingChoice === 'NUMBERED' && (
-                <div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
-                    You'll place real, numbered seats on a canvas shaped like your venue from the Seat Map Builder once this venue is created. For now, just give an approximate total capacity — used for listings until your real layout is saved.
-                  </p>
-                  <label style={labelStyle}>Approximate total capacity</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={approxCapacity}
-                    onChange={(e) => setApproxCapacity(e.target.value)}
-                    placeholder="e.g. 250"
-                    style={{ ...inputStyle, maxWidth: '160px' }}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                  <PathCard
+                    title="General Admission"
+                    icon={<IconSection size={20} />}
+                    active={seatingChoice === 'GENERAL_ADMISSION'}
+                    onClick={() => setSeatingChoice('GENERAL_ADMISSION')}
+                    consequence="Audience picks a section, not a specific seat."
+                    points={['Fastest to set up', 'Great for standing rooms & open floors']}
+                  />
+                  <PathCard
+                    title="Numbered Seats"
+                    icon={<IconSeatGlyph size={20} />}
+                    active={seatingChoice === 'NUMBERED'}
+                    onClick={() => setSeatingChoice('NUMBERED')}
+                    consequence="Audience picks their exact seat on a map."
+                    points={['Live seat-map builder', 'Set an approximate capacity now, refine after']}
                   />
                 </div>
-              )}
+
+                {seatingChoice === 'GENERAL_ADMISSION' && (
+                  <>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '18px' }}>
+                      Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
+                    </p>
+                    <SeatSectionEditor sections={sections} onChange={setSections} />
+                  </>
+                )}
+
+                {seatingChoice === 'NUMBERED' && (
+                  <div>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
+                      You'll place real, numbered seats on a canvas shaped like your venue from the Seat Map Builder once this venue is created. For now, just give an approximate total capacity — used for listings until your real layout is saved.
+                    </p>
+                    <label style={labelStyle}>Approximate total capacity</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={approxCapacity}
+                      onChange={(e) => setApproxCapacity(e.target.value)}
+                      placeholder="e.g. 250"
+                      style={{ ...inputStyle, maxWidth: '160px' }}
+                    />
+                  </div>
+                )}
+              </div>
             </Card>
 
             {/* Actions */}
@@ -548,5 +562,76 @@ export default function CreateVenuePage() {
         </div>
       </main>
     </>
+  )
+}
+
+// Seating & Pricing fork card (GEN-2608-082, ported from the Figma export's
+// PathCard). Unlike Figma's mock - a one-way "choose a path" navigation into
+// the next wizard step - this is a real toggle between two form states on
+// the same page, so the active card shows "Selected" instead of Figma's
+// always-navigate "Choose this →", and either card can be re-selected at
+// any time.
+function PathCard({
+  title,
+  icon,
+  consequence,
+  points,
+  active,
+  onClick,
+}: {
+  title: string
+  icon: React.ReactNode
+  consequence: string
+  points: string[]
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`afa-path-card${active ? ' afa-path-card-active afa-card-lift' : ''}`}
+      style={{
+        textAlign: 'left',
+        borderRadius: '12px',
+        border: active ? '1px solid rgba(255,90,54,0.5)' : '1px solid rgba(245,245,240,0.12)',
+        background: active ? undefined : 'var(--afa-surface-page)',
+        padding: '20px',
+        cursor: 'pointer',
+        transition: 'border-color 150ms, transform 150ms',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '40px',
+            height: '40px',
+            borderRadius: '8px',
+            background: active ? 'rgba(255,90,54,0.2)' : 'rgba(245,245,240,0.08)',
+            color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
+          }}
+        >
+          {icon}
+        </span>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+          {title}
+        </h3>
+      </div>
+      <p style={{ marginTop: '14px', fontSize: '13.5px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
+      <ul style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>
+        {points.map((p) => (
+          <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: 'var(--afa-text-secondary)' }}>
+            <IconCheck size={12} style={{ color: 'var(--afa-text-muted)' }} />
+            {p}
+          </li>
+        ))}
+      </ul>
+      <span style={{ display: 'inline-block', marginTop: '14px', fontSize: '13px', fontWeight: 600, color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)' }}>
+        {active ? '✓ Selected' : 'Choose this →'}
+      </span>
+    </button>
   )
 }
