@@ -106,6 +106,92 @@ export function IconMap({ size = 20, style, strokeWidth = 1.5 }: IconProps) {
   )
 }
 
+/* ---------------- GEN-2608-082 glyphs ----------------
+   16x16 inline glyphs ported 1:1 from the Figma export's <Glyph> - kept
+   distinct from the 24x24 Icon* set above (own viewBox/strokeWidth
+   defaults) since these ride inline next to text/labels at small sizes
+   throughout the Seating & Pricing fork and the seat-map builder, not as
+   standalone nav/action icons. One word per concept (Section/Aisle/Level/
+   Seat) always pairs with the matching glyph here - see the Terminology
+   panel.
+   NOTE: also added on feat/venue-register-ga-figma-redesign (PR #1),
+   which branched off qa before this PR - both branches cut independently
+   per the "always branch fresh off qa" rule, so this block is duplicated
+   until one of the two PRs merges first; whichever merges second will
+   see a trivial identical-hunk conflict here, not a real one. */
+type GlyphProps = { size?: number; style?: CSSProperties }
+const glyphProps = { viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+
+export function IconSection({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2" y="2.5" width="12" height="3.2" rx="1" />
+      <rect x="2" y="6.5" width="12" height="3.2" rx="1" fill="currentColor" opacity="0.35" />
+      <rect x="2" y="10.5" width="12" height="3.2" rx="1" />
+    </svg>
+  )
+}
+export function IconAisleV({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2" y="2.5" width="4" height="11" rx="1" />
+      <rect x="10" y="2.5" width="4" height="11" rx="1" />
+      <path d="M8 3v10" strokeDasharray="1.5 1.8" />
+    </svg>
+  )
+}
+export function IconAisleH({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="2.5" y="2" width="11" height="4" rx="1" />
+      <rect x="2.5" y="10" width="11" height="4" rx="1" />
+      <path d="M3 8h10" strokeDasharray="1.5 1.8" />
+    </svg>
+  )
+}
+export function IconLevel({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M8 2 14 5 8 8 2 5 8 2Z" />
+      <path d="M2 8l6 3 6-3" />
+      <path d="M2 11l6 3 6-3" opacity="0.5" />
+    </svg>
+  )
+}
+export function IconSeatGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M4 7V4.5A1.5 1.5 0 0 1 5.5 3h5A1.5 1.5 0 0 1 12 4.5V7" />
+      <rect x="3" y="7" width="10" height="4.5" rx="1.2" />
+      <path d="M4.5 11.5V13M11.5 11.5V13" />
+    </svg>
+  )
+}
+export function IconStageGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <path d="M2 11h12" />
+      <path d="M4 11V6l4-3 4 3v5" />
+    </svg>
+  )
+}
+export function IconLockGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="3.5" y="7" width="9" height="6.5" rx="1.5" />
+      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+    </svg>
+  )
+}
+export function IconPhoneGlyph({ size = 16, style }: GlyphProps) {
+  return (
+    <svg width={size} height={size} style={{ flexShrink: 0, ...style }} {...glyphProps}>
+      <rect x="4.5" y="2" width="7" height="12" rx="1.6" />
+      <path d="M7 12.2h2" />
+    </svg>
+  )
+}
+
 /* ---------------- Status pill ---------------- */
 // Same bg/color pairs already established by organiser/page.tsx's
 // STATUS_STYLE and the bookings/venue-requests STATUS_STYLE maps -

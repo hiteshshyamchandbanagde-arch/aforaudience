@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
+import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
 //
@@ -66,7 +67,7 @@ type SeatMapDraft = {
   seatsByLevel: Record<string, SeatDraft[]>
   gridConfigByLevel: Record<string, GridConfig>
   zonePricesByLevel: Record<string, Record<string, string>>
-  builderPathByLevel: Record<string, 'choose' | 'wizard' | 'canvas' | null>
+  builderPathByLevel: Record<string, 'choose' | 'canvas' | null>
   markersByLevel: Record<string, MarkerDraft[]>
 }
 const draftKey = (venueId: string) => `afa-seatmap-draft:${venueId}`
@@ -261,13 +262,38 @@ const inputStyle = {
   color: 'var(--afa-text-primary)',
 }
 
-// Terracotta deliberately excluded - reserved app-wide for "selected /
-// primary action" (see SeatLayoutPreview.tsx TIER_COLORS for why).
-const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-ink)']
-
-function colorForTier(tierLabel: string, tierOrder: string[]) {
+// GEN-2608-082 - replaces the old 6-hue TIER_COLORS with the approved,
+// verified color system from the Figma export's src/lib/seating.ts
+// SECTION_PALETTE: orange stays the dominant/primary tier fill, amber is
+// reserved for a small accent role (never a large solid fill - see
+// seating-visual-polish.md Problem 2), and every step beyond the 4 locked
+// brand colors is an opacity/saturation derivative, never a new hue.
+// tierOrder.length can exceed this 5-entry table (real venues support
+// arbitrary row-groups, unlike Figma's fixed 1-3 sectionCount) - indices
+// beyond it keep alternating orange/amber at progressively lower opacity
+// rather than wrapping back to full-strength colors, so a 6th+ zone still
+// reads as visually subordinate to the first five.
+const SECTION_TIER_FILLS: { fill: string; marker: string | null; labelDark: boolean }[] = [
+  { fill: '#ff5a36', marker: null, labelDark: false }, // Front - full-saturation orange
+  { fill: 'rgba(255,90,54,0.48)', marker: null, labelDark: false }, // Middle - muted orange
+  { fill: 'rgba(245,245,240,0.14)', marker: '#c9973a', labelDark: true }, // Rear - neutral + amber marker
+  { fill: 'rgba(255,90,54,0.24)', marker: null, labelDark: false }, // Upper - fainter orange
+  { fill: 'rgba(245,245,240,0.07)', marker: '#c9973a', labelDark: true }, // Rooftop - faintest neutral + amber marker
+]
+function tierFill(tierLabel: string, tierOrder: string[]) {
   const idx = tierOrder.indexOf(tierLabel)
-  return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-ink)'
+  if (idx < 0) return SECTION_TIER_FILLS[0]
+  if (idx < SECTION_TIER_FILLS.length) return SECTION_TIER_FILLS[idx]
+  // Beyond the table: keep alternating orange/neutral, opacity roughly
+  // halving each extra step past the last defined tier.
+  const extra = idx - SECTION_TIER_FILLS.length + 1
+  const opacity = Math.max(0.03, 0.07 / (extra + 1))
+  return extra % 2 === 0
+    ? { fill: `rgba(255,90,54,${opacity})`, marker: null, labelDark: false }
+    : { fill: `rgba(245,245,240,${opacity})`, marker: '#c9973a', labelDark: true }
+}
+function colorForTier(tierLabel: string, tierOrder: string[]) {
+  return tierFill(tierLabel, tierOrder).fill
 }
 
 // A generated (or manually placed) layout can be wider/taller than the
@@ -583,9 +609,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // linger unnoticed - owner must explicitly re-enter a real price.
   const setZoneFree = (zoneName: string, free: boolean) => setZonePrice(zoneName, free ? '0' : '')
 
-  const [builderPathByLevel, setBuilderPathByLevel] = useState<Record<string, 'choose' | 'wizard' | 'canvas' | null>>({})
+  const [builderPathByLevel, setBuilderPathByLevel] = useState<Record<string, 'choose' | 'canvas' | null>>({})
   const builderPath = builderPathByLevel[activeLevel] ?? null
-  const setBuilderPath = (path: 'choose' | 'wizard' | 'canvas' | null) =>
+  const setBuilderPath = (path: 'choose' | 'canvas' | null) =>
     setBuilderPathByLevel((prev) => ({ ...prev, [activeLevel]: path }))
 
   const addLevel = () => {
@@ -632,30 +658,37 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
   // the entire point) - toggleable either way at any time.
   const [manualPlacement, setManualPlacement] = useState(false)
 
-  // §9.4 - Grid Generator state. Kept separate from the freeform seats
-  // array - Generate computes seats and appends them, manual placement
-  // still works on top of a generated layout.
-  const [showGenerator, setShowGenerator] = useState(false)
-
-  // Guided Setup (wizard) - a plain-language front door onto the SAME
-  // gridConfig/computeGridSeats engine the advanced Generate Grid panel
-  // uses. Not a separate feature: it edits the same state via the same
-  // helper functions below, just one question at a time instead of a
-  // dense all-at-once form. "Draw It Myself" (existing canvas) stays a
-  // fully first-class second path, not a fallback - some venue owners
-  // want hands-on creative control and shouldn't be funneled away from it.
-  // Step order: shape -> zones (rows + zone names + suggested price per
-  // zone) -> vertical walkway -> row alignment -> horizontal aisle(s) ->
-  // preview.
+  // GEN-2608-082 - Guided Setup used to be a step-gated wizard (shape ->
+  // zones -> vertical aisle -> row alignment -> horizontal aisle ->
+  // preview) that handed off to a separate "advanced" Generate Grid panel
+  // at the end - exactly the "no spatial feedback until the last step" /
+  // "guided doesn't finish the job" pattern the Figma redesign (round 1,
+  // venue-seating-redesign.md problems #1/#2) exists to fix. Flattened per
+  // Hitesh's call: one continuous panel, every field visible/editable at
+  // once, the canvas sits beside it the whole time (not gated behind a
+  // step count). Committing an edit to the canvas is still an explicit
+  // "Generate / Update Layout" click, not live-on-every-keystroke -
+  // generateGrid() APPENDS and refuses on collision (see below) precisely
+  // so a hand-placed/dragged seat survives a later config tweak; live-
+  // replacing on every keystroke the way the Figma mock does would
+  // silently wipe those edits, which is a real data-loss risk this
+  // codebase already went out of its way to prevent (see generateGrid's
+  // collision guard and its own comment).
   const effectivePath = builderPath ?? (seats.length > 0 ? 'canvas' : 'choose')
-  const [wizardStep, setWizardStep] = useState(0)
+  // Whether the Guided Setup panel is showing beside the canvas -
+  // Figma's `guidedOpen`. Collapsible at any time; collapsing it doesn't
+  // lose any field values, it's purely a visibility toggle so "collapse
+  // and place seats freehand" (the design brief's explicit ask) works
+  // without losing guided progress.
+  const [guidedPanelOpen, setGuidedPanelOpen] = useState(true)
+  const [showTerminologyPanel, setShowTerminologyPanel] = useState(false)
   const [wizardShape, setWizardShape] = useState<'rows' | 'other' | null>(null)
   const [wizardMultiZone, setWizardMultiZone] = useState<boolean | null>(null)
   const [wizardHasVerticalAisle, setWizardHasVerticalAisle] = useState<boolean | null>(null)
   const [wizardHasAisle, setWizardHasAisle] = useState<boolean | null>(null)
 
-  const startWizard = () => { if (seatMapFrozen) return; setBuilderPath('wizard'); setWizardStep(0); setWizardShape(null); setWizardMultiZone(null); setWizardHasVerticalAisle(null); setWizardHasAisle(null) }
-  const startDrawMyself = () => { if (seatMapFrozen) return; setBuilderPath('canvas'); setManualPlacement(true) }
+  const startWizard = () => { if (seatMapFrozen) return; setBuilderPath('canvas'); setGuidedPanelOpen(true) }
+  const startDrawMyself = () => { if (seatMapFrozen) return; setBuilderPath('canvas'); setManualPlacement(true); setGuidedPanelOpen(false) }
   // §9.4 (session 48) - "Back to setup options" used to be reachable
   // with zero warning even when this level already had real seats.
   // Guided Setup's Generate APPENDS seats on top of whatever exists
@@ -670,10 +703,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
       `This level already has ${seats.length} seat${seats.length === 1 ? '' : 's'}. Existing seats won't be deleted, but generating a new layout adds seats on top of them and can create overlapping duplicates - review the canvas afterward if you continue.`
     )) return
     setBuilderPath('choose')
-    setWizardStep(0)
+    setWizardShape(null)
+    setWizardMultiZone(null)
+    setWizardHasVerticalAisle(null)
+    setWizardHasAisle(null)
   }
-  const wizardNext = () => setWizardStep((s) => s + 1)
-  const wizardBack = () => setWizardStep((s) => Math.max(0, s - 1))
 
   // "Multiple zones" just means "more than one row-group" - each
   // row-group already IS a zone (rows + seat count + a name). Single
@@ -720,13 +754,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     else if (gridConfig.aisles.length === 0) addAisle()
   }
 
+  // Ghost preview only - a pure recompute from gridConfig, never touches
+  // the real committed `seats` state. This is what gives the guided panel
+  // Figma-style live feedback on every field change (rendered in the
+  // panel itself, see the guided-panel JSX below) without the data-loss
+  // risk of live-replacing the real canvas - see the flattening note
+  // above effectivePath.
   const wizardPreviewSeats = computeGridSeats(gridConfig, 40, STAGE_CLEARANCE_Y)
-
-  const finishWizard = () => {
-    generateGrid()
-    setManualPlacement(false)
-    setBuilderPath('canvas')
-  }
 
   const addRowGroup = () =>
     setGridConfig((g) => ({ ...g, rowGroups: [...g.rowGroups, { id: makeClientId(), rows: 5, columns: 10, zoneName: defaultZoneName(g.rowGroups.length), verticalAisles: [] }] }))
@@ -848,7 +882,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     }
     setSeats((prev) => [...prev, ...generated.map((s) => ({ ...s, clientId: makeClientId() }))])
     showToast(`Generated ${generated.length} seats.`, 'success')
-    setShowGenerator(false)
   }
 
   const resetLayout = () => {
@@ -1240,8 +1273,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // button was reachable at every wizard step. Now it warns instead of
     // proceeding silently, but doesn't block Save outright, since other
     // levels may already have a real, finished layout worth saving.
-    if (effectivePath === 'wizard' && seats.length === 0) {
-      if (!window.confirm(`You haven't finished Guided Setup for ${levelLabel(activeLevel)} yet - it will save with 0 seats. Continue?`)) {
+    if (guidedPanelOpen && seats.length === 0) {
+      if (!window.confirm(`You haven't generated a layout for ${levelLabel(activeLevel)} yet - it will save with 0 seats. Continue?`)) {
         return
       }
     }
@@ -1309,9 +1342,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
     // "General" on both Ground and Balcony), but only with explicit
     // confirmation - it's easy to type the same word out of habit
     // without meaning to signal "these are the same pricing identity."
-    // Same-level duplicates are already blocked earlier (generateGrid/
-    // wizardNext), before generation ever merges them into one
-    // indistinguishable tierLabel.
+    // Same-level duplicates are already blocked earlier (generateGrid and
+    // the guided panel share the same findDuplicateZoneNames check),
+    // before generation ever merges them into one indistinguishable
+    // tierLabel.
     const levelsByZoneName = new Map<string, Set<string>>()
     for (const key of zoneKeysInUse) {
       const [level, zoneName] = key.split('::')
@@ -1398,13 +1432,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap',
               padding: '12px 16px', borderRadius: '10px', marginBottom: '18px',
-              background: seatMapFrozen ? 'rgba(200,68,26,0.08)' : 'rgba(245,245,240,0.03)',
-              border: seatMapFrozen ? '1px solid var(--afa-terracotta)' : '1px dashed rgba(245,245,240,0.2)',
+              // Frozen = amber tone-pair (matches Figma's lock/warning
+              // treatment - amber as accent, never a large orange fill).
+              background: seatMapFrozen ? 'rgba(201,151,58,0.12)' : 'rgba(245,245,240,0.03)',
+              border: seatMapFrozen ? '1px solid rgba(201,151,58,0.35)' : '1px dashed rgba(245,245,240,0.2)',
             }}
           >
-            <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+            <div style={{ fontSize: '13px', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {seatMapFrozen ? (
-                <><strong>🔒 Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
+                <><IconLockGlyph size={15} /> <strong>Seat map frozen</strong> — finalized and read-only. Unfreeze to make changes.</>
               ) : (
                 'Once this layout is finished, freeze it to lock it against accidental edits.'
               )}
@@ -1415,8 +1451,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               style={{
                 padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: freezing ? 'default' : 'pointer',
                 border: 'none', opacity: freezing ? 0.6 : 1,
-                background: seatMapFrozen ? 'var(--afa-surface-raised)' : 'var(--afa-terracotta)',
-                color: seatMapFrozen ? 'var(--afa-text-primary)' : 'var(--afa-white)',
+                background: seatMapFrozen ? 'var(--afa-surface-raised)' : 'var(--afa-fill-solid)',
+                color: seatMapFrozen ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                 ...(seatMapFrozen ? { border: '1px solid rgba(245,245,240,0.2)' } : {}),
               }}
             >
@@ -1481,16 +1517,22 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         )}
 
         {seatingMode === 'NUMBERED' && effectivePath === 'choose' && (
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', maxWidth: '760px' }}>
+          <div className="afa-glow-orange" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', maxWidth: '780px', padding: '20px', margin: '0 -20px', borderRadius: '12px' }}>
             <button
               onClick={startWizard}
+              className="afa-card-lift"
               style={{
                 flex: '1 1 300px', textAlign: 'left', cursor: 'pointer', padding: '22px',
-                borderRadius: '12px', border: '2px solid var(--afa-terracotta)', background: 'var(--afa-surface-raised)',
+                borderRadius: '12px', border: '1px solid rgba(255,90,54,0.5)',
               }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-terracotta)', marginBottom: '6px' }}>Recommended</div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Guided Setup</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255,90,54,0.2)', color: 'var(--afa-fill-solid)' }}>
+                  <IconSection size={18} />
+                </span>
+                <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-fill-solid)' }}>Recommended</div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Guided Setup</div>
               <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Answer a few simple questions — rows, seats per row, walkways — and we'll lay out the seats for you. Best if your seating is straight rows facing the stage.
               </div>
@@ -1502,275 +1544,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 borderRadius: '12px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)',
               }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '6px' }}>For hands-on control</div>
-              <div style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Draw It Myself</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }}>
+                  <IconSeatGlyph size={18} />
+                </span>
+                <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5 }}>For hands-on control</div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Draw It Myself</div>
               <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Place and drag every seat by hand on a canvas shaped like your real venue. Good for curved rows, round tables, or any layout that isn't straight rows.
               </div>
             </button>
-          </div>
-        )}
-
-        {seatingMode === 'NUMBERED' && effectivePath === 'wizard' && (
-          <div style={{ maxWidth: '560px' }}>
-            <button onClick={backToChoice} style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
-              ← Change approach
-            </button>
-
-            {wizardStep === 0 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>What's your seating shape?</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
-                    Straight rows facing the stage
-                  </button>
-                  <button onClick={() => setWizardShape('other')} style={{ textAlign: 'left', padding: '14px 16px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
-                    Curved rows, round tables, or a U-shape
-                  </button>
-                </div>
-                {wizardShape === 'other' && (
-                  <div style={{ marginTop: '14px', padding: '14px', borderRadius: '8px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
-                    Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. You can either draw that shape by hand, or start from straight rows here and adjust later.
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                      <button onClick={startDrawMyself} style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Draw It Myself instead</button>
-                      <button onClick={() => { setWizardShape('rows'); wizardNext() }} style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Continue with straight rows anyway</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {wizardStep === 1 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Do you want different pricing sections by row depth?</h3>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '12px' }}>
-                  e.g. "Front" costs more than "Back". Each section is a range of rows with its own name and seat count - that name is what an organiser will price when they build an event here.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setMultiZone(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
-                    No, one section for everything
-                  </button>
-                  <button onClick={() => setMultiZone(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
-                    Yes, multiple sections
-                  </button>
-                </div>
-
-                {wizardMultiZone === false && (
-                  <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Total rows</label>
-                      <ClampedNumberInput style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.rows || 1} min={1} max={200} onCommit={(n) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'rows', n)} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Seats per row</label>
-                      <ClampedNumberInput style={{ ...inputStyle, width: '90px' }} value={gridConfig.rowGroups[0]?.columns || 1} min={1} max={200} onCommit={(n) => gridConfig.rowGroups[0] && updateRowGroup(gridConfig.rowGroups[0].id, 'columns', n)} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Section name</label>
-                      <input style={{ ...inputStyle, width: '160px' }} value={gridConfig.rowGroups[0]?.zoneName || ''} placeholder="e.g. General" onChange={(e) => gridConfig.rowGroups[0] && updateRowGroupZone(gridConfig.rowGroups[0].id, e.target.value)} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Price</label>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <input
-                          type="number"
-                          style={{ ...inputStyle, width: '120px', ...(gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
-                          placeholder="₹"
-                          disabled={!!gridConfig.rowGroups[0] && zoneIsFree(gridConfig.rowGroups[0].zoneName)}
-                          value={zonePrices[gridConfig.rowGroups[0]?.zoneName || ''] || ''}
-                          onChange={(e) => gridConfig.rowGroups[0] && setZonePrice(gridConfig.rowGroups[0].zoneName, e.target.value)}
-                        />
-                        {gridConfig.rowGroups[0] && (
-                          <FreeToggle checked={zoneIsFree(gridConfig.rowGroups[0].zoneName)} onChange={(free) => gridConfig.rowGroups[0] && setZoneFree(gridConfig.rowGroups[0].zoneName, free)} />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {wizardMultiZone === true && (
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '8px' }}>Add a section for each range of rows, front to back (e.g. rows 1-5 "Front" at 10 seats/row, rows 6-15 "Mid" at 14 seats/row).</div>
-                    {gridConfig.rowGroups.map((rg, i) => (
-                      <div key={rg.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '50px' }}>Section {i + 1}:</span>
-                        <label style={{ fontSize: '12px' }}>Rows:</label>
-                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
-                        <label style={{ fontSize: '12px' }}>Seats:</label>
-                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
-                        <label style={{ fontSize: '12px' }}>Name:</label>
-                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Section ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
-                        <label style={{ fontSize: '12px' }}>Price:</label>
-                        <input
-                          type="number"
-                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
-                          placeholder="₹"
-                          disabled={zoneIsFree(rg.zoneName)}
-                          value={zonePrices[rg.zoneName] || ''}
-                          onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
-                        />
-                        <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
-                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
-                      </div>
-                    ))}
-                    <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
-                      + Add another zone
-                    </button>
-                    {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--afa-error)', fontWeight: 600 }}>
-                        Section name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each section on this level needs a unique name.
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button
-                    onClick={wizardNext}
-                    disabled={wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0}
-                    style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (wizardMultiZone === null || gridConfig.rowGroups.some((rg) => !rg.zoneName.trim()) || findDuplicateZoneNames(gridConfig.rowGroups).length > 0) ? 0.5 : 1 }}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {wizardStep === 2 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any walkway splitting the rows, like left/right?</h3>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '12px' }}>
-                  This is just a walking gap — it doesn't change pricing. Pricing already comes from the zone(s) you set up on the previous step. This sets the same walkway for every zone to start; if different zones need different splits, fine-tune each one separately afterward in the advanced Generate Grid panel.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardVerticalAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasVerticalAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasVerticalAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
-                    No, one solid block
-                  </button>
-                  <button onClick={() => setWizardVerticalAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasVerticalAisle === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasVerticalAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasVerticalAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>
-                    Yes, a center walkway
-                  </button>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '16px' }}>
-                  Need more than one walkway, or a different split per zone? Finish here, then use the advanced Generate Grid panel afterward — it supports any number, independently per zone.
-                </p>
-
-                {wizardHasVerticalAisle === true && (
-                  <>
-                    <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>How wide should the walkway be?</label>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                      {[{ label: 'Narrow', px: 40 }, { label: 'Standard', px: 60 }, { label: 'Wide', px: 90 }].map((opt) => (
-                        <button
-                          key={opt.label}
-                          onClick={() => setGridConfig((g) => ({ ...g, rowGroups: g.rowGroups.map((rg) => ({ ...rg, verticalAisles: rg.verticalAisles.map((a, i) => (i === 0 ? { ...a, gapPx: opt.px } : a)) })) }))}
-                          style={{ padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowGroups[0]?.verticalAisles[0]?.gapPx === opt.px ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardHasVerticalAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasVerticalAisle === null ? 0.5 : 1 }}>Next</button>
-                </div>
-              </div>
-            )}
-
-            {wizardStep === 3 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>How should rows of different widths line up?</h3>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '12px' }}>
-                  Only matters if your zones have different seats-per-row (tapering rows). Referenced to the stage, not the audience.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  {(['left', 'center', 'right'] as const).map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
-                      style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '16px' }}>
-                  {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides — every zone shares one central aisle, like a real fan-style hall.'}
-                  {gridConfig.rowAlignment === 'left' && 'Every row starts at the stage-left edge — wider rows only grow toward stage-right. Use this if stage-left is against a wall.'}
-                  {gridConfig.rowAlignment === 'right' && 'Every row ends at the stage-right edge — wider rows only grow toward stage-left.'}
-                </p>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Next</button>
-                </div>
-              </div>
-            )}
-
-            {wizardStep === 4 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Any gangways between rows (front-to-back walkways)?</h3>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '12px' }}>
-                  e.g. a walking gap after row 10, so rows 11+ have extra space in front of them. You can add more than one - answering Yes adds a row-number field below for each gangway.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button onClick={() => setWizardAisle(true)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasAisle === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasAisle === true ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>Yes</button>
-                  <button onClick={() => setWizardAisle(false)} style={{ padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: wizardHasAisle === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardHasAisle === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardHasAisle === false ? 'var(--afa-white)' : 'var(--afa-text-primary)' }}>No</button>
-                </div>
-
-                {wizardHasAisle === true && (
-                  <div style={{ marginBottom: '16px' }}>
-                    {gridConfig.aisles.map((a, i) => (
-                      <div key={a.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '70px' }}>Gangway {i + 1}:</span>
-                        <label style={{ fontSize: '13px', fontWeight: 600 }}>After row #</label>
-                        <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
-                        {gridConfig.aisles.length > 1 && <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
-                      </div>
-                    ))}
-                    <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
-                      + Add another gangway
-                    </button>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={wizardNext} disabled={wizardHasAisle === null} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: wizardHasAisle === null ? 0.5 : 1 }}>Next: Preview</button>
-                </div>
-              </div>
-            )}
-
-            {wizardStep === 5 && (
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>Preview</h3>
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '12px' }}>
-                  This is exactly what your audience will see. {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows.
-                </p>
-                <div
-                  style={{
-                    maxWidth: '100%', maxHeight: '420px', overflow: 'auto', display: 'flex',
-                    background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', marginBottom: '16px', padding: '10px 0',
-                  }}
-                >
-                  <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
-                    <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                      Stage
-                    </div>
-                    {wizardPreviewSeats.map((s, i) => (
-                      <div key={i} style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: colorForTier(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel)))), opacity: 0.85, color: 'var(--afa-white)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {s.row}{s.number}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={wizardBack} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Back</button>
-                  <button onClick={finishWizard} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Looks good — continue to fine-tune</button>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -1795,13 +1579,23 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </div>
               ) : (
                 <>
+                  {/* GEN-2608-082 - Guided Setup toggle. Collapsing it never
+                      loses field values (Figma's `guidedOpen` pattern) -
+                      it's purely a visibility toggle so "collapse and place
+                      seats freehand" works without losing guided progress. */}
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
-                      onClick={() => setShowGenerator((v) => !v)}
-                      title="Drops a starting grid of seats onto the canvas - you can then freely move, add, or delete any of them by hand."
-                      style={{ padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)' }}
+                      onClick={() => setGuidedPanelOpen((v) => !v)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: guidedPanelOpen ? 'none' : '1px solid rgba(255,90,54,0.4)', background: guidedPanelOpen ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: guidedPanelOpen ? 'var(--afa-on-fill-solid)' : 'var(--afa-fill-solid)' }}
                     >
-                      {showGenerator ? 'Close Quick Layout' : '+ Quick Layout (start from a grid)'}
+                      <IconSection size={14} /> {guidedPanelOpen ? 'Collapse Guided Setup' : 'Guided Setup'}
+                    </button>
+                    <button
+                      onClick={() => setShowTerminologyPanel(true)}
+                      title="What Section / Aisle / Level / Seat mean, and how the live preview behaves"
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.25)', background: 'none', color: 'var(--afa-text-secondary)', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
+                    >
+                      ?
                     </button>
                     <button
                       onClick={resetLayout}
@@ -1827,6 +1621,196 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       ? 'Clicking the canvas adds a new seat. Turn this off to safely scroll/inspect without accidentally placing seats.'
                       : 'Canvas clicks are safe right now - nothing gets added. Turn manual placement on to hand-place extra seats.'}
                   </p>
+
+                  {/* GEN-2608-082 - the flattened Guided Setup panel. Every
+                      field is visible/editable at once (no step gating) and
+                      the ghost preview below updates on every keystroke, so
+                      there's real spatial feedback immediately - but nothing
+                      commits to the real canvas until "Generate / Update
+                      Layout" is clicked (append + collision-guarded, same
+                      as generateGrid always was - see the note above
+                      effectivePath for why this can't safely be a live
+                      replace-on-keystroke the way the Figma mock does it). */}
+                  {guidedPanelOpen && (
+                    <div className="afa-glow-orange" style={{ marginBottom: '18px', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,90,54,0.18)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
+                      </div>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+                        Every field below updates the preview instantly. Click Generate / Update Layout when it looks right - it adds these seats to the canvas without disturbing anything you've already placed by hand.
+                      </p>
+
+                      {/* Shape - the entry question, now just the panel's
+                          first field rather than a gated step. */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          What's your seating shape?
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <button onClick={() => setWizardShape('rows')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape !== 'other' ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            Straight rows facing the stage
+                          </button>
+                          <button onClick={() => setWizardShape('other')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape === 'other' ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            Curved rows, round tables, or a U-shape
+                          </button>
+                        </div>
+                        {wizardShape === 'other' && (
+                          <div style={{ marginTop: '10px', padding: '12px', borderRadius: '8px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.8 }}>
+                            Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. Draw that shape by hand below (turn on Manual placement), or keep using the straight-row fields here as a starting point and adjust by hand afterward.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Zones - multi-zone toggle above the same per-zone
+                          list the old "advanced" panel had (richer than
+                          Figma's fixed 1-3 sectionCount - real venues need
+                          arbitrary zone counts), so there's no longer a
+                          separate simplified-vs-advanced duality. */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          <IconSection size={13} style={{ opacity: 0.6 }} /> Sections
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                          <button onClick={() => setMultiZone(false)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            One section for everything
+                          </button>
+                          <button onClick={() => setMultiZone(true)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            Multiple sections
+                          </button>
+                        </div>
+                        {gridConfig.rowGroups.map((rg, i) => (
+                          <div key={rg.id} style={{ border: '1px solid rgba(245,245,240,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '8px', background: 'var(--afa-surface-raised)' }}>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '11px', opacity: 0.6, minWidth: '55px' }}>Section {i + 1}:</span>
+                              <label style={{ fontSize: '12px' }}>Rows:</label>
+                              <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
+                              <label style={{ fontSize: '12px' }}>Seats:</label>
+                              <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
+                              <label style={{ fontSize: '12px' }}>Name:</label>
+                              <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} placeholder={`Section ${i + 1}`} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
+                              <label style={{ fontSize: '12px' }}>Price:</label>
+                              <input
+                                type="number"
+                                style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
+                                placeholder="₹"
+                                disabled={zoneIsFree(rg.zoneName)}
+                                value={zonePrices[rg.zoneName] || ''}
+                                onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
+                              />
+                              <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
+                              {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <IconAisleV size={12} style={{ opacity: 0.7 }} /> Vertical aisles for this section (0% = against the wall, 100% = after the last seat)
+                            </div>
+                            {rg.verticalAisles.map((a) => (
+                              <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                                <label style={{ fontSize: '12px' }}>Position (%):</label>
+                                <ClampedNumberInput min={0} max={100} style={{ ...inputStyle, width: '55px' }} value={Math.round(a.afterFraction * 100)} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', n / 100)} />
+                                <label style={{ fontSize: '12px' }}>Width:</label>
+                                <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={a.gapPx} min={0} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', n)} />
+                                <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                              </div>
+                            ))}
+                            <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', marginTop: '2px' }}>
+                              + Add vertical aisle
+                            </button>
+                          </div>
+                        ))}
+                        <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                          + Add another section
+                        </button>
+                        {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
+                          <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--afa-error)', fontWeight: 600 }}>
+                            Section name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each section on this level needs a unique name.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Row alignment */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '8px' }}>
+                          Row alignment <span style={{ fontWeight: 400, opacity: 0.6 }}>(only matters when sections taper to different widths)</span>
+                        </label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          {(['left', 'center', 'right'] as const).map((opt) => (
+                            <button key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Horizontal aisles */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          <IconAisleH size={13} style={{ opacity: 0.6 }} /> Gangways between rows <span style={{ fontWeight: 400, opacity: 0.6 }}>(front-to-back walking gaps)</span>
+                        </label>
+                        {gridConfig.aisles.map((a, i) => (
+                          <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
+                            <span style={{ fontSize: '11px', opacity: 0.6, minWidth: '65px' }}>Gangway {i + 1}:</span>
+                            <label style={{ fontSize: '12px' }}>After row #:</label>
+                            <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
+                            <label style={{ fontSize: '12px' }}>Width:</label>
+                            <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.gapPx} min={0} onCommit={(n) => updateAisle(a.id, 'gapPx', n)} />
+                            <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                          </div>
+                        ))}
+                        <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>
+                          + Add gangway
+                        </button>
+                      </div>
+
+                      {/* Advanced spacing - real feature Figma's mock has no
+                          equivalent for; kept as a compact sub-section
+                          rather than a separate mode, per "fold the
+                          advanced panel into the same sidebar". */}
+                      <details style={{ marginBottom: '16px' }}>
+                        <summary style={{ fontSize: '12px', fontWeight: 700, cursor: 'pointer', color: 'var(--afa-text-secondary)' }}>Advanced spacing</summary>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin:</label>
+                          <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} min={0} max={500} onCommit={(n) => setGridConfig((g) => ({ ...g, sideMarginPx: n }))} />
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing X/Y:</label>
+                          <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
+                          <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
+                        </div>
+                      </details>
+
+                      {/* Ghost live preview - see the wizardPreviewSeats
+                          comment above. Purely visual, never committed. */}
+                      <div style={{ marginBottom: '14px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Live preview — {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows
+                        </div>
+                        <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', padding: '10px 0' }}>
+                          <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
+                            <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                              Stage
+                            </div>
+                            {wizardPreviewSeats.map((s, i) => {
+                              const tf = tierFill(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel))))
+                              return (
+                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-ink)' : 'var(--afa-white)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  {s.row}{s.number}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={generateGrid}
+                        disabled={seatMapFrozen}
+                        style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '13px', fontWeight: 700, cursor: seatMapFrozen ? 'default' : 'pointer', opacity: seatMapFrozen ? 0.5 : 1 }}
+                      >
+                        Generate / Update Layout
+                      </button>
+                      <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.45, marginTop: '8px' }}>
+                        Adds these seats to the canvas below on top of anything already there. Re-running this after hand-editing won't duplicate existing seats - it'll tell you to Reset Layout first if it would.
+                      </p>
+                    </div>
+                  )}
 
                   {/* §9.4 cluster item #6 (session 48/49) - safety/reference
                       markers, scoped as potentially Fire-NOC-relevant.
@@ -1909,117 +1893,6 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '4px', marginBottom: '12px' }}>
                 Upload a floor plan or venue photo to trace over - it stretches to fit behind the canvas and doesn't affect saved seats/markers. If you have a PDF floor plan, export or screenshot the page as an image first.
               </p>
-
-              {showGenerator && !isMobile && (
-                <div style={{ marginBottom: '16px', padding: '18px', borderRadius: '10px', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)' }}>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
-                    This is a starting point, not a final layout. Set the shape below and it drops seats onto the canvas above - then hand-edit anything (move, add, delete) just like a manually placed seat.
-                  </p>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Side margin:</label>
-                    <ClampedNumberInput style={{ ...inputStyle, width: '70px' }} value={gridConfig.sideMarginPx} min={0} max={500} onCommit={(n) => setGridConfig((g) => ({ ...g, sideMarginPx: n }))} />
-                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Seat spacing, side-to-side / front-to-back:</label>
-                    <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingX} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingX: n }))} />
-                    <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={gridConfig.seatSpacingY} min={10} max={200} onCommit={(n) => setGridConfig((g) => ({ ...g, seatSpacingY: n }))} />
-                  </div>
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 0, marginBottom: '12px' }}>
-                    These are canvas units, not a real-world measurement - bigger number means more empty space. Adjust and watch the preview above; there's no need to know exactly what "px" means.
-                  </p>
-
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 600 }}>
-                      Row alignment (only matters when rows taper to different widths):
-                    </label>
-                    {(['left', 'center', 'right'] as const).map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))}
-                        style={{
-                          padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
-                          border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                          background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                          color: gridConfig.rowAlignment === opt ? 'var(--afa-white)' : 'var(--afa-text-primary)',
-                        }}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-10px', marginBottom: '14px' }}>
-                    {gridConfig.rowAlignment === 'center' && 'Narrower rows are inset equally on both sides, so every row shares one central aisle — the shape of a real fan-style hall.'}
-                    {gridConfig.rowAlignment === 'left' && 'Every row starts at the same left edge — wider rows only grow to the right. Use this if one side of your venue is against a wall.'}
-                    {gridConfig.rowAlignment === 'right' && 'Every row ends at the same right edge — wider rows only grow to the left.'}
-                  </p>
-
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Sections / row groups (rows can taper — different column counts per range, counted across the whole row)</div>
-                  {gridConfig.rowGroups.map((rg, i) => (
-                    <div key={rg.id} style={{ border: '1px solid rgba(245,245,240,0.12)', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', opacity: 0.6, minWidth: '55px' }}>Section {i + 1}:</span>
-                        <label style={{ fontSize: '12px' }}>Rows:</label>
-                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.rows} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'rows', n)} />
-                        <label style={{ fontSize: '12px' }}>Columns:</label>
-                        <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={rg.columns} min={1} max={200} onCommit={(n) => updateRowGroup(rg.id, 'columns', n)} />
-                        <label style={{ fontSize: '12px' }}>Name:</label>
-                        <input style={{ ...inputStyle, width: '120px' }} value={rg.zoneName} onChange={(e) => updateRowGroupZone(rg.id, e.target.value)} />
-                        <label style={{ fontSize: '12px' }}>Price:</label>
-                        <input
-                          type="number"
-                          style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
-                          placeholder="₹"
-                          disabled={zoneIsFree(rg.zoneName)}
-                          value={zonePrices[rg.zoneName] || ''}
-                          onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
-                        />
-                        <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
-                        {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
-                      </div>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '4px' }}>
-                        Vertical aisles for this zone only (different zones can have different splits) - add as many as you need; 0% = walkway before seat 1 (against the wall), 100% = walkway after the last seat. The scale already runs the full width, so a position near the right edge just means a number close to 100 - there's no separate "from the right" field needed.
-                      </div>
-                      {rg.verticalAisles.map((a) => (
-                        <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
-                          <label style={{ fontSize: '12px' }}>Position (%):</label>
-                          <ClampedNumberInput
-                            min={0}
-                            max={100}
-                            style={{ ...inputStyle, width: '55px' }}
-                            value={Math.round(a.afterFraction * 100)}
-                            onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', n / 100)}
-                          />
-                          <label style={{ fontSize: '12px' }}>Aisle width:</label>
-                          <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={a.gapPx} min={0} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', n)} />
-                          <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
-                        </div>
-                      ))}
-                      <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', marginTop: '2px' }}>
-                        + Add vertical aisle to this zone
-                      </button>
-                    </div>
-                  ))}
-                  <button onClick={addRowGroup} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px' }}>
-                    + Add row group / zone
-                  </button>
-
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>Horizontal aisles (a walking gap between two rows, e.g. a gangway)</div>
-                  {gridConfig.aisles.map((a) => (
-                    <div key={a.id} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '12px' }}>After row #:</label>
-                      <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
-                      <label style={{ fontSize: '12px' }}>Aisle width:</label>
-                      <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.gapPx} min={0} onCommit={(n) => updateAisle(a.id, 'gapPx', n)} />
-                      <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
-                    </div>
-                  ))}
-                  <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', marginBottom: '14px', display: 'block' }}>
-                    + Add horizontal aisle
-                  </button>
-
-                  <button onClick={generateGrid} disabled={seatMapFrozen} style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '13px', fontWeight: 700, cursor: seatMapFrozen ? 'default' : 'pointer', opacity: seatMapFrozen ? 0.5 : 1 }}>
-                    Generate Seats
-                  </button>
-                </div>
-              )}
 
               {!isMobile && (
                 <>
@@ -2106,7 +1979,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   >
                     Stage
                   </div>
-                  {seats.map((s) => (
+                  {seats.map((s) => {
+                    const tf = tierFill(s.tierLabel, tierOrder)
+                    return (
                     <div
                       key={s.clientId}
                       data-testid="seat"
@@ -2129,11 +2004,17 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         width: `${SEAT_SIZE}px`,
                         height: `${SEAT_SIZE}px`,
                         borderRadius: '5px',
-                        background: colorForTier(s.tierLabel, tierOrder),
+                        background: tf.fill,
+                        // Amber-tier seats use a light neutral fill (see
+                        // SECTION_TIER_FILLS) - a corner marker instead of
+                        // an equally-weighted second solid color, per the
+                        // brand system's "amber is an accent, not a fill"
+                        // rule, plus dark label text so it stays legible.
+                        boxShadow: tf.marker ? `inset -6px 6px 0 -3px ${tf.marker}` : undefined,
                         opacity: selectedId === s.clientId ? 1 : 0.85,
                         outline: selectedId === s.clientId ? '2px solid var(--afa-ink)' : 'none',
                         outlineOffset: '2px',
-                        color: 'var(--afa-white)',
+                        color: tf.labelDark ? 'var(--afa-ink)' : 'var(--afa-white)',
                         fontSize: '9px',
                         display: 'flex',
                         alignItems: 'center',
@@ -2144,7 +2025,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     >
                       {s.row}{s.number}
                     </div>
-                  ))}
+                    )
+                  })}
                   {seats.length === 0 && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-primary)', opacity: 0.35, fontSize: '14px', textAlign: 'center', padding: '0 20px' }}>
                       {isMobile ? 'No seats placed yet - switch to a tablet or desktop to build this layout' : (manualPlacement ? 'Click anywhere to place your first seat' : 'Turn on Manual placement above to click and place seats')}
@@ -2293,21 +2175,92 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        {!(seatingMode === 'NUMBERED' && effectivePath === 'wizard') && (
-          <button
-            onClick={save}
-            disabled={saving || seatMapFrozen}
-            style={{
-              marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
-              background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontSize: '14px', fontWeight: 700,
-              cursor: (saving || seatMapFrozen) ? 'not-allowed' : 'pointer', opacity: (saving || seatMapFrozen) ? 0.6 : 1,
-            }}
-          >
-            {saving ? 'Saving...' : 'Save Seat Map'}
-          </button>
-        )}
+        <button
+          onClick={save}
+          disabled={saving || seatMapFrozen}
+          style={{
+            marginTop: '24px', padding: '11px 28px', borderRadius: '8px', border: 'none',
+            background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '14px', fontWeight: 700,
+            cursor: (saving || seatMapFrozen) ? 'not-allowed' : 'pointer', opacity: (saving || seatMapFrozen) ? 0.6 : 1,
+          }}
+        >
+          {saving ? 'Saving...' : 'Save Seat Map'}
+        </button>
       </div>
       </main>
+      {showTerminologyPanel && <TerminologyPanel onClose={() => setShowTerminologyPanel(false)} />}
     </>
+  )
+}
+
+// GEN-2608-082 - Terminology reference, ported verbatim from the Figma
+// export's App.tsx Glossary screen (per Hitesh: in-builder help panel,
+// not a standalone route). Content/copy kept exact - only the container
+// changed (a slide-over here, a full page there).
+function TerminologyPanel({ onClose }: { onClose: () => void }) {
+  const rows: { glyph: React.ReactNode; term: string; def: string; why: string }[] = [
+    {
+      glyph: <IconSection size={18} />,
+      term: 'Section',
+      def: 'A pricing group of seats.',
+      why: 'Not "Zone", not "Tier" — one word, matched to the General Admission screen.',
+    },
+    {
+      glyph: <IconAisleV size={18} />,
+      term: 'Aisle',
+      def: 'Any gap left for people to walk through.',
+      why: 'Not "Walkway", not "Gangway". Orientation is shown by a glyph, not a different word.',
+    },
+    {
+      glyph: <IconLevel size={18} />,
+      term: 'Level',
+      def: 'A floor of the venue (Ground, Balcony…).',
+      why: 'Switched with tabs that carry a level glyph, so it reads at a glance.',
+    },
+    {
+      glyph: <IconSeatGlyph size={18} />,
+      term: 'Seat',
+      def: 'One numbered place a guest can book.',
+      why: 'Auto-labelled A1, A2… so numbering is never a manual chore.',
+    },
+  ]
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="afa-glow-amber"
+        style={{ width: '100%', maxWidth: '440px', height: '100%', overflowY: 'auto', padding: '28px 24px', borderLeft: '1px solid rgba(245,245,240,0.1)' }}
+      >
+        <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', color: 'var(--afa-text-secondary)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }} aria-label="Close">×</button>
+        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afa-amber)', marginBottom: '10px' }}>
+          Terminology · used consistently across every screen
+        </div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: '0 0 8px' }}>One word per concept</h2>
+        <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px' }}>
+          Section not Zone. Aisle not Walkway/Gangway. Each concept carries a small glyph so meaning survives translation and non-native English.
+        </p>
+        <div style={{ borderRadius: '12px', border: '1px solid rgba(245,245,240,0.1)', background: 'var(--afa-surface-raised)' }}>
+          {rows.map((r, i) => (
+            <div key={r.term} style={{ display: 'flex', gap: '14px', padding: '14px', borderTop: i === 0 ? 'none' : '1px solid rgba(245,245,240,0.08)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: '8px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }}>
+                {r.glyph}
+              </span>
+              <div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--afa-text-primary)' }}>{r.term}</div>
+                <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{r.def}</div>
+                <div style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.45, marginTop: '2px' }}>{r.why}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: '20px', padding: '14px 16px', borderRadius: '10px', background: 'rgba(245,245,240,0.06)', border: '1px solid rgba(245,245,240,0.16)', fontSize: '13px', lineHeight: 1.5, color: 'var(--afa-text-primary)' }}>
+          <div style={{ fontWeight: 600, marginBottom: '4px' }}>Live-preview behaviour (builder)</div>
+          Guided answers that change <b>counts or structure</b> (rows, seats, sections) regenerate the map — seats fade/scale in (180ms) so the change is legible. Answers that only shift position (aisle width, alignment) <b>snap</b> instantly with no animation, so fine-tuning feels direct. Manual edits (select, reassign, remove) never animate — they apply on click.
+        </div>
+      </div>
+    </div>
   )
 }
