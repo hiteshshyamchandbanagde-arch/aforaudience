@@ -1,38 +1,46 @@
-# Session Handoff — 24 Aug 2026 (Figma-first workflow adopted + Venue Seating redesign shipped)
+# Session Handoff — 25 Aug 2026 (billing dashboards root-caused + venue-flow click-through fixes)
 
-`qa` HEAD: `2fdfe60` — last code commits: PR #536 + PR #537 (GEN-2608-082, Venue Creation + Seat Arrangement Figma redesign, both merged)
+`qa` HEAD: `ff3d483` — no new commits landed on `qa` this session; two feature branches pushed and awaiting PR creation/merge (see below).
 
 ## 🔴 Next session — priority order
 
-1. **Razorpay / Google Maps billing dashboards** — still unconfirmed, now carried across every session this month. Please actually check these before anything else.
-2. **Live click-through of GEN-2608-082** — everything shipped via `tsc --noEmit` + mocked-session Playwright, never a real browser. Specifically verify: the Seat Map Builder's Guided Setup panel (all fields now live-editable at once, not step-gated — confirm the ghost preview updates on every keystroke without touching real seats), the "Generate / Update Layout" button (must stay an explicit click — confirm it doesn't silently overwrite hand-placed/dragged seats), and the Terminology slide-over inside the builder.
+1. **Rotate Razorpay + Google Places credentials** — root-caused this session (see below), no longer "unconfirmed." Both are dead keys, not a network/plumbing bug. Only Hitesh can fix this (needs the actual dashboard/console access).
+2. **Merge the two branches pushed this session** (see "Shipped this session" below) — `fix/bug-2608-098-099-venue-shell` and `fix/bug-2608-100-103-seatmap-polish`. No `gh` CLI on this machine (see memory), so PRs were never opened, just pushed — open + review + merge both.
 3. **`dashboard/admin/settings/page.tsx` has no dark shell at all** (found 23 Aug, still not fixed — needs an actual dark-shell pass, not a token swap). Screenshot proof in PR #535's description.
 4. **`src/components/Toast.tsx` appears light-themed** (found 23 Aug, still not investigated). Visibly inconsistent with the dark `ErrorBanner` shown for the same message on the same page.
 5. **BUG-2608-091 / BUG-2608-090** — small, queued, not dispatched. Past Requests rows missing date/time; a stat-card subtitle sitting on the wrong card. Pick up whenever.
-6. **`--afa-terracotta` audit** — GEN-2608-082 fixed every remaining instance in `SeatSectionEditor.tsx` and `seat-map/page.tsx` (the two files it touched), but did NOT do a repo-wide sweep. If `--afa-terracotta` shows up as a primary-CTA color anywhere else, that's the same old-orange-vs-locked-palette mismatch, not a new bug.
-7. **Remaining pages never reviewed against Figma**: Flexible Requests page, auth pages (login/register/forgot-password/reset-password/verify-email — still fully pre-dark-redesign, flagged as a separate full-page-redesign item, not a token bug).
+6. **`--afa-terracotta` repo-wide sweep still not done** — confirmed again this session, ~69 files still reference it. Still deliberately out of scope for every dispatch so far; someone needs to actually schedule this as its own pass eventually rather than fixing it file-by-file forever.
+7. **`--afa-cream-tint-1/2` repo-wide sweep** — new this session, same shape of problem as `--afa-terracotta`. Fixed on the seat-map canvas (see below) but still live in `SeatPicker.tsx` and `LegalDocLayout.tsx`.
+8. **SeatSectionEditor's running-total bar isn't sticky** — minor, non-blocking deviation from the Figma export (Figma's is `sticky bottom-4`, the real one scrolls away). Only matters for venues with many sections. Noted, not fixed, this session.
+9. **Remaining pages never reviewed against Figma**: Flexible Requests page, auth pages (login/register/forgot-password/reset-password/verify-email — still fully pre-dark-redesign, flagged as a separate full-page-redesign item, not a token bug).
 
-## New standing rules this session — apply going forward
+## Shipped this session
 
-- **All design work — any size — goes through Figma Make first, no exceptions by default.** Agreed exception: skip Figma only when a fix has no design decision in it, i.e. it's copying an already-established value onto something that's clearly supposed to match it (e.g. "make X the same color as its sibling Y three lines down"). If there's a real choice being made — new interaction, new visual treatment, new copy — it goes through Figma even if the diff is one line.
-- **Coding still always routes through Claude Code**, mobile exception unchanged.
-- **Repo-wide grep for deprecated tokens before closing any theme/token-migration bug** (added 23 Aug, reinforced this session) — a page-level or component-level fix is not "done" until you've grepped all of `src/` for the specific token, not just the files already suspected.
+### Billing dashboards — root-caused (not fixed, needs Hitesh)
 
-## Shipped this session — GEN-2608-082, Venue Creation + Seat Arrangement redesign
+The "unconfirmed" billing-dashboard item had carried across every session since at least 22 Aug without anyone actually testing the keys end-to-end. This session bypassed the app entirely and hit both real APIs directly with the local `.env.local` credentials:
 
-Full arc: two-round Figma Make design process → verified against exported code (not screenshots) both rounds → two Claude Code PRs → one real merge conflict resolved.
+- **Razorpay**: `401 Authentication failed` (`BAD_REQUEST_ERROR`) straight from `api.razorpay.com`. Network reachability itself is fine (clean 401, not a timeout) — this contradicts a stale comment in `src/lib/razorpay.ts` claiming the sandbox can't reach Razorpay at all. The key/secret pair is just invalid.
+- **Google Places**: `400 API_KEY_INVALID` straight from `places.googleapis.com`.
 
-**Figma round 1**: unified the seat-map builder into one live-canvas tool instead of a 5-step no-preview wizard handing off to a separate "advanced" editor — this was the actual UX problem, not a style issue. Established Section/Aisle/Level/Seat as the one-word-per-concept vocabulary (was Zone/Tier/Walkway/Gangway inconsistently). Terminology reference screen designed to document this.
+Both need fresh keys from the Razorpay dashboard and Google Cloud Console, pasted into local `.env.local` and Vercel's Preview env. Not a code fix — nothing in the app is broken. Full diagnosis in memory (`project_billing_dashboards_invalid_creds`).
 
-**Figma round 2** (scoped fix, not a redo): found via direct code inspection — not screenshot-eyeballing — that round 1 had invented an off-brand color (`#6f8fa8`, a blue-grey, for a 3rd seating section) and was using amber as a large fill instead of an accent. Both fixed: palette is now orange-opacity-steps for tiers with amber reserved for a small marker/accent role. Also added real AFA visual personality (radial-glow depth classes, italic-serif accent copy) that was missing from round 1 — confirmed these were actually wired into the screens, not just defined-and-unused.
+### BUG-2608-098 through BUG-2608-103 — venue-flow live click-through fixes
 
-**PR #536** (Register Venue + GA, low-risk, merged clean): ports Figma's visual/copy/interaction layer onto the real form — no data model changes, `/api/venues` call untouched. Also fixed `--afa-terracotta` → `--afa-fill-solid` on `SeatSectionEditor.tsx`'s remaining CTAs.
+Hitesh did the real-browser click-through of GEN-2608-082 that was flagged as still-needed at the top of last handoff, found 6 issues, and dispatched them as a single brief covering two parts. Both parts done this session, pushed as separate branches (no PR opened — no `gh` CLI on this machine):
 
-**PR #537** (Seat Map Builder, high-risk — 2,313-line file with real backend wiring): Claude Code flagged the risk itself rather than me having to catch it, and made one real judgment call worth knowing about — flattened the 6-step gated wizard into one continuous always-editable panel, since the step-gating *was* the "no spatial feedback" problem the redesign exists to fix. Confirmed this with Hitesh before doing it (per the commit message) rather than assuming. Deliberately did NOT make `generateGrid()` live-replace on every keystroke the way Figma's mock does — kept "Generate / Update Layout" an explicit click, because the real function's append+collision-guard (protects hand-placed/dragged seats from being silently overwritten) would otherwise have been defeated. This is real backend-aware judgment, not blind Figma-porting.
+**`fix/bug-2608-098-099-venue-shell`** (low-risk, no design decision):
+https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/fix/bug-2608-098-099-venue-shell
+- BUG-2608-098: `FacilitiesPicker`'s free-text "Other" input had no background/color set at all — black-on-black. One-line fix, same `fieldStyle` pattern already used by every other field in the file.
+- BUG-2608-099: `dashboard/venue/[id]/page.tsx` never adopted the shared `Card`/`PageHead`/`SectionTitle` system its sibling pages use, and layered its own content on the same `--afa-surface-raised` token as the page background — zero depth. Wrapped in `PageHead` + two `Card` sections, gave chips/rows their own recessed background, swapped the file's `--afa-terracotta` usages for `--afa-fill-solid`. Also investigated the garbage facility value (`bHJbkjxzbJKxbKJXkjxcbn`) flagged alongside this bug: confirmed no seed script produces it, it's genuine test input correctly round-tripped by `FacilitiesPicker` — not a display bug.
 
-Both PRs' key claims were verified against the raw diff before merging, not taken on trust: `seatMapFrozen` still referenced 22×, zero `fetch`/API lines touched in either PR, `generateGrid()`'s collision-guard comment intact.
+**`fix/bug-2608-100-103-seatmap-polish`** (higher-risk, seat-map visual-polish completion):
+https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/fix/bug-2608-100-103-seatmap-polish
+- BUG-2608-100: the top-level General Admission / Numbered Seating toggle had zero glow/accent treatment. Added the same `.afa-glow-orange` pattern already used elsewhere plus a new italic-serif accent line.
+- BUG-2608-102: two real fixes here. (1) Both the Guided Setup ghost preview and the main seat-grid canvas were rendering on `--afa-cream-tint-1` (#FBF8F3, near-white) — the literal "canvas is a plain white/cream block" bug, confirmed live and in code. Swapped to `--afa-surface-page` plus border-color fixes. (2) Traced the broader "generic dark dashboard, no depth" complaint to its actual root cause: `<main>`'s own background was `--afa-surface-raised`, the *same* token every button/card/pill on the page uses for its own "raised" surface (~15 spots) — all of them were rendering flush against an identically-colored page. Fixed once at the source instead of touching all 15 individual declarations.
+- Investigated but left unchanged (already correct, verified live and in code, not re-fixed): BUG-2608-101 (Guided Setup/Draw It Myself choice cards already have glow + icon-tint — the dispatch's reference screenshot describes a 3-card chooser that PR #537 deliberately replaced with this 2-card one, confirmed with Hitesh at the time), `SECTION_TIER_FILLS` (this file's SECTION_PALETTE — confirmed no `#6f8fa8`, amber still accent-only), and BUG-2608-103 (`SeatSectionEditor.tsx` already explicitly ported from the Figma export's `GeneralAdmission.tsx`, confirmed structurally equivalent — see the sticky-bar note above for the one small deviation).
 
-**The one real merge conflict**: both branches had independently added the same icon set to `VenuePortalUI.tsx` (both cut fresh off `qa` before either merged, per the standing branching rule — correct behavior, not a mistake). Resolved directly via a local clone + merge rather than punting back to Claude Code: diffed the two pre-merge versions byte-for-byte and confirmed the *only* difference was one now-stale forward-looking code comment, zero actual code divergence. Pushed the resolved merge commit, CI re-ran green, then squash-merged normally.
+Both branches verified via mocked-session Playwright (screenshots taken at each step) — local DB unreachable again this session (same recurring P1001/ENOTFOUND issue, re-confirmed not a new bug), so this was a real browser render, not a `tsc --noEmit`-only check.
 
 ## Explicitly parked / rejected (carried forward, unchanged)
 
@@ -40,4 +48,4 @@ Both PRs' key claims were verified against the raw diff before merging, not take
 
 ## Tally
 
-15 PRs merged total (#527–#537), zero reverted. This session: 2 PRs (GEN-2608-082), one real merge conflict resolved cleanly, two Figma Make design rounds completed and verified against actual exported code both times.
+15 PRs merged total (#527–#537) as of last session — nothing merged this session yet (2 branches pushed, awaiting PR creation/review/merge). Zero reverted so far.
