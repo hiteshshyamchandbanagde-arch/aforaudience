@@ -1389,42 +1389,53 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></main></>)
+  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)' }}><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></main></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 20px' }}>
         <BackLink href={`/dashboard/venue/${id}/edit`} label="Back to Venue" />
-        <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '10px 0 4px', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
-        <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: '20px' }}>
-          General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
-        </p>
 
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <button
-            onClick={() => setSeatingMode('GENERAL_ADMISSION')}
-            style={{
-              padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.15)',
-              background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-              color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-            }}
-          >
-            General Admission
-          </button>
-          <button
-            onClick={() => setSeatingMode('NUMBERED')}
-            style={{
-              padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-              border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.15)',
-              background: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-              color: seatingMode === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-            }}
-          >
-            Numbered Seating
-          </button>
+        {/* BUG-2608-100 - round-2 visual-polish pass: this entry moment had
+            zero glow/accent treatment despite being the same "which mode"
+            fork as the Register Venue wizard's Seating & Pricing step -
+            reuses the same .afa-glow-orange pattern already established
+            there and on the Guided Setup panel below. */}
+        <div className="afa-glow-orange" style={{ padding: '20px', margin: '10px -20px 20px', borderRadius: '12px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 4px', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
+          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: '6px' }}>
+            General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
+          </p>
+          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '15px', color: 'var(--afa-amber)', marginTop: '6px', marginBottom: '18px' }}>
+            &ldquo;the shape of the room decides the show&rdquo;
+          </p>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={() => setSeatingMode('GENERAL_ADMISSION')}
+              style={{
+                padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
+                color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+              }}
+            >
+              General Admission
+            </button>
+            <button
+              onClick={() => setSeatingMode('NUMBERED')}
+              style={{
+                padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                background: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
+                color: seatingMode === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+              }}
+            >
+              Numbered Seating
+            </button>
+          </div>
         </div>
 
         {seatingMode === 'NUMBERED' && (
@@ -1782,7 +1793,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Live preview — {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows
                         </div>
-                        <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-cream-tint-1)', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', padding: '10px 0' }}>
+                        <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '10px', padding: '10px 0' }}>
                           <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
                             <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                               Stage
@@ -1939,7 +1950,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </p>
               )}
 
-              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '10px', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
+              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '10px', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
                 <div
                   ref={canvasRef}
                   onClick={handleCanvasClick}
@@ -1948,7 +1959,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     position: 'relative',
                     width: `${canvasBounds.width}px`,
                     height: `${canvasBounds.height}px`,
-                    background: 'var(--afa-cream-tint-1)',
+                    background: 'var(--afa-surface-page)',
                     cursor: isMobile ? 'default' : (manualPlacement || markerMode ? 'crosshair' : 'default'),
                   }}
                 >
