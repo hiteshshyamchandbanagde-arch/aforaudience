@@ -8,7 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
-import { ErrorBanner } from '@/components/dashboard/VenuePortalUI'
+import { ErrorBanner, PageHead, Card, SectionTitle, StatusPill, Button } from '@/components/dashboard/VenuePortalUI'
 
 interface SeatSection {
   id: string
@@ -146,41 +146,28 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '16px', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
-            <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
-                {venue.name}
-              </h1>
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-                {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ''}
-              </p>
-            </div>
-            <span
-              style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                padding: '6px 14px',
-                borderRadius: '999px',
-                background: venue.isApproved ? 'rgba(74,103,65,0.12)' : 'rgba(201,151,58,0.15)',
-                color: venue.isApproved ? 'var(--afa-sage)' : 'var(--afa-gold)',
-                whiteSpace: 'nowrap',
-              }}
+          <div style={{ marginTop: '20px' }}>
+            <PageHead
+              eyebrow="Venue"
+              title={venue.name}
+              description={`${venue.address}, ${venue.city}${venue.state ? `, ${venue.state}` : ''}`}
             >
-              {venue.isApproved ? 'Published' : 'Draft'}
-            </span>
+              <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>
+                {venue.isApproved ? 'Published' : 'Draft'}
+              </StatusPill>
+            </PageHead>
           </div>
 
           {error && (
             <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <SectionTitle n="01" title="Overview" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
               <div>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
@@ -203,16 +190,18 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Facilities</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: 'var(--afa-surface-raised)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>
+                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>
                       {facility}
                     </span>
                   ))}
                 </div>
               </div>
             )}
+          </Card>
 
+          <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <SectionTitle n="02" title="Seating Sections" />
             <div>
-              <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Seating Sections</h2>
               {venue.seatingMode === 'NUMBERED' ? (
                 numberedZones.length === 0 ? (
                   <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
@@ -227,7 +216,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           display: 'flex',
                           justifyContent: 'space-between',
                           padding: '12px 16px',
-                          background: 'var(--afa-surface-raised)',
+                          background: 'var(--afa-surface-page)',
                           borderRadius: '8px',
                           fontSize: '14px',
                         }}
@@ -236,7 +225,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           {z.zoneName}{z.level ? ` · ${z.level}` : ''}
                         </span>
                         <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{z.count} seats</span>
-                        <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
                           {z.price === null ? (
                             '—'
                           ) : z.price > 0 ? (
@@ -276,14 +265,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         display: 'flex',
                         justifyContent: 'space-between',
                         padding: '12px 16px',
-                        background: 'var(--afa-surface-raised)',
+                        background: 'var(--afa-surface-page)',
                         borderRadius: '8px',
                         fontSize: '14px',
                       }}
                     >
                       <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{s.name}</span>
                       <span style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}>{s.seats} seats</span>
-                      <span style={{ fontWeight: 700, color: 'var(--afa-terracotta)' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--afa-fill-solid)' }}>
                         {Number(s.price) > 0 ? (
                           `₹${s.price}`
                         ) : (
@@ -312,7 +301,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
               )}
             </div>
-          </div>
+          </Card>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link
@@ -327,23 +316,14 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             >
               📊 Revenue
             </Link>
-            <button
+            <Button
               onClick={togglePublish}
               disabled={toggling}
-              style={{
-                fontSize: '14px',
-                fontWeight: 600,
-                color: venue.isApproved ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                background: venue.isApproved ? 'transparent' : 'var(--afa-terracotta)',
-                border: venue.isApproved ? '1px solid rgba(245,245,240,0.2)' : 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                opacity: toggling ? 0.6 : 1,
-              }}
+              variant={venue.isApproved ? 'outline' : 'primary'}
+              style={{ opacity: toggling ? 0.6 : 1 }}
             >
               {toggling ? 'Updating...' : venue.isApproved ? 'Unpublish' : 'Publish Venue'}
-            </button>
+            </Button>
           </div>
         </div>
       </main>
