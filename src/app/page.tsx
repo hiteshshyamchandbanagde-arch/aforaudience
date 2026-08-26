@@ -6,10 +6,9 @@ import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import Ledger from "@/components/Ledger";
-import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
+import { TYPE_META, LineupChips, IllustratedEventFallback, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
-import { EventTypeIcon } from "@/components/icons/EventIcons";
 
 // "Happening soon" bento tile - 3 size variants (large/medium/strip), per
 // the V2 spec's bento mosaic layout. Distinct from the events-listing
@@ -44,8 +43,13 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
       {event.posterImage && !photoFailed ? (
         <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
       ) : (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <EventTypeIcon type={event.type} style={{ width: "56px", height: "56px", color: "var(--afa-amber)", opacity: 0.9 }} />
+        // Bottom clearance so the fallback's own "NO POSTER · TYPE" caption
+        // (vertically centered within its box) doesn't collide with this
+        // tile's title/venue text block below - EventCard.tsx never hits
+        // this because it always confines the fallback to a dedicated
+        // poster box separate from the card's (non-overlaid) text.
+        <div style={{ position: "absolute", inset: 0, bottom: size === "large" ? "110px" : size === "strip" ? "100px" : "95px" }}>
+          <IllustratedEventFallback type={event.type} typeLabel={typeLabel} />
         </div>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
