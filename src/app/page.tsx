@@ -9,6 +9,7 @@ import Ledger from "@/components/Ledger";
 import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
+import { EventTypeIcon } from "@/components/icons/EventIcons";
 
 // "Happening soon" bento tile - 3 size variants (large/medium/strip), per
 // the V2 spec's bento mosaic layout. Distinct from the events-listing
@@ -23,8 +24,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
   const height = size === "large" ? "440px" : size === "medium" ? "210px" : "220px";
   const titleSize = size === "large" ? "28px" : size === "strip" ? "24px" : "18px";
   // BUG-2608-079 - a dead posterImage URL previously left Photo rendering
-  // a broken <img>. Falls back to this tile's existing no-photo state
-  // (the same TYPE_META emoji already shown when posterImage is null),
+  // a broken <img>. Falls back to this tile's existing no-photo state,
   // not a new pattern.
   const [photoFailed, setPhotoFailed] = useState(false)
 
@@ -44,7 +44,9 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
       {event.posterImage && !photoFailed ? (
         <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
       ) : (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "72px" }}>{meta.emoji}</div>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <EventTypeIcon type={event.type} style={{ width: "56px", height: "56px", color: "var(--afa-amber)", opacity: 0.9 }} />
+        </div>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
       <div style={{ position: "absolute", left: size === "strip" ? "28px" : "20px", right: "20px", bottom: "20px" }}>
