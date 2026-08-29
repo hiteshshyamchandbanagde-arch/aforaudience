@@ -43,13 +43,12 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
       {event.posterImage && !photoFailed ? (
         <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
       ) : (
-        // Bottom clearance so the fallback's own "NO POSTER · TYPE" caption
-        // (vertically centered within its box) doesn't collide with this
-        // tile's title/venue text block below - EventCard.tsx never hits
-        // this because it always confines the fallback to a dedicated
-        // poster box separate from the card's (non-overlaid) text.
-        <div style={{ position: "absolute", inset: 0, bottom: size === "large" ? "110px" : size === "strip" ? "100px" : "95px" }}>
-          <IllustratedEventFallback type={event.type} typeLabel={typeLabel} />
+        // hideCaption: this tile already shows type + venue in its own
+        // bottom overlay below, so the fallback's "NO POSTER · TYPE"
+        // caption is redundant here and would collide with that text
+        // (both are absolutely-positioned layers on the same tile).
+        <div style={{ position: "absolute", inset: 0 }}>
+          <IllustratedEventFallback type={event.type} typeLabel={typeLabel} hideCaption />
         </div>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
