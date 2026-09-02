@@ -6,10 +6,9 @@ import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import Ledger from "@/components/Ledger";
-import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
+import { TYPE_META, LineupChips, IllustratedEventFallback, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
-import { EventTypeIcon } from "@/components/icons/EventIcons";
 
 // "Happening soon" bento tile - 3 size variants (large/medium/strip), per
 // the V2 spec's bento mosaic layout. Distinct from the events-listing
@@ -44,8 +43,12 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
       {event.posterImage && !photoFailed ? (
         <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
       ) : (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <EventTypeIcon type={event.type} style={{ width: "56px", height: "56px", color: "var(--afa-amber)", opacity: 0.9 }} />
+        // hideCaption: this tile already shows type + venue in its own
+        // bottom overlay below, so the fallback's "NO POSTER · TYPE"
+        // caption is redundant here and would collide with that text
+        // (both are absolutely-positioned layers on the same tile).
+        <div style={{ position: "absolute", inset: 0 }}>
+          <IllustratedEventFallback type={event.type} typeLabel={typeLabel} hideCaption />
         </div>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />

@@ -125,7 +125,13 @@ export function EventTypeBadge({ type, typeLabel, size = 16, style }: { type: st
 // Distinct from the grid-texture treatment used on Venues (a different
 // export with its own approved fallback language) - ported faithfully
 // to what THIS export actually shows, not assumed to match Venues.
-export function IllustratedEventFallback({ type, typeLabel }: { type: string; typeLabel: string }) {
+// hideCaption lets the homepage bento tile (src/app/page.tsx) drop the
+// caption: that tile already shows type + venue in its own bottom
+// overlay, so the caption is redundant there and colliding with it
+// (both are absolutely-positioned layers on the same tile). Hiding it
+// removes the collision at the root instead of clipping the radial
+// pattern short to make room for it.
+export function IllustratedEventFallback({ type, typeLabel, hideCaption = false }: { type: string; typeLabel: string; hideCaption?: boolean }) {
   const { t: tr } = useLocale()
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#241a10" }}>
@@ -138,9 +144,11 @@ export function IllustratedEventFallback({ type, typeLabel }: { type: string; ty
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", color: "var(--afa-amber)" }}>
         <EventTypeIcon type={type} style={{ width: "44px", height: "44px", opacity: 0.9 }} />
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
-          {tr.eventsPage.noPosterCaption.replace("{type}", typeLabel)}
-        </span>
+        {!hideCaption && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
+            {tr.eventsPage.noPosterCaption.replace("{type}", typeLabel)}
+          </span>
+        )}
       </div>
     </div>
   )
