@@ -115,7 +115,7 @@ export default function TourDetailPage() {
   }, [status, tourId])
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!tour) return (<><SiteNav /><main style={{ padding: '48px 24px', textAlign: 'center' }}>Tour not found.</main></>)
+  if (!tour) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', textAlign: 'center', color: 'var(--afa-text-primary)' }}>Tour not found.</main></>)
 
   const handleAddStop = async () => {
     if (!stopTitle.trim() || !stopDate || !stopVenueId) {
@@ -224,7 +224,8 @@ export default function TourDetailPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px 100px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px 100px' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <div style={{ marginTop: '20px', marginBottom: '28px' }}>
@@ -455,6 +456,7 @@ export default function TourDetailPage() {
             </button>
           </div>
         )}
+        </div>
       </main>
     </>
   )

@@ -63,7 +63,8 @@ export default function OrganiserToursPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
@@ -139,6 +140,7 @@ export default function OrganiserToursPage() {
             })}
           </div>
         )}
+        </div>
       </main>
     </>
   )
