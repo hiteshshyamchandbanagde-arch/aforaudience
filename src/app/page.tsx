@@ -6,9 +6,29 @@ import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
 import PlatformGrowthStrip from "@/components/PlatformGrowthStrip";
 import Ledger from "@/components/Ledger";
-import { TYPE_META, LineupChips, IllustratedEventFallback, type EventItem } from "@/components/EventCard";
+import { TYPE_META, LineupChips, type EventItem } from "@/components/EventCard";
 import Photo from "@/components/Photo";
 import { useLocale } from "@/lib/i18n/translate";
+
+// Real Unsplash photos (Unsplash License, verified per-photo - see
+// public/images/event-fallbacks/ for the source IDs) standing in for a
+// no-posterImage event, one per type. Downloaded rather than hotlinked
+// (BUG-2608-079's failure mode) and sized at 2600px wide so a single
+// fixed <img> (Photo.tsx has no srcset) still covers the largest bento
+// slot's actual rendered size at 2x DPR - the "strip" tile is ~1288px
+// CSS-wide, so it needs ~2576px at retina; see the other two sizes'
+// math below in BentoTile. Rendered through the same Photo component
+// (and its already-correct grayscale+contrast+brightness+amber-multiply
+// duotone) real posters use - this is a source swap, not a new visual
+// treatment. Homepage-only: EventCard.tsx's IllustratedEventFallback
+// (events listing/detail hero) is untouched.
+const EVENT_FALLBACK_PHOTOS: Record<string, string> = {
+  OPEN_MIC: "/images/event-fallbacks/open-mic.jpg",
+  STAND_UP: "/images/event-fallbacks/stand-up.jpg",
+  POETRY: "/images/event-fallbacks/poetry.jpg",
+  THEATER: "/images/event-fallbacks/theater.jpg",
+  LINEUP: "/images/event-fallbacks/lineup.jpg",
+}
 
 // "Happening soon" bento tile - 3 size variants (large/medium/strip), per
 // the V2 spec's bento mosaic layout. Distinct from the events-listing
@@ -23,9 +43,11 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
   const height = size === "large" ? "440px" : size === "medium" ? "210px" : "220px";
   const titleSize = size === "large" ? "28px" : size === "strip" ? "24px" : "18px";
   // BUG-2608-079 - a dead posterImage URL previously left Photo rendering
-  // a broken <img>. Falls back to this tile's existing no-photo state,
+  // a broken <img>. Falls back to this tile's stock-photo state below,
   // not a new pattern.
   const [photoFailed, setPhotoFailed] = useState(false)
+  const usingFallbackPhoto = !event.posterImage || photoFailed
+  const fallbackPhoto = EVENT_FALLBACK_PHOTOS[event.type] || EVENT_FALLBACK_PHOTOS.OPEN_MIC
 
   return (
     <Link
@@ -40,16 +62,36 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         textDecoration: "none",
       }}
     >
-      {event.posterImage && !photoFailed ? (
+      {!usingFallbackPhoto ? (
         <Photo src={event.posterImage} alt={event.title} onError={() => setPhotoFailed(true)} />
       ) : (
-        // hideCaption: this tile already shows type + venue in its own
-        // bottom overlay below, so the fallback's "NO POSTER · TYPE"
-        // caption is redundant here and would collide with that text
-        // (both are absolutely-positioned layers on the same tile).
-        <div style={{ position: "absolute", inset: 0 }}>
-          <IllustratedEventFallback type={event.type} typeLabel={typeLabel} hideCaption />
-        </div>
+        // Real photo (Unsplash, licensed - see EVENT_FALLBACK_PHOTOS above),
+        // not an illustration - reuses Photo's existing duotone treatment
+        // rather than a bespoke one so it reads identically to a real
+        // poster. The "Illustrative" chip below is what keeps it from
+        // being mistaken for this specific event's actual photo.
+        <Photo src={fallbackPhoto} alt={typeLabel} />
+      )}
+      {usingFallbackPhoto && (
+        <span
+          style={{
+            position: "absolute",
+            left: size === "strip" ? "28px" : "20px",
+            top: "16px",
+            display: "inline-flex",
+            background: "rgba(10,10,10,0.7)",
+            backdropFilter: "blur(4px)",
+            padding: "5px 9px",
+            borderRadius: "2px",
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--afa-amber)",
+          }}
+        >
+          {tr.homePage.bentoIllustrativeLabel}
+        </span>
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
       <div style={{ position: "absolute", left: size === "strip" ? "28px" : "20px", right: "20px", bottom: "20px" }}>
