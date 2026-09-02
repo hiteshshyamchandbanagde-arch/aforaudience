@@ -302,7 +302,7 @@ html {
    by default the way a real <a> would. Scoped to .afa-focusable rather
    than every role="link" site-wide, to stay within this ticket's scope. */
 .afa-focusable:focus-visible {
-  outline: 2px solid var(--afa-terracotta);
+  outline: 2px solid var(--afa-amber);
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {

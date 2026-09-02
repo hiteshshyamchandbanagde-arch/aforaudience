@@ -93,7 +93,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           // page. Same translucent-on-dark treatment ErrorBanner/
           // SuccessBanner already use, extended to the 'info' kind they
           // don't have.
-          const accent = t.kind === 'error' ? 'var(--afa-terracotta)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
+          const accent = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
           const bg = t.kind === 'error' ? 'rgba(179,38,30,0.1)' : t.kind === 'info' ? 'rgba(201,151,58,0.12)' : 'rgba(74,103,65,0.12)'
           const text = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage)'
           return (
