@@ -783,6 +783,7 @@ const de: Dictionary = {
     happeningSoonEyebrow: "This week",
     happeningSoonTitle: "Happening soon",
     happeningSoonAll: "All →",
+    bentoIllustrativeLabel: "Illustrative",
     feePromiseEyebrow: "Never tax the scene",
     feePromiseHeadline: "A ticket sends 100% of the base price to the artist and venue. We add one clear booking fee — and show you the maths before you pay.",
     feeBaseLabel: "Base price",
