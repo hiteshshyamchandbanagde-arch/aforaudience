@@ -280,8 +280,10 @@ export default function AdminCommandCenter() {
     return (
       <>
         <SiteNav />
-        <main style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
+            <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
+          </div>
         </main>
       </>
     )
@@ -293,7 +295,8 @@ export default function AdminCommandCenter() {
   return (
     <>
       <SiteNav />
-      <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px', overflowX: 'hidden' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
           Command Center
         </h1>
@@ -438,6 +441,7 @@ export default function AdminCommandCenter() {
           <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-plum)" />
           <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-taupe)" />
           <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-gold)" />
+        </div>
         </div>
       </main>
     </>

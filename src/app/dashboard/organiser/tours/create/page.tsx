@@ -59,7 +59,8 @@ export default function CreateTourPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 24px 80px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '20px', marginBottom: '8px' }}>
@@ -99,6 +100,7 @@ export default function CreateTourPage() {
           >
             {saving ? 'Creating...' : 'Create Tour'}
           </button>
+        </div>
         </div>
       </main>
     </>

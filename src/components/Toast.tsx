@@ -86,9 +86,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }}
       >
         {toasts.map((t) => {
+          // BUG-2608-092/BUG-2608-095 (see ErrorBanner.tsx) - this was still
+          // on the pre-dark-redesign light tokens (--afa-error-bg #FDECEA,
+          // --afa-cream-tint-3, --afa-mint-tint-2 - all near-white), which
+          // read as a stray light-themed box floating on the otherwise-dark
+          // page. Same translucent-on-dark treatment ErrorBanner/
+          // SuccessBanner already use, extended to the 'info' kind they
+          // don't have.
           const accent = t.kind === 'error' ? 'var(--afa-terracotta)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
-          const bg = t.kind === 'error' ? 'var(--afa-error-bg)' : t.kind === 'info' ? 'var(--afa-cream-tint-3)' : 'var(--afa-mint-tint-2)'
-          const text = t.kind === 'error' ? 'var(--afa-maroon)' : t.kind === 'info' ? 'var(--afa-gold)' : 'var(--afa-green-forest)'
+          const bg = t.kind === 'error' ? 'rgba(179,38,30,0.1)' : t.kind === 'info' ? 'rgba(201,151,58,0.12)' : 'rgba(74,103,65,0.12)'
+          const text = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage)'
           return (
             <div
               key={t.id}

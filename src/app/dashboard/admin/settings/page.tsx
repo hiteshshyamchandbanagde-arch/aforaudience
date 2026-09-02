@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
 
@@ -483,9 +484,7 @@ export default function AdminSettingsPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
-          Loading settings…
-        </div>
+        <BrandLoader label="Loading settings…" />
       </>
     )
   }
@@ -494,16 +493,18 @@ export default function AdminSettingsPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
-            Admins only
-          </h1>
-          <p style={{ opacity: 0.7 }}>
-            This page is only visible to platform admins.
-          </p>
-          <Link href="/" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
-            ← Home
-          </Link>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'system-ui' }}>
+          <div style={{ maxWidth: 560, margin: '0 auto' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
+              Admins only
+            </h1>
+            <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>
+              This page is only visible to platform admins.
+            </p>
+            <Link href="/" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
+              ← Home
+            </Link>
+          </div>
         </main>
       </>
     )
@@ -514,13 +515,13 @@ export default function AdminSettingsPage() {
       <SiteNav />
       <main
         style={{
-          padding: '32px 20px 64px',
-          maxWidth: 640,
-          margin: '0 auto',
+          minHeight: '100vh',
+          background: 'var(--afa-surface-raised)',
           fontFamily: 'system-ui, sans-serif',
           color: 'var(--afa-text-primary)',
         }}
       >
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 64px' }}>
         <div style={{ fontSize: 12, color: 'var(--afa-taupe)', marginBottom: 6, letterSpacing: '0.04em' }}>
           <Link href="/dashboard/admin" style={{ color: 'var(--afa-taupe)', textDecoration: 'none' }}>
             ← Admin
@@ -1073,6 +1074,7 @@ export default function AdminSettingsPage() {
           {initialPaise === 0 && initialMinPaise === 0
             ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'
             : `A ₹${(initialPaise / 100).toLocaleString('en-IN')} booking fee is pre-filled on every paid booking, adjustable by the audience between ₹${(initialMinPaise / 100).toLocaleString('en-IN')} and ₹${(initialMaxPaise / 100).toLocaleString('en-IN')}, shown as a separate line item on the checkout page.`}
+        </div>
         </div>
       </main>
     </>
