@@ -21,9 +21,9 @@ function Stars({ value, onChange }: { value: number; onChange: (n: number) => vo
           key={n}
           type="button"
           onClick={() => onChange(n)}
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "32px", padding: 0, opacity: value >= n ? 1 : 0.25 }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "32px", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
         >
-          ⭐
+          {value >= n ? "★" : "☆"}
         </button>
       ))}
     </div>
@@ -111,7 +111,7 @@ export default function RatePromptClientPage({
 
   if (!event) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <p style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
@@ -122,14 +122,13 @@ export default function RatePromptClientPage({
 
   if (!canReview) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>🎤</div>
-          <p style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
             {tr.ratePromptPage.checkInRequired}
           </p>
-          <Link href={`/events/${event.id}`} style={{ color: "var(--afa-terracotta)", fontSize: "14px", fontWeight: 600 }}>
+          <Link href={`/events/${event.id}`} style={{ color: "var(--afa-amber)", fontSize: "14px", fontWeight: 600 }}>
             {tr.ratePromptPage.viewEventDetails}
           </Link>
         </div>
@@ -139,34 +138,34 @@ export default function RatePromptClientPage({
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}>
         <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
-          <div style={{ background: "white", borderRadius: "16px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.1)" }}>
             <p style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
               placeholder={tr.ratePromptPage.commentPlaceholder}
-              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical" }}
+              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "white", color: "var(--afa-ink)" }}
             />
-            {overallError && <p style={{ color: "var(--afa-terracotta)", fontSize: "13px", marginTop: "8px" }}>{overallError}</p>}
+            {overallError && <p style={{ color: "var(--afa-error)", fontSize: "13px", marginTop: "8px" }}>{overallError}</p>}
             <button
               onClick={submitOverall}
               disabled={overallSubmitting}
-              style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", border: "none", background: "var(--afa-terracotta)", color: "white", fontSize: "15px", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
+              style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", border: "none", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", fontSize: "15px", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
             >
               {overallSubmitting ? tr.ratePromptPage.submitting : tr.ratePromptPage.submitRating}
             </button>
           </div>
         ) : (
-          <div style={{ background: "white", borderRadius: "16px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontSize: "24px" }}>✓</span>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "20px 28px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.1)", display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "24px", color: "var(--afa-amber)" }}>✓</span>
             <p style={{ fontSize: "14px", color: "var(--afa-text-primary)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
         )}
@@ -188,10 +187,10 @@ export default function RatePromptClientPage({
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
               return (
-                <div key={p.id} style={{ background: "white", borderRadius: "12px", padding: "16px 20px", border: "1px solid rgba(245,245,240,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+                <div key={p.id} style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "16px 20px", border: "1px solid rgba(245,245,240,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
-                    <span style={{ fontSize: "13px", color: "var(--afa-terracotta)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
+                    <span style={{ fontSize: "13px", color: "var(--afa-amber)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <div style={{ display: "flex", gap: "2px" }}>
@@ -199,9 +198,9 @@ export default function RatePromptClientPage({
                           <button
                             key={n}
                             onClick={() => setPerfDrafts((prev) => ({ ...prev, [p.id]: n }))}
-                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: 0, opacity: (perfDrafts[p.id] || 0) >= n ? 1 : 0.25 }}
+                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
                           >
-                            ⭐
+                            {(perfDrafts[p.id] || 0) >= n ? "★" : "☆"}
                           </button>
                         ))}
                       </div>

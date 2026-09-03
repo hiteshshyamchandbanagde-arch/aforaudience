@@ -283,7 +283,7 @@ export default function HomeHeader() {
             <button
               key={l.id}
               onClick={() => setLocale(l.id)}
-              style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", background: locale === l.id ? "rgba(200,68,26,0.08)" : "transparent", border: locale === l.id ? "1.5px solid var(--afa-amber)" : "1px solid rgba(245,245,240,0.15)", borderRadius: "999px", padding: "6px 12px", cursor: "pointer" }}
+              style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", background: locale === l.id ? "rgba(201,151,58,0.08)" : "transparent", border: locale === l.id ? "1.5px solid var(--afa-amber)" : "1px solid rgba(245,245,240,0.15)", borderRadius: "999px", padding: "6px 12px", cursor: "pointer" }}
             >
               {l.nativeLabel}
             </button>
