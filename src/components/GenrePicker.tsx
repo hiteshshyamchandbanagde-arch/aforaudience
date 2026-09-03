@@ -66,7 +66,7 @@ export default function GenrePicker({ value, onChange }: Props) {
                 padding: '7px 14px',
                 borderRadius: '999px',
                 border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
-                background: selected ? 'var(--afa-fill-solid)' : 'transparent',
+                background: selected ? 'var(--afa-amber)' : 'transparent',
                 color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 cursor: 'pointer',
               }}

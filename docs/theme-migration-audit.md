@@ -23,6 +23,31 @@ already-tracked items aren't re-reported as new. Snapshot: qa @ `bc9cb21`
 
 ---
 
+## Status updates (post-audit)
+
+- **`profile/page.tsx` — FIXED.** This file was present in §6's bulk
+  `--afa-terracotta` file list all along, but under-triaged: folded into the
+  generic sweep instead of getting its own row like the pages in §1, so its
+  two non-mechanical issues (an already-drifted `rgba(196,90,54,0.12)` active-
+  card glow that doesn't even match the terracotta token's real RGB, and a
+  page-specific amber-vs-fill-solid decision for "Save"/"Apply" buttons) went
+  unflagged. Caught via a live screenshot, not this pass's grep. Fixed:
+  11 `--afa-terracotta` occurrences → `--afa-amber` (no money/checkout action
+  on this page — profile edits and admin-approval-gated applications only,
+  confirmed against `site-knowledge.ts`), active-card border/glow corrected to
+  real amber RGB (`rgba(201,151,58,0.12)`) at the same visual weight, `12px`
+  card radius confirmed correct against the dashboard-family convention
+  (`afa-design-tokens-reference.md` §7) and left as-is. `GenrePicker.tsx`'s
+  selected-pill fill (shared with `dashboard/artist/edit/page.tsx`) moved
+  from `--afa-fill-solid` to `--afa-amber` for the same reason — genre
+  selection isn't a commit action either.
+- Live-render check (mocked session, since `/profile` requires auth):
+  the reported "headers rendering in orange" symptom did **not** reproduce —
+  every `<h2>` correctly resolves to `var(--afa-text-primary)` (cream), both
+  in source and on screen. The real, confirmed issue was the buttons, not the
+  headings — worth remembering that a screenshot report's framing isn't
+  always the precise root cause.
+
 ## 1. New, high-priority — full pages still on the pre-dark-reskin design
 
 These are the same bug class as Wall of Fame before PR #544 (white cards,

@@ -31,8 +31,8 @@ const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
   padding: '24px',
-  border: active ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.08)',
-  boxShadow: active ? '0 0 0 4px rgba(196,90,54,0.12)' : 'none',
+  border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
+  boxShadow: active ? '0 0 0 4px rgba(201,151,58,0.12)' : 'none',
   marginBottom: '16px',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
 })
@@ -438,7 +438,7 @@ function ProfileContent() {
       <button
         onClick={() => switchRole(kind)}
         disabled={switching === kind}
-        style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1.5px solid var(--afa-terracotta)', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
+        style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-amber)', background: 'transparent', border: '1.5px solid var(--afa-amber)', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
         {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
       </button>
@@ -502,8 +502,8 @@ function ProfileContent() {
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
-                color: 'white',
-                background: 'var(--afa-terracotta)',
+                color: 'var(--afa-on-fill-solid)',
+                background: 'var(--afa-amber)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 16px',
@@ -531,7 +531,7 @@ function ProfileContent() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
               )}
-              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
               </label>
@@ -550,8 +550,8 @@ function ProfileContent() {
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
-                color: 'white',
-                background: 'var(--afa-terracotta)',
+                color: 'var(--afa-on-fill-solid)',
+                background: 'var(--afa-amber)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 16px',
@@ -590,8 +590,8 @@ function ProfileContent() {
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
-                color: 'white',
-                background: 'var(--afa-terracotta)',
+                color: 'var(--afa-on-fill-solid)',
+                background: 'var(--afa-amber)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 16px',
@@ -619,7 +619,7 @@ function ProfileContent() {
                 <button
                   onClick={applyArtist}
                   disabled={applying === 'artist'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
                 >
                   {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
                 </button>
@@ -650,7 +650,7 @@ function ProfileContent() {
                 <button
                   onClick={applyOrganiser}
                   disabled={applying === 'organiser'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
+                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
                 >
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
                 </button>
@@ -673,7 +673,7 @@ function ProfileContent() {
               <button
                 onClick={applyVenueOwner}
                 disabled={applying === 'venue'}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
               >
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
               </button>
@@ -720,7 +720,7 @@ function ProfileContent() {
                     fontSize: '13px',
                     fontWeight: 700,
                     color: 'var(--afa-on-fill-solid)',
-                    background: 'var(--afa-terracotta)',
+                    background: 'var(--afa-amber)',
                     borderRadius: '999px',
                     padding: '4px 12px',
                   }}
