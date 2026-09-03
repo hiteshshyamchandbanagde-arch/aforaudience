@@ -589,6 +589,8 @@ export default function AdminSettingsPage() {
                     borderRadius: 6,
                     border: '1px solid rgba(245,245,240,0.15)',
                     fontSize: 15,
+                    background: 'white',
+                    color: 'var(--afa-ink)',
                   }}
                 />
               </div>
@@ -665,6 +667,8 @@ export default function AdminSettingsPage() {
                 borderRadius: 6,
                 border: '1px solid rgba(245,245,240,0.15)',
                 fontSize: 15,
+                background: 'white',
+                color: 'var(--afa-ink)',
               }}
             />
           </div>
@@ -718,7 +722,7 @@ export default function AdminSettingsPage() {
             value={risingMinGigs}
             onChange={(e) => setRisingMinGigs(e.target.value)}
             placeholder="3"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16 }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
           />
 
           <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -733,7 +737,7 @@ export default function AdminSettingsPage() {
             value={risingMinAvgRating}
             onChange={(e) => setRisingMinAvgRating(e.target.value)}
             placeholder="4.0"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16 }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
           />
 
           <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -747,7 +751,7 @@ export default function AdminSettingsPage() {
             value={risingMinAttendees}
             onChange={(e) => setRisingMinAttendees(e.target.value)}
             placeholder="5"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16 }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
           />
 
           <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -762,7 +766,7 @@ export default function AdminSettingsPage() {
               value={featuredVouchThreshold}
               onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
               placeholder="5"
-              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }}
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
             />
           </div>
           <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
@@ -781,7 +785,7 @@ export default function AdminSettingsPage() {
               value={rosterLookback}
               onChange={(e) => setRosterLookback(e.target.value)}
               placeholder="5"
-              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }}
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
             />
             <button
               onClick={saveRosterLookback}
@@ -818,7 +822,7 @@ export default function AdminSettingsPage() {
               value={eventWindow}
               onChange={(e) => setEventWindow(e.target.value)}
               placeholder="3"
-              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }}
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
             />
             <button
               onClick={saveEventWindow}
@@ -914,6 +918,8 @@ export default function AdminSettingsPage() {
               fontSize: 15,
               marginBottom: 8,
               opacity: directPayoutsEnabled ? 1 : 0.5,
+              background: 'white',
+              color: 'var(--afa-ink)',
             }}
           />
           <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
@@ -958,15 +964,15 @@ export default function AdminSettingsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
-              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }} />
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }} />
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15 }} />
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
             </div>
           </div>
           <p style={{ fontSize: 11, color: voteWeightsSum === 100 ? 'var(--afa-taupe)' : 'var(--afa-terracotta)', marginBottom: 16 }}>
@@ -1044,6 +1050,8 @@ export default function AdminSettingsPage() {
                       borderRadius: 6,
                       border: '1px solid rgba(245,245,240,0.15)',
                       fontSize: 14,
+                      background: 'white',
+                      color: 'var(--afa-ink)',
                     }}
                   />
                   <button

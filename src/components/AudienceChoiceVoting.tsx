@@ -108,7 +108,7 @@ function Ballot({
           <select
             value={picks[rank]}
             onChange={(e) => setPicks((prev) => ({ ...prev, [rank]: e.target.value }))}
-            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
+            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'white', color: 'var(--afa-ink)' }}
           >
             <option value="">—</option>
             {lineup.map((p) => (

@@ -333,7 +333,7 @@ export default function FeedbackDetailPanel({
                   value={noteDraft}
                   onChange={(e) => setNoteDraft(e.target.value)}
                   rows={3}
-                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', resize: 'vertical', fontFamily: 'inherit' }}
+                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', resize: 'vertical', fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                   <button

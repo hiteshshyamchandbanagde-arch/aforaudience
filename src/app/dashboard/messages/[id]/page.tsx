@@ -174,6 +174,8 @@ export default function MessageThreadPage() {
                 border: '1px solid rgba(245,245,240,0.2)',
                 fontFamily: 'system-ui, sans-serif',
                 fontSize: '14px',
+                background: 'var(--afa-surface-raised)',
+                color: 'var(--afa-text-primary)',
               }}
             />
             <button

@@ -191,12 +191,12 @@ export default function AdminArtistsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search artist name..."
-              style={{ flex: '1 1 220px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
+              style={{ flex: '1 1 220px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             />
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -267,7 +267,7 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px' }}
+                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                           />
                           <button
                             onClick={() => handleHeadlinerToggle(a)}

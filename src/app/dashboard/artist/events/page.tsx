@@ -284,7 +284,7 @@ export default function BrowseEventsToApplyPage() {
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
                           placeholder="Optional note to the organiser"
                           rows={2}
-                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const }}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
                         <button
                           onClick={() => apply(event.id)}

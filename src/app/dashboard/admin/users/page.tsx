@@ -136,12 +136,12 @@ export default function AdminUsersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name, display name, or email..."
-              style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
+              style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px' }}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
@@ -195,7 +195,7 @@ export default function AdminUsersPage() {
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px' }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
                         <button
                           onClick={() => handleSuspend(u.id)}

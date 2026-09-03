@@ -85,7 +85,7 @@ export default function GenrePicker({ value, onChange }: Props) {
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder={tr.genrePicker.otherPlaceholder}
-        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
       />
     </div>
   )

@@ -474,7 +474,7 @@ export default function ArtistDashboard() {
                             value={replyDrafts[r.id] || ''}
                             onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
                             maxLength={500}
-                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
+                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                           />
                           <button
                             onClick={() => submitReply(r.id)}

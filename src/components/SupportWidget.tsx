@@ -626,6 +626,8 @@ export default function SupportWidget() {
                         fontSize: 14,
                         outline: 'none',
                         opacity: capReached ? 0.5 : 1,
+                        background: 'var(--afa-surface-page)',
+                        color: 'var(--afa-text-primary)',
                       }}
                     />
                     <button
@@ -677,6 +679,8 @@ export default function SupportWidget() {
                       border: '1px solid #E5DCCF',
                       fontSize: 14,
                       marginBottom: 12,
+                      background: 'var(--afa-surface-page)',
+                      color: 'var(--afa-text-primary)',
                     }}
                   >
                     {FEEDBACK_CATEGORIES.map((c) => (
@@ -703,6 +707,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
@@ -721,6 +727,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
@@ -739,6 +747,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                     </>
@@ -760,6 +770,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
@@ -778,6 +790,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                     </>
@@ -799,6 +813,8 @@ export default function SupportWidget() {
                           fontSize: 14,
                           resize: 'vertical',
                           marginBottom: 12,
+                          background: 'var(--afa-surface-page)',
+                          color: 'var(--afa-text-primary)',
                         }}
                       />
                     </>

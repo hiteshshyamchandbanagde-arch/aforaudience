@@ -809,6 +809,7 @@ export default function CheckoutPage() {
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
                   border: '1px solid rgba(14,12,10,0.15)', boxSizing: 'border-box',
+                  background: 'white', color: 'var(--afa-ink)',
                 }}
               />
               {companionSearching && (
