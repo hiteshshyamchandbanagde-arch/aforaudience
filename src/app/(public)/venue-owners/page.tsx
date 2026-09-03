@@ -47,13 +47,13 @@ export default function VenueOwnersPage() {
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
       <SiteNav />
 
       <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "white", marginBottom: "8px", lineHeight: 1.1 }}>
-            {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-terracotta)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
+            {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
           </div>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {loading ? tr.venueOwnersPage.loading : tr.venueOwnersPage.countHosting.replace("{n}", String(filtered.length))}
@@ -89,8 +89,7 @@ export default function VenueOwnersPage() {
           <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏛️</div>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetTitle : tr.venueOwnersPage.emptyNoneFoundTitle}
             </div>
             <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
@@ -117,10 +116,10 @@ export default function VenueOwnersPage() {
                   }}
                   className="hover-lift-card"
                   style={{
-                    background: "white",
-                    borderRadius: "16px",
+                    background: "var(--afa-surface-raised)",
+                    borderRadius: "3px",
                     overflow: "hidden",
-                    border: "1px solid rgba(245,245,240,0.08)",
+                    border: "1px solid rgba(245,245,240,0.1)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
@@ -128,13 +127,13 @@ export default function VenueOwnersPage() {
                   }}
                 >
                   {isNavigatingThis && (
-                    <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-terracotta)", animation: "afa-spin 0.7s linear infinite" }} />
+                    <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                       <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   )}
-                  <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", background: "var(--afa-plum-black)" }}>
-                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "3px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "white", flexShrink: 0, overflow: "hidden" }}>
+                  <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(245,245,240,0.1)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                       {owner.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -142,13 +141,13 @@ export default function VenueOwnersPage() {
                         displayName.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div style={{ fontFamily: "Georgia, serif", fontSize: "18px", fontWeight: 700, color: "white" }}>{displayName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-ink)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "13px", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
                       {owner.bio || tr.venueOwnersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "12px", color: "var(--afa-text-secondary)", opacity: 0.5 }}>
                       {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersPage.venueSingular : tr.venueOwnersPage.venuePlural}
                     </div>
                   </div>
