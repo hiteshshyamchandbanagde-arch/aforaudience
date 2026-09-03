@@ -56,4 +56,4 @@ Missed in #547. Tested two candidate fixes directly in Chromium before picking o
 
 ## Tally
 
-27 PRs merged total (#527–#549). Zero pushed-and-awaiting-review. Zero reverted.
+23 PRs merged total (#527–#549). Zero pushed-and-awaiting-review. Zero reverted.
