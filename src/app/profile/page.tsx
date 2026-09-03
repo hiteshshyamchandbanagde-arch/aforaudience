@@ -576,7 +576,7 @@ function ProfileContent() {
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'white' }}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             >
               {currencies.map((c) => (
                 <option key={c.code} value={c.code}>
