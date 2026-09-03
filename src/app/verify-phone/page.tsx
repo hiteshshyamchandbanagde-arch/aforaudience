@@ -18,6 +18,7 @@ const inputStyle = {
   letterSpacing: '0.3em',
   textAlign: 'center' as const,
   color: 'var(--afa-text-primary)',
+  background: 'var(--afa-surface-raised)',
 }
 
 // Standalone "verify your phone" completion flow. Before this page existed,

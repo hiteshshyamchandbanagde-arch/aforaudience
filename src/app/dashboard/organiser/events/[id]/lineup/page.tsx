@@ -151,7 +151,7 @@ function SortableRow({
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', textAlign: 'center' }}
+          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
         <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>min</span>
       </div>
@@ -313,7 +313,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px' }}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <button
                   onClick={handleBroadcast}

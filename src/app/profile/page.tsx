@@ -492,6 +492,8 @@ function ProfileContent() {
                 fontSize: '14px',
                 marginBottom: '12px',
                 boxSizing: 'border-box' as const,
+                background: 'var(--afa-surface-raised)',
+                color: 'var(--afa-text-primary)',
                 opacity: nameLoaded ? 1 : 0.5,
                 cursor: nameLoaded ? 'text' : 'default',
               }}
@@ -542,7 +544,7 @@ function ProfileContent() {
               rows={3}
               maxLength={500}
               placeholder={tr.profilePage.bioPlaceholder}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit' }}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
             />
             <button
               onClick={saveAbout}
@@ -645,7 +647,7 @@ function ProfileContent() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder={tr.profilePage.orgNamePlaceholder}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <button
                   onClick={applyOrganiser}

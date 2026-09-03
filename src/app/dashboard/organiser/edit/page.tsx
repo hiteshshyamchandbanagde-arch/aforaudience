@@ -9,7 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 
 const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit' }
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
 
 // Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
 // previously these could only be set once, at apply-time. Powers the new

@@ -134,14 +134,14 @@ export default function AdminDiaryPage() {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Title (e.g. GST registration)"
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '15px', marginBottom: '10px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '15px', marginBottom: '10px', boxSizing: 'border-box', background: 'white', color: 'var(--afa-ink)' }}
             />
             <textarea
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
               placeholder="Notes (optional)"
               rows={3}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical', background: 'white', color: 'var(--afa-ink)' }}
             />
             <button
               onClick={handleCreate}
