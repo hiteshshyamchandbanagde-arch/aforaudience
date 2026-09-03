@@ -441,7 +441,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
@@ -469,7 +469,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       <button
                         key={l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                       >
                         {l.nativeLabel}
                       </button>
@@ -498,21 +498,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       aria-label={l.label}
                       aria-current={l.isActive ? "page" : undefined}
                       className="sitenav-icon-link"
-                      style={{ color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCount}
                         </span>
                       )}
                       {l.key === "messages" && unreadCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {unreadCount}
                         </span>
                       )}
                       {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCompanionCount}
                         </span>
                       )}
@@ -603,11 +603,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             href={l.href}
                             onClick={() => setMenuOpen(false)}
                             aria-current={l.isActive ? "page" : undefined}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "14px", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(200,68,26,0.08)" : "transparent", textDecoration: "none" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "14px", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.08)" : "transparent", textDecoration: "none" }}
                           >
                             {l.label}
                             {l.badge > 0 && (
-                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "1px 7px" }}>
+                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 7px" }}>
                                 {l.badge}
                               </span>
                             )}
@@ -710,7 +710,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 <button
                   key={l.id}
                   onClick={() => { setLocale(l.id); setMobileLangExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)', background: locale === l.id ? 'rgba(200,68,26,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.15)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                 >
                   {l.nativeLabel}
                 </button>
@@ -723,7 +723,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             key={l.key}
             href={l.href}
             onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}
+            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}
           >
             {l.label}
           </Link>
@@ -752,21 +752,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
                 aria-current={l.isActive ? "page" : undefined}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-terracotta)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
+                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {l.label}
                 {l.key === "dashboard" && pendingCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCount}
                   </span>
                 )}
                 {l.key === "messages" && unreadCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
                     {unreadCount}
                   </span>
                 )}
                 {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-terracotta)", borderRadius: "999px", padding: "2px 7px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
                     {pendingCompanionCount}
                   </span>
                 )}

@@ -46,7 +46,7 @@ type Panel = 'closed' | 'chat' | 'feedback';
 function ChatIcon({ size = 24, pulse = false }: { size?: number; pulse?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="9" r="9" fill="var(--afa-terracotta)" opacity="0.18">
+      <circle cx="12" cy="9" r="9" fill="var(--afa-amber)" opacity="0.18">
         {pulse && (
           <>
             <animate attributeName="opacity" values="0.18;0.32;0.18" dur="2.6s" repeatCount="indefinite" />
@@ -510,7 +510,7 @@ export default function SupportWidget() {
                   <button
                     onClick={switchToFeedbackPanel}
                     style={{
-                      background: 'var(--afa-terracotta)',
+                      background: 'var(--afa-amber)',
                       color: 'white',
                       border: 'none',
                       borderRadius: 999,
@@ -542,7 +542,7 @@ export default function SupportWidget() {
                             borderRadius: 12,
                             fontSize: 14,
                             lineHeight: 1.4,
-                            background: m.role === 'user' ? 'var(--afa-terracotta)' : 'var(--afa-tan)',
+                            background: m.role === 'user' ? 'var(--afa-amber)' : 'var(--afa-tan)',
                             color: m.role === 'user' ? 'white' : 'var(--afa-text-primary)',
                             float: m.role === 'user' ? 'right' : 'left',
                             clear: 'both',
@@ -558,9 +558,9 @@ export default function SupportWidget() {
                               }
                               style={{
                                 fontSize: 12,
-                                color: 'var(--afa-terracotta)',
+                                color: 'var(--afa-amber)',
                                 background: 'transparent',
-                                border: '1px solid var(--afa-terracotta)',
+                                border: '1px solid var(--afa-amber)',
                                 borderRadius: 999,
                                 padding: '4px 10px',
                                 cursor: 'pointer',
@@ -593,7 +593,7 @@ export default function SupportWidget() {
                         <button
                           onClick={switchToFeedbackPanel}
                           style={{
-                            color: 'var(--afa-terracotta)',
+                            color: 'var(--afa-amber)',
                             background: 'transparent',
                             border: 'none',
                             fontWeight: 600,
@@ -633,7 +633,7 @@ export default function SupportWidget() {
                       disabled={chatLoading || !chatInput.trim() || capReached}
                       style={{
                         marginLeft: 8,
-                        background: 'var(--afa-terracotta)',
+                        background: 'var(--afa-amber)',
                         color: 'white',
                         border: 'none',
                         borderRadius: 999,
@@ -825,7 +825,7 @@ export default function SupportWidget() {
                         onClick={clearAttachment}
                         style={{
                           fontSize: 12,
-                          color: 'var(--afa-terracotta)',
+                          color: 'var(--afa-amber)',
                           background: 'transparent',
                           border: 'none',
                           cursor: 'pointer',
@@ -858,7 +858,7 @@ export default function SupportWidget() {
                     disabled={fbSubmitting || !fbCanSubmit}
                     style={{
                       width: '100%',
-                      background: 'var(--afa-terracotta)',
+                      background: 'var(--afa-amber)',
                       color: 'white',
                       border: 'none',
                       borderRadius: 999,
