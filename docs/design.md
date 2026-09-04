@@ -1335,3 +1335,32 @@ Not yet built — Claude Code build brief next, one PR per page (5 total) recomm
 - **A ~2s branded intro-splash overlay (this file's root `layout.tsx`, sessionStorage-gated) plus a brief `BrandLoader` Suspense fallback both precede real page content on a fresh session.** Neither is part of this redesign, but both can shadow a screenshot taken too soon after navigation during live-testing — wait for both to clear (~3.5s from a fresh Playwright context) before trusting what a screenshot shows.
 
 *Confidential — Do not share*
+
+---
+
+## Auth Pages — Desktop Brand Panel Redesign (Figma Make round, 5 Sep 2026)
+
+**Problem:** Live auth pages (Register/Login/Forgot/Reset/Verify — see redesign above) are visually correct but were built mobile-first and stretched onto desktop, leaving large dead space either side of the centered form on wide viewports.
+
+**Figma Make round:** New file "AFA Auth Pages — Dark Theme Redesign" (`figma.com/make/YYegRKW2GfpeMUGB02M7oi`). Prompt asked for two independent breakpoint layouts (not one scaled to fit the other) and two brand-panel treatment options for desktop.
+
+**Decision (Hitesh, 5 Sep 2026): Duotone/photo variant chosen over abstract graphic.**
+
+**Desktop layout:** Asymmetric split — fixed 480px form panel (left) + flexible brand panel (right) filling remaining width with real event photography. Confirmed exact match to locked token values (`#141414`/`#F5F5F0`/`#FF5A36`/`#C9973A`) in the exported code's `index.css`.
+
+**Photo treatment (PhotoPanel in exported `BrandPanel.tsx`):** grayscale(100%) contrast(1.2) brightness(0.55) base image, `mixBlendMode: luminosity`, then `#C9973A` overlay at `mixBlendMode: multiply` opacity 0.7, plus an ember radial glow (bottom-left) and top/bottom vignettes. This is a variant of the existing `Photo.tsx` duotone treatment, not identical — worth reconciling into one shared treatment during port rather than maintaining two duotone implementations.
+
+**Photo source (Hitesh, 5 Sep 2026): stock photography for now**, not real AFA event photos — swap for real photography later when available. Current export uses a placeholder Unsplash concert-crowd image; needs a properly licensed stock replacement before this ships even to preview.
+
+**Mobile layout:** unchanged single-column full-bleed — no brand panel on mobile (screen too tight to justify it).
+
+**Rollout (Hitesh, 5 Sep 2026): preview branch first, not a direct qa merge.** This round replaces only the desktop brand-panel/layout shell (`AuthLayout.tsx` desktop path) around the five already-shipped, already-approved forms (PR #551/#552) — the forms themselves, OTP inline-stage behavior, and Google Sign-In wiring are NOT being redesigned, just the desktop shell around them. Build on a dedicated preview branch, deploy to a Vercel preview URL, get Hitesh's live sign-off on a real screenshot before any merge toward `qa`.
+
+**Export package:** `Redesign_Authentication_Screens.zip` (Figma Make code export) — React/Vite scaffold with `AuthLayout.tsx` (viewport-aware shell), `BrandPanel.tsx` (Photo + Abstract variants — only Photo variant needed going forward), and re-implementations of all 5 screens for reference. This is a **prototype harness**, not app code — includes viewport/variant toggle UI (`context.ts`, showcase controls) that must NOT be ported; only the desktop split-panel structure and `PhotoPanel` treatment should be extracted into the real Next.js `AuthLayout`/equivalent.
+
+**Port checklist for whoever builds this:**
+1. Extract desktop split-panel structure + `PhotoPanel` treatment from `AuthLayout.tsx`/`BrandPanel.tsx` — discard the showcase/toggle harness (`context.ts`, viewport switcher, variant switcher)
+2. Replace placeholder Unsplash image with a properly licensed stock photo (not final AFA photography yet — Hitesh's call to revisit later)
+3. Reconcile the new photo-duotone math (luminosity blend + amber multiply + vignettes) against the existing `Photo.tsx` treatment (grayscale/contrast/brightness + amber multiply div) — decide whether to unify into one shared treatment or intentionally keep auth's panel treatment distinct
+4. Apply only to the desktop layout path — do not touch the existing, already-approved mobile layout or any of the 5 forms' internals (fields, OTP flow, validation, Google Sign-In)
+5. Ship to a preview branch + Vercel preview URL; do not open a PR toward `qa` until Hitesh has reviewed live screenshots and given explicit go-ahead
