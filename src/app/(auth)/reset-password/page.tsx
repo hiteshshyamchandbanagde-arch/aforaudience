@@ -7,6 +7,22 @@ import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
 import { useLocale } from "@/lib/i18n/translate"
 
+// Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - same
+// two-path eye outline as RegisterForm.tsx, re-skinning the 🙈/👁️ emoji.
+function EyeIcon({ visible }: { visible: boolean }) {
+  return visible ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.59 21.59 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.59 21.59 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
+
 function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -64,10 +80,10 @@ function ResetPasswordForm() {
         </p>
       </div>
 
-      <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+      <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[rgba(245,245,240,0.08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
         {!token ? (
-          <p style={{ fontSize: "14px", color: "var(--afa-terracotta)" }}>
-            {tr.resetPasswordPage.resetLinkInvalidOrExpired} <Link href="/forgot-password" style={{ color: "var(--afa-terracotta)", fontWeight: 500 }}>{tr.resetPasswordPage.requestNewOneLink}</Link>.
+          <p style={{ fontSize: "14px", color: "var(--afa-error)" }}>
+            {tr.resetPasswordPage.resetLinkInvalidOrExpired} <Link href="/forgot-password" style={{ color: "var(--afa-amber)", fontWeight: 500 }}>{tr.resetPasswordPage.requestNewOneLink}</Link>.
           </p>
         ) : (
           <>
@@ -83,7 +99,7 @@ function ResetPasswordForm() {
                 { label: tr.resetPasswordPage.confirmNewPasswordLabel, name: "confirm", placeholder: tr.registerPage.repeatPasswordPlaceholder },
               ].map((field) => (
                 <div key={field.name}>
-                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                     {field.label}
                   </label>
                   <div style={{ position: "relative" }}>
@@ -93,15 +109,15 @@ function ResetPasswordForm() {
                       value={form[field.name as keyof typeof form]}
                       onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}
                       onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                     />
                     <button
                       type="button"
                       onClick={() => setVisible({ ...visible, [field.name]: !visible[field.name as keyof typeof visible] })}
                       aria-label={visible[field.name as keyof typeof visible] ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                     >
-                      {visible[field.name as keyof typeof visible] ? "🙈" : "👁️"}
+                      <EyeIcon visible={visible[field.name as keyof typeof visible]} />
                     </button>
                   </div>
                 </div>
@@ -111,7 +127,7 @@ function ResetPasswordForm() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.resetPasswordPage.updatingEllipsis : tr.resetPasswordPage.updatePasswordButton}
             </button>
