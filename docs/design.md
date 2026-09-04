@@ -1364,3 +1364,12 @@ Not yet built — Claude Code build brief next, one PR per page (5 total) recomm
 3. Reconcile the new photo-duotone math (luminosity blend + amber multiply + vignettes) against the existing `Photo.tsx` treatment (grayscale/contrast/brightness + amber multiply div) — decide whether to unify into one shared treatment or intentionally keep auth's panel treatment distinct
 4. Apply only to the desktop layout path — do not touch the existing, already-approved mobile layout or any of the 5 forms' internals (fields, OTP flow, validation, Google Sign-In)
 5. Ship to a preview branch + Vercel preview URL; do not open a PR toward `qa` until Hitesh has reviewed live screenshots and given explicit go-ahead
+
+**Status update (5 Sep 2026): merged to `qa` as PR #553** (commit `6167409`, squash-merged from `preview/auth-desktop-brand-panel`). Deploy READY, zero runtime errors post-merge.
+
+Port checklist above was fully applied:
+- Off-palette hex (`#1E1E1E`/`#252525`/`#1A1A1A`/`#1C1C1C`) never made it in — those only existed in the export's unused `ui.tsx` (forms' internals, correctly out of scope, never ported)
+- Duotone math kept intentionally distinct from `Photo.tsx`, with an in-code comment explaining why (hero background vs. content thumbnail)
+- Placeholder photo re-hosted on Vercel Blob (`.../auth/brand-panel-placeholder.jpg`), flagged in a comment as temp stock — still needs swapping for real AFA photography later
+- Desktop double-wordmark resolved: dropped the smaller wordmark above the form on `lg+`, brand panel's wordmark now carries it alone (reversible via removing `lg:hidden` if preference changes)
+- Independently verified branch content, file list, and token usage before merge — all matched CC's self-report exactly
