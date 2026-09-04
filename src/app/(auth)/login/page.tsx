@@ -155,12 +155,12 @@ function LoginForm() {
         </h2>
 
         {registered && (
-          <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
+          <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
             {tr.loginPage.accountCreatedBanner}
           </div>
         )}
         {justReset && (
-          <div style={{ background: "var(--afa-success-bg)", border: "1px solid #68D391", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
+          <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-green-dark)" }}>
             {tr.loginPage.passwordUpdatedBanner}
           </div>
         )}
