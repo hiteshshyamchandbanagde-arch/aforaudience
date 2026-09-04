@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import EnvBadge from "@/components/EnvBadge"
+import AuthLayout from "@/components/AuthLayout"
 import { useLocale } from "@/lib/i18n/translate"
 
 export default function ForgotPasswordPage() {
@@ -32,10 +33,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--afa-surface-page)] flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 font-sans">
+    <AuthLayout>
       <div className="w-full max-w-[440px]">
         <div className="text-center mb-8">
-          <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline">
+          <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden">
             <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
             <EnvBadge />
           </Link>
@@ -101,6 +102,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </p>
       </div>
-    </main>
+    </AuthLayout>
   )
 }

@@ -321,10 +321,9 @@ export default function RegisterForm() {
 
   if (stage === "otp") {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
+            <Link href="/" className="lg:hidden" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
               <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               <EnvBadge />
             </Link>
@@ -370,15 +369,13 @@ export default function RegisterForm() {
             </button>
           </div>
         </div>
-      </main>
     )
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: "480px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
+          <Link href="/" className="lg:hidden" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             <EnvBadge />
           </Link>
@@ -660,6 +657,5 @@ export default function RegisterForm() {
           {tr.registerPage.everyoneJoinsAsAudience}
         </p>
       </div>
-    </main>
   )
 }
