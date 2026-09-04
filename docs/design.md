@@ -1330,4 +1330,8 @@ Triggered by BUG-2609-001 (register page legibility bug, PR #550, merged) — Hi
 
 Not yet built — Claude Code build brief next, one PR per page (5 total) recommended given each page is independently testable and this is a large enough visual change to want isolated review/rollback per page rather than one mega-PR.
 
+**Status update (5 Sep 2026): all 5 pages built and merged to `qa`.** Register shipped separately as PR #551 (its own session, following BUG-2609-001). Login, Forgot Password, Reset Password, and Verify Email shipped together as PR #552 in a single time-boxed session, one commit per file. Every item in the fix-before-port list above was applied. Two things worth flagging for whoever picks this up next:
+- **Login's registered/password-updated success banners still hardcode `1px solid #68D391`** instead of using a token — the identical pattern that was called out as a pre-existing bug and fixed on Verify Email's success banner in PR #552, just not in Login's brief that round. Worth a token sweep across all `--afa-success-bg` banners app-wide (there may be more than these two).
+- **A ~2s branded intro-splash overlay (this file's root `layout.tsx`, sessionStorage-gated) plus a brief `BrandLoader` Suspense fallback both precede real page content on a fresh session.** Neither is part of this redesign, but both can shadow a screenshot taken too soon after navigation during live-testing — wait for both to clear (~3.5s from a fresh Playwright context) before trusting what a screenshot shows.
+
 *Confidential — Do not share*
