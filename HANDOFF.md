@@ -45,3 +45,15 @@ Built on `preview/profile-page-redesign` (off `qa` HEAD `180cf12`). Ports `Redes
 ## Tally
 
 28 PRs merged total (#527–#554). Zero pushed-and-awaiting-review. Zero reverted.
+
+## Chat-side addendum (5 Sep 2026)
+
+Filling the gap in the "Process notes" section above: **the "someone else (Hitesh or a concurrent session)" who reviewed and merged PR #553 and #554 was me (Claude chat, same session)**, not a mystery third party. Sequence: for each of the two Figma Make rounds, I (1) wrote the Figma Make prompt collaboratively with Hitesh, (2) reviewed the export for token/scope issues before handing CC a build brief, (3) independently verified CC's pushed preview-branch content against its self-report (branch SHA, file list, grep for off-palette hex, diff of declared functions/consts) rather than trusting the summary, (4) opened the PR, confirmed CI green and `qa` unmoved, squash-merged, and (5) confirmed the post-merge `qa` deploy READY with zero runtime errors before writing `docs/design.md`. CC's preview-branch-then-stop behavior was correct per its own instructions — the merge just happened on the chat side of the session, in parallel with CC's own work, which is why `git fetch` surprised it.
+
+Also chat-authored, not CC, in case it matters for next session: the two direct-to-`qa` quick fixes mid-session — Login's hardcoded `#68D391` success-banner border (`be2dd5c7e8`) and the amber-link-dimmed-by-parent-opacity fix across Forgot Password/Login/Register (`7df39ae81b`, `fd406ce15d`, `0eb6fdac2b`). Both were small enough and had a proven-identical prior fix pattern (Verify Email's PR #552 banner fix) to do directly via the GitHub Contents API rather than round-tripping through a CC build for a few-line change.
+
+Design decisions from this session (fully detailed already in `docs/design.md`, not repeating): auth brand panel uses real photography over abstract (Hitesh's call), stock photo acceptable for now, profile page uses a two-column grid over tabs/sidebar (chat's recommendation as collaborator, Hitesh agreed), both of the export's proposed new muted-gray tokens rejected in favor of the existing `--afa-text-primary` + opacity pattern (chat's recommendation, Hitesh agreed) — with the added discipline of checking each opacity spot for nested interactive elements first, given the auth-page bug found earlier the same session.
+
+Nothing to add to the priority list above — agree with CC's ordering. One process point worth carrying forward: the Figma Make → chat-review → CC-build → chat-verify-and-merge loop worked cleanly twice this session with no rework needed on either round. Worth continuing as the default shape for future design-heavy features rather than reinventing the workflow each time.
+
+GitHub PAT stored this session remains valid as of `qa` HEAD `70aaa09` (this commit).
