@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import { useLocale } from "@/lib/i18n/translate"
 
@@ -10,15 +11,52 @@ const inputStyle = (hasError?: boolean) => ({
   width: "100%",
   padding: "12px 14px",
   borderRadius: "8px",
-  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
+  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`,
   fontSize: "14px",
-  color: "var(--afa-ink)",
-  background: "white",
+  color: "var(--afa-text-primary)",
+  background: "transparent",
   outline: "none",
   boxSizing: "border-box" as const,
 })
 
-const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }
+const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }
+
+// Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - simple
+// two-path eye outline replacing the 🙈/👁️ emoji, per Figma. Re-skin only;
+// the show/hide state and onClick logic it sits inside is unchanged.
+function EyeIcon({ visible }: { visible: boolean }) {
+  return visible ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.59 21.59 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.59 21.59 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="var(--afa-green-dark)" />
+      <path d="M7 12.5l3 3 7-7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  )
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.95v2.33A9 9 0 0 0 9 18z"/>
+      <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.03l3-2.33z"/>
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
+    </svg>
+  )
+}
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -52,6 +90,30 @@ export default function RegisterForm() {
   // independently.
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+
+  // Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - real
+  // strength heuristic (length + character-variety), not just the static
+  // 3-segment visual Figma shows. Weak: anything below the medium bar.
+  // Medium: 8+ chars and 2+ of {lower/upper/digit/symbol}. Strong: 10+
+  // chars and 3+ varieties.
+  const passwordStrength = (() => {
+    const pw = form.password
+    if (!pw) return 0
+    const variety = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((re) => re.test(pw)).length
+    if (pw.length >= 10 && variety >= 3) return 3
+    if (pw.length >= 8 && variety >= 2) return 2
+    return 1
+  })()
+  const strengthColor =
+    passwordStrength === 3 ? "var(--afa-green-dark)" :
+    passwordStrength === 2 ? "var(--afa-amber)" :
+    passwordStrength === 1 ? "var(--afa-error)" :
+    "rgba(245,245,240,0.12)"
+  const strengthLabel =
+    passwordStrength === 3 ? tr.registerPage.passwordStrengthStrong :
+    passwordStrength === 2 ? tr.registerPage.passwordStrengthMedium :
+    passwordStrength === 1 ? tr.registerPage.passwordStrengthWeak :
+    ""
 
   // Previously auto-suggested a username derived from Full Name
   // ("Will Smith" -> "willsmith") until the user edited it themselves.
@@ -259,7 +321,7 @@ export default function RegisterForm() {
 
   if (stage === "otp") {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
@@ -271,7 +333,7 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
             {devOtp && (
               <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
@@ -295,14 +357,14 @@ export default function RegisterForm() {
             <button
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
             </button>
             <button
               onClick={handleResendOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               {tr.loginPage.resendCodeButton}
             </button>
@@ -313,7 +375,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: "480px" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <Link href="/" style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
@@ -327,7 +389,30 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
+          {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
+              Name per docs/design.md. QST-2607-009 backend is merged so the
+              call is wired for real, but it only actually completes once
+              Hitesh finishes the OAuth redirect URI + test users setup in
+              Google Cloud Console - same env gate as Login's button. */}
+          {process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
+            <>
+              <button
+                type="button"
+                onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "transparent", color: "var(--afa-text-primary)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+              >
+                <GoogleIcon />
+                {tr.loginPage.continueWithGoogle}
+              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0" }}>
+                <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+                <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+                <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+              </div>
+            </>
+          )}
+
           {error && (
             <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
               {error}
@@ -359,7 +444,7 @@ export default function RegisterForm() {
               />
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
                 <div style={{ marginTop: "8px" }}>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
                     {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
@@ -389,7 +474,7 @@ export default function RegisterForm() {
                       title={tr.registerPage.tryMoreSuggestionsTitle}
                       style={{
                         fontSize: "12px",
-                        color: "var(--afa-ink)",
+                        color: "var(--afa-text-primary)",
                         opacity: initialsLoading ? 0.4 : 0.6,
                         background: "none",
                         border: "none",
@@ -403,10 +488,12 @@ export default function RegisterForm() {
                 </div>
               )}
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
               )}
               {usernameStatus === "available" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>{tr.registerPage.availableLabel}</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)", display: "flex", alignItems: "center" }}>
+                  <CheckCircleIcon />{tr.registerPage.availableLabel}
+                </p>
               )}
               {usernameStatus === "taken" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-terracotta)" }}>
@@ -444,8 +531,12 @@ export default function RegisterForm() {
 
             <div>
               <label style={labelStyle}>{tr.registerPage.mobileNumberLabel}</label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <div style={{ padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-raised)" }}>
+              {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - unified
+                  bordered container replacing the old two-separate-boxes
+                  look; +91 prefix and the number input now share one
+                  border with an internal divider, per Figma. */}
+              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`, borderRadius: "8px", overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", padding: "0 14px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid rgba(245,245,240,0.12)" }}>
                   +91
                 </div>
                 <input
@@ -454,10 +545,10 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.tenDigitPlaceholder}
                   value={form.phoneNumber}
                   onChange={handleChange}
-                  style={{ ...inputStyle(!!fieldErrors.phone), flex: 1 }}
+                  style={{ flex: 1, minWidth: 0, padding: "12px 14px", border: "none", background: "transparent", color: "var(--afa-text-primary)", fontSize: "14px", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
-              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45 }}>
+              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
@@ -480,11 +571,34 @@ export default function RegisterForm() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  <EyeIcon visible={showPassword} />
                 </button>
               </div>
+              {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - real
+                  length + character-variety strength meter (passwordStrength
+                  above), not a static visual. */}
+              {form.password.length > 0 && (
+                <div style={{ marginTop: "8px" }}>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        style={{
+                          flex: 1,
+                          height: "4px",
+                          borderRadius: "2px",
+                          background: i < passwordStrength ? strengthColor : "rgba(245,245,240,0.12)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <p style={{ marginTop: "4px", fontSize: "11px", color: strengthColor }}>
+                    {strengthLabel}
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <label style={labelStyle}>{tr.registerPage.confirmPasswordLabel}</label>
@@ -501,9 +615,9 @@ export default function RegisterForm() {
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
                   aria-label={showConfirm ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                 >
-                  {showConfirm ? "🙈" : "👁️"}
+                  <EyeIcon visible={showConfirm} />
                 </button>
               </div>
             </div>
@@ -519,7 +633,7 @@ export default function RegisterForm() {
               subtitle above (#415); only renders when a role param was
               recognized. */}
           {intendedRoleLabel && (
-            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65 }}>
+            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.65 }}>
               {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
             </p>
           )}
@@ -527,20 +641,20 @@ export default function RegisterForm() {
           <button
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken"}
-            style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
+            style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
             {tr.registerPage.agreeToTermsPrefix}{" "}
-            <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
-            <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
+            <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
+            <Link href="/privacy" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
           </p>
         </div>
 
         <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
           {tr.registerPage.alreadyHaveAccountPrefix} {" "}
-          <Link href="/login" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
+          <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
         <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
           {tr.registerPage.everyoneJoinsAsAudience}
