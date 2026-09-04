@@ -642,15 +642,15 @@ export default function RegisterForm() {
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
-            {tr.registerPage.agreeToTermsPrefix}{" "}
-            <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
-            <Link href="/privacy" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px" }}>
+            <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.agreeToTermsPrefix}</span>{" "}
+            <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.andConjunction}</span>{" "}
+            <Link href="/privacy" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link><span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>.</span>
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
-          {tr.registerPage.alreadyHaveAccountPrefix} {" "}
+        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px" }}>
+          <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.registerPage.alreadyHaveAccountPrefix}</span> {" "}
           <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
         <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
