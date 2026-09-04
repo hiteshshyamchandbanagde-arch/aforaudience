@@ -25,10 +25,15 @@ const MAX_OTHER_LENGTH = 200
 interface Props {
   value: string[]
   onChange: (genres: string[]) => void
+  // Profile page redesign (5 Sep 2026, Figma Make port) wants more generously
+  // padded pills there; defaults to the original size so every other caller
+  // (e.g. dashboard/artist/edit) renders unchanged.
+  size?: 'default' | 'lg'
 }
 
-export default function GenrePicker({ value, onChange }: Props) {
+export default function GenrePicker({ value, onChange, size = 'default' }: Props) {
   const { t: tr } = useLocale()
+  const pillPadding = size === 'lg' ? '9px 18px' : '7px 14px'
   const presetSelected = value.filter((v) => PRESET_GENRES.includes(v))
   // Anything in `value` that isn't one of the presets is "Other" content -
   // this correctly round-trips existing artists who already have free-text
@@ -63,7 +68,7 @@ export default function GenrePicker({ value, onChange }: Props) {
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
-                padding: '7px 14px',
+                padding: pillPadding,
                 borderRadius: '999px',
                 border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
                 background: selected ? 'var(--afa-amber)' : 'transparent',
