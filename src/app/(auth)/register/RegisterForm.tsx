@@ -12,13 +12,13 @@ const inputStyle = (hasError?: boolean) => ({
   borderRadius: "8px",
   border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(245,245,240,0.15)"}`,
   fontSize: "14px",
-  color: "var(--afa-text-primary)",
+  color: "var(--afa-ink)",
   background: "white",
   outline: "none",
   boxSizing: "border-box" as const,
 })
 
-const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }
+const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -273,7 +273,7 @@ export default function RegisterForm() {
 
           <div style={{ background: "white", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
             {devOtp && (
-              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
+              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
@@ -359,7 +359,7 @@ export default function RegisterForm() {
               />
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
                 <div style={{ marginTop: "8px" }}>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-ink)", opacity: 0.6 }}>
                     {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
@@ -389,7 +389,7 @@ export default function RegisterForm() {
                       title={tr.registerPage.tryMoreSuggestionsTitle}
                       style={{
                         fontSize: "12px",
-                        color: "var(--afa-text-primary)",
+                        color: "var(--afa-ink)",
                         opacity: initialsLoading ? 0.4 : 0.6,
                         background: "none",
                         border: "none",
@@ -403,7 +403,7 @@ export default function RegisterForm() {
                 </div>
               )}
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
               )}
               {usernameStatus === "available" && (
                 <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)" }}>{tr.registerPage.availableLabel}</p>
@@ -457,7 +457,7 @@ export default function RegisterForm() {
                   style={{ ...inputStyle(!!fieldErrors.phone), flex: 1 }}
                 />
               </div>
-              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
+              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.45 }}>
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
@@ -519,7 +519,7 @@ export default function RegisterForm() {
               subtitle above (#415); only renders when a role param was
               recognized. */}
           {intendedRoleLabel && (
-            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.65 }}>
+            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-ink)", opacity: 0.65 }}>
               {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
             </p>
           )}
@@ -531,7 +531,7 @@ export default function RegisterForm() {
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5 }}>
             {tr.registerPage.agreeToTermsPrefix}{" "}
             <Link href="/terms" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> {tr.registerPage.andConjunction}{" "}
             <Link href="/privacy" style={{ color: "var(--afa-terracotta)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link>.
