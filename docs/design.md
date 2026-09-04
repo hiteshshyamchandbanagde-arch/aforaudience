@@ -1377,3 +1377,19 @@ Port checklist above was fully applied:
 **Follow-up fixes (5 Sep 2026, same session):**
 - Login's two success banners had the hardcoded `1px solid #68D391` border noted above — fixed by applying the identical token pattern already used on Verify Email (`rgba(39,103,73,0.15)` bg + `var(--afa-green-dark)` border/text). Repo-wide grep on `qa` confirmed no other occurrences existed anywhere else.
 - Forgot Password's "Back to sign in" link was reported as visibly dimmer than other amber links. Investigated and confirmed as a real bug, not a screenshot artifact: the link's wrapping `<p>` had `opacity: 0.6` with no prefix text to justify it (a copy-paste artifact from Login/Register's dimmed-prefix pattern, applied where there was no prefix to dim). Repo-wide check for the same pattern (opacity on a parent wrapping an amber `Link`) found 3 more instances — Login's "Create one free" link, and Register's "Sign in" link plus its Terms/Privacy links — all fixed by moving the opacity onto a `<span>` around the plain prefix/connector text only, leaving every amber link at full strength.
+
+## Profile Page — Desktop Two-Column Redesign (Figma Make round, 5 Sep 2026)
+
+Same dead-space problem as the auth pages (docs above), found on `/profile`: single 640px column centered in the viewport, plus every element read cramped (thin borders, small text, card-on-card-tone flatness). Figma Make prompt asked for a two-column desktop grid instead of tabs/sidebar — collaborator recommendation was a card grid since the page has 7 small sections, not deep enough per-section content to justify hiding any behind tabs.
+
+**Layout, live on qa (PR #554, commit 5c60aca):** "YOUR PROFILE" column (Display Name, About You, Display Currency) left, "GROW YOUR REACH" column (Become an Artist, Become an Organiser, List Your Venue) right, "My Feedback" full-width below. Single column under 900px (matches the site's existing collapse breakpoint elsewhere, not the export's 860px). Inputs/textarea/select moved to `var(--afa-surface-page)` so they read as recessed wells against the raised card - this, plus `main`'s background correction from `--afa-surface-raised` to `--afa-surface-page`, was the real fix for the "flat/cramped" complaint, not just bigger padding.
+
+**Color decision (Hitesh, 5 Sep 2026): rejected the export's two new muted grays** (`#A8A89E` given a token name, and an undefined stray `#6E6E68` used only for column eyebrow labels + "Login code"). Reused the existing `var(--afa-text-primary)` + opacity pattern instead - consistent with every other page, and each spot was checked for nested links/buttons first (the exact bug class just fixed on the auth pages) before reusing that pattern.
+
+**Skipped from the export:** the "YOUR PROFILE"/"GROW YOUR REACH" eyebrow labels have no i18n keys and this dictionary requires all 11 locale files to satisfy the same TypeScript type - out of scope for a layout-only pass. Card headings + grid grouping already communicate the sections without them.
+
+**GenrePicker.tsx:** additive optional `size` prop (`'default' | 'lg'`), defaults to unchanged so every other caller (dashboard/artist/edit) is unaffected. Only the profile page opts into the larger pill padding.
+
+**Known, accepted:** page-level scrollbar on desktop, since this page's 7 cards of real content genuinely exceed most viewport heights - confirmed by Hitesh as expected, not a bug (addendum on GEN-2609-002).
+
+**Verification:** independently confirmed branch SHA/file list matched CC's claim, zero off-palette hex via grep, identical set of declared functions/consts between qa and the branch (no logic touched), GenrePicker diff additive-only, Vercel deploy READY with no runtime errors both pre- and post-merge.
