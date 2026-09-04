@@ -9,6 +9,22 @@ import { useLocale } from '@/lib/i18n/translate'
 
 type Mode = "password" | "otp-request" | "otp-verify"
 
+// Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - same
+// two-path eye outline as RegisterForm.tsx, re-skinning the 🙈/👁️ emoji.
+function EyeIcon({ visible }: { visible: boolean }) {
+  return visible ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.59 21.59 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a21.59 21.59 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  )
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -132,8 +148,8 @@ function LoginForm() {
         </p>
       </div>
 
-      <div className="bg-white rounded-[16px] p-8 sm:p-10 border border-[rgba(14,12,10,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-ink)", marginBottom: "24px" }}>
+      <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[rgba(245,245,240,0.08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
+        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "24px" }}>
           {tr.loginPage.signInHeading}
         </h2>
 
@@ -170,7 +186,7 @@ function LoginForm() {
 
         {mode !== "otp-verify" && (
           <div style={{ marginBottom: "16px" }}>
-            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+            <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
               {tr.loginPage.identifierLabel}
             </label>
             <input
@@ -178,7 +194,7 @@ function LoginForm() {
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder={tr.loginPage.identifierPlaceholder}
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
-              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
             />
           </div>
         )}
@@ -186,7 +202,7 @@ function LoginForm() {
         {mode === "password" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.passwordLabel}
               </label>
               <div style={{ position: "relative" }}>
@@ -196,28 +212,28 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", padding: "4px", opacity: 0.5, lineHeight: 1 }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  <EyeIcon visible={showPassword} />
                 </button>
               </div>
             </div>
             <button
               onClick={handleLogin}
               disabled={loading || !identifier || !password}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
             </button>
             <button
               onClick={() => { setMode("otp-request"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               {tr.loginPage.useOtpInstead}
             </button>
@@ -229,13 +245,13 @@ function LoginForm() {
             <button
               onClick={handleRequestOtp}
               disabled={loading || !identifier}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
             </button>
             <button
               onClick={() => { setMode("password"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               {tr.loginPage.usePasswordInstead}
             </button>
@@ -245,7 +261,7 @@ function LoginForm() {
         {mode === "otp-verify" && (
           <>
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-ink)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }}>
                 {tr.loginPage.enterCodeLabel}
               </label>
               <input
@@ -253,20 +269,20 @@ function LoginForm() {
                 onChange={(e) => setOtpCode(e.target.value)}
                 maxLength={6}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
             </div>
             <button
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
             </button>
             <button
               onClick={handleRequestOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-terracotta)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
             >
               {tr.loginPage.resendCodeButton}
             </button>
@@ -282,14 +298,14 @@ function LoginForm() {
         {mode !== "otp-verify" && process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0" }}>
-              <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
-              <span style={{ fontSize: "12px", color: "var(--afa-ink)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
-              <div style={{ flex: 1, height: "1px", background: "rgba(14,12,10,0.12)" }} />
+              <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+              <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+              <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
             </div>
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "white", color: "var(--afa-ink)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(14,12,10,0.15)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "transparent", color: "var(--afa-text-primary)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>
@@ -303,7 +319,7 @@ function LoginForm() {
         )}
 
         <div style={{ textAlign: "center", marginTop: "16px" }}>
-          <Link href="/forgot-password" style={{ fontSize: "13px", color: "var(--afa-terracotta)", textDecoration: "none" }}>
+          <Link href="/forgot-password" style={{ fontSize: "13px", color: "var(--afa-amber)", textDecoration: "none" }}>
             {tr.loginPage.forgotPasswordLink}
           </Link>
         </div>
@@ -311,7 +327,7 @@ function LoginForm() {
 
       <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
         {tr.loginPage.noAccountPrefix}{" "}
-        <Link href="/register" style={{ color: "var(--afa-terracotta)", textDecoration: "none", fontWeight: 500 }}>
+        <Link href="/register" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
           {tr.loginPage.createOneFreeLink}
         </Link>
       </p>
