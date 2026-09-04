@@ -30,12 +30,26 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
 const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
-  padding: '24px',
-  border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
+  padding: '28px 28px 24px',
+  border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.07)',
   boxShadow: active ? '0 0 0 4px rgba(201,151,58,0.12)' : 'none',
-  marginBottom: '16px',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
 })
+
+// Recessed field look (Figma Make profile-page redesign, 5 Sep 2026 - see
+// docs/design.md) - inputs sit a shade darker than the card so they read as
+// wells instead of blending into the card body. Same border/radius as
+// before, just the background + a subtle amber focus ring.
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '11px 14px',
+  borderRadius: '8px',
+  border: '1px solid rgba(245,245,240,0.1)',
+  fontSize: '14px',
+  boxSizing: 'border-box',
+  background: 'var(--afa-surface-page)',
+  color: 'var(--afa-text-primary)',
+}
 
 function ProfileContent() {
   const { t: tr } = useLocale()
@@ -448,24 +462,53 @@ function ProfileContent() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
-            {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
-          </h1>
-          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
-          {user?.code && (
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '32px', fontFamily: 'monospace' }}>
-              {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
-            </p>
-          )}
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+        <div
+          className="afa-profile-page-container"
+          style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(32px, 5vw, 56px) clamp(20px, 5vw, 56px)' }}
+        >
+          {/* Two-column grid on desktop, single column on mobile. Scoped to
+              this wrapper (not global) so it can't affect SiteNav's own
+              inputs/focus states above. 900px matches the breakpoint the
+              rest of the site already uses for this kind of collapse (see
+              HomeHeader, SiteNav, ArtistProfileClientPage, organisers/venues
+              pages) rather than the Figma export's 860px. */}
+          <style>{`
+            .afa-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+            .afa-profile-col { display: flex; flex-direction: column; gap: 20px; }
+            @media (max-width: 900px) {
+              .afa-profile-grid { grid-template-columns: 1fr; gap: 20px; }
+            }
+            .afa-profile-page-container input:focus,
+            .afa-profile-page-container textarea:focus,
+            .afa-profile-page-container select:focus {
+              outline: none;
+              border-color: rgba(201,151,58,0.5) !important;
+              box-shadow: 0 0 0 3px rgba(201,151,58,0.08);
+            }
+          `}</style>
+
+          <div style={{ marginBottom: '40px' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+              {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
+            </h1>
+            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
+            {user?.code && (
+              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'monospace' }}>
+                {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+              </p>
+            )}
+          </div>
 
           {message && (
-            <SuccessBanner style={{ marginBottom: '20px' }}>{message}</SuccessBanner>
+            <SuccessBanner style={{ marginBottom: '24px' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
           )}
+
+          <div className="afa-profile-grid">
+          <div className="afa-profile-col">
 
           {/* Display name — separate from the login username. Shows on
               tickets, emails, and greetings. Falls back to username if
@@ -485,15 +528,8 @@ function ProfileContent() {
               disabled={!nameLoaded}
               maxLength={120}
               style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '6px',
-                border: '1px solid rgba(245,245,240,0.15)',
-                fontSize: '14px',
-                marginBottom: '12px',
-                boxSizing: 'border-box' as const,
-                background: 'var(--afa-surface-raised)',
-                color: 'var(--afa-text-primary)',
+                ...fieldStyle,
+                marginBottom: '18px',
                 opacity: nameLoaded ? 1 : 0.5,
                 cursor: nameLoaded ? 'text' : 'default',
               }}
@@ -544,7 +580,7 @@ function ProfileContent() {
               rows={3}
               maxLength={500}
               placeholder={tr.profilePage.bioPlaceholder}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, resize: 'vertical' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              style={{ ...fieldStyle, marginBottom: '18px', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
             />
             <button
               onClick={saveAbout}
@@ -578,7 +614,20 @@ function ProfileContent() {
             <select
               value={displayCurrency}
               onChange={(e) => setDisplayCurrency(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              style={{
+                ...fieldStyle,
+                marginBottom: '18px',
+                cursor: 'pointer',
+                appearance: 'none',
+                // Chevron stroke inlined as rgba(245,245,240,0.65) - the same
+                // value as --afa-text-secondary - since a data-URI can't
+                // reference a CSS custom property. Not a new color.
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 14px center',
+                paddingRight: '36px',
+              }}
             >
               {currencies.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -604,9 +653,15 @@ function ProfileContent() {
               {savingCurrency ? tr.profilePage.savingEllipsis : tr.profilePage.saveCurrencyBtn}
             </button>
           </div>
+          </div>
+
+          <div className="afa-profile-col">
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              {tr.profilePage.becomeArtistBtn}
+            </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               {tr.profilePage.artistUpgradeDesc}
             </p>
@@ -616,7 +671,7 @@ function ProfileContent() {
             ) : (
               <>
                 <div style={{ marginBottom: '12px' }}>
-                  <GenrePicker value={genre} onChange={setGenre} />
+                  <GenrePicker value={genre} onChange={setGenre} size="lg" />
                 </div>
                 <button
                   onClick={applyArtist}
@@ -647,7 +702,7 @@ function ProfileContent() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder={tr.profilePage.orgNamePlaceholder}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ ...fieldStyle, marginBottom: '18px' }}
                 />
                 <button
                   onClick={applyOrganiser}
@@ -682,6 +737,9 @@ function ProfileContent() {
             )}
           </div>
 
+          </div>
+          </div>
+
           {/* My Feedback link (session 63) was structurally placed OUTSIDE
               this maxWidth wrapper - the wrapper's closing </div> used to
               sit right here, before the Link, making it a sibling of this
@@ -694,6 +752,7 @@ function ProfileContent() {
             style={{
               display: 'block',
               ...cardStyle(),
+              marginTop: '32px',
               textDecoration: 'none',
               color: 'inherit',
             }}
