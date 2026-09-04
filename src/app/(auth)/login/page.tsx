@@ -326,8 +326,8 @@ function LoginForm() {
         </div>
       </div>
 
-      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
-        {tr.loginPage.noAccountPrefix}{" "}
+      <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px" }}>
+        <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.loginPage.noAccountPrefix}</span>{" "}
         <Link href="/register" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
           {tr.loginPage.createOneFreeLink}
         </Link>
