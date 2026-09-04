@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
+        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px" }}>
           <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>
             {tr.forgotPasswordPage.backToSignIn}
           </Link>
