@@ -1427,3 +1427,19 @@ Export reviewed ("AFA Audience Dashboard Shell" round, `Design_AFA_Dashboard_She
 **Kept as-is, not flagged:** the confirmed/reserved ticket cards' gradient accent strip (orange→amber tones) — decorative, not a mislabeled action or category color, different from the type-tag case above.
 
 **Build brief written and handed off** (full text in HANDOFF.md / session transcript) covering: new shared shell component, applying it to the 3 real pages (Dashboard/Messages/Tickets) with all existing handler/API logic preserved, the 3 color fixes above, and folding in BUG-2609-003's fixes (Messages' white-card fallback, terracotta leftovers) since those files are being touched anyway. Not yet executed as of this write-up.
+
+---
+
+### Dashboard Shell (#555) — merged to qa, plus a nav-consistency gap found post-merge
+
+**Merged**: PR #555, squash commit `8a04ee1`. Verified independently (not just CC self-report) before merge: repo-wide deprecated-token grep clean across all 4 changed files, no hover-dependent color, `--afa-fill-solid` used correctly on commit actions (Pay Now, Confirm-companion) vs `--afa-amber` on nav links (Browse Events x2 — Dashboard *and* Tickets, both leftover terracotta spots), thread-type-tag collapse confirmed (single amber style block, differentiated by `CONTEXT_LABEL` text only, comment cites BUG-2609-003), SupportWidget tap-collision fix confirmed (`paddingRight: 88` on mobile nav `zIndex 40`, comment references widget's `zIndex 45`), role sections confirmed inert (`aria-disabled`, no href/onClick). Vercel build READY on both the preview branch and post-merge `qa`. BUG-2609-003 marked RESOLVED/DEPLOYED_QA.
+
+**Gap found after merge (BUG-2609-004), via Hitesh's screenshots**: the shell brief scoped only Dashboard/Messages/Tickets — Profile page (separately redesigned in #554) was left out. Two consequences:
+1. Sidebar's own "Profile" nav item leads to a page with no sidebar — nav disappears, reads as broken.
+2. The pre-existing SiteNav account dropdown (top-right avatar) still lists Dashboard/Messages/My Tickets/Profile — duplicating the new sidebar's nav on the 3 pages that have it.
+
+**Process note**: the verify-before-merge pass checked code correctness (tokens, colors, structure, inert-ness) but not the end-to-end nav experience against *existing* chrome that wasn't part of the diff. Worth adding to the verification checklist for any future shared-nav/shell component: does it duplicate or conflict with nav that already exists elsewhere on the same pages?
+
+**Planned fix** (not a revert — shell itself is working correctly on the 3 pages it covers):
+1. Wrap `/profile/page.tsx` in `DashboardShell`.
+2. Make `SiteNav`'s account dropdown shell-aware: drop the Dashboard/Messages/My Tickets/Profile entries on pages that have the sidebar (keep language/location/Sign out there); keep the full dropdown on non-shell pages (homepage, events, etc.) where it's the only nav.
