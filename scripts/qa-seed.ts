@@ -147,6 +147,16 @@ async function wipe(prisma: PrismaClient) {
     ["VenueBooking", () => prisma.venueBooking.deleteMany()],
     ["Conversation", () => prisma.conversation.deleteMany()],
     ["Event", () => prisma.event.deleteMany()],
+    // Pre-existing gap found while running this script (not previously hit
+    // because these 4 tables happened to be empty on past runs): all four
+    // reference Artist/Organiser with no onDelete cascade, so a non-empty
+    // CorporateBookingInquiry/ArtistTourStop/TourArtistConsent/Tour blocks
+    // the Artist/Organiser deleteMany below with a real FK violation, not
+    // just a hypothetical one - reproduced against the live QA DB.
+    ["TourArtistConsent", () => prisma.tourArtistConsent.deleteMany()],
+    ["Tour", () => prisma.tour.deleteMany()],
+    ["CorporateBookingInquiry", () => prisma.corporateBookingInquiry.deleteMany()],
+    ["ArtistTourStop", () => prisma.artistTourStop.deleteMany()],
     ["Artist", () => prisma.artist.deleteMany()],
     ["Organiser", () => prisma.organiser.deleteMany()],
     ["Venue", () => prisma.venue.deleteMany()],
@@ -925,8 +935,589 @@ async function seedGoldenScenario(
 }
 
 // ---------------------------------------------------------------------------
+// Demo personas — 8 fixed-ID, named QA accounts for manual click-testing.
+// Distinct from both the volume pool (randomized Faker content, generic
+// qa.audience001-style logins) and the e2e/golden fixtures above (protected -
+// other code asserts against their exact ids/strings). These are hand-built,
+// human-named personas so Hitesh can log in as "Omkar" or "Hrithik" and see a
+// specific, deliberately-shaped account rather than hunting through a random
+// volume row. Four are cross-linked into one shared story (Vinayak's venues
+// host Omkar's events, Hrithik performs at them, Atul attends) so the story
+// renders coherently across all 4 dashboards; the other four are
+// deliberately sparse and NOT linked to that story, for testing empty/thin-
+// state UI on a still-legitimate account.
+//
+// Every id here uses the "qa-demo-" prefix — NEVER "e2efixture"
+// (e2e/helpers/roles.ts) or "qa-golden" (the golden scenario above), both of
+// which other code asserts against by literal id/string.
+// ---------------------------------------------------------------------------
+
+async function seedDemoPersonas(
+  prisma: PrismaClient,
+  pools: { organisers: SeededOrganiser[]; venueOwners: SeededVenueOwner[]; artists: SeededArtist[]; audiences: SeededUser[] }
+) {
+  console.log("\n[seed] Demo personas (8 fixed-ID named accounts: 4 cross-linked 'full', 4 sparse 'partial')...")
+
+  const passwordHash = await hashPassword(VOLUME_PASSWORD)
+
+  // -- Vinayak — Venue Owner Full: 6 fully-fleshed venues ------------------
+  const vinayakId = "qa-demo-vo-full"
+  const vinayakRoleId = "qa-demo-vo-full-role"
+  await prisma.user.upsert({
+    where: { id: vinayakId },
+    update: { email: "vinayak.venue@aforaudience.qa", displayName: "Vinayak", password: passwordHash },
+    create: {
+      id: vinayakId,
+      name: "qa_demo_vo_full",
+      email: "vinayak.venue@aforaudience.qa",
+      displayName: "Vinayak",
+      password: passwordHash,
+      role: Role.VENUE_OWNER,
+      phone: `+91${faker.string.numeric(10)}`,
+      avatar: faker.image.avatarGitHub(),
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.venueOwner.upsert({
+    where: { id: vinayakRoleId },
+    update: {},
+    create: {
+      id: vinayakRoleId,
+      userId: vinayakId,
+      isApproved: true,
+      // Venue itself has no description field in the schema (see
+      // docs/qa-seed-script-spec.md follow-up note) - the "real, not lorem"
+      // descriptive content the brief asked for lives here on the owner's
+      // bio instead, since that's the closest real field available.
+      bio: "Running live music and comedy spaces across Pune for the last six years - from an 80-seat basement club to a 300-capacity rooftop arena. If it's got a stage and decent acoustics, there's a good chance it's one of ours.",
+    },
+  })
+
+  type DemoVenuePlan = {
+    id: string
+    name: string
+    address: string
+    capacity: number
+    rateType: RateType
+    hourlyRate?: number
+    dailyRate?: number
+    facilities: string[]
+  }
+  const venuePlans: DemoVenuePlan[] = [
+    { id: "qa-demo-venue-full-1", name: "Koregaon Park Lounge", address: "Lane 5, Koregaon Park", capacity: 80, rateType: RateType.HOURLY, hourlyRate: 2500, facilities: ["Sound System", "Bar", "Air Conditioning"] },
+    { id: "qa-demo-venue-full-2", name: "FC Road Comedy Hall", address: "FC Road, Shivajinagar", capacity: 150, rateType: RateType.DAILY, dailyRate: 18000, facilities: ["Sound System", "Green Room", "Parking", "Stage Lighting"] },
+    { id: "qa-demo-venue-full-3", name: "Baner Underground Club", address: "Baner Road", capacity: 60, rateType: RateType.HOURLY, hourlyRate: 1800, facilities: ["Sound System", "Bar"] },
+    { id: "qa-demo-venue-full-4", name: "Aundh Heritage Theatre", address: "Aundh-Baner Link Road", capacity: 300, rateType: RateType.DAILY, dailyRate: 35000, facilities: ["Sound System", "Green Room", "Parking", "Stage Lighting", "Wheelchair Accessible"] },
+    { id: "qa-demo-venue-full-5", name: "Camp Corner Cafe", address: "East Street, Camp", capacity: 40, rateType: RateType.HOURLY, hourlyRate: 1200, facilities: ["Sound System", "Bar", "WiFi"] },
+    { id: "qa-demo-venue-full-6", name: "Viman Nagar Arena", address: "Viman Nagar Main Road", capacity: 250, rateType: RateType.DAILY, dailyRate: 28000, facilities: ["Sound System", "Parking", "Power Backup", "Stage Lighting"] },
+  ]
+  for (const v of venuePlans) {
+    await prisma.venue.upsert({
+      where: { id: v.id },
+      update: { name: v.name, capacity: v.capacity },
+      create: {
+        id: v.id,
+        ownerId: vinayakRoleId,
+        name: v.name,
+        address: v.address,
+        city: "Pune",
+        state: "Maharashtra",
+        country: "India",
+        capacity: v.capacity,
+        photos: [],
+        facilities: v.facilities,
+        isApproved: true,
+        rateType: v.rateType,
+        hourlyRate: v.hourlyRate,
+        dailyRate: v.dailyRate,
+        seatingMode: "GENERAL_ADMISSION",
+      },
+    })
+  }
+
+  // -- Omkar — Organiser Full: 10 events across Vinayak's 6 venues ---------
+  const omkarId = "qa-demo-org-full"
+  const omkarRoleId = "qa-demo-org-full-role"
+  await prisma.user.upsert({
+    where: { id: omkarId },
+    update: { email: "omkar.organiser@aforaudience.qa", displayName: "Omkar", password: passwordHash },
+    create: {
+      id: omkarId,
+      name: "qa_demo_org_full",
+      email: "omkar.organiser@aforaudience.qa",
+      displayName: "Omkar",
+      password: passwordHash,
+      role: Role.ORGANISER,
+      phone: `+91${faker.string.numeric(10)}`,
+      avatar: faker.image.avatarGitHub(),
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.organiser.upsert({
+    where: { id: omkarRoleId },
+    update: {},
+    create: {
+      id: omkarRoleId,
+      userId: omkarId,
+      orgName: "Omkar Live Presents",
+      bio: "Independent event organiser bringing stand-up, poetry, and open-mic nights to Pune every week. Booked 200+ shows since 2022 - always looking for fresh voices.",
+      isApproved: true,
+    },
+  })
+
+  // 2 already past (Sept 1-4 2026, COMPLETED) + 8 upcoming (Sept 5 - Oct 31
+  // 2026). One (index 3, "One-Act Play Festival") gets a pending Application
+  // left in its queue below; one (index 5, "Full House Open Mic") gets its
+  // lineup filled to capacity. Venues repeat (10 events > 6 venues).
+  type DemoEventPlan = {
+    id: string
+    title: string
+    type: EventType
+    status: EventStatus
+    dayOffset: number
+    venueId: string
+    isFree: boolean
+    ticketPrice: number | null
+    maxPerformers: number
+  }
+  const eventPlans: DemoEventPlan[] = [
+    { id: "qa-demo-event-full-1", title: "Tuesday Night Open Mic", type: EventType.OPEN_MIC, status: EventStatus.COMPLETED, dayOffset: -4, venueId: venuePlans[0].id, isFree: true, ticketPrice: null, maxPerformers: 6 },
+    { id: "qa-demo-event-full-2", title: "Solo Stand-up Showcase", type: EventType.STAND_UP, status: EventStatus.COMPLETED, dayOffset: -2, venueId: venuePlans[1].id, isFree: false, ticketPrice: 300, maxPerformers: 4 },
+    { id: "qa-demo-event-full-3", title: "Verses & Vinyl: Poetry Night", type: EventType.POETRY, status: EventStatus.APPROVED, dayOffset: 3, venueId: venuePlans[2].id, isFree: false, ticketPrice: 200, maxPerformers: 6 },
+    { id: "qa-demo-event-full-4", title: "One-Act Play Festival", type: EventType.THEATER, status: EventStatus.APPROVED, dayOffset: 10, venueId: venuePlans[3].id, isFree: false, ticketPrice: 400, maxPerformers: 5 },
+    { id: "qa-demo-event-full-5", title: "Mixed Bag Comedy Lineup", type: EventType.LINEUP, status: EventStatus.APPROVED, dayOffset: 17, venueId: venuePlans[4].id, isFree: false, ticketPrice: 250, maxPerformers: 6 },
+    { id: "qa-demo-event-full-6", title: "Full House Open Mic", type: EventType.OPEN_MIC, status: EventStatus.APPROVED, dayOffset: 24, venueId: venuePlans[5].id, isFree: true, ticketPrice: null, maxPerformers: 3 },
+    { id: "qa-demo-event-full-7", title: "Headliner Stand-up Night", type: EventType.STAND_UP, status: EventStatus.APPROVED, dayOffset: 31, venueId: venuePlans[0].id, isFree: false, ticketPrice: 350, maxPerformers: 4 },
+    { id: "qa-demo-event-full-8", title: "Spoken Word Sundays", type: EventType.POETRY, status: EventStatus.APPROVED, dayOffset: 38, venueId: venuePlans[1].id, isFree: false, ticketPrice: 200, maxPerformers: 6 },
+    { id: "qa-demo-event-full-9", title: "Improv Theatre Jam", type: EventType.THEATER, status: EventStatus.APPROVED, dayOffset: 45, venueId: venuePlans[2].id, isFree: false, ticketPrice: 400, maxPerformers: 5 },
+    { id: "qa-demo-event-full-10", title: "Grand Finale Lineup Night", type: EventType.LINEUP, status: EventStatus.APPROVED, dayOffset: 52, venueId: venuePlans[3].id, isFree: false, ticketPrice: 300, maxPerformers: 6 },
+  ]
+  for (const e of eventPlans) {
+    const isPast = e.dayOffset < 0
+    await prisma.event.upsert({
+      where: { id: e.id },
+      update: { status: e.status },
+      create: {
+        id: e.id,
+        organiserId: omkarRoleId,
+        venueId: e.venueId,
+        title: e.title,
+        description: faker.lorem.paragraph(),
+        type: e.type,
+        status: e.status,
+        date: daysFromNow(e.dayOffset),
+        startTime: "19:00",
+        endTime: "21:30",
+        isFree: e.isFree,
+        ticketPrice: e.ticketPrice,
+        totalSeats: 80,
+        availableSeats: isPast ? 74 : 80,
+        maxPerformers: e.maxPerformers,
+        applicationApprovalMode: ApprovalMode.MANUAL,
+        defaultCompensationType: CompensationType.FREE,
+      },
+    })
+  }
+
+  // -- Hrithik — Artist Full: applies/performs across 6 of Omkar's events -
+  const hrithikId = "qa-demo-artist-full"
+  const hrithikRoleId = "qa-demo-artist-full-role"
+  await prisma.user.upsert({
+    where: { id: hrithikId },
+    update: { email: "hrithik.artist@aforaudience.qa", displayName: "Hrithik", password: passwordHash },
+    create: {
+      id: hrithikId,
+      name: "qa_demo_art_full",
+      email: "hrithik.artist@aforaudience.qa",
+      displayName: "Hrithik",
+      password: passwordHash,
+      role: Role.ARTIST,
+      phone: `+91${faker.string.numeric(10)}`,
+      avatar: faker.image.avatarGitHub(),
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.artist.upsert({
+    where: { id: hrithikRoleId },
+    update: {},
+    create: {
+      id: hrithikRoleId,
+      userId: hrithikId,
+      bio: "Observational stand-up comedian turning everyday Pune chaos - traffic, landlords, WFH calls - into material.",
+      genre: ["Stand-up Comedy"],
+      styleTag: ["Observational", "High Energy"],
+      videoReel: [],
+      tagline: "Turning Pune traffic into 45 minutes of material.",
+    },
+  })
+
+  // Schema note: ApplicationStatus has no "ACCEPTED" value (PENDING /
+  // APPROVED / REJECTED / WAITLISTED) - "ACCEPTED" in the brief maps to
+  // APPROVED, same as the golden scenario above already does.
+  type HeroLineupPlan = {
+    eventId: string
+    appStatus: "APPROVED" | "PENDING"
+    compensationType?: CompensationType
+    feeAmount?: number
+    buyInAmount?: number
+  }
+  const heroLineupEvents: HeroLineupPlan[] = [
+    { eventId: "qa-demo-event-full-1", appStatus: "APPROVED", compensationType: CompensationType.PAID, feeAmount: 1500 },
+    { eventId: "qa-demo-event-full-2", appStatus: "APPROVED", compensationType: CompensationType.BUY_IN, buyInAmount: 300 },
+    { eventId: "qa-demo-event-full-3", appStatus: "APPROVED", compensationType: CompensationType.FREE },
+    { eventId: "qa-demo-event-full-4", appStatus: "PENDING" }, // the pending-queue event - no performance yet
+    { eventId: "qa-demo-event-full-5", appStatus: "APPROVED", compensationType: CompensationType.FREE },
+    { eventId: "qa-demo-event-full-6", appStatus: "APPROVED", compensationType: CompensationType.FREE }, // the lineup-full event
+  ]
+
+  const hrithikPerformanceIdByEvent: Record<string, string> = {}
+  for (let i = 0; i < heroLineupEvents.length; i++) {
+    const plan = heroLineupEvents[i]
+    const applicationId = `qa-demo-app-full-hrithik-${i + 1}`
+    await prisma.application.upsert({
+      where: { id: applicationId },
+      update: { status: plan.appStatus },
+      create: {
+        id: applicationId,
+        eventId: plan.eventId,
+        artistId: hrithikRoleId,
+        status: plan.appStatus,
+      },
+    })
+    if (plan.appStatus === "APPROVED") {
+      const performanceId = `qa-demo-perf-full-hrithik-${i + 1}`
+      hrithikPerformanceIdByEvent[plan.eventId] = performanceId
+      await prisma.performance.upsert({
+        where: { id: performanceId },
+        update: {},
+        create: {
+          id: performanceId,
+          eventId: plan.eventId,
+          artistId: hrithikRoleId,
+          slot: 1,
+          duration: 15,
+          compensationType: plan.compensationType,
+          feeAmount: plan.feeAmount,
+          buyInAmount: plan.buyInAmount,
+        },
+      })
+    }
+  }
+
+  // Fill event-6's lineup the rest of the way (maxPerformers: 3) with 2
+  // filler performances from the volume artist pool, so it's genuinely
+  // lineup-full, not just "Hrithik + empty seats."
+  const lineupFillerArtists = pools.artists.slice(0, 2)
+  for (let i = 0; i < lineupFillerArtists.length; i++) {
+    const applicationId = `qa-demo-app-full-6-filler-${i + 1}`
+    await prisma.application.upsert({
+      where: { id: applicationId },
+      update: {},
+      create: { id: applicationId, eventId: "qa-demo-event-full-6", artistId: lineupFillerArtists[i].artistId, status: "APPROVED" },
+    })
+    await prisma.performance.upsert({
+      where: { id: `qa-demo-perf-full-6-filler-${i + 1}` },
+      update: {},
+      create: {
+        id: `qa-demo-perf-full-6-filler-${i + 1}`,
+        eventId: "qa-demo-event-full-6",
+        artistId: lineupFillerArtists[i].artistId,
+        slot: i + 2,
+        duration: 10,
+        compensationType: CompensationType.FREE,
+      },
+    })
+  }
+  // event-4 (the pending-queue event) gets one already-approved filler too,
+  // so it reads as "a queue in progress" against a partially-filled lineup,
+  // not a totally empty one.
+  await prisma.application.upsert({
+    where: { id: "qa-demo-app-full-4-filler-1" },
+    update: {},
+    create: { id: "qa-demo-app-full-4-filler-1", eventId: "qa-demo-event-full-4", artistId: pools.artists[2].artistId, status: "APPROVED" },
+  })
+  await prisma.performance.upsert({
+    where: { id: "qa-demo-perf-full-4-filler-1" },
+    update: {},
+    create: { id: "qa-demo-perf-full-4-filler-1", eventId: "qa-demo-event-full-4", artistId: pools.artists[2].artistId, slot: 1, duration: 15, compensationType: CompensationType.FREE },
+  })
+
+  // -- Atul — Audience Full: tickets across Omkar's events -----------------
+  const atulId = "qa-demo-audience-full"
+  await prisma.user.upsert({
+    where: { id: atulId },
+    update: { email: "atul.audience@aforaudience.qa", displayName: "Atul", password: passwordHash },
+    create: {
+      id: atulId,
+      name: "qa_demo_aud_full",
+      email: "atul.audience@aforaudience.qa",
+      displayName: "Atul",
+      password: passwordHash,
+      role: Role.AUDIENCE,
+      phone: `+91${faker.string.numeric(10)}`,
+      avatar: faker.image.avatarGitHub(),
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+
+  type DemoBookingPlan = { eventId: string; dayOffset: number; isPast: boolean; ticketPrice: number | null }
+  const atulBookings: DemoBookingPlan[] = [
+    { eventId: "qa-demo-event-full-1", dayOffset: -4, isPast: true, ticketPrice: null },
+    { eventId: "qa-demo-event-full-2", dayOffset: -2, isPast: true, ticketPrice: 300 },
+    { eventId: "qa-demo-event-full-3", dayOffset: 3, isPast: false, ticketPrice: 200 },
+    { eventId: "qa-demo-event-full-5", dayOffset: 17, isPast: false, ticketPrice: 250 },
+  ]
+  for (let i = 0; i < atulBookings.length; i++) {
+    const b = atulBookings[i]
+    const bookingId = `qa-demo-booking-full-atul-${i + 1}`
+    const subtotal = b.ticketPrice ?? 0
+    await prisma.booking.upsert({
+      where: { id: bookingId },
+      update: {},
+      create: {
+        id: bookingId,
+        userId: atulId,
+        eventId: b.eventId,
+        seats: b.ticketPrice === null ? {} : { General: 1 },
+        totalAmount: subtotal,
+        subtotalAmount: subtotal,
+        bookingFeeAmount: 0,
+        status: BookingStatus.CONFIRMED,
+        checkedInAt: b.isPast ? daysFromNow(b.dayOffset) : null,
+        checkedInByUserId: b.isPast ? omkarId : null,
+      },
+    })
+  }
+
+  // Reviews on the 2 past events - doubles as Hrithik's "reviews on the 2
+  // completed events" requirement, since these are reviews on his own
+  // performances there. Deliberately Review (ratings/comments), not the
+  // Feedback model - Feedback is real support-widget bug/feature data
+  // (see wipe()'s own comment: explicitly not seeded test data), unrelated
+  // to event ratings.
+  await prisma.review.upsert({
+    where: { id: "qa-demo-review-full-atul-1" },
+    update: {},
+    create: {
+      id: "qa-demo-review-full-atul-1",
+      userId: atulId,
+      eventId: "qa-demo-event-full-1",
+      performanceId: hrithikPerformanceIdByEvent["qa-demo-event-full-1"],
+      rating: 5,
+      comment: "Hrithik's traffic bit killed. Genuinely one of the best open mic sets I've seen here.",
+    },
+  })
+  await prisma.review.upsert({
+    where: { id: "qa-demo-review-full-atul-2" },
+    update: {},
+    create: {
+      id: "qa-demo-review-full-atul-2",
+      userId: atulId,
+      eventId: "qa-demo-event-full-2",
+      performanceId: hrithikPerformanceIdByEvent["qa-demo-event-full-2"],
+      rating: 4,
+      comment: "Solid headline set - venue sound was a bit rough but the material carried it.",
+    },
+  })
+
+  // Messages - getOrCreateConversation() (src/lib/messaging.ts) is only
+  // ever called lazily from the message-thread API routes, never
+  // automatically on booking/application confirmation, so Atul's inbox
+  // stays genuinely empty unless a thread is seeded directly here.
+  const atulOmkarConversationId = "qa-demo-conv-atul-omkar-1"
+  await prisma.conversation.upsert({
+    where: { id: atulOmkarConversationId },
+    update: {},
+    create: {
+      id: atulOmkarConversationId,
+      contextType: "BOOKING",
+      contextId: "qa-demo-booking-full-atul-3", // event-3, Poetry Night, upcoming
+    },
+  })
+  await prisma.conversationParticipant.upsert({
+    where: { conversationId_userId: { conversationId: atulOmkarConversationId, userId: atulId } },
+    update: {},
+    create: { id: "qa-demo-convpart-atul-1", conversationId: atulOmkarConversationId, userId: atulId },
+  })
+  await prisma.conversationParticipant.upsert({
+    where: { conversationId_userId: { conversationId: atulOmkarConversationId, userId: omkarId } },
+    update: {},
+    create: { id: "qa-demo-convpart-omkar-1", conversationId: atulOmkarConversationId, userId: omkarId },
+  })
+  await prisma.message.upsert({
+    where: { id: "qa-demo-msg-1" },
+    update: {},
+    create: { id: "qa-demo-msg-1", conversationId: atulOmkarConversationId, senderId: atulId, body: "Hi! What time should I get there for the poetry night?" },
+  })
+  await prisma.message.upsert({
+    where: { id: "qa-demo-msg-2" },
+    update: {},
+    create: { id: "qa-demo-msg-2", conversationId: atulOmkarConversationId, senderId: omkarId, body: "Doors open 6:30pm, show starts 7pm sharp. See you there!" },
+  })
+
+  // Follows - Atul + 2 volume audiences, so Hrithik's follower count > 0.
+  // No stored counter on Artist - follower count is a live count of Follow
+  // rows (targetType ARTIST, targetId = Artist.id), same shape used by
+  // src/app/api/artists/me/route.ts.
+  const hrithikFollowerIds = [atulId, pools.audiences[0].id, pools.audiences[1].id]
+  for (let i = 0; i < hrithikFollowerIds.length; i++) {
+    await prisma.follow.upsert({
+      where: { userId_targetType_targetId: { userId: hrithikFollowerIds[i], targetType: "ARTIST", targetId: hrithikRoleId } },
+      update: {},
+      create: { id: `qa-demo-follow-hrithik-${i + 1}`, userId: hrithikFollowerIds[i], targetType: "ARTIST", targetId: hrithikRoleId },
+    })
+  }
+
+  // -- Orri — Organiser Partial: 1 draft event, nothing else ---------------
+  const orriId = "qa-demo-org-partial"
+  const orriRoleId = "qa-demo-org-partial-role"
+  await prisma.user.upsert({
+    where: { id: orriId },
+    update: { email: "orri.organiser@aforaudience.qa", displayName: "Orri", password: passwordHash },
+    create: {
+      id: orriId,
+      name: "qa_demo_org_partial",
+      email: "orri.organiser@aforaudience.qa",
+      displayName: "Orri",
+      password: passwordHash,
+      role: Role.ORGANISER,
+      phone: `+91${faker.string.numeric(10)}`,
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.organiser.upsert({
+    where: { id: orriRoleId },
+    update: {},
+    create: { id: orriRoleId, userId: orriId, orgName: "Orri Events (Draft)", isApproved: true },
+  })
+  // Deliberately no venueId (Orri isn't linked to Vinayak's venues - this
+  // persona is sparse/unlinked on purpose) - Event.venueId is nullable.
+  await prisma.event.upsert({
+    where: { id: "qa-demo-event-partial-org-1" },
+    update: {},
+    create: {
+      id: "qa-demo-event-partial-org-1",
+      organiserId: orriRoleId,
+      venueId: null,
+      title: "Untitled Draft Show",
+      description: "Draft event, still working out the details.",
+      type: EventType.OPEN_MIC,
+      status: EventStatus.DRAFT,
+      date: daysFromNow(20),
+      startTime: "19:00",
+      endTime: "21:00",
+      isFree: true,
+      totalSeats: 50,
+      availableSeats: 50,
+    },
+  })
+
+  // -- Vijay — Venue Owner Partial: 1 thin venue, no availability rows -----
+  const vijayId = "qa-demo-vo-partial"
+  const vijayRoleId = "qa-demo-vo-partial-role"
+  await prisma.user.upsert({
+    where: { id: vijayId },
+    update: { email: "vijay.venue@aforaudience.qa", displayName: "Vijay", password: passwordHash },
+    create: {
+      id: vijayId,
+      name: "qa_demo_vo_partial",
+      email: "vijay.venue@aforaudience.qa",
+      displayName: "Vijay",
+      password: passwordHash,
+      role: Role.VENUE_OWNER,
+      phone: `+91${faker.string.numeric(10)}`,
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.venueOwner.upsert({
+    where: { id: vijayRoleId },
+    update: {},
+    create: { id: vijayRoleId, userId: vijayId, isApproved: true },
+  })
+  // Thin fields only - no photos, no rate configured, and (deliberately,
+  // per the brief) no VenueAvailability rows created for it anywhere below.
+  await prisma.venue.upsert({
+    where: { id: "qa-demo-venue-partial-1" },
+    update: {},
+    create: {
+      id: "qa-demo-venue-partial-1",
+      ownerId: vijayRoleId,
+      name: "Kothrud Backyard",
+      address: "Kothrud",
+      city: "Pune",
+      capacity: 30,
+      photos: [],
+      facilities: [],
+      isApproved: true,
+      seatingMode: "GENERAL_ADMISSION",
+    },
+  })
+
+  // -- Shahrukh — Artist Partial: bare profile, nothing else ---------------
+  const shahrukhId = "qa-demo-artist-partial"
+  const shahrukhRoleId = "qa-demo-artist-partial-role"
+  await prisma.user.upsert({
+    where: { id: shahrukhId },
+    update: { email: "shahrukh.artist@aforaudience.qa", displayName: "Shahrukh", password: passwordHash },
+    create: {
+      id: shahrukhId,
+      name: "qa_demo_art_partial",
+      email: "shahrukh.artist@aforaudience.qa",
+      displayName: "Shahrukh",
+      password: passwordHash,
+      role: Role.ARTIST,
+      phone: `+91${faker.string.numeric(10)}`,
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+  await prisma.artist.upsert({
+    where: { id: shahrukhRoleId },
+    update: {},
+    create: { id: shahrukhRoleId, userId: shahrukhId, genre: ["Improv"], styleTag: [], videoReel: [] },
+  })
+
+  // -- Amit — Audience Partial: zero everything ----------------------------
+  const amitId = "qa-demo-audience-partial"
+  await prisma.user.upsert({
+    where: { id: amitId },
+    update: { email: "amit.audience@aforaudience.qa", displayName: "Amit", password: passwordHash },
+    create: {
+      id: amitId,
+      name: "qa_demo_aud_partial",
+      email: "amit.audience@aforaudience.qa",
+      displayName: "Amit",
+      password: passwordHash,
+      role: Role.AUDIENCE,
+      phone: `+91${faker.string.numeric(10)}`,
+      isVerified: true,
+      isApproved: true,
+    },
+  })
+
+  return {
+    vinayak: { label: "Vinayak (Venue Owner, full/cross-linked)", email: "vinayak.venue@aforaudience.qa" },
+    omkar: { label: "Omkar (Organiser, full/cross-linked)", email: "omkar.organiser@aforaudience.qa" },
+    hrithik: { label: "Hrithik (Artist, full/cross-linked)", email: "hrithik.artist@aforaudience.qa" },
+    atul: { label: "Atul (Audience, full/cross-linked)", email: "atul.audience@aforaudience.qa" },
+    orri: { label: "Orri (Organiser, partial/sparse)", email: "orri.organiser@aforaudience.qa" },
+    vijay: { label: "Vijay (Venue Owner, partial/sparse)", email: "vijay.venue@aforaudience.qa" },
+    shahrukh: { label: "Shahrukh (Artist, partial/sparse)", email: "shahrukh.artist@aforaudience.qa" },
+    amit: { label: "Amit (Audience, partial/sparse)", email: "amit.audience@aforaudience.qa" },
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
+
+type DemoPersonaCreds = Record<"vinayak" | "omkar" | "hrithik" | "atul" | "orri" | "vijay" | "shahrukh" | "amit", { label: string; email: string }>
 
 async function printSummary(
   prisma: PrismaClient,
@@ -938,7 +1529,8 @@ async function printSummary(
     checkedInBookerEmail: string
     panelistEmail: string
     celebrityEmail: string
-  }
+  },
+  demoCreds: DemoPersonaCreds
 ) {
   console.log("\n[summary] Row counts:")
   const counts: Array<[string, number]> = [
@@ -957,6 +1549,10 @@ async function printSummary(
     ["Celebrity", await prisma.celebrity.count()],
     ["VenueBooking", await prisma.venueBooking.count()],
     ["TicketTier", await prisma.ticketTier.count()],
+    ["Conversation", await prisma.conversation.count()],
+    ["ConversationParticipant", await prisma.conversationParticipant.count()],
+    ["Message", await prisma.message.count()],
+    ["Follow", await prisma.follow.count()],
   ]
   for (const [name, count] of counts) {
     console.log(`  - ${name}: ${count}`)
@@ -970,6 +1566,12 @@ async function printSummary(
   console.log(`  - Golden event accepted panelist: ${goldenCreds.panelistEmail} / ${VOLUME_PASSWORD}`)
   console.log(`  - Golden event accepted celebrity: ${goldenCreds.celebrityEmail} / ${VOLUME_PASSWORD}`)
   console.log(`  - All other volume accounts (qa.audience001..100 / qa.organiser01..10 / qa.venueowner01..10 / qa.artist001..100 @example.com): password ${VOLUME_PASSWORD}`)
+
+  console.log("\n[summary] Demo persona credentials (all password " + VOLUME_PASSWORD + "):")
+  for (const key of ["vinayak", "omkar", "hrithik", "atul", "orri", "vijay", "shahrukh", "amit"] as const) {
+    const c = demoCreds[key]
+    console.log(`  - Demo: ${c.label}: ${c.email} / ${VOLUME_PASSWORD}`)
+  }
   console.log("")
 }
 
@@ -1013,8 +1615,9 @@ async function main() {
     await seedGeneralEvents(prisma, pools)
     const fixtureCreds = await seedE2eFixtures(prisma)
     const goldenCreds = await seedGoldenScenario(prisma, pools)
+    const demoCreds = await seedDemoPersonas(prisma, pools)
 
-    await printSummary(prisma, fixtureCreds, goldenCreds)
+    await printSummary(prisma, fixtureCreds, goldenCreds, demoCreds)
     console.log("[qa-seed] Done.")
   } finally {
     await prisma.$disconnect()

@@ -1,115 +1,62 @@
-# Session Handoff — 5 Sep 2026 (Dashboard Shell: #555-#557 merged, BUG-2609-009 brief ready, not yet executed)
+# Session Handoff — 5 Sep 2026 (BUG-2609-009 shipped as #558; QA demo personas added, uncommitted)
 
-`qa` HEAD: `52fe85d` (docs-only, no new code since PR #557). BUG-2609-009's build brief is written and ready to hand to CC as-is - not yet sent/executed as of this write-up.
+`qa` HEAD: `81e82e8` ("Fix BUG-2609-009: wrap all 13 nested dashboard pages in DashboardShell (#558)"). This was merged by a concurrent workflow between sessions - byte-verified as this thread's own pushed work, the 4th confirmed instance of this handoff-collision pattern.
+
+## ⚠️ Uncommitted work sitting in the working tree right now
+
+`scripts/qa-seed.ts` has real, tested, working changes **not yet committed** - do not `git checkout`/`reset --hard`/`stash drop` on this branch without first checking `git status` and preserving this diff. Confirm with Hitesh whether to commit before touching it.
+
+What's in the diff (both pieces already run successfully against the live QA DB, not just written):
+
+1. **New `seedDemoPersonas()`** - 8 fixed-ID, named QA login accounts (prefix `qa-demo-`, never `e2efixture`/`qa-golden`), called from `main()` before `printSummary`. Four cross-linked into one shared story (Vinayak's 6 venues host Omkar's 10 events; Hrithik performs/reviews/earns across 6 of them; Atul holds tickets + has a seeded message thread with Omkar), four deliberately sparse/unlinked (Orri, Vijay, Shahrukh, Amit) for empty/thin-state testing. All 8 use `VOLUME_PASSWORD` (`QaPass!2026`).
+2. **Pre-existing `wipe()` bug found and fixed** - the FK-safe deletion order was missing `CorporateBookingInquiry`, `ArtistTourStop`, `TourArtistConsent`, and `Tour` (all reference Artist/Organiser with no cascade). The live QA DB actually had rows in 3 of those 4 tables, so `npm run db:seed:qa` hard-failed with a real FK violation (`CorporateBookingInquiry_artistId_fkey`) on the very first attempt this session - not a hypothetical, reproduced live. Fixed by inserting the 4 missing steps in correct order; re-run succeeded cleanly.
+
+`tsc --noEmit` is clean on this diff. The QA database has already been wiped and reseeded with this data (ran `npm run db:seed:qa` for real, twice - once to hit the bug, once clean after the fix) - so the 8 demo accounts are live and usable right now regardless of whether the script change ever gets committed. **If someone re-runs `npm run db:seed:qa` without this diff committed, the demo personas and the wipe() fix both disappear on the next reseed.**
+
+### The 8 demo accounts (all password `QaPass!2026`)
+
+| Name | Role | Email | Shape |
+|---|---|---|---|
+| Vinayak | Venue Owner | vinayak.venue@aforaudience.qa | Full - 6 fleshed-out Pune venues |
+| Omkar | Organiser | omkar.organiser@aforaudience.qa | Full - 10 events (2 past/completed, 1 pending-application-queue, 1 lineup-full, 6 plain published) across Vinayak's venues |
+| Hrithik | Artist | hrithik.artist@aforaudience.qa | Full - applied/performed across 6 of Omkar's events, recorded PAID + BUY_IN compensation on the 2 completed ones, 2 reviews, 3 followers |
+| Atul | Audience | atul.audience@aforaudience.qa | Full - 4 bookings (2 checked-in-past w/ reviews, 2 confirmed-upcoming), 1 seeded message thread with Omkar |
+| Orri | Organiser | orri.organiser@aforaudience.qa | Partial - 1 unlinked draft event, nothing else |
+| Vijay | Venue Owner | vijay.venue@aforaudience.qa | Partial - 1 thin venue, zero VenueAvailability rows |
+| Shahrukh | Artist | shahrukh.artist@aforaudience.qa | Partial - bare profile, single genre tag, zero everything else |
+| Amit | Audience | amit.audience@aforaudience.qa | Partial - zero tickets/bookings/messages |
+
+### Schema gaps found while building this (worth knowing before touching Venue/Application/messaging again)
+
+- **`Venue` has no `description` field at all** - only `VenueOwner.bio` exists for free-text venue narrative. The "real, not lorem" descriptive content the brief wanted went onto Vinayak's owner bio instead; the 6 venues themselves are differentiated through real names/addresses/capacity/facilities/pricing, not a description.
+- **`ApplicationStatus` has no `ACCEPTED` value** (only `PENDING/APPROVED/REJECTED/WAITLISTED`) - "accepted" always means `APPROVED` in this schema, same mapping the pre-existing golden scenario already uses.
+- **Message threads are never auto-created on booking/application confirmation.** `getOrCreateConversation()` (`src/lib/messaging.ts`) is only called lazily from the message-thread API routes on first open/send - confirmed by reading the source, not assumed. Any future "make sure this account has messages" ask needs the `Conversation`/`ConversationParticipant`/`Message` rows seeded directly, same as done for Atul here.
 
 ## 🔴 Next session — priority order
 
-1. **Send BUG-2609-009's build brief to CC (full text below), then run the standard verify-before-merge pass.** This is the largest single batch yet - 13 nested pages across all 3 roles getting wrapped in DashboardShell, zero exceptions (see below for why the earlier "leave 5 task pages alone" plan was revised to "wrap everything"). Given the size, lean hard on CC's own one-page-at-a-time verification discipline, and don't skip spot-checking Create Event and Register Venue specifically for layout regressions - they're the widest/most complex of the 13.
-
-2. **Admin nav (BUG-2609-008), deferred by explicit choice.** `/dashboard/admin/` has the same unwrapped-dashboard gap the other 3 roles had, but Admin's real surface (7 sub-areas: artists/bookings/diary/feedback/revenue/settings/users) is much bigger than a 3-5 item role section fits. Needs a design decision first (does Admin get a role-section at all, or a different nav shape?) before any code.
-
-3. **Rotate Razorpay + Google Places credentials** — still unresolved, only Hitesh can fix.
-
-4. **White-card-on-dark-shell** — still fully open, untouched (unrelated to shell work).
-
-5. **`--afa-terracotta` sweep** — items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question, bare `monospace` fontFamily).
-
-6. **`--afa-gold` dark-on-dark contrast question — still unresolved.**
-
-7. **`--afa-cream-tint-1/2`** — still live in `SeatPicker.tsx`/`LegalDocLayout.tsx`.
-
-8. **Auth desktop brand panel's placeholder stock photo** — swap for real AFA photography when available.
-
-9. **Profile page's two column-eyebrow labels** — deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
-
-## Ready to hand off — BUG-2609-009 build brief
-
-<details>
-<summary>Full CC build brief (click to expand if viewing this rendered)</summary>
-
-```
-TASK: Fix BUG-2609-009 - extend DashboardShell to ALL 13 nested pages
-across Organiser/Venue Owner/Artist. Nothing excluded this round.
-
-Branch from qa HEAD, name it: preview/dashboard-shell-nested-pages
-Confirm a clean branch before starting.
-
-CONTEXT: BUG-2609-007 wrapped each role's top-level dashboard. Every
-nested page one level deeper still has no shell - just a "Back to
-Dashboard" link. Decision: wrap all of them for full consistency, no
-exceptions - checked the 2 biggest/most complex ones (Create Event,
-Register Venue) for layout risk first; both are narrow single-column
-forms (~760-780px), no wide canvas content, safe to wrap like everything
-else.
-
-WHAT TO WRAP (wrapper-only, same pattern as Profile/organiser/venue/
-artist - import DashboardShell, wrap the existing return, no handler/
-fetch/state changes, all early-return branches get it too):
-
-VENUE_OWNER:
-- /dashboard/venue/bookings/page.tsx
-- /dashboard/venue/sales/page.tsx
-- /dashboard/venue/edit/page.tsx
-- /dashboard/venue/create/page.tsx
-
-ORGANISER:
-- /dashboard/organiser/sales/page.tsx
-- /dashboard/organiser/payouts/page.tsx
-- /dashboard/organiser/tours/page.tsx
-- /dashboard/organiser/events/[id]/page.tsx
-- /dashboard/organiser/edit/page.tsx
-- /dashboard/organiser/events/create/page.tsx
-
-ARTIST:
-- /dashboard/artist/events/page.tsx (heading is "Browse Events")
-- /dashboard/artist/corporate-inquiries/page.tsx
-- /dashboard/artist/edit/page.tsx
-
-Existing "Back to Dashboard"/"Back to Venues" links can stay -
-redundant with the sidebar's own Dashboard link, but harmless.
-
-13 pages is the largest batch yet - go one at a time, verify each live
-before moving to the next, don't batch-verify at the end.
-
-VERIFY BEFORE HANDOFF, for each of the 13 pages:
-- Persistent sidebar/mobile nav renders correctly.
-- Correct nav item shows active-state highlighting where applicable.
-- No regression to existing handlers, fetches, state, or the page's
-  own internal layout - specifically check Create Event and Register
-  Venue render at full usability with the sidebar present (their forms
-  are the widest of the 13, confirm nothing wraps awkwardly or feels
-  cramped even though the content itself is narrow).
-- tsc --noEmit clean. Vercel build READY (local VAPID_SUBJECT failure
-  is the known pre-existing gap, not this branch's problem).
-
-DELIVERABLE: Push the branch, deploy to Vercel preview, stop. No PR.
-Report preview URL, summary of changes per file, and confirmation of
-every verify-before-handoff item above, per page.
-```
-
-</details>
-
-**Why the scope grew from "5 pages excluded" to "wrap everything"**: original plan split nested pages into hub-like (repeatedly checked - gets the shell) vs task-like (one-shot forms/creation flows - stays shell-free, on the reasoning that full-bleed focus is better for a long form). Hitesh preferred full consistency instead ("keep all pages on sidebar if there is not harm to do so"). Checked the one real risk that reasoning raised - whether Create Event or Register Venue have wide canvas/seat-map layouts that would clash with a 220px sidebar - and found neither does (both are narrow single-column forms, the actual seat-map builder is a separate later flow). No real harm found, so scope was widened to all 13 pages, zero exclusions.
+1. **Decide whether to commit `scripts/qa-seed.ts`.** It's tested and working (the QA DB already reflects it), just sitting uncommitted on `qa`. Losing this diff means losing both the demo personas *and* the wipe() fix on the next reseed.
+2. **Admin nav (BUG-2609-008), deferred by explicit choice, unchanged since last handoff.** `/dashboard/admin/` has the same unwrapped-dashboard gap the other 3 roles had before #555-#558, but Admin's real surface (7 sub-areas: artists/bookings/diary/feedback/revenue/settings/users) is too big for a simple 3-5 item role section. Needs a design decision on nav shape before any code - not a straight wrap-and-link like the other 3 roles got.
+3. **Rotate Razorpay + Google Places credentials** - still unresolved, only Hitesh can fix (both keys confirmed dead 25 Aug, 401/400 direct from each API).
+4. **White-card-on-dark-shell** - still fully open, untouched.
+5. **`--afa-terracotta` sweep** - items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question below, bare `monospace` fontFamily).
+6. **`--afa-gold` dark-on-dark contrast question** - still unresolved.
+7. **`--afa-cream-tint-1/2`** - still live in `SeatPicker.tsx`/`LegalDocLayout.tsx`.
+8. **Auth desktop brand panel's placeholder stock photo** - swap for real AFA photography when available.
+9. **Profile page's two column-eyebrow labels** - deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
 
 ## What shipped this session, in order
 
-**PR #555 — Audience Dashboard Shell.** New `DashboardShell.tsx`, applied to Dashboard/Messages/Tickets. Fixed BUG-2609-003 in the same pass.
+**BUG-2609-009 (#558)** - all 13 nested dashboard pages (4 Venue Owner, 6 Organiser, 3 Artist) wrapped in `DashboardShell`, wrapper-only, every early-return branch included (a deliberate change from the #555-#557 convention of leaving loading/no-session unwrapped). Verified one page at a time, live, mocked-session Playwright per role. The two widest forms (Create Event, Register Venue) specifically confirmed to render at full usability with the sidebar present. Pushed as `preview/dashboard-shell-nested-pages`, deployed to Vercel preview, merged by a concurrent workflow as #558 before this session could open its own PR (4th confirmed handoff-collision instance).
 
-**PR #556 — BUG-2609-004/005.** Profile wrapped in the shell. SiteNav's account dropdown made shell-aware. Badge counts (`useBadgeCounts()`) restored on the shell's own sidebar/mobile nav after a second-order regression from the dropdown fix.
-
-**PR #557 — BUG-2609-006/007.** All 11 role-section sidebar sub-items converted from inert placeholders to real links (11/11 already had real, built pages - the "no destinations yet" claim was never checked and was simply wrong). Each role's own top-level dashboard page (`/dashboard/organiser/`, `/dashboard/venue/`, `/dashboard/artist/`) wrapped in the shell for the first time. Shell's own "Dashboard" nav item made role-aware via `getShellDashboardLink()` (was hardcoded to `/dashboard/audience` for everyone). A suspected mobile-specific role-section rendering bug was investigated and found not to be a real defect - confirmed live this session as a plain page-load timing window (role section briefly absent right after navigation, present a moment later, same on every viewport) - not fixed because there was nothing to fix.
-
-**BUG-2609-009 — scoped and written up, not yet sent to CC.** Extends the shell to all 13 nested pages under the 3 role dashboards, per the discussion above.
-
-All 3 merged PRs independently verified before merge - every diff read directly against the actual pushed branch, deprecated-token/hover-color grep clean throughout, route-existence claims spot-checked against the actual repo, CI green and Vercel READY confirmed pre- and post-merge each time.
+**QA demo personas** - see the uncommitted-work section above. Full detail in the diff itself; every new id/table choice has an inline comment explaining the reasoning (why `bio` not `description`, why `APPROVED` not `ACCEPTED`, why messages needed seeding directly, why the wipe() fix was needed).
 
 ## Process notes worth remembering
 
-- **Verify claims about what a page "doesn't have yet" against the actual repo, every time** - BUG-2609-006 existed for one full merged PR because "no destinations yet" was written into a brief and repeated through two verification passes without anyone actually checking. One grep, once someone checked, was the whole fix.
-- **Live testing as each actual role catches real bugs that code review alone does not.** Every bug found after #555 (account dropdown duplication, badge regression, dead role links, unwrapped role dashboards + hardcoded Dashboard link, and now the nested-pages gap) was found by Hitesh clicking through the live site as each role in turn - not by anything in the build-verify-merge loop on its own. Treat "test live as every affected role" as a standing step before considering any shared-nav/shell change done.
-- **When a design call raises a specific risk, check it against the actual code rather than treating the risk as settled either way.** The "task pages might have wide layouts that clash with a sidebar" concern was worth raising, but turned out false once checked - don't let a plausible-sounding risk go unverified in either direction (assuming it's real, or assuming it's fine).
-- A scoping call made in one session can look reasonable in isolation and still be revised once the person actually using the product weighs in on the trade-off - "leave 5 pages alone" wasn't wrong, it was a preference Hitesh was entitled to override once he understood the actual trade-off (which turned out to have no real cost once checked).
+- **A `--check-only` flag on a destructive script is worth actually using before running it for real** - `qa-seed.ts`'s own `assertQaDatabase()` guard was checked via `--check-only` before the real wipe+reseed, catching nothing wrong this time, but confirming the habit is cheap and worth keeping.
+- **"This table has always been empty so far" is not the same as "this table will always be empty."** The `wipe()` FK-ordering gap (`CorporateBookingInquiry`/`Tour`/`ArtistTourStop`/`TourArtistConsent`) had presumably existed since those features shipped, silently harmless only because those tables happened to have zero rows on every past reseed. The first real data in them (from actual QA click-testing of the Tour/corporate-inquiry features) turned a latent bug into a hard failure. Any wipe-and-reseed script needs its FK-safe ordering re-audited against the *current* full schema periodically, not just extended incrementally per feature.
+- **When a task brief asks for content a model doesn't support (e.g. "real venue descriptions" against a schema with no `Venue.description`), flag it and use the closest real field rather than either inventing a fake field or silently dropping the request.** Applied here for Venue description -> VenueOwner bio.
+- **Verify "does X happen automatically" claims by reading the actual code path, not by assuming from the model shape.** Whether message threads auto-spawn on booking confirmation looked like a reasonable default to assume either way - reading `src/lib/messaging.ts` directly settled it in under a minute instead of guessing.
 
 ## Tally
 
-31 PRs merged total (#527-#557). BUG-2609-009 scoped and ready, not yet executed. Zero pushed-and-awaiting-review as of this write-up. Zero reverted.
+32 PRs merged total (#527-#558). Zero pushed-and-awaiting-review. Zero reverted. One uncommitted-but-tested diff on `qa` (`scripts/qa-seed.ts`) awaiting a commit decision.
