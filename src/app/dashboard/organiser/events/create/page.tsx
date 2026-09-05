@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
@@ -535,12 +536,13 @@ export default function CreateEventPage() {
     }
   }
 
-  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading') return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Events" />
@@ -978,6 +980,7 @@ export default function CreateEventPage() {
           </form>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

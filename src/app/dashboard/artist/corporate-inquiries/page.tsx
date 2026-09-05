@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 
 interface Inquiry {
   id: string
@@ -80,12 +81,13 @@ export default function CorporateInquiriesPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/artist" label="Back to Dashboard" />
@@ -156,6 +158,7 @@ export default function CorporateInquiriesPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

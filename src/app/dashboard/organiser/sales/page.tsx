@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 
 interface EventRow {
   id: string
@@ -96,10 +97,10 @@ export default function OrganiserSalesOverviewPage() {
     }
   }, [status, range, fetchOverview])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
-  if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
+  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>No data</div></DashboardShell></>)
 
   const { totals, events, timeline } = data
   const maxTimelineRevenue = Math.max(1, ...timeline.map((t) => t.revenue))
@@ -107,6 +108,7 @@ export default function OrganiserSalesOverviewPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
@@ -184,6 +186,7 @@ export default function OrganiserSalesOverviewPage() {
           </Section>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

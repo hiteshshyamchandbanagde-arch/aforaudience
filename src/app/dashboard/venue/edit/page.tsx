@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
@@ -109,12 +110,13 @@ export default function VenueOwnerEditPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Dashboard" />
@@ -162,6 +164,7 @@ export default function VenueOwnerEditPage() {
           </button>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
