@@ -85,11 +85,6 @@ type RoleSectionDef = {
   role: RoleKey
   icon: IconName
   items: { label: string; icon: IconName; href: string; badgeKey?: BadgeKey }[]
-  // Persistent sidebar create-action (BUG-2609-010 Part 1, "Register
-  // Venue"): rendered as an icon-only affordance next to the section
-  // header, distinct from a regular SidebarLink row - Hitesh's call that
-  // venue creation reads as "create", not "navigate".
-  createHref?: string
 }
 
 // BUG-2609-006: these were built as inert placeholders on a wrong claim
@@ -146,12 +141,17 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
     icon: 'map',
     items: [
       { label: 'My Venues', icon: 'building', href: '/dashboard/venue' },
+      // BUG-2609-013: was an icon-only "+" affordance next to the section
+      // header (BUG-2609-010 Part 1) - reversed as confusing; a normal
+      // SidebarLink row is the same treatment ORGANISER's "Create Event"
+      // already gets right after its own primary listing item, and that
+      // one hasn't been flagged.
+      { label: 'Register Venue', icon: 'plus', href: '/dashboard/venue/create' },
       { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings', badgeKey: 'venueBookings' },
       { label: 'Sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
       { label: 'Account Settings', icon: 'user', href: '/dashboard/venue/edit' },
       { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequests' },
     ],
-    createHref: '/dashboard/venue/create',
   },
 ]
 
@@ -278,6 +278,36 @@ function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingC
 // deliberately left as a dead branch: /dashboard/admin/ is out of scope
 // for this round and is never wrapped in this shell, so this case never
 // actually fires - kept only so the switch mirrors SiteNav's exactly.
+type NavEntry = { id: string; href: string }
+
+// BUG-2609-012: was a per-item pathname.startsWith(href + '/') check, so
+// every registered href that happened to be a string-prefix of the
+// current pathname reported active at once (e.g. dashboardHref
+// "/dashboard/organiser" prefixes "/dashboard/organiser/sales" - both lit
+// up together). Resolves a single winner across every entry in play
+// instead, identified by id rather than href alone: Organiser's/Venue
+// Owner's own "My Events"/"My Venues" item deliberately shares its href
+// with the top-nav Dashboard item (see ROLE_SECTIONS's own comment on
+// this), so on those two routes' root page two entries tie on href
+// length - the role-section entry (the more specific one, someone is
+// literally looking at "My Events") wins that tie, topNav's generic
+// Dashboard entry doesn't.
+function resolveActiveId(pathname: string | null, entries: NavEntry[]): string | undefined {
+  if (!pathname) return undefined
+  let bestId: string | undefined
+  let bestScore = -1
+  for (const e of entries) {
+    if (pathname === e.href || pathname.startsWith(e.href + '/')) {
+      const score = e.href.length * 2 + (e.id.startsWith('role:') ? 1 : 0)
+      if (score > bestScore) {
+        bestScore = score
+        bestId = e.id
+      }
+    }
+  }
+  return bestId
+}
+
 function getShellDashboardLink(role?: string): string {
   switch (role) {
     case 'VENUE_OWNER':
@@ -322,7 +352,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
   )
 }
 
-function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (href: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
+function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (id: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
   return (
     <div className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
       {/* BUG-2609-011: no icon on this row (every real nav row below has
@@ -334,17 +364,6 @@ function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNav
         <span style={{ color: 'var(--afa-amber)', fontSize: dense ? 11 : 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           {roleLabel}
         </span>
-        {section.createHref && (
-          <Link
-            href={section.createHref}
-            aria-label={`Create new ${roleLabel.toLowerCase()} listing`}
-            onClick={onNavigate}
-            className="ml-auto flex items-center justify-center rounded-full transition-colors"
-            style={{ width: dense ? 20 : 18, height: dense ? 20 : 18, color: 'var(--afa-amber)', background: 'rgba(201,151,58,0.14)' }}
-          >
-            <Icon name="plus" size={dense ? 13 : 11} />
-          </Link>
-        )}
       </div>
       <div className={dense ? 'space-y-0.5' : undefined} onClick={onNavigate}>
         {section.items.map((item) => (
@@ -353,7 +372,7 @@ function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNav
             href={item.href}
             label={item.label}
             icon={item.icon}
-            active={isActive(item.href)}
+            active={isActive(`role:${section.role}:${item.href}`)}
             badge={badgeFor(item.badgeKey)}
             compact={!dense}
           />
@@ -389,7 +408,15 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   }
   const roleSections = ROLE_SECTIONS.filter((s) => held[s.role])
 
-  const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/') || false
+  // Every entry registered for this session, across all 3 nav surfaces
+  // below (desktop sidebar, mobile drawer, mobile bottom bar share this
+  // one resolution) - see resolveActiveId above.
+  const allEntries: NavEntry[] = [
+    ...topNav.map((i) => ({ id: `top:${i.href}`, href: i.href })),
+    ...roleSections.flatMap((s) => s.items.map((i) => ({ id: `role:${s.role}:${i.href}`, href: i.href }))),
+  ]
+  const activeId = resolveActiveId(pathname, allEntries)
+  const isActive = (id: string) => id === activeId
 
   return (
     <div className="lg:flex" style={{ background: 'var(--afa-surface-page)' }}>
@@ -400,7 +427,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className="flex-1 p-3">
           <div className="mb-4 space-y-1">
             {topNav.map((item) => (
-              <SidebarLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} badge={item.badge} />
+              <SidebarLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(`top:${item.href}`)} badge={item.badge} />
             ))}
           </div>
           {roleSections.map((section) => (
@@ -420,7 +447,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingRight: 88, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
       >
         {topNav.map((item) => {
-          const active = isActive(item.href)
+          const active = isActive(`top:${item.href}`)
           return (
             <Link
               key={item.href}
@@ -430,7 +457,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             >
               <span style={{ position: 'relative', display: 'inline-flex' }}>
                 <Icon name={item.icon} size={20} />
-                {item.badge && item.badge > 0 && (
+                {/* was `item.badge && item.badge > 0 &&` - the classic JSX
+                    footgun where a falsy-but-not-nullish 0 still renders as
+                    a literal "0" text node next to the icon, visible for
+                    every user whose count is genuinely zero. */}
+                {!!item.badge && item.badge > 0 && (
                   <span
                     style={{ position: 'absolute', top: -4, right: -6, fontSize: 10, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
                   >

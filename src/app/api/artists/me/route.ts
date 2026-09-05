@@ -73,7 +73,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json({ ...artist, followers, name: user.name, email: user.email })
+    return NextResponse.json({ ...artist, followers, name: user.name, displayName: user.displayName, email: user.email })
   } catch (err) {
     console.error('Error fetching artist profile:', err)
     return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })

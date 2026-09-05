@@ -74,6 +74,8 @@ interface ArtistProfile {
   styleTag: string[]
   socialLinks: Record<string, string> | null
   name: string
+  displayName: string | null
+  email: string
   applications: Application[]
   performances: Performance[]
   followers: Follower[]
@@ -275,8 +277,11 @@ export default function ArtistDashboard() {
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
+              {/* BUG-2609-018: was profile.name (the API's raw username
+                  field) - this heading is the public-profile preview, same
+                  fallback chain as the rest of the app. */}
               <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
-                {profile.name}
+                {profile.displayName || profile.name || profile.email}
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}

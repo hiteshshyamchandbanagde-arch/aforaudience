@@ -23,8 +23,12 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: 'var(--afa-cream)',
-    theme_color: 'var(--afa-terracotta)',
+    // BUG-2609-015: manifests are static JSON, not CSS-aware - CSS
+    // variable strings here were silently ignored by the browser (both
+    // properties). Resolved hex values from the locked 4-color palette
+    // (src/app/globals.css: --afa-cream, --afa-terracotta).
+    background_color: '#F7F3EE',
+    theme_color: '#C8441A',
     lang: 'en-IN',
     dir: 'ltr',
     categories: ['entertainment', 'events', 'music', 'social'],

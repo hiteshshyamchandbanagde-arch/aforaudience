@@ -129,10 +129,6 @@ export default function AudienceActivityPage() {
                 </Link>
               </div>
             )}
-
-            <Link href="/tickets" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
-              {tr.audienceActivityPage.viewAllTickets}
-            </Link>
           </div>
         </div>
       </DashboardShell>
