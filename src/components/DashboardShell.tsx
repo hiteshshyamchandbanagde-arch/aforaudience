@@ -16,10 +16,6 @@ import { useLocale } from '@/lib/i18n/translate'
 // (5 Sep 2026), ported from the Figma Make export's Sidebar/
 // MobileBottomBar/MobileDrawer.
 //
-// Role sections are gated on but NOT wired to anything yet - their items
-// are inert placeholders (no href/onClick) since the target pages either
-// don't exist yet or haven't had this shell applied. Do not add links
-// here until those pages exist.
 const SIDEBAR_BORDER = '1px solid rgba(245,245,240,0.08)'
 
 type IconName =
@@ -84,45 +80,52 @@ type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER'
 type RoleSectionDef = {
   role: RoleKey
   icon: IconName
-  items: { label: string; icon: IconName }[]
+  items: { label: string; icon: IconName; href: string }[]
 }
 
-// Item labels are hardcoded English on purpose - these are inert
-// placeholders (no working links yet, see module comment above) and this
-// repo's i18n Dictionary type requires real, hand-written translations
-// across all 11 locale files for any new key (no partial/fallback
-// mechanism - see src/lib/i18n/translate.tsx). Same call as the profile
-// page's skipped column-eyebrow labels (PR #554): guessing translations
-// into languages with no real linguistic basis is worse than a flagged
-// gap. Revisit with real copy once these items get real destinations.
+// BUG-2609-006: these were built as inert placeholders on a wrong claim
+// that the target pages didn't exist yet - all 11 are real, already-built
+// pages. Item labels stay hardcoded English (this repo's i18n Dictionary
+// type requires real, hand-written translations across all 11 locale
+// files for any new key - see src/lib/i18n/translate.tsx - and guessing
+// translations is worse than a flagged gap, same call as the profile
+// page's skipped column-eyebrow labels from PR #554), but the links
+// themselves are now real.
+//
+// Organiser's "My Events" points at /dashboard/organiser itself, not
+// /dashboard/organiser/events - that route doesn't exist (only
+// /dashboard/organiser/events/create and /dashboard/organiser/events/[id]
+// do). The base organiser dashboard page IS the events list ("Your
+// Events" heading), the same overlap already specified for Venue Owner's
+// "My Venues" -> /dashboard/venue below.
 const ROLE_SECTIONS: RoleSectionDef[] = [
   {
     role: 'ORGANISER',
     icon: 'briefcase',
     items: [
-      { label: 'My Events', icon: 'calendar' },
-      { label: 'Create Event', icon: 'plus' },
-      { label: 'Tours', icon: 'map' },
-      { label: 'Sales', icon: 'trendUp' },
-      { label: 'Payouts', icon: 'dollarSign' },
+      { label: 'My Events', icon: 'calendar', href: '/dashboard/organiser' },
+      { label: 'Create Event', icon: 'plus', href: '/dashboard/organiser/events/create' },
+      { label: 'Tours', icon: 'map', href: '/dashboard/organiser/tours' },
+      { label: 'Sales', icon: 'trendUp', href: '/dashboard/organiser/sales' },
+      { label: 'Payouts', icon: 'dollarSign', href: '/dashboard/organiser/payouts' },
     ],
   },
   {
     role: 'ARTIST',
     icon: 'music',
     items: [
-      { label: 'Edit Profile', icon: 'user' },
-      { label: 'My Events', icon: 'calendar' },
-      { label: 'Corporate Inquiries', icon: 'briefcase' },
+      { label: 'Edit Profile', icon: 'user', href: '/dashboard/artist/edit' },
+      { label: 'My Events', icon: 'calendar', href: '/dashboard/artist/events' },
+      { label: 'Corporate Inquiries', icon: 'briefcase', href: '/dashboard/artist/corporate-inquiries' },
     ],
   },
   {
     role: 'VENUE_OWNER',
     icon: 'building',
     items: [
-      { label: 'My Venues', icon: 'building' },
-      { label: 'Bookings', icon: 'grid' },
-      { label: 'Sales', icon: 'trendUp' },
+      { label: 'My Venues', icon: 'building', href: '/dashboard/venue' },
+      { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings' },
+      { label: 'Sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
     ],
   },
 ]
@@ -213,19 +216,44 @@ function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingC
   return { pendingCount, unreadCount, pendingCompanionCount }
 }
 
-function SidebarLink({ href, label, icon, active, badge }: { href: string; label: string; icon: IconName; active: boolean; badge?: number }) {
+// BUG-2609-007: the sidebar's own "Dashboard" link was hardcoded to
+// /dashboard/audience regardless of the signed-in user's role - wrong for
+// every non-Audience role using the shell. Mirrors SiteNav's
+// getDashboardLink() (src/components/SiteNav.tsx) - same duplication
+// tradeoff already made for useBadgeCounts() above, kept consistent
+// rather than exporting/importing across the two files. ADMIN is
+// deliberately left as a dead branch: /dashboard/admin/ is out of scope
+// for this round and is never wrapped in this shell, so this case never
+// actually fires - kept only so the switch mirrors SiteNav's exactly.
+function getShellDashboardLink(role?: string): string {
+  switch (role) {
+    case 'VENUE_OWNER':
+      return '/dashboard/venue'
+    case 'ARTIST':
+      return '/dashboard/artist'
+    case 'ORGANISER':
+      return '/dashboard/organiser'
+    case 'ADMIN':
+      return '/dashboard/admin'
+    default:
+      return '/dashboard/audience'
+  }
+}
+
+function SidebarLink({ href, label, icon, active, badge, compact }: { href: string; label: string; icon: IconName; active: boolean; badge?: number; compact?: boolean }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors"
+      className={compact ? 'flex items-center gap-3 rounded-lg px-3 text-left transition-colors' : 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors'}
       style={{
         background: active ? 'rgba(201,151,58,0.12)' : 'transparent',
         color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
         opacity: active ? 1 : 0.75,
         fontWeight: active ? 600 : 400,
+        ...(compact ? { fontSize: 12.5, paddingTop: 8, paddingBottom: 8 } : {}),
       }}
     >
-      <Icon name={icon} size={16} />
+      <Icon name={icon} size={compact ? 14 : 16} />
       {label}
       {badge && badge > 0 ? (
         <span
@@ -241,7 +269,7 @@ function SidebarLink({ href, label, icon, active, badge }: { href: string; label
   )
 }
 
-function RoleSectionBlock({ section, roleLabel, dense }: { section: RoleSectionDef; roleLabel: string; dense?: boolean }) {
+function RoleSectionBlock({ section, roleLabel, isActive, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (href: string) => boolean; dense?: boolean; onNavigate?: () => void }) {
   return (
     <div className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
       <div className="flex items-center gap-2 px-3 mb-1.5" style={dense ? { paddingLeft: 0 } : undefined}>
@@ -250,25 +278,16 @@ function RoleSectionBlock({ section, roleLabel, dense }: { section: RoleSectionD
           {roleLabel}
         </span>
       </div>
-      <div className={dense ? 'space-y-0.5' : undefined}>
+      <div className={dense ? 'space-y-0.5' : undefined} onClick={onNavigate}>
         {section.items.map((item) => (
-          // Inert on purpose - see module comment above.
-          <span
-            key={item.label}
-            aria-disabled="true"
-            className="flex items-center gap-3 rounded-lg px-3 text-left"
-            style={{
-              color: 'var(--afa-text-primary)',
-              opacity: 0.45,
-              fontSize: dense ? 14 : 12.5,
-              cursor: 'default',
-              paddingTop: dense ? 12 : 8,
-              paddingBottom: dense ? 12 : 8,
-            }}
-          >
-            <Icon name={item.icon} size={dense ? 16 : 14} />
-            {item.label}
-          </span>
+          <SidebarLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            icon={item.icon}
+            active={isActive(item.href)}
+            compact={!dense}
+          />
         ))}
       </div>
     </div>
@@ -278,12 +297,15 @@ function RoleSectionBlock({ section, roleLabel, dense }: { section: RoleSectionD
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { t } = useLocale()
+  const { data: session } = useSession()
   const held = useHeldRoles()
   const { pendingCount, unreadCount, pendingCompanionCount } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
+
   const topNav: { href: string; label: string; icon: IconName; badge?: number }[] = [
-    { href: '/dashboard/audience', label: t.nav.dashboard, icon: 'dashboard', badge: pendingCount },
+    { href: dashboardHref, label: t.nav.dashboard, icon: 'dashboard', badge: pendingCount },
     { href: '/tickets', label: t.nav.myTickets, icon: 'ticket', badge: pendingCompanionCount },
     { href: '/dashboard/messages', label: t.nav.messages, icon: 'message', badge: unreadCount },
     { href: '/profile', label: t.nav.profile, icon: 'user' },
@@ -311,7 +333,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             ))}
           </div>
           {roleSections.map((section) => (
-            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} />
+            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} isActive={isActive} />
           ))}
         </div>
       </aside>
@@ -382,7 +404,14 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             </div>
             <div className="p-4 space-y-5">
               {roleSections.map((section) => (
-                <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} dense />
+                <RoleSectionBlock
+                  key={section.role}
+                  section={section}
+                  roleLabel={roleLabelFor[section.role]}
+                  isActive={isActive}
+                  dense
+                  onNavigate={() => setDrawerOpen(false)}
+                />
               ))}
             </div>
           </div>
