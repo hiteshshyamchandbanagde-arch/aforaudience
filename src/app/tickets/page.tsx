@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import MessageButton from '@/components/MessageButton'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
@@ -259,8 +260,9 @@ export default function MyTicketsPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
+      <DashboardShell>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ maxWidth: '800px', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
@@ -292,7 +294,7 @@ export default function MyTicketsPage() {
                     <button
                       onClick={() => respondToTag(t.id, true)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
+                      style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
                       {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
                     </button>
@@ -343,8 +345,8 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-              {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+              {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
             </div>
           ) : (
             (['today', 'weekend', 'upcoming', 'past'] as TicketSection[]).map((section) => {
@@ -368,6 +370,7 @@ export default function MyTicketsPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 
@@ -428,7 +431,7 @@ export default function MyTicketsPage() {
                       {b.totalAmount > 0 && (
                         <Link
                           href={`/checkout/${b.id}`}
-                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                         >
                           {tr.ticketsPage.payNowArrow}
                         </Link>
