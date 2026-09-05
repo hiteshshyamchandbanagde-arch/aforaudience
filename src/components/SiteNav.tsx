@@ -337,8 +337,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
   // purpose: /dashboard/messages/[id] (the conversation thread page)
   // deliberately isn't wrapped in the shell, so it still needs this
   // dropdown's full list as its only way back to those destinations.
+  // next.config.ts sets trailingSlash: true, so the live pathname is
+  // "/profile/" etc - strip exactly one trailing slash before the exact
+  // match rather than switching to a startsWith prefix check, which
+  // would also swallow "/dashboard/messages/[id]/" (no shell there).
   const SHELL_ROUTES = ["/dashboard/audience", "/dashboard/messages", "/tickets", "/profile"]
-  const insideShell = !!pathname && SHELL_ROUTES.includes(pathname)
+  const normalizedPathname = pathname?.replace(/\/$/, "") ?? ""
+  const insideShell = SHELL_ROUTES.includes(normalizedPathname)
 
   // key is the stable icon/badge lookup id (see NavIcon); label is the
   // translated display text - kept separate since Multi-language Phase 1.
