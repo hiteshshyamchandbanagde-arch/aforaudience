@@ -162,7 +162,58 @@ function useHeldRoles(): Record<RoleKey, boolean> {
   return held
 }
 
-function SidebarLink({ href, label, icon, active }: { href: string; label: string; icon: IconName; active: boolean }) {
+// BUG-2609-005: SiteNav's account dropdown (src/components/SiteNav.tsx,
+// same 3 endpoints/gating around lines 186-226) already fetches these
+// counts for its own icon badges, but filtering the dropdown down to just
+// language/location/sign-out on shell pages (BUG-2609-004) removed the
+// only place these badges rendered - the sidebar never had badge support.
+// Kept as this file's own one-shot fetches rather than sharing SiteNav's
+// state (they're siblings under each page, not parent/child, so sharing
+// would mean lifting state into every page that renders both, or a new
+// Context) - these are cheap one-shot status calls, not polling loops, so
+// the small duplication is a fair trade against changing SiteNav's
+// already-verified fetch logic.
+function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number } {
+  const { data: session } = useSession()
+  const user = session?.user as { email?: string | null; role?: string } | undefined
+
+  const [pendingCount, setPendingCount] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
+    let cancelled = false
+    fetch('/api/notifications/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  const [unreadCount, setUnreadCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/conversations/unread-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setUnreadCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+
+  const [pendingCompanionCount, setPendingCompanionCount] = useState(0)
+  useEffect(() => {
+    if (!user?.email) return
+    let cancelled = false
+    fetch('/api/companions/pending-count')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setPendingCompanionCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.email])
+
+  return { pendingCount, unreadCount, pendingCompanionCount }
+}
+
+function SidebarLink({ href, label, icon, active, badge }: { href: string; label: string; icon: IconName; active: boolean; badge?: number }) {
   return (
     <Link
       href={href}
@@ -176,7 +227,16 @@ function SidebarLink({ href, label, icon, active }: { href: string; label: strin
     >
       <Icon name={icon} size={16} />
       {label}
-      {active && <span className="ml-auto h-1 w-1 rounded-full" style={{ background: 'var(--afa-amber)' }} />}
+      {badge && badge > 0 ? (
+        <span
+          className="ml-auto"
+          style={{ fontSize: 11, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3 }}
+        >
+          {badge}
+        </span>
+      ) : (
+        active && <span className="ml-auto h-1 w-1 rounded-full" style={{ background: 'var(--afa-amber)' }} />
+      )}
     </Link>
   )
 }
@@ -219,12 +279,13 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { t } = useLocale()
   const held = useHeldRoles()
+  const { pendingCount, unreadCount, pendingCompanionCount } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const topNav: { href: string; label: string; icon: IconName }[] = [
-    { href: '/dashboard/audience', label: t.nav.dashboard, icon: 'dashboard' },
-    { href: '/tickets', label: t.nav.myTickets, icon: 'ticket' },
-    { href: '/dashboard/messages', label: t.nav.messages, icon: 'message' },
+  const topNav: { href: string; label: string; icon: IconName; badge?: number }[] = [
+    { href: '/dashboard/audience', label: t.nav.dashboard, icon: 'dashboard', badge: pendingCount },
+    { href: '/tickets', label: t.nav.myTickets, icon: 'ticket', badge: pendingCompanionCount },
+    { href: '/dashboard/messages', label: t.nav.messages, icon: 'message', badge: unreadCount },
     { href: '/profile', label: t.nav.profile, icon: 'user' },
   ]
 
@@ -246,7 +307,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className="flex-1 p-3">
           <div className="mb-4 space-y-1">
             {topNav.map((item) => (
-              <SidebarLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} />
+              <SidebarLink key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} badge={item.badge} />
             ))}
           </div>
           {roleSections.map((section) => (
@@ -274,7 +335,16 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
               className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
               style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.7 }}
             >
-              <Icon name={item.icon} size={20} />
+              <span style={{ position: 'relative', display: 'inline-flex' }}>
+                <Icon name={item.icon} size={20} />
+                {item.badge && item.badge > 0 && (
+                  <span
+                    style={{ position: 'absolute', top: -4, right: -6, fontSize: 10, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </span>
               <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{item.label}</span>
             </Link>
           )
