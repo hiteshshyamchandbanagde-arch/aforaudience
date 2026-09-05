@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 
 interface EventItem {
@@ -94,6 +95,7 @@ export default function OrganiserDashboard() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
@@ -101,6 +103,7 @@ export default function OrganiserDashboard() {
             <BackLink href="/" label="Back to Home" />
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -109,6 +112,7 @@ export default function OrganiserDashboard() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
@@ -120,6 +124,7 @@ export default function OrganiserDashboard() {
             </p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -127,6 +132,7 @@ export default function OrganiserDashboard() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
@@ -269,6 +275,7 @@ export default function OrganiserDashboard() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
