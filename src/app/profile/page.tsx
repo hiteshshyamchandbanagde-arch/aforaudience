@@ -6,6 +6,7 @@ import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import GenrePicker from '@/components/GenrePicker'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
@@ -462,6 +463,7 @@ function ProfileContent() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
         <div
           className="afa-profile-page-container"
@@ -793,6 +795,7 @@ function ProfileContent() {
           </Link>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

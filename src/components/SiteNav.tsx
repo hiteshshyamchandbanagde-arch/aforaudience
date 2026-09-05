@@ -330,6 +330,16 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     ? [{ key: "back", href: backHref, label: backLabel ?? t.nav.back, isActive: false }]
     : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: navLabelFor[l.key], isActive: active === l.key }))
 
+  // BUG-2609-004: the 4 pages below now have DashboardShell's own sidebar
+  // covering Dashboard/Messages/My Tickets/Profile, so this dropdown no
+  // longer needs to duplicate those destinations there - keeping both
+  // just doubles the same nav on screen. Exact-match (not prefix) on
+  // purpose: /dashboard/messages/[id] (the conversation thread page)
+  // deliberately isn't wrapped in the shell, so it still needs this
+  // dropdown's full list as its only way back to those destinations.
+  const SHELL_ROUTES = ["/dashboard/audience", "/dashboard/messages", "/tickets", "/profile"]
+  const insideShell = !!pathname && SHELL_ROUTES.includes(pathname)
+
   // key is the stable icon/badge lookup id (see NavIcon); label is the
   // translated display text - kept separate since Multi-language Phase 1.
   const accountLinks = user
@@ -338,7 +348,9 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         { key: "messages", href: "/dashboard/messages", label: t.nav.messages, accent: false, badge: unreadCount },
         { key: "myTickets", href: "/tickets", label: t.nav.myTickets, accent: false, badge: pendingCompanionCount },
         { key: "profile", href: "/profile", label: t.nav.profile, accent: false, badge: 0 },
-      ].map((l) => ({ ...l, isActive: pathname === l.href || pathname?.startsWith(l.href + "/") || false }))
+      ]
+        .filter(() => !insideShell)
+        .map((l) => ({ ...l, isActive: pathname === l.href || pathname?.startsWith(l.href + "/") || false }))
     : []
 
   return (
