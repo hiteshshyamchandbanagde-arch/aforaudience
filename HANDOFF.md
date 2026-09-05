@@ -1,50 +1,122 @@
-# Session Handoff — 6 Sep 2026 (BUG-2609-012 through 019 shipped as #560)
+# Session Handoff — 6 Sept 2026
 
-`qa` HEAD: `90f7242` ("Fix BUG-2609-012 through 019: nav highlighting, sidebar consistency, manifest colors, artist heading (#560)"). Pushed to `fix/bug-2609-012-019-batch` this session, merged by a concurrent workflow before this session could write its own handoff - byte-verified identical to this thread's own pushed branch (`git diff 528b915 origin/qa` was empty). **6th confirmed instance of the handoff-collision pattern** - always `git fetch && git log <lastKnownHEAD>..origin/qa` before writing a new handoff, don't assume your last-known HEAD is still current.
+## qa HEAD: `90f7242` (PR #560 merged, deployed READY)
 
 ## What shipped this session
 
-Cross-role QA validation batch (Vinayak/Omkar/Shahrukh personas, desktop + mobile), 8 tickets:
+1. **BUG-2609-009** (#558) — wrapped all 13 nested dashboard pages in DashboardShell.
+2. **QA demo personas** — 8 fixed-ID `qa-demo-*` accounts added to `scripts/qa-seed.ts`
+   and run against the live QA DB (committed directly to qa by a concurrent process,
+   verified byte-identical): Vinayak/Vijay (Venue Owner full/partial), Omkar/Orri
+   (Organiser full/partial), Hrithik/Shahrukh (Artist full/partial), Atul/Amit
+   (Audience full/partial). All password `QaPass!2026`. Full personas cross-linked
+   into one shared story (Vinayak's venues host Omkar's events, Hrithik performs,
+   Atul attends).
+3. **BUG-2609-010/011** (#559) — consolidated duplicate dashboard nav entry points
+   (sidebar is now the single source of truth), removed confirmed-redundant
+   breadcrumbs, dropped the icon on role-section headers.
+4. **BUG-2609-012 through 019** (#560) — batch fix from live cross-role validation
+   using the new personas (Vinayak/Omkar/Shahrukh, desktop+mobile):
+   - 012: nav double/triple-highlighting (prefix-collision in `isActive()`) —
+     fixed with a single longest-match winner across every registered nav entry,
+     applied to desktop sidebar, mobile drawer, and mobile bottom tab bar alike.
+     Confirmed affecting **all 3 roles**, not just Venue Owner as first thought —
+     see note below on a real mid-session correction.
+   - 013: Register Venue reverted from icon-only "+" back to a normal labeled
+     sidebar item (consistency with Organiser's existing "Create Event").
+   - 014: removed redundant "View all my tickets" link (Audience dashboard).
+   - 015: `manifest.ts` theme_color/background_color were CSS `var()` strings
+     (browser silently ignores non-CSS-aware manifests) — resolved to verified
+     hex values from `globals.css`.
+   - 016: investigated recurring console TypeError — traced to Next.js's own
+     vendored `web-vitals` build, not app code. No fix needed, documented only.
+   - 017: removed a colorful emoji glyph from the Sales Overview heading
+     (only place in the app not using the monochrome icon language).
+   - 018: Artist Dashboard heading was reading raw username instead of
+     displayName — API route (`/api/artists/me`) wasn't returning `displayName`
+     at all. Fixed both the route and the fallback chain.
+   - 019: mobile "Signed in as {name}" line — **still open**, see below.
+   - Two incidental fixes found via the batch's own verification: `next.config.ts`
+     `turbopack.root` pin (a stray parent-directory lockfile was 404ing every
+     route with no build error), and a badge-count-of-zero rendering as a
+     literal "0" next to the mobile Dashboard icon (`count && <Badge/>` footgun).
 
-1. **BUG-2609-012 (nav double/triple-highlighting, all 3 roles) - the important one.** `DashboardShell`'s `isActive()` was a per-item `pathname === href || pathname.startsWith(href + '/')` check, so any registered href that was a string-prefix of another lit up simultaneously - up to 3 sidebar rows at once on Organiser nested pages, plus the mobile bottom tab bar's Dashboard icon lighting up on pages the bottom bar doesn't even list. Two distinct causes stacked: (a) ancestor-prefixing (`dashboardHref` prefixes its own nested pages) and (b) Venue Owner's "My Venues"/Organiser's "My Events" **sharing the literal same href** as topNav's Dashboard entry (by design - see the `ROLE_SECTIONS` comment). A pure "longest href wins" resolution does NOT fix (b), since both entries still satisfy `href === activeHref` when the hrefs are identical strings. Fixed by resolving a single winning **entry id** (`top:<href>` vs `role:<ROLE>:<href>`, not a bare href), with role-section entries winning ties against the generic top-nav Dashboard entry. Verified exactly one active item per page across desktop sidebar, mobile bottom bar, and mobile "My Roles" drawer, all 3 roles.
-2. **BUG-2609-013** - reverted the icon-only "Register Venue" "+" affordance (added last round, BUG-2609-010 Part 1) back to a normal labeled sidebar row, matching Organiser's existing "Create Event" treatment. Hitesh's original "reads as create not navigate" call didn't survive contact with QA.
-3. **BUG-2609-014** - removed the redundant "View all my tickets" link on the Audience dashboard (duplicated the sidebar/bottom-bar My Tickets item).
-4. **BUG-2609-015** - `manifest.ts`'s `theme_color`/`background_color` were CSS variable strings (`var(--afa-terracotta)` etc.) - manifests are static JSON, browser silently ignores non-literal-color values. Replaced with resolved hex from the locked palette.
-5. **BUG-2609-017** - removed the emoji glyph on the Sales Overview heading (only place in the app using one).
-6. **BUG-2609-018** - Artist Dashboard heading (public-profile preview) now falls back `displayName || name || email` instead of showing the raw username. `/api/artists/me` wasn't even returning `displayName` in its response - had to add it server-side too.
-7. **BUG-2609-016 (web-vitals TypeError) - investigated, no code fix applied.** Traced to `node_modules/next/dist/compiled/web-vitals*` - this is Next.js's own vendored/internal build (used by framework-internal instrumentation), not an app dependency; confirmed no app source calls `useReportWebVitals`/`next/web-vitals`. Not fixable from app code short of changing the `next` version itself, which was out of scope. **Still an open console noise item** if anyone wants to chase it further (would mean investigating/pinning the `next` package itself, a bigger call).
-8. **BUG-2609-019 (missing mobile "Signed in as" line) - could not reproduce.** Mocked-session Playwright across all 3 personas showed the line rendering correctly every time, immediately on opening the mobile panel, on every role. Reported as not-reproducible rather than guessing at a fix, per the brief's own instruction for this part. **If Hitesh still sees this live, it's likely something not captured by a mocked session** (real-auth timing, a specific device/browser, or a stale deploy) - worth a fresh live repro report rather than re-diffing this code blind.
+All of the above independently verified by chat (diffs checked against spec,
+manifest hex values confirmed byte-identical to `globals.css`, CI green, Vercel
+READY on exact commit) before merging — not just taking CC's word for it.
 
-**Two incidental fixes found via this batch's own verification pass** (unrelated to the 8 tickets, called out separately, not hidden in the ticket work):
-- `next.config.ts` now pins `turbopack: { root: __dirname }`. A stray `package-lock.json` in the parent directory (`C:\Users\hites\AforA\package-lock.json`, unrelated to this project) was making Turbopack auto-detect *that* folder as the workspace root instead of `aforaudience/` itself - broke **every single app route** (blanket 404s, `/events` included) with **no build error at all**, only an easy-to-miss "detected multiple lockfiles" startup warning. See `project_turbopack_root_misdetection` memory for the full signature - this is a different failure mode than the previously-logged "stale `.next` cache" gotcha (that one throws real compile errors; this one is silent).
-- The mobile bottom tab bar rendered a literal `"0"` text node next to the Dashboard icon whenever its pending-count badge was exactly 0 (the common case) - classic `count && <Badge/>` JSX footgun, where `0` is falsy but still a renderable value. Fixed (`!!count && count > 0 &&`).
+## Correction made mid-session (worth knowing about)
 
-Verified via mocked-session Playwright across all 3 roles/personas, desktop + mobile (local DB was P1001-unreachable again this session, see below) - `tsc --noEmit` clean.
+Early in BUG-2609-012's investigation, chat incorrectly stated the Artist role
+was unaffected by the nav-highlighting bug, based on checking only exact-href
+equality and missing that `isActive()` also does a prefix match. Screenshots
+from the Artist persona later proved this wrong (Dashboard + My Events both lit
+on Browse Events, Dashboard + Corporate Inquiries both lit on that page) — the
+ticket was corrected before it went to CC, so the shipped fix covers all 3
+roles correctly. Flagging this only so nobody assumes chat's first read on a
+root-cause is automatically right — it wasn't, here, and needed evidence to
+catch.
 
-## Next session — priority order
+## Still open
 
-Nothing new blocking; everything below carries forward unchanged from last handoff.
+- **BUG-2609-019** — mobile "Signed in as {name}" line. CC's mocked-session
+  Playwright pass couldn't reproduce it missing (rendered fine every time,
+  all 3 personas, desktop+mobile) — but it was visibly absent across every
+  real screenshot taken this session. Left `UNDER_REVIEW`, not `RESOLVED`.
+  **Needs a real-device/real-browser check**, not another mocked pass, before
+  anyone calls this closed either way.
+- **QST-2609-001** — status badge semantic-color exception (Published=sage,
+  Draft=gold). Chat's recommendation as UX collaborator: allow it, but only
+  for non-interactive badges, one canonical token per meaning, documented
+  explicitly, each token independently passing WCAG AA. Tied to the
+  pre-existing `--afa-gold` contrast question (3.27–3.65:1, below AA) — that
+  token can't be grandfathered into a status role while still failing
+  contrast, regardless of the broader policy answer. Decision still Hitesh's
+  to make.
+- **Two ambiguous BackLinks from BUG-2609-010**, deliberately left alone rather
+  than decided unilaterally:
+  1. `organiser/events/[id]` and `venue/[id]` detail pages' "back to list" link
+     (arguably redundant with sidebar, arguably legitimate list-context nav).
+  2. `organiser/page.tsx`/`venue/page.tsx` dashboard roots' "Back to Home" link
+     (sidebar has no Home entry at all today, so this might be the only
+     non-logo way out of the dashboard shell).
+- **BUG-2609-008** (Admin DashboardShell) — still deliberately deferred,
+  needs a design decision before any code, unchanged from prior sessions.
 
-1. **Get Hitesh's decision on the two flagged BackLinks** (still the only unresolved item from the *prior* nav-consolidation round, untouched by this session):
-   - `organiser/events/[id]/page.tsx` and `venue/[id]/page.tsx`'s "back to list" BackLinks (→ `/dashboard/organiser` and `/dashboard/venue`).
-   - `organiser/page.tsx` and `venue/page.tsx`'s "Back to Home" BackLinks (→ `/`, only inside the "not registered for this role" branch) - sidebar has no Home entry today.
-2. **Admin nav (BUG-2609-008)**, deferred by explicit choice, unchanged. `/dashboard/admin/` has the same unwrapped-dashboard gap the other 3 roles had before #555-#559. Needs a nav-shape decision before any code (7 sub-areas is too big for a simple role section).
-3. **Rotate Razorpay + Google Places credentials** - still unresolved, only Hitesh can fix (both keys confirmed dead 25 Aug, 401/400 direct from each API).
-4. **White-card-on-dark-shell** - still fully open, untouched.
-5. **`--afa-terracotta` sweep** - items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question below, bare `monospace` fontFamily).
-6. **`--afa-gold` dark-on-dark contrast question** - still unresolved.
-7. **`--afa-cream-tint-1/2`** - still live in `SeatPicker.tsx`/`LegalDocLayout.tsx`.
-8. **Auth desktop brand panel's placeholder stock photo** - swap for real AFA photography when available.
-9. **Profile page's two column-eyebrow labels** - deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
-10. **BUG-2609-016 (web-vitals console noise)** - open if worth chasing further; would mean touching the `next` package version itself, not app code (see above).
+## Validation coverage so far (this session's new personas)
 
-## Process notes worth remembering
+Clicked through, desktop + mobile, with real findings logged for each:
+- **Vinayak** (Venue Owner full)
+- **Omkar** (Organiser full)
+- **Shahrukh** (Artist partial)
+- **Atul** (Audience full) — desktop only, no dedicated mobile pass yet
 
-- **Local DB was P1001-unreachable again this session** (same recurring issue, now 4+ sessions) - confirmed via the dev server's own Prisma error, not assumed. Used mocked-session Playwright (`page.route` intercepting `/api/auth/session` + every page's own data fetches) instead of a real login, same established pattern as prior sessions.
-- **A blanket 404 across every route with no build error is not necessarily a code problem** - see the `turbopack.root`/stray-parent-lockfile finding above. Check the dev server's startup warnings (not just its error output) before assuming the app broke.
-- **Same href registered under two different nav labels needs identity-based active-state resolution, not href-based.** If a future nav change reintroduces two entries pointing at the exact same URL (this app already does this deliberately for Dashboard/My Events and Dashboard/My Venues), a plain `href === activeHref` check will make both entries active together - resolve by a unique id per entry instead, as `DashboardShell.tsx`'s `resolveActiveId` now does.
-- **`count && <Badge/>` in JSX renders a literal "0" when count is exactly 0** - always guard as `!!count && count > 0 &&` (or `count > 0 &&` if count can't be a non-numeric falsy value) when the badge should disappear at zero, not just at falsy/undefined.
+**Not yet validated**: Vijay (Venue Owner partial), Orri (Organiser partial),
+Hrithik (Artist full), Amit (Audience partial). Next session's natural first
+move is finishing this pass — the partial personas in particular are the ones
+that will show whether the empty-state / sparse-content UX work (the original
+reason these personas were built) actually needs the background-texture
+Figma round we scoped earlier, or whether nav consolidation alone fixed the
+"floating in a large black space" feeling enough to reassess.
 
-## Tally
+## Standing backlog, unchanged
 
-35 PRs merged total (#527-#560). Zero pushed-and-awaiting-review. Zero reverted. Nothing uncommitted on `qa` right now.
+- Razorpay + Google Places API key rotation (dead keys confirmed, Hitesh must
+  rotate via dashboards + update `.env.local`/Vercel Preview env)
+- White-card-on-dark bug (Messages read-thread rows)
+- `--afa-terracotta` sweep across Dashboard/Messages/Tickets — the manifest.ts
+  instance (BUG-2609-015) is fixed, but this was only one file; the broader
+  component-level sweep is still open
+- `--afa-gold` contrast question (tied to QST-2609-001 above)
+- Cream-tint tokens
+- Auth stock photo placeholder
+- Profile eyebrow i18n
+
+## Session-start protocol reminder for next session
+
+1. 🔴 Check Razorpay + Google Maps/Places billing dashboards
+2. Query Feedback table (NEW/UNDER_REVIEW) and cross-check against this file
+   before treating anything as open
+3. Verify qa HEAD against `90f7242`
+4. Fresh GitHub PAT into `/home/claude/afa/token.txt`
+5. Confirm priority: finish persona validation pass, or move to something else
