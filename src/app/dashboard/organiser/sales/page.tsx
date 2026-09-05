@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
@@ -111,9 +110,7 @@ export default function OrganiserSalesOverviewPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
-          <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               📊 Sales Overview
             </h1>

@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
@@ -119,9 +118,7 @@ export default function VenueOwnerEditPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <BackLink href="/dashboard/venue" label="Back to Dashboard" />
-
-          <div style={{ marginTop: '20px' }}>
+          <div>
             <PageHead eyebrow="Public profile" title="Edit Your Profile" description="This is what people see on your public Venue Owner page." />
           </div>
 

@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { useToast } from '@/components/Toast'
@@ -104,9 +103,7 @@ export default function OrganiserPayoutsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
-
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Direct Payouts
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '28px' }}>

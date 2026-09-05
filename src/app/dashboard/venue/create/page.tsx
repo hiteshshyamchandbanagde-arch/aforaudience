@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import SeatSectionEditor, { SeatSection, findDuplicateSectionNames, findIncompleteSections } from '@/components/SeatSectionEditor'
 import FacilitiesPicker from '@/components/FacilitiesPicker'
@@ -272,9 +271,7 @@ export default function CreateVenuePage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <BackLink href="/dashboard/venue" label="Back to Venues" />
-
-          <div style={{ marginTop: '20px' }}>
+          <div>
             <PageHead eyebrow="New listing" title="Register Venue" description="Add your space, design its seating layout, and set your prices per section." />
           </div>
 
