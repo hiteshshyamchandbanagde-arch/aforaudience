@@ -6,6 +6,7 @@ import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 
 interface Application {
   id: string
@@ -226,8 +227,8 @@ export default function ArtistDashboard() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
-  if (!profile) return (<><SiteNav /><div style={{ padding: '32px' }}>Profile not found</div></>)
+  if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>Profile not found</div></DashboardShell></>)
 
   const upcoming = profile.performances
     .filter((p) => !p.cancelledAt && new Date(p.event.date) >= new Date(new Date().toDateString()))
@@ -269,6 +270,7 @@ export default function ArtistDashboard() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
@@ -648,6 +650,7 @@ export default function ArtistDashboard() {
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
