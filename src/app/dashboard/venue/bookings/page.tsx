@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
+import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 
 interface BookingRequest {
@@ -87,8 +88,8 @@ export default function VenueBookingsPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   const pending = bookings.filter((b) => b.status === 'PENDING')
   const resolved = bookings.filter((b) => b.status !== 'PENDING')
@@ -135,6 +136,7 @@ export default function VenueBookingsPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
@@ -297,6 +299,7 @@ export default function VenueBookingsPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

@@ -14,6 +14,7 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
+import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Button, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
 
 const inputStyle = {
@@ -262,12 +263,13 @@ export default function CreateVenuePage() {
     }
   }
 
-  if (status === 'loading') return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading') return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Venues" />
@@ -561,6 +563,7 @@ export default function CreateVenuePage() {
           </form>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

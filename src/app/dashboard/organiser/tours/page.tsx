@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 
 interface TourItem {
@@ -58,11 +59,12 @@ export default function OrganiserToursPage() {
     if (status === 'authenticated') load()
   }, [status])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
@@ -142,6 +144,7 @@ export default function OrganiserToursPage() {
         )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

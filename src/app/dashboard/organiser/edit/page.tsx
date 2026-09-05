@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 
 const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
@@ -119,12 +120,13 @@ export default function OrganiserEditPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Dashboard" />
@@ -178,6 +180,7 @@ export default function OrganiserEditPage() {
           </button>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

@@ -11,6 +11,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
 
 interface VenueRow {
@@ -149,10 +150,10 @@ export default function VenueOwnerSalesOverviewPage() {
 
   useEffect(() => { setShowAllVenues(false) }, [range])
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
-  if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
+  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>No data</div></DashboardShell></>)
 
   const { totals, previousTotals, venues, organisers, timeline } = data
   const topVenues = venues.slice(0, TOP_VENUES_SHOWN)
@@ -161,6 +162,7 @@ export default function VenueOwnerSalesOverviewPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <BackLink href="/dashboard/venue" label="Back to Dashboard" />
@@ -331,6 +333,7 @@ export default function VenueOwnerSalesOverviewPage() {
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

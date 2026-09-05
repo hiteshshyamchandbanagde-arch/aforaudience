@@ -10,6 +10,7 @@ import PosterShareCard from '@/components/PosterShareCard'
 import { formatEventTimeRange } from '@/lib/eventTime'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 
 interface Application {
   id: string
@@ -242,16 +243,17 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
-  if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>Event not found</div></>)
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
+  if (error && !event) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (!event) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>Event not found</div></DashboardShell></>)
 
   const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Events" />
@@ -528,6 +530,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
