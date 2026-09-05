@@ -8,6 +8,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { IN, AU, JP, SG, CA, US, GB, AE } from 'country-flag-icons/react/3x2'
 import {
   PageHead, Card, StatusPill, EmptyState, ErrorBanner,
@@ -179,6 +180,7 @@ export default function VenueDashboard() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
@@ -186,6 +188,7 @@ export default function VenueDashboard() {
             <BackLink href="/" label="Back to Home" />
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -194,6 +197,7 @@ export default function VenueDashboard() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
@@ -203,6 +207,7 @@ export default function VenueDashboard() {
             </p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -210,6 +215,7 @@ export default function VenueDashboard() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 24px 80px' }}>
           <PageHead eyebrow="Portfolio" title="Your Venues">
@@ -343,6 +349,7 @@ export default function VenueDashboard() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
