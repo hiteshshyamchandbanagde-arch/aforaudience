@@ -21,7 +21,7 @@ const SIDEBAR_BORDER = '1px solid rgba(245,245,240,0.08)'
 type IconName =
   | 'dashboard' | 'ticket' | 'message' | 'user' | 'calendar' | 'plus'
   | 'map' | 'trendUp' | 'dollarSign' | 'briefcase' | 'building' | 'music'
-  | 'grid' | 'more' | 'x'
+  | 'grid' | 'more' | 'x' | 'tag'
 
 function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
   const common = {
@@ -70,6 +70,8 @@ function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
       return (<svg {...common}><circle cx="12" cy="5" r="1" fill="currentColor" /><circle cx="12" cy="12" r="1" fill="currentColor" /><circle cx="12" cy="19" r="1" fill="currentColor" /></svg>)
     case 'x':
       return (<svg {...common}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>)
+    case 'tag':
+      return (<svg {...common}><path d="M12.59 2.59 20.41 10.41a2 2 0 0 1 0 2.83l-6.17 6.17a2 2 0 0 1-2.83 0L3.59 11.59A2 2 0 0 1 3 10.17V4a2 2 0 0 1 2-2h6.17a2 2 0 0 1 1.42.59Z" /><circle cx="7.5" cy="7.5" r="0.5" fill="currentColor" /></svg>)
     default:
       return null
   }
@@ -77,10 +79,17 @@ function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
 
 type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER'
 
+type BadgeKey = 'venueBookings' | 'flexRequests'
+
 type RoleSectionDef = {
   role: RoleKey
   icon: IconName
-  items: { label: string; icon: IconName; href: string }[]
+  items: { label: string; icon: IconName; href: string; badgeKey?: BadgeKey }[]
+  // Persistent sidebar create-action (BUG-2609-010 Part 1, "Register
+  // Venue"): rendered as an icon-only affordance next to the section
+  // header, distinct from a regular SidebarLink row - Hitesh's call that
+  // venue creation reads as "create", not "navigate".
+  createHref?: string
 }
 
 // BUG-2609-006: these were built as inert placeholders on a wrong claim
@@ -98,6 +107,14 @@ type RoleSectionDef = {
 // do). The base organiser dashboard page IS the events list ("Your
 // Events" heading), the same overlap already specified for Venue Owner's
 // "My Venues" -> /dashboard/venue below.
+//
+// BUG-2609-010: consolidated in each dashboard page's own action buttons
+// (Edit Profile, Account Settings, Flexible Requests) so the sidebar is
+// the single source of truth - see each page's own diff for the removed
+// buttons/BackLinks. "Flexible Requests" is genuinely the same feature
+// for both ORGANISER and VENUE_OWNER (src/app/dashboard/venue-requests/
+// page.tsx is role-gated by callerSide, not two different pages), so it
+// gets one sidebar entry per role rather than living in neither.
 const ROLE_SECTIONS: RoleSectionDef[] = [
   {
     role: 'ORGANISER',
@@ -108,6 +125,8 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
       { label: 'Tours', icon: 'map', href: '/dashboard/organiser/tours' },
       { label: 'Sales', icon: 'trendUp', href: '/dashboard/organiser/sales' },
       { label: 'Payouts', icon: 'dollarSign', href: '/dashboard/organiser/payouts' },
+      { label: 'Edit Profile', icon: 'user', href: '/dashboard/organiser/edit' },
+      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequests' },
     ],
   },
   {
@@ -121,12 +140,18 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
   },
   {
     role: 'VENUE_OWNER',
-    icon: 'building',
+    // Was 'building', identical to this section's own "My Venues" item
+    // icon below (BUG-2609-011) - reads as just another row instead of a
+    // category label. 'map' isn't used by any of this section's items.
+    icon: 'map',
     items: [
       { label: 'My Venues', icon: 'building', href: '/dashboard/venue' },
-      { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings' },
+      { label: 'Bookings', icon: 'grid', href: '/dashboard/venue/bookings', badgeKey: 'venueBookings' },
       { label: 'Sales', icon: 'trendUp', href: '/dashboard/venue/sales' },
+      { label: 'Account Settings', icon: 'user', href: '/dashboard/venue/edit' },
+      { label: 'Flexible Requests', icon: 'tag', href: '/dashboard/venue-requests', badgeKey: 'flexRequests' },
     ],
+    createHref: '/dashboard/venue/create',
   },
 ]
 
@@ -176,7 +201,7 @@ function useHeldRoles(): Record<RoleKey, boolean> {
 // Context) - these are cheap one-shot status calls, not polling loops, so
 // the small duplication is a fair trade against changing SiteNav's
 // already-verified fetch logic.
-function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number } {
+function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number } {
   const { data: session } = useSession()
   const user = session?.user as { email?: string | null; role?: string } | undefined
 
@@ -187,6 +212,34 @@ function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingC
     fetch('/api/notifications/pending-count')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => { if (!cancelled && data) setPendingCount(data.count) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  // BUG-2609-010: these per-item counts used to live on the Venue Owner/
+  // Organiser dashboard pages' own "Booking Requests"/"Flexible Requests"
+  // action buttons (same fetch-and-filter each page already did) - moved
+  // here so the now-consolidated sidebar entries (ROLE_SECTIONS below)
+  // keep the same signal instead of losing it to the aggregate Dashboard
+  // badge (pendingCount, /api/notifications/pending-count) alone.
+  const [venueBookingsPending, setVenueBookingsPending] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'VENUE_OWNER') return
+    let cancelled = false
+    fetch('/api/venues/my-bookings')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && Array.isArray(data)) setVenueBookingsPending(data.filter((b: { status: string }) => b.status === 'PENDING').length) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  const [flexRequestsPending, setFlexRequestsPending] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'VENUE_OWNER' && user?.role !== 'ORGANISER') return
+    let cancelled = false
+    fetch('/api/venue-booking-requests')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && Array.isArray(data)) setFlexRequestsPending(data.filter((r: { status: string }) => r.status === 'PENDING').length) })
       .catch(() => {})
     return () => { cancelled = true }
   }, [user?.role])
@@ -213,7 +266,7 @@ function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingC
     return () => { cancelled = true }
   }, [user?.email])
 
-  return { pendingCount, unreadCount, pendingCompanionCount }
+  return { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending }
 }
 
 // BUG-2609-007: the sidebar's own "Dashboard" link was hardcoded to
@@ -269,14 +322,29 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
   )
 }
 
-function RoleSectionBlock({ section, roleLabel, isActive, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (href: string) => boolean; dense?: boolean; onNavigate?: () => void }) {
+function RoleSectionBlock({ section, roleLabel, isActive, badgeFor, dense, onNavigate }: { section: RoleSectionDef; roleLabel: string; isActive: (href: string) => boolean; badgeFor: (key?: BadgeKey) => number | undefined; dense?: boolean; onNavigate?: () => void }) {
   return (
     <div className={dense ? undefined : 'pt-3 mt-1'} style={dense ? undefined : { borderTop: SIDEBAR_BORDER }}>
+      {/* BUG-2609-011: no icon on this row (every real nav row below has
+          one) is what marks it as a category label rather than a link -
+          it used to carry section.icon, which for Venue Owner duplicated
+          its own "My Venues" item icon and reinforced the opposite
+          impression. */}
       <div className="flex items-center gap-2 px-3 mb-1.5" style={dense ? { paddingLeft: 0 } : undefined}>
-        <span style={{ color: 'var(--afa-amber)' }}><Icon name={section.icon} size={dense ? 13 : 12} /></span>
         <span style={{ color: 'var(--afa-amber)', fontSize: dense ? 11 : 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           {roleLabel}
         </span>
+        {section.createHref && (
+          <Link
+            href={section.createHref}
+            aria-label={`Create new ${roleLabel.toLowerCase()} listing`}
+            onClick={onNavigate}
+            className="ml-auto flex items-center justify-center rounded-full transition-colors"
+            style={{ width: dense ? 20 : 18, height: dense ? 20 : 18, color: 'var(--afa-amber)', background: 'rgba(201,151,58,0.14)' }}
+          >
+            <Icon name="plus" size={dense ? 13 : 11} />
+          </Link>
+        )}
       </div>
       <div className={dense ? 'space-y-0.5' : undefined} onClick={onNavigate}>
         {section.items.map((item) => (
@@ -286,6 +354,7 @@ function RoleSectionBlock({ section, roleLabel, isActive, dense, onNavigate }: {
             label={item.label}
             icon={item.icon}
             active={isActive(item.href)}
+            badge={badgeFor(item.badgeKey)}
             compact={!dense}
           />
         ))}
@@ -299,8 +368,10 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { t } = useLocale()
   const { data: session } = useSession()
   const held = useHeldRoles()
-  const { pendingCount, unreadCount, pendingCompanionCount } = useBadgeCounts()
+  const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const badgeFor = (key?: BadgeKey): number | undefined =>
+    key === 'venueBookings' ? venueBookingsPending : key === 'flexRequests' ? flexRequestsPending : undefined
 
   const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
 
@@ -333,7 +404,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             ))}
           </div>
           {roleSections.map((section) => (
-            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} isActive={isActive} />
+            <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} isActive={isActive} badgeFor={badgeFor} />
           ))}
         </div>
       </aside>
@@ -409,6 +480,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                   section={section}
                   roleLabel={roleLabelFor[section.role]}
                   isActive={isActive}
+                  badgeFor={badgeFor}
                   dense
                   onNavigate={() => setDrawerOpen(false)}
                 />

@@ -12,8 +12,8 @@ import DashboardShell from '@/components/DashboardShell'
 import { IN, AU, JP, SG, CA, US, GB, AE } from 'country-flag-icons/react/3x2'
 import {
   PageHead, Card, StatusPill, EmptyState, ErrorBanner,
-  IconVenue, IconEdit, IconChart, IconCalendar, IconTag, IconPlus, IconUsers, IconMap,
-  primaryLinkStyle, outlineLinkStyle, navPillStyle, NavBadge,
+  IconVenue, IconTag, IconPlus, IconUsers, IconMap,
+  primaryLinkStyle, outlineLinkStyle,
 } from '@/components/dashboard/VenuePortalUI'
 
 interface SeatSection {
@@ -103,8 +103,6 @@ export default function VenueDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [venues, setVenues] = useState<Venue[]>([])
-  const [pendingBookings, setPendingBookings] = useState(0)
-  const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -138,38 +136,8 @@ export default function VenueDashboard() {
       }
     }
 
-    const fetchBookings = async () => {
-      try {
-        const res = await fetch('/api/venues/my-bookings')
-        if (res.ok) {
-          const data = await res.json()
-          setPendingBookings(data.filter((b: any) => b.status === 'PENDING').length)
-        }
-      } catch {
-        // Non-critical for this view; the dedicated bookings page will surface errors.
-      }
-    }
-
-    // Same pending-count badge pattern as Booking Requests above, for the
-    // Flexible-rate negotiation inbox - previously had no indicator at all,
-    // so a pending request against a Flexible venue was easy to miss unless
-    // the owner specifically thought to check this separate page.
-    const fetchFlexRequests = async () => {
-      try {
-        const res = await fetch('/api/venue-booking-requests')
-        if (res.ok) {
-          const data = await res.json()
-          setPendingFlexRequests(data.filter((r: any) => r.status === 'PENDING').length)
-        }
-      } catch {
-        // Non-critical for this view; the dedicated requests page will surface errors.
-      }
-    }
-
     if (session?.user) {
       fetchVenues()
-      fetchBookings()
-      fetchFlexRequests()
     }
   }, [session])
 
@@ -218,25 +186,14 @@ export default function VenueDashboard() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <PageHead eyebrow="Portfolio" title="Your Venues">
-            <Link href="/dashboard/venue/edit" className="avp-hover-border" style={navPillStyle}>
-              <IconEdit size={16} /> Account Settings
-            </Link>
-            <Link href="/dashboard/venue/sales" className="avp-hover-border" style={navPillStyle}>
-              <IconChart size={16} /> Revenue Overview
-            </Link>
-            <Link href="/dashboard/venue/bookings" className="avp-hover-border" style={navPillStyle}>
-              <IconCalendar size={16} /> Booking Requests
-              {pendingBookings > 0 && <NavBadge>{pendingBookings}</NavBadge>}
-            </Link>
-            <Link href="/dashboard/venue-requests" className="avp-hover-border" style={navPillStyle}>
-              <IconTag size={16} /> Flexible Requests
-              {pendingFlexRequests > 0 && <NavBadge>{pendingFlexRequests}</NavBadge>}
-            </Link>
-            <Link href="/dashboard/venue/create" className="avp-btn-primary" style={primaryLinkStyle}>
-              <IconPlus /> Register Venue
-            </Link>
-          </PageHead>
+          {/* BUG-2609-010: Account Settings/Revenue Overview/Booking
+              Requests/Flexible Requests are all now sidebar entries
+              (DashboardShell's VENUE_OWNER ROLE_SECTIONS); Register Venue
+              is the sidebar section's persistent "+" affordance instead
+              of an in-page CTA, per Hitesh's call. pendingBookings/
+              pendingFlexRequests badges moved with Bookings/Flexible
+              Requests into the sidebar (SidebarLink's own badge prop). */}
+          <PageHead eyebrow="Portfolio" title="Your Venues" />
 
           {error && (
             <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>

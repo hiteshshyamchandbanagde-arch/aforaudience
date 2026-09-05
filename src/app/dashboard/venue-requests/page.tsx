@@ -4,9 +4,9 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, EmptyState, IconTag, IconCheck, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
 
 interface Offer {
@@ -111,17 +111,16 @@ export default function VenueRequestsPage() {
     }
   }
 
-  if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
-  if (!session) return <SiteNav />
+  if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
+  if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
 
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '820px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <BackLink href={callerSide === 'VENUE_OWNER' ? '/dashboard/venue' : callerSide === 'ORGANISER' ? '/dashboard/organiser' : '/'} label="Back to Dashboard" />
-
-          <div style={{ marginTop: '20px' }}>
+          <div>
             <PageHead
               eyebrow="Flexible-rate negotiations"
               title="Venue Booking Requests"
@@ -249,6 +248,7 @@ export default function VenueRequestsPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

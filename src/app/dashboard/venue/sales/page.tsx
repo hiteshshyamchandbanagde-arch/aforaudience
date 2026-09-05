@@ -8,7 +8,6 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
@@ -165,9 +164,7 @@ export default function VenueOwnerSalesOverviewPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <BackLink href="/dashboard/venue" label="Back to Dashboard" />
-
-          <div style={{ marginTop: '20px' }}>
+          <div>
             <PageHead
               eyebrow="Analytics"
               title="Revenue Overview"

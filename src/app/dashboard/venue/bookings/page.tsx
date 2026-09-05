@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
-import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
@@ -139,9 +138,7 @@ export default function VenueBookingsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <BackLink href="/dashboard/venue" label="Back to Venues" />
-
-          <div style={{ marginTop: '20px' }}>
+          <div>
             <PageHead
               eyebrow="Bookings & Revenue"
               title="Booking Requests"

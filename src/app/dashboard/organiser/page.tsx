@@ -38,7 +38,6 @@ export default function OrganiserDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [orgStatus, setOrgStatus] = useState<{ isOrganiser: boolean; hasProfile: boolean; isApproved: boolean; orgName?: string | null; walletBalance?: number; payoutAccountLinked?: boolean; payoutAccountStatus?: string | null; directPayoutsEnabled?: boolean } | null>(null)
-  const [pendingFlexRequests, setPendingFlexRequests] = useState(0)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -66,25 +65,8 @@ export default function OrganiserDashboard() {
       }
     }
 
-    // Same pending-count badge pattern as the Venue Owner side's Booking
-    // Requests badge - the Flexible-rate negotiation inbox previously had
-    // no indicator, so a request sitting on the Organiser's own turn to
-    // respond was easy to miss.
-    const fetchFlexRequests = async () => {
-      try {
-        const res = await fetch('/api/venue-booking-requests')
-        if (res.ok) {
-          const data = await res.json()
-          setPendingFlexRequests(data.filter((r: any) => r.status === 'PENDING').length)
-        }
-      } catch {
-        // Non-critical for this view; the dedicated requests page will surface errors.
-      }
-    }
-
     if (session?.user) {
       fetchStatusAndEvents()
-      fetchFlexRequests()
     }
   }, [session])
 
@@ -162,43 +144,10 @@ export default function OrganiserDashboard() {
                 </p>
               )}
             </div>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <Link
-                href="/dashboard/organiser/edit"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                Edit Profile
-              </Link>
-              <Link
-                href="/dashboard/organiser/sales"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                📊 Sales Overview
-              </Link>
-              <Link
-                href="/dashboard/venue-requests"
-                style={{ position: 'relative', fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                Flexible Requests
-                {pendingFlexRequests > 0 && (
-                  <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--afa-terracotta)', color: 'var(--afa-on-fill-solid)', fontSize: '11px', fontWeight: 700, borderRadius: '999px', padding: '2px 7px' }}>
-                    {pendingFlexRequests}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/dashboard/organiser/tours"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                🚌 Tours
-              </Link>
-              <Link
-                href="/dashboard/organiser/events/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px' }}
-              >
-                + Create Event
-              </Link>
-            </div>
+            {/* BUG-2609-010: Edit Profile/Sales Overview/Flexible Requests/
+                Tours/Create Event are all now sidebar entries
+                (DashboardShell's ORGANISER ROLE_SECTIONS) - pendingFlexRequests
+                badge moved there too (SidebarLink's own badge prop). */}
           </div>
 
           {error && (
