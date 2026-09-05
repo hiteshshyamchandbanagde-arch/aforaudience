@@ -1,14 +1,16 @@
-# Session Handoff — 5 Sep 2026 (Audience Dashboard Shell — build brief written, not yet built)
+# Session Handoff — 5 Sep 2026 (Dashboard Shell merged #555, nav-consistency fix queued)
 
-`qa` HEAD: `ec7537a`. No code changes this session — export review + build-brief-writing only. Nothing pushed and awaiting review.
+`qa` HEAD: `8a04ee1`. PR #555 (Audience Dashboard Shell) squash-merged this session. Verified independently before merge (deprecated-token grep clean, no hover-dependent color, color-fix decisions correctly applied, SupportWidget tap-fix confirmed, role sections inert, Vercel build READY both pre- and post-merge). BUG-2609-003 marked RESOLVED/DEPLOYED_QA.
+
+**Post-merge, Hitesh caught a real gap via screenshots** (not a false alarm, not "remove it" territory) — logged as BUG-2609-004, build brief below.
 
 ## 🔴 Next session — priority order
 
-1. **Check whether the dashboard shell build brief has been run yet.** If Claude Code has pushed `preview/dashboard-shell`, this is the first thing to verify (branch SHA/file list match claim, grep for the 3 color fixes below, confirm role-section items are genuinely inert with no working links, confirm BUG-2609-003's fixes landed) before opening a PR — same process as PRs #553/#554. If not yet run, the build brief is below, ready to hand to CC as-is.
+1. **Check whether the BUG-2609-004 build brief (below) has been run yet.** If CC has pushed a branch, verify: Profile page now wrapped in DashboardShell + sidebar renders there; SiteNav dropdown correctly hides the 4 duplicate entries on shell pages (Dashboard/Messages/Tickets/Profile) but keeps its full list on non-shell pages (homepage, events, etc.); no regressions to the 3 already-shipped shell pages. If not yet run, build brief is below, ready to hand to CC as-is.
 
 2. **Rotate Razorpay + Google Places credentials** — still unresolved, only Hitesh can fix.
 
-3. **White-card-on-dark-shell — still fully open, untouched.**
+3. **White-card-on-dark-shell** — still fully open, untouched (unrelated to shell work).
 
 4. **`--afa-terracotta` sweep** — items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question, bare `monospace` fontFamily).
 
@@ -20,88 +22,67 @@
 
 8. **Profile page's two column-eyebrow labels** — deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
 
-9. **BUG-2609-003** (leftover terracotta + Messages' white-card fallback) — folded into the dashboard shell build brief below, will get fixed as part of that pass rather than separately.
+## In progress — BUG-2609-004, build brief ready
 
-## In progress — Audience Dashboard Shell, build brief ready
-
-Figma Make export ("AFA Audience Dashboard Shell") reviewed this session. Structurally clean — role-section sidebar/drawer items have no `onClick`/`href` (genuinely inert), only 7 distinct hex values used, no stray colors beyond what's listed below. Full review detail in `docs/design.md`'s "Figma Make Export Review" section.
-
-**Three color decisions made, all confirmed by Hitesh:**
-- Rejected the export's invented muted-gray `#9C9C96` (35 occurrences) — same call as the profile-page round, use `var(--afa-text-primary)` + opacity instead.
-- Rejected orange on both "Browse Events →" links (Dashboard/Tickets empty states) — orange is CTA-only, these are nav links, should be amber.
-- Rejected 3 distinct colors for message thread type tags (booking/venue-booking/performance) — collapsed to one amber treatment for all three, differentiated by label text only, since the locked palette only has 2 non-CTA colors.
-
-**Build brief written and handed to Hitesh, full text below for reference / to re-paste if needed:**
+**Root cause**: last session's shell brief explicitly scoped out Profile ("Do NOT touch profile/page.tsx... not part of this shell") as a deliberate call at the time. Once built and viewed end-to-end, that call was wrong: the sidebar's own "Profile" nav item leads to a page with no sidebar (looks broken), and the pre-existing SiteNav account dropdown still duplicates all 4 nav destinations the sidebar now covers on the pages it wraps. This wasn't caught in the verify-before-merge pass because that pass checked code correctness (tokens/colors/structure/inertness), not the nav experience against existing chrome outside the diff. Adding that check to the standing verification list going forward.
 
 <details>
 <summary>Full CC build brief (click to expand if viewing this rendered)</summary>
 
 ```
-TASK: Build the audience dashboard shell from a Figma Make export onto a
-NEW PREVIEW BRANCH. Do NOT touch qa directly. Do NOT open a PR yet.
+TASK: Fix BUG-2609-004 (Dashboard Shell nav-consistency gap) on a NEW
+PREVIEW BRANCH. Do NOT touch qa directly. Do NOT open a PR yet.
 
-Branch from qa HEAD (ec7537a). Name it: preview/dashboard-shell
+Branch from qa HEAD (8a04ee1). Name it: preview/dashboard-shell-nav-fix
 Confirm a clean branch before starting.
 
-SOURCE: Design_AFA_Dashboard_Shell.zip - a Figma Make code export
-(React/Vite), single-file App.tsx (~750 lines).
+WHAT TO FIX:
+1. Wrap src/app/profile/page.tsx in <DashboardShell> the same way
+   Dashboard/Messages/Tickets already are (see those 3 files' diffs
+   in PR #555 for the pattern - import, wrap the existing return,
+   adjust page bg to --afa-surface-page if not already). Preserve
+   every handler/API call/state exactly as today - this is a wrapper
+   change only, same discipline as the shell's original build.
+   Profile's own two-column layout (#554) should render unchanged
+   inside the shell's content area.
 
-WHAT TO BUILD:
-1. New shared shell component implementing:
-   - Desktop: persistent left sidebar, 220px wide, two tiers - top tier
-     always rendered (Dashboard/Tickets/Messages/Profile, linking to
-     real routes /dashboard/audience, /tickets, /dashboard/messages,
-     /profile), below that one section per role (Organiser/Artist/
-     Venue Owner) rendered ONLY if the account holds that role (reuse
-     existing role-check logic), items styled as inert placeholders
-     (no onClick/href).
-   - Mobile: bottom tab bar (same 4 top-tier items) + "More" button
-     opening a drawer with the same inert role sections.
-   - Keep the existing global top bar untouched, out of scope.
-2. Apply the shell to 3 real pages: dashboard/audience/page.tsx,
-   dashboard/messages/page.tsx, tickets/page.tsx. Preserve every
-   handler/API call/state exactly as today - layout/styling change
-   only, same discipline as the auth-pages and profile-page rounds.
-   Do NOT touch profile/page.tsx - stays exactly as shipped, not part
-   of this shell.
+2. Make SiteNav's account dropdown shell-aware. It currently lists
+   Dashboard / Messages / My Tickets / Profile / language switcher /
+   location / Sign out on every page. On the 4 pages that now have
+   DashboardShell's sidebar (dashboard/audience, dashboard/messages,
+   tickets, profile), drop the 4 duplicate nav entries (Dashboard,
+   Messages, My Tickets, Profile) from the dropdown - keep language
+   switcher, location, and Sign out there, since those aren't in the
+   sidebar. On every other page (homepage, events, artists, venues,
+   wall-of-fame, etc.) keep the dropdown exactly as it is today - it's
+   the only nav to those 4 destinations from outside the shell.
+   Implementation approach is your call - e.g. a prop on SiteNav for
+   "inside shell" pages, or a route check - whichever fits the
+   existing SiteNav structure with the least duplication.
 
-REQUIRED FIXES (don't copy verbatim from export):
-1. Replace the export's #9C9C96 muted-gray (35 occurrences) with
-   var(--afa-text-primary) + opacity. Check each spot for nested
-   links/buttons first (the bug class already fixed on auth pages) -
-   scan suggests all clear, but verify.
-2. Both "Browse Events ->" links use orange - change to
-   var(--afa-amber), same fix pattern as elsewhere this session.
-3. Collapse the 3 message-thread type tag colors to one amber
-   treatment, differentiate by label text only.
-4. Fold in BUG-2609-003's fixes since these files are being touched
-   anyway: Messages' read-thread rows currently fall back to
-   var(--afa-cream, #fff) on the live page - fix to a correct dark
-   tone (export's own MessagesPage already does this right, port that
-   pattern). Dashboard's "Browse events" link and Tickets' status
-   badges/buttons currently use leftover --afa-terracotta - fix each
-   to whichever of --afa-fill-solid/--afa-amber matches its actual
-   action, check individually rather than blanket-replacing.
-5. The export's gradient accent strip on ticket cards
-   (orange->amber) is fine to keep as-is - decorative, not a
-   mislabeled action/category color.
+VERIFY BEFORE HANDOFF:
+- Profile page has a working, visually-consistent sidebar matching
+  the other 3 pages (same active-state highlighting on "Profile").
+- Account dropdown shows the trimmed list on all 4 shell pages,
+  full list everywhere else - spot check at least one shell page and
+  one non-shell page.
+- No regression to Profile's existing two-column content, handlers,
+  or the 3 already-shipped shell pages.
+- tsc --noEmit and next build both clean.
 
 DELIVERABLE: Push the branch, deploy to Vercel preview, stop. No PR.
-Report the preview URL, summary of changes per file, explicit
-confirmation role-section items are inert, and confirmation no
-existing handler/API logic in the 3 ported pages was touched.
-
-TESTING NOTE: ~3.5s intro-splash/BrandLoader delay before a fresh
-screenshot is trustworthy.
+Report the preview URL, summary of changes per file, and explicit
+confirmation of the two verify-before-handoff checks above.
 ```
 
 </details>
 
 ## Process notes worth remembering
 
-- Continuing the pattern from last session: Figma Make → chat-review → CC-build → chat-verify-and-merge. This round's review surfaced a genuinely new failure mode worth watching for on future rounds - Figma Make inventing a small *palette* (3 colors for thread types) rather than just one stray token, when the underlying categorization has more states than the locked palette has spare colors for. Worth checking for this shape of issue (N categories needing N colors, but only 2 non-CTA colors exist) on any future export involving status/category tags, not just individual hardcoded hex.
-- Route-auditing before designing a shared shell (done last session) continues to pay off - this round's shell design cleanly reflects the role-gating reality already surfaced then.
+- Figma Make → chat-review → CC-build → chat-verify-and-merge continues to work well for catching *code-level* issues (tokens, colors, hover states, inert-ness). It does not automatically catch *cross-cutting nav/UX consistency* issues that only show up when a new shared component is used alongside chrome that predates it and wasn't part of the diff. Add this as a standing check for any future shared shell/nav work: does it duplicate or conflict with nav that already exists on the same pages?
+- A scoping call made in one session ("don't touch X, out of scope") can look reasonable in isolation and still be wrong once the built result is seen end-to-end. Worth flagging scope-exclusions explicitly as "provisional, revisit once live" rather than treating them as settled, especially for anything nav/shell-adjacent that touches every page a user might land on.
+- Continuing from last session: watch for Figma Make inventing a small *palette* for categorizations (N categories, only 2 non-CTA colors available) as a distinct failure shape from a single stray hex.
 
 ## Tally
 
-28 PRs merged total (#527-#554), unchanged - nothing new merged this session. Zero pushed-and-awaiting-review as of this write-up (build brief given, not yet executed). Zero reverted.
+29 PRs merged total (#527-#555). Zero pushed-and-awaiting-review as of this write-up (BUG-2609-004 build brief given, not yet executed). Zero reverted.
