@@ -1,45 +1,115 @@
-# Session Handoff — 5 Sep 2026 (Dashboard Shell: full role-completion round, #555-#557 merged)
+# Session Handoff — 5 Sep 2026 (Dashboard Shell: #555-#557 merged, BUG-2609-009 brief ready, not yet executed)
 
-`qa` HEAD: `31300fd`. This session shipped the Dashboard Shell (#555), then found and fixed two rounds of real gaps through live role-by-role testing (#556, #557) rather than code review alone. All 6 bugs from this arc are RESOLVED/DEPLOYED_QA except one deliberately deferred (BUG-2609-008, Admin).
+`qa` HEAD: `52fe85d` (docs-only, no new code since PR #557). BUG-2609-009's build brief is written and ready to hand to CC as-is - not yet sent/executed as of this write-up.
 
 ## 🔴 Next session — priority order
 
-1. **Admin nav (BUG-2609-008), deferred by explicit choice, not urgency.** `/dashboard/admin/` ("Command Center") has the same unwrapped-dashboard gap as the other 3 roles did, but Admin's real surface (7 sub-areas: artists/bookings/diary/feedback/revenue/settings/users) is much bigger than a 3-5 item role section fits. Needs a design decision first (does Admin get a role-section at all, or a different nav shape?) before any code - don't just wrap-and-link it the same way as the other 3 without that decision.
+1. **Send BUG-2609-009's build brief to CC (full text below), then run the standard verify-before-merge pass.** This is the largest single batch yet - 13 nested pages across all 3 roles getting wrapped in DashboardShell, zero exceptions (see below for why the earlier "leave 5 task pages alone" plan was revised to "wrap everything"). Given the size, lean hard on CC's own one-page-at-a-time verification discipline, and don't skip spot-checking Create Event and Register Venue specifically for layout regressions - they're the widest/most complex of the 13.
 
-2. **Rotate Razorpay + Google Places credentials** — still unresolved, only Hitesh can fix.
+2. **Admin nav (BUG-2609-008), deferred by explicit choice.** `/dashboard/admin/` has the same unwrapped-dashboard gap the other 3 roles had, but Admin's real surface (7 sub-areas: artists/bookings/diary/feedback/revenue/settings/users) is much bigger than a 3-5 item role section fits. Needs a design decision first (does Admin get a role-section at all, or a different nav shape?) before any code.
 
-3. **White-card-on-dark-shell** — still fully open, untouched (unrelated to shell work).
+3. **Rotate Razorpay + Google Places credentials** — still unresolved, only Hitesh can fix.
 
-4. **`--afa-terracotta` sweep** — items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question, bare `monospace` fontFamily).
+4. **White-card-on-dark-shell** — still fully open, untouched (unrelated to shell work).
 
-5. **`--afa-gold` dark-on-dark contrast question — still unresolved.**
+5. **`--afa-terracotta` sweep** — items 7-11 of the theme-migration audit still open (bell emoji, `AuthPromptSheet`/`CorporateInquiryModal`/`SeatPicker`, remaining shared components, dashboard sweep blocked on the gold-contrast question, bare `monospace` fontFamily).
 
-6. **`--afa-cream-tint-1/2`** — still live in `SeatPicker.tsx`/`LegalDocLayout.tsx`.
+6. **`--afa-gold` dark-on-dark contrast question — still unresolved.**
 
-7. **Auth desktop brand panel's placeholder stock photo** — swap for real AFA photography when available.
+7. **`--afa-cream-tint-1/2`** — still live in `SeatPicker.tsx`/`LegalDocLayout.tsx`.
 
-8. **Profile page's two column-eyebrow labels** — deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
+8. **Auth desktop brand panel's placeholder stock photo** — swap for real AFA photography when available.
+
+9. **Profile page's two column-eyebrow labels** — deliberately skipped, needs a real i18n translation pass across all 11 locale files if wanted.
+
+## Ready to hand off — BUG-2609-009 build brief
+
+<details>
+<summary>Full CC build brief (click to expand if viewing this rendered)</summary>
+
+```
+TASK: Fix BUG-2609-009 - extend DashboardShell to ALL 13 nested pages
+across Organiser/Venue Owner/Artist. Nothing excluded this round.
+
+Branch from qa HEAD, name it: preview/dashboard-shell-nested-pages
+Confirm a clean branch before starting.
+
+CONTEXT: BUG-2609-007 wrapped each role's top-level dashboard. Every
+nested page one level deeper still has no shell - just a "Back to
+Dashboard" link. Decision: wrap all of them for full consistency, no
+exceptions - checked the 2 biggest/most complex ones (Create Event,
+Register Venue) for layout risk first; both are narrow single-column
+forms (~760-780px), no wide canvas content, safe to wrap like everything
+else.
+
+WHAT TO WRAP (wrapper-only, same pattern as Profile/organiser/venue/
+artist - import DashboardShell, wrap the existing return, no handler/
+fetch/state changes, all early-return branches get it too):
+
+VENUE_OWNER:
+- /dashboard/venue/bookings/page.tsx
+- /dashboard/venue/sales/page.tsx
+- /dashboard/venue/edit/page.tsx
+- /dashboard/venue/create/page.tsx
+
+ORGANISER:
+- /dashboard/organiser/sales/page.tsx
+- /dashboard/organiser/payouts/page.tsx
+- /dashboard/organiser/tours/page.tsx
+- /dashboard/organiser/events/[id]/page.tsx
+- /dashboard/organiser/edit/page.tsx
+- /dashboard/organiser/events/create/page.tsx
+
+ARTIST:
+- /dashboard/artist/events/page.tsx (heading is "Browse Events")
+- /dashboard/artist/corporate-inquiries/page.tsx
+- /dashboard/artist/edit/page.tsx
+
+Existing "Back to Dashboard"/"Back to Venues" links can stay -
+redundant with the sidebar's own Dashboard link, but harmless.
+
+13 pages is the largest batch yet - go one at a time, verify each live
+before moving to the next, don't batch-verify at the end.
+
+VERIFY BEFORE HANDOFF, for each of the 13 pages:
+- Persistent sidebar/mobile nav renders correctly.
+- Correct nav item shows active-state highlighting where applicable.
+- No regression to existing handlers, fetches, state, or the page's
+  own internal layout - specifically check Create Event and Register
+  Venue render at full usability with the sidebar present (their forms
+  are the widest of the 13, confirm nothing wraps awkwardly or feels
+  cramped even though the content itself is narrow).
+- tsc --noEmit clean. Vercel build READY (local VAPID_SUBJECT failure
+  is the known pre-existing gap, not this branch's problem).
+
+DELIVERABLE: Push the branch, deploy to Vercel preview, stop. No PR.
+Report preview URL, summary of changes per file, and confirmation of
+every verify-before-handoff item above, per page.
+```
+
+</details>
+
+**Why the scope grew from "5 pages excluded" to "wrap everything"**: original plan split nested pages into hub-like (repeatedly checked - gets the shell) vs task-like (one-shot forms/creation flows - stays shell-free, on the reasoning that full-bleed focus is better for a long form). Hitesh preferred full consistency instead ("keep all pages on sidebar if there is not harm to do so"). Checked the one real risk that reasoning raised - whether Create Event or Register Venue have wide canvas/seat-map layouts that would clash with a 220px sidebar - and found neither does (both are narrow single-column forms, the actual seat-map builder is a separate later flow). No real harm found, so scope was widened to all 13 pages, zero exclusions.
 
 ## What shipped this session, in order
 
-**PR #555 — Audience Dashboard Shell.** New `DashboardShell.tsx`, applied to Dashboard/Messages/Tickets. Fixed BUG-2609-003 in the same pass. Full color-decision trail in `docs/design.md`.
+**PR #555 — Audience Dashboard Shell.** New `DashboardShell.tsx`, applied to Dashboard/Messages/Tickets. Fixed BUG-2609-003 in the same pass.
 
-**PR #556 — BUG-2609-004/005, found via Hitesh's screenshots.** Profile wrapped in the shell (was explicitly out of scope in #555's brief - the call looked reasonable at the time, wrong once seen live). SiteNav's account dropdown made shell-aware (drops duplicate nav on the 4 shell pages, keeps full list elsewhere), with a trailing-slash route-match bug caught and fixed mid-round. Then a second-order regression found during that same fix's own verification: removing the dropdown's duplicate entries had also silently removed the only place badge counts (unread messages, pending companion confirmations) rendered - restored via a new `useBadgeCounts()` hook on `DashboardShell`'s own sidebar/mobile nav.
+**PR #556 — BUG-2609-004/005.** Profile wrapped in the shell. SiteNav's account dropdown made shell-aware. Badge counts (`useBadgeCounts()`) restored on the shell's own sidebar/mobile nav after a second-order regression from the dropdown fix.
 
-**PR #557 — BUG-2609-006/007, found via Hitesh testing live as every role (Venue Owner, Organiser, Artist).** Two compounding gaps:
-- BUG-2609-006: all 11 role-section sidebar items (Organiser/Artist/Venue Owner sub-links) were built as inert placeholders on a claim - never checked against the actual repo - that their target pages didn't exist. All 11 already existed, fully built. Converted to real links; corrected Organiser's "My Events" to point at `/dashboard/organiser` itself (not `/dashboard/organiser/events`, which has no `page.tsx`).
-- BUG-2609-007: the shell was only ever built and tested for the Audience role. Every other role's own real dashboard page (`/dashboard/organiser/`, `/dashboard/venue/`, `/dashboard/artist/`) was never wrapped in the shell at all, and the shell's own "Dashboard" nav item was hardcoded to `/dashboard/audience` regardless of role - would send a non-Audience user to the wrong dashboard if clicked from inside the shell. Fixed by adding a role-aware `getShellDashboardLink()` (mirrors `SiteNav`'s existing `getDashboardLink()`) and wrapping all 3 role dashboards, one at a time, verifying each live before the next - these are meaningfully bigger/more complex pages than Profile was (14-34KB vs Profile's ~24KB), all early-return branches (not-registered, pending-approval, fetch-error) wrapped consistently, no handler/state changes.
-- A suspected mobile-specific role-section rendering bug (role section showing on desktop but not mobile for the same account) was investigated and found to NOT be a real defect - both viewports read the same state from the same component instance; symmetric behavior confirmed under an artificial fetch delay. Most likely a testing-timing artifact from the original report, not fixed because there was nothing to fix.
+**PR #557 — BUG-2609-006/007.** All 11 role-section sidebar sub-items converted from inert placeholders to real links (11/11 already had real, built pages - the "no destinations yet" claim was never checked and was simply wrong). Each role's own top-level dashboard page (`/dashboard/organiser/`, `/dashboard/venue/`, `/dashboard/artist/`) wrapped in the shell for the first time. Shell's own "Dashboard" nav item made role-aware via `getShellDashboardLink()` (was hardcoded to `/dashboard/audience` for everyone). A suspected mobile-specific role-section rendering bug was investigated and found not to be a real defect - confirmed live this session as a plain page-load timing window (role section briefly absent right after navigation, present a moment later, same on every viewport) - not fixed because there was nothing to fix.
 
-All 3 PRs independently verified before merge - not on CC's self-report alone: every diff read directly against the actual pushed branch, deprecated-token/hover-color grep clean throughout, route-existence claims spot-checked against the actual repo (not assumed), CI green and Vercel READY confirmed both pre- and post-merge each time, Contents API confirms every change live on `qa`.
+**BUG-2609-009 — scoped and written up, not yet sent to CC.** Extends the shell to all 13 nested pages under the 3 role dashboards, per the discussion above.
+
+All 3 merged PRs independently verified before merge - every diff read directly against the actual pushed branch, deprecated-token/hover-color grep clean throughout, route-existence claims spot-checked against the actual repo, CI green and Vercel READY confirmed pre- and post-merge each time.
 
 ## Process notes worth remembering
 
-- **The single biggest lesson this session: verify claims about what a page/route "doesn't have yet" against the actual repo, don't accept them at face value from a Figma Make export's own commentary or a prior brief.** BUG-2609-006 existed for one full merged PR because "no destinations yet" was written into the original brief and repeated through two rounds of my own verification without anyone actually checking. The fix, once someone checked, took one grep.
-- **Live testing as each actual role caught real bugs that code review across two verification passes did not** - the account dropdown duplication (BUG-2609-004), the badge regression (BUG-2609-005), the dead role links (BUG-2609-006), and the unwrapped role dashboards with a hardcoded wrong link (BUG-2609-007) were all found by Hitesh clicking through the live site as Audience, Venue Owner, Organiser, and Artist in turn - not by anything in the build-verify-merge loop on its own. Worth treating "test live as every affected role" as a standing step before considering any shared-nav/shell change done, not an optional extra.
-- A scoping call made in one session ("out of scope," "no destinations yet") can look reasonable in isolation and still be wrong once the built result is seen end-to-end and actually checked against the codebase.
-- Bigger/more complex pages (Organiser 14KB, Venue 17KB, Artist 34KB) carry more wrapper-change risk than a simple page like Profile did - verifying one at a time before moving to the next (as CC did this round) is worth keeping as the default approach for any future wrap-in-shell work, not just a one-off caution.
+- **Verify claims about what a page "doesn't have yet" against the actual repo, every time** - BUG-2609-006 existed for one full merged PR because "no destinations yet" was written into a brief and repeated through two verification passes without anyone actually checking. One grep, once someone checked, was the whole fix.
+- **Live testing as each actual role catches real bugs that code review alone does not.** Every bug found after #555 (account dropdown duplication, badge regression, dead role links, unwrapped role dashboards + hardcoded Dashboard link, and now the nested-pages gap) was found by Hitesh clicking through the live site as each role in turn - not by anything in the build-verify-merge loop on its own. Treat "test live as every affected role" as a standing step before considering any shared-nav/shell change done.
+- **When a design call raises a specific risk, check it against the actual code rather than treating the risk as settled either way.** The "task pages might have wide layouts that clash with a sidebar" concern was worth raising, but turned out false once checked - don't let a plausible-sounding risk go unverified in either direction (assuming it's real, or assuming it's fine).
+- A scoping call made in one session can look reasonable in isolation and still be revised once the person actually using the product weighs in on the trade-off - "leave 5 pages alone" wasn't wrong, it was a preference Hitesh was entitled to override once he understood the actual trade-off (which turned out to have no real cost once checked).
 
 ## Tally
 
-31 PRs merged total (#527-#557). Zero pushed-and-awaiting-review as of this write-up. Zero reverted.
+31 PRs merged total (#527-#557). BUG-2609-009 scoped and ready, not yet executed. Zero pushed-and-awaiting-review as of this write-up. Zero reverted.
