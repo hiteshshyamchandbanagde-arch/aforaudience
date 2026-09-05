@@ -6,7 +6,12 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import DashboardShell from '@/components/DashboardShell'
 import { useLocale } from '@/lib/i18n/translate'
+
+function initials(name: string) {
+  return name.charAt(0).toUpperCase() || '?'
+}
 
 interface Thread {
   conversationId: string
@@ -66,72 +71,108 @@ export default function MessagesInboxPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+    <>
       <SiteNav />
-      <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
-          {tr.messagesInboxPage.heading}
-        </h1>
+      <DashboardShell>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ maxWidth: '760px', padding: '32px 24px' }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
+              {tr.messagesInboxPage.heading}
+            </h1>
 
-        {threads.length === 0 && (
-          <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
-            {tr.messagesInboxPage.emptyState}
-          </p>
-        )}
+            {threads.length === 0 && (
+              <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
+                {tr.messagesInboxPage.emptyState}
+              </p>
+            )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {threads.map((t) => (
-            <Link
-              key={t.conversationId}
-              href={`/dashboard/messages/${t.conversationId}`}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 16px',
-                borderRadius: '10px',
-                border: '1px solid rgba(245,245,240,0.1)',
-                background: t.unread ? 'rgba(212,163,60,0.08)' : 'var(--afa-cream, #fff)',
-                textDecoration: 'none',
-                color: t.unread ? 'var(--afa-text-primary)' : 'var(--afa-ink)',
-              }}
-            >
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', opacity: 0.55 }}>
-                    {CONTEXT_LABEL[t.contextType]}
-                  </span>
-                  {!t.isActive && (
-                    <span style={{ fontSize: '11px', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
-                  )}
-                  {t.unread && (
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-terracotta, #b3261e)' }} />
-                  )}
-                </div>
-                <div style={{ fontWeight: 600, fontFamily: 'system-ui, sans-serif', marginTop: '2px' }}>
-                  {t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? tr.messagesInboxPage.unknownParticipant}
-                  {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
-                </div>
-                {t.lastMessage && (
-                  <div
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {threads.map((t) => {
+                const name = t.otherParticipant?.displayName ?? t.otherParticipant?.name ?? tr.messagesInboxPage.unknownParticipant
+                return (
+                  <Link
+                    key={t.conversationId}
+                    href={`/dashboard/messages/${t.conversationId}`}
                     style={{
-                      fontSize: '13px',
-                      opacity: 0.65,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      marginTop: '2px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: t.unread ? '1px solid rgba(201,151,58,0.18)' : '1px solid rgba(245,245,240,0.06)',
+                      background: t.unread ? 'rgba(201,151,58,0.07)' : 'var(--afa-surface-raised)',
+                      textDecoration: 'none',
+                      color: 'var(--afa-text-primary)',
                     }}
                   >
-                    {t.lastMessage.body}
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </main>
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        background: 'rgba(245,245,240,0.08)',
+                        color: 'var(--afa-text-primary)',
+                      }}
+                    >
+                      {initials(name)}
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                        {/* Type tag: single amber treatment for all 3 context types
+                            (BUG-2609-003 / Figma Make review) - differentiated by
+                            label text only, not by color. */}
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            fontWeight: 500,
+                            letterSpacing: '0.04em',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: 'rgba(201,151,58,0.15)',
+                            color: 'var(--afa-amber)',
+                          }}
+                        >
+                          {CONTEXT_LABEL[t.contextType]}
+                        </span>
+                        {!t.isActive && (
+                          <span style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
+                        )}
+                        {t.unread && (
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-amber)' }} />
+                        )}
+                      </div>
+                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'system-ui, sans-serif', fontSize: '13px' }}>
+                        {name}
+                        {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
+                      </div>
+                      {t.lastMessage && (
+                        <div
+                          style={{
+                            fontSize: '12.5px',
+                            opacity: 0.6,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginTop: '2px',
+                          }}
+                        >
+                          {t.lastMessage.body}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </main>
+      </DashboardShell>
+    </>
   )
 }
