@@ -366,4 +366,41 @@ html {
 .ga-remove-btn:hover { color: var(--afa-fill-solid) !important; }
 .ga-add-row:hover { border-color: rgba(255, 90, 54, 0.5) !important; color: var(--afa-text-primary) !important; }
 .afa-path-card:hover { transform: translateY(-2px); }
+
+/* GEN-2609-003 - Mobile Redesign Phase 1: nav shell + push transitions.
+   MobileTabBar.tsx toggles this class on <body> (not a per-page wrapper -
+   see that file's own comment for why) so its fixed bottom bar never
+   covers page content. `lg` matches DashboardShell.tsx's own mobile
+   breakpoint, the only other place this codebase draws that line, and
+   the min-width companion keeps desktop completely untouched even if the
+   class is present (defensive - MobileTabBar already checks viewport via
+   its own `lg:hidden`, this is belt-and-suspenders on the CSS side). */
+@media (max-width: 1023px) {
+  body.afa-mobile-tab-bar-active {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Push-transition mount animation for full-screen routes entered from
+   the mobile tab shell (EventDetail, Checkout - see their own
+   layout.tsx files). Ported from the Figma Make export's
+   afa-push-in/.afa-push (src/index.css) - same timing/easing/offset,
+   applied here via a plain CSS animation on mount rather than the View
+   Transitions API, since a route's client page component always mounts
+   fresh on real App Router navigation into it - no JS/useEffect needed
+   to trigger it. Mobile-only (this is a tab-shell concept; desktop
+   navigates to these routes via normal SiteNav links, not a "push") and
+   skipped under reduced-motion. */
+@keyframes afa-push-in {
+  from { transform: translateX(28px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (max-width: 1023px) {
+  .afa-push-mount {
+    animation: afa-push-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .afa-push-mount { animation: none; }
+}
 .afa-path-card:not(.afa-path-card-active):hover { border-color: rgba(245, 245, 240, 0.3); }
