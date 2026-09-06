@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/lib/i18n/translate'
+import { useHeldRoles } from '@/components/HeldRolesContext'
 
 // Shared shell for the Audience-tier dashboard pages (Dashboard/My
 // Activity, Messages, Tickets). Desktop: persistent 220px left sidebar,
@@ -154,41 +155,6 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
     ],
   },
 ]
-
-// Mirrors the profile page's loadStatuses() calls (src/app/profile/page.tsx)
-// - same three status endpoints, same "check profile existence directly"
-// approach, since an account's held roles are independent of whichever
-// single role is currently active (see each route's own comment for why).
-function useHeldRoles(): Record<RoleKey, boolean> {
-  const { data: session } = useSession()
-  const [held, setHeld] = useState<Record<RoleKey, boolean>>({
-    ORGANISER: false,
-    ARTIST: false,
-    VENUE_OWNER: false,
-  })
-
-  useEffect(() => {
-    if (!session?.user) return
-    let cancelled = false
-    Promise.all([
-      fetch('/api/organisers/status').then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch('/api/artists/status').then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch('/api/venue-owners/status').then((r) => (r.ok ? r.json() : null)).catch(() => null),
-    ]).then(([org, artist, venue]) => {
-      if (cancelled) return
-      setHeld({
-        ORGANISER: !!org?.hasProfile,
-        ARTIST: !!artist?.hasProfile,
-        VENUE_OWNER: !!venue?.hasProfile,
-      })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [session?.user])
-
-  return held
-}
 
 // BUG-2609-005: SiteNav's account dropdown (src/components/SiteNav.tsx,
 // same 3 endpoints/gating around lines 186-226) already fetches these

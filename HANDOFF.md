@@ -1,4 +1,88 @@
-# Session Handoff — 6 Sept 2026
+# Session Handoff — 6 Sept 2026 (BUG-2609-020, dashboard role-menu load delay)
+
+## Branch: `bug-2609-020-held-roles-server-side`, on top of qa HEAD `6f604a8` — awaiting PR/CI/review, not merged. Separate, unrelated to the also-unmerged `gen-2609-003-mobile-shell-phase1` branch from earlier the same day.
+
+## BUG-2609-020 — Dashboard role-menu load delay (server-side held-roles resolution)
+
+**Root cause (confirmed by reading source, not guessed):** `DashboardShell.tsx`'s
+`useHeldRoles()` was a client-side `useEffect` that waited for `useSession()`
+to resolve, then fired 3 parallel `fetch()` calls
+(`/api/organisers/status`/`/api/artists/status`/`/api/venue-owners/status`)
+before the Create/Sales/Bookings role-section menu items could render - the
+visible pop-in delay, on all 21 `DashboardShell` call sites. `SiteNav.tsx`
+already fetches the same 3 endpoints independently for its own dropdown
+badges (BUG-2609-005) - 6 network calls total per dashboard-shell page load
+for 3 things that don't change during a session.
+
+**Fix shipped, this branch:**
+- `src/lib/held-roles.ts` (new) - `getHeldRoles(userId)`, direct parallel
+  Prisma queries (`Organiser`/`Artist`/`VenueOwner.findUnique({where:{userId}})`),
+  no HTTP round-trip.
+- `src/components/HeldRolesContext.tsx` (new) - `HeldRolesProvider` +
+  `useHeldRoles()` (same name as the hook it replaces, so `DashboardShell.tsx`'s
+  call site (`const held = useHeldRoles()`) didn't need to change - only the
+  import and the hook's implementation moved).
+- `src/app/dashboard/layout.tsx`, `src/app/tickets/layout.tsx`,
+  `src/app/profile/layout.tsx` (new, additive - none existed before) - each
+  an async Server Component: `getServerSession` -> `getHeldRoles` ->
+  `HeldRolesProvider`. `/tickets` and `/profile` need their own copy since
+  they render `DashboardShell` outside the `/dashboard/*` prefix.
+- `DashboardShell.tsx` - deleted the old client-fetch `useHeldRoles()`
+  function entirely (kept `useEffect` import - still used by
+  `useBadgeCounts()` elsewhere in the file), added one import. Net diff is
+  a clean deletion + a single new import line.
+- `SiteNav.tsx` and the 3 `/api/*/status` routes: **untouched**, per the
+  ticket's explicit scope (SiteNav renders site-wide, different scope,
+  own fetch stays).
+
+**Real bug caught via the build itself, not assumed away:** first pass of
+`HeldRolesContext.tsx` imported `EMPTY_HELD_ROLES` as a *runtime* value from
+`held-roles.ts` - which also imports `prisma`. Even though only one export
+was used, the whole module (including its `prisma`/`pg` import chain) got
+pulled into the client bundle, breaking the build on `net`/`tls`/`util/types`
+module-not-found errors. Fixed with a type-only import
+(`import type { HeldRoles }`, erased at compile time) plus a small
+locally-defined fallback constant in the client file instead.
+
+**Verification:**
+- `tsc --noEmit` clean, `next build` clean (0 errors/warnings, same VAPID
+  env-var workaround as the mobile-shell session - see that memory).
+  Note: `/dashboard/*` routes are now correctly `ƒ` (dynamic) instead of
+  previously-static for some of them - expected, since the new layout calls
+  `getServerSession()` per-request; not a regression.
+- Guest/unauthenticated fallback path (`!userId` -> `EMPTY_HELD_ROLES`, zero
+  Prisma calls) confirmed via curl: 200 on `/dashboard/organiser/`,
+  `/dashboard/venue/`, `/tickets/`, `/profile/`, no errors in the dev server
+  log for any of the 4.
+- `getHeldRoles()`'s query logic confirmed against real QA DB data via direct
+  SQL for 3 known personas: Vinayak -> `VENUE_OWNER` only, Omkar ->
+  `ORGANISER` only, Atul -> none. Matches expected.
+- **Not verified**: an actual live, signed-in browser render (role sections
+  present on first paint, zero client-side pop-in, for a real session). Real
+  login (`vinayak.venue@aforaudience.qa` / `QaPass!2026`) failed - the same
+  recurring local-DB P1001 flakiness as the mobile-shell-phase1 session,
+  this time on the credentials callback itself (confirmed in the dev server
+  log). Mocking `/api/auth/session` (the client-side pattern used last
+  session) does **not** help here - it has no effect on `getServerSession()`
+  inside a Server Component, which decodes the session cookie directly, not
+  via that endpoint. Someone should do a real end-to-end check (login +
+  screenshot of the role-section menu on first paint) once local dev is
+  reachable, before calling this fully verified.
+
+**Process note:** stopped the dev server this time by finding the actual
+Windows PID via `tasklist` and killing just that process tree
+(`taskkill /F /PID <pid> /T`), not the blanket `taskkill /F /IM node.exe /T`
+flagged as a mistake in the previous session's handoff - confirmed via
+`tasklist` afterward that the 2 unrelated pre-existing node.exe processes
+were left untouched.
+
+## BUG-2609-020 ticket status: `BUILD_COMPLETE` (Feedback table, full
+status-flow audit trail in `FeedbackChangeLog`) - awaiting CI/Vercel on the
+pushed branch, then PR review/merge.
+
+---
+
+# Session Handoff — 6 Sept 2026 (earlier same day, BUG-2609-012/019)
 
 ## qa HEAD: `90f7242` (PR #560 merged, deployed READY)
 
