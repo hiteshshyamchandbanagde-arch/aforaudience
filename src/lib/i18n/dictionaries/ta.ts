@@ -106,6 +106,10 @@ const ta: Dictionary = {
     sortPriceLowHigh: "விலை: குறைவு முதல் அதிகம்",
     sortPriceHighLow: "விலை: அதிகம் முதல் குறைவு",
     sortFillingFast: "வேகமாக நிரம்புகிறது",
+    filtersButtonLabel: "வடிகட்டிகளைத் திற",
+    filterSheetTitle: "நிகழ்வுகளை வடிகட்டு",
+    filterSheetReset: "மீட்டமை",
+    filterSheetCloseLabel: "வடிகட்டிகளை மூடு",
     emptyNoPastTitle: "இதுவரை கடந்த நிகழ்வுகள் இல்லை",
     emptyNoPastSub: "நிகழ்வுகள் முடிந்தவுடன் அவை தானாகவே இங்கு வரும்.",
     emptyNoneYetTitle: "இதுவரை நிகழ்வுகள் வெளியிடப்படவில்லை",
@@ -533,6 +537,7 @@ const ta: Dictionary = {
     plusOneRetryError: "இப்போது உறுதிப்படுத்த முடியவில்லை - மீண்டும் முயற்சிக்கவும்",
     reserveFailed: "இருக்கைகளை முன்பதிவு செய்ய முடியவில்லை",
     reviewFailed: "மதிப்புரையைச் சமர்ப்பிக்க முடியவில்லை",
+    selectTicketsCta: "டிக்கெட்டுகளைத் தேர்ந்தெடுக்கவும்",
   },
   checkoutPage: {
     loadingCheckout: "உங்கள் செக்அவுட் ஏற்றப்படுகிறது…",

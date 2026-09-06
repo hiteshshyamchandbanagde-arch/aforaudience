@@ -106,6 +106,10 @@ const gu: Dictionary = {
     sortPriceLowHigh: "કિંમત: ઓછીથી વધુ",
     sortPriceHighLow: "કિંમત: વધુથી ઓછી",
     sortFillingFast: "ઝડપથી ભરાઈ રહ્યું છે",
+    filtersButtonLabel: "ફિલ્ટર્સ ખોલો",
+    filterSheetTitle: "ઇવેન્ટ્સ ફિલ્ટર કરો",
+    filterSheetReset: "રીસેટ કરો",
+    filterSheetCloseLabel: "ફિલ્ટર્સ બંધ કરો",
     emptyNoPastTitle: "હજુ સુધી કોઈ ભૂતકાળના ઇવેન્ટ્સ નથી",
     emptyNoPastSub: "ઇવેન્ટ્સ પૂરા થયા પછી તે આપમેળે અહીં આવે છે.",
     emptyNoneYetTitle: "હજુ સુધી કોઈ ઇવેન્ટ્સ પ્રકાશિત થયા નથી",
@@ -533,6 +537,7 @@ const gu: Dictionary = {
     plusOneRetryError: "અત્યારે પુષ્ટિ કરી શકાયું નથી - કૃપા કરીને ફરી પ્રયાસ કરો",
     reserveFailed: "સીટો રિઝર્વ કરવામાં નિષ્ફળ",
     reviewFailed: "સમીક્ષા સબમિટ કરવામાં નિષ્ફળ",
+    selectTicketsCta: "ટિકિટ પસંદ કરો",
   },
   checkoutPage: {
     loadingCheckout: "તમારું ચેકઆઉટ લોડ થઈ રહ્યું છે…",

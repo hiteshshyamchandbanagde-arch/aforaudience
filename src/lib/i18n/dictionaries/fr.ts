@@ -111,6 +111,10 @@ const fr: Dictionary = {
     sortPriceLowHigh: "Prix : croissant",
     sortPriceHighLow: "Prix : décroissant",
     sortFillingFast: "Se remplit vite",
+    filtersButtonLabel: "Ouvrir les filtres",
+    filterSheetTitle: "Filtrer les événements",
+    filterSheetReset: "Réinitialiser",
+    filterSheetCloseLabel: "Fermer les filtres",
     emptyNoPastTitle: "Aucun événement passé pour l'instant",
     emptyNoPastSub: "Les événements arrivent ici automatiquement une fois terminés.",
     emptyNoneYetTitle: "Aucun événement publié pour l'instant",
@@ -538,6 +542,7 @@ const fr: Dictionary = {
     plusOneRetryError: "Impossible de confirmer pour le moment - veuillez réessayer",
     reserveFailed: "Échec de la réservation des places",
     reviewFailed: "Échec de l'envoi de l'avis",
+    selectTicketsCta: "Sélectionner les billets",
   },
   checkoutPage: {
     loadingCheckout: "Chargement de votre paiement…",

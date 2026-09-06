@@ -115,6 +115,10 @@ const de: Dictionary = {
     sortPriceLowHigh: "Preis: aufsteigend",
     sortPriceHighLow: "Preis: absteigend",
     sortFillingFast: "Füllt sich schnell",
+    filtersButtonLabel: "Filter öffnen",
+    filterSheetTitle: "Events filtern",
+    filterSheetReset: "Zurücksetzen",
+    filterSheetCloseLabel: "Filter schließen",
     emptyNoPastTitle: "Noch keine vergangenen Events",
     emptyNoPastSub: "Events werden hier automatisch aufgeführt, sobald sie vorbei sind.",
     emptyNoneYetTitle: "Noch keine Events veröffentlicht",
@@ -542,6 +546,7 @@ const de: Dictionary = {
     plusOneRetryError: "Konnte gerade nicht bestätigt werden - bitte versuche es erneut",
     reserveFailed: "Plätze konnten nicht reserviert werden",
     reviewFailed: "Bewertung konnte nicht gesendet werden",
+    selectTicketsCta: "Tickets auswählen",
   },
   checkoutPage: {
     loadingCheckout: "Deine Kasse wird geladen…",

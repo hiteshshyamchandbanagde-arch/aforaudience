@@ -106,6 +106,10 @@ const kn: Dictionary = {
     sortPriceLowHigh: "ಬೆಲೆ: ಕಡಿಮೆಯಿಂದ ಹೆಚ್ಚಿಗೆ",
     sortPriceHighLow: "ಬೆಲೆ: ಹೆಚ್ಚಿನಿಂದ ಕಡಿಮೆಗೆ",
     sortFillingFast: "ವೇಗವಾಗಿ ತುಂಬುತ್ತಿದೆ",
+    filtersButtonLabel: "ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ",
+    filterSheetTitle: "ಈವೆಂಟ್‌ಗಳನ್ನು ಫಿಲ್ಟರ್ ಮಾಡಿ",
+    filterSheetReset: "ಮರುಹೊಂದಿಸಿ",
+    filterSheetCloseLabel: "ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಮುಚ್ಚಿ",
     emptyNoPastTitle: "ಇನ್ನೂ ಹಿಂದಿನ ಈವೆಂಟ್‌ಗಳಿಲ್ಲ",
     emptyNoPastSub: "ಈವೆಂಟ್‌ಗಳು ಮುಗಿದ ನಂತರ ಅವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಇಲ್ಲಿಗೆ ಬರುತ್ತವೆ.",
     emptyNoneYetTitle: "ಇನ್ನೂ ಈವೆಂಟ್‌ಗಳು ಪ್ರಕಟವಾಗಿಲ್ಲ",
@@ -533,6 +537,7 @@ const kn: Dictionary = {
     plusOneRetryError: "ಇದೀಗ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ - ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
     reserveFailed: "ಸೀಟುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲು ವಿಫಲವಾಗಿದೆ",
     reviewFailed: "ವಿಮರ್ಶೆಯನ್ನು ಸಲ್ಲಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    selectTicketsCta: "ಟಿಕೆಟ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
   },
   checkoutPage: {
     loadingCheckout: "ನಿಮ್ಮ ಚೆಕ್‌ಔಟ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",

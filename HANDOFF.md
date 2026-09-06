@@ -1,3 +1,93 @@
+# Session Handoff — 6 Sept 2026 (GEN-2609-004, Mobile Redesign Phase 2)
+
+## Branch: `gen-2609-004-mobile-phase2`, on top of qa HEAD `0118938` (both Phase 1 #561 and BUG-2609-020 #562 confirmed merged) — awaiting PR/CI/review, not merged.
+
+## GEN-2609-004 — Mobile Redesign Phase 2: Discover + EventDetail + Seat Selection
+
+**1. Seat/ticket-tier picker extracted to its own route** -
+`src/app/(public)/events/[id]/seats/` (new: `layout.tsx` push-transition
+wrapper, `page.tsx` server component with a leaner query than
+EventDetailPage's own, `SeatSelectionClientPage.tsx` holding the entire
+booking panel). This was a genuine relocation, not a rewrite - every piece
+of state/logic (GA quantity steppers, NUMBERED `SeatPicker`, fee slider,
+`reserveSeats`/`handleBookClick`, the Router-Cache-staleness
+`router.refresh()` fix, the booking `AuthPromptSheet` instance) moved
+verbatim from `EventDetailClientPage.tsx`, which shrank to a price/
+availability summary + a single `Select tickets` CTA linking to the new
+route.
+
+**Real coupling caught before it became a silent regression:** the old
+`bookingError` state was also used by `confirmPlusOne` (a plus-one RSVP
+error had been silently piggybacking on the booking panel's own error
+render slot). Gave it a dedicated `plusOneError` state + render site on
+EventDetail so that error path didn't go invisible after the panel moved.
+
+**End-to-end verified, not just build success:** real login, real seat/
+quantity selection, real `POST /api/bookings` through the new route,
+confirmed an actual `CONFIRMED` `Booking` row landed in the QA DB (not just
+a 200) for a free `GENERAL_ADMISSION` event. Push transition confirmed
+(`.afa-push-mount` present on real EventDetail -> `/seats` navigation).
+NUMBERED event (Jaipur Mic Gala 100, 100 real seats) confirmed rendering
+all 100 seat elements via DOM + direct API check.
+
+**Found, not fixed (pre-existing, out of scope):** the NUMBERED seat map
+visually clusters all seats in one corner of the canvas rather than
+spreading across it, at both mobile and desktop width. Confirmed via
+`git diff origin/qa -- src/components/SeatPicker.tsx` (empty) that this
+file is byte-identical to before this ticket - a seed-data/coordinate
+characteristic of this specific venue's `Seat` rows, not a regression from
+the relocation. Worth its own ticket if it matters for a real venue.
+
+**2. Discover (`/events`) mobile filter sheet** - new
+`src/components/MobileEventFilterSheet.tsx`, visual structure ported from
+the Figma export's `FilterSheet.tsx` (pill buttons, slide-up sheet, Reset +
+"Showing N events" CTA) but wired to this app's real filter state
+(type/city/price/sort) - presentation only, zero filtering-logic changes.
+Replaces the desktop inline filter row below `lg` (Phase 1's own mobile
+breakpoint convention - `DashboardShell.tsx`/`MobileTabBar.tsx`); desktop
+keeps the exact same inline row, confirmed via screenshot at both widths
+that the two are mutually exclusive with no layout shift. New
+`FilterSlidersIcon` added to `EventIcons.tsx` matching this repo's inline-
+SVG icon convention (not the unused `lucide-react` dependency).
+
+**3. EventDetail mobile restyle** - the booking-panel simplification above
+(shrunk to a summary + CTA) is itself most of what "mobile restyle" meant
+in practice, since the existing hero/meta/lineup/facilities grids already
+had `1024px`-scoped responsive CSS from a prior session (GEN-2608-077) that
+this ticket didn't need to touch. Confirmed via screenshot at both widths -
+no regression, and the simplified booking box actually reads cleaner at
+both sizes than the old embedded picker did.
+
+**i18n:** 5 new keys added with real translations across all 11 locales
+(not hardcoded English) - `eventDetailPage.selectTicketsCta` and 4
+`eventsPage.filterSheet*`/`filtersButtonLabel` strings for the new sheet's
+chrome. Everything else reuses existing keys verbatim (the entire booking
+panel's copy moved with its JSX, no new booking-related strings needed;
+`checkoutPage.backToEventLabel` reused for the new page's own back-link,
+matching Checkout's exact established pattern instead of inventing a
+near-duplicate).
+
+**Verification:** `tsc --noEmit` and `next build` both clean at every
+stage. Live Playwright screenshots: Discover mobile (+ filter sheet open)
+and desktop, EventDetail mobile/desktop (GA event), seats page mobile/
+desktop (GA event, NUMBERED event, free event), full free-booking flow
+screenshot sequence. One live-testing gotcha worth remembering: the first
+attempt at the end-to-end booking check closed the browser context before
+the `POST /api/bookings` request resolved (dev-mode Turbopack compile
+latency), which looked like a silent failure until checked against the DB
+directly - the fix was waiting for the actual network response
+(`page.waitForResponse`), not a longer fixed sleep. Also re-confirmed the
+`trailingSlash: true` gotcha from Phase 1 applies to API routes too, not
+just pages - `fetch('/api/bookings')` 308s to `/api/bookings/` first
+(`fetch` follows 308s transparently, preserving method+body, so this is
+harmless - just something to know when watching network logs).
+
+## GEN-2609-004 ticket status: `BUILD_COMPLETE` (Feedback table, full
+status-flow audit trail in `FeedbackChangeLog`) - awaiting CI/Vercel on the
+pushed branch, then PR review/merge.
+
+---
+
 # Session Handoff — 6 Sept 2026 (Live verification pass: PR #561 + #562 both PASS)
 
 ## qa HEAD: `f136f87` (docs only, on top of `fecbfea`/`6f604a8`)

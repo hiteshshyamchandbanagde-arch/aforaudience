@@ -404,3 +404,31 @@ html {
   .afa-push-mount { animation: none; }
 }
 .afa-path-card:not(.afa-path-card-active):hover { border-color: rgba(245, 245, 240, 0.3); }
+
+/* GEN-2609-004 (Mobile Redesign Phase 2) - bottom-sheet mount animation,
+   used by the mobile filter sheet on /events (MobileEventFilterSheet.tsx).
+   Same naming spirit as .afa-push-mount above (Phase 1) - a plain CSS
+   animation on mount, no JS timing needed since the sheet is a fresh
+   mount each time it opens (conditionally rendered, not toggled via
+   visibility). Not gated to mobile-only via @media the way push-mount is,
+   since this class is only ever applied by a component that itself only
+   mounts below the same `lg` breakpoint - nothing stops it being reused
+   by a future sheet at any width, so the gate belongs on the trigger, not
+   the animation. */
+@keyframes afa-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes afa-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.afa-sheet-mount {
+  animation: afa-sheet-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.afa-backdrop-mount {
+  animation: afa-backdrop-in 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .afa-sheet-mount, .afa-backdrop-mount { animation: none; }
+}

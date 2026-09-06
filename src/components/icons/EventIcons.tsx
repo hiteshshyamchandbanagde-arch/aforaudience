@@ -145,6 +145,19 @@ export function GridViewIcon({ className, style }: IconProps) {
   )
 }
 
+// GEN-2609-004 (Mobile Redesign Phase 2) - opens the mobile filter bottom
+// sheet on /events. Path data ported from the Figma Make export's
+// icons.tsx (SlidersIcon), translated to this file's convention.
+export function FilterSlidersIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M4 7h11M18 7h2M4 17h2M9 17h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="7" cy="17" r="2" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  )
+}
+
 export function ListViewIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
