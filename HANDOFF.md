@@ -1,3 +1,88 @@
+# Session Handoff — 6 Sept 2026 (end of session: all 3 branches merged)
+
+## qa HEAD: `c6847de` — PR #563 (GEN-2609-004) merged by chat. PRs #561
+(GEN-2609-003) and #562 (BUG-2609-020) confirmed merged earlier the same
+session. All three Feedback tickets moved to `IN_TEST` (see each phase's
+own section below for detail) - none moved to `RESOLVED` yet, since that
+was verified against each branch's own Preview deployment pre-merge, not
+independently re-checked against the post-merge qa deployment.
+
+## This session, in order: transaction-pooler fix -> live PR verification -> Phase 2 build
+
+1. **Transaction-mode Supabase pooler** - verified safe for this
+   codebase's exact Prisma adapter setup, found the real live issue was
+   Vercel Preview's `DATABASE_URL` still on session mode, fixed + confirmed
+   live via Vercel's own runtime logs. A QA DB password got exposed in this
+   chat mid-investigation (`.env`, not `.env.local` - inconsistent masking
+   between the two, see memory) - handled carefully, rotation was in
+   progress by end of that turn. **Confirm the post-rotation password
+   actually landed in `.env.local` + Vercel's `DATABASE_URL` before
+   trusting either next session** - this was flagged as not-yet-confirmed-
+   done at the time and no later check in this session re-verified it.
+2. **Live verification pass, PR #561 + #562** - both PASS against their
+   real Preview deployments (all 3 dashboard roles render correctly for
+   #562; mobile tab bar/push-transitions/DashboardShell-collision-guard
+   all confirmed for #561). Both moved to `IN_TEST`.
+3. **GEN-2609-004, Mobile Redesign Phase 2** - seat/ticket-tier picker
+   extracted to its own route (`events/[id]/seats`), Discover's mobile
+   filter bottom sheet shipped, EventDetail simplified to a summary + CTA.
+   End-to-end verified with a real DB booking row, not just a 200
+   response. Full detail already in this file's next section down (Phase 2
+   was written up in detail already; keeping it rather than duplicating).
+
+All three PRs merged into `qa` by chat during/after this session - #561 and
+#562 sometime between the transaction-pooler work and the live-verification
+pass, #563 sometime between the Phase 2 build finishing and this final
+handoff (confirmed via `git log origin/qa`, not assumed).
+
+## Standing items carried forward, unchanged this session
+
+- **Phase 1's guest-only tab-bar decision** (GEN-2609-003) never got an
+  explicit final "yes" from Hitesh after his own question about it mid-
+  build - see that ticket's memory file. Worth a quick confirm, not a
+  blocker to anything.
+- **Seed-data seat-map clustering** (found during GEN-2609-004
+  verification) - the NUMBERED seat map for Jaipur Mic Gala 100 visually
+  clusters all 100 seats in one corner of its canvas instead of spreading
+  out. Confirmed pre-existing (`SeatPicker.tsx` untouched, clean git diff),
+  not this session's regression - worth its own ticket if a real venue
+  ever looks like this, not opened yet.
+- **GEN-2608-039** (pg pool `max:1` + concurrent bookings) - added a real,
+  reproduced-live observation to this existing ticket during Phase 2
+  testing (a `pg` deprecation warning about concurrent queries on one
+  client, seen during an actual booking-creation request) rather than
+  opening a duplicate. Not investigated further - out of scope for
+  Phase 2, `/api/bookings/route.ts` itself was untouched.
+- **BUG-2609-019** (mobile "Signed in as {name}" line missing on live QA,
+  present in code) - still `UNDER_REVIEW`, needs a real-device check, not
+  another mocked-session pass. Unchanged from before this session.
+- **QST-2609-001** (status-badge semantic-color policy), the two ambiguous
+  BackLinks from BUG-2609-010, and **BUG-2609-008** (Admin DashboardShell,
+  deliberately deferred) - all unchanged, still open, still Hitesh's calls
+  to make.
+- Razorpay + Google Places API key rotation, white-card-on-dark bug
+  (Messages), `--afa-terracotta` sweep, `--afa-gold` contrast question,
+  cream-tint tokens, auth stock photo placeholder, profile eyebrow i18n -
+  all unchanged standing backlog from before this session, not touched.
+
+## Session-start protocol reminder for next session
+
+1. Confirm the post-rotation QA DB password actually landed in both
+   `.env.local` and Vercel's `DATABASE_URL` (see item 1 above) - don't
+   assume either is done.
+2. `git fetch && git status` - confirm qa HEAD matches `c6847de` or later.
+3. Query the Feedback table for anything `NEW`/`UNDER_REVIEW` and
+   cross-check against this file before treating anything as open - there
+   is a large pre-existing backlog (sessions ~52-65) not re-triaged this
+   session, this file only tracks what's actively relevant.
+4. If picking up Mobile Redesign Phase 3 (Checkout/FeeSheet, per the
+   original Phase 2 brief's own non-goals list) - re-read
+   `SeatSelectionClientPage.tsx` and the `checkout/[bookingId]/` route
+   first, don't re-litigate the push-transition/route-extraction pattern
+   already established across Phases 1-2.
+
+---
+
 # Session Handoff — 6 Sept 2026 (GEN-2609-004, Mobile Redesign Phase 2)
 
 ## Branch: `gen-2609-004-mobile-phase2`, on top of qa HEAD `0118938` (both Phase 1 #561 and BUG-2609-020 #562 confirmed merged) — awaiting PR/CI/review, not merged.
