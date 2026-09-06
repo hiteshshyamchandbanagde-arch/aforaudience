@@ -1,4 +1,93 @@
-# Session Handoff — 6 Sept 2026
+# Session Handoff — 6 Sept 2026 (Transaction-pooler verification + live fix + password incident)
+
+## qa HEAD: `fecbfea` (empty deploy-trigger commit on top of `6f604a8`)
+
+## Transaction-mode Supabase pooler: verified safe, live issue fixed
+
+**Task was originally scoped as read-only verification** (don't touch
+`prisma.ts`/`.env.local`/Vercel env vars, just report findings) - turned into
+an actual live fix once the investigation surfaced the real root cause.
+
+**Verification result:** ran this app's real query patterns (simple
+`findUnique`, the 3 parallel `getHeldRoles` queries, an interactive
+`$transaction`, a batch `$transaction`, plus a repeated query on the same
+client afterward) directly against the QA project's transaction-mode pooler
+connection string (port 6543), using the actual `@prisma/adapter-pg` + `pg`
+setup from `src/lib/prisma.ts`. **All passed cleanly, identically with and
+without `pgbouncer=true`.** Confirms two things found by reading the
+installed adapter's own source first (not assumed from generic docs):
+`@prisma/adapter-pg` only caches named prepared statements if a
+`statementNameGenerator` is explicitly configured (it isn't, here), and
+`pg`/`pg-connection-string` don't recognize `pgbouncer` as a connection
+param at all - so that flag is a no-op for this codebase's exact adapter
+path.
+
+**Real root cause found:** the app's local `.env`/`.env.local` `DATABASE_URL`
+was *already* on transaction mode (port 6543) - the actual problem was
+Vercel's **Preview** environment's `DATABASE_URL` still being on session
+mode (port 5432), confirmed directly via `get_runtime_errors`: 93
+occurrences of `(EMAXCONNSESSION) max clients reached in session mode - max
+clients are limited to pool_size: 15` going back to July 8, most recently
+03:23 UTC today.
+
+**Fix applied (with Hitesh's explicit go-ahead, live production-adjacent
+config):**
+1. Hitesh updated Vercel's Preview `DATABASE_URL` to the transaction-mode
+   string via the dashboard (Environment Variables - it's a write-only
+   `Secret` type, so its prior value could never be directly confirmed).
+2. Env var changes don't apply to already-running deployments - pushed an
+   empty commit (`fecbfea`, "chore: trigger Preview redeploy...") to `qa` to
+   force a fresh one.
+3. Confirmed live: hit the new deployment's real endpoints
+   (`/api/events/upcoming`, `/api/auth/session` x5, `/api/wall-of-fame`) -
+   all clean 200s, zero errors in that deployment's own runtime logs. The
+   session-mode error's `lastDeployment` in Vercel's error aggregate still
+   points to the *old* deployment - nothing recurred on the new one.
+
+**Not yet confirmed:** sustained real concurrent-user traffic over time
+(this was a handful of manual requests, not a load test) - worth watching
+Vercel's runtime errors again over the next day or two to make sure the
+session-mode error is actually gone for good, not just quiet for an hour.
+
+## Security incident this session: QA DB password exposed in chat, being rotated
+
+While deriving the transaction-mode connection string, `grep`/`Read` on
+`.env` (not `.env.local`) printed the **real QA database password in
+plaintext** - `.env.local`'s `DATABASE_URL` is masked/protected in this
+environment (shows as `[SENSITIVE]`), `.env`'s is not, an inconsistency
+neither Hitesh nor chat had reason to know about before this. `.env` is
+gitignored and not tracked in git history, so this did not leak into the
+repo - but it did leak into this chat's transcript.
+
+Handled carefully once caught: never re-printed the value after the initial
+exposure, wrote it only to a throwaway file outside the repo (deleted
+immediately after use) rather than a command line or committed file, and
+all script error-handling sanitizes it out of any message before printing.
+Confirmed with Hitesh before proceeding to actually use the exposed value
+for the live test (his call - "run the test now, rotate after," reasoning
+being it's a QA credential, not production, and not using it doesn't undo
+the exposure that already happened).
+
+**Hitesh is rotating the password now** (Supabase -> Project Settings ->
+Database -> Reset password). Sequencing that matters: update Vercel's
+`DATABASE_URL` *before* rotating was already done above; after rotating,
+the new password needs to land in `.env.local` (Hitesh's own edit) and
+Vercel's `DATABASE_URL` again (second update) - **not yet done as of this
+handoff**, flag to next session if it wasn't finished this one.
+
+**Also fixed as part of this**: `.env`'s `DATABASE_URL` line was removed
+entirely (was dead weight regardless of the password issue - Next.js loads
+`.env.local` with higher precedence, so `.env`'s copy was never actually
+used; also `.env`'s `NEXT_PUBLIC_SUPABASE_URL` pointed at the **prod**
+Supabase project (`cncumfwwnjcwacggrgsr`) while its `DATABASE_URL` pointed
+at **QA** (`nqiyrypmjtogoocerxtu`) - an internally inconsistent, essentially
+template/placeholder file with `RAZORPAY_KEY_ID="your-key"`-style stub
+values throughout; `.env.local` is the real source of truth). `.env` is
+gitignored, so this cleanup has no git diff to show for it.
+
+---
+
+# Session Handoff — 6 Sept 2026 (previous entry, BUG-2609-012 through 019)
 
 ## qa HEAD: `90f7242` (PR #560 merged, deployed READY)
 
