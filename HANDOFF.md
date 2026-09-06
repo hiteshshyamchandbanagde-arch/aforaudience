@@ -1,6 +1,53 @@
-# Session Handoff — 6 Sept 2026 (BUG-2609-020, dashboard role-menu load delay)
+# Session Handoff — 6 Sept 2026 (BUG-2609-020 follow-up: PR #562 regression fix)
 
-## Branch: `bug-2609-020-held-roles-server-side`, on top of qa HEAD `6f604a8` — awaiting PR/CI/review, not merged. Separate, unrelated to the also-unmerged `gen-2609-003-mobile-shell-phase1` branch from earlier the same day.
+## Branch: `bug-2609-020-held-roles-server-side` (same branch, new commit). **DO NOT MERGE** - live verification (screenshots) explicitly required before this is safe to merge, and this session could not obtain it (see below). Fix itself is pushed; merge is still blocked.
+
+## Follow-up: fixed the PR #562 regression (Organiser/Venue Owner role sections missing)
+
+Live testing on PR #562 found Artist's role section rendering correctly but
+Organiser's and Venue Owner's missing **entirely** (not delayed - absent).
+Chat's diagnosis: since all 3 roles go through the identical
+`dashboard/layout.tsx` function with no per-role branching, 2-out-of-3 wrong
+is the signature of a stale cached render being served, not a logic bug (a
+pure computation bug would break all 3 the same way).
+
+**Fix applied:** added `export const dynamic = 'force-dynamic'` to all 3
+layout files (`dashboard/layout.tsx`, `tickets/layout.tsx`,
+`profile/layout.tsx`) - `getServerSession()`'s cookie read is supposed to
+auto-opt a route out of caching, but this project builds with Turbopack,
+which has had known gaps in that auto-detection vs. webpack. Declares it
+explicitly instead of relying on implicit detection. `tsc --noEmit` and
+`next build` both clean afterward (0 errors/warnings); all affected routes
+confirmed `ƒ` (dynamic) in the build output.
+
+**Could not complete the required live-verification screenshots this
+session - environment blocker, not a code issue:** Made 4 separate real-login
+attempts (Vinayak/Omkar/Hrithik, each in a fresh isolated Playwright context
+- the incognito-window-equivalent methodology the ticket asked for, plus one
+extra script-timing fix along the way when an early attempt's fixed sleep
+turned out too short relative to observed 2-3s DB latency) - all 4 blocked
+by the same recurring local-DB P1001 flakiness from the last 2 sessions,
+confirmed via the dev server's own log showing `DatabaseNotReachable`
+immediately before each `POST /api/auth/callback/credentials` 401. Ruled out
+"wrong test credentials" as an alternative explanation first - confirmed via
+direct SQL that Vinayak's user row has a valid 60-char bcrypt hash and the
+correct `VENUE_OWNER` role. This is squarely the known environment issue
+(see [[project_local_db_unreachable]]), not a problem with the fix or the
+test methodology.
+
+**What IS verified:** the fix itself (`force-dynamic`) directly addresses
+the diagnosed cause (implicit dynamic-detection gap), all 3 layout files are
+still logically identical (no new per-role branching introduced), and the
+build confirms all affected routes are now unambiguously dynamic. What is
+**not** verified: the actual live render showing all 3 role sections
+correctly, which the ticket was explicit is the only acceptable evidence for
+this specific class of bug (session/caching-dependent UI). **Merge should
+stay blocked until someone gets that live check** - either a future session
+when local dev's DB is stable, or a manual check by Hitesh directly.
+
+## Original BUG-2609-020 fix (previous commit, same branch, unchanged)
+
+## BUG-2609-020 — Dashboard role-menu load delay (server-side held-roles resolution)
 
 ## BUG-2609-020 — Dashboard role-menu load delay (server-side held-roles resolution)
 

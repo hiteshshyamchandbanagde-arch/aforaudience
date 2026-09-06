@@ -3,6 +3,15 @@ import { authOptions } from '@/lib/auth'
 import { getHeldRoles, EMPTY_HELD_ROLES } from '@/lib/held-roles'
 import { HeldRolesProvider } from '@/components/HeldRolesContext'
 
+// Force dynamic rendering explicitly rather than relying on Turbopack to
+// auto-detect that getServerSession()'s cookie read should opt this layout
+// out of caching - it has had known gaps here vs webpack. Fixes a real
+// regression on PR #562: Organiser/Venue Owner role sections went missing
+// entirely (not delayed - absent) while Artist rendered fine, the
+// signature of a stale cached render being served for 2 of 3 roles rather
+// than a logic bug (a pure computation bug would break all 3 identically).
+export const dynamic = 'force-dynamic'
+
 // BUG-2609-020 - covers all /dashboard/* pages (the bulk of DashboardShell's
 // 21 call sites: Organiser/Artist/Venue Owner/Audience/Messages/
 // venue-requests). Resolves held roles server-side, once, before first
