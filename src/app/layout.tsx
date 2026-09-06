@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Newsreader, Manrope, IBM_Plex_Mono,
+  Archivo, Instrument_Sans, JetBrains_Mono,
   Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu,
   Noto_Sans_Kannada, Noto_Sans_Malayalam, Noto_Sans_Gujarati, Noto_Sans_Bengali,
 } from "next/font/google";
@@ -9,6 +9,7 @@ import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
 import SupportWidget from "@/components/SupportWidget";
+import MobileTabBar from "@/components/mobile/MobileTabBar";
 
 // Real webfonts, not system-font fallbacks. "Georgia, serif" /
 // "monospace" everywhere was a big part of why the site read as
@@ -16,14 +17,24 @@ import SupportWidget from "@/components/SupportWidget";
 // highest-leverage things separating "looks default" from "looks
 // premium." Exposed as CSS custom properties so any component can opt
 // in via var(--font-display) etc. without importing next/font itself.
-// Newsreader = editorial serif (optically sized, real italics) for
-// headlines. Manrope = warm geometric sans for body/UI. IBM Plex Mono
-// = has actual character vs. generic monospace, for
-// eyebrows/labels/stats. Currently wired into the homepage only -
-// platform-wide rollout is the natural next slice of FEAT-2607-028.
-const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-display", style: ["normal", "italic"], display: "swap" });
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
+// GEN-2609-003 (Mobile Redesign Phase 1): swapped from
+// Newsreader/Manrope/IBM Plex Mono to the Mobile App v2 Figma Make
+// export's type system - Archivo (display), Instrument Sans (body),
+// JetBrains Mono (labels/prices/category tags/nav labels) - so desktop
+// and mobile share one identity instead of diverging. Same variable
+// names as before (--font-display/--font-sans/--font-mono), so every
+// existing component that already opts in via var(--font-display) etc.
+// (currently homepage-only, see FEAT-2607-028) picks up the new
+// typefaces automatically with no per-component changes.
+// style: both, not just "normal" - several real components (ArtistNoPhoto,
+// FourRooms, HeroRotator, PlatformGrowthStrip) set fontStyle:"italic" on
+// var(--font-display), same as Newsreader's real italics before. Loading
+// normal-only here would've left those rendering as browser-synthesized
+// fake-oblique Archivo instead - caught via the required before/after
+// screenshot pass (see GEN-2609-003 build notes), not assumed away.
+const archivo = Archivo({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+const instrumentSans = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
+const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
 
 // Phase 2c multi-script fix (FEAT-2608-051): --font-sans (Manrope) only
 // covers Latin, so headings/body silently fell back to a generic system
@@ -138,7 +149,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${newsreader.variable} ${manrope.variable} ${plexMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
+      <body className={`${archivo.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.
@@ -262,6 +273,7 @@ export default function RootLayout({
         <Providers>
           <NudgeStack />
           {children}
+          <MobileTabBar />
         </Providers>
         <InstallPrompt />
         <SupportWidget />
