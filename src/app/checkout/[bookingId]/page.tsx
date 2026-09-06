@@ -12,6 +12,7 @@ import {
   loadRazorpayCheckoutScript,
   openRazorpayCheckout,
 } from '@/lib/razorpay-checkout'
+import { FeeSheet } from '@/components/FeeSheet'
 
 // Checkout page — order summary + Pay button.
 //
@@ -82,6 +83,7 @@ export default function CheckoutPage() {
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [scriptReady, setScriptReady] = useState(false)
+  const [feeSheetOpen, setFeeSheetOpen] = useState(false)
 
   // Companion Tagging Phase 1 - separate from the payment state above
   // since tagging never blocks or is blocked by the payment flow.
@@ -334,7 +336,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', padding: 32, fontFamily: 'system-ui', color: 'var(--afa-text-primary)' }}>
           {tr.checkoutPage.loadingCheckout}
         </div>
       </>
@@ -345,12 +347,12 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 16 }}>
             {tr.checkoutPage.somethingWrongTitle}
           </h1>
           <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
-          <Link href="/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
+          <Link href="/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>
             {tr.nav.backToEvents}
           </Link>
         </div>
@@ -404,7 +406,7 @@ export default function CheckoutPage() {
         <main
           style={{
             minHeight: '100vh',
-            background: 'var(--afa-surface-raised)',
+            background: 'var(--afa-surface-page)',
             padding: '48px 24px',
             maxWidth: 560,
             margin: '0 auto',
@@ -454,7 +456,7 @@ export default function CheckoutPage() {
               href={`/api/bookings/${state.booking.id}/ticket`}
               style={{
                 background: 'var(--afa-fill-solid)',
-                color: 'white',
+                color: 'var(--afa-on-fill-solid)',
                 padding: '12px 20px',
                 borderRadius: 10,
                 fontWeight: 600,
@@ -467,13 +469,14 @@ export default function CheckoutPage() {
             <Link
               href="/tickets"
               style={{
-                background: 'var(--afa-terracotta)',
-                color: 'white',
+                background: 'var(--afa-surface-inverse)',
+                color: 'var(--afa-text-primary)',
                 padding: '12px 20px',
                 borderRadius: 10,
                 fontWeight: 600,
                 textDecoration: 'none',
                 display: 'inline-block',
+                border: '1px solid rgba(245,245,240,0.12)',
               }}
             >
               {tr.checkoutPage.viewMyTicketsArrow}
@@ -506,7 +509,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.bookingCancelledTitle}
           </h1>
@@ -515,7 +518,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href={`/events/${state.booking.event.id}`}
-            style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
+            style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}
           >
             {tr.checkoutPage.backToEventLabel}
           </Link>
@@ -529,7 +532,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.reservationExpiredTitle}
           </h1>
@@ -539,8 +542,8 @@ export default function CheckoutPage() {
           <Link
             href={`/events/${state.booking.event.id}`}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '12px 20px',
               borderRadius: 10,
               fontWeight: 600,
@@ -560,7 +563,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.paymentsNotLiveTitle}
           </h1>
@@ -569,7 +572,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href="/tickets"
-            style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}
+            style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}
           >
             {tr.checkoutPage.viewMyReservationsArrow}
           </Link>
@@ -585,7 +588,7 @@ export default function CheckoutPage() {
       <main
         style={{
           minHeight: '100vh',
-          background: 'var(--afa-surface-raised)',
+          background: 'var(--afa-surface-page)',
           padding: '32px 20px',
           maxWidth: 560,
           margin: '0 auto',
@@ -602,9 +605,9 @@ export default function CheckoutPage() {
 
         <div
           style={{
-            background: 'white',
-            color: 'var(--afa-ink)',
-            border: '1px solid rgba(14,12,10,0.1)',
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -637,7 +640,7 @@ export default function CheckoutPage() {
 
           <div
             style={{
-              borderTop: '1px solid rgba(14,12,10,0.06)',
+              borderTop: '1px solid rgba(245,245,240,0.08)',
               paddingTop: 16,
               marginBottom: 12,
             }}
@@ -690,7 +693,7 @@ export default function CheckoutPage() {
                   padding: '10px 0 4px',
                   fontSize: 13,
                   opacity: 0.75,
-                  borderTop: '1px dashed rgba(14,12,10,0.1)',
+                  borderTop: '1px dashed rgba(245,245,240,0.12)',
                   marginTop: 6,
                 }}
               >
@@ -712,7 +715,7 @@ export default function CheckoutPage() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid rgba(14,12,10,0.1)',
+              borderTop: '1px solid rgba(245,245,240,0.08)',
               paddingTop: 16,
             }}
           >
@@ -721,6 +724,19 @@ export default function CheckoutPage() {
               {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
             </span>
           </div>
+
+          {state.booking.totalAmount > 0 && (
+            <button
+              onClick={() => setFeeSheetOpen(true)}
+              style={{
+                display: 'block', width: '100%', textAlign: 'right', marginTop: 10,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                fontSize: 12.5, fontWeight: 600, color: 'var(--afa-amber)',
+              }}
+            >
+              See fee breakdown →
+            </button>
+          )}
         </div>
 
         {/* Companion Tagging Phase 1 (reputation epic §7) - optional, never
@@ -728,9 +744,9 @@ export default function CheckoutPage() {
             since the API itself refuses to create tags without it. */}
         <div
           style={{
-            background: 'white',
-            color: 'var(--afa-ink)',
-            border: '1px solid rgba(14,12,10,0.1)',
+            background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
+            border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
             padding: 20,
             marginBottom: 20,
@@ -808,8 +824,8 @@ export default function CheckoutPage() {
                 disabled={companionBusy}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
-                  border: '1px solid rgba(14,12,10,0.15)', boxSizing: 'border-box',
-                  background: 'white', color: 'var(--afa-ink)',
+                  border: '1px solid rgba(245,245,240,0.12)', boxSizing: 'border-box',
+                  background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)',
                 }}
               />
               {companionSearching && (
@@ -826,12 +842,12 @@ export default function CheckoutPage() {
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(14,12,10,0.1)',
+                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(245,245,240,0.1)',
                           background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
                         }}
                       >
                         <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 12 }}>@{u.name}</span></span>
-                        <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600, fontSize: 12 }}>{tr.checkoutPage.tagButtonLabel}</span>
+                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 12 }}>{tr.checkoutPage.tagButtonLabel}</span>
                       </button>
                     ))}
                 </div>
@@ -865,8 +881,8 @@ export default function CheckoutPage() {
           disabled={paying || confirming}
           style={{
             width: '100%',
-            background: 'var(--afa-terracotta)',
-            color: 'white',
+            background: 'var(--afa-fill-solid)',
+            color: 'var(--afa-on-fill-solid)',
             padding: 16,
             border: 'none',
             borderRadius: 12,
@@ -897,6 +913,15 @@ export default function CheckoutPage() {
           {tr.checkoutPage.securePaymentFooterCheckout}
         </div>
       </main>
+
+      {feeSheetOpen && (
+        <FeeSheet
+          ticketFaceValue={state.booking.subtotalAmount}
+          bookingFee={state.booking.bookingFeeAmount}
+          currency={displayCurrency}
+          onClose={() => setFeeSheetOpen(false)}
+        />
+      )}
     </>
   )
 }
