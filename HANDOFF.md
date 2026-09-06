@@ -1,3 +1,170 @@
+# Session Handoff — 6 Sept 2026 (Live verification pass: PR #561 + #562 both PASS)
+
+## qa HEAD: `f136f87` (docs only, on top of `fecbfea`/`6f604a8`)
+
+## Live verification: BOTH pending PRs PASS, ready for chat to merge
+
+Now that the QA DB password rotation + transaction-pooler switch were live on
+both PRs' Preview deployments, ran a full live verification pass on each
+(instructed not to merge - verify and report only).
+
+### PR #562 (BUG-2609-020, dashboard role-menu fix) — PASS
+
+Tested all 3 personas in **separate incognito browser contexts** (not
+sequential logins in one tab, specifically to rule out the client-side
+Router Cache confound from the earlier regression) against the live Preview
+deployment (`dpl_9Lty1PTvEx2AYtXBEtgHXDBqi1RU`):
+- Vinayak (Venue Owner) -> `/dashboard/venue` -> **My Venues** section
+  visible immediately, no pop-in/delay. Screenshot confirmed.
+- Omkar (Organiser) -> `/dashboard/organiser` -> **Create Event** section
+  visible immediately. Screenshot confirmed.
+- Hrithik (Artist) -> `/dashboard/artist` -> **Corporate Inquiries** section
+  visible immediately. Screenshot confirmed.
+
+Checked Vercel's runtime logs/errors for this deployment during the test
+window: **zero `EMAXCONNSESSION`/`P1001` errors.** One unrelated one-off:
+`P1000` ("Authentication failed... credentials for postgres are not valid")
+on `/api/chat/config`, `count=1`, landing right in the test window -
+plausibly a transient artifact of the password-rotation event itself (a
+pooled connection opened right at the rotation boundary), not a recurrence
+of the original bug and not the error class this ticket is about. Flagging
+it honestly rather than omitting it, but it does not block this PASS.
+
+**Status: `IN_TEST`, ready for chat to merge.**
+
+### PR #561 (GEN-2609-003, mobile redesign Phase 1) — PASS
+
+Tested against the live Preview deployment
+(`dpl_7xM8vpMrPKvTyqorTx9SKg6nw7x3`):
+- Guest mobile tab bar on `/events` (390px viewport) - renders correctly,
+  Discover/My Tickets/Saved/Profile, Discover active in orange. Screenshot
+  confirmed.
+- EventDetail push transition - tapped a real event card (had to switch
+  from a plain `<a href>` selector to `[role="link"]` + a proper
+  `waitForURL` instead of a fixed sleep, since these cards use a
+  click-guarded `router.push` inside `startTransition`, not a real anchor
+  tag - see `goToEvent()` in `(public)/events/page.tsx`). Confirmed
+  `.afa-push-mount` class present on the resulting `/events/[id]` page.
+- Checkout push transition - the test event had no visible Book flow in
+  view, so used a real existing booking ID
+  (`qa-demo-booking-full-atul-4`) directly instead, logged in as Atul.
+  Confirmed `.afa-push-mount` present on `/checkout/[bookingId]` (rendered
+  the booking's already-CONFIRMED "You're in!" state, which is correct
+  behavior for a booking in that status - the layout-level push class
+  applies regardless of the page's content state).
+- Signed-in DashboardShell-collision check (the core decision from the
+  earlier build session): logged in as Atul, visited `/tickets` and
+  `/profile` - both show **exactly one** fixed bottom nav
+  (DashboardShell's own Dashboard/My Tickets/Messages/Profile bar), never
+  the new Discover/Saved bar. Screenshots confirmed for both routes.
+
+Zero `EMAXCONNSESSION`/`P1001` errors during this entire pass either.
+
+**Status: `IN_TEST`, ready for chat to merge.**
+
+### Note on my own test-script bug (not a product bug)
+
+First pass of the verification script initialized `report.pr561 = []`
+(array) then set named properties on it - `JSON.stringify` on an array only
+serializes indexed elements, so the report silently came back empty for
+that half despite the actual test steps running fine. Caught by checking
+the screenshot files directly (they saved correctly regardless), not by
+trusting the JSON summary blindly - worth remembering for any future
+multi-part verification script: initialize accumulator objects as `{}`,
+not `[]`, if you're going to assign named properties to them.
+
+---
+
+# Session Handoff — 6 Sept 2026 (Transaction-pooler verification + live fix + password incident)
+
+## qa HEAD: `fecbfea` (empty deploy-trigger commit on top of `6f604a8`)
+
+## Transaction-mode Supabase pooler: verified safe, live issue fixed
+
+**Task was originally scoped as read-only verification** (don't touch
+`prisma.ts`/`.env.local`/Vercel env vars, just report findings) - turned into
+an actual live fix once the investigation surfaced the real root cause.
+
+**Verification result:** ran this app's real query patterns (simple
+`findUnique`, the 3 parallel `getHeldRoles` queries, an interactive
+`$transaction`, a batch `$transaction`, plus a repeated query on the same
+client afterward) directly against the QA project's transaction-mode pooler
+connection string (port 6543), using the actual `@prisma/adapter-pg` + `pg`
+setup from `src/lib/prisma.ts`. **All passed cleanly, identically with and
+without `pgbouncer=true`.** Confirms two things found by reading the
+installed adapter's own source first (not assumed from generic docs):
+`@prisma/adapter-pg` only caches named prepared statements if a
+`statementNameGenerator` is explicitly configured (it isn't, here), and
+`pg`/`pg-connection-string` don't recognize `pgbouncer` as a connection
+param at all - so that flag is a no-op for this codebase's exact adapter
+path.
+
+**Real root cause found:** the app's local `.env`/`.env.local` `DATABASE_URL`
+was *already* on transaction mode (port 6543) - the actual problem was
+Vercel's **Preview** environment's `DATABASE_URL` still being on session
+mode (port 5432), confirmed directly via `get_runtime_errors`: 93
+occurrences of `(EMAXCONNSESSION) max clients reached in session mode - max
+clients are limited to pool_size: 15` going back to July 8, most recently
+03:23 UTC today.
+
+**Fix applied (with Hitesh's explicit go-ahead, live production-adjacent
+config):**
+1. Hitesh updated Vercel's Preview `DATABASE_URL` to the transaction-mode
+   string via the dashboard (Environment Variables - it's a write-only
+   `Secret` type, so its prior value could never be directly confirmed).
+2. Env var changes don't apply to already-running deployments - pushed an
+   empty commit (`fecbfea`, "chore: trigger Preview redeploy...") to `qa` to
+   force a fresh one.
+3. Confirmed live: hit the new deployment's real endpoints
+   (`/api/events/upcoming`, `/api/auth/session` x5, `/api/wall-of-fame`) -
+   all clean 200s, zero errors in that deployment's own runtime logs. The
+   session-mode error's `lastDeployment` in Vercel's error aggregate still
+   points to the *old* deployment - nothing recurred on the new one.
+
+**Not yet confirmed:** sustained real concurrent-user traffic over time
+(this was a handful of manual requests, not a load test) - worth watching
+Vercel's runtime errors again over the next day or two to make sure the
+session-mode error is actually gone for good, not just quiet for an hour.
+
+## Security incident this session: QA DB password exposed in chat, being rotated
+
+While deriving the transaction-mode connection string, `grep`/`Read` on
+`.env` (not `.env.local`) printed the **real QA database password in
+plaintext** - `.env.local`'s `DATABASE_URL` is masked/protected in this
+environment (shows as `[SENSITIVE]`), `.env`'s is not, an inconsistency
+neither Hitesh nor chat had reason to know about before this. `.env` is
+gitignored and not tracked in git history, so this did not leak into the
+repo - but it did leak into this chat's transcript.
+
+Handled carefully once caught: never re-printed the value after the initial
+exposure, wrote it only to a throwaway file outside the repo (deleted
+immediately after use) rather than a command line or committed file, and
+all script error-handling sanitizes it out of any message before printing.
+Confirmed with Hitesh before proceeding to actually use the exposed value
+for the live test (his call - "run the test now, rotate after," reasoning
+being it's a QA credential, not production, and not using it doesn't undo
+the exposure that already happened).
+
+**Hitesh is rotating the password now** (Supabase -> Project Settings ->
+Database -> Reset password). Sequencing that matters: update Vercel's
+`DATABASE_URL` *before* rotating was already done above; after rotating,
+the new password needs to land in `.env.local` (Hitesh's own edit) and
+Vercel's `DATABASE_URL` again (second update) - **not yet done as of this
+handoff**, flag to next session if it wasn't finished this one.
+
+**Also fixed as part of this**: `.env`'s `DATABASE_URL` line was removed
+entirely (was dead weight regardless of the password issue - Next.js loads
+`.env.local` with higher precedence, so `.env`'s copy was never actually
+used; also `.env`'s `NEXT_PUBLIC_SUPABASE_URL` pointed at the **prod**
+Supabase project (`cncumfwwnjcwacggrgsr`) while its `DATABASE_URL` pointed
+at **QA** (`nqiyrypmjtogoocerxtu`) - an internally inconsistent, essentially
+template/placeholder file with `RAZORPAY_KEY_ID="your-key"`-style stub
+values throughout; `.env.local` is the real source of truth). `.env` is
+gitignored, so this cleanup has no git diff to show for it.
+
+---
+
+# Session Handoff — 6 Sept 2026 (previous entry, BUG-2609-012 through 019)
 # Session Handoff — 6 Sept 2026 (BUG-2609-020 follow-up: PR #562 regression fix)
 
 ## Branch: `bug-2609-020-held-roles-server-side` (same branch, new commit). **DO NOT MERGE** - live verification (screenshots) explicitly required before this is safe to merge, and this session could not obtain it (see below). Fix itself is pushed; merge is still blocked.
