@@ -1,3 +1,80 @@
+# Session Handoff — 6 Sept 2026 (Live verification pass: PR #561 + #562 both PASS)
+
+## qa HEAD: `f136f87` (docs only, on top of `fecbfea`/`6f604a8`)
+
+## Live verification: BOTH pending PRs PASS, ready for chat to merge
+
+Now that the QA DB password rotation + transaction-pooler switch were live on
+both PRs' Preview deployments, ran a full live verification pass on each
+(instructed not to merge - verify and report only).
+
+### PR #562 (BUG-2609-020, dashboard role-menu fix) — PASS
+
+Tested all 3 personas in **separate incognito browser contexts** (not
+sequential logins in one tab, specifically to rule out the client-side
+Router Cache confound from the earlier regression) against the live Preview
+deployment (`dpl_9Lty1PTvEx2AYtXBEtgHXDBqi1RU`):
+- Vinayak (Venue Owner) -> `/dashboard/venue` -> **My Venues** section
+  visible immediately, no pop-in/delay. Screenshot confirmed.
+- Omkar (Organiser) -> `/dashboard/organiser` -> **Create Event** section
+  visible immediately. Screenshot confirmed.
+- Hrithik (Artist) -> `/dashboard/artist` -> **Corporate Inquiries** section
+  visible immediately. Screenshot confirmed.
+
+Checked Vercel's runtime logs/errors for this deployment during the test
+window: **zero `EMAXCONNSESSION`/`P1001` errors.** One unrelated one-off:
+`P1000` ("Authentication failed... credentials for postgres are not valid")
+on `/api/chat/config`, `count=1`, landing right in the test window -
+plausibly a transient artifact of the password-rotation event itself (a
+pooled connection opened right at the rotation boundary), not a recurrence
+of the original bug and not the error class this ticket is about. Flagging
+it honestly rather than omitting it, but it does not block this PASS.
+
+**Status: `IN_TEST`, ready for chat to merge.**
+
+### PR #561 (GEN-2609-003, mobile redesign Phase 1) — PASS
+
+Tested against the live Preview deployment
+(`dpl_7xM8vpMrPKvTyqorTx9SKg6nw7x3`):
+- Guest mobile tab bar on `/events` (390px viewport) - renders correctly,
+  Discover/My Tickets/Saved/Profile, Discover active in orange. Screenshot
+  confirmed.
+- EventDetail push transition - tapped a real event card (had to switch
+  from a plain `<a href>` selector to `[role="link"]` + a proper
+  `waitForURL` instead of a fixed sleep, since these cards use a
+  click-guarded `router.push` inside `startTransition`, not a real anchor
+  tag - see `goToEvent()` in `(public)/events/page.tsx`). Confirmed
+  `.afa-push-mount` class present on the resulting `/events/[id]` page.
+- Checkout push transition - the test event had no visible Book flow in
+  view, so used a real existing booking ID
+  (`qa-demo-booking-full-atul-4`) directly instead, logged in as Atul.
+  Confirmed `.afa-push-mount` present on `/checkout/[bookingId]` (rendered
+  the booking's already-CONFIRMED "You're in!" state, which is correct
+  behavior for a booking in that status - the layout-level push class
+  applies regardless of the page's content state).
+- Signed-in DashboardShell-collision check (the core decision from the
+  earlier build session): logged in as Atul, visited `/tickets` and
+  `/profile` - both show **exactly one** fixed bottom nav
+  (DashboardShell's own Dashboard/My Tickets/Messages/Profile bar), never
+  the new Discover/Saved bar. Screenshots confirmed for both routes.
+
+Zero `EMAXCONNSESSION`/`P1001` errors during this entire pass either.
+
+**Status: `IN_TEST`, ready for chat to merge.**
+
+### Note on my own test-script bug (not a product bug)
+
+First pass of the verification script initialized `report.pr561 = []`
+(array) then set named properties on it - `JSON.stringify` on an array only
+serializes indexed elements, so the report silently came back empty for
+that half despite the actual test steps running fine. Caught by checking
+the screenshot files directly (they saved correctly regardless), not by
+trusting the JSON summary blindly - worth remembering for any future
+multi-part verification script: initialize accumulator objects as `{}`,
+not `[]`, if you're going to assign named properties to them.
+
+---
+
 # Session Handoff — 6 Sept 2026 (Transaction-pooler verification + live fix + password incident)
 
 ## qa HEAD: `fecbfea` (empty deploy-trigger commit on top of `6f604a8`)
