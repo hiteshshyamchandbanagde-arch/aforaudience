@@ -105,6 +105,10 @@ const hi: Dictionary = {
     sortPriceLowHigh: "कीमत: कम से ज़्यादा",
     sortPriceHighLow: "कीमत: ज़्यादा से कम",
     sortFillingFast: "तेज़ी से भर रहे",
+    filtersButtonLabel: "फ़िल्टर खोलें",
+    filterSheetTitle: "इवेंट फ़िल्टर करें",
+    filterSheetReset: "रीसेट करें",
+    filterSheetCloseLabel: "फ़िल्टर बंद करें",
     emptyNoPastTitle: "अभी तक कोई पिछला इवेंट नहीं",
     emptyNoPastSub: "इवेंट खत्म होने के बाद वे अपने आप यहां आ जाते हैं।",
     emptyNoneYetTitle: "अभी तक कोई इवेंट प्रकाशित नहीं हुआ",
@@ -532,6 +536,7 @@ const hi: Dictionary = {
     plusOneRetryError: "अभी पुष्टि नहीं हो सकी - कृपया फिर से कोशिश करें",
     reserveFailed: "सीटें आरक्षित करने में विफल",
     reviewFailed: "समीक्षा सबमिट करने में विफल",
+    selectTicketsCta: "टिकट चुनें",
   },
   checkoutPage: {
     loadingCheckout: "आपका चेकआउट लोड हो रहा है…",

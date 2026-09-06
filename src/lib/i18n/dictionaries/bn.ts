@@ -106,6 +106,10 @@ const bn: Dictionary = {
     sortPriceLowHigh: "দাম: কম থেকে বেশি",
     sortPriceHighLow: "দাম: বেশি থেকে কম",
     sortFillingFast: "দ্রুত পূরণ হচ্ছে",
+    filtersButtonLabel: "ফিল্টার খুলুন",
+    filterSheetTitle: "ইভেন্ট ফিল্টার করুন",
+    filterSheetReset: "রিসেট",
+    filterSheetCloseLabel: "ফিল্টার বন্ধ করুন",
     emptyNoPastTitle: "এখনও কোনো অতীত ইভেন্ট নেই",
     emptyNoPastSub: "ইভেন্ট শেষ হওয়ার পর সেগুলো স্বয়ংক্রিয়ভাবে এখানে চলে আসে।",
     emptyNoneYetTitle: "এখনও কোনো ইভেন্ট প্রকাশিত হয়নি",
@@ -533,6 +537,7 @@ const bn: Dictionary = {
     plusOneRetryError: "এই মুহূর্তে নিশ্চিত করা যায়নি - দয়া করে আবার চেষ্টা করুন",
     reserveFailed: "সিট সংরক্ষণ করতে ব্যর্থ",
     reviewFailed: "রিভিউ জমা দিতে ব্যর্থ",
+    selectTicketsCta: "টিকিট নির্বাচন করুন",
   },
   checkoutPage: {
     loadingCheckout: "আপনার চেকআউট লোড হচ্ছে…",

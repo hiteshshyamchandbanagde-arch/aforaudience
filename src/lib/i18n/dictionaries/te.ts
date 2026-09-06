@@ -106,6 +106,10 @@ const te: Dictionary = {
     sortPriceLowHigh: "ధర: తక్కువ నుండి ఎక్కువ",
     sortPriceHighLow: "ధర: ఎక్కువ నుండి తక్కువ",
     sortFillingFast: "వేగంగా నిండుతోంది",
+    filtersButtonLabel: "ఫిల్టర్‌లను తెరవండి",
+    filterSheetTitle: "ఈవెంట్‌లను ఫిల్టర్ చేయండి",
+    filterSheetReset: "రీసెట్ చేయండి",
+    filterSheetCloseLabel: "ఫిల్టర్‌లను మూసివేయండి",
     emptyNoPastTitle: "ఇంకా గత ఈవెంట్‌లు లేవు",
     emptyNoPastSub: "ఈవెంట్‌లు ముగిసిన తర్వాత అవి ఇక్కడకు వాటంతట అవే వస్తాయి.",
     emptyNoneYetTitle: "ఇంకా ఈవెంట్‌లు ప్రచురించబడలేదు",
@@ -533,6 +537,7 @@ const te: Dictionary = {
     plusOneRetryError: "ఇప్పుడు నిర్ధారించలేకపోయాము - దయచేసి మళ్ళీ ప్రయత్నించండి",
     reserveFailed: "సీట్లను రిజర్వ్ చేయడంలో విఫలమైంది",
     reviewFailed: "రివ్యూను సమర్పించడంలో విఫలమైంది",
+    selectTicketsCta: "టికెట్లను ఎంచుకోండి",
   },
   checkoutPage: {
     loadingCheckout: "మీ చెక్‌అవుట్ లోడ్ అవుతోంది…",

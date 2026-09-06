@@ -106,6 +106,10 @@ const ml: Dictionary = {
     sortPriceLowHigh: "വില: കുറഞ്ഞത് മുതൽ കൂടിയത് വരെ",
     sortPriceHighLow: "വില: കൂടിയത് മുതൽ കുറഞ്ഞത് വരെ",
     sortFillingFast: "വേഗത്തിൽ നിറയുന്നു",
+    filtersButtonLabel: "ഫിൽട്ടറുകൾ തുറക്കുക",
+    filterSheetTitle: "ഇവന്റുകൾ ഫിൽട്ടർ ചെയ്യുക",
+    filterSheetReset: "പുനഃസജ്ജമാക്കുക",
+    filterSheetCloseLabel: "ഫിൽട്ടറുകൾ അടയ്ക്കുക",
     emptyNoPastTitle: "ഇതുവരെ കഴിഞ്ഞ ഇവന്റുകളില്ല",
     emptyNoPastSub: "ഇവന്റുകൾ കഴിഞ്ഞാൽ അവ സ്വയമേവ ഇവിടെ വരും.",
     emptyNoneYetTitle: "ഇതുവരെ ഇവന്റുകളൊന്നും പ്രസിദ്ധീകരിച്ചിട്ടില്ല",
@@ -533,6 +537,7 @@ const ml: Dictionary = {
     plusOneRetryError: "ഇപ്പോൾ സ്ഥിരീകരിക്കാൻ കഴിഞ്ഞില്ല - ദയവായി വീണ്ടും ശ്രമിക്കുക",
     reserveFailed: "സീറ്റുകൾ റിസർവ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     reviewFailed: "അവലോകനം സമർപ്പിക്കാൻ കഴിഞ്ഞില്ല",
+    selectTicketsCta: "ടിക്കറ്റുകൾ തിരഞ്ഞെടുക്കുക",
   },
   checkoutPage: {
     loadingCheckout: "നിങ്ങളുടെ ചെക്ക്ഔട്ട് ലോഡ് ചെയ്യുന്നു…",

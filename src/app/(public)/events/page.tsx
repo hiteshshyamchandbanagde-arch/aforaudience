@@ -5,9 +5,10 @@ import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
-import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
+import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon, FilterSlidersIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
 import { ErrorBanner } from "@/components/ErrorBanner"
+import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -77,6 +78,12 @@ export default function EventsPage() {
   const [sortBy, setSortBy] = useState<"date" | "priceLowHigh" | "priceHighLow" | "fillingFast">("date")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming")
+  // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only filter bottom
+  // sheet (MobileEventFilterSheet.tsx). Below `lg`, the desktop inline
+  // filter row is hidden via CSS and this trigger + sheet take over,
+  // driving the exact same selectedType/selectedCity/priceFilter/sortBy
+  // state - presentation only, no new filtering logic.
+  const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false)
   // Toggle-based discovery entry point for Organisers (session 62,
   // design.md §9.5) - deliberately not a new top-level nav route.
   // Independent of `view` above (grid/list is an events-only display mode).
@@ -339,7 +346,10 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* FILTERS */}
+            {/* FILTERS - desktop inline row, hidden below `lg` (Phase 1's
+                mobile breakpoint - DashboardShell.tsx/MobileTabBar.tsx) in
+                favor of afa-mobile-filter-trigger + MobileEventFilterSheet
+                below. Same underlying state either way, presentation only. */}
             <style>{`
               .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
               .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
@@ -348,8 +358,82 @@ export default function EventsPage() {
                 .afa-events-select { width: 100%; box-sizing: border-box; }
                 .afa-events-view-toggle { display: none; }
               }
+              .afa-desktop-filters { display: block; }
+              .afa-mobile-filter-trigger { display: none; }
+              @media (max-width: 1023px) {
+                .afa-desktop-filters { display: none; }
+                .afa-mobile-filter-trigger { display: inline-flex; }
+              }
             `}</style>
-            <div style={{ marginTop: "20px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px" }}>
+
+            <div className="afa-mobile-filter-trigger" style={{ alignItems: "center", gap: "8px", marginTop: "20px" }}>
+              <button
+                type="button"
+                onClick={() => setMobileFilterSheetOpen(true)}
+                aria-label={tr.eventsPage.filtersButtonLabel}
+                style={{
+                  position: "relative",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(245,245,240,0.15)",
+                  background: "var(--afa-surface-raised)",
+                  color: "var(--afa-text-primary)",
+                  padding: "10px 16px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  cursor: "pointer",
+                }}
+              >
+                <FilterSlidersIcon style={{ width: "16px", height: "16px" }} />
+                {tr.eventsPage.filterSheetTitle}
+                {(selectedType !== null || selectedCity !== "All Cities" || priceFilter !== "All") && (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: "18px",
+                      height: "18px",
+                      borderRadius: "999px",
+                      background: "var(--afa-fill-solid)",
+                      color: "var(--afa-on-fill-solid)",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      padding: "0 5px",
+                    }}
+                  >
+                    {[selectedType !== null, selectedCity !== "All Cities", priceFilter !== "All"].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {mobileFilterSheetOpen && (
+              <MobileEventFilterSheet
+                onClose={() => setMobileFilterSheetOpen(false)}
+                resultCount={filtered.length}
+                selectedType={selectedType}
+                onSelectType={setSelectedType}
+                selectedCity={selectedCity}
+                onSelectCity={setSelectedCity}
+                cities={cities}
+                priceFilter={priceFilter}
+                onSelectPrice={setPriceFilter}
+                sortBy={sortBy}
+                onSelectSort={setSortBy}
+                onReset={() => {
+                  setSelectedType(null)
+                  setSelectedCity("All Cities")
+                  setPriceFilter("All")
+                }}
+              />
+            )}
+
+            <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px" }}>
               <div className="events-type-row" style={{ marginBottom: "16px" }}>
                 <button
                   onClick={() => setSelectedType(null)}

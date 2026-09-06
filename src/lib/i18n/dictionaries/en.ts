@@ -105,6 +105,10 @@ const en = {
     sortPriceLowHigh: "Price: Low to High",
     sortPriceHighLow: "Price: High to Low",
     sortFillingFast: "Filling Fast",
+    filtersButtonLabel: "Open filters",
+    filterSheetTitle: "Filter events",
+    filterSheetReset: "Reset",
+    filterSheetCloseLabel: "Close filters",
     emptyNoPastTitle: "No past events yet",
     emptyNoPastSub: "Events move here automatically once they're over.",
     emptyNoneYetTitle: "No events published yet",
@@ -554,6 +558,7 @@ const en = {
     plusOneRetryError: "Couldn't confirm right now - please try again",
     reserveFailed: "Failed to reserve seats",
     reviewFailed: "Failed to submit review",
+    selectTicketsCta: "Select tickets",
   },
   checkoutPage: {
     loadingCheckout: "Loading your checkout…",

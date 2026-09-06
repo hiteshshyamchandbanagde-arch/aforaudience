@@ -2,13 +2,12 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { useSession, getSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import AudienceChoiceVoting from "@/components/AudienceChoiceVoting"
-import SeatPicker from "@/components/SeatPicker"
 import { EventPoster, EventTypeBadge, SeatStateDot } from "@/components/EventCard"
-import { CalendarIcon, ClockIcon, PinIcon, TicketIcon, TrophyIcon, DressCodeIcon, VibeIcon, SurpriseIcon, AgeIcon } from "@/components/icons/EventIcons"
+import { CalendarIcon, ClockIcon, PinIcon, TrophyIcon, DressCodeIcon, VibeIcon, SurpriseIcon, AgeIcon } from "@/components/icons/EventIcons"
 import { FacilityIcon } from "@/components/icons/VenueIcons"
 import { formatEventTimeRange } from "@/lib/eventTime"
 import { useLocale } from "@/lib/i18n/translate"
@@ -135,14 +134,6 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const { t: tr } = useLocale()
   const router = useRouter()
   const { data: session, status } = useSession()
-  const [selectedSeats, setSelectedSeats] = useState<Record<string, number>>({})
-  const isNumbered = event?.venue?.seatingMode === 'NUMBERED'
-  const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([])
-  const [numberedAmount, setNumberedAmount] = useState(0)
-  const [showAuthSheet, setShowAuthSheet] = useState(false)
-  const [reserving, setReserving] = useState(false)
-  const [reservedMessage, setReservedMessage] = useState("")
-  const [bookingError, setBookingError] = useState("")
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, { rating: number; comment: string }>>({})
   const [reviewSubmitting, setReviewSubmitting] = useState<string | null>(null)
   const [reviewError, setReviewError] = useState("")
@@ -151,36 +142,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const [plusOneStatus, setPlusOneStatus] = useState<Record<string, { required: number; confirmedCount: number; alreadyConfirmed: boolean; fulfilled: boolean }>>({})
   const [plusOneBusy, setPlusOneBusy] = useState<string | null>(null)
   const [plusOneAuthTarget, setPlusOneAuthTarget] = useState<string | null>(null)
-
-  // Audience-adjustable booking fee (28 Jul). Defaults to the platform's
-  // configured fee (fetched once, since it rarely changes) but the person
-  // can lower it - down to ₹0 - or raise it before booking. null while
-  // loading; feeInput tracks the actual editable value once the default
-  // arrives. Server re-validates whatever gets sent (see POST /api/bookings) -
-  // this is UX responsiveness, not the enforcement boundary.
-  const [defaultBookingFee, setDefaultBookingFee] = useState<number | null>(null)
-  const [feeInput, setFeeInput] = useState<number>(0)
-  // Admin-configurable band (29 Jul) the fee input is clamped to — was a
-  // hardcoded ₹0–₹500 range before this, now comes from the same
-  // endpoint as the default. Falls back to ₹0–₹500 while loading/on
-  // fetch failure so the input still has sane bounds; the real gate is
-  // still server-side in POST /api/bookings regardless of these values.
-  const [minBookingFee, setMinBookingFee] = useState<number>(0)
-  const [maxBookingFee, setMaxBookingFee] = useState<number>(500)
-  useEffect(() => {
-    fetch("/api/platform-settings/audience-fee")
-      .then((res) => res.json())
-      .then((data) => {
-        setDefaultBookingFee(data.audienceBookingFeeRupees)
-        setFeeInput(data.audienceBookingFeeRupees)
-        setMinBookingFee(data.minAudienceBookingFeeRupees)
-        setMaxBookingFee(data.maxAudienceBookingFeeRupees)
-      })
-      .catch(() => {
-        setDefaultBookingFee(0)
-        setFeeInput(0)
-      })
-  }, [])
+  // GEN-2609-004 - split off from the old shared `bookingError` state, which
+  // this used to piggyback on (confirmPlusOne set it, but its only render
+  // site lived inside the booking panel below - now moved to
+  // /events/[id]/seats). Needs its own state + render site here or a
+  // failed plus-one confirmation would go silently invisible.
+  const [plusOneError, setPlusOneError] = useState("")
 
   // Live-caught (28 Jul): browser back/forward navigation always serves
   // the Router Cache's snapshot of this page regardless of staleTimes
@@ -219,70 +186,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
       if (res.ok) {
         setPlusOneStatus((prev) => ({ ...prev, [performanceId]: data }))
       } else {
-        setBookingError(data.error || tr.eventDetailPage.plusOneRetryError)
+        setPlusOneError(data.error || tr.eventDetailPage.plusOneRetryError)
       }
     } finally {
       setPlusOneBusy(null)
-    }
-  }
-
-  const totalSelected = isNumbered ? selectedSeatIds.length : Object.values(selectedSeats).reduce((sum, q) => sum + q, 0)
-  const totalAmount = isNumbered
-    ? numberedAmount
-    : event
-    ? event.ticketTiers.length > 0
-      ? event.ticketTiers.reduce((sum, t) => sum + (selectedSeats[t.sectionName] || 0) * t.price, 0)
-      : (selectedSeats['General'] || 0) * (event.ticketPrice || 0)
-    : 0
-
-  const updateSeat = (section: string, delta: number, max: number) => {
-    setBookingError("")
-    setSelectedSeats((prev) => {
-      const current = prev[section] || 0
-      const next = Math.max(0, Math.min(current + delta, max, event?.maxSeatsPerBooking || 4))
-      const otherTotal = totalSelected - current
-      if (otherTotal + next > (event?.maxSeatsPerBooking || 4)) return prev
-      return { ...prev, [section]: next }
-    })
-  }
-
-  const reserveSeats = async () => {
-    if (!event) return
-    setReserving(true)
-    setBookingError("")
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          isNumbered
-            ? { eventId: event.id, seatIds: selectedSeatIds, bookingFeeOverride: feeInput }
-            : { eventId: event.id, seats: selectedSeats, bookingFeeOverride: feeInput }
-        ),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        if (data.reason === "PHONE_NOT_VERIFIED") {
-          router.push(`/verify-phone?next=${encodeURIComponent(`/events/${event.id}`)}`)
-          return
-        }
-        throw new Error(data.error || tr.eventDetailPage.reserveFailed)
-      }
-
-      // Two possible responses:
-      //   - payment is attached → Razorpay was configured; go to checkout
-      //   - no payment (message only) → this env doesn't have Razorpay
-      //     yet, so keep the Checkpoint 1 "reserved, we'll email you"
-      //     behavior right here on this page.
-      if (data.payment && data.booking) {
-        router.push(`/checkout/${data.booking.id}`)
-        return
-      }
-      setReservedMessage(data.message)
-    } catch (err: any) {
-      setBookingError(err.message)
-    } finally {
-      setReserving(false)
     }
   }
 
@@ -316,54 +223,6 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
     } finally {
       setReviewSubmitting(null)
     }
-  }
-
-  const handleBookClick = async () => {
-    if (totalSelected === 0) {
-      setBookingError(tr.eventDetailPage.selectSeatFirst)
-      return
-    }
-    if (!event) return
-    // Feedback (31 Jul, Hitesh device test) - booking creation had no
-    // check at all against the event's own date/time, so a past event
-    // could be booked and paid for end-to-end. Server now rejects this
-    // too (POST /api/bookings) - this is the client-side mirror so the
-    // person gets a clear message instead of reaching a payment screen
-    // for a show that's already over.
-    if (isPastEvent(event)) {
-      setBookingError(tr.eventDetailPage.eventAlreadyHappened)
-      return
-    }
-    if (status === "loading") {
-      return
-    }
-    if (status !== "authenticated") {
-      // BUG-2608-055: useSession()'s client-side status can briefly read
-      // "unauthenticated" right after a real login - on a cold serverless
-      // function the hook can settle in that order (loading ->
-      // unauthenticated -> authenticated) instead of going straight to
-      // "authenticated". The Continue button was already enabled by then
-      // (only "loading" disables it), so a click here used to be
-      // misrouted straight to the sign-in sheet even for a genuinely
-      // signed-in person - confirmed via CI: zero /api/bookings requests
-      // ever fired in the failing runs.
-      //
-      // Guests really are unauthenticated and should see the sign-in
-      // sheet, so we can't just widen the disabled condition without
-      // breaking that intended flow. Instead, before trusting the
-      // possibly-stale hook, ask the server directly - getSession() hits
-      // /api/auth/session fresh, same source of truth the middleware and
-      // API routes use, so it can't be behind the hook.
-      const freshSession = await getSession()
-      if (freshSession?.user) {
-        // Genuinely already signed in - proceed as if status had been
-        // "authenticated" all along.
-      } else {
-        setShowAuthSheet(true)
-        return
-      }
-    }
-    reserveSeats()
   }
 
   if (!event) {
@@ -466,19 +325,17 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               )}
             </div>
 
-            {/* Booking - export's static price+CTA box, in place with the
-                real interactive seat/tier picker + fee slider + Book
-                button (a real multi-state flow, not a single button). */}
+            {/* Booking - GEN-2609-004: simplified to a price/availability
+                summary + a CTA that pushes to /events/[id]/seats, which
+                now owns the actual interactive seat/tier picker + fee
+                slider + Book button (see that route's own
+                SeatSelectionClientPage.tsx - this used to all live here,
+                relocated wholesale, not rewritten). */}
             <div style={{ marginTop: "28px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
               {isPast ? (
                 <div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
                   <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
-                </div>
-              ) : reservedMessage ? (
-                <div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsReserved}</div>
-                  <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)", lineHeight: 1.6 }}>{reservedMessage}</p>
                 </div>
               ) : (
                 <>
@@ -492,110 +349,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
                   </div>
 
-                  {!event.isFree && isNumbered && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <SeatPicker
-                        eventId={event.id}
-                        maxSeatsPerBooking={event.maxSeatsPerBooking}
-                        selected={selectedSeatIds}
-                        onChange={(ids, amount) => {
-                          setBookingError("")
-                          setSelectedSeatIds(ids)
-                          setNumberedAmount(amount)
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {!event.isFree && !isNumbered && (
-                    <div style={{ marginBottom: "16px" }}>
-                      {event.ticketTiers.length > 0 ? (
-                        event.ticketTiers.map((t) => (
-                          <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
-                            <div>
-                              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{t.sectionName}</div>
-                              <div style={{ fontSize: "11px", color: "rgba(245,245,240,0.5)" }}>₹{t.price}</div>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
-                              <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats[t.sectionName] || 0}</span>
-                              <button onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.generalAdmission}</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
-                            <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
-                            <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {event.isFree && (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsLabel}</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
-                        <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
-                        <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
-                      </div>
-                    </div>
-                  )}
-
-                  {bookingError && (
-                    <div style={{ fontSize: "12px", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
-                  )}
-
-                  {totalAmount > 0 ? (
-                    <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                        <span style={{ fontSize: "14px", color: "var(--afa-cream)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "12px" }}>
-                        <div>
-                          <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
-                          <div style={{ fontSize: "10px", color: "rgba(245,245,240,0.4)", maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-                          <span style={{ fontSize: "14px", color: "var(--afa-cream)" }}>₹</span>
-                          <input
-                            type="number"
-                            min={minBookingFee}
-                            max={maxBookingFee}
-                            step={1}
-                            value={feeInput}
-                            disabled={defaultBookingFee === null}
-                            onChange={(e) => {
-                              const n = Number(e.target.value)
-                              if (!Number.isFinite(n)) return
-                              setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
-                            }}
-                            style={{ width: "64px", padding: "6px 8px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", fontSize: "14px", textAlign: "right" }}
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
-                        <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.totalLabel}</span>
-                        <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-cream)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
-                      <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                      <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-cream)" }}>{tr.eventDetailPage.freeAmount}</span>
-                    </div>
-                  )}
-
-                  <button onClick={handleBookClick} disabled={reserving || status === "loading"} className="afa-book-btn" style={{ opacity: reserving || status === "loading" ? 0.7 : 1, cursor: reserving || status === "loading" ? "default" : "pointer" }}>
-                    <TicketIcon style={{ width: "18px", height: "18px" }} />
-                    {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
-                  </button>
+                  <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ textDecoration: "none" }}>
+                    {tr.eventDetailPage.selectTicketsCta}
+                  </Link>
 
                   <div style={{ marginTop: "12px", fontSize: "12px", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
                     {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
@@ -697,6 +453,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             >
                               {plusOneBusy === p.id ? tr.eventDetailPage.plusOneConfirming : tr.eventDetailPage.plusOneIllBeThere.replace("{name}", performerName.split(" ")[0]).replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                             </button>
+                          )}
+                          {plusOneError && (
+                            <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--afa-error)" }}>{plusOneError}</div>
                           )}
                         </div>
                       )}
@@ -873,17 +632,6 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           </section>
         )}
       </div>
-
-      <AuthPromptSheet
-        open={showAuthSheet}
-        onClose={() => setShowAuthSheet(false)}
-        title={tr.eventDetailPage.signInToReserve}
-        subtitle={`${totalSelected} ${totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}${totalAmount > 0 ? ` · ₹${(totalAmount + feeInput).toLocaleString("en-IN")}` : ""}`}
-        onSuccess={() => {
-          setShowAuthSheet(false)
-          reserveSeats()
-        }}
-      />
 
       <AuthPromptSheet
         open={reviewAuthTarget !== null}
