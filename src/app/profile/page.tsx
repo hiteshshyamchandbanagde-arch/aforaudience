@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
@@ -9,7 +9,61 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import GenrePicker from '@/components/GenrePicker'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+import { FeeSheet } from '@/components/FeeSheet'
+import { PlusIcon } from '@/components/icons/VenueIcons'
 import { useLocale } from '@/lib/i18n/translate'
+
+// Mobile Redesign Phase 4c (GEN-2609-008) - small inline line-icons for the
+// mobile nav-hub's two grouped action lists below. No dedicated shared
+// icon file for these (Building/Gear/Receipt/Logout) since this is the
+// only page that needs them - PlusIcon above is reused from VenueIcons
+// rather than duplicated, since it already exists there.
+function BuildingIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M5 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16M13 21v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 8h0M8 12h0M8 16h0M3 21h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function UserBadgeIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function ReceiptIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M6 3h12v18l-2.5-1.5L13 21l-1.5-1.5L10 21l-2.5-1.5L6 21V3Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function GearIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18 6l-1.8 1.8M7.8 16.2 6 18M18 18l-1.8-1.8M7.8 7.8 6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function LogoutIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l4-5-4-5M20 12H9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function ChevronRightIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 type RoleStatus = { hasProfile: boolean; isApproved: boolean; isActive: boolean }
 
@@ -73,23 +127,48 @@ function ProfileContent() {
   // one field and hit the button, instead of scanning three cards to
   // find the one they meant.
   const [highlightedCard, setHighlightedCard] = useState<'artist' | 'organiser' | 'venue' | null>(null)
+
+  // Mobile Redesign Phase 4c (GEN-2609-008) - generalized the ?role=
+  // scroll-and-highlight below into a function both that effect AND the
+  // mobile nav-hub's row taps can call, rather than the hub duplicating
+  // its own scroll/focus logic. `focus` defaults true (matches the
+  // original ?role= behavior); the hub's plain "jump to this section"
+  // taps (Settings) pass false since there's no single input to focus.
+  const scrollToCard = (id: string, highlight?: 'artist' | 'organiser' | 'venue', focus = true) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (highlight) {
+      setHighlightedCard(highlight)
+      setTimeout(() => setHighlightedCard(null), 2500)
+    }
+    if (focus) {
+      setTimeout(() => {
+        const focusable = el.querySelector<HTMLElement>('input, button')
+        focusable?.focus()
+      }, 500)
+    }
+  }
+
   useEffect(() => {
     const role = searchParams.get('role')
     if (role !== 'artist' && role !== 'organiser' && role !== 'venue') return
-    const el = document.getElementById(`apply-${role}`)
-    if (!el) return
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    setHighlightedCard(role)
-    const focusTimer = setTimeout(() => {
-      const focusable = el.querySelector<HTMLElement>('input, button')
-      focusable?.focus()
-    }, 500)
-    const clearTimer = setTimeout(() => setHighlightedCard(null), 2500)
-    return () => {
-      clearTimeout(focusTimer)
-      clearTimeout(clearTimer)
-    }
+    scrollToCard(`apply-${role}`, role)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
+
+  // Mobile Redesign Phase 4c - the hub's "Fee breakdown" row reuses the
+  // real Phase 3 FeeSheet component unmodified (out of scope to edit -
+  // see docs/design.md). FeeSheet needs a specific booking's numbers,
+  // which don't exist on this page (no purchase in progress) - so this
+  // shows a representative example ticket (matches the Figma export's
+  // own ₹500 illustrative framing for this exact "how fees work in
+  // general" context) priced against the REAL current platform booking
+  // fee via the same /api/platform-settings/audience-fee endpoint the
+  // seat picker already uses, rather than inventing that number too.
+  const [feeSheetOpen, setFeeSheetOpen] = useState(false)
+  const [audienceBookingFee, setAudienceBookingFee] = useState(0)
+  const isAudience = (session?.user as any)?.role === 'AUDIENCE'
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
@@ -297,6 +376,15 @@ function ProfileContent() {
     if (session?.user) loadStatuses()
   }, [session])
 
+  useEffect(() => {
+    if (!isAudience) return
+    fetch('/api/platform-settings/audience-fee')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data) setAudienceBookingFee(data.audienceBookingFeeRupees ?? 0) })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAudience])
+
   // s60-profile-status-stale-no-refetch: loadStatuses only ran on
   // useEffect([session]) - the NextAuth session object doesn't change on
   // ordinary navigation, so a user sitting on this page when their
@@ -490,7 +578,96 @@ function ProfileContent() {
             }
           `}</style>
 
-          <div style={{ marginBottom: '40px' }}>
+          {/* Mobile Redesign Phase 4c (GEN-2609-008) - mobile nav-hub, per
+              the Figma v2 export's Profile.tsx, scoped to the Audience
+              role only per the resolved decision (Venue/Organiser/Artist
+              keep today's behavior at every width - they're dashboard-
+              based, out of scope here). Not a fork of this page's data or
+              apply logic - every row below scrolls to and reuses the exact
+              same cards/handlers the desktop column already has. */}
+          {isAudience && (
+            <div className="lg:hidden" style={{ marginBottom: '28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                {avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(245,245,240,0.1)' }} />
+                ) : (
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid rgba(201,151,58,0.3)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700 }}>
+                    {(initialDisplayName || user?.name || '?').trim().slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
+                  </h1>
+                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: 'var(--afa-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                  {user?.code && (
+                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--afa-text-muted)', fontFamily: 'monospace' }}>
+                      {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* No stats row and no membership-tier badge here, unlike the
+                  mock's "Attended/Saved/Cities" row and "Front-row member"
+                  chip - neither has a real backing computation on this
+                  page today (checked: no attended-shows count, no saved-
+                  events count, no membership-tier concept anywhere server-
+                  side - Scene Status is an Artist-only reputation concept,
+                  unrelated). Per the brief's own instruction to reuse
+                  existing stats rather than compute new ones, the honest
+                  choice was to omit rather than invent three numbers. */}
+
+              {[
+                {
+                  label: 'Create',
+                  rows: [
+                    { icon: <PlusIcon style={{ width: 18, height: 18 }} />, title: 'List an event', onClick: () => scrollToCard('apply-organiser', 'organiser') },
+                    { icon: <BuildingIcon style={{ width: 18, height: 18 }} />, title: 'Register a venue', onClick: () => scrollToCard('apply-venue', 'venue') },
+                    { icon: <UserBadgeIcon style={{ width: 18, height: 18 }} />, title: 'Artist profiles', onClick: () => scrollToCard('apply-artist', 'artist') },
+                  ],
+                },
+                {
+                  label: 'Money & account',
+                  rows: [
+                    { icon: <ReceiptIcon style={{ width: 18, height: 18 }} />, title: 'Fee breakdown', hint: 'How our 0% commission works', onClick: () => setFeeSheetOpen(true) },
+                    { icon: <GearIcon style={{ width: 18, height: 18 }} />, title: 'Settings', onClick: () => scrollToCard('account-settings', undefined, false) },
+                    { icon: <LogoutIcon style={{ width: 18, height: 18 }} />, title: 'Log out', danger: true, onClick: () => signOut({ callbackUrl: '/' }) },
+                  ],
+                },
+              ].map((group) => (
+                <div key={group.label} style={{ marginTop: '18px' }}>
+                  <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                    {group.label}
+                  </p>
+                  <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                    {group.rows.map((row, i) => (
+                      <button
+                        key={row.title}
+                        onClick={row.onClick}
+                        style={{
+                          display: 'flex', alignItems: 'center', width: '100%', gap: '12px', padding: '14px 16px',
+                          background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                          borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
+                          color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-primary)',
+                        }}
+                      >
+                        <span style={{ display: 'flex', flexShrink: 0, color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-secondary)' }}>{row.icon}</span>
+                        <span style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ display: 'block', fontSize: '14px', fontWeight: 600 }}>{row.title}</span>
+                          {row.hint && <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--afa-text-muted)', marginTop: '1px' }}>{row.hint}</span>}
+                        </span>
+                        {!row.danger && <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={isAudience ? 'hidden lg:block' : undefined} style={{ marginBottom: '40px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
               {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
             </h1>
@@ -510,7 +687,7 @@ function ProfileContent() {
           )}
 
           <div className="afa-profile-grid">
-          <div className="afa-profile-col">
+          <div id="account-settings" className="afa-profile-col">
 
           {/* Display name — separate from the login username. Shows on
               tickets, emails, and greetings. Falls back to username if
@@ -796,6 +973,15 @@ function ProfileContent() {
         </div>
       </main>
       </DashboardShell>
+
+      {feeSheetOpen && (
+        <FeeSheet
+          ticketFaceValue={500}
+          bookingFee={audienceBookingFee}
+          currency={null}
+          onClose={() => setFeeSheetOpen(false)}
+        />
+      )}
     </>
   )
 }
