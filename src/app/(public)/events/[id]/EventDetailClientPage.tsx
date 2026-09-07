@@ -237,6 +237,18 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
   const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
   const typeLabel = tr.eventTypes[typeKey]
   const isPast = isPastEvent(event)
+  // GEN-2609-011 - shared by the hero booking box and the mobile sticky
+  // CTA bar below, so the two stay in sync instead of drifting apart as
+  // two copies of the same ternary. Reuses existing tr.eventDetailPage
+  // strings only - no new dictionary keys, per the standing i18n rule
+  // (11 locales required for any new user-facing string).
+  const priceLabel = event.isFree
+    ? tr.eventDetailPage.freeEntry
+    : event.ticketTiers.length > 0
+    ? tr.eventDetailPage.chooseSection
+    : event.ticketPrice
+    ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}`
+    : tr.eventDetailPage.priceTBD
 
   // GEN-2608-077 - full rebuild against the approved Figma Make export
   // (EventDetail.tsx). The export is a single flowing scroll (hero ->
@@ -276,6 +288,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         @media (min-width: 1024px) { .afa-event-facility-grid { grid-template-columns: repeat(3, 1fr); } }
         .afa-book-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--afa-fill-solid); color: var(--afa-on-fill-solid); padding: 14px; border-radius: 3px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: filter 0.2s ease; }
         .afa-book-btn:hover { filter: brightness(1.08); }
+        /* GEN-2609-011 - reserves room below 1024px (this file's existing
+           lg breakpoint) so the fixed sticky CTA bar never permanently
+           covers the last section's content. Declared after the two
+           rules above so it wins the padding-bottom cascade at any width
+           under 1024px, including the 640px-and-up range. */
+        @media (max-width: 1023px) { .afa-event-detail-container { padding-bottom: 132px; } }
       `}</style>
       <SiteNav backHref="/events" backLabel={tr.nav.backToEvents} />
 
@@ -341,7 +359,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
                     <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-cream)" }}>
-                      {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? tr.eventDetailPage.chooseSection : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
+                      {priceLabel}
                     </span>
                     <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
                   </div>
@@ -632,6 +650,44 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           </section>
         )}
       </div>
+
+      {/* GEN-2609-011 - mobile-only sticky bottom price/CTA bar, per the
+          Figma v2 reconciliation decision (build the bar, skip the
+          mock's tap-to-expand accordion - every section above stays
+          always-expanded exactly as it was). Routes to the same
+          /events/[id]/seats booking flow as the hero CTA above - no
+          separate handler to duplicate, just another link to it. Hidden
+          for isPast (nothing to book) since the hero box already shows
+          the "event ended" state and this bar would have no action to
+          offer. paddingRight reserves the same ~88px SupportWidget
+          floating-bubble clearance MobileTabBar.tsx already uses, so the
+          book button isn't sitting underneath that bubble. */}
+      {!isPast && (
+        <div
+          className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-between"
+          style={{
+            zIndex: 30,
+            gap: "16px",
+            background: "rgba(10,10,10,0.94)",
+            backdropFilter: "blur(12px)",
+            borderTop: "1px solid rgba(245,245,240,0.08)",
+            padding: "12px 96px 12px 20px",
+            paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>
+              {typeLabel}
+            </div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "17px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {priceLabel}
+            </div>
+          </div>
+          <Link href={`/events/${event.id}/seats`} className="afa-book-btn" style={{ width: "auto", padding: "12px 24px", textDecoration: "none", flexShrink: 0 }}>
+            {tr.eventDetailPage.selectTicketsCta}
+          </Link>
+        </div>
+      )}
 
       <AuthPromptSheet
         open={reviewAuthTarget !== null}

@@ -1562,6 +1562,34 @@ Full implementation brief dispatched to Claude Code, covering exact files, scope
 
 ---
 
+## GEN-2609-010 — built (7 Sep 2026)
+
+Branch: `feat/gen-2609-010-seat-legend`.
+
+**Finding while implementing:** the reconciliation note's premise ("shipped `SeatSelectionClientPage.tsx` has no equivalent legend") is only half true. For NUMBERED venues, `SeatPicker.tsx` already renders its own zone/price legend (colored dot + price, lines ~260-269) above its canvas, using the same `colorForZone` helper as `SeatLayoutPreview.tsx` - that path was never missing a legend, just placed differently than the Figma reference (above the grid, not beneath) and structurally can't move without lifting zone/price state out of `SeatPicker` into the parent, which is out of this ticket's additive-only scope. Left untouched.
+
+The real gap was the flat ticket-tier list (`!isNumbered`, `event.ticketTiers`) rendered directly in `SeatSelectionClientPage.tsx` - that one had zero color coding. Added a small pill-style legend there (colored dot via `colorForZone` + `sectionName · ₹price`), placed after the tier +/- list and before the total/booking-fee block - satisfies "beneath the grid, above the total" for the one path that actually needed it. Only renders when `ticketTiers.length > 1` (a single tier isn't a legend). No pricing logic touched - purely reads `event.ticketTiers`, which the page already had.
+
+**Verification:** `tsc --noEmit` clean, `eslint` on the touched file clean (2 pre-existing issues elsewhere in the file, unrelated to this change, left as-is). Could not get a live visual check - the local dev server's Prisma-backed queries returned empty/null for events that a direct `pg` query confirms exist in the same database (this is the recurring local-DB-connectivity gap noted in earlier sessions: raw SQL reaches the DB fine, app-level Prisma queries intermittently don't). Did not attempt to seed temporary multi-tier data directly via SQL to work around it - that's a write to shared data outside this ticket's actual scope, and the auto-mode classifier declined it, correctly. Confidence here rests on `colorForZone`'s existing, already-shipped usage in the same file (via `SeatPicker`) rather than a fresh screenshot.
+
+---
+
+## GEN-2609-011 — built (7 Sep 2026)
+
+Branch: `feat/gen-2609-011-sticky-cta`.
+
+Added a `lg:hidden` fixed-bottom price/CTA bar to `EventDetailClientPage.tsx`, matching this file's own existing `lg` (1024px) breakpoint convention and `MobileTabBar.tsx`'s `lg:hidden` usage - not a new breakpoint. Routes to the same `/events/[id]/seats` flow as the existing hero CTA (`Link`, not a click handler, so there was nothing to extract/duplicate - just a second link to the same href). Hidden when `isPast`, since the hero box already shows the "event ended" state and there's no action to offer.
+
+Reused the hero box's exact price-label ternary (free / choose-section / flat-price / TBD) by lifting it into a shared `priceLabel` const rather than copy-pasting the expression twice - both the hero box and the new bar now read from one place. Deliberately did not invent new compact copy ("From ₹X" etc.) for the sticky bar even though space is tighter there: any new user-facing string needs all 11 locales in the i18n dictionary (standing rule, see 5 Sep session notes), and the existing `tr.eventDetailPage.*` strings already cover every case this bar needs.
+
+`/events/[id]` is a "pushed screen," not one of `MobileTabBar.tsx`'s tab roots (`GLOBAL_TAB_ROOTS`/`GUEST_ONLY_TAB_ROOTS` are `/events`, `/tickets`, `/saved`, `/profile` - exact-match only, so `/events/[id]` never matches `/events`) - confirmed there's no existing bottom nav on this route to stack against. There is a floating `SupportWidget` chat bubble (fixed bottom-right, 56px, z-index 45) that `MobileTabBar.tsx` already reserves ~88px of right-padding for - copied that same clearance convention here so the new bar's Book button isn't sitting under the bubble.
+
+Added a `max-width: 1023px` padding-bottom override on `.afa-event-detail-container` (132px, up from the existing 112px baseline) so the Venue Facilities section - the last one on the page - isn't permanently hidden behind the new fixed bar on mobile/tablet widths; desktop keeps the original 112px since the bar never renders there.
+
+**Verification:** `tsc --noEmit` clean, `eslint` on the touched file shows 2 pre-existing `no-explicit-any` errors + 1 pre-existing `no-img-element` warning, none introduced by this change (confirmed against the pre-edit file). Same local-DB-connectivity gap as GEN-2609-010 blocked a live screenshot (dev server's Prisma queries return empty against a DB that direct `pg` queries confirm has data) - not attempting a DB write to work around it for a display-only change.
+
+---
+
 ## GEN-2609-012 — built (7 Sep 2026)
 
 Branch: `feat/gen-2609-012-discover-carousels`. Biggest of the three, built last as planned.

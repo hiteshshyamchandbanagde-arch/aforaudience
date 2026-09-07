@@ -5,6 +5,7 @@ import { useSession, getSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import SeatPicker from "@/components/SeatPicker"
+import { colorForZone } from "@/components/SeatLayoutPreview"
 import { SeatStateDot } from "@/components/EventCard"
 import { TicketIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
@@ -288,6 +289,24 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                     <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
                     <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
                   </div>
+                </div>
+              )}
+
+              {/* GEN-2609-010 - price-tier legend, additive/display-only:
+                  reconciliation with Figma v2's SeatMap.tsx found the
+                  NUMBERED path already gets an equivalent color legend for
+                  free (SeatPicker.tsx renders one above its own canvas,
+                  using this same colorForZone helper). The actual gap was
+                  here - the flat tier list had no color coding at all.
+                  Only shown for >1 tier; a single price isn't a "legend". */}
+              {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+                  {event.ticketTiers.map((t) => (
+                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "11px", color: "var(--afa-cream)", background: "rgba(245,245,240,0.08)", padding: "4px 10px", borderRadius: "999px" }}>
+                      <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "6px" }} />
+                      {t.sectionName} · ₹{t.price}
+                    </span>
+                  ))}
                 </div>
               )}
 
