@@ -163,7 +163,7 @@ export function IllustratedEventFallback({ type, typeLabel, hideCaption = false 
 // multiply overlay at 0.48 opacity is the correct, already-shipped
 // recipe (see docs/venues-full-fidelity-audit-2026-08-20.md's
 // "Re-checked, no action needed" section).
-export function EventPoster({ posterImage, title, type, typeLabel }: { posterImage: string | null; title: string; type: string; typeLabel: string }) {
+export function EventPoster({ posterImage, title, type, typeLabel, hideCaption = false }: { posterImage: string | null; title: string; type: string; typeLabel: string; hideCaption?: boolean }) {
   // BUG-2608-079 - a stored posterImage that 404s/times out (confirmed
   // live: qa-general-event-04's Unsplash URL) previously left Photo
   // rendering a broken <img> with the amber overlay still multiplied on
@@ -174,7 +174,7 @@ export function EventPoster({ posterImage, title, type, typeLabel }: { posterIma
   return posterImage && !failed ? (
     <Photo src={posterImage} alt={title} onError={() => setFailed(true)} />
   ) : (
-    <IllustratedEventFallback type={type} typeLabel={typeLabel} />
+    <IllustratedEventFallback type={type} typeLabel={typeLabel} hideCaption={hideCaption} />
   )
 }
 
