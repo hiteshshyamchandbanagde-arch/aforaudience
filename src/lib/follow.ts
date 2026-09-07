@@ -1,25 +1,50 @@
 import prisma from '@/lib/prisma'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
 
-export type FollowTargetType = 'ARTIST' | 'VENUE' | 'ORGANISER'
+// Mobile Redesign Phase 4b (GEN-2609-007) - added 'EVENT' (Saved/wishlist).
+// This type was a plain hand-written union, not imported from the Prisma-
+// generated FollowTargetType enum, so adding the enum value in schema.prisma
+// alone did NOT widen it here or make any switch over it exhaustive - had
+// to update both by hand. Converted resolveTargetOwner below from an if/
+// else-falls-through-to-Venue chain into a real switch with a `never`
+// exhaustiveness check specifically so this doesn't happen silently again
+// the next time a target type is added.
+export type FollowTargetType = 'ARTIST' | 'VENUE' | 'ORGANISER' | 'EVENT'
 
 // Resolves the target's underlying User id (for the "new follower" push)
 // given the target's own id (not the User id). Artist/Organiser have a
-// direct userId; Venue routes through its VenueOwner.
+// direct userId; Venue routes through its VenueOwner; Event routes through
+// its Organiser - same "new follower" notification semantics as following
+// that event's organiser directly.
 async function resolveTargetOwner(targetType: FollowTargetType, targetId: string) {
-  if (targetType === 'ARTIST') {
-    const artist = await prisma.artist.findUnique({ where: { id: targetId }, select: { userId: true } })
-    return artist ? { userId: artist.userId, dashboardUrl: '/dashboard/artist' } : null
+  switch (targetType) {
+    case 'ARTIST': {
+      const artist = await prisma.artist.findUnique({ where: { id: targetId }, select: { userId: true } })
+      return artist ? { userId: artist.userId, dashboardUrl: '/dashboard/artist' } : null
+    }
+    case 'ORGANISER': {
+      const organiser = await prisma.organiser.findUnique({ where: { id: targetId }, select: { userId: true } })
+      return organiser ? { userId: organiser.userId, dashboardUrl: '/dashboard/organiser' } : null
+    }
+    case 'VENUE': {
+      const venue = await prisma.venue.findUnique({
+        where: { id: targetId },
+        select: { owner: { select: { userId: true } } },
+      })
+      return venue ? { userId: venue.owner.userId, dashboardUrl: '/dashboard/venue' } : null
+    }
+    case 'EVENT': {
+      const event = await prisma.event.findUnique({
+        where: { id: targetId },
+        select: { organiser: { select: { userId: true } } },
+      })
+      return event ? { userId: event.organiser.userId, dashboardUrl: '/dashboard/organiser' } : null
+    }
+    default: {
+      const _exhaustive: never = targetType
+      throw new Error(`Unhandled FollowTargetType: ${_exhaustive}`)
+    }
   }
-  if (targetType === 'ORGANISER') {
-    const organiser = await prisma.organiser.findUnique({ where: { id: targetId }, select: { userId: true } })
-    return organiser ? { userId: organiser.userId, dashboardUrl: '/dashboard/organiser' } : null
-  }
-  const venue = await prisma.venue.findUnique({
-    where: { id: targetId },
-    select: { owner: { select: { userId: true } } },
-  })
-  return venue ? { userId: venue.owner.userId, dashboardUrl: '/dashboard/venue' } : null
 }
 
 export async function getFollowStatus(userId: string | null, targetType: FollowTargetType, targetId: string) {
