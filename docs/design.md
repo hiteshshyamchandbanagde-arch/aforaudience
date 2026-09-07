@@ -1559,3 +1559,15 @@ Hitesh asked chat directly for a recommendation on all three reconciliation find
 **GEN-2609-012 (Discover carousel-grouped sections)** — build the carousel-grouped browse model, since it's the direction already committed to via Figma v2. Explicit guardrail: any row with fewer than 3 events does not render, to avoid sparse-looking carousels in lower-inventory cities. The existing filter sheet (Phase 2) stays reachable for intent-based search - carousels are for browsing, not a full replacement for search. Biggest effort and real product-shape risk of the three; build last, most worth getting right rather than fast.
 
 Full implementation brief dispatched to Claude Code, covering exact files, scope boundaries, and the guardrail logic for each. Branches expected: one per ticket, none self-merged, same PR-lifecycle pattern as every other phase this session.
+
+---
+
+## GEN-2609-010 — built (7 Sep 2026)
+
+Branch: `feat/gen-2609-010-seat-legend`.
+
+**Finding while implementing:** the reconciliation note's premise ("shipped `SeatSelectionClientPage.tsx` has no equivalent legend") is only half true. For NUMBERED venues, `SeatPicker.tsx` already renders its own zone/price legend (colored dot + price, lines ~260-269) above its canvas, using the same `colorForZone` helper as `SeatLayoutPreview.tsx` - that path was never missing a legend, just placed differently than the Figma reference (above the grid, not beneath) and structurally can't move without lifting zone/price state out of `SeatPicker` into the parent, which is out of this ticket's additive-only scope. Left untouched.
+
+The real gap was the flat ticket-tier list (`!isNumbered`, `event.ticketTiers`) rendered directly in `SeatSelectionClientPage.tsx` - that one had zero color coding. Added a small pill-style legend there (colored dot via `colorForZone` + `sectionName · ₹price`), placed after the tier +/- list and before the total/booking-fee block - satisfies "beneath the grid, above the total" for the one path that actually needed it. Only renders when `ticketTiers.length > 1` (a single tier isn't a legend). No pricing logic touched - purely reads `event.ticketTiers`, which the page already had.
+
+**Verification:** `tsc --noEmit` clean, `eslint` on the touched file clean (2 pre-existing issues elsewhere in the file, unrelated to this change, left as-is). Could not get a live visual check - the local dev server's Prisma-backed queries returned empty/null for events that a direct `pg` query confirms exist in the same database (this is the recurring local-DB-connectivity gap noted in earlier sessions: raw SQL reaches the DB fine, app-level Prisma queries intermittently don't). Did not attempt to seed temporary multi-tier data directly via SQL to work around it - that's a write to shared data outside this ticket's actual scope, and the auto-mode classifier declined it, correctly. Confidence here rests on `colorForZone`'s existing, already-shipped usage in the same file (via `SeatPicker`) rather than a fresh screenshot.
