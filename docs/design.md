@@ -1546,3 +1546,16 @@ Per the brief: **verification, not a rebuild** - diffed the shipped Discover/Eve
 **3. Seat map: price-tier legend vs. shipped picker.** The mock's `SeatMap.tsx` shows a 3-band color legend (front/mid/rear pricing, by row) beneath the seat grid, plus a sticky selection-total bar. The shipped `SeatSelectionClientPage.tsx` has no equivalent legend today (checked: no legend/tier-color-band markup exists). This one's lower-risk than #1/#2 (additive-only, not a restructure) - but seat selection feeds directly into real booking/payment, and the brief's own standing rule is to stop and log anything touching payment-adjacent surfaces rather than freelance a change there without review, same bar as everywhere else this run. Not implemented for that reason, not because it's a bad idea. Per the brief, the pre-existing NUMBERED seat-map clustering bug was not touched or folded into this - it stays its own separately-scoped ticket.
 
 No branch for this entry - documentation-only, committed directly. Merged via PR #568.
+---
+
+## Mobile v2 reconciliation — decisions made, dispatched to build (7 Sep 2026)
+
+Hitesh asked chat directly for a recommendation on all three reconciliation findings above, then approved building all three. Decisions, in build order:
+
+**GEN-2609-010 (Seat map price-tier legend)** — build as-is per the reconciliation note. Additive only, no booking/payment logic touched (display-only, derived from data the picker already computes). Lowest risk, build first.
+
+**GEN-2609-011 (Event Detail sticky CTA bar)** — split decision: build the sticky bottom price/CTA bar (standard ticketing UX, purely additive, real conversion upside), but explicitly do NOT build the mock's tap-to-expand accordion for About/Lineup/Venue. Reasoning: accordion trades scannability for compactness with no clear problem it solves on this page; sections stay always-expanded exactly as they are today.
+
+**GEN-2609-012 (Discover carousel-grouped sections)** — build the carousel-grouped browse model, since it's the direction already committed to via Figma v2. Explicit guardrail: any row with fewer than 3 events does not render, to avoid sparse-looking carousels in lower-inventory cities. The existing filter sheet (Phase 2) stays reachable for intent-based search - carousels are for browsing, not a full replacement for search. Biggest effort and real product-shape risk of the three; build last, most worth getting right rather than fast.
+
+Full implementation brief dispatched to Claude Code, covering exact files, scope boundaries, and the guardrail logic for each. Branches expected: one per ticket, none self-merged, same PR-lifecycle pattern as every other phase this session.
