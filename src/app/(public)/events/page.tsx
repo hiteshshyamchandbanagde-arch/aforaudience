@@ -34,6 +34,60 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
   return eventStart.getTime() <= Date.now()
 }
 
+// GEN-2609-012 - "this weekend" range: today through the end of the
+// upcoming Sunday. Sunday needs its own branch - by Sunday morning
+// Saturday has already passed, so the weekend "in progress" is just
+// today, not a jump forward to next week's Saturday.
+function getWeekendRange(from: Date): { start: Date; end: Date } {
+  const day = from.getDay() // 0 = Sunday .. 6 = Saturday
+  const start = new Date(from)
+  start.setHours(0, 0, 0, 0)
+  if (day !== 0) start.setDate(from.getDate() + (6 - day))
+  const end = new Date(start)
+  end.setDate(start.getDate() + (day === 0 ? 1 : 2))
+  return { start, end }
+}
+
+// GEN-2609-012 - one horizontally-scrolling, snap-scroll carousel row for
+// the mobile Discover browse experience (Figma v2's Discover.tsx). Reuses
+// EventCard's "grid" variant as-is (poster + title + meta + price, same
+// click-guard props the desktop grid already passes) rather than forking
+// a new card - the narrower width here comes entirely from the wrapping
+// flex-item, not from any change to EventCard itself.
+function DiscoverCarouselRow({
+  title,
+  events,
+  navigatingId,
+  onOpen,
+}: {
+  title: string
+  events: EventItem[]
+  navigatingId: string | null
+  onOpen: (id: string) => void
+}) {
+  return (
+    <div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)", marginBottom: "12px" }}>
+        {title}
+      </div>
+      <div className="afa-discover-carousel-track" style={{ display: "flex", gap: "12px", overflowX: "auto", scrollSnapType: "x proximity", paddingBottom: "4px", WebkitOverflowScrolling: "touch" }}>
+        {events.map((event) => (
+          <div key={event.id} style={{ flex: "0 0 168px", scrollSnapAlign: "start" }}>
+            <EventCard
+              event={event}
+              view="grid"
+              tab="upcoming"
+              isNavigating={navigatingId === event.id}
+              disabled={navigatingId !== null}
+              onOpen={() => onOpen(event.id)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function EventsPage() {
   const router = useRouter()
   const { t: tr } = useLocale()
@@ -84,6 +138,12 @@ export default function EventsPage() {
   // driving the exact same selectedType/selectedCity/priceFilter/sortBy
   // state - presentation only, no new filtering logic.
   const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false)
+  // GEN-2609-012 - mobile Discover defaults to the carousel-grouped
+  // browse model; "See all events" (or picking any filter/search, see
+  // hasActiveFilters below) switches to the same filtered grid/list
+  // desktop always shows. Irrelevant above `lg` - desktop never reads
+  // this state.
+  const [mobileBrowseMode, setMobileBrowseMode] = useState<"carousels" | "list">("carousels")
   // Toggle-based discovery entry point for Organisers (session 62,
   // design.md §9.5) - deliberately not a new top-level nav route.
   // Independent of `view` above (grid/list is an events-only display mode).
@@ -206,6 +266,50 @@ export default function EventsPage() {
   // events vs organisers.
   const filteredOrganisers = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
+  // GEN-2609-012 - Discover mobile carousel rows, built from the same
+  // `filtered` array desktop's grid/list already uses (so city/tab
+  // scoping stays identical) - only meaningful with no active
+  // search/filter, since a carousel browse has no sensible way to
+  // reflect "results matching X". `hasActiveFilters` deliberately
+  // excludes selectedCity: that filter auto-applies from the visitor's
+  // detected location (see the effect above), not a deliberate
+  // "narrow my search" action, so it shouldn't kick the mobile view out
+  // of browse mode on its own.
+  const hasActiveFilters = search.trim() !== "" || selectedType !== null || priceFilter !== "All" || sortBy !== "date"
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const tomorrowStart = new Date(todayStart)
+  tomorrowStart.setDate(todayStart.getDate() + 1)
+  const { start: weekendStart, end: weekendEnd } = getWeekendRange(todayStart)
+  const tonightEvents = filtered.filter((e) => {
+    const d = new Date(e.date)
+    return d >= todayStart && d < tomorrowStart
+  })
+  const weekendEvents = filtered.filter((e) => {
+    const d = new Date(e.date)
+    return d >= weekendStart && d < weekendEnd
+  })
+  // Category buckets straight off the real Event.type enum (TYPE_OPTIONS,
+  // same list the desktop type-filter row already uses) - not the mock's
+  // own invented category names ("Comedy," "Poetry & Words," ...), per
+  // the brief. Reuses tr.eventTypes' existing translated labels, so no
+  // new dictionary keys needed for these rows specifically.
+  const categoryLabel = (type: string) => tr.eventTypes[type as keyof typeof tr.eventTypes]
+  const cityLabel = selectedCity !== "All Cities" ? selectedCity : null
+  const carouselRows = [
+    { key: "tonight", title: cityLabel ? tr.eventsPage.discoverTonightInCityHeading.replace("{city}", cityLabel) : tr.eventsPage.discoverTonightHeading, events: tonightEvents },
+    { key: "weekend", title: tr.eventsPage.discoverWeekendHeading, events: weekendEvents },
+    ...TYPE_OPTIONS.map((type) => ({ key: type, title: categoryLabel(type), events: filtered.filter((e) => e.type === type) })),
+    // Guardrail (non-negotiable, per brief): a row with fewer than 3
+    // events doesn't render at all - no sparse-looking carousels in
+    // lower-inventory cities.
+  ].filter((row) => row.events.length >= 3)
+  // Fallback for "every row is sparse" (small/new city with little
+  // inventory): carouselRows ends up empty, showMobileCarousels goes
+  // false below, and the mobile view quietly renders the same
+  // grid/list desktop always shows instead of an empty Discover page.
+  const showMobileCarousels = tab === "upcoming" && !hasActiveFilters && mobileBrowseMode === "carousels" && carouselRows.length > 0
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
@@ -233,6 +337,8 @@ export default function EventsPage() {
         .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 2px; border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-cream); }
         .afa-events-view-btn.active { background: var(--afa-cream); color: var(--afa-surface-inverse); }
+        .afa-discover-carousel-track { scrollbar-width: none; -ms-overflow-style: none; }
+        .afa-discover-carousel-track::-webkit-scrollbar { display: none; }
       `}</style>
       <SiteNav active="events" />
 
@@ -515,34 +621,73 @@ export default function EventsPage() {
                   {tab === "past" ? tr.eventsPage.emptyNoPastSub : events.length === 0 ? tr.eventsPage.emptyNoneYetSub : tr.eventsPage.emptyNoneFoundSub}
                 </p>
               </div>
-            ) : view === "grid" ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
-                {filtered.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    view="grid"
-                    tab={tab}
-                    isNavigating={navigatingId === event.id}
-                    disabled={navigatingId !== null}
-                    onOpen={() => goToEvent(event.id)}
-                  />
-                ))}
-              </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {filtered.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    view="list"
-                    tab={tab}
-                    isNavigating={navigatingId === event.id}
-                    disabled={navigatingId !== null}
-                    onOpen={() => goToEvent(event.id)}
-                  />
-                ))}
-              </div>
+              <>
+                {/* GEN-2609-012 - mobile carousel browse, default state.
+                    Only ever visible below `lg` (Tailwind, this codebase's
+                    one non-inline-style breakpoint convention) - the
+                    "hidden"/"block" half of each className below covers
+                    the case where showMobileCarousels is false (active
+                    filters, Past tab, or every row too sparse), so the
+                    plain grid/list renders on mobile too in that case
+                    instead of an empty carousel section. */}
+                <div className={showMobileCarousels ? "lg:hidden flex flex-col" : "hidden"} style={{ gap: "32px" }}>
+                  {carouselRows.map((row) => (
+                    <DiscoverCarouselRow key={row.key} title={row.title} events={row.events} navigatingId={navigatingId} onOpen={goToEvent} />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setMobileBrowseMode("list")}
+                    style={{
+                      alignSelf: "flex-start",
+                      borderRadius: "999px",
+                      border: "1px solid rgba(245,245,240,0.15)",
+                      background: "transparent",
+                      color: "var(--afa-amber)",
+                      padding: "10px 18px",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "12px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {tr.eventsPage.discoverSeeAllEvents}
+                  </button>
+                </div>
+
+                <div className={showMobileCarousels ? "hidden lg:block" : "block"}>
+                  {view === "grid" ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
+                      {filtered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          view="grid"
+                          tab={tab}
+                          isNavigating={navigatingId === event.id}
+                          disabled={navigatingId !== null}
+                          onOpen={() => goToEvent(event.id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      {filtered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          view="list"
+                          tab={tab}
+                          isNavigating={navigatingId === event.id}
+                          disabled={navigatingId !== null}
+                          onOpen={() => goToEvent(event.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </>
         )}

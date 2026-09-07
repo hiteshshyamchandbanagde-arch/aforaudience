@@ -125,6 +125,10 @@ const gu: Dictionary = {
     performingCount: "{n} લોકો પ્રદર્શન કરી રહ્યા છે",
     freeBadge: "મફત",
     leftSuffix: " બાકી",
+    discoverTonightHeading: "આજે રાત્રે",
+    discoverTonightInCityHeading: "{city}માં આજે રાત્રે",
+    discoverWeekendHeading: "આ સપ્તાહાંતે",
+    discoverSeeAllEvents: "બધા ઇવેન્ટ્સ જુઓ",
   },
   venuesPage: {
     eyebrowDirectory: "ડિરેક્ટરી · {count} સ્થળો",

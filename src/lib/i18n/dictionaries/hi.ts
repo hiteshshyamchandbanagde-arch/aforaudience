@@ -124,6 +124,10 @@ const hi: Dictionary = {
     performingCount: "{n} प्रस्तुति दे रहे हैं",
     freeBadge: "मुफ़्त",
     leftSuffix: " बचे",
+    discoverTonightHeading: "आज रात",
+    discoverTonightInCityHeading: "{city} में आज रात",
+    discoverWeekendHeading: "इस वीकेंड",
+    discoverSeeAllEvents: "सभी इवेंट देखें",
   },
   venuesPage: {
     eyebrowDirectory: "डायरेक्टरी · {count} स्थान",
