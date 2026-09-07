@@ -1,4 +1,53 @@
-# Session Handoff — 6 Sept 2026 (end of session: all 3 branches merged)
+# Session Handoff — 7 Sept 2026 (end of session: 1 branch merged, 4 pushed unreviewed)
+
+## qa HEAD: `56ff3b7` — PR #564 (GEN-2609-005, Mobile Redesign Phase 3: Checkout dark-theme + FeeSheet) merged, live on `qa.aforaudience.com`. Hitesh reviewed that diff personally before merge (not just CC self-report) and flagged one real issue in it to resolve himself - see "Do not touch" below. **Nothing else this session is merged.**
+
+## This session, in order: GEN-2609-005 review/merge -> 6-hour autonomous run (Phases 4a/4b/4c + reconciliation)
+
+1. **GEN-2609-005 (Phase 3) reviewed and merged.** Hitesh read the real diff himself (asked for it inline, not just a summary) given it touches payment-adjacent surface (Razorpay flow, companion tagging). Found the FeeSheet "Booking / convenience fee" row's AFA-takes/artist-venue-takes attribution looks inconsistent with copy elsewhere (seat-picker calls the same fee "artist-ecosystem support") - **he is resolving this himself**, explicitly told CC not to touch `src/components/FeeSheet.tsx`'s row logic/copy/attribution this run, and it wasn't touched. Don't re-flag this as a bug next session; it's a known, owned item.
+2. **Autonomous 6-hour run** (Hitesh unavailable, full brief in chat history) built the rest of the mobile-v2 package end to end: Phase 4a (My Tickets), Phase 4b (Saved - schema + UI), Phase 4c (Profile mobile nav-hub), and a reconciliation pass against the Figma export for Discover/EventDetail/SeatMap. **Each phase pushed to its own branch, none merged, none self-reviewed past CC's own tsc+Playwright+DB checks** - per the brief's explicit "do not self-merge, push and stop" instruction. All 4 branches still need: real ticket-number reconciliation (placeholders used below), PR creation (no `gh` CLI on this machine - compare URLs given), human diff review, and merge in the dependency order the brief specified (4a -> 4b migration+UI -> 4c -> reconciliation notes).
+
+## The 4 unmerged branches from the autonomous run
+
+| Branch | SHA | What | Placeholder ticket |
+|---|---|---|---|
+| `feat/gen-2609-006-my-tickets` | `caca3da` | My Tickets restyle - real scannable QR (not decorative), real booking statuses/actions kept, did NOT port the mock's non-functional "Transfer/refund" row | GEN-2609-006 |
+| `feat/gen-2609-007-saved` | `cdf55c5` | Saved (schema + UI) - `FollowTargetType.EVENT` added, new heart/save toggle on Discover, `/saved` page | GEN-2609-007 |
+| `feat/gen-2609-008-profile-mobile` | `8e95572` | Profile mobile nav-hub, Audience role only | GEN-2609-008 |
+| `docs/gen-2609-mobile-v2-reconciliation` | `7810759` | Reconciliation pass writeup only, no code | — |
+
+Compare URLs (no `gh` CLI here - open these directly):
+- `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-006-my-tickets?expand=1`
+- `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-007-saved?expand=1`
+- `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-008-profile-mobile?expand=1`
+- `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...docs/gen-2609-mobile-v2-reconciliation?expand=1`
+
+Full build detail (ambiguities resolved, judgment calls + reasoning, verification method per phase) is in `docs/design.md` under the "AFA Mobile v2 — Autonomous run" headings, one per phase, written as they went rather than batched at the end.
+
+## ⚠️ Needs a real look before any future schema change: `prisma migrate dev` is broken
+
+Not caused by this session, found while building Phase 4b. `prisma migrate dev`/`migrate status`'s shadow-database rebuild hangs/fails - it can't cleanly replay the pre-existing `20260802080000_feedback_workflow_overhaul` migration from scratch (that migration's own data-cast `UPDATE ... CASE` references an enum literal ('TESTED') its own earlier steps already retired, so a from-empty shadow DB replay chokes on it). Separately, the pooled `DATABASE_URL` (port 6543) also hangs on Prisma CLI commands specifically - a raw `pg` client connects fine over the same URL in under 2s, so that half is PgBouncer transaction-mode not supporting whatever session-level operation Prisma's migration engine needs, not a real network block. Worked around both for this session's one schema change (`FollowTargetType.EVENT`) by confirming this project has never actually used Prisma's own migration tracking anyway (`_prisma_migrations` doesn't exist in the DB) and applying directly via `Supabase:apply_migration`, same as the precedent migration's own file header documents. **This will block the next real schema change too** unless someone fixes the shadow-db replay (likely needs the old migration's data-cast statement patched to be replay-safe, or the migration history squashed) - worth prioritizing before it's someone's blocker mid-task again.
+
+## Standing items carried forward, unchanged or newly added this session
+
+- **Phase 1's guest-only tab-bar decision** (GEN-2609-003) - still never got an explicit final "yes" from Hitesh. Unchanged, several sessions running now.
+- **Seed-data seat-map clustering** (GEN-2609-004) - still not opened as its own ticket. Unchanged.
+- **New this session - 3 reconciliation findings, need product decisions, not auto-fixable**: (1) Discover's carousel-grouped browse model (mock) vs. shipped grid/list+tabs - different information architectures, not a restyle away from each other. (2) Event Detail's tap-to-expand accordion + sticky mobile book-bar (mock) vs. shipped always-expanded sections with no persistent CTA bar. (3) Seat map's price-tier color legend (mock) vs. none in the shipped picker - lower-risk than the other two but touches real booking surface, held to the same "don't freelance near payment logic" bar. None implemented; full detail in `docs/design.md`.
+- **New this session - Profile mobile hub's omitted stat row/badge**: the mock's "Attended/Saved/Cities" stats and "Front-row member" badge were deliberately left out of Phase 4c - neither has real backing data anywhere server-side today (checked: no attended-count, no saved-count on that branch, no audience membership-tier concept exists - Scene Status is Artist-only). Worth a decision: build real versions of these (would need new queries) or leave the hub without them permanently.
+- **QA DB credentials** - confirmed *working* multiple times this session via `.env.local`'s `DATABASE_URL` (raw `pg` connects, Supabase MCP works, the direct-connection migration workaround above succeeded) - but this only confirms `.env.local` is current and correct. Whether Vercel's own `DATABASE_URL` env var matches was **not** re-checked this session (same gap flagged, still open, from the 6 Sep transaction-pooler session).
+- Razorpay + Google Places API key rotation, `--afa-gold` contrast question, cream-tint tokens, auth stock photo placeholder, profile eyebrow i18n, QST-2609-001 (status-badge color policy), BUG-2609-008 (Admin DashboardShell, deliberately deferred) - all unchanged standing backlog, not touched this session.
+
+## Session-start protocol reminder for next session
+
+1. `git fetch && git status` - confirm `qa` HEAD is still `56ff3b7` or later (check nothing else merged without this file being updated).
+2. Reconcile GEN-2609-006/007/008 against the real Feedback ticket counter before opening PRs - all three are placeholder numbers CC assigned itself per the autonomous brief's own instruction to do so.
+3. Review and merge the 4 branches above in the brief's specified order: 4a (My Tickets, no schema) -> 4b (Saved - **apply the schema change's real-world equivalent check**: confirm `FollowTargetType` on the target DB already has `EVENT` before merging, since it was applied directly via Supabase, not via a trackable Prisma migration - re-run `prisma generate` locally after pulling this branch, the generated client needs it) -> 4c (Profile) -> reconciliation docs (no code, safe to merge whenever).
+4. Do **not** touch `FeeSheet.tsx`'s booking-fee row - Hitesh owns that fix.
+5. Before attempting any *other* schema change, read the `prisma migrate dev` section above first - don't rediscover the same 20-minute detour.
+
+---
+
+
 
 ## qa HEAD: `c6847de` — PR #563 (GEN-2609-004) merged by chat. PRs #561
 (GEN-2609-003) and #562 (BUG-2609-020) confirmed merged earlier the same
