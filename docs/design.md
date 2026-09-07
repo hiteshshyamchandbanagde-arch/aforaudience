@@ -1559,3 +1559,19 @@ Hitesh asked chat directly for a recommendation on all three reconciliation find
 **GEN-2609-012 (Discover carousel-grouped sections)** — build the carousel-grouped browse model, since it's the direction already committed to via Figma v2. Explicit guardrail: any row with fewer than 3 events does not render, to avoid sparse-looking carousels in lower-inventory cities. The existing filter sheet (Phase 2) stays reachable for intent-based search - carousels are for browsing, not a full replacement for search. Biggest effort and real product-shape risk of the three; build last, most worth getting right rather than fast.
 
 Full implementation brief dispatched to Claude Code, covering exact files, scope boundaries, and the guardrail logic for each. Branches expected: one per ticket, none self-merged, same PR-lifecycle pattern as every other phase this session.
+
+---
+
+## GEN-2609-011 — built (7 Sep 2026)
+
+Branch: `feat/gen-2609-011-sticky-cta`.
+
+Added a `lg:hidden` fixed-bottom price/CTA bar to `EventDetailClientPage.tsx`, matching this file's own existing `lg` (1024px) breakpoint convention and `MobileTabBar.tsx`'s `lg:hidden` usage - not a new breakpoint. Routes to the same `/events/[id]/seats` flow as the existing hero CTA (`Link`, not a click handler, so there was nothing to extract/duplicate - just a second link to the same href). Hidden when `isPast`, since the hero box already shows the "event ended" state and there's no action to offer.
+
+Reused the hero box's exact price-label ternary (free / choose-section / flat-price / TBD) by lifting it into a shared `priceLabel` const rather than copy-pasting the expression twice - both the hero box and the new bar now read from one place. Deliberately did not invent new compact copy ("From ₹X" etc.) for the sticky bar even though space is tighter there: any new user-facing string needs all 11 locales in the i18n dictionary (standing rule, see 5 Sep session notes), and the existing `tr.eventDetailPage.*` strings already cover every case this bar needs.
+
+`/events/[id]` is a "pushed screen," not one of `MobileTabBar.tsx`'s tab roots (`GLOBAL_TAB_ROOTS`/`GUEST_ONLY_TAB_ROOTS` are `/events`, `/tickets`, `/saved`, `/profile` - exact-match only, so `/events/[id]` never matches `/events`) - confirmed there's no existing bottom nav on this route to stack against. There is a floating `SupportWidget` chat bubble (fixed bottom-right, 56px, z-index 45) that `MobileTabBar.tsx` already reserves ~88px of right-padding for - copied that same clearance convention here so the new bar's Book button isn't sitting under the bubble.
+
+Added a `max-width: 1023px` padding-bottom override on `.afa-event-detail-container` (132px, up from the existing 112px baseline) so the Venue Facilities section - the last one on the page - isn't permanently hidden behind the new fixed bar on mobile/tablet widths; desktop keeps the original 112px since the bar never renders there.
+
+**Verification:** `tsc --noEmit` clean, `eslint` on the touched file shows 2 pre-existing `no-explicit-any` errors + 1 pre-existing `no-img-element` warning, none introduced by this change (confirmed against the pre-edit file). Same local-DB-connectivity gap as GEN-2609-010 blocked a live screenshot (dev server's Prisma queries return empty against a DB that direct `pg` queries confirm has data) - not attempting a DB write to work around it for a display-only change.
