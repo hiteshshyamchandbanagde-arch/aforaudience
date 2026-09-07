@@ -714,6 +714,7 @@ enum FollowTargetType {
   ARTIST
   VENUE
   ORGANISER
+  EVENT
 }
 
 // Follows an Artist, Venue, or Organiser. userId is the follower (any role

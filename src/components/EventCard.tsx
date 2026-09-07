@@ -4,6 +4,7 @@ import { getAvailabilityStatus } from "@/lib/availability"
 import { useLocale } from "@/lib/i18n/translate"
 import Photo from "@/components/Photo"
 import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
+import { EventSaveHeartButton } from "@/components/EventSaveButton"
 
 export interface EventItem {
   id: string
@@ -270,6 +271,9 @@ export function EventCard({
         <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "rgba(10,10,10,0.7)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "2px" }}>
           <EventTypeBadge type={event.type} typeLabel={typeLabel} size={14} />
         </span>
+        <span style={{ position: "absolute", right: "12px", top: "12px" }}>
+          <EventSaveHeartButton eventId={event.id} />
+        </span>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: "16px", padding: view === "grid" ? "20px" : 0 }}>
@@ -300,6 +304,97 @@ export function EventCard({
             )}
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Mobile Redesign Phase 4b (GEN-2609-007) - wide horizontal row card, per
+// the Figma v2 export's components.tsx EventRow. New shared component
+// (no prior equivalent existed) - ported from the mock's Tailwind classes
+// into this codebase's inline-style-object convention, reusing EventPoster/
+// EventTypeIcon/EventSaveHeartButton rather than re-deriving the poster-
+// fallback or save-toggle logic. Same click-guarded isNavigating/disabled/
+// onOpen shape as EventCard above, so a parent page can drive both with
+// one navigatingId state if it ever needs to mix layouts.
+export function EventRow({
+  event,
+  isNavigating,
+  disabled,
+  onOpen,
+  onSaveToggled,
+}: {
+  event: EventItem
+  isNavigating: boolean
+  disabled: boolean
+  onOpen: () => void
+  onSaveToggled?: (saved: boolean) => void
+}) {
+  const { t: tr } = useLocale()
+  const typeKey = (event.type in tr.eventTypes ? event.type : "OPEN_MIC") as keyof typeof tr.eventTypes
+  const typeLabel = tr.eventTypes[typeKey]
+  const priceLabel = event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      aria-busy={isNavigating}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "stretch",
+        gap: "14px",
+        overflow: "hidden",
+        background: "var(--afa-surface-raised)",
+        border: "1px solid rgba(245,245,240,0.08)",
+        borderRadius: "12px",
+        padding: "10px",
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled && !isNavigating ? 0.5 : 1,
+        transition: "opacity 0.15s ease",
+      }}
+    >
+      {isNavigating && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-amber)", animation: "afa-spin 0.7s linear infinite" }} />
+        </div>
+      )}
+
+      <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "8px" }}>
+        <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "2px 0" }}>
+        <div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
+            {typeLabel}
+          </div>
+          <h3 style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {event.title}
+          </h3>
+          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "rgba(245,245,240,0.55)" }}>
+            <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}, {event.startTime}
+              {event.venue && ` · ${event.venue.city}`}
+            </span>
+          </div>
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.45)" }}>
+          {priceLabel}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+        <EventSaveHeartButton eventId={event.id} size="row" onToggled={onSaveToggled} />
       </div>
     </div>
   )
