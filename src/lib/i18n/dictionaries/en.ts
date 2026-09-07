@@ -124,6 +124,12 @@ const en = {
     performingCount: "{n} performing",
     freeBadge: "FREE",
     leftSuffix: " left",
+    // GEN-2609-012 - mobile Discover carousel-row headings + the entry
+    // point back into the existing filtered grid/list view.
+    discoverTonightHeading: "Tonight",
+    discoverTonightInCityHeading: "Tonight in {city}",
+    discoverWeekendHeading: "This Weekend",
+    discoverSeeAllEvents: "See all events",
   },
   venuesPage: {
     eyebrowDirectory: "Directory · {count} spaces",

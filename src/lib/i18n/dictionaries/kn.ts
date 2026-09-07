@@ -125,6 +125,10 @@ const kn: Dictionary = {
     performingCount: "{n} ಮಂದಿ ಪ್ರದರ್ಶನ ನೀಡುತ್ತಿದ್ದಾರೆ",
     freeBadge: "ಉಚಿತ",
     leftSuffix: " ಬಾಕಿ",
+    discoverTonightHeading: "ಇಂದು ರಾತ್ರಿ",
+    discoverTonightInCityHeading: "{city}ನಲ್ಲಿ ಇಂದು ರಾತ್ರಿ",
+    discoverWeekendHeading: "ಈ ವಾರಾಂತ್ಯ",
+    discoverSeeAllEvents: "ಎಲ್ಲಾ ಈವೆಂಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
   },
   venuesPage: {
     eyebrowDirectory: "ಡೈರೆಕ್ಟರಿ · {count} ಸ್ಥಳಗಳು",

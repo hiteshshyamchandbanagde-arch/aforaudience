@@ -125,6 +125,10 @@ const ta: Dictionary = {
     performingCount: "{n} பேர் நிகழ்த்துகிறார்கள்",
     freeBadge: "இலவசம்",
     leftSuffix: " மீதம்",
+    discoverTonightHeading: "இன்றிரவு",
+    discoverTonightInCityHeading: "{city}இல் இன்றிரவு",
+    discoverWeekendHeading: "இந்த வார இறுதியில்",
+    discoverSeeAllEvents: "அனைத்து நிகழ்வுகளையும் காண்க",
   },
   venuesPage: {
     eyebrowDirectory: "அடைவு · {count} இடங்கள்",

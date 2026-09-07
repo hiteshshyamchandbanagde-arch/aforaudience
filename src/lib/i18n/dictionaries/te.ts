@@ -125,6 +125,10 @@ const te: Dictionary = {
     performingCount: "{n} మంది ప్రదర్శిస్తున్నారు",
     freeBadge: "ఉచితం",
     leftSuffix: " మిగిలాయి",
+    discoverTonightHeading: "ఈ రాత్రి",
+    discoverTonightInCityHeading: "{city}లో ఈ రాత్రి",
+    discoverWeekendHeading: "ఈ వీకెండ్",
+    discoverSeeAllEvents: "అన్ని ఈవెంట్‌లు చూడండి",
   },
   venuesPage: {
     eyebrowDirectory: "డైరెక్టరీ · {count} ప్రదేశాలు",

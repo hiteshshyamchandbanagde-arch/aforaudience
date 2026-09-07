@@ -129,6 +129,10 @@ const es: Dictionary = {
     performingCount: "{n} actuaciones",
     freeBadge: "GRATIS",
     leftSuffix: " restantes",
+    discoverTonightHeading: "Esta noche",
+    discoverTonightInCityHeading: "Esta noche en {city}",
+    discoverWeekendHeading: "Este fin de semana",
+    discoverSeeAllEvents: "Ver todos los eventos",
   },
   venuesPage: {
     eyebrowDirectory: "Directorio · {count} espacios",

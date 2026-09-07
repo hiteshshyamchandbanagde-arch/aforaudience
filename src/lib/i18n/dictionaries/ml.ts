@@ -125,6 +125,10 @@ const ml: Dictionary = {
     performingCount: "{n} പേർ അവതരിപ്പിക്കുന്നു",
     freeBadge: "സൗജന്യം",
     leftSuffix: " ബാക്കി",
+    discoverTonightHeading: "ഇന്ന് രാത്രി",
+    discoverTonightInCityHeading: "{city}ൽ ഇന്ന് രാത്രി",
+    discoverWeekendHeading: "ഈ വാരാന്ത്യം",
+    discoverSeeAllEvents: "എല്ലാ ഇവന്റുകളും കാണുക",
   },
   venuesPage: {
     eyebrowDirectory: "ഡയറക്ടറി · {count} സ്ഥലങ്ങൾ",

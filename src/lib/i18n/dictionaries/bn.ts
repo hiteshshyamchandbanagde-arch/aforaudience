@@ -125,6 +125,10 @@ const bn: Dictionary = {
     performingCount: "{n} জন পারফর্ম করছেন",
     freeBadge: "বিনামূল্যে",
     leftSuffix: " বাকি",
+    discoverTonightHeading: "আজ রাতে",
+    discoverTonightInCityHeading: "{city}-এ আজ রাতে",
+    discoverWeekendHeading: "এই সপ্তাহান্তে",
+    discoverSeeAllEvents: "সব ইভেন্ট দেখুন",
   },
   venuesPage: {
     eyebrowDirectory: "ডিরেক্টরি · {count} স্থান",

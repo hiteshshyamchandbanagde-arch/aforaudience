@@ -134,6 +134,10 @@ const de: Dictionary = {
     performingCount: "{n} Auftritte",
     freeBadge: "GRATIS",
     leftSuffix: " übrig",
+    discoverTonightHeading: "Heute Abend",
+    discoverTonightInCityHeading: "Heute Abend in {city}",
+    discoverWeekendHeading: "Dieses Wochenende",
+    discoverSeeAllEvents: "Alle Events ansehen",
   },
   venuesPage: {
     eyebrowDirectory: "Verzeichnis · {count} Orte",
