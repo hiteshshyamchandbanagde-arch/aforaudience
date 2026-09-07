@@ -88,6 +88,19 @@ export function EventTypeIcon({ type, className, style }: IconProps & { type: st
 
 /* ---- UI / metadata icons (export icons.tsx line 75-217) ---- */
 
+// Mobile Redesign Phase 4b (GEN-2609-007) - Saved/heart toggle. No
+// existing heart-shaped icon anywhere in this codebase's icon sets
+// (checked VenueIcons/ArtistIcons/OrganiserIcons first) - path adapted
+// from the Figma v2 export's icons.tsx HeartIcon into this file's own
+// stroke convention, with a filled variant for the "already saved" state.
+export function HeartIcon({ className, style, filled }: IconProps & { filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} className={className} style={style} aria-hidden="true">
+      <path d="M12 20s-7-4.35-9.5-8.5C.8 8.6 2.3 5.5 5.4 5.5c1.9 0 3.1 1.1 3.9 2.2.8-1.1 2-2.2 3.9-2.2 3.1 0 4.6 3.1 2.9 6C19 15.65 12 20 12 20Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function CalendarIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
