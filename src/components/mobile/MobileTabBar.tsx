@@ -24,16 +24,19 @@ import { DiscoverTabIcon, TicketsTabIcon, SavedTabIcon, ProfileTabIcon } from '@
 // DashboardShell.tsx's own mobile/desktop split (the only other
 // `lg:hidden` usage in this codebase), not a new breakpoint convention.
 //
-// /tickets and /profile are a special case: DashboardShell already wraps
-// them (and only them, outside /dashboard/*) with its own mobile bottom
-// bar for signed-in users - see DashboardShell.tsx's topNav. Showing
-// this bar there too would stack two fixed bottom bars. Decision (Hitesh,
-// GEN-2609-003 build session, after reviewing 4 Figma mockups of the
-// options): this bar shows on those 2 routes for guests only; signed-in
-// users keep DashboardShell's existing bar untouched. /events and /saved
-// never hit DashboardShell, so they always show this bar.
-const GLOBAL_TAB_ROOTS = ['/events', '/saved'] as const
-const GUEST_ONLY_TAB_ROOTS = ['/tickets', '/profile'] as const
+// GEN-2609-013 (7 Sep) - this bar now shows on all 4 tab roots for
+// everyone, signed in or not. /tickets and /profile used to be
+// guest-only: DashboardShell wraps those two routes (and only those two,
+// outside /dashboard/*) with its own mobile bottom bar for signed-in
+// users, and showing both at once would stack two fixed bottom bars. That
+// guest-only carve-out was flagged open since GEN-2609-003 and never
+// signed off - Hitesh + chat closed it 7 Sep in favor of one consistent
+// bar everywhere. DashboardShell.tsx now suppresses its own bar on
+// exactly these 2 routes instead (see that file's own comment), and
+// profile/page.tsx recovers the Dashboard/Messages links signed-in users
+// would otherwise lose from DashboardShell's bar. /events and /saved
+// never hit DashboardShell, so they were never part of this exception.
+const GLOBAL_TAB_ROOTS = ['/events', '/tickets', '/saved', '/profile'] as const
 
 type TabDef = {
   href: string
@@ -43,7 +46,7 @@ type TabDef = {
 
 export default function MobileTabBar() {
   const rawPathname = usePathname()
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const { t } = useLocale()
 
   // next.config.ts sets trailingSlash: true, so usePathname() returns
@@ -55,10 +58,8 @@ export default function MobileTabBar() {
   // approach needs it explicit.
   const pathname = rawPathname && rawPathname !== '/' ? rawPathname.replace(/\/$/, '') : rawPathname
 
-  const isGuestOnlyRoot = (GUEST_ONLY_TAB_ROOTS as readonly string[]).includes(pathname ?? '')
   const isGlobalRoot = (GLOBAL_TAB_ROOTS as readonly string[]).includes(pathname ?? '')
-  const isSignedIn = status === 'authenticated' && !!session
-  const shouldRender = status !== 'loading' && (isGlobalRoot || (isGuestOnlyRoot && !isSignedIn))
+  const shouldRender = status !== 'loading' && isGlobalRoot
 
   // Reserves body scroll space so this bar's fixed position never covers
   // page content - see the `.afa-mobile-tab-bar-active` rule in

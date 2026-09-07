@@ -167,7 +167,10 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
 // Context) - these are cheap one-shot status calls, not polling loops, so
 // the small duplication is a fair trade against changing SiteNav's
 // already-verified fetch logic.
-function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number } {
+// GEN-2609-013 - exported so profile/page.tsx's mobile "Quick links"
+// group can recover the same Dashboard/Messages badge counts the bar
+// below used to show on /profile, without recomputing them separately.
+export function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number } {
   const { data: session } = useSession()
   const user = session?.user as { email?: string | null; role?: string } | undefined
 
@@ -274,7 +277,10 @@ function resolveActiveId(pathname: string | null, entries: NavEntry[]): string |
   return bestId
 }
 
-function getShellDashboardLink(role?: string): string {
+// GEN-2609-013 - exported so profile/page.tsx's mobile "Quick links"
+// group can route to the same role-specific dashboard this shell's own
+// topNav does, instead of hardcoding a route.
+export function getShellDashboardLink(role?: string): string {
   switch (role) {
     case 'VENUE_OWNER':
       return '/dashboard/venue'
@@ -384,6 +390,20 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const activeId = resolveActiveId(pathname, allEntries)
   const isActive = (id: string) => id === activeId
 
+  // GEN-2609-013 - /tickets and /profile now get MobileTabBar.tsx's
+  // unified bar for every user, signed in or not (that file's own
+  // comment has the full decision history). Rendering this component's
+  // own mobile bottom bar there too would stack two fixed bottom bars,
+  // so it's suppressed on exactly these 2 routes - every other
+  // /dashboard/* route is untouched. Normalized the same way
+  // MobileTabBar.tsx normalizes its own pathname (next.config.ts's
+  // trailingSlash: true means usePathname() returns "/tickets/", not
+  // "/tickets") rather than reusing the bare `pathname` above, which only
+  // needs prefix-matching for resolveActiveId and tolerates the trailing
+  // slash there as a side effect, not by an explicit check.
+  const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
+  const hideMobileBarForUnifiedTabBar = normalizedPathname === '/tickets' || normalizedPathname === '/profile'
+
   return (
     <div className="lg:flex" style={{ background: 'var(--afa-surface-page)' }}>
       <aside
@@ -402,55 +422,71 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0 pb-20 lg:pb-0">{children}</div>
+      {/* GEN-2609-013 - this bottom padding exists to reserve scroll space
+          for this component's own mobile bar below. On /tickets/profile
+          that bar no longer renders - MobileTabBar.tsx's unified bar
+          reserves its own space via the `.afa-mobile-tab-bar-active` body
+          class instead (see that file), so adding pb-20 here too would
+          double the reserved space into a visible empty gap. */}
+      <div className={`flex-1 min-w-0 lg:pb-0${hideMobileBarForUnifiedTabBar ? '' : ' pb-20'}`}>{children}</div>
 
       {/* Mobile bottom tab bar. paddingRight reserves space for
           SupportWidget's floating chat bubble (fixed, right:20/bottom:20,
           56px, zIndex 45 - above this bar's zIndex 40) so the last tab
-          isn't rendered underneath it and doesn't eat its taps. */}
-      <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 py-2"
-        style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingRight: 88, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
-      >
-        {topNav.map((item) => {
-          const active = isActive(`top:${item.href}`)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
+          isn't rendered underneath it and doesn't eat its taps.
+          GEN-2609-013 - suppressed on /tickets and /profile now that
+          MobileTabBar.tsx covers those routes for everyone; see
+          hideMobileBarForUnifiedTabBar above. Note this also removes the
+          "More" role-sections drawer trigger below from mobile on those 2
+          routes for held-role users, since that trigger lives inside this
+          same bar - the brief didn't ask for a replacement entry point
+          for that, so none was added; flagged in docs/design.md rather
+          than guessed at. */}
+      {!hideMobileBarForUnifiedTabBar && (
+        <nav
+          className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 py-2"
+          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingRight: 88, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
+        >
+          {topNav.map((item) => {
+            const active = isActive(`top:${item.href}`)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
+                style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.7 }}
+              >
+                <span style={{ position: 'relative', display: 'inline-flex' }}>
+                  <Icon name={item.icon} size={20} />
+                  {/* was `item.badge && item.badge > 0 &&` - the classic JSX
+                      footgun where a falsy-but-not-nullish 0 still renders as
+                      a literal "0" text node next to the icon, visible for
+                      every user whose count is genuinely zero. */}
+                  {!!item.badge && item.badge > 0 && (
+                    <span
+                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 10, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </span>
+                <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{item.label}</span>
+              </Link>
+            )
+          })}
+          {roleSections.length > 0 && (
+            <button
+              onClick={() => setDrawerOpen(true)}
+              aria-label="More"
               className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
-              style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.7 }}
+              style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
-              <span style={{ position: 'relative', display: 'inline-flex' }}>
-                <Icon name={item.icon} size={20} />
-                {/* was `item.badge && item.badge > 0 &&` - the classic JSX
-                    footgun where a falsy-but-not-nullish 0 still renders as
-                    a literal "0" text node next to the icon, visible for
-                    every user whose count is genuinely zero. */}
-                {!!item.badge && item.badge > 0 && (
-                  <span
-                    style={{ position: 'absolute', top: -4, right: -6, fontSize: 10, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </span>
-              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{item.label}</span>
-            </Link>
-          )
-        })}
-        {roleSections.length > 0 && (
-          <button
-            onClick={() => setDrawerOpen(true)}
-            aria-label="More"
-            className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
-            style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
-          >
-            <Icon name="more" size={20} />
-            <span style={{ fontSize: 10 }}>More</span>
-          </button>
-        )}
-      </nav>
+              <Icon name="more" size={20} />
+              <span style={{ fontSize: 10 }}>More</span>
+            </button>
+          )}
+        </nav>
+      )}
 
       {/* Mobile "More" drawer - role sections only, matches desktop grouping */}
       {drawerOpen && (

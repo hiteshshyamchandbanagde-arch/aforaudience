@@ -341,6 +341,7 @@ const hi: Dictionary = {
   profilePage: {
     fallbackTitle: "आपकी प्रोफ़ाइल",
     loginCodeLabel: "आपका लॉगिन कोड: ",
+    quickLinksLabel: "क्विक लिंक",
     savingEllipsis: "सेव हो रहा है…",
     displayNameHeading: "प्रदर्शन नाम",
     displayNameDescPrefix: "आपके टिकट और ईमेल पर यही दिखेगा। आपका लॉगिन यूज़रनेम ",

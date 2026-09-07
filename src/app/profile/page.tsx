@@ -6,7 +6,7 @@ import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
-import DashboardShell from '@/components/DashboardShell'
+import DashboardShell, { getShellDashboardLink, useBadgeCounts } from '@/components/DashboardShell'
 import GenrePicker from '@/components/GenrePicker'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { FeeSheet } from '@/components/FeeSheet'
@@ -61,6 +61,28 @@ function ChevronRightIcon({ style }: { style?: React.CSSProperties }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
       <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+// GEN-2609-013 - same shapes as DashboardShell.tsx's internal Icon
+// component's 'dashboard'/'message' cases, redrawn at this file's own
+// strokeWidth (1.4, matching the icons above) rather than importing that
+// non-exported component - same "no dedicated shared icon file" call as
+// every other icon in this block.
+function DashboardIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function MessageIcon({ style }: { style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -169,6 +191,14 @@ function ProfileContent() {
   const [feeSheetOpen, setFeeSheetOpen] = useState(false)
   const [audienceBookingFee, setAudienceBookingFee] = useState(0)
   const isAudience = (session?.user as any)?.role === 'AUDIENCE'
+
+  // GEN-2609-013 - Dashboard/Messages recovery for the mobile "Quick
+  // links" group below, now that MobileTabBar.tsx's unified bar (not
+  // DashboardShell's own bar) covers this route. Same resolver + hook
+  // DashboardShell.tsx's own topNav uses, not reimplemented - see that
+  // file's exported getShellDashboardLink/useBadgeCounts.
+  const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
+  const { pendingCount, unreadCount } = useBadgeCounts()
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
@@ -577,6 +607,51 @@ function ProfileContent() {
               box-shadow: 0 0 0 3px rgba(201,151,58,0.08);
             }
           `}</style>
+
+          {/* GEN-2609-013 - mobile "Quick links" to Dashboard/Messages,
+              recovering what DashboardShell.tsx's own mobile bottom bar
+              used to provide on this route before MobileTabBar.tsx's
+              unified bar replaced it here (see both files' own comments
+              on the 7 Sep decision). Deliberately NOT gated by isAudience
+              like the hub below: the tab-bar swap that created this gap
+              applies to every signed-in role that can reach /profile, not
+              just Audience, so Venue/Organiser/Artist users need it too
+              even though they don't get the rest of the Phase 4c hub.
+              Same row visual as that hub's own groups (icon, title,
+              trailing chevron), plus a badge pill matching
+              DashboardShell.tsx's SidebarLink badge treatment exactly
+              rather than inventing a new one. */}
+          <div className="lg:hidden" style={{ marginBottom: '18px' }}>
+            <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+              {tr.profilePage.quickLinksLabel}
+            </p>
+            <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              {[
+                { icon: <DashboardIcon style={{ width: 18, height: 18 }} />, title: tr.nav.dashboard, badge: pendingCount, href: dashboardHref },
+                { icon: <MessageIcon style={{ width: 18, height: 18 }} />, title: tr.nav.messages, badge: unreadCount, href: '/dashboard/messages' },
+              ].map((row, i) => (
+                <Link
+                  key={row.href}
+                  href={row.href}
+                  style={{
+                    display: 'flex', alignItems: 'center', width: '100%', gap: '12px', padding: '14px 16px',
+                    textDecoration: 'none',
+                    borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
+                    color: 'var(--afa-text-primary)',
+                  }}
+                >
+                  <span style={{ display: 'flex', flexShrink: 0, color: 'var(--afa-text-secondary)' }}>{row.icon}</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 600 }}>{row.title}</span>
+                  {!!row.badge && row.badge > 0 && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3, flexShrink: 0 }}>
+                      {row.badge}
+                    </span>
+                  )}
+                  <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                </Link>
+              ))}
+            </div>
+          </div>
 
           {/* Mobile Redesign Phase 4c (GEN-2609-008) - mobile nav-hub, per
               the Figma v2 export's Profile.tsx, scoped to the Audience

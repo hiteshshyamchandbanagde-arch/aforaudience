@@ -342,6 +342,7 @@ const bn: Dictionary = {
   profilePage: {
     fallbackTitle: "আপনার প্রোফাইল",
     loginCodeLabel: "আপনার লগইন কোড: ",
+    quickLinksLabel: "দ্রুত লিঙ্ক",
     savingEllipsis: "সংরক্ষণ করা হচ্ছে…",
     displayNameHeading: "ডিসপ্লে নাম",
     displayNameDescPrefix: "এটি আপনার টিকিট এবং ইমেইলে প্রদর্শিত হয়। আপনার লগইন ইউজারনেম ",

@@ -351,6 +351,7 @@ const de: Dictionary = {
   profilePage: {
     fallbackTitle: "Dein Profil",
     loginCodeLabel: "Dein Login-Code: ",
+    quickLinksLabel: "Schnellzugriff",
     savingEllipsis: "Wird gespeichert…",
     displayNameHeading: "Anzeigename",
     displayNameDescPrefix: "Erscheint auf deinen Tickets und in E-Mails. Dein Login-Benutzername ",

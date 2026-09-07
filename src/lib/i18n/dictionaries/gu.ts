@@ -342,6 +342,7 @@ const gu: Dictionary = {
   profilePage: {
     fallbackTitle: "તમારી પ્રોફાઇલ",
     loginCodeLabel: "તમારો લોગિન કોડ: ",
+    quickLinksLabel: "ઝડપી લિંક્સ",
     savingEllipsis: "સાચવી રહ્યું છે…",
     displayNameHeading: "ડિસ્પ્લે નામ",
     displayNameDescPrefix: "તમારી ટિકિટો અને ઇમેઇલમાં આ દેખાય છે. તમારું લોગિન યુઝરનેમ ",
