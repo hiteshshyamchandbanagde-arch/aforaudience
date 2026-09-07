@@ -342,6 +342,7 @@ const kn: Dictionary = {
   profilePage: {
     fallbackTitle: "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್",
     loginCodeLabel: "ನಿಮ್ಮ ಲಾಗಿನ್ ಕೋಡ್: ",
+    quickLinksLabel: "ತ್ವರಿತ ಲಿಂಕ್‌ಗಳು",
     savingEllipsis: "ಉಳಿಸುತ್ತಿದೆ…",
     displayNameHeading: "ಪ್ರದರ್ಶನ ಹೆಸರು",
     displayNameDescPrefix: "ನಿಮ್ಮ ಟಿಕೆಟ್‌ಗಳು ಮತ್ತು ಇಮೇಲ್‌ಗಳಲ್ಲಿ ಇದು ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ. ನಿಮ್ಮ ಲಾಗಿನ್ ಬಳಕೆದಾರಹೆಸರು ",

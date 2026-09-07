@@ -342,6 +342,7 @@ const te: Dictionary = {
   profilePage: {
     fallbackTitle: "మీ ప్రొఫైల్",
     loginCodeLabel: "మీ లాగిన్ కోడ్: ",
+    quickLinksLabel: "త్వరిత లింకులు",
     savingEllipsis: "సేవ్ అవుతోంది…",
     displayNameHeading: "ప్రదర్శన పేరు",
     displayNameDescPrefix: "మీ టికెట్లు మరియు ఇమెయిల్‌లలో ఇది కనిపిస్తుంది. మీ లాగిన్ యూజర్‌నేమ్ ",

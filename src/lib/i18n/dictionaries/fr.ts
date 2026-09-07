@@ -347,6 +347,7 @@ const fr: Dictionary = {
   profilePage: {
     fallbackTitle: "Votre profil",
     loginCodeLabel: "Votre code de connexion : ",
+    quickLinksLabel: "Liens rapides",
     savingEllipsis: "Enregistrement…",
     displayNameHeading: "Nom d'affichage",
     displayNameDescPrefix: "Apparaît sur vos billets et e-mails. Votre nom d'utilisateur de connexion ",

@@ -346,6 +346,7 @@ const es: Dictionary = {
   profilePage: {
     fallbackTitle: "Tu perfil",
     loginCodeLabel: "Tu código de inicio de sesión: ",
+    quickLinksLabel: "Enlaces rápidos",
     savingEllipsis: "Guardando…",
     displayNameHeading: "Nombre visible",
     displayNameDescPrefix: "Aparece en tus entradas y correos electrónicos. Tu nombre de usuario de inicio de sesión ",

@@ -342,6 +342,7 @@ const ml: Dictionary = {
   profilePage: {
     fallbackTitle: "നിങ്ങളുടെ പ്രൊഫൈൽ",
     loginCodeLabel: "നിങ്ങളുടെ ലോഗിൻ കോഡ്: ",
+    quickLinksLabel: "ദ്രുത ലിങ്കുകൾ",
     savingEllipsis: "സേവ് ചെയ്യുന്നു…",
     displayNameHeading: "ഡിസ്പ്ലേ പേര്",
     displayNameDescPrefix: "നിങ്ങളുടെ ടിക്കറ്റുകളിലും ഇമെയിലുകളിലും ഇത് ദൃശ്യമാകും. നിങ്ങളുടെ ലോഗിൻ യൂസർനെയിം ",

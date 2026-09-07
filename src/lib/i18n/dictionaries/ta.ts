@@ -342,6 +342,7 @@ const ta: Dictionary = {
   profilePage: {
     fallbackTitle: "உங்கள் சுயவிவரம்",
     loginCodeLabel: "உங்கள் உள்நுழைவு குறியீடு: ",
+    quickLinksLabel: "விரைவு இணைப்புகள்",
     savingEllipsis: "சேமிக்கிறது…",
     displayNameHeading: "காட்சி பெயர்",
     displayNameDescPrefix: "உங்கள் டிக்கெட்டுகள் மற்றும் மின்னஞ்சல்களில் இது தோன்றும். உங்கள் உள்நுழைவு பயனர்பெயர் ",

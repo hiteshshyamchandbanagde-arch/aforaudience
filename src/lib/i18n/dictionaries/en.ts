@@ -364,6 +364,8 @@ const en = {
   profilePage: {
     fallbackTitle: "Your Profile",
     loginCodeLabel: "Your login code: ",
+    // GEN-2609-013 - mobile "Quick links" group heading (Dashboard/Messages).
+    quickLinksLabel: "Quick links",
     savingEllipsis: "Saving…",
     displayNameHeading: "Display name",
     displayNameDescPrefix: "What appears on your tickets and emails. Your login username ",
