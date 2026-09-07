@@ -1465,6 +1465,28 @@ Export reviewed ("AFA Audience Dashboard Shell" round, `Design_AFA_Dashboard_She
 
 ---
 
+## AFA Mobile v2 — Autonomous run, Phase 4a: My Tickets (6 Sep 2026, Hitesh unavailable ~6h)
+
+**Context**: GEN-2609-005 (Phase 3) merged and live on `qa` at `56ff3b7` before this run started. Running per Hitesh's autonomous-build brief — every ambiguity pre-resolved, conservative-and-reversible default for anything new, stop only for schema changes beyond the specified one / payment-logic changes / prod-adjacent config. Nothing here touches payment logic or schema.
+
+**Found before building**: same pattern as Checkout in Phase 3 - the Figma mock's `Tickets.tsx` (binary upcoming/used split, no cancel/refund, no companion tags, no PDF download, a decorative non-functional "Transfer or refund a ticket" row) is far thinner than the real `/tickets` page (date-sectioned today/weekend/upcoming/past, 5 real booking statuses, pending-companion-tag inbox, accepted-guest cards, pay-now/cancel-with-refund-preview, PDF download, message-organiser). Treated as reconcile-in-place again: ported the mock's poster-card + QR-stub *presentation* onto the real page's existing data/logic, kept every real status/action, and did **not** port the mock's non-functional "Transfer or refund" row — no such feature exists anywhere in this codebase, and wiring a button that does nothing would be worse than the real per-card Cancel/refund-preview that already works. Flagging this decision per the brief's "document any judgment call" instruction, not because it seemed risky - straightforward inline judgment call, listed here for visibility on return.
+
+**QR code**: the mock uses a decorative `QrIcon` glyph. Checked `src/lib/ticket-pdf.ts` first - the real PDF ticket already generates a genuine scannable QR encoding the raw booking ID (`QRCode.toBuffer(t.bookingId, ...)`, comment there: "not signed, not tokenized... a check-in scanner can trust it as-is"). A decorative lookalike icon on the mobile card would silently fail if anyone tried to actually scan it at a door, so built a real one instead (`qrcode`'s `toDataURL`, client-side, same encoded value) - `qrcode` and its `@types` were already project dependencies, no new package added.
+
+**Data**: `/api/bookings/my`'s Prisma query already does a full-scalar `include` on `event` (not a narrowed `select`), so `posterImage`, `type`, and the booking's own `ticketCode` were already present in the JSON response - they just had no field in the hand-typed client-side `BookingItem` interface. Widened the interface to expose them; zero API or schema changes.
+
+**Shared-component fix found along the way**: reusing `EventCard.tsx`'s `EventPoster` for the poster header surfaced a real layout bug - `IllustratedEventFallback`'s own centered "No poster · {type}" caption collided with this card's bottom overlay once a 2-line-clamped title pushed the overlay taller. `EventPoster` didn't expose the `hideCaption` prop that `IllustratedEventFallback` already supports (used by the homepage bento tile for the identical redundancy reason). Threaded it through as a new optional prop, default `false` - every existing `EventPoster` caller (Discover's `EventCard`) is unaffected; only this ticket card opts in, since it's the only caller whose own overlay already repeats the type label.
+
+**Click-guard**: added the same `navigatingId` + `useTransition` pattern already established in `src/app/(public)/events/page.tsx` - full ticket card is now a clickable `role="link"` to the event page, action buttons underneath call `stopPropagation` so Cancel/Pay-now/Download/Message clicks don't also trigger card navigation.
+
+**i18n gap, not guessed**: "Scan at door"/"Scanned" have no dictionary key. Same call as `MobileTabBar`'s Discover/Saved labels (BUG-2609-006) - plain English literal with a comment, not an invented translation key.
+
+**Verification**: `tsc --noEmit` clean project-wide. Network-mocked Playwright pass (mocked `/api/auth/session`, `/api/bookings/my`, `/api/companions/mine`) against 3 fixture bookings - CONFIRMED/upcoming (QR "scan at door"), PENDING (no QR, Pay now/Cancel), CONFIRMED/past+checked-in (dimmed, QR "scanned", no Cancel button since past). Caught and fixed the caption-overlap bug above via this pass before it shipped. No DB writes this time (pure network mocks, no Supabase fixture rows needed).
+
+**Merged as**: GEN-2609-006, PR #565.
+
+---
+
 ## AFA Mobile v2 — Autonomous run, Phase 4b: Saved / schema + UI (7 Sep 2026, Hitesh unavailable ~6h)
 
 **⚠️ Flagged for review first, not buried in the writeup below**: `prisma migrate dev`'s shadow-database rebuild is currently broken in this environment, unrelated to anything in this phase - it fails replaying the pre-existing `20260802080000_feedback_workflow_overhaul` migration from scratch (that migration's data-cast `UPDATE ... CASE status WHEN 'TESTED' THEN 'IN_TEST'` references an enum literal that migration's own earlier steps have already retired by the time a fresh shadow DB replays the full history in order). This is not something this session introduced or attempted to fix - see below for what was done instead. Worth a real look when there's time, since it means `prisma migrate dev`/`migrate deploy` can't be used for *any* future schema change until it's addressed, not just this one.
@@ -1489,4 +1511,4 @@ Export reviewed ("AFA Audience Dashboard Shell" round, `Design_AFA_Dashboard_She
 
 **Verification**: `tsc --noEmit` clean project-wide (including the Prisma Client regen needed after the schema change - `EVENT` didn't exist in the generated types until `prisma generate` ran, caught as real compile errors, not assumed). Real (not mocked) DB check via Supabase execute_sql against the QA project: inserted a `Follow` row with `targetType='EVENT'` matching `getFollowStatus`'s exact query shape, confirmed it reads back correctly, deleted it, confirmed the delete persisted - exercises the same insert/query/delete shape `toggleFollow`/`getFollowStatus` use, without needing a real authenticated browser session (this app's real-login-via-Playwright path is a documented recurring blocker elsewhere in this doc). Network-mocked Playwright screenshots: `/saved` populated (2 rows, filled hearts) and empty state, and Discover's heart toggling from outline to filled amber on click without navigating away (confirming the stopPropagation guards actually work, not just compile). No console errors beyond the same pre-existing `#intro-splash` hydration warning seen in every other page checked this way.
 
-**Branch**: `feat/gen-2609-007-saved` (placeholder ticket number, same reconciliation caveat as Phase 4a).
+**Merged as**: GEN-2609-007, PR #566.

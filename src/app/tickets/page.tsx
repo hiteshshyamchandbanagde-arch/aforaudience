@@ -2,14 +2,40 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
+import QRCode from 'qrcode'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import MessageButton from '@/components/MessageButton'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import { EventPoster } from '@/components/EventCard'
+import { CalendarIcon, PinIcon } from '@/components/icons/EventIcons'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+
+// Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
+// than the Figma mock's decorative QrIcon glyph. Encodes the raw
+// booking ID, same convention as the PDF ticket's QR (src/lib/ticket-
+// pdf.ts) - "not signed, not tokenized... a check-in scanner can trust
+// it as-is" per that file's own comment, so this is the exact value a
+// future scanner will expect, not a lookalike placeholder that would
+// fail if someone actually tried to scan a phone screen at a door.
+function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    QRCode.toDataURL(value, { margin: 0, width: size * 2 }).then((url) => {
+      if (!cancelled) setDataUrl(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [value, size])
+  if (!dataUrl) return <div style={{ width: size, height: size, background: 'rgba(245,245,240,0.08)', borderRadius: 6 }} />
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 4 }} />
+}
 
 // Companion Tagging Phase 1 (reputation epic §7) - tags where the
 // logged-in user is the one being tagged, awaiting their response.
@@ -54,6 +80,11 @@ interface BookingItem {
   // full-scalar `include`, not a `select`), just never surfaced in the
   // UI before. Used to split the Past section into attended/missed.
   checkedInAt: string | null
+  // Mobile Redesign Phase 4a (GEN-2609-006) - same story as checkedInAt
+  // above: /api/bookings/my's `include` already returns this scalar,
+  // it just had no client-side field to land in before this restyle's
+  // ticket-code caption needed it. No API or schema change.
+  ticketCode: string | null
   // Session 65 (Hitesh feedback) - who's tagged on this booking + their
   // response status, same PENDING/ACCEPTED/DECLINED shape as checkout.
   companionTags: {
@@ -66,6 +97,11 @@ interface BookingItem {
     title: string
     date: string
     startTime: string
+    // Mobile Redesign Phase 4a (GEN-2609-006) - both already present in
+    // /api/bookings/my's response (event is a full-scalar `include`),
+    // just newly typed/surfaced here for the restyled poster header.
+    type: string
+    posterImage: string | null
     venue: { name: string; city: string } | null
   }
 }
@@ -158,6 +194,20 @@ export default function MyTicketsPage() {
   const [pendingTags, setPendingTags] = useState<PendingCompanionTag[]>([])
   const [acceptedTags, setAcceptedTags] = useState<AcceptedCompanionTag[]>([])
   const [respondingTag, setRespondingTag] = useState<string | null>(null)
+  // Mobile Redesign Phase 4a (GEN-2609-006) - click-guarded card
+  // navigation, same pattern as EventCard/events/page.tsx's
+  // navigatingId + useTransition (see that file's comment: without the
+  // guard, a slow first render reads as "nothing happened" and repeat
+  // clicks fire duplicate navigations).
+  const [, startTransition] = useTransition()
+  const [navigatingId, setNavigatingId] = useState<string | null>(null)
+  const goToEvent = (id: string) => {
+    if (navigatingId) return
+    setNavigatingId(id)
+    startTransition(() => {
+      router.push(`/events/${id}`)
+    })
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -381,39 +431,139 @@ export default function MyTicketsPage() {
               const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
               const isLivePending = eff === 'PENDING'
               const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
+              // Mobile Redesign Phase 4a (GEN-2609-006) - poster header +
+              // QR stub per the Figma v2 export's Tickets.tsx. That mock
+              // only had a binary upcoming/used split; the real statuses
+              // above (PENDING/CONFIRMED/CANCELLED/REFUNDED/EXPIRED, plus
+              // attended-vs-missed) are richer and are kept as-is, just
+              // repositioned onto the poster overlay instead of dropped.
+              const typeKey = (b.event.type in tr.eventTypes ? b.event.type : 'OPEN_MIC') as keyof typeof tr.eventTypes
+              const typeLabel = tr.eventTypes[typeKey]
+              const isNavigating = navigatingId === b.event.id
+              // The QR only makes sense once a booking is actually
+              // CONFIRMED (matches the existing "Download ticket PDF"
+              // button's own gating below) - a PENDING/CANCELLED/
+              // REFUNDED booking has nothing to scan at a door.
+              const showQr = eff === 'CONFIRMED'
+              const used = showQr && !!b.checkedInAt
               return (
-                <div key={b.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(245,245,240,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${b.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
-                      {b.event.title}
-                    </Link>
-                    <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
-                        {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
-                      </span>
-                      {showAttendancePill && (
-                        <span style={{
-                          fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
-                          background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(245,245,240,0.08)',
-                          color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)',
-                        }}>
-                          {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
+                <div
+                  key={b.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-busy={isNavigating}
+                  onClick={() => goToEvent(b.event.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      goToEvent(b.event.id)
+                    }
+                  }}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: 'var(--afa-surface-raised)',
+                    borderRadius: '12px',
+                    marginBottom: '14px',
+                    border: '1px solid rgba(245,245,240,0.08)',
+                    cursor: navigatingId && !isNavigating ? 'default' : 'pointer',
+                    opacity: (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.7 : 1),
+                    transition: 'opacity 0.15s ease',
+                  }}
+                >
+                  {isNavigating && (
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'rgba(10,10,10,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '3px solid rgba(245,245,240,0.15)', borderTopColor: 'var(--afa-amber)', animation: 'afa-spin 0.7s linear infinite' }} />
+                    </div>
+                  )}
+
+                  <div style={{ position: 'relative', height: '132px', overflow: 'hidden' }}>
+                    <EventPoster posterImage={b.event.posterImage} title={b.event.title} type={b.event.type} typeLabel={typeLabel} hideCaption />
+                    <div
+                      style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.85) 100%)',
+                      }}
+                    />
+                    <div style={{ position: 'absolute', left: 14, right: 14, bottom: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                          {typeLabel}
+                        </div>
+                        <h3
+                          style={{
+                            marginTop: 2, fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: 'var(--afa-text-primary)',
+                            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                          }}
+                        >
+                          {b.event.title}
+                        </h3>
+                      </div>
+                      <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap', background: s.bg, color: s.color }}>
+                          {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
                         </span>
+                        {showAttendancePill && (
+                          <span style={{
+                            fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
+                            background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(245,245,240,0.08)',
+                            color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)',
+                          }}>
+                            {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                    <div style={{ flex: 1, minWidth: 0, padding: '16px 20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 6 }}>
+                        <CalendarIcon style={{ width: 14, height: 14, color: 'rgba(245,245,240,0.4)', flexShrink: 0 }} />
+                        <span>
+                          {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
+                        </span>
+                      </div>
+                      {b.event.venue && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 10 }}>
+                          <PinIcon style={{ width: 14, height: 14, color: 'rgba(245,245,240,0.4)', flexShrink: 0 }} />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.event.venue.name}, {b.event.venue.city}</span>
+                        </div>
                       )}
-                    </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+                        <span>
+                          {b.seatLabels && b.seatLabels.length > 0
+                            ? tr.ticketsPage.seatsListTemplate.replace('{labels}', b.seatLabels.join(', '))
+                            : Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}
+                          {b.ticketCode && <span style={{ opacity: 0.5 }}> · {b.ticketCode}</span>}
+                        </span>
+                        <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}</span>
+                      </div>
+                    </div>
+
+                    {showQr && (
+                      <div
+                        style={{
+                          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          width: 100, flexShrink: 0, padding: 12,
+                          borderLeft: '1px dashed rgba(245,245,240,0.15)', background: 'var(--afa-surface-inverse)',
+                        }}
+                      >
+                        <div style={{ padding: 4, borderRadius: 8, background: 'var(--afa-text-primary)' }}>
+                          <TicketQr value={b.id} size={56} />
+                        </div>
+                        {/* No existing i18n dictionary key for either state (same
+                            flagged gap as MobileTabBar's Discover/Saved labels,
+                            BUG-2609-006) - plain English rather than guessing a
+                            translation key that doesn't exist. */}
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
+                          {used ? 'Scanned' : 'Scan at door'}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 10px' }}>
-                    {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
-                    {b.event.venue && <> · {b.event.venue.name}, {b.event.venue.city}</>}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
-                    <span>
-                      {b.seatLabels && b.seatLabels.length > 0
-                        ? tr.ticketsPage.seatsListTemplate.replace('{labels}', b.seatLabels.join(', '))
-                        : Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}
-                    </span>
-                    <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}</span>
-                  </div>
+
+                  <div style={{ padding: '0 20px 16px' }} onClick={(e) => e.stopPropagation()}>
                   {b.companionTags && b.companionTags.length > 0 && (
                     <p style={{ fontSize: '12.5px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: '8px 0 0' }}>
                       {tr.ticketsPage.goingWith}{' '}
@@ -473,6 +623,7 @@ export default function MyTicketsPage() {
                         : tr.ticketsPage.cancelledNoRefund}
                     </p>
                   )}
+                  </div>
                 </div>
               )
   }
