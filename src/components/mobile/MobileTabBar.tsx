@@ -36,7 +36,15 @@ import { DiscoverTabIcon, TicketsTabIcon, SavedTabIcon, ProfileTabIcon } from '@
 // profile/page.tsx recovers the Dashboard/Messages links signed-in users
 // would otherwise lose from DashboardShell's bar. /events and /saved
 // never hit DashboardShell, so they were never part of this exception.
-const GLOBAL_TAB_ROOTS = ['/events', '/tickets', '/saved', '/profile'] as const
+//
+// GEN-2609-017 (8 Sep) - '/' added per Hitesh's explicit instruction:
+// homepage stays the default landing page on mobile (reverses
+// GEN-2609-014's same-day redirect-to-/events) and now carries this same
+// bar for nav consistency with the other 4 routes. None of the 4 tab
+// hrefs equal '/', so isActive below naturally leaves every tab
+// unhighlighted on the homepage - exactly the "no tab highlighted"
+// behavior Hitesh asked for, no extra logic needed.
+const GLOBAL_TAB_ROOTS = ['/', '/events', '/tickets', '/saved', '/profile'] as const
 
 type TabDef = {
   href: string

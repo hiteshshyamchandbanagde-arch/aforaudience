@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import HomeHeader from "@/components/HomeHeader";
 import Hero from "@/components/Hero";
 import FourRooms from "@/components/FourRooms";
@@ -115,26 +114,19 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
 
 export default function Home() {
   const { t: tr } = useLocale()
-  const router = useRouter()
 
-  // GEN-2609-014 (7 Sep decision) - Figma v2 has no separate marketing-
-  // homepage concept on mobile; every visit opens straight on the
-  // Discover carousel with the tab bar. Desktop keeps this bento-mosaic
-  // homepage (Website V1, already Figma-closed) untouched - this is a
-  // routing decision only, no new Figma needed since it just reuses the
-  // already-built /events carousel. `lg` (1024px) matches the same
-  // breakpoint MobileTabBar.tsx and DashboardShell.tsx already use for
-  // their own mobile/desktop split, not a new convention. Client-side
-  // viewport check (not UA sniffing) so desktop-UA crawlers/social-
-  // preview bots still render this page's SSR'd marketing HTML for SEO -
-  // accepted tradeoff is a brief flash of this homepage before redirect
-  // on real mobile browsers. router.replace (not push) so the flashed
-  // homepage doesn't sit in browser history between /events and back.
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      router.replace("/events")
-    }
-  }, [router])
+  // GEN-2609-017 (8 Sep, reverses GEN-2609-014 same-day): Hitesh's
+  // explicit instruction overrides the "no mobile homepage" reading of
+  // Figma v2 - homepage stays the default landing page on every
+  // viewport, in sync with desktop, with the same global tab bar other
+  // routes get (see MobileTabBar.tsx's GLOBAL_TAB_ROOTS - '/' added
+  // there, no tab highlighted since none of the 4 hrefs match). Tapping
+  // the AforAudience wordmark already links here (SiteNav.tsx / this
+  // page's own HomeHeader both href="/"), so no separate change needed
+  // for that part of the instruction. Flagged: this is a real nav
+  // decision made in chat rather than Figma Make first, per Hitesh's
+  // direct instruction - logged as an explicit exception, not a
+  // precedent for skipping Figma on future nav changes.
 
   // "Happening soon" bento mosaic (V2 spec) - top 4 upcoming events across
   // all cities. Same /api/events call the events listing page already
