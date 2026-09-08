@@ -30,18 +30,44 @@ type Props = {
   onChange: (seatIds: string[], amount: number) => void
 }
 
-const CANVAS_WIDTH = 900
-const CANVAS_HEIGHT = 560
-// Seat size as a fraction of the canvas, not a fixed pixel value - x/y
-// positions are already percentage-based (scale with the container), so
-// a fixed-px seat size stayed constant while spacing shrank at narrower
-// render widths (e.g. inside this sidebar panel), causing seats to
-// visually overlap. Expressing width/height as their own axis's
-// percentage of SEAT_SIZE/CANVAS_* keeps the seat square and in sync
-// with the container at any width - see SeatPicker overlap bug, 22 Jul.
+// Outer container's max-width cap only (desktop) - no longer doubles as
+// the coordinate-normalization base. See GEN-2609-015: a fixed 900x560
+// virtual canvas assumed every venue's seat data filled that space: a
+// small/tight layout (like Jaipur Mic Gala 100's) only occupied its
+// top-left ~20%, leaving the rest dead and shrinking real tap targets
+// down to a sliver. Seat positions are now normalized against each
+// level's own real coordinate bounding box (see contentBox below),
+// same technique already used by SeatLayoutPreview.tsx's minX/maxX/
+// minY/maxY (Organiser pricing screen) and the builder's own
+// contentBounds()/previewBounds() (src/app/dashboard/venue/[id]/seat-map)
+// - reused/adapted here rather than invented fresh.
+const MAX_CONTAINER_WIDTH = 900
+// Seat size in the same coordinate units the builder saves x/y in (its
+// default seatSpacingX/Y is 26/30 - see seat-map/page.tsx), not a fixed
+// pixel value - x/y positions are percentage-based (scale with the
+// container), so a fixed-px seat size stayed constant while spacing
+// shrank at narrower render widths (e.g. inside this sidebar panel),
+// causing seats to visually overlap. Expressing width/height as their
+// own axis's percentage of SEAT_SIZE/contentBox keeps the seat square
+// and in sync with the container at any width - see SeatPicker overlap
+// bug, 22 Jul.
 const SEAT_SIZE = 22
-const SEAT_WIDTH_PCT = (SEAT_SIZE / CANVAS_WIDTH) * 100
-const SEAT_HEIGHT_PCT = (SEAT_SIZE / CANVAS_HEIGHT) * 100
+// Padding (same coordinate units as seat x/y) around the real bounding
+// box of a level's seats, so seats/labels aren't flush against the
+// container edge. Extra clearance at the top specifically for the
+// "Stage" badge, which overlays the canvas rather than reserving its
+// own layout space - without it, a level whose seats start near y=0
+// (e.g. the Jaipur fixture) puts row 1 directly under the badge.
+const PAD_X = 50
+const PAD_TOP = 90
+const PAD_BOTTOM = 50
+// Safety clamp on the fitted container's aspect ratio - real
+// builder-generated grids land well inside this range (seatSpacingX/Y
+// defaults keep rows/columns roughly proportionate), but an extreme
+// single-row-of-many-seats or single-column layout could otherwise
+// stretch the container into an unusable sliver.
+const MIN_ASPECT = 0.35
+const MAX_ASPECT = 3
 
 // Pinch-to-zoom + pan (session 65, BUG-2608-030) - at high seat counts
 // (600 in the reported case) seats squeeze down to a handful of px on
@@ -221,6 +247,24 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
     price: levelSeats.find((s: SeatInfo) => s.tierLabel === zone)?.price ?? null,
   }))
 
+  // Real bounding box of this level's actual seat coordinates (GEN-2609-015)
+  // - same technique as SeatLayoutPreview's minX/maxX/minY/maxY, extended
+  // with fixed padding (see PAD_X/PAD_TOP/PAD_BOTTOM above) since this is
+  // the interactive canvas rather than a small fixed-size thumbnail.
+  // Recomputed per level, same reasoning as zoneOrder above - each
+  // level's coordinates are independently generated near their own origin.
+  const xs = levelSeats.map((s: SeatInfo) => s.x)
+  const ys = levelSeats.map((s: SeatInfo) => s.y)
+  const minX = Math.min(...xs)
+  const maxX = Math.max(...xs)
+  const minY = Math.min(...ys)
+  const maxY = Math.max(...ys)
+  const contentWidth = maxX - minX + PAD_X * 2
+  const contentHeight = maxY - minY + PAD_TOP + PAD_BOTTOM
+  const aspect = Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, contentWidth / contentHeight))
+  const seatWidthPct = (SEAT_SIZE / contentWidth) * 100
+  const seatHeightPct = (SEAT_SIZE / contentHeight) * 100
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
@@ -260,7 +304,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
       {zonePrices.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
           {zonePrices.map(({ zone, price }) => (
-            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: '12px', color: 'var(--afa-text-primary)', background: 'var(--afa-cream-tint-1)', padding: '4px 10px', borderRadius: '999px' }}>
+            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: '12px', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: '4px 10px', borderRadius: '999px' }}>
               <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: '6px' }} />
               {zone} — {price ? `₹${price}` : 'not on sale'}
             </span>
@@ -276,9 +320,9 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
               onClick={() => setActiveLevel(lvl)}
               style={{
                 fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
-                border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.2)',
-                background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
-                color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-text-primary)',
+                border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.2)',
+                background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
+                color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
               }}
             >
               {lvl || 'Main'}
@@ -295,10 +339,10 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: `${CANVAS_WIDTH}px`,
-          aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`,
-          background: 'var(--afa-cream-tint-1)',
-          border: '1px solid rgba(14,12,10,0.15)',
+          maxWidth: `${MAX_CONTAINER_WIDTH}px`,
+          aspectRatio: `${aspect}`,
+          background: 'var(--afa-surface-raised)',
+          border: '1px solid rgba(245,245,240,0.15)',
           borderRadius: '10px',
           overflow: 'hidden',
           containerType: 'inline-size',
@@ -323,7 +367,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
             width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px',
-            background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '10px', fontWeight: 700,
+            background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '10px', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
           }}
         >
@@ -347,7 +391,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             s.status === 'taken'
               ? 'var(--afa-ink-a13)'
               : isSelected
-              ? 'var(--afa-terracotta)'
+              ? 'var(--afa-fill-solid)'
               : s.status === 'priceUnset'
               ? 'var(--afa-ink-a8)'
               : colorForZone(s.tierLabel, zoneOrder)
@@ -370,18 +414,19 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
               }
               style={{
                 position: 'absolute',
-                left: `${(s.x / CANVAS_WIDTH) * 100}%`,
-                top: `${(s.y / CANVAS_HEIGHT) * 100}%`,
-                width: `${SEAT_WIDTH_PCT}%`,
-                height: `${SEAT_HEIGHT_PCT}%`,
-                marginLeft: `-${SEAT_WIDTH_PCT / 2}%`,
+                left: `${((s.x - minX + PAD_X) / contentWidth) * 100}%`,
+                top: `${((s.y - minY + PAD_TOP) / contentHeight) * 100}%`,
+                width: `${seatWidthPct}%`,
+                height: `${seatHeightPct}%`,
+                marginLeft: `-${seatWidthPct / 2}%`,
                 // CSS quirk: percentage margin-top/-bottom resolve against the
                 // containing block's WIDTH, not its height, even though this is
-                // a vertical offset. Since the seat is square (width_px ===
-                // height_px by construction above), the width-based percentage
-                // here is the correct value - using SEAT_HEIGHT_PCT would be
-                // computed against the wrong axis and mis-center vertically.
-                marginTop: `-${SEAT_WIDTH_PCT / 2}%`,
+                // a vertical offset. The seat is square in real (px) terms
+                // when the container's aspectRatio equals contentWidth /
+                // contentHeight exactly, which is true unless MIN_ASPECT/
+                // MAX_ASPECT clamped it - in that rare case this is a
+                // deliberate near-enough approximation, not a bug.
+                marginTop: `-${seatWidthPct / 2}%`,
                 borderRadius: '5px',
                 background: bg,
                 // Selected seats get their own visual weight (scale + white
@@ -392,8 +437,8 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 // neighboring seat drawn after it in DOM order.
                 transform: isSelected ? `scale(${selectedBoost})` : undefined,
                 zIndex: isSelected ? 2 : undefined,
-                boxShadow: isSelected ? '0 0 0 2px var(--afa-white)' : undefined,
-                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-white)',
+                boxShadow: isSelected ? '0 0 0 2px var(--afa-text-primary)' : undefined,
+                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-text-primary)',
                 fontSize: isSelected ? '10px' : 'clamp(5px, 1.3cqw, 9px)',
                 fontWeight: isSelected ? 700 : 400,
                 display: 'flex',
@@ -410,7 +455,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-terracotta)', marginRight: '4px' }} />Selected</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-fill-solid)', marginRight: '4px' }} />Selected</span>
         <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-ink-a13)', marginRight: '4px' }} />Taken</span>
       </div>
     </div>
