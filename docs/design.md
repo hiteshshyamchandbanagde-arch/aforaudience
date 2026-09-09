@@ -1659,3 +1659,19 @@ Branch: `feat/gen-2609-015-seatpicker-fix`, based on latest `origin/qa`. Both bu
 **Regression check - method used: mocked API response, no DB write.** No second NUMBERED-seating venue exists in current QA seed data (confirmed by querying the DB directly - `qa-jaipur-venue-0001` is the only one) to check the fix isn't overfit to Jaipur's specific coordinate shape. Rather than seeding new DB rows for this (a `qa-diag-regr-*` additive-only script using the seed scripts' own `generateGridSeats`/`generateCanvasSeats` logic was written and was ready to go, pre-approved if needed, but wasn't run), used Playwright's `page.route()` to intercept the real, unmodified `/api/events/[id]/seats` client fetch on the real Jaipur event page shell and return a synthetic 80-seat, 2-tier layout deliberately shaped very differently from Jaipur's - wide-short (20 columns x 4 rows) and offset far from the origin (`x`: 520-900, `y`: 400-460, vs. Jaipur's `x`: 20-200, `y`: 0-180) rather than another near-square/near-origin grid. This exercises the real production `SeatPicker.tsx` component and the real `/api/events/[id]/seats` route contract end to end, just with the client's fetch response substituted - not a hand-rolled test-only render path. Rendered correctly: both tier legends ("VIP — ₹800", "General — ₹350") readable, seats sized reasonably and filling the fitted container with no dead space or clipping, and a far-edge seat (row A, seat 10) selected correctly with the right price flowing into the booking summary. No `page.route()`/mocked-fetch pattern existed elsewhere in this codebase for isolated component verification (e2e tests all drive real seeded data against the real DB) - this is a new-but-standard technique, not an invented one, and was one of the methods explicitly pre-approved for this check.
 
 **Verification:** `tsc --noEmit` clean (re-confirmed after the regression check, no further source changes made during it). Grep-confirmed no deprecated token remains in `SeatPicker.tsx`. Real screenshots: legend readable + seat grid filling the canvas + a selected seat rendering in the correct fill-solid color, both on the real Jaipur event (real DB, real dev server) and on the synthetic wide-shape layout (mocked fetch, same real component/page/dev server) - not code-read inferences.
+
+## Process note — GEN-2609-014 / GEN-2609-017 coded directly in chat (8 Sep)
+
+Both `GEN-2609-014` (mobile `/` → `/events` redirect) and its same-session
+reversal `GEN-2609-017` (homepage stays default, tab bar added to `/`) were
+written and pushed directly from chat's sandbox rather than dispatched to
+Claude Code, breaking the standing chat/CC tooling split (chat: context-
+dependent orchestration; CC: mechanical builds). Happened because both
+diffs were small (one `useEffect`, one array entry) and felt faster inline
+- that isn't the actual criterion the split is drawn on.
+
+**Decision (Hitesh, 8 Sep): leave both changes as shipped.** Both are live
+on `qa`, CI passed, zero runtime errors confirmed post-deploy. Not
+reverted/redone through CC. Logged here as an acknowledged one-off
+exception, not a precedent - future code changes, however small, route
+through Claude Code per the standing split unless Hitesh says otherwise.
