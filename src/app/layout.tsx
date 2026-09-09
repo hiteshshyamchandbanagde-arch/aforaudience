@@ -10,6 +10,7 @@ import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
 import SupportWidget from "@/components/SupportWidget";
 import MobileTabBar from "@/components/mobile/MobileTabBar";
+import MobileTopBar from "@/components/mobile/MobileTopBar";
 
 // Real webfonts, not system-font fallbacks. "Georgia, serif" /
 // "monospace" everywhere was a big part of why the site read as
@@ -272,6 +273,7 @@ export default function RootLayout({
         />
         <Providers>
           <NudgeStack />
+          <MobileTopBar />
           {children}
           <MobileTabBar />
         </Providers>

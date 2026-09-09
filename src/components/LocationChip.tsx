@@ -23,7 +23,7 @@ interface CityOption {
 // user override it from a free list of cities we actually have venues
 // in. Deliberately no browser Geolocation prompt and no Google Places
 // call - see route/component comments for why.
-export default function LocationChip({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' }) {
+export default function LocationChip({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' | 'topbar' }) {
   const { t } = useLocale()
   const [location, setLocation] = useState<LocationState | null>(null)
   const [open, setOpen] = useState(false)
@@ -82,25 +82,32 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
   const filteredCities = cities.filter((c) => c.city.toLowerCase().includes(query.toLowerCase()))
   const label = location?.city ? cityLabel(location.city, location.country) : (location === null ? '…' : 'Set location')
 
+  // 'topbar' (GEN-2609-019, Phase A) - MobileTopBar.tsx's compact slot
+  // next to the logo: no pin emoji/background/padding (those read fine as
+  // a standalone chip but too heavy stacked next to a logo + search bar
+  // in a 60px-tall header), just the label + chevron at the small mono
+  // size TopBar.tsx's own Figma reference uses for this exact spot.
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
       ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
+      : variant === 'topbar'
+      ? { display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
       : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen((v) => !v)} style={chipStyle}>
-        <span aria-hidden>📍</span>
+        {variant !== 'topbar' && <span aria-hidden>📍</span>}
         <span>{label}</span>
-        <span style={{ opacity: 0.5, fontSize: '10px' }}>▾</span>
+        <span style={{ opacity: 0.5, fontSize: variant === 'topbar' ? '8px' : '10px' }}>▾</span>
       </button>
       {open && (
         <div
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
-            left: variant === 'mobile' ? 0 : 'auto',
-            right: variant === 'mobile' ? 0 : 0,
+            left: variant === 'mobile' || variant === 'topbar' ? 0 : 'auto',
+            right: variant === 'mobile' || variant === 'topbar' ? 0 : 0,
             background: 'var(--afa-surface-raised)',
             border: '1px solid rgba(245,245,240,0.15)',
             borderRadius: '10px',
