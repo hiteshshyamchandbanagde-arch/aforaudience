@@ -5,10 +5,11 @@ import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
-import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon, FilterSlidersIcon } from "@/components/icons/EventIcons"
+import { GridViewIcon, ListViewIcon, TheaterMark, EventTypeIcon } from "@/components/icons/EventIcons"
 import SearchInputBox from "@/components/SearchInputBox"
 import { ErrorBanner } from "@/components/ErrorBanner"
 import MobileEventFilterSheet from "@/components/MobileEventFilterSheet"
+import { MOBILE_SEARCH_EVENT, MOBILE_SEARCH_OPEN_FILTERS_EVENT } from "@/components/mobile/MobileTopBar"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Mirrors OrganiserItem in OrganisersGridEmbed.tsx - duplicated locally
@@ -138,6 +139,27 @@ export default function EventsPage() {
   // driving the exact same selectedType/selectedCity/priceFilter/sortBy
   // state - presentation only, no new filtering logic.
   const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false)
+  // GEN-2609-019 (Mobile Nav v3, Phase A) - the global MobileTopBar's
+  // search input now covers this page too on mobile (this page's own
+  // hero search below is hidden under `lg`, see its own comment), so it
+  // needs a way to reach this page's `search`/mobileFilterSheetOpen state
+  // from a different component tree. Same custom-window-event pattern
+  // profile/page.tsx already uses for its own cross-tree signal
+  // (afa:feedback-submitted) rather than inventing a Context just for
+  // this one bridge.
+  useEffect(() => {
+    const handleSearch = (e: Event) => {
+      const detail = (e as CustomEvent<{ query: string }>).detail
+      if (detail) setSearch(detail.query)
+    }
+    const handleOpenFilters = () => setMobileFilterSheetOpen(true)
+    window.addEventListener(MOBILE_SEARCH_EVENT, handleSearch)
+    window.addEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
+    return () => {
+      window.removeEventListener(MOBILE_SEARCH_EVENT, handleSearch)
+      window.removeEventListener(MOBILE_SEARCH_OPEN_FILTERS_EVENT, handleOpenFilters)
+    }
+  }, [])
   // GEN-2609-012 - mobile Discover defaults to the carousel-grouped
   // browse model; "See all events" (or picking any filter/search, see
   // hasActiveFilters below) switches to the same filtered grid/list
@@ -385,8 +407,17 @@ export default function EventsPage() {
           </button>
         </div>
 
+        {/* GEN-2609-019 (Mobile Nav v3, Phase A) - hidden below `lg`: the
+            global MobileTopBar's search input now covers this route on
+            mobile (bridged via the afa:mobile-search* events above), so
+            keeping this hero search visible too would put two search
+            boxes on screen at once - exactly what the "one unified entry
+            point" decision (8 Sep) was against. Desktop is untouched;
+            BrowseSearchDropdown's autocomplete only exists on this hero
+            box, so mobile trades it away for the unified bar - flagged as
+            an accepted scope-trim in MobileTopBar.tsx's own comment. */}
         {contentMode === "events" && (
-          <div style={{ marginTop: "24px" }}>
+          <div className="hidden lg:block" style={{ marginTop: "24px" }}>
             <BrowseSearchDropdown
               query={search}
               items={filtered}
@@ -416,24 +447,28 @@ export default function EventsPage() {
         {contentMode === "organisers" ? (
           <div style={{ marginTop: "32px" }}>
             {/* Session 65 fix: same hero search box position/styling as
-                Events mode - just pointed at organisers. */}
-            <BrowseSearchDropdown
-              query={search}
-              items={filteredOrganisers}
-              getId={(o) => o.id}
-              emptyLabel={tr.common.nounOrganisers}
-              translate
-              onSelect={(o) => goToOrganiser(o.id)}
-              renderRow={(o) => <span style={{ fontWeight: 600 }}>{o.orgName}</span>}
-            >
-              <SearchInputBox
-                value={search}
-                onChange={setSearch}
-                placeholder={tr.eventsPage.searchOrganisersPlaceholder}
-                className="afa-events-search-box"
-                style={{ marginBottom: "24px" }}
-              />
-            </BrowseSearchDropdown>
+                Events mode - just pointed at organisers.
+                GEN-2609-019 - hidden below `lg`, same reasoning as the
+                Events-mode hero search above. */}
+            <div className="hidden lg:block">
+              <BrowseSearchDropdown
+                query={search}
+                items={filteredOrganisers}
+                getId={(o) => o.id}
+                emptyLabel={tr.common.nounOrganisers}
+                translate
+                onSelect={(o) => goToOrganiser(o.id)}
+                renderRow={(o) => <span style={{ fontWeight: 600 }}>{o.orgName}</span>}
+              >
+                <SearchInputBox
+                  value={search}
+                  onChange={setSearch}
+                  placeholder={tr.eventsPage.searchOrganisersPlaceholder}
+                  className="afa-events-search-box"
+                  style={{ marginBottom: "24px" }}
+                />
+              </BrowseSearchDropdown>
+            </div>
             <OrganisersGridEmbed search={search} hideSearchBar onItemsLoaded={setOrganisers} />
           </div>
         ) : (
@@ -452,10 +487,17 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* FILTERS - desktop inline row, hidden below `lg` (Phase 1's
-                mobile breakpoint - DashboardShell.tsx/MobileTabBar.tsx) in
-                favor of afa-mobile-filter-trigger + MobileEventFilterSheet
-                below. Same underlying state either way, presentation only. */}
+            {/* FILTERS - desktop inline row, hidden below `lg`.
+                GEN-2609-019 (Mobile Nav v3, Phase A) - the standalone
+                "Filter events" pill that used to live here below `lg` is
+                gone; the global MobileTopBar's search bar now carries that
+                same trigger (an attached filter-sliders icon, see that
+                file's own comment) so there's exactly one way to open
+                MobileEventFilterSheet on mobile, not two competing ones.
+                One accepted regression: this pill's active-filter-count
+                badge doesn't have an equivalent on the new trigger yet
+                (would need this state bridged back up to a global-header
+                component) - worth a fast-follow, not done here. */}
             <style>{`
               .events-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
               .events-type-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
@@ -465,58 +507,10 @@ export default function EventsPage() {
                 .afa-events-view-toggle { display: none; }
               }
               .afa-desktop-filters { display: block; }
-              .afa-mobile-filter-trigger { display: none; }
               @media (max-width: 1023px) {
                 .afa-desktop-filters { display: none; }
-                .afa-mobile-filter-trigger { display: inline-flex; }
               }
             `}</style>
-
-            <div className="afa-mobile-filter-trigger" style={{ alignItems: "center", gap: "8px", marginTop: "20px" }}>
-              <button
-                type="button"
-                onClick={() => setMobileFilterSheetOpen(true)}
-                aria-label={tr.eventsPage.filtersButtonLabel}
-                style={{
-                  position: "relative",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(245,245,240,0.15)",
-                  background: "var(--afa-surface-raised)",
-                  color: "var(--afa-text-primary)",
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  cursor: "pointer",
-                }}
-              >
-                <FilterSlidersIcon style={{ width: "16px", height: "16px" }} />
-                {tr.eventsPage.filterSheetTitle}
-                {(selectedType !== null || selectedCity !== "All Cities" || priceFilter !== "All") && (
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minWidth: "18px",
-                      height: "18px",
-                      borderRadius: "999px",
-                      background: "var(--afa-fill-solid)",
-                      color: "var(--afa-on-fill-solid)",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      padding: "0 5px",
-                    }}
-                  >
-                    {[selectedType !== null, selectedCity !== "All Cities", priceFilter !== "All"].filter(Boolean).length}
-                  </span>
-                )}
-              </button>
-            </div>
 
             {mobileFilterSheetOpen && (
               <MobileEventFilterSheet

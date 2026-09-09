@@ -47,6 +47,15 @@ function initials(name: string) {
  * Figma Make reference's 5-icons -> 1-dropdown pattern. Signed-in users
  * still see this lighter header on "/"; SiteNav takes over once they
  * navigate deeper into the app.
+ *
+ * GEN-2609-019 (Mobile Nav v3, Phase A) - same treatment as SiteNav.tsx:
+ * this whole header is now hidden below 900px (not just its hamburger),
+ * replaced by the global MobileTopBar (mounted once in layout.tsx, so it
+ * already covers "/" too). Caught by an actual mobile screenshot of the
+ * homepage during Phase A verification - this component is a separate
+ * one from SiteNav (homepage-only), so hiding SiteNav's own hamburger
+ * didn't touch it, and it was still rendering its full desktop-style
+ * logo/wordmark/QA-badge row underneath the new global bar.
  */
 export default function HomeHeader() {
   const { data: session, status } = useSession()
@@ -89,7 +98,6 @@ export default function HomeHeader() {
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -120,15 +128,12 @@ export default function HomeHeader() {
   const initialsLabel = user ? initials(user.displayName || user.name || user.email || "?") : null
 
   return (
-    <header style={{ position: "absolute", insetInline: 0, top: "var(--nudge-stack-height, 0px)", zIndex: 100 }}>
+    <header className="home-header-root" style={{ position: "absolute", insetInline: 0, top: "var(--nudge-stack-height, 0px)", zIndex: 100 }}>
       <style>{`
         .home-header-desktop { display: flex; }
-        .home-header-hamburger { display: none; }
-        .home-header-mobile-panel { display: none; }
+        .home-header-root { display: block; }
         @media (max-width: 900px) {
-          .home-header-desktop { display: none; }
-          .home-header-hamburger { display: flex; }
-          .home-header-mobile-panel.open { display: flex; }
+          .home-header-root { display: none; }
         }
       `}</style>
 
@@ -251,74 +256,6 @@ export default function HomeHeader() {
           )}
         </div>
 
-        {/* Mobile hamburger - everything moves into the dropdown panel below */}
-        <button
-          className="home-header-hamburger"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          style={{ marginLeft: "auto", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", border: "none", background: "transparent", cursor: "pointer", flexDirection: "column", gap: "4px" }}
-        >
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-text-primary)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-text-primary)", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-text-primary)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
-        </button>
-      </div>
-
-      {/* Mobile dropdown panel */}
-      <div className={`home-header-mobile-panel${mobileOpen ? " open" : ""}`} style={{ flexDirection: "column", padding: "0 24px 20px", background: "var(--afa-surface-inverse)", borderTop: "1px solid rgba(245,245,240,0.08)", maxHeight: "80vh", overflowY: "auto" }}>
-        {NAV_LINKS.map((l) => (
-          <Link key={l.key} href={l.href} onClick={() => setMobileOpen(false)} style={{ fontSize: "15px", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}>
-            {navLabelFor[l.key]}
-          </Link>
-        ))}
-        <div style={{ padding: "14px 0" }}>
-          <SearchBox />
-        </div>
-        <div style={{ padding: "0 0 14px" }}>
-          <LocationChip variant="mobile" />
-        </div>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", padding: "0 0 14px" }}>
-          {LOCALES.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setLocale(l.id)}
-              style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", background: locale === l.id ? "rgba(201,151,58,0.08)" : "transparent", border: locale === l.id ? "1.5px solid var(--afa-amber)" : "1px solid rgba(245,245,240,0.15)", borderRadius: "999px", padding: "6px 12px", cursor: "pointer" }}
-            >
-              {l.nativeLabel}
-            </button>
-          ))}
-        </div>
-
-        {status === "loading" ? null : user ? (
-          <>
-            {accountLinks.map((l) => (
-              <Link key={l.href} href={l.href} onClick={() => setMobileOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}>
-                {l.label}
-                {l.badge > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "999px", padding: "2px 7px" }}>
-                    {l.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
-            <button
-              onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
-              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
-            >
-              {t.nav.signOut}
-            </button>
-          </>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingTop: "6px" }}>
-            <Link href="/login" onClick={() => setMobileOpen(false)} style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)" }}>
-              {t.nav.signIn}
-            </Link>
-            <Link href="/register" onClick={() => setMobileOpen(false)} style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", textAlign: "center", background: "var(--afa-fill-solid)", padding: "12px 20px", borderRadius: "8px" }}>
-              {t.nav.signUp}
-            </Link>
-          </div>
-        )}
       </div>
     </header>
   )

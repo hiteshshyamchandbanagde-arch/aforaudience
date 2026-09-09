@@ -224,54 +224,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       .catch(() => {})
     return () => { cancelled = true }
   }, [user?.email])
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const mobilePanelRef = useRef<HTMLDivElement | null>(null)
-  // BUG (3 Aug, live report): panel had no bounded height/scroll container
-  // at all - fine while its content fit one screen, but Multi-language
-  // Phase 1's Language section pushed it past the fold and the extra
-  // content (Profile, Sign out) became permanently unreachable, with no
-  // page-scroll fallback on the home-page variant since that nav is
-  // position:fixed (taken out of normal document flow, so there's no
-  // page height left to scroll into). Measures available viewport space
-  // below the panel's own top edge and caps it there with overflow-y
-  // auto, instead of guessing a fixed header-height pixel value that
-  // would drift out of sync with real header content changes.
-  const [panelMaxHeight, setPanelMaxHeight] = useState<number | undefined>(undefined)
-  useEffect(() => {
-    if (!mobileOpen) return
-    const update = () => {
-      if (mobilePanelRef.current) {
-        setPanelMaxHeight(window.innerHeight - mobilePanelRef.current.getBoundingClientRect().top)
-      }
-    }
-    update()
-    window.addEventListener("resize", update)
-    return () => window.removeEventListener("resize", update)
-  }, [mobileOpen])
-  // Swipe-up-to-close for the mobile dropdown panel (Feedback f1c26af4) -
-  // previously only the X/hamburger button dismissed it; a swipe on the
-  // panel just scrolled the page behind it instead. Simple vertical-delta
-  // threshold, no gesture library needed for a single-direction dismiss.
-  const touchStartY = useRef<number | null>(null)
-  const SWIPE_CLOSE_THRESHOLD_PX = 40
-  const handlePanelTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY
-  }
-  const handlePanelTouchMove = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return
-    // Same fix as above, other half: an upward drag to scroll down through
-    // overflowing content is physically identical to the swipe-up-to-close
-    // gesture. When the panel actually needs to scroll, don't intercept it
-    // as a close - let native scroll (now that it has somewhere to scroll
-    // within, see panelMaxHeight above) and the X button handle it instead.
-    const el = mobilePanelRef.current
-    if (el && el.scrollHeight > el.clientHeight + 1) return
-    const deltaY = touchStartY.current - e.touches[0].clientY
-    if (deltaY > SWIPE_CLOSE_THRESHOLD_PX) {
-      setMobileOpen(false)
-      touchStartY.current = null
-    }
-  }
   // Multi-language Phase 1 - same picker shape as the (now-removed) theme menu
   // (dropdown desktop, pill row mobile), backed by useLocale()'s
   // localStorage-persisted state instead of a data- attribute.
@@ -315,17 +267,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     "wall-of-fame": t.nav.wallOfFame,
   }
 
-  // Mobile Theme/Language sections used to always render every option as
-  // a full pill grid - fine for one 7-theme grid, but stacking a second
-  // (soon 6-language) grid on top of it visibly bloated the panel (live
-  // report, 3 Aug) and would only get worse once Telugu/Tamil/Kannada/
-  // Malayalam are added. Collapsed-by-default summary row (current
-  // selection + chevron) that expands to the pill grid on tap, same
-  // information/options as before, just not force-displayed every time
-  // the menu opens - mirrors the desktop icon-button-opens-dropdown
-  // pattern instead of always-open.
-  const [mobileLangExpanded, setMobileLangExpanded] = useState(false)
-
   const primaryLinks = backHref
     ? [{ key: "back", href: backHref, label: backLabel ?? t.nav.back, isActive: false }]
     : NAV_LINKS.map((l) => ({ key: l.key as string, href: l.href, label: navLabelFor[l.key], isActive: active === l.key }))
@@ -360,6 +301,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
 
   return (
     <nav
+      className="sitenav-root"
       style={{
         position: isHome ? "fixed" : "sticky",
         top: "var(--nudge-stack-height, 0px)",
@@ -373,12 +315,20 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
     >
       <style>{`
         .sitenav-desktop { display: flex; }
-        .sitenav-hamburger { display: none; }
-        .sitenav-mobile-panel { display: none; }
+        /* GEN-2609-019 (Mobile Nav v3, Phase A) - this whole header is now
+           hidden below 900px, not just collapsed into a hamburger. The
+           global MobileTopBar (src/components/mobile/MobileTopBar.tsx,
+           mounted once in layout.tsx) replaces it entirely on mobile -
+           logo/search/auth-state there, primary nav + role dashboards in
+           the Phase B/C bottom bar, language in that bar's own globe
+           picker. See MobileTopBar.tsx's own comment for the full
+           reasoning on where each piece of the old hamburger panel
+           (nav links, search, location, language, account row, sign out)
+           landed. Desktop (>900px, .sitenav-desktop) is untouched.
+        */
+        .sitenav-root { display: block; }
         @media (max-width: 900px) {
-          .sitenav-desktop { display: none; }
-          .sitenav-hamburger { display: flex; }
-          .sitenav-mobile-panel.open { display: flex; }
+          .sitenav-root { display: none; }
         }
         /* Header nav wrapped to a second line when logged in. Root cause
            (confirmed 29 Jul): the account row (Hi, name + role badge +
@@ -445,7 +395,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       <div className="sitenav-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: isHome ? "18px 24px" : "16px 24px" }}>
         <Link
           href="/"
-          onClick={() => setMobileOpen(false)}
           className="sitenav-logo"
           style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}
         >
@@ -680,140 +629,6 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           )}
         </div>
 
-        {/* Mobile: hamburger toggle, everything moves into the dropdown panel below */}
-        <button
-          className="sitenav-hamburger"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          style={{ alignItems: "center", justifyContent: "center", width: "36px", height: "36px", border: "none", background: "transparent", cursor: "pointer", flexDirection: "column", gap: "4px" }}
-        >
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(6px) rotate(45deg)" : "none" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", opacity: mobileOpen ? 0 : 1, transition: "opacity 0.15s" }} />
-          <span style={{ display: "block", width: "22px", height: "2px", background: "var(--afa-fill-solid)", transition: "transform 0.15s", transform: mobileOpen ? "translateY(-6px) rotate(-45deg)" : "none" }} />
-        </button>
-      </div>
-
-      {/* Mobile dropdown panel */}
-      <div
-        ref={mobilePanelRef}
-        className={`sitenav-mobile-panel${mobileOpen ? " open" : ""}`}
-        style={{
-          flexDirection: "column",
-          padding: "8px 24px 20px",
-          borderTop: "1px solid rgba(245,245,240,0.08)",
-          maxHeight: panelMaxHeight ? `${panelMaxHeight}px` : "80vh",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
-        }}
-        onTouchStart={handlePanelTouchStart}
-        onTouchMove={handlePanelTouchMove}
-      >
-        <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
-          <button
-            onClick={() => setMobileLangExpanded((v) => !v)}
-            aria-expanded={mobileLangExpanded}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: 0, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
-          >
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.languagePicker.label}</span>
-              <span>{LOCALES.find((l) => l.id === locale)?.nativeLabel}</span>
-            </span>
-            <span style={{ opacity: 0.5, fontSize: '12px', transform: mobileLangExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
-          </button>
-          {mobileLangExpanded && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-              {LOCALES.map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => { setLocale(l.id); setMobileLangExpanded(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '999px', border: locale === l.id ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.15)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
-                >
-                  {l.nativeLabel}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        {primaryLinks.map((l) => (
-          <Link
-            key={l.key}
-            href={l.href}
-            onClick={() => setMobileOpen(false)}
-            style={{ fontSize: "15px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)" }}
-          >
-            {l.label}
-          </Link>
-        ))}
-
-        {!backHref && (
-          <div style={{ padding: "14px 0" }}>
-            <SearchBox />
-          </div>
-        )}
-        {!backHref && <LocationChip variant="mobile" />}
-
-        {status === "loading" ? null : user ? (
-          <>
-            <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, padding: "12px 0 4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span>{t.nav.signedInAs} {user.displayName || user.name || user.email}</span>
-              {getRoleLabel(user.role, t.roles) && (
-                <span style={ROLE_BADGE_STYLE}>
-                  {getRoleLabel(user.role, t.roles)}
-                </span>
-              )}
-            </div>
-            {accountLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setMobileOpen(false)}
-                aria-current={l.isActive ? "page" : undefined}
-                style={{ fontSize: "15px", fontWeight: 600, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", padding: "12px 0", borderBottom: "1px solid rgba(245,245,240,0.06)", display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                {l.label}
-                {l.key === "dashboard" && pendingCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
-                    {pendingCount}
-                  </span>
-                )}
-                {l.key === "messages" && unreadCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
-                    {unreadCount}
-                  </span>
-                )}
-                {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "2px 7px" }}>
-                    {pendingCompanionCount}
-                  </span>
-                )}
-              </Link>
-            ))}
-            <button
-              onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }) }}
-              style={{ marginTop: "16px", fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "12px 20px", borderRadius: "8px", width: "100%" }}
-            >
-              {t.nav.signOut}
-            </button>
-          </>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingTop: "16px" }}>
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)", textDecoration: "none", textAlign: "center", padding: "12px 20px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)" }}
-            >
-              {t.nav.signIn}
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setMobileOpen(false)}
-              style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", textAlign: "center", background: "var(--afa-fill-solid)", padding: "12px 20px", borderRadius: "8px" }}
-            >
-              {t.nav.signUp}
-            </Link>
-          </div>
-        )}
       </div>
     </nav>
   )
