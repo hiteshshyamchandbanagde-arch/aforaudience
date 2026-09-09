@@ -394,15 +394,26 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   // unified bar for every user, signed in or not (that file's own
   // comment has the full decision history). Rendering this component's
   // own mobile bottom bar there too would stack two fixed bottom bars,
-  // so it's suppressed on exactly these 2 routes - every other
+  // so it's suppressed on exactly these routes - every other
   // /dashboard/* route is untouched. Normalized the same way
   // MobileTabBar.tsx normalizes its own pathname (next.config.ts's
   // trailingSlash: true means usePathname() returns "/tickets/", not
   // "/tickets") rather than reusing the bare `pathname` above, which only
   // needs prefix-matching for resolveActiveId and tolerates the trailing
   // slash there as a side effect, not by an explicit check.
+  //
+  // GEN-2609-019 Phase B - /dashboard/messages added to this list.
+  // MobileTabBar.tsx's morphing primary bar now includes a Messages tab
+  // routed at /dashboard/messages, so this component's own mobile bar
+  // needs to stay off that one route too, same reasoning as /tickets and
+  // /profile. Every other /dashboard/* route (organiser/venue/artist/
+  // admin, and the /dashboard/audience placeholder MobileTabBar's own
+  // Discover-sub "Dashboard" item lands on) deliberately keeps this
+  // component's existing mobile bar untouched - see MobileTabBar.tsx's
+  // own comment on why Phase B doesn't try to cover those yet.
   const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
-  const hideMobileBarForUnifiedTabBar = normalizedPathname === '/tickets' || normalizedPathname === '/profile'
+  const hideMobileBarForUnifiedTabBar =
+    normalizedPathname === '/tickets' || normalizedPathname === '/profile' || normalizedPathname === '/dashboard/messages'
 
   return (
     <div className="lg:flex" style={{ background: 'var(--afa-surface-page)' }}>
