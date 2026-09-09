@@ -19,12 +19,16 @@ import { useHeldRoles } from '@/components/HeldRolesContext'
 //
 const SIDEBAR_BORDER = '1px solid rgba(245,245,240,0.08)'
 
-type IconName =
+export type IconName =
   | 'dashboard' | 'ticket' | 'message' | 'user' | 'calendar' | 'plus'
   | 'map' | 'trendUp' | 'dollarSign' | 'briefcase' | 'building' | 'music'
   | 'grid' | 'more' | 'x' | 'tag'
 
-function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
+// GEN-2609-019 Phase C - exported so MobileTabBar.tsx's new role-specific
+// bars can reuse the exact same icon shapes the desktop sidebar already
+// uses for these same items (My Events/Create Event/Sales/etc.), instead
+// of duplicating SVG paths in a second file.
+export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
   const common = {
     width: size,
     height: size,
@@ -406,14 +410,47 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   // MobileTabBar.tsx's morphing primary bar now includes a Messages tab
   // routed at /dashboard/messages, so this component's own mobile bar
   // needs to stay off that one route too, same reasoning as /tickets and
-  // /profile. Every other /dashboard/* route (organiser/venue/artist/
-  // admin, and the /dashboard/audience placeholder MobileTabBar's own
-  // Discover-sub "Dashboard" item lands on) deliberately keeps this
-  // component's existing mobile bar untouched - see MobileTabBar.tsx's
-  // own comment on why Phase B doesn't try to cover those yet.
+  // /profile.
+  //
+  // GEN-2609-019 Phase C - every Artist/Organiser/Venue Owner route now
+  // covered by MobileTabBar.tsx's new role-specific bars added here too.
+  // Found live (not in code review): before this list was extended,
+  // Hrithik's Artist dashboard rendered BOTH this component's old topNav
+  // bar AND MobileTabBar.tsx's bar stacked at once, duplicating Messages/
+  // Tickets/Profile between them - the exact bug this list exists to
+  // prevent, just not yet applied to the new routes. /dashboard/venue-
+  // requests is shared between Organiser and Venue Owner (see this file's
+  // own ROLE_SECTIONS comment) - covered either way, so it only needs one
+  // entry here regardless of which role is signed in.
+  // /dashboard/admin/* is deliberately NOT in this list - that's the next
+  // phase; this component's existing bar still covers Admin unchanged.
+  // The deeper single-purpose tool pages (event edit/checkin/lineup/
+  // sales, tour create, venue seat-map builder, etc.) don't use this
+  // component at all today, so they need no entry here - there is
+  // nothing for them to suppress.
+  const MOBILE_TAB_BAR_ROUTES = [
+    '/tickets',
+    '/profile',
+    '/dashboard/messages',
+    '/dashboard/artist',
+    '/dashboard/artist/events',
+    '/dashboard/artist/edit',
+    '/dashboard/artist/corporate-inquiries',
+    '/dashboard/organiser',
+    '/dashboard/organiser/events/create',
+    '/dashboard/organiser/sales',
+    '/dashboard/organiser/payouts',
+    '/dashboard/organiser/tours',
+    '/dashboard/organiser/edit',
+    '/dashboard/venue',
+    '/dashboard/venue/bookings',
+    '/dashboard/venue/sales',
+    '/dashboard/venue/create',
+    '/dashboard/venue/edit',
+    '/dashboard/venue-requests',
+  ]
   const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
-  const hideMobileBarForUnifiedTabBar =
-    normalizedPathname === '/tickets' || normalizedPathname === '/profile' || normalizedPathname === '/dashboard/messages'
+  const hideMobileBarForUnifiedTabBar = !!normalizedPathname && MOBILE_TAB_BAR_ROUTES.includes(normalizedPathname)
 
   return (
     <div className="lg:flex" style={{ background: 'var(--afa-surface-page)' }}>
