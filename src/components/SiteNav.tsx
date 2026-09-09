@@ -316,18 +316,32 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
       <style>{`
         .sitenav-desktop { display: flex; }
         /* GEN-2609-019 (Mobile Nav v3, Phase A) - this whole header is now
-           hidden below 900px, not just collapsed into a hamburger. The
-           global MobileTopBar (src/components/mobile/MobileTopBar.tsx,
-           mounted once in layout.tsx) replaces it entirely on mobile -
-           logo/search/auth-state there, primary nav + role dashboards in
-           the Phase B/C bottom bar, language in that bar's own globe
-           picker. See MobileTopBar.tsx's own comment for the full
-           reasoning on where each piece of the old hamburger panel
-           (nav links, search, location, language, account row, sign out)
-           landed. Desktop (>900px, .sitenav-desktop) is untouched.
+           hidden below the lg breakpoint (Tailwind's default 1024px -
+           confirmed no --breakpoint-lg override in this project's @theme
+           block), not just collapsed into a hamburger. The global
+           MobileTopBar (src/components/mobile/MobileTopBar.tsx, mounted
+           once in layout.tsx, hidden via Tailwind's own lg:hidden class)
+           replaces it entirely below that same cutover - logo/search/
+           auth-state there, primary nav + role dashboards in the Phase B/C
+           bottom bar, language in that bar's own globe picker. See
+           MobileTopBar.tsx's own comment for the full reasoning on where
+           each piece of the old hamburger panel (nav links, search,
+           location, language, account row, sign out) landed. Desktop
+           (>=1024px, .sitenav-desktop) is untouched.
+           GEN-2609-019 follow-up (post-review) - this was 900px, a stale
+           29 Jul value that predates this whole nav-unification effort and
+           had no relationship to MobileTopBar's own 1024px cutover, so the
+           two headers both rendered in the 901-1023px gap between them
+           (caught in review, not by this session's own screenshot pass -
+           same double-header shape as the HomeHeader bug caught earlier in
+           this same phase, this time from a breakpoint mismatch rather than
+           a missed component). Aligned to 1024px to match MobileTopBar
+           exactly, and to the same lg cutover MobileTabBar.tsx/
+           DashboardShell.tsx already use everywhere else - 900px had no
+           remaining reason to stay a special case.
         */
         .sitenav-root { display: block; }
-        @media (max-width: 900px) {
+        @media (max-width: 1023px) {
           .sitenav-root { display: none; }
         }
         /* Header nav wrapped to a second line when logged in. Root cause

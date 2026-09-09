@@ -49,13 +49,21 @@ function initials(name: string) {
  * navigate deeper into the app.
  *
  * GEN-2609-019 (Mobile Nav v3, Phase A) - same treatment as SiteNav.tsx:
- * this whole header is now hidden below 900px (not just its hamburger),
+ * this whole header is now hidden below `lg` (not just its hamburger),
  * replaced by the global MobileTopBar (mounted once in layout.tsx, so it
  * already covers "/" too). Caught by an actual mobile screenshot of the
  * homepage during Phase A verification - this component is a separate
  * one from SiteNav (homepage-only), so hiding SiteNav's own hamburger
  * didn't touch it, and it was still rendering its full desktop-style
  * logo/wordmark/QA-badge row underneath the new global bar.
+ *
+ * GEN-2609-019 follow-up (post-review) - cutover corrected from 900px to
+ * 1024px (Tailwind's `lg`, matching MobileTopBar's own `lg:hidden` exactly)
+ * - same fix, same reasoning, and the same stale-900px root cause as
+ * SiteNav.tsx's own follow-up comment. This file wasn't flagged in that
+ * review (it only named SiteNav.tsx), but it's the identical bug: any
+ * width in the old 901-1023px gap rendered this header on top of
+ * MobileTopBar too, not just on the non-homepage routes SiteNav covers.
  */
 export default function HomeHeader() {
   const { data: session, status } = useSession()
@@ -132,7 +140,7 @@ export default function HomeHeader() {
       <style>{`
         .home-header-desktop { display: flex; }
         .home-header-root { display: block; }
-        @media (max-width: 900px) {
+        @media (max-width: 1023px) {
           .home-header-root { display: none; }
         }
       `}</style>
