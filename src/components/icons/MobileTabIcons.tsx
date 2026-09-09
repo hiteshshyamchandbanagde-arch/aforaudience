@@ -58,3 +58,48 @@ export function ProfileTabIcon({ className, style }: IconProps & { filled?: bool
     </svg>
   )
 }
+
+// GEN-2609-019 Phase B - 4 more tab icons for the primary bar's Messages
+// slot and the Discover sub-nav's Events/Artists/Dashboard slots (Venues
+// and Wall of Fame reuse the app's existing exported PinIcon/TrophyIcon
+// from EventIcons.tsx directly rather than duplicating them here). Same
+// convention as the 4 above; path shapes for Messages/Events/Artists/
+// Dashboard ported from the Figma Make "AFA Mobile App v3" export's
+// icons.tsx (MessageIcon/CalendarIcon/MicIcon/SparkIcon) - MessageIcon's
+// path is already byte-identical to the one used in DashboardShell.tsx/
+// HomeHeader.tsx/MobileTopBar.tsx's own icon sets, confirming it's this
+// codebase's established shape for that concept, not a new one.
+export function MessagesTabIcon({ className, style }: IconProps & { filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function EventsTabIcon({ className, style }: IconProps & { filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function ArtistsTabIcon({ className, style }: IconProps & { filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 10a7 7 0 0 0 14 0M12 19v3M9 22h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function DashboardMorphTabIcon({ className, style }: IconProps & { filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 9a3 3 0 0 0 3 3 3 3 0 0 0-3 3 3 3 0 0 0-3-3 3 3 0 0 0 3-3Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
