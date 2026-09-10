@@ -1067,6 +1067,40 @@ async function seedDemoPersonas(
     },
   })
 
+  // GEN-2609-019 Phase D - second role (Venue Owner) so Omkar is a real
+  // 2+-role QA persona for live-testing the new Profile role switcher.
+  // Deliberately Organiser + Venue Owner, not some other pairing: both
+  // bars already got full live verification in Phase C, so any bug this
+  // uncovers is isolated to the switcher/role-resolution logic itself,
+  // not confounded with an unverified role bar. `role` on the User
+  // record stays ORGANISER - matches /api/users/me/switch-role's own
+  // rule that gaining a second role never silently moves the active
+  // role, only an explicit switch does. Venue mirrors Vijay's thin-venue
+  // shape below (bare fields, no photos/availability) - it only needs to
+  // exist so "My Venues" isn't an empty state, not be fully fleshed.
+  const omkarVenueOwnerRoleId = "qa-demo-org-full-vo-role"
+  await prisma.venueOwner.upsert({
+    where: { id: omkarVenueOwnerRoleId },
+    update: {},
+    create: { id: omkarVenueOwnerRoleId, userId: omkarId, isApproved: true },
+  })
+  await prisma.venue.upsert({
+    where: { id: "qa-demo-venue-omkar-1" },
+    update: {},
+    create: {
+      id: "qa-demo-venue-omkar-1",
+      ownerId: omkarVenueOwnerRoleId,
+      name: "Omkar's Loft Space",
+      address: "Koregaon Park",
+      city: "Pune",
+      capacity: 45,
+      photos: [],
+      facilities: [],
+      isApproved: true,
+      seatingMode: "GENERAL_ADMISSION",
+    },
+  })
+
   // 2 already past (Sept 1-4 2026, COMPLETED) + 8 upcoming (Sept 5 - Oct 31
   // 2026). One (index 3, "One-Act Play Festival") gets a pending Application
   // left in its queue below; one (index 5, "Full House Open Mic") gets its
@@ -1503,7 +1537,7 @@ async function seedDemoPersonas(
 
   return {
     vinayak: { label: "Vinayak (Venue Owner, full/cross-linked)", email: "vinayak.venue@aforaudience.qa" },
-    omkar: { label: "Omkar (Organiser, full/cross-linked)", email: "omkar.organiser@aforaudience.qa" },
+    omkar: { label: "Omkar (Organiser + Venue Owner, full/cross-linked)", email: "omkar.organiser@aforaudience.qa" },
     hrithik: { label: "Hrithik (Artist, full/cross-linked)", email: "hrithik.artist@aforaudience.qa" },
     atul: { label: "Atul (Audience, full/cross-linked)", email: "atul.audience@aforaudience.qa" },
     orri: { label: "Orri (Organiser, partial/sparse)", email: "orri.organiser@aforaudience.qa" },
