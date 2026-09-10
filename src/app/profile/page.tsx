@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell, { getShellDashboardLink, useBadgeCounts } from '@/components/DashboardShell'
+import { useHeldRoles } from '@/components/HeldRolesContext'
 import GenrePicker from '@/components/GenrePicker'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { FeeSheet } from '@/components/FeeSheet'
@@ -199,6 +200,13 @@ function ProfileContent() {
   // file's exported getShellDashboardLink/useBadgeCounts.
   const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
   const { pendingCount, unreadCount } = useBadgeCounts()
+
+  // GEN-2609-019 Phase D - role switcher below, for accounts holding 2+
+  // roles. Reuses the server-resolved HeldRoles context (already driving
+  // DashboardShell.tsx's own ROLE_SECTIONS filtering) rather than
+  // inventing new role-state.
+  const held = useHeldRoles()
+  const activeRole = (session?.user as { role?: string } | undefined)?.role
 
   const [orgStatus, setOrgStatus] = useState<RoleStatus | null>(null)
   const [venueStatus, setVenueStatus] = useState<RoleStatus | null>(null)
@@ -753,6 +761,59 @@ function ProfileContent() {
               </p>
             )}
           </div>
+
+          {/* GEN-2609-019 Phase D - role switcher, shown only for accounts
+              holding 2+ roles (HeldRoles only tracks the 3 switchable
+              roles, so this never fires for AUDIENCE-only or 1-role
+              accounts, matching the mobile bar's own single-role
+              assumption everywhere else). Calls the same switchRole()
+              below that already powers each card's per-role "Switch to
+              X" link further down this page - not a second
+              implementation. MobileTabBar.tsx's Discover-sub "Dashboard"
+              item reads session.user.role directly for its target link,
+              so switching the active role here is the only piece that
+              was missing - that file needs no changes of its own. */}
+          {[held.ORGANISER, held.ARTIST, held.VENUE_OWNER].filter(Boolean).length >= 2 && (
+            <div style={{ marginBottom: '28px' }}>
+              <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                Active role
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {(
+                  [
+                    { kind: 'artist', held: held.ARTIST, value: 'ARTIST', label: tr.roles.ARTIST },
+                    { kind: 'organiser', held: held.ORGANISER, value: 'ORGANISER', label: tr.roles.ORGANISER },
+                    { kind: 'venue', held: held.VENUE_OWNER, value: 'VENUE_OWNER', label: tr.roles.VENUE_OWNER },
+                  ] as const
+                )
+                  .filter((r) => r.held)
+                  .map((r) => {
+                    const active = activeRole === r.value
+                    return (
+                      <button
+                        key={r.kind}
+                        type="button"
+                        onClick={() => { if (!active) switchRole(r.kind) }}
+                        disabled={switching !== null}
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          padding: '7px 14px',
+                          borderRadius: '999px',
+                          border: active ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
+                          background: active ? 'var(--afa-amber)' : 'transparent',
+                          color: active ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                          cursor: switching !== null ? 'default' : 'pointer',
+                          opacity: switching !== null && !active ? 0.6 : 1,
+                        }}
+                      >
+                        {switching === r.kind ? tr.profilePage.switchingEllipsis : r.label}
+                      </button>
+                    )
+                  })}
+              </div>
+            </div>
+          )}
 
           {message && (
             <SuccessBanner style={{ marginBottom: '24px' }}>{message}</SuccessBanner>
