@@ -422,8 +422,15 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   // requests is shared between Organiser and Venue Owner (see this file's
   // own ROLE_SECTIONS comment) - covered either way, so it only needs one
   // entry here regardless of which role is signed in.
-  // /dashboard/admin/* is deliberately NOT in this list - that's the next
-  // phase; this component's existing bar still covers Admin unchanged.
+  // Admin follow-up (GEN-2609-019, also closes BUG-2609-008) - the 8
+  // /dashboard/admin/* routes below, added for consistency with every
+  // other role now covered. Unlike the 3 roles above, this isn't fixing
+  // an active double-bar bug: no admin page has ever rendered this
+  // component (see dashboard/layout.tsx's own comment - that's the
+  // actual substance of BUG-2609-008), so there was no old bar here to
+  // stack against MobileTabBar.tsx's new one. Listed anyway so this
+  // table stays the single source of truth for "does the unified tab
+  // bar own this route" across all 4 roles, not 3.
   // The deeper single-purpose tool pages (event edit/checkin/lineup/
   // sales, tour create, venue seat-map builder, etc.) don't use this
   // component at all today, so they need no entry here - there is
@@ -448,6 +455,14 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     '/dashboard/venue/create',
     '/dashboard/venue/edit',
     '/dashboard/venue-requests',
+    '/dashboard/admin',
+    '/dashboard/admin/bookings',
+    '/dashboard/admin/revenue',
+    '/dashboard/admin/users',
+    '/dashboard/admin/artists',
+    '/dashboard/admin/diary',
+    '/dashboard/admin/feedback',
+    '/dashboard/admin/settings',
   ]
   const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
   const hideMobileBarForUnifiedTabBar = !!normalizedPathname && MOBILE_TAB_BAR_ROUTES.includes(normalizedPathname)

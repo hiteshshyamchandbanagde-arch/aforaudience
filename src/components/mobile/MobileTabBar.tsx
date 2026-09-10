@@ -50,10 +50,25 @@ import { useBadgeCounts, getShellDashboardLink, Icon as DashboardIcon, type Icon
 // both Organiser and Venue Owner, so which role's bar renders there
 // depends on the signed-in user's role too. Every other route is still
 // pathname-only.
-
+//
+// Admin follow-up (GEN-2609-019, also closes BUG-2609-008 - Admin
+// dashboard had no mobile shell at all) - the earlier assumption that
+// this needed a QA persona was wrong: the one ADMIN-role account is
+// Hitesh's own real Google-auth account, protected from every reseed
+// by the seed script's delete-guard, so it was always testable live.
+// Unlike the other 3 roles, DashboardShell.tsx never wrapped
+// /dashboard/admin/* to begin with (see dashboard/layout.tsx's own
+// comment - that's the actual substance of BUG-2609-008), so there was
+// no old bar to fight with here; this bar is the first bottom nav
+// Admin has ever had on mobile. Item split (Overview/Bookings/Revenue/
+// Users primary, Artists/Diary/Feedback/Settings in More) is the
+// lowest-confidence guess in the whole mobile nav v3 brief - no usage
+// data behind it, shipped as specified so there's something real to
+// react to, most likely item to need correction once Hitesh has
+// actually used it for a few days.
 type PrimaryTab = 'messages' | 'tickets' | 'saved' | 'profile'
 type DiscoverSub = 'events' | 'artists' | 'venues' | 'wall-of-fame'
-type RoleBarKind = 'ARTIST' | 'ORGANISER' | 'VENUE_OWNER'
+type RoleBarKind = 'ARTIST' | 'ORGANISER' | 'VENUE_OWNER' | 'ADMIN'
 
 type BarState =
   | { kind: 'primary'; active: PrimaryTab | null }
@@ -139,6 +154,26 @@ function deriveBarState(pathname: string | null, role: string | undefined): BarS
       if (role === 'ORGANISER') return { kind: 'role', role: 'ORGANISER', active: 'requests' }
       if (role === 'VENUE_OWNER') return { kind: 'role', role: 'VENUE_OWNER', active: 'requests' }
       return { kind: 'hidden' }
+
+    // Admin - unlike the other 3 roles' base route, "Overview" is a real
+    // bar item pointing at this exact URL (not just an unhighlighted
+    // landing state), so it gets its own active id instead of null.
+    case '/dashboard/admin':
+      return { kind: 'role', role: 'ADMIN', active: 'overview' }
+    case '/dashboard/admin/bookings':
+      return { kind: 'role', role: 'ADMIN', active: 'bookings' }
+    case '/dashboard/admin/revenue':
+      return { kind: 'role', role: 'ADMIN', active: 'revenue' }
+    case '/dashboard/admin/users':
+      return { kind: 'role', role: 'ADMIN', active: 'users' }
+    case '/dashboard/admin/artists':
+      return { kind: 'role', role: 'ADMIN', active: 'artists' }
+    case '/dashboard/admin/diary':
+      return { kind: 'role', role: 'ADMIN', active: 'diary' }
+    case '/dashboard/admin/feedback':
+      return { kind: 'role', role: 'ADMIN', active: 'feedback' }
+    case '/dashboard/admin/settings':
+      return { kind: 'role', role: 'ADMIN', active: 'settings' }
 
     default:
       return { kind: 'hidden' }
@@ -320,8 +355,37 @@ export default function MobileTabBar() {
     { id: 'account-settings', href: '/dashboard/venue/edit', label: 'Account Settings', Icon: roleIcon('user') },
   ]
 
+  // Admin - primary 4 + More. Icons pulled from the same shared
+  // DashboardShell name set every other role bar uses (via roleIcon()
+  // above), not the admin overview page's own page-local icon set -
+  // best-fit matches: 'dashboard' for Overview (a real landing/summary
+  // page, unlike the other roles' base routes), 'ticket' for Bookings
+  // (matches the desktop admin page's own QuickLink choice for this
+  // exact item), 'trendUp' for Revenue (Admin's equivalent of the
+  // Organiser/Venue Owner bars' own "Sales" item), 'grid' for Users (a
+  // list/table, and avoids colliding with 'user' below). More sheet:
+  // 'music' for Artists (matches the Artist role bar's own base icon),
+  // 'calendar' for Diary, 'message' for Feedback (matches the desktop
+  // page's own chat-icon choice), 'user' for Settings (matches
+  // Organiser/Venue Owner's own "Edit Profile"/"Account Settings" icon
+  // choice for the same concept).
+  const adminItems: ItemDef[] = [
+    { id: 'overview', href: '/dashboard/admin', label: 'Overview', Icon: roleIcon('dashboard'), nav: 'replace' },
+    { id: 'bookings', href: '/dashboard/admin/bookings', label: 'Bookings', Icon: roleIcon('ticket'), nav: 'replace' },
+    { id: 'revenue', href: '/dashboard/admin/revenue', label: 'Revenue', Icon: roleIcon('trendUp'), nav: 'replace' },
+    { id: 'users', href: '/dashboard/admin/users', label: 'Users', Icon: roleIcon('grid'), nav: 'replace' },
+  ]
+  const adminMoreItems: MoreItemDef[] = [
+    { id: 'artists', href: '/dashboard/admin/artists', label: 'Artists', Icon: roleIcon('music') },
+    { id: 'diary', href: '/dashboard/admin/diary', label: 'Diary', Icon: roleIcon('calendar') },
+    { id: 'feedback', href: '/dashboard/admin/feedback', label: 'Feedback', Icon: roleIcon('message') },
+    { id: 'settings', href: '/dashboard/admin/settings', label: 'Settings', Icon: roleIcon('user') },
+  ]
+
+  const roleItems: Record<RoleBarKind, ItemDef[]> =
+    { ARTIST: artistItems, ORGANISER: organiserItems, VENUE_OWNER: venueOwnerItems, ADMIN: adminItems }
   const roleMoreItems: Record<RoleBarKind, MoreItemDef[]> =
-    { ARTIST: [], ORGANISER: organiserMoreItems, VENUE_OWNER: venueOwnerMoreItems }
+    { ARTIST: [], ORGANISER: organiserMoreItems, VENUE_OWNER: venueOwnerMoreItems, ADMIN: adminMoreItems }
 
   let items: ItemDef[]
   let activeId: string | null
@@ -335,7 +399,7 @@ export default function MobileTabBar() {
     items = discoverItems
     activeId = barState.active
   } else {
-    items = barState.role === 'ARTIST' ? artistItems : barState.role === 'ORGANISER' ? organiserItems : venueOwnerItems
+    items = roleItems[barState.role]
     activeId = barState.active
     moreItems = roleMoreItems[barState.role]
     moreActive = !!barState.active && moreItems.some((m) => m.id === barState.active)
