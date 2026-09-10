@@ -16,9 +16,12 @@ export const dynamic = 'force-dynamic'
 // 21 call sites: Organiser/Artist/Venue Owner/Audience/Messages/
 // venue-requests). Resolves held roles server-side, once, before first
 // paint - no more client-side fetch-after-session-resolves delay. Admin
-// dashboard pages are also under /dashboard/* but don't use DashboardShell
-// yet (BUG-2609-008, deferred) - this layout still wraps them, but an
-// unused provider value is harmless.
+// dashboard pages are also under /dashboard/* but still don't use
+// DashboardShell itself - this layout still wraps them, but an unused
+// provider value is harmless. BUG-2609-008 (Admin had no mobile shell at
+// all) is resolved a different way, not by adopting DashboardShell here:
+// MobileTabBar.tsx (GEN-2609-019 Admin follow-up) now recognizes every
+// /dashboard/admin/* route and renders its own Admin bar there directly.
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
   const userId = (session?.user as any)?.id
