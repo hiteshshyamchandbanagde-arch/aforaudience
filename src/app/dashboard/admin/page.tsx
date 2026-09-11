@@ -188,7 +188,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
-        <div style={{ fontSize: '11.5px', color: 'var(--afa-taupe)', marginTop: '3px' }}>{label}</div>
+        <div style={{ fontSize: '11.5px', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>
       </div>
     </div>
   )
@@ -235,7 +235,7 @@ const sectionLabel: React.CSSProperties = {
   fontSize: '11px',
   fontWeight: 700,
   letterSpacing: '0.06em',
-  color: 'var(--afa-taupe)',
+  color: 'var(--afa-text-secondary)',
   textTransform: 'uppercase',
   marginBottom: '10px',
 }
@@ -321,7 +321,7 @@ export default function AdminCommandCenter() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     textDecoration: 'none',
-                    borderLeft: `4px solid ${a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-gold)'}`,
+                    borderLeft: `4px solid ${a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)'}`,
                     padding: '14px 18px',
                   }}
                 >
@@ -330,8 +330,8 @@ export default function AdminCommandCenter() {
                     style={{
                       fontSize: '13px',
                       fontWeight: 700,
-                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-text-primary)',
-                      background: a.tone === 'critical' ? 'var(--afa-error-border)' : 'rgba(245,245,240,0.08)',
+                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)',
+                      background: a.tone === 'critical' ? 'rgba(179,38,30,0.15)' : 'rgba(201,151,58,0.15)',
                       borderRadius: '999px',
                       padding: '2px 10px',
                     }}
@@ -347,12 +347,12 @@ export default function AdminCommandCenter() {
           <div
             style={{
               marginBottom: '28px',
-              background: 'var(--afa-mint-tint)',
+              background: 'rgba(22,101,52,0.12)',
               border: '1px solid rgba(245,245,240,0.08)',
-              borderLeft: '4px solid var(--afa-sage)',
+              borderLeft: '4px solid var(--afa-green-deep)',
               borderRadius: '10px',
               padding: '14px 18px',
-              color: 'var(--afa-sage)',
+              color: 'var(--afa-green-deep)',
               fontSize: '13px',
               fontWeight: 600,
             }}
@@ -365,10 +365,10 @@ export default function AdminCommandCenter() {
         <div style={{ marginBottom: '10px' }}>
           <div style={sectionLabel}>Feedback health</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
-            <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-ink)" href="/dashboard/admin/feedback?status=ALL" />
-            <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-gold)" href="/dashboard/admin/feedback?status=NEW" />
-            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="In Test" accent="var(--afa-plum)" href="/dashboard/admin/feedback?status=IN_TEST" />
-            <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-sage)" href="/dashboard/admin/feedback?status=RESOLVED" />
+            <TicketTile icon={<IconClipboard />} value={k?.totalFeedback ?? '—'} label="Total reported" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=ALL" />
+            <TicketTile icon={<IconClock />} value={k?.pending ?? '—'} label="Pending" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=NEW" />
+            <TicketTile icon={<IconFlask />} value={k?.tested ?? '—'} label="In Test" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=IN_TEST" />
+            <TicketTile icon={<IconCheckCircle />} value={k?.resolved ?? '—'} label="Resolved" accent="var(--afa-amber)" href="/dashboard/admin/feedback?status=RESOLVED" />
             <TicketTile icon={<IconBulb />} value={k?.featureIdeas ?? '—'} label="Feature ideas" accent="var(--afa-amber)" href="/dashboard/admin/feedback?category=FEATURE_IDEA" />
           </div>
         </div>
@@ -377,8 +377,8 @@ export default function AdminCommandCenter() {
         <div style={{ marginTop: '24px', marginBottom: '24px' }}>
           <div style={sectionLabel}>This month</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '12px' }}>
-            <TicketTile icon={<IconRupee />} value={k ? formatINR(k.monthRevenue) : '—'} label="Revenue" accent="var(--afa-forest)" />
-            <TicketTile icon={<IconTicket />} value={k?.monthBookings ?? '—'} label="Bookings" accent="var(--afa-terracotta)" />
+            <TicketTile icon={<IconRupee />} value={k ? formatINR(k.monthRevenue) : '—'} label="Revenue" accent="var(--afa-amber)" />
+            <TicketTile icon={<IconTicket />} value={k?.monthBookings ?? '—'} label="Bookings" accent="var(--afa-amber)" />
           </div>
         </div>
 
@@ -395,39 +395,43 @@ export default function AdminCommandCenter() {
           <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
             Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
           </div>
-          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginLeft: '-2px', paddingLeft: '2px' }}>
-            <div style={{ position: 'relative', height: '130px', minWidth: '420px' }}>
-              {/* subtle gridlines */}
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} style={{ borderTop: '1px solid rgba(245,245,240,0.08)' }} />
-                ))}
-              </div>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '6px', height: '100%' }}>
-                {(data?.dailyTrend || []).map((d) => (
-                  <div key={d.day} style={{ flex: '1 0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                    <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: '108px' }}>
-                      <div
-                        title={`Opened: ${d.opened}`}
-                        style={{ width: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }}
-                      />
-                      <div
-                        title={`Resolved: ${d.resolved}`}
-                        style={{ width: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-sage)', borderRadius: '3px 3px 0 0' }}
-                      />
-                    </div>
-                    <span style={{ fontSize: '9.5px', color: 'var(--afa-taupe)', marginTop: '6px' }}>{dayLabel(d.day)}</span>
+          {/* Fluid width, no horizontal scroll — bars compress on narrow
+              screens instead of requiring a scroll gesture. Day labels only
+              at the first/last bar (like the design spec's own spark chart)
+              to avoid 14 crowded labels on a ~390px screen; exact per-day
+              values stay available via each bar's title tooltip. */}
+          <div style={{ position: 'relative', height: '130px' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} style={{ borderTop: '1px solid rgba(245,245,240,0.08)' }} />
+              ))}
+            </div>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>
+              {(data?.dailyTrend || []).map((d, i, arr) => (
+                <div key={d.day} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
+                    <div
+                      title={`Opened: ${d.opened}`}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px 0 0' }}
+                    />
+                    <div
+                      title={`Resolved: ${d.resolved}`}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: '3px 3px 0 0' }}
+                    />
                   </div>
-                ))}
-              </div>
+                  <span style={{ fontSize: '9.5px', color: 'var(--afa-text-secondary)', marginTop: '6px', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
+                    {dayLabel(d.day)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: '11.5px' }}>
-            <span style={{ color: 'var(--afa-terracotta)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-terracotta)', display: 'inline-block' }} /> Opened
+            <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
             </span>
-            <span style={{ color: 'var(--afa-sage)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-sage)', display: 'inline-block' }} /> Resolved
+            <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
             </span>
           </div>
         </div>
@@ -435,12 +439,12 @@ export default function AdminCommandCenter() {
         {/* Quick links */}
         <div style={sectionLabel}>Go to</div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <QuickLink href="/dashboard/admin/feedback" icon={<IconChat />} label="Feedback board" accent="var(--afa-ink)" />
-          <QuickLink href="/dashboard/admin/bookings" icon={<IconTicket />} label="Bookings" accent="var(--afa-terracotta)" />
-          <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-forest)" />
-          <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-plum)" />
-          <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-taupe)" />
-          <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-gold)" />
+          <QuickLink href="/dashboard/admin/feedback" icon={<IconChat />} label="Feedback board" accent="var(--afa-amber)" />
+          <QuickLink href="/dashboard/admin/bookings" icon={<IconTicket />} label="Bookings" accent="var(--afa-amber)" />
+          <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-amber)" />
+          <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-amber)" />
+          <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-amber)" />
+          <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-amber)" />
         </div>
         </div>
       </main>
