@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import SearchInputBox from '@/components/SearchInputBox'
 
 interface UserRow {
   id: string
@@ -123,31 +124,34 @@ export default function AdminUsersPage() {
           <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
-            🚩 Accounts
+            Accounts
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '640px' }}>
             Suspending blocks login immediately and hides the account's future events/venues from public
             listings. It does not cancel existing confirmed bookings or already-published events. Fully
             reversible — unsuspend at any time.
           </p>
 
-          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <input
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: '10px', marginBottom: '20px' }}>
+            <SearchInputBox
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={setSearch}
               placeholder="Search name, display name, or email..."
-              style={{ flex: '1 1 240px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              className="lg:flex-1"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
               ))}
             </select>
-            <button type="submit" style={{ padding: '10px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+            <button
+              type="submit"
+              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}
+            >
               Search
             </button>
           </form>
@@ -156,25 +160,25 @@ export default function AdminUsersPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {users.length === 0 && !loading && (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No users match.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No users match.</p>
             )}
             {users.map((u) => (
               <div
                 key={u.id}
                 style={{
-                  background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
-                  border: u.isSuspended ? '1px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.08)',
+                  background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px',
+                  border: u.isSuspended ? '1px solid rgba(179,38,30,0.4)' : '1px solid rgba(245,245,240,0.08)',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '10px' }}>
                   <div>
                     <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
-                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase' }}>Suspended</span>}
+                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-error)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
-                    <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)' }}>{u.email} · {u.role}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
-                      <p style={{ fontSize: '12px', color: 'var(--afa-terracotta)', marginTop: '6px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--afa-error)', marginTop: '6px' }}>
                         Reason: {u.suspendReason}
                       </p>
                     )}
@@ -185,22 +189,22 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-sage)', background: 'var(--afa-surface-raised)', color: 'var(--afa-sage)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-green-deep)', background: 'transparent', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}
                       >
                         Unsuspend
                       </button>
                     ) : (
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                         <input
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                         />
                         <button
                           onClick={() => handleSuspend(u.id)}
                           disabled={actioningId === u.id}
-                          style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                          style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
                         >
                           Suspend
                         </button>
