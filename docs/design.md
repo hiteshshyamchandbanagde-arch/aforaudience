@@ -1711,3 +1711,42 @@ Remaining 7, sequenced smallest/lowest-risk first per the CC brief:
 Overview, Bookings, Revenue, Users, Artists, Feedback, Settings (last two
 given their size — Feedback 894 lines, Settings 1090 lines/36 legacy-token
 hits).
+
+## GEN-2609-020: Admin pages redesign, 8/8 shipped — 11 Sep
+
+All 7 remaining PRs (#582–588: Overview, Bookings, Revenue, Users, Artists,
+Feedback, Settings) opened, CI-verified green, spot-checked against the
+codebase, and squash-merged to `qa`. Final HEAD `b34ab5d`, Vercel `READY`,
+zero runtime errors in the 30 minutes post-deploy.
+
+**Two corrections caught before shipping, beyond Diary's pattern-setting
+PR:**
+- Artists (#586): the v4 mock's tier list (PANELIST/CELEBRITY/RISING/
+  FEATURED) doesn't match this route's real `sceneStatus` enum
+  (NEW_EMERGING/RISING/FEATURED/HEADLINER) — left the real enum and its
+  existing tier-filter `<select>` untouched, only recolored the badges.
+  Spot-verified against `/api/admin/artists/route.ts`, which already uses
+  `NEW_EMERGING` as a literal.
+- Settings (#588): the design spec's 6 cards became 8 — two live sections
+  (Support chat message cap, Direct payouts / Razorpay Route) exist in the
+  real page and aren't in the v4 mock at all. Kept both, styled to match.
+
+**Known gap, flagged rather than silently missed:** `FeedbackTrends.tsx`
+and `FeedbackDetailPanel.tsx` (shared components the Feedback page imports)
+still carry legacy tokens — 5 and 1 hits respectively, confirmed by grep.
+Out of this scope; worth its own follow-up ticket rather than scope-creeping
+into #587.
+
+**Verification method:** before merging, diffed each branch's changed page
+against `qa` origin/main for the specific claims in CC's handoff (Artists'
+real enum usage, Settings' actual section headings/copy, the Feedback
+shared-component gap) rather than merging on CC's summary alone — all
+confirmed accurate. Full legacy-token grep swept clean across all 8 changed
+page files (0 hits each).
+
+**No `gh` CLI / `GITHUB_TOKEN` in Claude Code's environment** — all 8 PRs
+were opened, reviewed, and merged from chat, which has API access.
+
+**Remaining:** live click-through against Hitesh's real Admin account —
+same constraint as the mobile-nav-v3 Admin follow-up, can't be done from
+either chat or CC's sandbox.
