@@ -1889,3 +1889,54 @@ bar.
 
 Logged to the Feedback table as `GEN-2609-023` and `GEN-2609-024`
 (both `RESOLVED`, `deployStage: DEPLOYED_QA`).
+
+## GEN-2609-025: re-home support chat as a pill docked above the tab bar — 11 Sep
+
+Re-adds the chat entry point `GEN-2609-023` removed, in a new position
+decided directly by Hitesh — "Option B" from the earlier Figma Make
+exploration (`AFA Mobile App v3-1`), chosen over a 6th tab (would only
+fix Audience's bar, since Artist/Organiser/Venue Owner/Admin each have
+their own 5-item `nav.tsx` set ending in a "More" sheet) or a top-bar
+icon (already ruled out earlier for silently dropping the guest
+globe/language icon in the Figma Make exploration, and there's even
+less room there now with the full wordmark from `GEN-2609-023`).
+
+**Implementation (`qa` `97c35f9`, PR #592):** button and its open panel
+moved off the old flat `bottom: 20/88` to sit above the tab bar on
+mobile only (`@media (max-width: 1023px)`, matching the `lg:hidden`
+breakpoint convention used elsewhere). The offset is built from
+`calc(64px + env(safe-area-inset-bottom))` plus an 8px gap — the same
+expression `globals.css`'s `body.afa-mobile-tab-bar-active` already
+uses for its own reserved space, not a new hardcoded number, so the
+two stay in sync if that height ever changes. Desktop keeps its
+original flat offsets (no tab bar there to clear). Button `background`
+swapped from `var(--afa-fill-solid)` (CTA orange, reserved for
+booking/payment/commit actions only) to `var(--afa-amber)`; `color`
+kept as `var(--afa-on-fill-solid)` — confirmed against
+`DashboardShell.tsx`/`SiteNav.tsx`, where that exact amber+on-fill-solid
+pairing is already the established convention for badges, not a new
+pattern invented here. Did not re-add any of the three clearance-padding
+spots `GEN-2609-023` removed (`MobileTabBar.tsx`, `DashboardShell.tsx`,
+`EventDetailClientPage.tsx`) — this placement doesn't overlap the tab
+bar, so that clearance isn't needed.
+
+**Known minor gap, flagged not silently absorbed:** the tab bar's real
+rendered height measures ~70px, 6px more than the 64px `globals.css`
+reserves for it. Since the offset was built from that same reserved-
+height constant as instructed, the achieved visual gap above the bar
+is ~2px rather than the ~8px targeted — confirmed via DOM measurement.
+Still reads as visibly separated with no tap-target overlap in
+screenshots at 360/375/414px; the real fix, if a fuller gap is wanted,
+is reconciling the pre-existing 64-vs-70px mismatch (or bumping this
+widget's own `+8px`), left as a follow-up rather than done unilaterally.
+
+**Verification:** diff pulled and matched exactly against the dispatch
+prompt before merging — including a direct grep-check of the claimed
+amber+`on-fill-solid` convention against `DashboardShell.tsx`/
+`SiteNav.tsx`, not taken on CC's word alone. `tsc` clean; lint clean on
+touched lines. CI green (Vercel). Fresh head SHA re-fetched immediately
+before the merge PUT. `qa` HEAD and file content verified post-merge via
+the Contents API. Zero runtime errors in the 15 minutes post-deploy.
+
+Logged to the Feedback table as `GEN-2609-025` (`RESOLVED`,
+`deployStage: DEPLOYED_QA`).
