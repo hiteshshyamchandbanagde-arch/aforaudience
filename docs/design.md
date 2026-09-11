@@ -1675,3 +1675,39 @@ on `qa`, CI passed, zero runtime errors confirmed post-deploy. Not
 reverted/redone through CC. Logged here as an acknowledged one-off
 exception, not a precedent - future code changes, however small, route
 through Claude Code per the standing split unless Hitesh says otherwise.
+
+## GEN-2609-020: Admin pages redesign, 1/8 (Diary) — 11 Sep
+
+Source design: `AFA Mobile App v4` Figma Make export (duplicated from v3,
+which stays the clean shipped reference for the audience-facing flow).
+Verified against the actual exported code before use, not the Figma Make
+chat's self-report — `AdminDashboard` correctly branches on `sub` into 8
+real components with faithful content; `nav.tsx` and the other 3 role
+dashboards diffed byte-identical against v3, confirming v4's Admin work
+stayed scoped to Admin only.
+
+**Diary (PR #581, merged to `qa`, CI green, zero runtime errors post-
+deploy):** reskinned to the locked `--afa-surface`/`--afa-text`/
+`--afa-amber`/`--afa-fill-solid` palette. Reskin only — no data-fetching,
+mutation, or status-workflow logic touched. Judgment calls from this PR,
+which set the pattern for the remaining 7:
+- Always-show the new-entry form instead of a toggle-to-reveal button
+  (matches the v4 design spec).
+- 3-level surface mapping: outer page = `--afa-surface-raised`, cards =
+  `--afa-surface-page`, inputs = `--afa-surface-inverse`.
+- Real `lg:hidden`/`hidden lg:block` split added — this page previously had
+  no distinct desktop layout at all.
+- Diary's mock has no status field; `--afa-amber`/`--afa-blue`/
+  `--afa-green-deep` (all already in the locked palette) chosen from
+  scratch for its three statuses.
+
+**No `gh` CLI / `GITHUB_TOKEN` in the Claude Code environment** (consistent
+with prior sessions) — CC pushes branches and hands off the compare link;
+opening/merging PRs and Vercel verification happens from chat, which has
+API access. CC can still read CI status and verify file contents post-merge
+since the repo is public (unauthenticated GitHub API reads work).
+
+Remaining 7, sequenced smallest/lowest-risk first per the CC brief:
+Overview, Bookings, Revenue, Users, Artists, Feedback, Settings (last two
+given their size — Feedback 894 lines, Settings 1090 lines/36 legacy-token
+hits).
