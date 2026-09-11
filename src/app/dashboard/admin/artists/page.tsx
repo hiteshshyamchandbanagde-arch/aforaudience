@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import SearchInputBox from '@/components/SearchInputBox'
 
 // /dashboard/admin/artists — session 56, Hitesh's request: a roster view
 // with the real signals needed to make Featured/Headliner calls (gigs
@@ -40,10 +41,10 @@ interface ArtistRow {
 type SortKey = 'name' | 'gigsPerformed' | 'hypeScore' | 'firstGigDate' | 'organiserAvgRating' | 'verifiedAttendees' | 'featuredOrganiserCount'
 
 const TIER_STYLE: Record<string, { label: string; bg: string; color: string }> = {
-  NEW_EMERGING: { label: 'New / Emerging', bg: 'rgba(245,245,240,0.06)', color: 'rgba(245,245,240,0.5)' },
-  RISING: { label: 'Rising', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  FEATURED: { label: 'Featured', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  HEADLINER: { label: '★ Headliner', bg: 'var(--afa-gold)', color: 'var(--afa-plum-black)' },
+  NEW_EMERGING: { label: 'New / Emerging', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-secondary)' },
+  RISING: { label: 'Rising', bg: 'rgba(22,101,52,0.15)', color: 'var(--afa-green-deep)' },
+  FEATURED: { label: 'Featured', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
+  HEADLINER: { label: '★ Headliner', bg: 'var(--afa-amber)', color: 'var(--afa-on-fill-solid)' },
 }
 
 function timeInScene(firstGigDate: string | null): string {
@@ -159,7 +160,7 @@ export default function AdminArtistsPage() {
       onClick={() => toggleSort(key)}
       style={{
         background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
-        fontSize: '11px', fontWeight: 700, color: sortKey === key ? 'var(--afa-terracotta)' : 'rgba(245,245,240,0.4)',
+        fontSize: '11px', fontWeight: 700, color: sortKey === key ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
         textTransform: 'uppercase', letterSpacing: '0.04em',
       }}
     >
@@ -178,32 +179,35 @@ export default function AdminArtistsPage() {
           <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
-            🎤 Artist Roster
+            Artist Roster
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.6)', marginBottom: '20px', maxWidth: '680px' }}>
+          <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '680px' }}>
             Rising and Featured are fully automatic — thresholds live at{' '}
-            <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Platform Settings</Link>.
+            <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Platform Settings</Link>.
             Headliner is the one manual call here — deliberately not a formula. Organiser ratings are private everywhere except this page, where they're shown to inform your decision.
           </p>
 
-          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
-            <input
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row" style={{ gap: '10px', marginBottom: '12px' }}>
+            <SearchInputBox
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={setSearch}
               placeholder="Search artist name..."
-              style={{ flex: '1 1 220px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              className="lg:flex-1"
             />
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
                 <option key={key} value={key}>{s.label}</option>
               ))}
             </select>
-            <button type="submit" style={{ padding: '10px 18px', borderRadius: '8px', border: 'none', background: 'var(--afa-terracotta)', color: 'var(--afa-white)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+            <button
+              type="submit"
+              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}
+            >
               Search
             </button>
           </form>
@@ -222,7 +226,7 @@ export default function AdminArtistsPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {sorted.length === 0 && !loading && (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No artists match.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No artists match.</p>
             )}
             {sorted.map((a) => {
               const tier = TIER_STYLE[a.sceneStatus]
@@ -230,13 +234,13 @@ export default function AdminArtistsPage() {
                 <div
                   key={a.id}
                   style={{
-                    background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px',
-                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.08)',
+                    background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px',
+                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '12px' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: a.avatar ? `url(${a.avatar}) center/cover` : 'var(--afa-plum-black)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, flexShrink: 0 }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: a.avatar ? `url(${a.avatar}) center/cover` : 'var(--afa-surface-inverse)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-primary)', fontWeight: 700, flexShrink: 0 }}>
                         {!a.avatar && a.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -246,18 +250,18 @@ export default function AdminArtistsPage() {
                             {tier.label}
                           </span>
                         </p>
-                        <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '2px' }}>
+                        <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>
                           {timeInScene(a.firstGigDate)} in the scene
                         </p>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                    <div className="lg:items-end" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
                       {a.isSceneStatusHeadliner ? (
                         <button
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--afa-terracotta)', background: 'var(--afa-surface-raised)', color: 'var(--afa-terracotta)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
                         >
                           Remove Headliner
                         </button>
@@ -267,12 +271,12 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                           />
                           <button
                             onClick={() => handleHeadlinerToggle(a)}
                             disabled={actioningId === a.id}
-                            style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-gold)', color: 'var(--afa-plum-black)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                            style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
                           >
                             ★ Grant Headliner
                           </button>
@@ -281,7 +285,7 @@ export default function AdminArtistsPage() {
                       {a.headlinerNote && (
                         <button
                           onClick={() => setExpandedNote(expandedNote === a.id ? null : a.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'rgba(245,245,240,0.4)', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-secondary)', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                           {expandedNote === a.id ? 'Hide note' : 'View note'}
                         </button>
