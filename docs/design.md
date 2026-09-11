@@ -1750,3 +1750,50 @@ were opened, reviewed, and merged from chat, which has API access.
 **Remaining:** live click-through against Hitesh's real Admin account —
 same constraint as the mobile-nav-v3 Admin follow-up, can't be done from
 either chat or CC's sandbox.
+
+## GEN-2609-021: Admin desktop sidebar + badges + nav cleanup — 11 Sep
+
+Root cause of the redundant-nav observation (Hitesh, live click-through):
+`DashboardShell.tsx`'s desktop sidebar (`ROLE_SECTIONS`) covers Organiser/
+Artist/Venue Owner but Admin was never wrapped in `DashboardShell` at all
+(`dashboard/layout.tsx`'s own comment already said as much) — Overview's
+"Go to" pills and Feedback's legacy "Admin Dashboard" pill header (commented
+`Admin Dashboard v1 (design.md §9.1)`, predates the bottom tab bar) both
+existed as workarounds for that gap.
+
+**Fix (PR #589, merged to `qa`, CI green, zero runtime errors post-deploy):**
+- All 8 Admin pages wrapped in `<DashboardShell>`, matching Organiser's
+  pattern exactly. `diary/page.tsx` needed restructuring first (`SiteNav`
+  was nested inside `<main>` with no fragment). `MOBILE_TAB_BAR_ROUTES`
+  already listed all 8 admin routes, so `DashboardShell`'s own mobile bar
+  stays inert there — confirmed by reading the gating logic, not assumed.
+- **Admin kept structurally separate from `HeldRoles`** — that type/filter
+  mechanism (`held[s.role]`) is specifically for Audience accounts
+  additionally holding Organiser/Artist/Venue Owner. Admin is a single
+  exclusive `session.user.role`, never additive. `RoleKey` widened to
+  include `'ADMIN'` for shared typing, but `ROLE_SECTIONS` itself stays
+  narrowed to the 3 held roles so `held[s.role]` still type-checks; a
+  separate `ADMIN_SECTION` renders gated directly on
+  `session.user.role === 'ADMIN'`.
+- New `settings` gear icon added to `IconName`/`Icon()` — reuses the exact
+  path already used by `admin/page.tsx`'s own local `IconGear()`, not a new
+  shape.
+- Two sidebar badges (Feedback pending, Bookings failed-delivery) reuse
+  existing endpoints with zero server changes: `/api/admin/command-center`'s
+  `kpis.pending`, `/api/admin/bookings?status=errored&limit=1`'s
+  `counts.errored` — the `limit=1` shrinks the unneeded row payload since
+  `counts.errored` is computed independently of that param.
+- Feedback's pill header deleted outright (superseded on every breakpoint
+  now). Overview's "Go to" and the 4 subpages' "Back to Dashboard" links
+  kept but `lg:hidden` — still the only way back on mobile, where there's
+  no sidebar.
+
+**Verification:** diff pulled and spot-checked line-by-line against every
+claim in the handoff before merging (icon reuse, type-narrowing, endpoint
+params, Diary's restructuring, each `lg:hidden` wrap) — all confirmed
+accurate, not taken on summary alone. `tsc`/`eslint` clean per CC; CI green;
+zero runtime errors in the 15 minutes post-deploy.
+
+**Remaining:** live click-through against Hitesh's real Admin account —
+sidebar renders all 8 items with correct badges, no double mobile bar,
+sidebar doesn't leak into other roles' shells.
