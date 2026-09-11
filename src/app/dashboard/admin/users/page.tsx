@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import SearchInputBox from '@/components/SearchInputBox'
@@ -119,9 +120,13 @@ export default function AdminUsersPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+          <div className="lg:hidden">
+            <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          </div>
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             Accounts
@@ -217,6 +222,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

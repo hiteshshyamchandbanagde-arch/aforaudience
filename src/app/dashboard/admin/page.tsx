@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 
 // /dashboard/admin — Command Center (design.md §9.6, session 47)
@@ -280,11 +281,13 @@ export default function AdminCommandCenter() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
             <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -295,6 +298,7 @@ export default function AdminCommandCenter() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
@@ -436,18 +440,23 @@ export default function AdminCommandCenter() {
           </div>
         </div>
 
-        {/* Quick links */}
-        <div style={sectionLabel}>Go to</div>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <QuickLink href="/dashboard/admin/feedback" icon={<IconChat />} label="Feedback board" accent="var(--afa-amber)" />
-          <QuickLink href="/dashboard/admin/bookings" icon={<IconTicket />} label="Bookings" accent="var(--afa-amber)" />
-          <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-amber)" />
-          <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-amber)" />
-          <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-amber)" />
-          <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-amber)" />
+        {/* Quick links - lg:hidden now that the desktop sidebar (added by
+            DashboardShell) covers the same 6 links; still the only
+            quick-nav on mobile, where there's no sidebar. */}
+        <div className="lg:hidden">
+          <div style={sectionLabel}>Go to</div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <QuickLink href="/dashboard/admin/feedback" icon={<IconChat />} label="Feedback board" accent="var(--afa-amber)" />
+            <QuickLink href="/dashboard/admin/bookings" icon={<IconTicket />} label="Bookings" accent="var(--afa-amber)" />
+            <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-amber)" />
+            <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-amber)" />
+            <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-amber)" />
+            <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-amber)" />
+          </div>
         </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

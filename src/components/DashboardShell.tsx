@@ -22,7 +22,7 @@ const SIDEBAR_BORDER = '1px solid rgba(245,245,240,0.08)'
 export type IconName =
   | 'dashboard' | 'ticket' | 'message' | 'user' | 'calendar' | 'plus'
   | 'map' | 'trendUp' | 'dollarSign' | 'briefcase' | 'building' | 'music'
-  | 'grid' | 'more' | 'x' | 'tag'
+  | 'grid' | 'more' | 'x' | 'tag' | 'settings'
 
 // GEN-2609-019 Phase C - exported so MobileTabBar.tsx's new role-specific
 // bars can reuse the exact same icon shapes the desktop sidebar already
@@ -77,14 +77,25 @@ export function Icon({ name, size = 16 }: { name: IconName; size?: number }) {
       return (<svg {...common}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>)
     case 'tag':
       return (<svg {...common}><path d="M12.59 2.59 20.41 10.41a2 2 0 0 1 0 2.83l-6.17 6.17a2 2 0 0 1-2.83 0L3.59 11.59A2 2 0 0 1 3 10.17V4a2 2 0 0 1 2-2h6.17a2 2 0 0 1 1.42.59Z" /><circle cx="7.5" cy="7.5" r="0.5" fill="currentColor" /></svg>)
+    case 'settings':
+      // Same gear shape already used by admin/page.tsx's own local
+      // IconGear() component - matched for visual consistency rather
+      // than inventing a new gear.
+      return (<svg {...common}><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M4.4 4.4l2.1 2.1M17.5 17.5l2.1 2.1M2.5 12h3M18.5 12h3M4.4 19.6l2.1-2.1M17.5 6.5l2.1-2.1" /></svg>)
     default:
       return null
   }
 }
 
-type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER'
+// 'ADMIN' widens this purely for RoleSectionDef.role/RoleSectionBlock's
+// active-key typing below - this type is module-private (never exported),
+// so widening it can't affect HeldRoles (src/lib/held-roles.ts) or any
+// other file. ADMIN_SECTION (below) deliberately stays out of the
+// held-role-filtered ROLE_SECTIONS array; Admin is a single exclusive
+// session.user.role, never an additive held role.
+type RoleKey = 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER' | 'ADMIN'
 
-type BadgeKey = 'venueBookings' | 'flexRequests'
+type BadgeKey = 'venueBookings' | 'flexRequests' | 'adminFeedbackPending' | 'adminBookingsErrored'
 
 type RoleSectionDef = {
   role: RoleKey
@@ -115,7 +126,10 @@ type RoleSectionDef = {
 // for both ORGANISER and VENUE_OWNER (src/app/dashboard/venue-requests/
 // page.tsx is role-gated by callerSide, not two different pages), so it
 // gets one sidebar entry per role rather than living in neither.
-const ROLE_SECTIONS: RoleSectionDef[] = [
+// Narrowed to the 3 held roles specifically (not the wider RoleKey that
+// includes 'ADMIN') so `held[s.role]` below stays a valid HeldRoles
+// index at the type level, not just at runtime.
+const ROLE_SECTIONS: (Omit<RoleSectionDef, 'role'> & { role: 'ORGANISER' | 'ARTIST' | 'VENUE_OWNER' })[] = [
   {
     role: 'ORGANISER',
     icon: 'briefcase',
@@ -160,6 +174,26 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
   },
 ]
 
+// Admin's own section - deliberately NOT part of ROLE_SECTIONS (see the
+// RoleKey comment above: held[s.role] would just silently drop this,
+// since Admin is never a held role). Same order as the mobile nav
+// (MobileTabBar.tsx's adminItems/adminMoreItems) for a consistent mental
+// model across breakpoints.
+const ADMIN_SECTION: RoleSectionDef = {
+  role: 'ADMIN',
+  icon: 'dashboard', // unused by RoleSectionBlock's render, same as every other role's section.icon - just satisfies the type
+  items: [
+    { label: 'Overview', icon: 'dashboard', href: '/dashboard/admin' },
+    { label: 'Bookings', icon: 'ticket', href: '/dashboard/admin/bookings', badgeKey: 'adminBookingsErrored' },
+    { label: 'Revenue', icon: 'dollarSign', href: '/dashboard/admin/revenue' },
+    { label: 'Users', icon: 'user', href: '/dashboard/admin/users' },
+    { label: 'Artists', icon: 'music', href: '/dashboard/admin/artists' },
+    { label: 'Diary', icon: 'calendar', href: '/dashboard/admin/diary' },
+    { label: 'Feedback', icon: 'message', href: '/dashboard/admin/feedback', badgeKey: 'adminFeedbackPending' },
+    { label: 'Settings', icon: 'settings', href: '/dashboard/admin/settings' },
+  ],
+}
+
 // BUG-2609-005: SiteNav's account dropdown (src/components/SiteNav.tsx,
 // same 3 endpoints/gating around lines 186-226) already fetches these
 // counts for its own icon badges, but filtering the dropdown down to just
@@ -174,7 +208,7 @@ const ROLE_SECTIONS: RoleSectionDef[] = [
 // GEN-2609-013 - exported so profile/page.tsx's mobile "Quick links"
 // group can recover the same Dashboard/Messages badge counts the bar
 // below used to show on /profile, without recomputing them separately.
-export function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number } {
+export function useBadgeCounts(): { pendingCount: number; unreadCount: number; pendingCompanionCount: number; venueBookingsPending: number; flexRequestsPending: number; adminFeedbackPending: number; adminBookingsErrored: number } {
   const { data: session } = useSession()
   const user = session?.user as { email?: string | null; role?: string } | undefined
 
@@ -239,7 +273,35 @@ export function useBadgeCounts(): { pendingCount: number; unreadCount: number; p
     return () => { cancelled = true }
   }, [user?.email])
 
-  return { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending }
+  // Admin sidebar badges (ADMIN_SECTION below) - reuse existing endpoints
+  // rather than building new ones. command-center's `kpis.pending` is
+  // already NEW+UNDER_REVIEW feedback count. bookings' `counts.errored`
+  // is computed via its own dedicated count query independent of the
+  // status/limit params - status=errored&limit=1 shrinks the unneeded
+  // detail array to one row without touching the count itself.
+  const [adminFeedbackPending, setAdminFeedbackPending] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'ADMIN') return
+    let cancelled = false
+    fetch('/api/admin/command-center')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setAdminFeedbackPending(data.kpis?.pending ?? 0) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  const [adminBookingsErrored, setAdminBookingsErrored] = useState(0)
+  useEffect(() => {
+    if (user?.role !== 'ADMIN') return
+    let cancelled = false
+    fetch('/api/admin/bookings?status=errored&limit=1')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled && data) setAdminBookingsErrored(data.counts?.errored ?? 0) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user?.role])
+
+  return { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored }
 }
 
 // BUG-2609-007: the sidebar's own "Dashboard" link was hardcoded to
@@ -363,10 +425,18 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { t } = useLocale()
   const { data: session } = useSession()
   const held = useHeldRoles()
-  const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending } = useBadgeCounts()
+  const { pendingCount, unreadCount, pendingCompanionCount, venueBookingsPending, flexRequestsPending, adminFeedbackPending, adminBookingsErrored } = useBadgeCounts()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const badgeFor = (key?: BadgeKey): number | undefined =>
-    key === 'venueBookings' ? venueBookingsPending : key === 'flexRequests' ? flexRequestsPending : undefined
+    key === 'venueBookings' ? venueBookingsPending
+      : key === 'flexRequests' ? flexRequestsPending
+      : key === 'adminFeedbackPending' ? adminFeedbackPending
+      : key === 'adminBookingsErrored' ? adminBookingsErrored
+      : undefined
+
+  // Admin is a single exclusive session.user.role, never an additive held
+  // role - computed independently of `held`/HeldRoles, never added to it.
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN'
 
   const dashboardHref = getShellDashboardLink((session?.user as { role?: string } | undefined)?.role)
 
@@ -381,6 +451,12 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     ORGANISER: t.roles.ORGANISER,
     ARTIST: t.roles.ARTIST,
     VENUE_OWNER: t.roles.VENUE_OWNER,
+    // Hardcoded English, not routed through t.roles/the i18n Dictionary -
+    // matches this file's own established precedent (see the comment
+    // above ROLE_SECTIONS) that sidebar item/section labels stay
+    // hand-written English for these admin-only, single-user surfaces
+    // rather than adding a key across all 11 locale files for it.
+    ADMIN: 'Admin',
   }
   const roleSections = ROLE_SECTIONS.filter((s) => held[s.role])
 
@@ -390,6 +466,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const allEntries: NavEntry[] = [
     ...topNav.map((i) => ({ id: `top:${i.href}`, href: i.href })),
     ...roleSections.flatMap((s) => s.items.map((i) => ({ id: `role:${s.role}:${i.href}`, href: i.href }))),
+    ...(isAdmin ? ADMIN_SECTION.items.map((i) => ({ id: `role:ADMIN:${i.href}`, href: i.href })) : []),
   ]
   const activeId = resolveActiveId(pathname, allEntries)
   const isActive = (id: string) => id === activeId
@@ -482,6 +559,9 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           {roleSections.map((section) => (
             <RoleSectionBlock key={section.role} section={section} roleLabel={roleLabelFor[section.role]} isActive={isActive} badgeFor={badgeFor} />
           ))}
+          {isAdmin && (
+            <RoleSectionBlock section={ADMIN_SECTION} roleLabel={roleLabelFor.ADMIN} isActive={isActive} badgeFor={badgeFor} />
+          )}
         </div>
       </aside>
 

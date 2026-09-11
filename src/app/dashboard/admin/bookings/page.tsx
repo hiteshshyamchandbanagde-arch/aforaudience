@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 
 // /dashboard/admin/bookings
 //
@@ -124,6 +125,7 @@ export default function AdminBookingsPage() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
@@ -132,6 +134,7 @@ export default function AdminBookingsPage() {
             <p style={{ color: 'var(--afa-text-secondary)' }}>This page is restricted to platform administrators.</p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -174,6 +177,7 @@ export default function AdminBookingsPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px 80px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
@@ -322,6 +326,7 @@ export default function AdminBookingsPage() {
           )}
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }
