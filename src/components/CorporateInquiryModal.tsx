@@ -63,7 +63,7 @@ const FIELD_LIMITS: Record<string, number> = {
 const MESSAGE_LIMIT = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }
+const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", outline: "none", boxSizing: "border-box" }
 
 // Small shared field renderer so the row-pairing below (19 Aug) doesn't
 // repeat the label+input markup five times over. wrapperStyle is how a
@@ -180,7 +180,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             </p>
             <button
               onClick={handleClose}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: "pointer" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: "pointer" }}
             >
               Done
             </button>
@@ -197,7 +197,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             </div>
 
             {error && (
-              <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "10px 14px", marginBottom: "14px", fontSize: "13px", color: "var(--afa-terracotta)" }}>
+              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "14px", fontSize: "13px", color: "var(--afa-error)" }}>
                 {error}
               </div>
             )}
@@ -281,7 +281,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             <button
               onClick={handleSubmit}
               disabled={loading}
-              style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "10px" }}
+              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "10px" }}
             >
               {loading ? "Sending..." : "Send Inquiry"}
             </button>

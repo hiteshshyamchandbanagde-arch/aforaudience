@@ -436,7 +436,7 @@ export default function MobileTabBar() {
               href={item.href}
               replace={item.nav === 'replace'}
               className="relative flex flex-1 flex-col items-center gap-1 py-1.5"
-              style={{ color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.55 }}
+              style={{ color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: active ? 1 : 0.55 }}
             >
               <span style={{ position: 'relative', display: 'inline-flex' }}>
                 <item.Icon style={{ width: 22, height: 22 }} filled={item.id === 'saved' && active} />
@@ -481,7 +481,7 @@ export default function MobileTabBar() {
             type="button"
             onClick={() => setMoreOpen(true)}
             className="flex flex-1 flex-col items-center gap-1 py-1.5"
-            style={{ color: moreActive ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55, background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ color: moreActive ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55, background: 'none', border: 'none', cursor: 'pointer' }}
           >
             <DashboardIcon name="more" size={22} />
             <span

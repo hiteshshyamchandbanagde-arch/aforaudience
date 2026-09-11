@@ -123,7 +123,7 @@ export default function AuthPromptSheet({
         </div>
 
         {error && (
-          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "var(--afa-terracotta)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "var(--afa-error)" }}>
             {error}
           </div>
         )}
@@ -144,7 +144,7 @@ export default function AuthPromptSheet({
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-ink)", background: "white", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}
@@ -153,14 +153,14 @@ export default function AuthPromptSheet({
         <button
           onClick={handleSignIn}
           disabled={loading}
-          style={{ width: "100%", background: "var(--afa-terracotta)", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
+          style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
         >
           {loading ? "Signing in..." : "Sign In & Continue"}
         </button>
 
         <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
           New here?{" "}
-          <Link href="/register" style={{ color: "var(--afa-terracotta)", fontWeight: 600, textDecoration: "none" }}>
+          <Link href="/register" style={{ color: "var(--afa-amber)", fontWeight: 600, textDecoration: "none" }}>
             Create an account
           </Link>
         </div>
