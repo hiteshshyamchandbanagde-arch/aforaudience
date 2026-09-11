@@ -48,12 +48,6 @@ interface Counts {
 
 type Tab = 'errored' | 'pending' | 'delivered' | 'all'
 
-const BRAND_BG = 'var(--afa-cream)'
-const BRAND_INK = 'var(--afa-ink)'
-const BRAND_ACCENT = 'var(--afa-orange-dark)' // warm-orange for retry / errors
-const BRAND_MUTED = 'rgba(14,12,10,0.55)'
-const CARD_BORDER = '1px solid rgba(14,12,10,0.08)'
-
 export default function AdminBookingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -118,7 +112,9 @@ export default function AdminBookingsPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ padding: '32px', fontFamily: 'system-ui, sans-serif', color: BRAND_INK }}>Loading…</div>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+          <div style={{ padding: '32px', color: 'var(--afa-text-primary)' }}>Loading…</div>
+        </main>
       </>
     )
   }
@@ -128,12 +124,12 @@ export default function AdminBookingsPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: BRAND_BG, fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px', color: BRAND_INK }}>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
               Admin access only
             </h1>
-            <p style={{ color: BRAND_MUTED }}>This page is restricted to platform administrators.</p>
+            <p style={{ color: 'var(--afa-text-secondary)' }}>This page is restricted to platform administrators.</p>
           </div>
         </main>
       </>
@@ -147,14 +143,14 @@ export default function AdminBookingsPage() {
         key={id}
         onClick={() => setTab(id)}
         style={{
-          padding: '8px 14px',
+          padding: '7px 14px',
           borderRadius: '999px',
-          border: active ? `1px solid ${BRAND_INK}` : CARD_BORDER,
-          background: active ? BRAND_INK : 'var(--afa-white)',
-          color: active ? BRAND_BG : BRAND_INK,
-          fontSize: '14px',
+          border: active ? '1px solid transparent' : '1px solid rgba(245,245,240,0.14)',
+          background: active ? 'rgba(201,151,58,0.15)' : 'transparent',
+          color: active ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
+          fontSize: '13px',
+          fontWeight: 600,
           cursor: 'pointer',
-          fontFamily: 'system-ui, sans-serif',
         }}
       >
         {label} <span style={{ opacity: 0.7, marginLeft: '4px' }}>({count})</span>
@@ -171,17 +167,19 @@ export default function AdminBookingsPage() {
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }
-    if (b.deliveryError) return { label: 'Delivery failed', color: BRAND_ACCENT }
-    return { label: 'Pending delivery', color: BRAND_MUTED }
+    if (b.deliveryError) return { label: 'Delivery failed', color: 'var(--afa-error)' }
+    return { label: 'Pending delivery', color: 'var(--afa-amber)' }
   }
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: BRAND_BG, fontFamily: 'system-ui, sans-serif', color: BRAND_INK }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', marginBottom: '4px' }}>Bookings & delivery</h1>
-          <p style={{ color: BRAND_MUTED, marginBottom: '20px', fontSize: '14px' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px 80px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+            Bookings &amp; delivery
+          </h1>
+          <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '20px', fontSize: '14px' }}>
             Confirmed bookings, grouped by ticket-delivery state. Retry re-fires the delivery pipeline on failed
             attempts (30-second cooldown enforced by the endpoint).
           </p>
@@ -194,9 +192,9 @@ export default function AdminBookingsPage() {
           </div>
 
           {loading ? (
-            <div style={{ padding: '32px 0', color: BRAND_MUTED }}>Loading bookings…</div>
+            <div style={{ padding: '32px 0', color: 'var(--afa-text-secondary)' }}>Loading bookings…</div>
           ) : bookings.length === 0 ? (
-            <div style={{ padding: '48px 0', textAlign: 'center', color: BRAND_MUTED }}>
+            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--afa-text-secondary)' }}>
               {tab === 'errored'
                 ? 'Nothing failed. Ticket delivery is healthy.'
                 : tab === 'pending'
@@ -204,7 +202,7 @@ export default function AdminBookingsPage() {
                 : 'No bookings match this filter.'}
             </div>
           ) : (
-            <div>
+            <div className="flex flex-col gap-3">
               {bookings.map((b) => {
                 const s = rowState(b)
                 const isErrored = !b.deliveredAt && !!b.deliveryError
@@ -214,43 +212,42 @@ export default function AdminBookingsPage() {
                   <div
                     key={b.id}
                     style={{
-                      background: 'var(--afa-surface-raised)',
+                      background: 'var(--afa-surface-page)',
                       borderRadius: '12px',
                       padding: '18px 20px',
-                      border: CARD_BORDER,
-                      marginBottom: '12px',
+                      border: '1px solid rgba(245,245,240,0.08)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
-                      <div style={{ flex: 1, minWidth: '260px' }}>
-                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '2px' }}>
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
-                            <span style={{ marginLeft: '8px', fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: BRAND_BG, color: BRAND_MUTED, fontWeight: 400 }}>
+                            <span style={{ marginLeft: '8px', fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)', fontWeight: 500 }}>
                               FREE
                             </span>
                           ) : null}
                         </div>
-                        <div style={{ fontSize: '13px', color: BRAND_MUTED, marginBottom: '6px' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>
                           {displayName} — {b.user.email}
                         </div>
-                        <div style={{ fontSize: '12px', color: BRAND_MUTED, fontFamily: 'ui-monospace, monospace' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'ui-monospace, monospace' }}>
                           {b.id}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right', fontSize: '13px' }}>
+                      <div className="text-left lg:text-right" style={{ fontSize: '13px', flexShrink: 0 }}>
                         <div style={{ fontWeight: 600, color: s.color }}>{s.label}</div>
-                        <div style={{ color: BRAND_MUTED, marginTop: '2px' }}>{formatDate(b.createdAt)}</div>
+                        <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px' }}>{formatDate(b.createdAt)}</div>
                         {isDelivered && b.deliveredAt ? (
-                          <div style={{ color: BRAND_MUTED, marginTop: '2px', fontSize: '12px' }}>
+                          <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px', fontSize: '12px' }}>
                             Delivered {formatDate(b.deliveredAt)}
                           </div>
                         ) : null}
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '10px', fontSize: '13px', display: 'flex', gap: '16px', flexWrap: 'wrap', color: BRAND_MUTED }}>
-                      <span>Total: <strong style={{ color: BRAND_INK }}>{formatMoney(b.totalAmount)}</strong></span>
+                    <div style={{ marginTop: '10px', fontSize: '13px', display: 'flex', gap: '16px', flexWrap: 'wrap', color: 'var(--afa-text-secondary)' }}>
+                      <span>Total: <strong style={{ color: 'var(--afa-text-primary)' }}>{formatMoney(b.totalAmount)}</strong></span>
                       {b.bookingFeeAmount > 0 ? <span>Fee: {formatMoney(b.bookingFeeAmount)}</span> : null}
                       {b.payment ? (
                         <span>
@@ -267,11 +264,11 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '12px',
                           padding: '10px 12px',
-                          background: 'rgba(194,65,12,0.06)',
-                          border: '1px solid rgba(194,65,12,0.2)',
+                          background: 'rgba(179,38,30,0.12)',
+                          border: '1px solid rgba(179,38,30,0.3)',
                           borderRadius: '8px',
                           fontSize: '13px',
-                          color: BRAND_INK,
+                          color: 'var(--afa-error)',
                           fontFamily: 'ui-monospace, monospace',
                           whiteSpace: 'pre-wrap',
                           wordBreak: 'break-word',
@@ -286,7 +283,7 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '10px',
                           fontSize: '13px',
-                          color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : BRAND_ACCENT,
+                          color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : 'var(--afa-error)',
                         }}
                       >
                         {retryMessage.text}
@@ -302,11 +299,12 @@ export default function AdminBookingsPage() {
                             padding: '8px 16px',
                             borderRadius: '999px',
                             border: 'none',
-                            background: retryingId === b.id ? BRAND_MUTED : BRAND_ACCENT,
-                            color: 'var(--afa-white)',
+                            background: 'var(--afa-fill-solid)',
+                            color: 'var(--afa-on-fill-solid)',
                             fontSize: '13px',
+                            fontWeight: 600,
                             cursor: retryingId === b.id ? 'default' : 'pointer',
-                            fontFamily: 'system-ui, sans-serif',
+                            opacity: retryingId === b.id ? 0.6 : 1,
                           }}
                         >
                           {retryingId === b.id
