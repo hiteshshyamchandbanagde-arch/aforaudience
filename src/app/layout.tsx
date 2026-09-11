@@ -194,7 +194,7 @@ export default function RootLayout({
                     height: clamp(240px, 68vw, 440px);
                     animation: intro-icon-shrink 350ms ease 750ms both;
                   }
-                  #intro-wordmark { font-family: Georgia, serif; font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-on-fill-solid); }
+                  #intro-wordmark { font-family: var(--font-display); font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-text-primary); }
                   .intro-letter { opacity: 0; display: inline-block; }
                   #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: var(--afa-surface-raised); opacity: 0; }
                   #intro-tagline { font-family: Georgia, serif; font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
