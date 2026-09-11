@@ -1797,3 +1797,23 @@ zero runtime errors in the 15 minutes post-deploy.
 **Remaining:** live click-through against Hitesh's real Admin account —
 sidebar renders all 8 items with correct badges, no double mobile bar,
 sidebar doesn't leak into other roles' shells.
+
+## GEN-2609-022: remove Admin Overview's redundant "Go to" section — 11 Sep
+
+Follow-up correction to GEN-2609-021. That ticket kept Overview's "Go to"
+`lg:hidden`, reasoning it was still the only quick-nav on mobile since the
+new sidebar is desktop-only. Hitesh caught the flaw live: the bottom tab
+bar's primary 4 (Overview/Bookings/Revenue/Users) plus the More sheet
+(Artists/Diary/Feedback/Settings) already reach every one of the section's
+6 links in at most one extra tap on mobile too — "no sidebar" was
+incorrectly treated as "no nav," when the tab bar already is that nav.
+
+Removed entirely (commit `2252fd1`, direct chat commit — small, scoped,
+Hitesh on mobile, per the standing exception), including the now-dead
+icon/component code left behind (`IconBook`, `IconChat`, `IconUsersIcon`,
+`IconGear`, `IconBars`, `QuickLink`) rather than leaving it as unused
+weight. `IconTicket` kept — still used by the "This month" bookings tile.
+Verified via `esbuild` parse (clean, sandbox has no installed
+node_modules for a full `tsc` run) and a grep sweep confirming no dangling
+references to any removed symbol, then confirmed for real by the Vercel
+build itself succeeding. Zero runtime errors post-deploy.
