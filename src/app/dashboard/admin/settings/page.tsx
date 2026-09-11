@@ -501,7 +501,7 @@ export default function AdminSettingsPage() {
             <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>
               This page is only visible to platform admins.
             </p>
-            <Link href="/" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>
+            <Link href="/" style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>
               ← Home
             </Link>
           </div>
@@ -522,8 +522,8 @@ export default function AdminSettingsPage() {
         }}
       >
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 64px' }}>
-        <div style={{ fontSize: 12, color: 'var(--afa-taupe)', marginBottom: 6, letterSpacing: '0.04em' }}>
-          <Link href="/dashboard/admin" style={{ color: 'var(--afa-taupe)', textDecoration: 'none' }}>
+        <div style={{ fontSize: 12, color: 'var(--afa-text-secondary)', marginBottom: 6, letterSpacing: '0.04em' }}>
+          <Link href="/dashboard/admin" style={{ color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
             ← Admin
           </Link>{' '}
           / Settings
@@ -542,7 +542,7 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -551,7 +551,7 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Audience booking fee
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             A small flat fee added to each paid ticket at checkout — the platform's only revenue at MVP. Audiences can adjust it within the band below; "standard" is what's pre-filled for them. Shown as a separate line item with a short "supports the artist ecosystem" note. Set standard and min to ₹0 to make the fee fully optional; free events are never charged a fee regardless.
           </p>
 
@@ -566,7 +566,7 @@ export default function AdminSettingsPage() {
                   display: 'block',
                   fontSize: 12,
                   fontWeight: 700,
-                  color: 'var(--afa-terracotta)',
+                  color: 'var(--afa-amber)',
                   letterSpacing: '0.06em',
                   marginBottom: 6,
                 }}
@@ -589,19 +589,19 @@ export default function AdminSettingsPage() {
                     borderRadius: 6,
                     border: '1px solid rgba(245,245,240,0.15)',
                     fontSize: 15,
-                    background: 'white',
-                    color: 'var(--afa-ink)',
+                    background: 'var(--afa-surface-inverse)',
+                    color: 'var(--afa-text-primary)',
                   }}
                 />
               </div>
             </div>
           ))}
           {Number(minFeeRupees) > Number(feeRupees) || Number(feeRupees) > Number(maxFeeRupees) ? (
-            <p style={{ fontSize: 11, color: 'var(--afa-error, #b3261e)', marginBottom: 8 }}>
+            <p style={{ fontSize: 11, color: 'var(--afa-error)', marginBottom: 8 }}>
               Min must be ≤ standard, and standard must be ≤ max.
             </p>
           ) : null}
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)', marginBottom: 20 }}>
             Absolute ceiling (code-level, requires a deploy to change): ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
           </p>
 
@@ -609,8 +609,8 @@ export default function AdminSettingsPage() {
             onClick={save}
             disabled={saving || !isDirty || !isValid}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: 8,
@@ -626,7 +626,7 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -636,7 +636,7 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Support chat message cap
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             The support chatbot is free to use for everyone — guests and paying audience alike — no gate, no login required. This cap only bounds how many messages a single visitor can send per browser session, as a cost/abuse guard. Once reached, the chat tab points them to the feedback form instead. Set to 0 to disable chat entirely (emergency killswitch) without a deploy.
           </p>
 
@@ -645,7 +645,7 @@ export default function AdminSettingsPage() {
               display: 'block',
               fontSize: 12,
               fontWeight: 700,
-              color: 'var(--afa-terracotta)',
+              color: 'var(--afa-amber)',
               letterSpacing: '0.06em',
               marginBottom: 6,
             }}
@@ -667,12 +667,12 @@ export default function AdminSettingsPage() {
                 borderRadius: 6,
                 border: '1px solid rgba(245,245,240,0.15)',
                 fontSize: 15,
-                background: 'white',
-                color: 'var(--afa-ink)',
+                background: 'var(--afa-surface-inverse)',
+                color: 'var(--afa-text-primary)',
               }}
             />
           </div>
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)', marginBottom: 20 }}>
             Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
           </p>
 
@@ -680,8 +680,8 @@ export default function AdminSettingsPage() {
             onClick={saveChatCap}
             disabled={chatSaving || !isChatCapDirty || !isChatCapValid}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: 8,
@@ -697,7 +697,7 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -707,11 +707,11 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Scene Status thresholds
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             Rising and Featured are automatic, computed live on every profile/poster view — changes here take effect immediately, no deploy needed. Headliner isn't configurable here — it's a fully manual, admin-only tag (set per-artist), deliberately not earned via any formula.
           </p>
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
             RISING — MIN COMPLETED GIGS
           </label>
           <input
@@ -722,10 +722,10 @@ export default function AdminSettingsPage() {
             value={risingMinGigs}
             onChange={(e) => setRisingMinGigs(e.target.value)}
             placeholder="3"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
             RISING — MIN AVERAGE REVIEW RATING (0–5)
           </label>
           <input
@@ -737,10 +737,10 @@ export default function AdminSettingsPage() {
             value={risingMinAvgRating}
             onChange={(e) => setRisingMinAvgRating(e.target.value)}
             placeholder="4.0"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
             RISING — MIN VERIFIED ATTENDEES
           </label>
           <input
@@ -751,10 +751,10 @@ export default function AdminSettingsPage() {
             value={risingMinAttendees}
             onChange={(e) => setRisingMinAttendees(e.target.value)}
             placeholder="5"
-            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'white', color: 'var(--afa-ink)' }}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, marginBottom: 16, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
             FEATURED — MIN DISTINCT ORGANISERS WHO VOUCHED
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -766,92 +766,19 @@ export default function AdminSettingsPage() {
               value={featuredVouchThreshold}
               onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
               placeholder="5"
-              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
+              style={{ flex: 1, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
           </div>
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)', marginBottom: 20 }}>
             Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
-          </p>
-
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
-            ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
-          </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              step="1"
-              value={rosterLookback}
-              onChange={(e) => setRosterLookback(e.target.value)}
-              placeholder="5"
-              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
-            />
-            <button
-              onClick={saveRosterLookback}
-              disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}
-              style={{
-                background: 'var(--afa-terracotta)',
-                color: 'white',
-                padding: '9px 16px',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 'default' : 'pointer',
-                opacity: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 0.5 : 1,
-              }}
-            >
-              {rosterLookbackSaving ? 'Saving…' : 'Save'}
-            </button>
-          </div>
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
-            Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-terracotta)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
-          </p>
-
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>
-            EVENT CREATION WINDOW (MONTHS OUT, MAX)
-          </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={24}
-              step="1"
-              value={eventWindow}
-              onChange={(e) => setEventWindow(e.target.value)}
-              placeholder="3"
-              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }}
-            />
-            <button
-              onClick={saveEventWindow}
-              disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}
-              style={{
-                background: 'var(--afa-terracotta)',
-                color: 'white',
-                padding: '9px 16px',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 'default' : 'pointer',
-                opacity: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 0.5 : 1,
-              }}
-            >
-              {eventWindowSaving ? 'Saving…' : 'Save'}
-            </button>
-          </div>
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
-            How far out an organiser can pick an event date on Create/Edit Event without contacting admin. Enforced server-side (not just the date-picker's max) — capped at 24 months here as a sanity backstop.
           </p>
 
           <button
             onClick={saveSceneStatusThresholds}
             disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: 8,
@@ -867,7 +794,106 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
+            border: '1px solid rgba(245,245,240,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Hype Score lookback window
+          </h2>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            ADMIN ROSTER — HYPE SCORE LOOKBACK (RECENT N SCORED SHOWS)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step="1"
+              value={rosterLookback}
+              onChange={(e) => setRosterLookback(e.target.value)}
+              placeholder="5"
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            />
+            <button
+              onClick={saveRosterLookback}
+              disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}
+              style={{
+                background: 'var(--afa-fill-solid)',
+                color: 'var(--afa-on-fill-solid)',
+                padding: '9px 16px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 'default' : 'pointer',
+                opacity: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 0.5 : 1,
+              }}
+            >
+              {rosterLookbackSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)' }}>
+            Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
+            border: '1px solid rgba(245,245,240,0.08)',
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 20,
+          }}
+        >
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+            Event-creation forward window
+          </h2>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
+            EVENT CREATION WINDOW (MONTHS OUT, MAX)
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={24}
+              step="1"
+              value={eventWindow}
+              onChange={(e) => setEventWindow(e.target.value)}
+              placeholder="3"
+              style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            />
+            <button
+              onClick={saveEventWindow}
+              disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}
+              style={{
+                background: 'var(--afa-fill-solid)',
+                color: 'var(--afa-on-fill-solid)',
+                padding: '9px 16px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 'default' : 'pointer',
+                opacity: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 0.5 : 1,
+              }}
+            >
+              {eventWindowSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)' }}>
+            How far out an organiser can pick an event date on Create/Edit Event without contacting admin. Enforced server-side (not just the date-picker's max) — capped at 24 months here as a sanity backstop.
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -877,7 +903,7 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Direct payouts (Razorpay Route)
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             Razorpay Route (auto-split payouts) isn't available on the current account tier — confirmed against RBI's 2025 Payment Aggregator Directions, which require ₹40L+ turnover. K2 payouts run on a manual two-step transfer model instead. This is OFF by default so organisers aren't shown a linking flow that can't work. Flip on only if the account tier changes and Route needs re-testing.
           </p>
 
@@ -898,7 +924,7 @@ export default function AdminSettingsPage() {
               display: 'block',
               fontSize: 12,
               fontWeight: 700,
-              color: 'var(--afa-terracotta)',
+              color: 'var(--afa-amber)',
               letterSpacing: '0.06em',
               marginBottom: 6,
             }}
@@ -918,11 +944,11 @@ export default function AdminSettingsPage() {
               fontSize: 15,
               marginBottom: 8,
               opacity: directPayoutsEnabled ? 1 : 0.5,
-              background: 'white',
-              color: 'var(--afa-ink)',
+              background: 'var(--afa-surface-inverse)',
+              color: 'var(--afa-text-primary)',
             }}
           />
-          <p style={{ fontSize: 11, color: 'var(--afa-taupe)', marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)', marginBottom: 20 }}>
             Lazy-checked on read, no cron job — leave blank for no auto-expiry. If set, this flips back to disabled on its own past that time, without needing to remember to uncheck it.
           </p>
 
@@ -930,8 +956,8 @@ export default function AdminSettingsPage() {
             onClick={saveDirectPayouts}
             disabled={directPayoutsSaving || !isDirectPayoutsDirty}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: 8,
@@ -947,7 +973,7 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -957,25 +983,25 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Audience Choice default weights
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             Applies to any Competition Show event that hasn't set its own override on the Edit Event page. Must sum to 100, Audience must be at least 50 (the "Audience Choice" floor — otherwise it stops being genuinely audience-driven).
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
-              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-terracotta)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'white', color: 'var(--afa-ink)' }} />
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
           </div>
-          <p style={{ fontSize: 11, color: voteWeightsSum === 100 ? 'var(--afa-taupe)' : 'var(--afa-terracotta)', marginBottom: 16 }}>
+          <p style={{ fontSize: 11, color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error)', marginBottom: 16 }}>
             Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
           </p>
 
@@ -983,8 +1009,8 @@ export default function AdminSettingsPage() {
             onClick={saveVoteWeightDefaults}
             disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}
             style={{
-              background: 'var(--afa-terracotta)',
-              color: 'white',
+              background: 'var(--afa-fill-solid)',
+              color: 'var(--afa-on-fill-solid)',
               padding: '10px 20px',
               border: 'none',
               borderRadius: 8,
@@ -1000,7 +1026,7 @@ export default function AdminSettingsPage() {
 
         <div
           style={{
-            background: 'white',
+            background: 'var(--afa-surface-page)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 12,
             padding: 24,
@@ -1010,12 +1036,12 @@ export default function AdminSettingsPage() {
           <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Display currency rates
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--afa-taupe)', lineHeight: 1.6, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
             Rates behind the display-only currency preference in profiles and checkout — a user who picks e.g. USD sees prices converted at this rate alongside the real ₹ amount. Manually set, not a live feed; update here whenever a rate drifts noticeably. Real charges and settlement are always in Indian Rupees regardless of these values.
           </p>
 
           {currencyRates.length === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--afa-taupe)' }}>No currencies configured yet.</p>
+            <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)' }}>No currencies configured yet.</p>
           ) : (
             currencyRates.map((c) => {
               const inputValue = rateInputs[c.code] ?? String(c.rateFromINR)
@@ -1036,7 +1062,7 @@ export default function AdminSettingsPage() {
                   <div style={{ width: 92, fontSize: 14, flexShrink: 0 }}>
                     {c.symbol} {c.code}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--afa-taupe)', flexShrink: 0 }}>1 ₹ =</div>
+                  <div style={{ fontSize: 12, color: 'var(--afa-text-secondary)', flexShrink: 0 }}>1 ₹ =</div>
                   <input
                     type="number"
                     inputMode="decimal"
@@ -1050,16 +1076,16 @@ export default function AdminSettingsPage() {
                       borderRadius: 6,
                       border: '1px solid rgba(245,245,240,0.15)',
                       fontSize: 14,
-                      background: 'white',
-                      color: 'var(--afa-ink)',
+                      background: 'var(--afa-surface-inverse)',
+                      color: 'var(--afa-text-primary)',
                     }}
                   />
                   <button
                     onClick={() => saveCurrencyRate(c.code)}
                     disabled={savingCode === c.code || !isDirtyRow || !isValidRow}
                     style={{
-                      background: 'var(--afa-terracotta)',
-                      color: 'white',
+                      background: 'var(--afa-fill-solid)',
+                      color: 'var(--afa-on-fill-solid)',
                       padding: '8px 16px',
                       border: 'none',
                       borderRadius: 6,
@@ -1077,7 +1103,7 @@ export default function AdminSettingsPage() {
           )}
         </div>
 
-        <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-taupe)', lineHeight: 1.6 }}>
+        <div style={{ marginTop: 32, fontSize: 12, color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>
           <strong style={{ color: 'var(--afa-text-primary)', fontWeight: 700 }}>Current behavior:</strong>{' '}
           {initialPaise === 0 && initialMinPaise === 0
             ? 'No booking fee is charged by default, and audiences can leave it at ₹0. Checkout, ticket PDFs, and email receipts show only the ticket price unless they raise it.'
