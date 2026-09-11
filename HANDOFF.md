@@ -14,6 +14,20 @@
 
 `GEN-2609-020` and `GEN-2609-021` marked `RESOLVED`/`deployStage: DEPLOYED_QA` in the Feedback table, confirmed by Hitesh. `GEN-2609-022` still `BUILD_COMPLETE` - not yet live-clicked-through, just deploy-confirmed.
 
+## Independent verification (Claude Code, 11 Sept 2026)
+
+Confirmed from direct first-hand knowledge, not a summary re-read: this
+session authored both GEN-2609-020's 8-page reskin PRs and GEN-2609-021's
+sidebar PR end to end. Every technical claim above about those two
+tickets matches what was actually built - Diary's pattern-setting choices
+(always-visible form, 3-level surface mapping), the Artists real-enum
+correction, Settings' 6-to-8 card regroup, the `RoleKey`/`ROLE_SECTIONS`
+type-narrowing so `held[s.role]` still type-checks, the two badges
+sourced from existing endpoints with zero new server code, and the
+`settings` icon reusing `IconGear()`'s exact path. No corrections needed.
+This session has no further code changes beyond what's already merged at
+this HEAD - nothing to add to the open-items list below.
+
 ## Open items for next session
 
 - **GEN-2609-022 live click-through** - confirm the Go-to section is actually gone on a real device, not just deploy-confirmed. Then mark `RESOLVED`.
