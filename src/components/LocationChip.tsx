@@ -95,7 +95,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
       : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
       <button type="button" onClick={() => setOpen((v) => !v)} style={chipStyle}>
         {variant !== 'topbar' && <span aria-hidden>📍</span>}
         <span>{label}</span>
