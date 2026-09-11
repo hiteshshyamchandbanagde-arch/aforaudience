@@ -96,6 +96,19 @@ const MAX_ATTACHMENT_DIMENSION = 1280; // px, longest side, before compression
 const JPEG_QUALITY = 0.7;
 const MAX_ATTACHMENT_BYTES = 1_000_000; // matches server's ~1.4MB data-URL cap with base64 overhead
 
+// Re-homed off the tab bar (previously overlapped it at a flat
+// bottom:20, which is why the now-removed clearance padding existed
+// elsewhere). Mirrors `body.afa-mobile-tab-bar-active` in globals.css
+// (`calc(64px + env(safe-area-inset-bottom))`) rather than a hardcoded
+// guess, so this stays in sync if that height ever changes. Only
+// applies below the same 1023px breakpoint the tab bar itself renders
+// at (`lg:hidden` elsewhere in this codebase) - desktop keeps its
+// original flat offsets, since there's no tab bar there to clear.
+const MOBILE_TAB_BAR_HEIGHT = 'calc(64px + env(safe-area-inset-bottom))';
+const CHAT_BUTTON_MOBILE_BOTTOM = `calc(${MOBILE_TAB_BAR_HEIGHT} + 8px)`;
+const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + 56px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
+const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
+
 export default function SupportWidget() {
   const pathname = usePathname();
   const [panel, setPanel] = useState<Panel>('closed');
@@ -410,19 +423,27 @@ export default function SupportWidget() {
 
   return (
     <>
+      <style>{`
+        .afa-support-chat-btn { bottom: 20px; }
+        .afa-support-chat-panel { bottom: 88px; max-height: calc(100vh - 140px); }
+        @media (max-width: 1023px) {
+          .afa-support-chat-btn { bottom: ${CHAT_BUTTON_MOBILE_BOTTOM}; }
+          .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
+        }
+      `}</style>
       <button
+        className="afa-support-chat-btn"
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
         title={panel === 'closed' ? 'Chat with us' : 'Close'}
         style={{
           position: 'fixed',
           right: 20,
-          bottom: 20,
           zIndex: 45,
           width: 56,
           height: 56,
           borderRadius: '50%',
-          background: 'var(--afa-fill-solid)',
+          background: 'var(--afa-amber)',
           color: 'var(--afa-on-fill-solid)',
           border: 'none',
           boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
@@ -441,17 +462,16 @@ export default function SupportWidget() {
 
       {panel !== 'closed' && (
         <div
+          className="afa-support-chat-panel"
           role="dialog"
           aria-label="Support"
           style={{
             position: 'fixed',
             right: 20,
-            bottom: 88,
             zIndex: 45,
             width: 340,
             maxWidth: 'calc(100vw - 40px)',
             height: 460,
-            maxHeight: 'calc(100vh - 140px)',
             background: 'var(--afa-surface-raised)',
             borderRadius: 16,
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
