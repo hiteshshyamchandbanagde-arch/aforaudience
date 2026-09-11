@@ -1979,3 +1979,42 @@ Jul surfaced in the scan, not a regression).
 
 Logged to the Feedback table as `GEN-2609-026` (`RESOLVED`,
 `deployStage: DEPLOYED_QA`).
+
+## GEN-2609-027: fix invisible wordmark in the intro splash animation — 11 Sep
+
+Bug root-caused at the very start of this session's work (traced from
+a real-device screenshot showing only the orange "A" legible against
+black, with "forAudience" effectively invisible), fix dispatched and
+shipped now. Different component from `GEN-2609-023`'s wordmark fix —
+this is `#intro-wordmark`, the session-once typing-animation splash in
+`layout.tsx` (gated by `sessionStorage`), not `MobileTopBar.tsx`'s or
+`HomeHeader.tsx`'s wordmark. Same underlying mistake, separate fix.
+
+**Root cause:** `#intro-wordmark` set `color: var(--afa-on-fill-solid)`
+— a dark brown token correct for text sitting *on* the orange CTA fill
+(`--afa-fill-solid`), for contrast. This splash sits on
+`--afa-surface-inverse` (near-black) instead, so "forAudience" rendered
+dark-on-near-black.
+
+**Fix (`qa` `af2a323`, PR #594):** `color` → `var(--afa-text-primary)`,
+the cream token already used everywhere else text sits on this
+background. Also swapped `font-family` from the literal `Georgia,
+serif` to `var(--font-display)`, matching the other three wordmark
+instances already moved to that token in `GEN-2609-023`, rather than
+leaving one of four still hardcoded.
+
+**Verification:** CC verified rather than assumed `var(--font-display)`
+resolves this early in the page lifecycle — `getComputedStyle` on the
+live splash confirmed `fontFamily` resolves to `Archivo, "Archivo
+Fallback"` and `color` to `rgb(245,245,240)`. Fresh-session screenshots
+(no `sessionStorage`) at 375/414px confirm "AforAudience" fully legible
+throughout the typing animation. Tagline color (amber) and the
+three-bar fill animation confirmed unaffected; `MobileTopBar.tsx`/
+`HomeHeader.tsx` untouched — diff scoped to a single line in
+`layout.tsx`. `tsc` clean, CI green, fresh head SHA re-fetched
+immediately before the merge PUT, `qa` HEAD and file content verified
+post-merge via the Contents API, build completed clean (54s), zero
+runtime errors in the 15 minutes post-deploy.
+
+Logged to the Feedback table as `GEN-2609-027` (`RESOLVED`,
+`deployStage: DEPLOYED_QA`).
