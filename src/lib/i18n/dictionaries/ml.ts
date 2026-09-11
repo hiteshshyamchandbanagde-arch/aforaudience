@@ -48,6 +48,7 @@ const ml: Dictionary = {
   },
   search: {
     placeholder: "ഇവന്റുകൾ, കലാകാരന്മാർ, വേദികൾ തിരയുക...",
+    mobileTopBarPlaceholder: "തിരയുക...",
     searching: "തിരയുന്നു...",
     noResultsFor: '"{query}" ന് ഫലങ്ങളൊന്നുമില്ല',
   },

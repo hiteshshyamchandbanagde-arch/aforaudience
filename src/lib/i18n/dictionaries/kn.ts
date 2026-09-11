@@ -48,6 +48,7 @@ const kn: Dictionary = {
   },
   search: {
     placeholder: "ಈವೆಂಟ್‌ಗಳು, ಕಲಾವಿದರು, ಸ್ಥಳಗಳನ್ನು ಹುಡುಕಿ...",
+    mobileTopBarPlaceholder: "ಹುಡುಕಿ...",
     searching: "ಹುಡುಕುತ್ತಿದೆ...",
     noResultsFor: '"{query}" ಗೆ ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ',
   },

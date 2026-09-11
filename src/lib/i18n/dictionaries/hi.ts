@@ -47,6 +47,7 @@ const hi: Dictionary = {
   },
   search: {
     placeholder: "इवेंट्स, कलाकार, स्थल खोजें...",
+    mobileTopBarPlaceholder: "खोजें...",
     searching: "खोज जारी है...",
     noResultsFor: '"{query}" के लिए कोई परिणाम नहीं',
   },

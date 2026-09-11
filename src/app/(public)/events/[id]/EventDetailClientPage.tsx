@@ -659,9 +659,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           separate handler to duplicate, just another link to it. Hidden
           for isPast (nothing to book) since the hero box already shows
           the "event ended" state and this bar would have no action to
-          offer. paddingRight reserves the same ~88px SupportWidget
-          floating-bubble clearance MobileTabBar.tsx already uses, so the
-          book button isn't sitting underneath that bubble. */}
+          offer. */}
       {!isPast && (
         <div
           className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-between"
@@ -671,7 +669,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             background: "rgba(10,10,10,0.94)",
             backdropFilter: "blur(12px)",
             borderTop: "1px solid rgba(245,245,240,0.08)",
-            padding: "12px 96px 12px 20px",
+            padding: "12px 20px",
             paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
           }}
         >

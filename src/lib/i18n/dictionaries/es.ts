@@ -52,6 +52,7 @@ const es: Dictionary = {
   },
   search: {
     placeholder: "Buscar eventos, artistas, recintos...",
+    mobileTopBarPlaceholder: "Buscar...",
     searching: "Buscando...",
     noResultsFor: 'Sin resultados para "{query}"',
   },

@@ -415,7 +415,7 @@ export default function MobileTabBar() {
           borderTop: '1px solid rgba(245,245,240,0.08)',
           zIndex: 40,
           paddingLeft: 8,
-          paddingRight: 88, // reserves space for SupportWidget's floating bubble, same convention as before
+          paddingRight: 8,
           paddingTop: 8,
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
