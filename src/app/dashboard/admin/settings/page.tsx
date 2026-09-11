@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
@@ -493,6 +494,7 @@ export default function AdminSettingsPage() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'system-ui' }}>
           <div style={{ maxWidth: 560, margin: '0 auto' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
@@ -506,6 +508,7 @@ export default function AdminSettingsPage() {
             </Link>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -513,6 +516,7 @@ export default function AdminSettingsPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main
         style={{
           minHeight: '100vh',
@@ -522,7 +526,8 @@ export default function AdminSettingsPage() {
         }}
       >
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 20px 64px' }}>
-        <div style={{ fontSize: 12, color: 'var(--afa-text-secondary)', marginBottom: 6, letterSpacing: '0.04em' }}>
+        {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+        <div className="lg:hidden" style={{ fontSize: 12, color: 'var(--afa-text-secondary)', marginBottom: 6, letterSpacing: '0.04em' }}>
           <Link href="/dashboard/admin" style={{ color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
             ← Admin
           </Link>{' '}
@@ -1111,6 +1116,7 @@ export default function AdminSettingsPage() {
         </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

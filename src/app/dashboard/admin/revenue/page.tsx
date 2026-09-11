@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
@@ -114,9 +115,13 @@ export default function AdminRevenueOverviewPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
-          <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+          <div className="lg:hidden">
+            <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
@@ -237,6 +242,7 @@ export default function AdminRevenueOverviewPage() {
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

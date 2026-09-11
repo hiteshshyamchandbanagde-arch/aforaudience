@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
@@ -174,9 +175,13 @@ export default function AdminArtistsPage() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px 96px' }}>
-          <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
+          <div className="lg:hidden">
+            <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
+          </div>
 
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             Artist Roster
@@ -328,6 +333,7 @@ export default function AdminArtistsPage() {
           </div>
         </div>
       </main>
+      </DashboardShell>
     </>
   )
 }

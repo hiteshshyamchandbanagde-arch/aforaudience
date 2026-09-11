@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
+import DashboardShell from '@/components/DashboardShell'
 import { useToast } from '@/components/Toast'
 import FeedbackTrends from '@/components/admin/FeedbackTrends'
 import FeedbackDetailPanel, { type FeedbackDetailItem } from '@/components/admin/FeedbackDetailPanel'
@@ -463,6 +464,7 @@ function AdminFeedbackBoard() {
     return (
       <>
         <SiteNav />
+        <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
@@ -473,6 +475,7 @@ function AdminFeedbackBoard() {
             </p>
           </div>
         </main>
+        </DashboardShell>
       </>
     )
   }
@@ -584,21 +587,9 @@ function AdminFeedbackBoard() {
   return (
     <>
       <SiteNav />
+      <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: 0 }}>
-              Admin Dashboard
-            </h1>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <a href="/dashboard/admin/settings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'var(--afa-surface-raised)' }}>Platform Settings</a>
-              <a href="/dashboard/admin/revenue" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'var(--afa-surface-raised)' }}>Revenue</a>
-              <a href="/dashboard/admin/users" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'var(--afa-surface-raised)' }}>Accounts</a>
-              <a href="/dashboard/admin/bookings" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'var(--afa-surface-raised)' }}>Bookings</a>
-              <a href="/dashboard/admin/artists" style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, textDecoration: 'none', padding: '8px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'var(--afa-surface-raised)' }}>Artist Roster</a>
-            </div>
-          </div>
-
           {/* Pending Approvals - merged in from the old separate
               /dashboard/admin page (session 39 unification, Feedback
               f96a1262). Collapsible like Trends below, so an admin who
@@ -859,6 +850,7 @@ function AdminFeedbackBoard() {
           </div>
         </div>
       </main>
+      </DashboardShell>
 
       {selectedItem && (
         <FeedbackDetailPanel
