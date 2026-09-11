@@ -57,14 +57,6 @@ function IconClipboard() {
     </svg>
   )
 }
-function IconBook() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5V5.5a2 2 0 0 1 2-2h13.5v15H6a2 2 0 0 0 0 4h13.5" />
-      <line x1="9" y1="7.5" x2="15" y2="7.5" />
-    </svg>
-  )
-}
 function IconClock() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
@@ -108,39 +100,6 @@ function IconTicket() {
 function IconRupee() {
   return <span style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1 }}>₹</span>
 }
-function IconChat() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 5h16v11H9l-4 4V5z" />
-    </svg>
-  )
-}
-function IconUsersIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="8.5" r="3" />
-      <path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2" />
-      <circle cx="17" cy="9.5" r="2.2" />
-      <path d="M15.8 19.5c.2-2.2 1.8-3.9 3.7-4.2" />
-    </svg>
-  )
-}
-function IconGear() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 2.5v3M12 18.5v3M4.4 4.4l2.1 2.1M17.5 17.5l2.1 2.1M2.5 12h3M18.5 12h3M4.4 19.6l2.1-2.1M17.5 6.5l2.1-2.1" />
-    </svg>
-  )
-}
-function IconBars() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 20V11M11 20V4M17 20v-8" />
-    </svg>
-  )
-}
-
 // --- Ticket-stub KPI tile --------------------------------------------------
 // Perforation notches punched into the left/right edges (colored to match
 // the page background so they read as cut-through), plus a dashed
@@ -203,31 +162,6 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
   return (
     <Link href={href} style={{ textDecoration: 'none', display: 'block' }} aria-label={`${label}: ${value}`}>
       {content}
-    </Link>
-  )
-}
-
-function QuickLink({ href, icon, label, accent }: { href: string; icon: React.ReactNode; label: string; accent: string }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '13px',
-        fontWeight: 600,
-        color: 'var(--afa-text-primary)',
-        background: 'var(--afa-surface-raised)',
-        border: '1px solid rgba(245,245,240,0.08)',
-        borderBottom: `2.5px solid ${accent}`,
-        borderRadius: '10px',
-        padding: '9px 16px',
-        textDecoration: 'none',
-      }}
-    >
-      <span style={{ color: accent, display: 'flex' }}>{icon}</span>
-      {label}
     </Link>
   )
 }
@@ -437,21 +371,6 @@ export default function AdminCommandCenter() {
             <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
             </span>
-          </div>
-        </div>
-
-        {/* Quick links - lg:hidden now that the desktop sidebar (added by
-            DashboardShell) covers the same 6 links; still the only
-            quick-nav on mobile, where there's no sidebar. */}
-        <div className="lg:hidden">
-          <div style={sectionLabel}>Go to</div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <QuickLink href="/dashboard/admin/feedback" icon={<IconChat />} label="Feedback board" accent="var(--afa-amber)" />
-            <QuickLink href="/dashboard/admin/bookings" icon={<IconTicket />} label="Bookings" accent="var(--afa-amber)" />
-            <QuickLink href="/dashboard/admin/revenue" icon={<IconBars />} label="Revenue" accent="var(--afa-amber)" />
-            <QuickLink href="/dashboard/admin/users" icon={<IconUsersIcon />} label="Users" accent="var(--afa-amber)" />
-            <QuickLink href="/dashboard/admin/settings" icon={<IconGear />} label="Settings" accent="var(--afa-amber)" />
-            <QuickLink href="/dashboard/admin/diary" icon={<IconBook />} label="Admin Diary" accent="var(--afa-amber)" />
           </div>
         </div>
         </div>
