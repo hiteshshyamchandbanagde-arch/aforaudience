@@ -64,19 +64,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Other',
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  BUG: 'var(--afa-error)',
-  FEATURE_IDEA: 'var(--afa-sage)',
-  QUESTION: 'var(--afa-terracotta)',
-  GENERAL: 'var(--afa-taupe)',
-  OTHER: 'var(--afa-taupe)',
-}
+// Category is a label to scan by, not a status axis — one quiet amber
+// treatment for all categories (matches the v4 design spec's own Badge
+// usage, which colors every feedback category identically and reserves
+// distinct color for severity instead).
+const CATEGORY_BADGE = { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' }
 
-const SEVERITY_COLORS: Record<string, string> = {
-  LOW: 'var(--afa-sage)',
-  MEDIUM: 'var(--afa-gold)',
-  HIGH: 'var(--afa-orange-dark)',
-  CRITICAL: 'var(--afa-error)',
+// Severity IS a real urgency axis, so it keeps a graduated scale — low to
+// high maps green -> amber -> tinted red -> solid red, using only tokens
+// already in the locked palette.
+const SEVERITY_BADGE: Record<string, { bg: string; color: string }> = {
+  LOW: { bg: 'rgba(22,101,52,0.15)', color: 'var(--afa-green-deep)' },
+  MEDIUM: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
+  HIGH: { bg: 'rgba(179,38,30,0.15)', color: 'var(--afa-error)' },
+  CRITICAL: { bg: 'var(--afa-error)', color: 'var(--afa-on-fill-solid)' },
 }
 
 // Workflow overhaul (session 63, Hitesh's design). Two-field split -
@@ -481,12 +482,12 @@ function AdminFeedbackBoard() {
     padding: '7px 10px',
     borderRadius: '8px',
     border: '1px solid rgba(245,245,240,0.15)',
-    background: 'var(--afa-surface-raised)',
+    background: 'var(--afa-surface-page)',
     color: 'var(--afa-text-primary)',
   }
 
   const cardStyle: React.CSSProperties = {
-    background: 'var(--afa-surface-raised)',
+    background: 'var(--afa-surface-page)',
     borderRadius: '12px',
     padding: '16px',
     border: '1px solid rgba(245,245,240,0.08)',
@@ -503,8 +504,8 @@ function AdminFeedbackBoard() {
               fontSize: '10px',
               fontWeight: 700,
               letterSpacing: '0.03em',
-              color: 'white',
-              background: CATEGORY_COLORS[item.category] || 'var(--afa-taupe)',
+              color: CATEGORY_BADGE.color,
+              background: CATEGORY_BADGE.bg,
               padding: '2px 8px',
               borderRadius: '999px',
             }}
@@ -516,8 +517,8 @@ function AdminFeedbackBoard() {
               style={{
                 fontSize: '10px',
                 fontWeight: 700,
-                color: 'white',
-                background: SEVERITY_COLORS[item.severity],
+                color: SEVERITY_BADGE[item.severity]?.color,
+                background: SEVERITY_BADGE[item.severity]?.bg,
                 padding: '2px 8px',
                 borderRadius: '999px',
               }}
@@ -526,13 +527,13 @@ function AdminFeedbackBoard() {
             </span>
           )}
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--afa-taupe)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
+        <span style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
       </div>
       <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, marginBottom: '4px' }}>
         {item.title || item.message.slice(0, 80)}
       </div>
       {item.pageUrl && (
-        <div style={{ fontSize: '11px', color: 'var(--afa-taupe)', marginBottom: showMobileDropdown ? '8px' : 0 }}>
+        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', marginBottom: showMobileDropdown ? '8px' : 0 }}>
           {item.pageUrl}
         </div>
       )}
@@ -583,14 +584,6 @@ function AdminFeedbackBoard() {
   return (
     <>
       <SiteNav />
-      <style>{`
-        .fb-board { display: grid; }
-        .fb-mobile-list { display: none; }
-        @media (max-width: 780px) {
-          .fb-board { display: none; }
-          .fb-mobile-list { display: block; }
-        }
-      `}</style>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
@@ -624,7 +617,7 @@ function AdminFeedbackBoard() {
               </h2>
               {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
               {organisers.map((o) => (
-                <div key={o.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
+                <div key={o.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{o.orgName}</div>
@@ -632,8 +625,8 @@ function AdminFeedbackBoard() {
                       {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>
@@ -644,15 +637,15 @@ function AdminFeedbackBoard() {
               </h2>
               {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {venueOwners.map((v) => (
-                <div key={v.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
+                <div key={v.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: '14px', fontWeight: 600 }}>{v.user.name}</div>
                       <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{v.user.email}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>
@@ -679,12 +672,12 @@ function AdminFeedbackBoard() {
               </p>
               {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {genreRequests.map((g) => (
-                <div key={g.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
+                <div key={g.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: '14px', fontWeight: 600 }}>{g.value}</div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>
@@ -709,7 +702,7 @@ function AdminFeedbackBoard() {
               </p>
               {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {eventNotes.map((n) => (
-                <div key={n.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
+                <div key={n.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{n.title}</div>
@@ -717,8 +710,8 @@ function AdminFeedbackBoard() {
                       <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-white)', background: 'var(--afa-sage)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
+                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
                     </div>
                   </div>
                 </div>
@@ -758,12 +751,13 @@ function AdminFeedbackBoard() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '10px',
-                background: 'var(--afa-orange-tint, #FFF3E6)',
+                background: 'rgba(201,151,58,0.15)',
                 border: '1px solid rgba(245,245,240,0.13)',
                 borderRadius: '10px',
                 padding: '10px 14px',
                 marginBottom: '12px',
                 fontSize: '13px',
+                color: 'var(--afa-text-primary)',
               }}
             >
               <span>
@@ -833,7 +827,7 @@ function AdminFeedbackBoard() {
               there were only 4 statuses total). Equal-fraction columns
               stopped being readable well before 9. */}
           <div
-            className="fb-board"
+            className="hidden lg:grid"
             style={{
               gridAutoFlow: 'column',
               gridAutoColumns: '220px',
@@ -846,10 +840,10 @@ function AdminFeedbackBoard() {
             {(showResolved ? STATUSES : STATUSES.filter((s) => !CLOSED_STATUSES.includes(s))).map((statusCol) => (
               <div key={statusCol} id={`fb-col-${statusCol}`}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
-                  {labelize(statusCol)} <span style={{ color: 'var(--afa-taupe)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
+                  {labelize(statusCol)} <span style={{ color: 'var(--afa-text-secondary)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
                 </div>
                 {(columns[statusCol] || []).length === 0 && (
-                  <p style={{ fontSize: '12px', color: 'var(--afa-taupe)' }}>Nothing here.</p>
+                  <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)' }}>Nothing here.</p>
                 )}
                 {(columns[statusCol] || []).map((item) => renderCard(item, false))}
               </div>
@@ -857,7 +851,7 @@ function AdminFeedbackBoard() {
           </div>
 
           {/* Mobile stacked list */}
-          <div className="fb-mobile-list" style={{ marginTop: '10px' }}>
+          <div className="lg:hidden" style={{ marginTop: '10px' }}>
             {filtered.length === 0 && (
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing matches these filters.</p>
             )}
