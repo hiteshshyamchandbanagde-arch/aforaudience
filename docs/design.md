@@ -1817,3 +1817,75 @@ Verified via `esbuild` parse (clean, sandbox has no installed
 node_modules for a full `tsc` run) and a grep sweep confirming no dangling
 references to any removed symbol, then confirmed for real by the Vercel
 build itself succeeding. Zero runtime errors post-deploy.
+
+## GEN-2609-023/024: remove chatbot, full mobile wordmark, guest CTA + location-chip spacing — 11 Sep
+
+Three decisions made directly by Hitesh, not routed through Figma Make
+(explicit exception — a Figma Make exploration of the wordmark and a
+separate chat-entry-point placement had already run in a duplicated
+`AFA Mobile App v3-1` file; Hitesh reviewed the options and their
+tradeoffs, including code-level findings that two of three wordmark
+options and one of three chat options silently dropped the top bar's
+globe/language icon, then chose to decide directly rather than pick
+from the explored set).
+
+**GEN-2609-023 (`qa` `cbd2508`, PR #590):**
+- `SupportWidget`'s global floating-bubble mount removed from
+  `layout.tsx` (import + `<SupportWidget />`); the component file
+  itself is kept in place for a possible re-home later, not deleted.
+  Three stale clearance-padding spots that reserved space for the
+  bubble cleaned up: `MobileTabBar.tsx` (`paddingRight: 88` →
+  `8`), `DashboardShell.tsx`'s mobile bottom bar (`paddingRight: 88`
+  dropped entirely), and `EventDetailClientPage.tsx`'s sticky
+  book-CTA bar (`padding: "12px 96px 12px 20px"` → `"12px 20px"`).
+  Two in-page `SupportWidget` references (`profile/page.tsx`,
+  `my-feedback/page.tsx`, both `BUG-2608-020`) are a separate
+  in-page overlay flow, not the floating mount — left untouched.
+- `MobileTopBar.tsx`'s abbreviated "AfA" wordmark replaced with the
+  full "AforAudience", using `var(--font-display)` to match
+  desktop's `HomeHeader.tsx` and the footer's existing recipe (not
+  the old literal `Georgia, serif`). Search input narrowed (padding +
+  icon offset) to make room; kept as an always-visible, directly
+  tappable input rather than collapsing to icon-on-tap, since that
+  interaction was one of the three Figma Make wordmark options and
+  explicitly not the one picked. New shortened
+  `search.mobileTopBarPlaceholder` i18n key ("Search...") added
+  across all 11 locale dictionaries, since the full placeholder
+  string overflowed the narrower box. Globe/language icon deliberately
+  untouched — two of three Figma Make wordmark options silently
+  dropped it, which would have broken language switching for guests
+  specifically (the original reason language sits in the top bar
+  rather than gated in Profile).
+- Fold-in follow-up: signed-out Sign In/Sign Up sizing tightened
+  (letter-spacing `0.06em`→`0.01em`, Sign Up pill padding
+  `6px 10px`→`5px 7px`, inter-element gap `8px`→`5px`) after the
+  fuller wordmark left the search input at ~55-70px in that state at
+  360-375px. Signed-in state (`Sign Out`) untouched. At 360px the
+  placeholder still clips to "Sear" — flagged, not silently patched;
+  360px signed-out remains the tightest fit in this bar.
+
+**GEN-2609-024 (`qa` `ceaac01`, PR #591):** follow-up polish, not a
+new design decision — the wordmark change exposed a spacing gap.
+`LocationChip.tsx`'s `topbar` variant had zero top margin, tuned for
+the old short "AfA" mark; the fuller wordmark's extra visual weight at
+the same tight spacing made the city chip read as glued to it rather
+than its own line. Added `marginTop: 3px` on the `topbar` variant's
+outer wrapper only — `mobile`/`desktop` variants untouched.
+
+**Verification (both PRs):** diffs pulled and spot-checked line-by-line
+against the dispatch prompts before merging (not taken on CC's summary
+alone) — scope matched exactly on both, nothing missed, nothing extra.
+`tsc`/`eslint` clean per CC. CI green (Vercel build). Fresh head SHA
+re-fetched immediately before each merge PUT. `qa` HEAD and file
+content verified post-merge via the Contents API on both. Vercel build
+logs checked (55-56s builds, clean deploys) and zero new runtime
+errors in the 15-30 minutes post-deploy for both — one pre-existing,
+unrelated Node deprecation warning on `/api/auth/[...nextauth]`
+(dated back to 14 Jul) surfaced in the scan, noted as not a
+regression. Live screenshot from Hitesh's own device after both
+merges confirmed the full wordmark, separated location line, narrowed
+search, shrunk guest CTAs, and no chat bubble anywhere in the bottom
+bar.
+
+Logged to the Feedback table as `GEN-2609-023` and `GEN-2609-024`
+(both `RESOLVED`, `deployStage: DEPLOYED_QA`).
