@@ -284,10 +284,18 @@ export default function MobileTabBar() {
   // ROLE_SECTIONS' own already-hardcoded labels exactly (reused verbatim
   // where the item is the same concept, e.g. "My Events"/"Sales"/
   // "Payouts" - not re-translated or reworded independently).
+  //
+  // "Tickets" and "WOF" below are a different case - t.nav.myTickets and
+  // t.nav.wallOfFame do exist and are used as-is by SiteNav/HomeHeader/
+  // DashboardShell's desktop sidebar, which have the width for the full
+  // words. This bar's 5 equal-width slots don't - both wrapped to two
+  // lines at 10px/0.08em tracking - so these two are bar-specific English
+  // shorthand hardcoded here only, not a new i18n key and not a change to
+  // the shared dictionary value the other three surfaces still rely on.
   const primaryItems: ItemDef[] = [
     { id: 'discover', href: '/events', label: 'Discover', Icon: DiscoverTabIcon, nav: 'push' },
     { id: 'messages', href: '/dashboard/messages', label: t.nav.messages, Icon: MessagesTabIcon, badge: unreadCount, nav: 'replace' },
-    { id: 'tickets', href: '/tickets', label: t.nav.myTickets, Icon: TicketsTabIcon, nav: 'replace' },
+    { id: 'tickets', href: '/tickets', label: 'Tickets', Icon: TicketsTabIcon, nav: 'replace' },
     { id: 'saved', href: '/saved', label: 'Saved', Icon: SavedTabIcon, badge: savedCount, nav: 'replace' },
     { id: 'profile', href: '/profile', label: t.nav.profile, Icon: ProfileTabIcon, nav: 'replace' },
   ]
@@ -296,7 +304,7 @@ export default function MobileTabBar() {
     { id: 'events', href: '/events', label: 'Events', Icon: EventsTabIcon, nav: 'push' },
     { id: 'artists', href: '/artists', label: t.nav.artists, Icon: ArtistsTabIcon, nav: 'push' },
     { id: 'venues', href: '/venues', label: t.nav.venues, Icon: PinIcon, nav: 'push' },
-    { id: 'wall-of-fame', href: '/wall-of-fame', label: t.nav.wallOfFame, Icon: TrophyIcon, nav: 'push' },
+    { id: 'wall-of-fame', href: '/wall-of-fame', label: 'WOF', Icon: TrophyIcon, nav: 'push' },
     // Phase C fills this in for real now (previously a placeholder
     // landing on /dashboard/audience-style routes per Phase B's own
     // comment) - getShellDashboardLink already resolves to each role's
