@@ -32,6 +32,10 @@ Admin follow-up (#580) - also closes BUG-2609-008. Extended the same MobileTabBa
 - Next 16 won't run a second dev server in the same directory, even on a different port; a node_modules junction into a git worktree crashes Turbopack. Use a real npm ci in the worktree instead.
 - Confirmed working QA credentials (all QaPass!2026): omkar.organiser@aforaudience.qa (now Organiser + Venue Owner), hrithik.artist@aforaudience.qa (Artist), vinayak.venue@aforaudience.qa (Venue Owner, confirmed working post-reseed), atul.audience@aforaudience.qa (Audience, per original persona list). Admin is Hitesh's own real Google account, not a QA persona.
 
+## Independent verification (11 Sept, separate session)
+
+Re-checked the one falsifiable claim in this handoff that a second session could actually test without relying on the first session's self-report: Vinayak's login. Logged in as `vinayak.venue@aforaudience.qa` / `QaPass!2026` against the shared dev server and confirmed via `next-auth.session-token` cookie + a direct `GET /api/auth/session` call (server-side ground truth, not just a screenshot of the UI) - resolves correctly to `role: VENUE_OWNER`, `id: qa-demo-vo-full`. Confirms the claim in Phase C/this handoff: the account itself was always fine, the earlier failed attempts were a stale-DB artifact fixed by the reseed, not a wrong email pattern. Everything else in this handoff (Phase A-D + Admin follow-up shipped, Admin's real-account check still open, the 5 open items below) matches this session's own first-hand knowledge of the qa git history and code - no corrections needed.
+
 ## Session-start checklist
 
 1. git fetch && git reset --hard origin/qa.
