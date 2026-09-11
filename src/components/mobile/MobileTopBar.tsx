@@ -118,26 +118,26 @@ export default function MobileTopBar() {
       }}
     >
       <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block' }}>
-          <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>fA
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+          <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
         </span>
         <LocationChip variant="topbar" />
       </Link>
 
       <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
         <TopBarSearchIcon
-          style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', width: '14px', height: '14px', color: 'var(--afa-text-muted)', pointerEvents: 'none' }}
+          style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '14px', height: '14px', color: 'var(--afa-text-muted)', pointerEvents: 'none' }}
         />
         <input
           type="search"
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
           onFocus={handleOpenFilters}
-          placeholder={t.search.placeholder}
+          placeholder={t.search.mobileTopBarPlaceholder}
           style={{
             width: '100%',
             boxSizing: 'border-box',
-            padding: onEventsRoute ? '8px 34px 8px 30px' : '8px 10px 8px 30px',
+            padding: onEventsRoute ? '8px 30px 8px 26px' : '8px 8px 8px 26px',
             borderRadius: '999px',
             border: '1px solid rgba(245,245,240,0.12)',
             background: 'var(--afa-surface-raised)',
@@ -211,7 +211,7 @@ export default function MobileTopBar() {
         )}
       </div>
 
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? '8px' : '5px' }}>
         {status === 'loading' ? null : user ? (
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
@@ -221,12 +221,16 @@ export default function MobileTopBar() {
           </button>
         ) : (
           <>
-            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
+            {/* Narrower letter-spacing/padding than the signed-in Sign
+                Out button on purpose - two elements here (vs one) eat
+                into the search input's width at 360-375px, this is the
+                sizing-only fold-in for that. */}
+            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
               {t.nav.signIn}
             </Link>
             <Link
               href="/register"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '6px 10px', borderRadius: '999px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
             >
               {t.nav.signUp}
             </Link>

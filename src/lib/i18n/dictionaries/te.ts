@@ -48,6 +48,7 @@ const te: Dictionary = {
   },
   search: {
     placeholder: "ఈవెంట్‌లు, కళాకారులు, వేదికలు వెతకండి...",
+    mobileTopBarPlaceholder: "వెతకండి...",
     searching: "వెతుకుతోంది...",
     noResultsFor: '"{query}" కి ఫలితాలు లేవు',
   },

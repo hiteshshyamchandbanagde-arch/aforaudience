@@ -48,6 +48,7 @@ const gu: Dictionary = {
   },
   search: {
     placeholder: "ઇવેન્ટ્સ, કલાકારો, સ્થળો શોધો...",
+    mobileTopBarPlaceholder: "શોધો...",
     searching: "શોધી રહ્યું છે...",
     noResultsFor: '"{query}" માટે કોઈ પરિણામ નથી',
   },

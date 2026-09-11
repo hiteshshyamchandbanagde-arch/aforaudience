@@ -48,6 +48,7 @@ const bn: Dictionary = {
   },
   search: {
     placeholder: "ইভেন্ট, শিল্পী, ভেন্যু খুঁজুন...",
+    mobileTopBarPlaceholder: "খুঁজুন...",
     searching: "খোঁজা হচ্ছে...",
     noResultsFor: '"{query}" এর জন্য কোনো ফলাফল নেই',
   },

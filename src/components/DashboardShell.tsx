@@ -573,10 +573,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           double the reserved space into a visible empty gap. */}
       <div className={`flex-1 min-w-0 lg:pb-0${hideMobileBarForUnifiedTabBar ? '' : ' pb-20'}`}>{children}</div>
 
-      {/* Mobile bottom tab bar. paddingRight reserves space for
-          SupportWidget's floating chat bubble (fixed, right:20/bottom:20,
-          56px, zIndex 45 - above this bar's zIndex 40) so the last tab
-          isn't rendered underneath it and doesn't eat its taps.
+      {/* Mobile bottom tab bar.
           GEN-2609-013 - suppressed on /tickets and /profile now that
           MobileTabBar.tsx covers those routes for everyone; see
           hideMobileBarForUnifiedTabBar above. Note this also removes the
@@ -588,7 +585,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       {!hideMobileBarForUnifiedTabBar && (
         <nav
           className="lg:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 py-2"
-          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingRight: 88, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
+          style={{ background: 'var(--afa-surface-inverse)', borderTop: SIDEBAR_BORDER, zIndex: 40, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
         >
           {topNav.map((item) => {
             const active = isActive(`top:${item.href}`)

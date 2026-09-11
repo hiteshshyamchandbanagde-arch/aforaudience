@@ -47,6 +47,7 @@ const en = {
   },
   search: {
     placeholder: "Search events, artists, venues...",
+    mobileTopBarPlaceholder: "Search...",
     searching: "Searching...",
     noResultsFor: 'No results for "{query}"',
   },

@@ -53,6 +53,7 @@ const fr: Dictionary = {
   },
   search: {
     placeholder: "Rechercher événements, artistes, lieux...",
+    mobileTopBarPlaceholder: "Rechercher...",
     searching: "Recherche en cours...",
     noResultsFor: 'Aucun résultat pour "{query}"',
   },

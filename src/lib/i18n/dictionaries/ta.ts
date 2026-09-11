@@ -48,6 +48,7 @@ const ta: Dictionary = {
   },
   search: {
     placeholder: "நிகழ்வுகள், கலைஞர்கள், இடங்களைத் தேடுங்கள்...",
+    mobileTopBarPlaceholder: "தேடுங்கள்...",
     searching: "தேடுகிறது...",
     noResultsFor: '"{query}" க்கு முடிவுகள் இல்லை',
   },
