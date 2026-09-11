@@ -1940,3 +1940,42 @@ the Contents API. Zero runtime errors in the 15 minutes post-deploy.
 
 Logged to the Feedback table as `GEN-2609-025` (`RESOLVED`,
 `deployStage: DEPLOYED_QA`).
+
+## GEN-2609-026: fix wrapping mobile tab labels (Wall of Fame, My Tickets) — 11 Sep
+
+`MobileTabBar.tsx`'s small mono-uppercase tab labels (10px,
+`letterSpacing: 0.08em`, equal-width flex slots) had two multi-word
+labels wrapping to two lines: "Wall of Fame" (Discover sub-nav, 5
+items) confirmed wrapping live via screenshot; "My Tickets" (primary
+bar, also 5 items — same tightness) flagged as the same risk before
+Hitesh confirmed it should be fixed alongside it. Checked every other
+label across all six nav states (primary, Discover sub-nav, Artist,
+Organiser, Venue Owner, Admin) first — everything else is single-word
+except "My Events" (Artist/Organiser, roomier 3-4 item rows), "Edit
+Profile" (Artist), and "My Venues" (Venue Owner), left untouched as
+lower-risk/unconfirmed rather than pre-emptively reworded.
+
+**Implementation (`qa` `09c88c8`, PR #593):** hardcoded `'WOF'` and
+`'Tickets'` for just these two items in `MobileTabBar.tsx`, following
+the same precedent this file already uses for `'Discover'`/`'Saved'`
+(hardcoded English, no i18n key). Deliberately scoped to this one file
+only — `t.nav.wallOfFame`/`t.nav.myTickets` are shared i18n dictionary
+keys also consumed by `SiteNav.tsx`, `HomeHeader.tsx`, and
+`DashboardShell.tsx`'s desktop sidebar, all of which have the width
+for the full words and would have been wrongly shortened by editing
+the dictionary value directly instead. No new i18n keys added — these
+are bar-specific English shorthand, not meaningfully translatable
+initials/contractions across the 11 locales.
+
+**Verification:** diff pulled and matched exactly against the dispatch
+prompt — exactly the two label changes plus one explanatory comment,
+`SiteNav.tsx`/`HomeHeader.tsx`/`DashboardShell.tsx` don't appear in the
+diff at all. `tsc` clean. CI green. Fresh head SHA re-fetched
+immediately before the merge PUT. `qa` HEAD and file content verified
+post-merge via the Contents API. Build completed clean (54s); zero new
+runtime errors in the 15 minutes post-deploy (one pre-existing,
+unrelated NextAuth `url.parse()` deprecation warning dated back to 14
+Jul surfaced in the scan, not a regression).
+
+Logged to the Feedback table as `GEN-2609-026` (`RESOLVED`,
+`deployStage: DEPLOYED_QA`).
