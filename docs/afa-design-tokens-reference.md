@@ -238,3 +238,18 @@ A fourth, real tier sitting between `--afa-text-heading` (24px) and the hero/dis
 **Excluded from this tier - related but different:**
 - **Brand-wordmark instances (2 hits, `RegisterForm.tsx` lines 326 and 378)** - the "AforAudience" logo lockup at the top of the OTP-verification card, also 28px. Not a heading at all (a logo, same register as the site's other wordmark instances) - excluded from `--afa-text-page-title` on purpose, not an oversight.
 - ~~Stat/metric-number hits (3 hits) - dashboard/audience/page.tsx, VenueDetailClient.tsx~~ **Resolved, see GEN-2609-033 above.** No 5th tier was needed - `dashboard/audience/page.tsx`'s stat value and `admin/artists/page.tsx`'s stat value each fit cleanly into the existing two tokens once classified by context (personal-account vs admin-tool), same as everything else in the migration. `VenueDetailClient.tsx` was never actually broken.
+
+### 8.5 Page-title-lg tier (discovered 12 Sep, second-wave sweep beyond 8.4's 28-30px scope)
+
+A full-repo Georgia sweep post-GEN-2609-032/033 found 97 remaining hits across 39 files. Most (71) were confirmed legitimately excluded - h2/h3 section headings (`admin/settings` 20px h2s, `AuthPromptSheet.tsx`/`CorporateInquiryModal.tsx` 20px h2s, `profile/page.tsx`'s 8 section h2s at 18px, etc.), one-off labels (`DashboardShell.tsx`'s "My Roles" span), and the decorative `layout.tsx` intro-splash tagline - none of these are page titles and none were touched. The remaining 27 were genuine `<h1>` page titles across 4 size clusters that predate any font audit:
+
+| Value | Count | Treatment |
+|---|---|---|
+| **32px** | 12 | New token, `--afa-text-page-title-lg`: `32px` / `fontWeight: 700` / `font-family: var(--font-display)`. Top-level "your own account" pages with no `BackLink` - `profile`, `tickets`, `organiser`/`artist`/`venue` edit and dashboard-home pages, event create/edit |
+| **28px** | 5 | Folded into the existing `--afa-text-page-title` (28px) - all 5 render states of `checkout/[bookingId]/page.tsx` |
+| **26px** | 4 | Folded into `--afa-text-page-title`, resized 26px → 28px - `admin/page.tsx` ("Command Center") plus 3 nested pages with a `BackLink` (`organiser/events/[id]/checkin`, `organiser/tours/[id]`, `organiser/tours/create`), same structural pattern as the existing tier |
+| **24px** | 6 | Font-family fix only, already matches `--afa-text-heading` (24px) - empty/unregistered-state headings (`organiser`/`venue` "not registered" states) and secondary dashboard headers (`admin/feedback`, `admin/bookings`) |
+
+**Deferred, not part of this pass:** 3 one-off `<h1>` sizes with too small a sample to warrant a tier call - `messages/[id]/page.tsx` (22px), `(public)/tours/[slug]/page.tsx` (34px), `ComingSoon.tsx` (36px).
+
+**Built (GEN-2609-035, merged to qa in 5b6c2b4):** all 27 hits across 20 files migrated exactly per the table above. Verified via diff review (every change touches only `fontFamily`, cluster 3 also `fontSize`), `tsc --noEmit` clean, live-render via real QA logins across organiser/artist/venue/audience personas (admin pages verified via diff+grep+tsc only - admin auth is real Google OAuth, not a scriptable QA credential). Contents API confirmed the do-not-touch items (`checkout`'s 20px event-title div, `profile`'s h2 section headers) remained untouched. Vercel READY, zero runtime errors.

@@ -2436,3 +2436,34 @@ synthesized faux-italic, not a true italic cut. No code change made -
 this is a documentation-accuracy correction, flagging the real
 footprint for whoever next weighs whether to accept the faux-italic
 permanently or swap to an italic-capable typeface for these moments.
+
+## Second-wave page-title fixes (GEN-2609-035, 12 Sep) - new --afa-text-page-title-lg tier
+
+The 97-hit residual Georgia sweep (originally logged as GEN-2609-034,
+unscoped) was scoped into 4 real `<h1>` clusters - 27 genuine hits
+across 20 files, see `docs/afa-design-tokens-reference.md` Section 8.5
+for the full breakdown. The other 70 of the 97 were confirmed
+legitimately excluded (h2 section headings, one-off labels), not
+misses. GEN-2609-034 closed as REJECTED/superseded.
+
+Key finding: the 32px cluster (12 hits) turned out larger than the
+entire original 28-30px page-title tier (17 hits) and was structurally
+distinct - no `BackLink`, top-level "your own account" pages rather
+than nested dashboard sub-pages - so it became its own token,
+`--afa-text-page-title-lg`, rather than being resized down. The 26px
+cluster (4 hits) was checked individually and found to share the
+nested-page-with-BackLink structure of the *existing* tier, so those
+were resized up to 28px instead of getting their own tier.
+
+Dispatched to CC with an exact per-cluster line list. Verified: diff
+reviewed line-by-line (only `fontFamily` touched, cluster 3 also
+`fontSize`), `tsc --noEmit` clean, live-render via real QA logins
+(Omkar/organiser, Hrithik/artist, Atul/audience) confirmed computed
+styles on one sample per cluster; Admin pages checked via diff+grep+
+tsc only since Admin auth is Hitesh's real Google OAuth, not a
+scriptable credential. Chat opened PR #607, waited for Vercel success,
+re-fetched the head SHA before squash-merging (`5b6c2b4`), verified
+real file content via Contents API (both the 4 sample changes and the
+do-not-touch items - `checkout`'s 20px event-title div, `profile`'s
+h2 section headers - confirmed correct), Vercel READY, zero runtime
+errors. GEN-2609-035 moved to RESOLVED / DEPLOYED_QA.
