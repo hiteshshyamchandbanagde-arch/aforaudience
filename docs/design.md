@@ -2499,3 +2499,38 @@ real file content via Contents API (both the 4 sample changes and the
 do-not-touch items - `checkout`'s 20px event-title div, `profile`'s
 h2 section headers - confirmed correct), Vercel READY, zero runtime
 errors. GEN-2609-035 moved to RESOLVED / DEPLOYED_QA.
+
+## BUG-2609-023 — built and merged (12 Sep)
+
+Mobile top-bar search (`MobileTopBar.tsx`) was a real filter entry-point
+on `/events` but a dead no-op everywhere else (`/`, `/tickets`,
+`/saved`, `/profile`) - confirmed via screenshots showing the working
+`/events` filter sheet against the same input doing nothing elsewhere.
+Deferred since 9 Sep pending `GEN-2609-019`'s later phases; picked up
+now per the redirect option already leaned toward at the time.
+
+Fix: pressing Enter on a non-events route pushes to
+`/events?search=<query>` (trimmed, non-empty, `encodeURIComponent`-
+encoded); `events/page.tsx`'s existing `search` state now reads that
+param as its initial value via a lazy `useState` initializer, no new
+effect needed. `handleQueryChange`/`handleOpenFilters` untouched -
+still no-ops off `/events` on every keystroke/focus, only Enter now
+does anything there, so there's no per-keystroke navigation.
+
+One addition beyond the ticket's literal spec, caught by CC and
+confirmed necessary: adding `useSearchParams()` to `events/page.tsx`
+required wrapping the page in a `<Suspense>` boundary, or `next build`
+fails outright ("Missing Suspense boundary with useSearchParams") -
+`tsc --noEmit` and dev mode both stay silent about it, only a real
+production build catches it. Same split pattern `login/page.tsx`
+already uses; fallback `null` since the page has its own post-
+hydration loading state.
+
+Verified: `tsc --noEmit` clean, `next build` succeeds with `/events`
+static, live-tested on a real iPhone 12 Pro viewport as Atul (audience)
+across all 4 non-events routes with encoding edge cases (spaces, `&`,
+`/`, `?`), end-to-end pre-fill confirmed via real seeded data (16
+events unfiltered -> 1 for a matching title -> 0 for a nonsense query).
+Diff reviewed before merging, not taken on summary alone. Merged
+(`db41f20`), verified via Contents API, Vercel READY, zero runtime
+errors. `BUG-2609-023` moved to RESOLVED / DEPLOYED_QA.
