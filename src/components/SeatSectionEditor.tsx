@@ -300,12 +300,12 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           }}
         >
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
             <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
           </div>
           <div style={{ width: "1px", background: "rgba(245,245,240,0.12)" }} />
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
             </div>
             <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>per-seat range</div>

@@ -97,7 +97,7 @@ export default function MobileEventFilterSheet({
           <div style={{ width: "40px", height: "4px", borderRadius: "999px", background: "rgba(245,245,240,0.15)" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 4px" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-cream)", margin: 0 }}>
+          <h2 style={{ fontFamily: "var(--font-ui)", fontSize: "20px", fontWeight: 700, color: "var(--afa-cream)", margin: 0 }}>
             {tr.eventsPage.filterSheetTitle}
           </h2>
         </div>

@@ -57,7 +57,7 @@ export function FeeSheet({
           <div style={{ height: 4, width: 40, borderRadius: 999, background: 'rgba(245,245,240,0.15)' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 4px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
+          <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 22, fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
             Fee breakdown
           </h2>
           <Button variant="close" onClick={onClose} aria-label="Close">
