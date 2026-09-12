@@ -229,7 +229,7 @@ export default function TourDetailPage() {
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
         <div style={{ marginTop: '20px', marginBottom: '28px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h1>
           {tour.subject && <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '6px' }}>{tour.subject}</p>}
           {tour.status === 'LIVE' && (
             <a href={`/tours/${tour.slug}`} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: 'var(--afa-terracotta)', display: 'inline-block', marginTop: '8px' }}>

@@ -128,7 +128,7 @@ export default function AdminBookingsPage() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
               Admin access only
             </h1>
             <p style={{ color: 'var(--afa-text-secondary)' }}>This page is restricted to platform administrators.</p>

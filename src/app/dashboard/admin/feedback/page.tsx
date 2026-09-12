@@ -467,7 +467,7 @@ function AdminFeedbackBoard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>
               Admin access only
             </h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>

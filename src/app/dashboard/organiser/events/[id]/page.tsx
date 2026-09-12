@@ -260,7 +260,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '16px', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
             <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 {event.title}
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>

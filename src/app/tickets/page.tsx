@@ -313,7 +313,7 @@ export default function MyTicketsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '800px', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
           <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
