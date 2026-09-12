@@ -2293,3 +2293,57 @@ through to the hardcoded `#0E0C0A` fallback every time. Harmless today
 (the fallback is always what renders), but a genuine broken-reference
 that would misbehave the moment anyone expects that variable to be
 overridable. Not fixed - flagged for whoever next touches that file.
+
+## Font migration Archivo -> Young Serif + Schibsted Grotesk, all 6 phases (12 Sep)
+
+Full-app rollout following the Phase A classification (47 files, 132
+`var(--font-display)` hits): editorial/hero/discovery/name content ->
+Young Serif (kept under the existing `--font-display` token name -
+third swap, Newsreader -> Archivo -> Young Serif); transactional/UI
+content -> new `--font-ui` token, Schibsted Grotesk. Rollout order:
+wordmark -> Static/marketing -> Dashboards (Venue Owner) -> Shared
+components -> Discover/Events -> Audience account pages, one branch
+per phase, stacked on Phase 1.
+
+1. **Wordmark** (`feat/font-migration-01-wordmark`) - added both
+   fonts, unified all 12 wordmark instances onto Young Serif.
+2. **Static/marketing** (`feat/font-migration-02-static-marketing`) -
+   6 files (FourRooms.tsx, page.tsx, HeroRotator.tsx, Hero.tsx,
+   PlatformGrowthStrip.tsx, for-artists/page.tsx), 16 hits, 100%
+   Young Serif - hero headlines, section headings, stat callouts,
+   italic taglines, no UI/nav content. **Zero code edits required**
+   (every hit was already correctly on the repointed token) - this
+   phase's branch carries only this doc entry as its record. Verified
+   by re-grepping all 16 hits post-migration (unchanged, none
+   reclassified to `--font-ui`) and live-checking the homepage hero
+   and for-artists page via the real dev server - both resolve to
+   `"Young Serif"`.
+3. **Dashboards, Venue Owner** (`feat/font-migration-03-dashboards`) -
+   13 of 15 hits across 6 files converted to `--font-ui` (management
+   tool, not a discovery surface); 2 italic brand-voice taglines left
+   on Young Serif.
+4. **Shared components** (`feat/font-migration-04-shared-components`)
+   - 4 of 25 hits across 17 files converted to `--font-ui`.
+   `ContributionMoment.tsx`'s "You're going." and `FaqAccordion.tsx`'s
+   question text stay Young Serif per two explicit overrides (the
+   app's one deliberate emotional moment; a FAQ question is read
+   before it's clicked).
+5. **Discover/Events**
+   (`feat/font-migration-05-discover-events`) - 9 of 71 hits across 5
+   files converted to `--font-ui` (tab/view-toggle/genre-filter
+   controls, price/status labels directly adjacent to a CTA); 62 stay
+   Young Serif (titles, venue names, lineups).
+6. **Audience account pages** - `tickets/page.tsx` and
+   `profile/page.tsx`, 3 hits (ticket's event title, profile
+   avatar-initial, display name), all classified Young Serif. Zero
+   code edits required, same as phase 2 - no branch pushed for an
+   empty diff.
+
+**Final confirmation:** grepped the whole `src/` tree once all six
+phases landed - 117 `var(--font-display)` hits remain, every one
+either the wordmark, an editorial/hero/name render, or one of the two
+intentionally-preserved italic taglines in the Venue Owner dashboard;
+14 `var(--font-ui)` hits, all from phases 3-5. Zero stray hits in
+Admin, Artist dashboard, or Organiser dashboard (explicitly
+out-of-scope, confirmed untouched); every Auth-page hit is exactly the
+wordmark line, nothing else.
