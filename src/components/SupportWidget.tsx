@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Button from '@/components/ui/Button';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -487,7 +488,7 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'chat' ? 'var(--afa-fill-solid)' : 'transparent',
+                background: panel === 'chat' ? 'var(--afa-amber)' : 'transparent',
                 color: panel === 'chat' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 border: 'none',
                 fontWeight: 600,
@@ -502,7 +503,7 @@ export default function SupportWidget() {
               style={{
                 flex: 1,
                 padding: '12px 8px',
-                background: panel === 'feedback' ? 'var(--afa-fill-solid)' : 'transparent',
+                background: panel === 'feedback' ? 'var(--afa-amber)' : 'transparent',
                 color: panel === 'feedback' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 border: 'none',
                 fontWeight: 600,
@@ -531,7 +532,7 @@ export default function SupportWidget() {
                     onClick={switchToFeedbackPanel}
                     style={{
                       background: 'var(--afa-amber)',
-                      color: 'white',
+                      color: 'var(--afa-on-fill-solid)',
                       border: 'none',
                       borderRadius: 999,
                       padding: '8px 16px',
@@ -650,24 +651,15 @@ export default function SupportWidget() {
                         color: 'var(--afa-text-primary)',
                       }}
                     />
-                    <button
+                    <Button
+                      variant="primary"
+                      fullWidth={false}
                       onClick={sendChatMessage}
                       disabled={chatLoading || !chatInput.trim() || capReached}
-                      style={{
-                        marginLeft: 8,
-                        background: 'var(--afa-amber)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 999,
-                        padding: '8px 16px',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        cursor: chatLoading || capReached ? 'default' : 'pointer',
-                        opacity: chatLoading || !chatInput.trim() || capReached ? 0.6 : 1,
-                      }}
+                      style={{ marginLeft: 8 }}
                     >
                       Send
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}
@@ -889,24 +881,9 @@ export default function SupportWidget() {
                     </div>
                   )}
 
-                  <button
-                    onClick={submitFeedback}
-                    disabled={fbSubmitting || !fbCanSubmit}
-                    style={{
-                      width: '100%',
-                      background: 'var(--afa-amber)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 999,
-                      padding: '10px',
-                      fontWeight: 600,
-                      fontSize: 14,
-                      cursor: fbSubmitting ? 'default' : 'pointer',
-                      opacity: fbSubmitting || !fbCanSubmit ? 0.6 : 1,
-                    }}
-                  >
+                  <Button variant="primary" onClick={submitFeedback} disabled={fbSubmitting || !fbCanSubmit}>
                     {fbSubmitting ? 'Sending…' : 'Send'}
-                  </button>
+                  </Button>
                 </>
               )}
             </div>

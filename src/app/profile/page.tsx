@@ -12,6 +12,7 @@ import GenrePicker from '@/components/GenrePicker'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import { FeeSheet } from '@/components/FeeSheet'
 import { PlusIcon } from '@/components/icons/VenueIcons'
+import Button, { variantStyle } from '@/components/ui/Button'
 import { useLocale } from '@/lib/i18n/translate'
 
 // Mobile Redesign Phase 4c (GEN-2609-008) - small inline line-icons for the
@@ -849,23 +850,14 @@ function ProfileContent() {
                 cursor: nameLoaded ? 'text' : 'default',
               }}
             />
-            <button
+            <Button
+              variant="primary"
+              fullWidth={false}
               onClick={saveDisplayName}
               disabled={savingName || displayName.trim() === initialDisplayName.trim()}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--afa-on-fill-solid)',
-                background: 'var(--afa-amber)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
-                cursor: savingName || displayName.trim() === initialDisplayName.trim() ? 'default' : 'pointer',
-                opacity: savingName || displayName.trim() === initialDisplayName.trim() ? 0.5 : 1,
-              }}
             >
               {savingName ? tr.profilePage.savingEllipsis : tr.profilePage.saveDisplayNameBtn}
-            </button>
+            </Button>
           </div>
 
           {/* "About You" - optional photo + short bio (session 62,
@@ -884,7 +876,7 @@ function ProfileContent() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
               )}
-              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+              <label style={{ ...variantStyle('primary', false, 36), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
                 <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
               </label>
@@ -897,23 +889,14 @@ function ProfileContent() {
               placeholder={tr.profilePage.bioPlaceholder}
               style={{ ...fieldStyle, marginBottom: '18px', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
             />
-            <button
+            <Button
+              variant="primary"
+              fullWidth={false}
               onClick={saveAbout}
               disabled={savingAbout || (avatar === initialAvatar && bio === initialBio)}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--afa-on-fill-solid)',
-                background: 'var(--afa-amber)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
-                cursor: savingAbout || (avatar === initialAvatar && bio === initialBio) ? 'default' : 'pointer',
-                opacity: savingAbout || (avatar === initialAvatar && bio === initialBio) ? 0.5 : 1,
-              }}
             >
               {savingAbout ? tr.profilePage.savingEllipsis : tr.profilePage.saveBtn}
-            </button>
+            </Button>
           </div>
 
           {/* Display-only currency preference (Option A). Real settlement
@@ -950,23 +933,14 @@ function ProfileContent() {
                 </option>
               ))}
             </select>
-            <button
+            <Button
+              variant="primary"
+              fullWidth={false}
               onClick={saveDisplayCurrency}
               disabled={savingCurrency || displayCurrency === initialDisplayCurrency}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--afa-on-fill-solid)',
-                background: 'var(--afa-amber)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 16px',
-                cursor: savingCurrency || displayCurrency === initialDisplayCurrency ? 'default' : 'pointer',
-                opacity: savingCurrency || displayCurrency === initialDisplayCurrency ? 0.5 : 1,
-              }}
             >
               {savingCurrency ? tr.profilePage.savingEllipsis : tr.profilePage.saveCurrencyBtn}
-            </button>
+            </Button>
           </div>
           </div>
 
@@ -988,13 +962,9 @@ function ProfileContent() {
                 <div style={{ marginBottom: '12px' }}>
                   <GenrePicker value={genre} onChange={setGenre} size="lg" />
                 </div>
-                <button
-                  onClick={applyArtist}
-                  disabled={applying === 'artist'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'artist' ? 0.6 : 1 }}
-                >
+                <Button variant="primary" fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
                   {applying === 'artist' ? tr.profilePage.settingUpEllipsis : tr.profilePage.becomeArtistBtn}
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -1019,13 +989,9 @@ function ProfileContent() {
                   placeholder={tr.profilePage.orgNamePlaceholder}
                   style={{ ...fieldStyle, marginBottom: '18px' }}
                 />
-                <button
-                  onClick={applyOrganiser}
-                  disabled={applying === 'organiser'}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'organiser' ? 0.6 : 1 }}
-                >
+                <Button variant="primary" fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -1042,13 +1008,9 @@ function ProfileContent() {
             {venueStatus?.hasProfile ? (
               renderRoleStatus(venueStatus, 'venue', tr.profilePage.roleLabelVenue)
             ) : (
-              <button
-                onClick={applyVenueOwner}
-                disabled={applying === 'venue'}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', opacity: applying === 'venue' ? 0.6 : 1 }}
-              >
+              <Button variant="primary" fullWidth={false} onClick={applyVenueOwner} disabled={applying === 'venue'}>
                 {applying === 'venue' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
-              </button>
+              </Button>
             )}
           </div>
 
