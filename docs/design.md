@@ -2250,3 +2250,46 @@ every non-ContributionMoment heading in this same flow. Georgia was
 the pre-redesign display font, superseded first by Newsreader then by
 Archivo (GEN-2609-003) - these six hits never migrated. Real, worth a
 follow-up ticket; not a button/input issue so not touched here.
+
+## Font-size audit, rest of the app - findings + page-title tier locked in (12 Sep, docs-only)
+
+Audited every remaining `fontSize`/`font-size` outside the 6 files
+GEN-2609-029 already migrated: 123 files, ~1,680 occurrences. ~76%
+already coincidentally match the Section 8 scale; 100 files have at
+least one value that doesn't. Full breakdown by area (Dashboards,
+Shared components, Discover/Events, Admin, Auth/onboarding,
+Static/marketing, plus two small unnamed buckets - audience account
+pages and role-shared dashboard pages) reported to Hitesh, not written
+to a doc - this was a scoping exercise for rollout-order decisions,
+not a spec.
+
+One thread from that audit **was** locked into a spec: the 28px/30px
+hits sitting just under the 32px hero cutoff turned out to be a real,
+consistent fourth type tier, not scattered one-offs or accidental
+hero-adjacent values. 17 hits across 16 files, every one an internal
+dashboard page's own `<h1>` title (`Georgia, serif`, weight ~700,
+`DashboardShell`-wrapped or an equivalent centered utility page) -
+confirmed from code context alone in every case, no screenshots
+needed. Documented as `--afa-text-page-title` in
+docs/afa-design-tokens-reference.md Section 8.4: 28px (9 hits) vs 30px
+(8 hits) is a genuine near-tie, flagged as such rather than forced to
+one value; weight is not close (13 explicit `700` + 3 undeclared
+defaulting to browser-bold vs a single `900` outlier) - 700
+recommended with confidence. Real open question, explicitly not
+decided: whether this tier migrates to `var(--font-display)`
+(Archivo) like the rest of the app did under GEN-2609-003, or stays
+Georgia deliberately as its own utility-dashboard register - flagged
+in the doc for a later call, not made here. Two brand-wordmark
+instances (RegisterForm.tsx) and three stat-number displays
+(dashboard/audience, VenueDetailClient.tsx x2) were found alongside
+the 17 but don't belong in this tier - logged as excluded/possible-
+future-tier in the same doc section, not built.
+
+**Separate follow-up, found incidentally while in my-feedback/page.tsx
+for this audit:** `var(--afa-black, #0E0C0A)` is referenced 6 times in
+that file (lines 185, 211, 240, 256, 324, 381) - `--afa-black` is not
+a defined token anywhere in globals.css, so all six silently fall
+through to the hardcoded `#0E0C0A` fallback every time. Harmless today
+(the fallback is always what renders), but a genuine broken-reference
+that would misbehave the moment anyone expects that variable to be
+overridable. Not fixed - flagged for whoever next touches that file.

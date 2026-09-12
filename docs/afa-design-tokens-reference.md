@@ -205,3 +205,30 @@ Retrofitting is explicitly out of scope for this spec. Components with the heavi
 - `FeedbackTrends.tsx`, `FeedbackDetailPanel.tsx` — 25+ font-size declarations between them, no shared sizing today (also carries pre-existing legacy-token debt, per `HANDOFF.md`)
 - `RegisterForm.tsx`, `(auth)/login/page.tsx` — 20+ font-size declarations each, almost entirely 12–15px freehand values that would cleanly land on the new `--afa-text-small`/`--afa-text-body` tokens
 - All hero components (`Hero.tsx`, `VenueDetailClient.tsx`, `ArtistProfileClientPage.tsx`, `VenuesHero.tsx`, `ArtistHero.tsx`, `FourRooms.tsx`, `about/page.tsx`, `organisers/[id]/page.tsx`, `events/page.tsx`, `events/[id]/EventDetailClientPage.tsx`) — every H1 `clamp()`, blocked on the separate display-scale decision noted in 8.1
+
+### 8.4 Page-title tier (discovered 12 Sep, auditing the 28px/30px hits excluded from 8.1's scale)
+
+A fourth, real tier sitting between `--afa-text-heading` (24px) and the hero/display `clamp()` gap — every internal dashboard page's own `<h1>` title, grepped and eyeballed one by one (no screenshots needed - unambiguous from code context in every case: single page-level `<h1>`, `Georgia, serif`, sitting above a descriptive paragraph, usually below a `BackLink`/breadcrumb, inside `DashboardShell` or an equivalent centered utility-page layout).
+
+**17 hits across 16 files** (`dashboard/admin/settings/page.tsx` has two - a forbidden-state h1 and the real page h1, in separate render branches):
+
+| Value | Count | Files |
+|---|---|---|
+| **28px** | 9 | `events/[id]/rate/RatePromptClientPage.tsx`, `verify-phone/page.tsx`, `dashboard/admin/settings/page.tsx` (forbidden state), `my-feedback/page.tsx`, `dashboard/admin/bookings/page.tsx`, `dashboard/organiser/tours/page.tsx`, `dashboard/admin/diary/page.tsx`, `dashboard/organiser/payouts/page.tsx`, `dashboard/messages/page.tsx` |
+| **30px** | 8 | `dashboard/venue/[id]/sales/page.tsx`, `dashboard/admin/users/page.tsx`, `dashboard/admin/settings/page.tsx` (main state), `dashboard/admin/revenue/page.tsx`, `dashboard/admin/artists/page.tsx`, `dashboard/organiser/sales/page.tsx`, `dashboard/organiser/events/[id]/sales/page.tsx`, `dashboard/organiser/events/[id]/lineup/page.tsx` |
+
+28px vs 30px is a near-tie (9-8 of 17) - noted as such, not a confident majority either way.
+
+`fontWeight`: 13 of 17 declare `700` explicitly; 3 declare no weight at all (falls through to the browser's default bold `<h1>`, effectively ~700-equivalent); 1 (`dashboard/admin/settings/page.tsx`'s real page heading) explicitly overrides to `900`. Effectively 16 of 17 render at weight ~700 - this split is not close.
+
+**Proposed token** (spec only - not applied to any file in this pass):
+
+| Token | Value | Note |
+|---|---|---|
+| `--afa-text-page-title` | `28px` / `fontWeight: 700` / `font-family: Georgia, serif` | Internal dashboard page `<h1>` titles only - not hero/display copy, not the 24px `--afa-text-heading` tier |
+
+**Open question, explicitly not decided here:** every other font-family in the app migrated off `Georgia, serif` to Archivo (`var(--font-display)`) under GEN-2609-003 - these 17 hits are the one place Georgia is still load-bearing (not just a stray leftover value, but the actual declared family on every one of these headings). Whether this tier should migrate to `var(--font-display)` alongside the rest of the app, or stay Georgia deliberately (a distinct "utility/dashboard" register vs. the public site's Archivo identity), is a real open call for whoever picks this up - not decided or acted on here.
+
+**Excluded from this tier - related but different:**
+- **Brand-wordmark instances (2 hits, `RegisterForm.tsx` lines 326 and 378)** - the "AforAudience" logo lockup at the top of the OTP-verification card, also 28px. Not a heading at all (a logo, same register as the site's other wordmark instances) - excluded from `--afa-text-page-title` on purpose, not an oversight.
+- **Stat/metric-number hits (3 hits)** - `dashboard/audience/page.tsx` (a KPI stat card's value), `VenueDetailClient.tsx` (venue capacity, and acoustic rating) - both at 28px inside an icon+label stat block, a different UI role than a heading. Flagged as a **possible future fifth tier** (a "stat display" size), not decided, not built.
