@@ -120,7 +120,7 @@ export default function VenueOwnersGridEmbed() {
                 goToOwner(owner.id)
               }
             }}
-            className="afa-owner-card"
+            className="afa-owner-card afa-focusable"
             style={{
               position: "relative",
               background: "var(--afa-surface-raised)",
