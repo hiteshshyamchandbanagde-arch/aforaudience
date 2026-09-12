@@ -2127,6 +2127,38 @@ fixed once, not across two more passes.
 Logged to the Feedback table as `BUG-2609-025` (`NEW`, not yet queued
 for build).
 
+## BUG-2609-025 — built and merged (12 Sep)
+
+All 4 banners migrated to the exact rgba/token patterns already
+established elsewhere in the app, not invented fresh: `wasSuspended`
+and `error` -> the `AuthPromptSheet.tsx`/`CorporateInquiryModal.tsx`
+error-banner pattern (`rgba(179,38,30,0.1)` bg / `rgba(179,38,30,0.3)`
+border / `var(--afa-error)` text); `wasIdle` -> the `verify-phone`/
+`RegisterForm.tsx` neutral-card pattern (`var(--afa-surface-raised)`
+bg / `rgba(245,245,240,0.1)` border / `var(--afa-text-primary)` text);
+`devOtp` -> the `FeeSheet.tsx:102` info-box pattern
+(`rgba(201,151,58,0.08)` bg / `rgba(201,151,58,0.3)` border /
+`var(--afa-amber)` text). Only `background`/`border`/`color` touched;
+the already-correct `justReset` success banner on the same page was
+left untouched as the reference point that confirmed the pattern.
+
+Verified: grep confirms zero remaining `afa-terracotta-tint`/
+`afa-mist`/`afa-amber-tint`/`var(--afa-ink)` hits in the file, `tsc
+--noEmit` clean, 3 of 4 states (`wasSuspended`, `wasIdle`, `error`)
+live-rendered with pixel-exact computed-style matches. The 4th
+(`devOtp`) couldn't be triggered locally - the OTP-request endpoint
+429s because `MSG91_AUTH_KEY`/`MSG91_TEMPLATE_ID` aren't set in the
+dev environment, an environment config gap unrelated to this change -
+verified instead via direct diff comparison against its
+`FeeSheet.tsx:102` source pattern and a manual hex-to-rgb cross-check
+of `--afa-error`/`--afa-amber`'s real `globals.css` values.
+
+Merged (`5f1f14e`), verified via Contents API, Vercel READY. This
+still leaves the `#68D391` "Account created!" banner from
+`GEN-2609-001` as the one remaining known gap on this page - not
+touched by this ticket, still open. `BUG-2609-025` moved to RESOLVED
+/ DEPLOYED_QA.
+
 ## Merge verification note (chat-side) — 12 Sep
 
 `BUG-2609-024` (this session's PR) merged to `qa` via PR #595, squash
