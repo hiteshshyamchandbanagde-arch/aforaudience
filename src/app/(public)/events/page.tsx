@@ -1,6 +1,6 @@
 "use client"
-import { useEffect, useRef, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useRef, useState, useTransition } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
@@ -89,8 +89,9 @@ function DiscoverCarouselRow({
   )
 }
 
-export default function EventsPage() {
+function EventsPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { t: tr } = useLocale()
   const [, startTransition] = useTransition()
   const [navigatingId, setNavigatingId] = useState<string | null>(null)
@@ -122,7 +123,7 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(() => searchParams.get("search") ?? "")
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [selectedCity, setSelectedCity] = useState("All Cities")
   const [priceFilter, setPriceFilter] = useState("All")
@@ -687,5 +688,21 @@ export default function EventsPage() {
         )}
       </div>
     </main>
+  )
+}
+
+// useSearchParams() (added for BUG-2609-023's mobile-search ?search= param)
+// requires a Suspense boundary around any Client Component that calls it, or
+// the production build fails with "Missing Suspense boundary with
+// useSearchParams" - confirmed in node_modules/next/dist/docs, same pattern
+// login/page.tsx already uses. Fallback is null, not a skeleton - this page
+// already renders its own loading state internally (see `loading` state
+// above) once hydrated, so there's nothing meaningful to show for the brief
+// pre-hydration gap.
+export default function EventsPage() {
+  return (
+    <Suspense fallback={null}>
+      <EventsPageContent />
+    </Suspense>
   )
 }

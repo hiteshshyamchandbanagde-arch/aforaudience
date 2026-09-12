@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useLocale } from '@/lib/i18n/translate'
 import { LOCALES } from '@/lib/i18n/locales'
@@ -48,6 +48,7 @@ export const MOBILE_SEARCH_OPEN_FILTERS_EVENT = 'afa:mobile-search-open-filters'
 
 export default function MobileTopBar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { data: session, status } = useSession()
   const { locale, setLocale, t } = useLocale()
 
@@ -84,6 +85,14 @@ export default function MobileTopBar() {
   const handleOpenFilters = () => {
     if (!onEventsRoute) return
     window.dispatchEvent(new CustomEvent(MOBILE_SEARCH_OPEN_FILTERS_EVENT))
+  }
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return
+    if (onEventsRoute) return
+    const trimmed = query.trim()
+    if (!trimmed) return
+    router.push(`/events?search=${encodeURIComponent(trimmed)}`)
   }
 
   const user = session?.user as { name?: string | null } | undefined
@@ -133,6 +142,7 @@ export default function MobileTopBar() {
           value={query}
           onChange={(e) => handleQueryChange(e.target.value)}
           onFocus={handleOpenFilters}
+          onKeyDown={handleSearchSubmit}
           placeholder={t.search.mobileTopBarPlaceholder}
           style={{
             width: '100%',
