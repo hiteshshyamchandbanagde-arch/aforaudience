@@ -183,7 +183,7 @@ export default function AdminArtistsPage() {
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             Artist Roster
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '680px' }}>

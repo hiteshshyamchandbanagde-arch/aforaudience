@@ -180,7 +180,7 @@ export default function AdminBookingsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px 80px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
             Bookings &amp; delivery
           </h1>
           <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '20px', fontSize: '14px' }}>

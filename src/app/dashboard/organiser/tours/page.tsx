@@ -68,7 +68,7 @@ export default function OrganiserToursPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>

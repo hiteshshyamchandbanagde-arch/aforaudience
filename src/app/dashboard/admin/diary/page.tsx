@@ -245,7 +245,7 @@ export default function AdminDiaryPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 80px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 6px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 6px' }}>
           Admin Diary
         </h1>
         <p style={{ color: 'var(--afa-text-secondary)', fontSize: '14px', marginBottom: '24px' }}>

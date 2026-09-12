@@ -497,7 +497,7 @@ export default function AdminSettingsPage() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'system-ui' }}>
           <div style={{ maxWidth: 560, margin: '0 auto' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
               Admins only
             </h1>
             <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>
@@ -534,7 +534,7 @@ export default function AdminSettingsPage() {
           / Settings
         </div>
 
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 30, fontWeight: 900, marginBottom: 8 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
           Platform settings
         </h1>
         <p style={{ opacity: 0.65, marginBottom: 28, fontSize: 14, lineHeight: 1.5 }}>

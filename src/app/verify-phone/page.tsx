@@ -127,7 +127,7 @@ function VerifyPhoneInner() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.verifyPhonePage.verifyYourPhoneHeading}
           </h1>
 
