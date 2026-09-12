@@ -2539,3 +2539,39 @@ events unfiltered -> 1 for a matching title -> 0 for a nonsense query).
 Diff reviewed before merging, not taken on summary alone. Merged
 (`db41f20`), verified via Contents API, Vercel READY, zero runtime
 errors. `BUG-2609-023` moved to RESOLVED / DEPLOYED_QA.
+
+## GEN-2609-037 — the audit's Step 5 finally built (12 Sep)
+
+The original UI/UX audit sequence's Step 5 (docs/afa-uiux-design-audit.md
+Section 09, "Booking-confirmation ticket stamp / seat lighting up
+moment") was never built - superseded by the font-migration tangent two
+sessions ago. Picked back up this session. Verified first that the
+shipped `ContributionMoment.tsx` seal already matched the original Figma
+spec (`MqFVU52wiZtjkxMGsmC0d0`, node `3:4`) - no build-vs-spec drift, the
+only gap was the missing entrance animation.
+
+Presented 3 animation concepts via an interactive live comparison
+(Stamp impact / Drop and flash / Simple pop) rather than a written
+description - Hitesh picked **Stamp impact**: the seal overshoots large
+with a slight twist, settles with a small wobble, then a faint amber
+ring pulses outward on landing.
+
+Dispatched to CC with exact keyframe/timing values matching the chosen
+concept. Built following the existing `.afa-sheet-in`/`.afa-backdrop-in`
+convention exactly - same file, same naming pattern, extended the
+existing `prefers-reduced-motion` selector list rather than duplicating
+it. Real trouble hit during live verification: a stale local dev server
+(`pkill -f "next dev"` doesn't reliably kill the process in CC's
+environment) served old CSS across two restarts, initially looking
+exactly like the animation wasn't wired up - root-caused by checking
+served CSS bytes directly, fixed via `taskkill //PID` on the real PID.
+Once on a genuinely fresh server: confirmed real `animation-name`/
+duration/transform-matrix on both the stamp and ring at mobile and
+desktop, `prefers-reduced-motion` correctly zeroing both, no layout
+shift from the ring's visual overflow past the 140px box.
+
+Diff reviewed before merging. Merged (`aa80ff7`), verified via Contents
+API, Vercel READY, zero runtime errors. `GEN-2609-037` moved to
+RESOLVED / DEPLOYED_QA. **Step 5 of the original 6-step sequence is now
+done; Step 6 (accessibility/motion-guidelines/icons/notifications/
+onboarding, one-page specs each) remains untouched.**
