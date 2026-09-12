@@ -93,3 +93,31 @@ assumed permanent.
    session's audit pass, filed `NEW`) is unscoped and unbuilt — pick up
    alongside `GEN-2609-001`'s still-open `#68D391` banner item per
    `docs/design.md`'s note, rather than as two separate passes.
+
+## Update — 12 Sep, end of UI/UX audit execution session
+
+The `gh`/`GITHUB_TOKEN` gap noted above remained stable and unremarkable
+all session — 5 separate PRs (#595-599) plus a 6-branch stacked font
+migration (#600-604) all flowed through the same push-branch/chat-
+merges pattern with zero friction. Treat this as settled; no need to
+re-verify the credential gap itself each session, though re-confirming
+`gh`/`GITHUB_TOKEN` still isn't present takes one `which gh` call and
+costs nothing if you're already checking git state.
+
+**New pattern worth knowing for future stacked-branch work:** this
+session pushed 6 font-migration branches that all diverged from the
+same pre-Phase-1 commit (not sequentially rebased on each other after
+Phase 1 merged). This is fine and safe - GitHub's merge algorithm
+handles it as a series of independent 3-way merges, each a no-op for
+already-applied content - but if you're the one building the next
+stacked set, consider rebasing each subsequent branch onto the
+previous one's actual merge commit once it lands, rather than all
+branching from one shared ancestor. Either approach works; rebasing
+sequentially just avoids the "stale diff" confusion chat had to work
+through this session (see HANDOFF.md's new gotcha note on this).
+
+`qa` HEAD as of this note: `7dd5ddb` (before this handoff commit
+itself). Local branch cleanup: `feat/font-migration-01` through `-05`
+are all merged and remote-deleted - if any of these still exist as
+local branches on this machine, they're safe to delete, nothing on
+them is unmerged.
