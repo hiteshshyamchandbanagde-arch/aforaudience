@@ -291,7 +291,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
           <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.55)', marginBottom: '24px' }}>

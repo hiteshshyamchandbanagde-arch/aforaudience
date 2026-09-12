@@ -76,7 +76,7 @@ export default function MessagesInboxPage() {
       <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '760px', padding: '32px 24px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
               {tr.messagesInboxPage.heading}
             </h1>
 
