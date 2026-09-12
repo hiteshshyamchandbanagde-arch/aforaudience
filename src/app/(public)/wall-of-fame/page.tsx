@@ -346,6 +346,7 @@ export default function WallOfFamePage() {
                               goTo(key, `/organisers/${o.id}`)
                             }
                           }}
+                          className="afa-focusable"
                           style={{
                             position: "relative",
                             display: "flex",
@@ -417,6 +418,7 @@ export default function WallOfFamePage() {
                               goTo(key, `/venues/${v.id}`)
                             }
                           }}
+                          className="afa-focusable"
                           style={{
                             position: "relative",
                             display: "flex",

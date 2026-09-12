@@ -116,7 +116,7 @@ export default function OrganisersPage() {
                       goToOrganiser(org.id)
                     }
                   }}
-                  className="hover-lift-card"
+                  className="hover-lift-card afa-focusable"
                   style={{
                     background: "var(--afa-surface-raised)",
                     borderRadius: "3px",

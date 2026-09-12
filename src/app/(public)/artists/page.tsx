@@ -364,7 +364,7 @@ export default function ArtistsPage() {
                       goToArtist(artist.id)
                     }
                   }}
-                  className="afa-artist-card"
+                  className="afa-artist-card afa-focusable"
                   style={{
                     background: "var(--afa-surface-raised)",
                     borderRadius: "10px",

@@ -583,6 +583,7 @@ export default function ArtistDashboard() {
                           goToEvent(app.event.id)
                         }
                       }}
+                      className="afa-focusable"
                       style={{
                         position: 'relative',
                         background: 'var(--afa-surface-raised)',

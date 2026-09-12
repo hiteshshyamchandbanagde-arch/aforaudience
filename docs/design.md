@@ -2622,4 +2622,58 @@ consolidation verified via diff only so far - the manual DevTools
 `prefers-reduced-motion: reduce` emulation check across all 5 patterns
 (dispatch's own verification step) has not been run yet this turn.
 Pending merge confirmation before Step 6's audit-tracking doc entry is
-finalized, per the standing rule.
+finalized, per the standing rule. Merged as `d304ce5`/PR #611 (confirmed
+via `git fetch` at the start of the next dispatch) - no collision this
+time.
+
+## Accessibility Guidelines - Step 6, sub-spec 2/5 (built, not yet merged)
+
+Second of Step 6's five specs. New file:
+`docs/accessibility-guidelines.md` - contrast pass (WCAG relative
+luminance, alpha-blended onto real component backgrounds, not assumed)
+plus a focus-visible fix, same discipline as the motion spec.
+
+**Two corrections surfaced while independently re-deriving this
+dispatch's own starting numbers, not just confirming them:**
+
+1. The error-banner/`--afa-red-alt` contrast figures (2.68:1 / 4.66:1)
+   only hold when the banner sits on `--afa-surface-page` - true for
+   `ErrorBanner.tsx`'s ~20 `DashboardShell`-wrapped usages, but 3 more
+   real usages (`login/page.tsx`, `AuthPromptSheet.tsx`,
+   `CorporateInquiryModal.tsx`) place the identical banner inside a
+   `--afa-surface-raised` card/sheet instead - a darker base giving a
+   worse failure today (2.40:1) and a red-alt candidate that still misses
+   AA (4.17:1). Both real contexts are now in the spec; the fix candidate
+   is not a uniform pass.
+2. The "12 files / 3 already compliant" framing for the focus-visible gap
+   had 2 comment false-positives (`globals.css`'s own rule comment,
+   `organisers/[id]/page.tsx`'s comment about using a real `<Link>`
+   instead of a role-div) - real count is 10 click-guard files, 2 already
+   compliant. The resulting 8-file fix list was unaffected (both
+   corrections cancel out), but the reasoning is corrected in the doc.
+
+**Shipped:** `afa-focusable` added to 10 click-guard elements across the 8
+files dispatched (`EventCard.tsx` and `wall-of-fame/page.tsx` each had two
+independent elements, not one - both caught and fixed). No new CSS, no
+behavior change. `tsc --noEmit` clean. Diff reviewed line-by-line before
+this doc entry.
+
+**Flagged, not fixed - needs Hitesh's call**, full numbers in the spec:
+- `--afa-error`'s AA failure + the `--afa-red-alt` retarget candidate -
+  not a clean swap: fixes the CRITICAL-badge background-fill case
+  (currently failing at 2.87:1 → 4.99:1) but breaks `OfflineBanner.tsx`'s
+  background-fill case (currently passing at 6.54:1 → 3.76:1), and still
+  doesn't fully clear AA for the card/sheet-context text case above.
+- `--afa-text-muted`'s AA failure for normal text - documented as a
+  usage rule (UI/large text only), not a token change. 5 real misuses
+  found (empty-state sentences at 13-14px in `OrganisersGridEmbed.tsx`,
+  `venue-requests/page.tsx`, `venue/sales/page.tsx` x2,
+  `venue/bookings/page.tsx`) - logged as a candidate follow-up ticket.
+
+Built on `feat/gen-2609-039-accessibility-guidelines`, branched from `qa`
+at `d304ce5` (synced via `git fetch` first - no collision this time).
+Diff-reviewed and `tsc`-clean; the dispatch's own real Tab-key
+click-through verification on ≥2 of the 8 pages has **not** been run this
+turn - no browser/Playwright tool was available in this session. Flagged
+to Hitesh rather than claimed as done. Pending merge confirmation before
+this entry is finalized, per the standing rule.

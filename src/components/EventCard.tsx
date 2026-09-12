@@ -245,7 +245,7 @@ export function EventCard({
           onOpen()
         }
       }}
-      className={`afa-event-card${view === "grid" ? " afa-event-card-grid" : " afa-event-card-list"}`}
+      className={`afa-focusable afa-event-card${view === "grid" ? " afa-event-card-grid" : " afa-event-card-list"}`}
       style={{
         position: "relative",
         display: view === "list" ? "flex" : "flex",
@@ -347,6 +347,7 @@ export function EventRow({
           onOpen()
         }
       }}
+      className="afa-focusable"
       style={{
         position: "relative",
         display: "flex",

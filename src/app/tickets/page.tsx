@@ -459,6 +459,7 @@ export default function MyTicketsPage() {
                       goToEvent(b.event.id)
                     }
                   }}
+                  className="afa-focusable"
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
