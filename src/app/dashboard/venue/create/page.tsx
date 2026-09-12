@@ -616,7 +616,7 @@ function PathCard({
         >
           {icon}
         </span>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+        <h3 style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
           {title}
         </h3>
       </div>

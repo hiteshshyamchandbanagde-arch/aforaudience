@@ -364,7 +364,7 @@ export function PageHead({
           </p>
           <h1
             style={{
-              fontFamily: 'var(--font-display)',
+              fontFamily: 'var(--font-ui)',
               fontSize: '34px',
               fontWeight: 500,
               lineHeight: 1,
@@ -418,7 +418,7 @@ export function SectionTitle({ n, title }: { n: string; title: string }) {
       }}
     >
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--afa-amber)' }}>{n}</span>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
     </div>
   )
 }

@@ -240,7 +240,7 @@ export default function VenueDashboard() {
                       </p>
                       <h3
                         style={{
-                          fontFamily: 'var(--font-display)', fontSize: '21px', fontWeight: 500, lineHeight: 1.2, color: 'var(--afa-text-primary)', margin: 0,
+                          fontFamily: 'var(--font-ui)', fontSize: '21px', fontWeight: 500, lineHeight: 1.2, color: 'var(--afa-text-primary)', margin: 0,
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         }}
                       >

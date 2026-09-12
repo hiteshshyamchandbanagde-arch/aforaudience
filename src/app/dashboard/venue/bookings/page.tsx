@@ -173,7 +173,7 @@ export default function VenueBookingsPage() {
               >
                 ←
               </button>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+              <p style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
                 {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
               </p>
               <button
@@ -233,7 +233,7 @@ export default function VenueBookingsPage() {
 
           {/* Pending */}
           <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
               Pending {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
@@ -272,7 +272,7 @@ export default function VenueBookingsPage() {
           {/* Resolved */}
           {resolved.length > 0 && (
             <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
                 Past Requests
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
