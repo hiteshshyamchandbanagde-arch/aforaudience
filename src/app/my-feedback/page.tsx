@@ -321,7 +321,7 @@ export default function MyFeedbackPage() {
     <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
       <SiteNav variant="page" />
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-black, #0E0C0A)' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-black, #0E0C0A)' }}>
           {tr.myFeedbackPage.heading}
         </h1>
         <p style={{ color: 'rgba(245,245,240,0.6)', marginBottom: '28px' }}>

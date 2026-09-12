@@ -341,7 +341,7 @@ export default function AdminArtistsPage() {
 function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: '10px', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
         {label}{sub && <span style={{ opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}> · {sub}</span>}
       </div>

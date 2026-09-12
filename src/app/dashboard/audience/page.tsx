@@ -37,7 +37,7 @@ function StatTile({ label, value, icon, sub }: { label: string; value: string; i
           {icons[icon]}
         </span>
       </div>
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: 30, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
       {sub && <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 12, marginTop: 6 }}>{sub}</p>}
     </div>
   )
@@ -103,7 +103,7 @@ export default function AudienceActivityPage() {
       <DashboardShell>
         <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '900px', padding: '48px 24px' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.audienceActivityPage.heading}
             </h1>
             <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
