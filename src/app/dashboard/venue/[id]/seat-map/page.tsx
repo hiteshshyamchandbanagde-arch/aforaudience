@@ -1543,7 +1543,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </span>
                 <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-fill-solid)' }}>Recommended</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Guided Setup</div>
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Guided Setup</div>
               <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Answer a few simple questions — rows, seats per row, walkways — and we'll lay out the seats for you. Best if your seating is straight rows facing the stage.
               </div>
@@ -1561,7 +1561,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </span>
                 <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5 }}>For hands-on control</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Draw It Myself</div>
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: '18px', color: 'var(--afa-text-primary)', marginBottom: '6px' }}>Draw It Myself</div>
               <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Place and drag every seat by hand on a canvas shaped like your real venue. Good for curved rows, round tables, or any layout that isn't straight rows.
               </div>
@@ -1645,7 +1645,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {guidedPanelOpen && (
                     <div className="afa-glow-orange" style={{ marginBottom: '18px', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,90,54,0.18)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
+                        <span style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
                       </div>
                       <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
                         Every field below updates the preview instantly. Click Generate / Update Layout when it looks right - it adds these seats to the canvas without disturbing anything you've already placed by hand.
@@ -2249,7 +2249,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afa-amber)', marginBottom: '10px' }}>
           Terminology · used consistently across every screen
         </div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: '0 0 8px' }}>One word per concept</h2>
+        <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: '0 0 8px' }}>One word per concept</h2>
         <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px' }}>
           Section not Zone. Aisle not Walkway/Gangway. Each concept carries a small glyph so meaning survives translation and non-native English.
         </p>
@@ -2260,7 +2260,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
                 {r.glyph}
               </span>
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '16px', color: 'var(--afa-text-primary)' }}>{r.term}</div>
+                <div style={{ fontFamily: 'var(--font-ui)', fontSize: '16px', color: 'var(--afa-text-primary)' }}>{r.term}</div>
                 <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{r.def}</div>
                 <div style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.45, marginTop: '2px' }}>{r.why}</div>
               </div>

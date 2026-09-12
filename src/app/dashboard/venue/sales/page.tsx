@@ -354,7 +354,7 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Card style={{ padding: '20px', marginBottom: '20px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
       {children}
     </Card>
   )
