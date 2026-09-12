@@ -2126,3 +2126,35 @@ fixed once, not across two more passes.
 
 Logged to the Feedback table as `BUG-2609-025` (`NEW`, not yet queued
 for build).
+
+## Merge verification note (chat-side) — 12 Sep
+
+`BUG-2609-024` (this session's PR) merged to `qa` via PR #595, squash
+SHA `61f6373b0ccdbf3d60ebb7886465d917f93476e7`. Diff spot-checked
+line-by-line against CC's own description before merging — token
+swaps confirmed correct (`--afa-terracotta`/hardcoded `white` →
+`--afa-error`/`--afa-fill-solid`+`--afa-on-fill-solid`/
+`--afa-surface-page`/`--afa-amber`, matching the roles described
+above). CI green, fresh head SHA re-fetched immediately before the
+merge PUT, `qa` HEAD and file content verified post-merge via the
+Contents API (`--afa-amber` present in `MobileTabBar.tsx`, zero
+`--afa-terracotta` hits remaining in either modal file), Vercel build
+READY, zero runtime errors in the 15 minutes post-deploy. Feedback
+table updated: `BUG-2609-024` → `RESOLVED`/`DEPLOYED_QA`.
+
+`BUG-2609-022` deliberately left at `BUILD_QUEUE` per CC's own note —
+this PR only closed the active-tab-color half of that ticket; icon
+style and label typography remain open, pending `GEN-2609-018`'s nav
+rework.
+
+This session's CC instance flagged (correctly, not a malfunction) that
+its local environment has no `gh` CLI or `GITHUB_TOKEN`, so it cannot
+open/merge PRs or hit the GitHub REST API itself — only `git`
+push/pull via Git Credential Manager. This matches the standing,
+previously-documented split (CC pushes branches, chat handles
+PR/merge/verify via PAT) and is not a new problem or a regression in
+CC's behavior; declining to fabricate a PR number, CI status, or merge
+SHA it couldn't observe was the correct call, not a refusal to work.
+CC's own `CC_HANDOFF.md` (repo root) has the full local/session-state
+account, including its self-audit of git state and this incident in
+its own words.
