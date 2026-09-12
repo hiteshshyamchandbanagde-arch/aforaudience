@@ -132,3 +132,76 @@ Real, shipped dashboards already exist under `src/app/dashboard/` — this is **
 **Important, non-obvious finding**: the dashboard family does **not** follow the public-site sharp-corner rule. Its event cards use `borderRadius: '12px'` and its status pills use `borderRadius: '999px'` ([dashboard/organiser/page.tsx:223,235](../src/app/dashboard/organiser/page.tsx#L223)) — rounded corners throughout, unlike Venues/Events/Artists cards. Card border there is also a flat `1px solid rgba(245,245,240,0.08)` with no amber hover treatment (dashboards aren't hover-interactive card grids the way public directories are).
 
 **Implication for new dashboard work**: match the *existing dashboard* convention (rounded `12px` cards, `999px` pills, flat borders, `--afa-surface-raised` fill) rather than the public-site sharp-corner rule — they are two deliberately different, already-coexisting systems in this codebase, not one the other should be reconciled toward.
+
+## 8. Type Scale & Spacing Grid (proposed, 12 Sep 2026 — UI/UX audit Section 06 / 12 Step 1)
+
+**Spec only — nothing below has been applied to any component yet.** Derived from grepping every shipped `font-size`/`fontSize` and `padding`/`margin`/`gap` value in `src/`, not assumed. Source: `docs/afa-uiux-design-audit.md`, qa @ `4456f3b`.
+
+### 8.1 Type scale
+
+Grep across `src/` (~1,621 `font-size`/`fontSize` hits) found this real distribution — the scale below is derived from it, not picked first and fitted after:
+
+| px | Count | | px | Count |
+|---|---|---|---|---|
+| 13 | 399 | | 18 | 48 |
+| 14 | 286 | | 20 | 40 |
+| 12 | 276 | | 24 | 31 |
+| 11 | 183 | | 22 | 28 |
+| 15 | 67 | | 17 | 25 |
+| 10 | 57 | | 32 | 22 |
+| 16 | 55 | | 9 | 15 |
+
+Long tail (low-frequency, not part of the proposed scale): 28/30/34/36px large-heading one-offs, and decimal hand-tunings (9.5/10.5/11.5/12.5/13.5px, 36 hits combined) — these read as freehand adjustments around the sizes above, not a separate tier.
+
+Proposed 6-step scale:
+
+| Token | px | Weight | Line-height | Use |
+|---|---|---|---|---|
+| `--afa-text-micro` | 11px | 700 | 1.2 | Eyebrows, uppercase meta labels, tiny badge/count text |
+| `--afa-text-small` | 12px | 700 / 500 | 1.3 | Secondary text, captions, small pills |
+| `--afa-text-ui` | 13px | 600 / 700 | 1.3 | Buttons, nav items, form labels — the single most common size shipped |
+| `--afa-text-body` | 14px | 400 | 1.6 | Paragraphs, descriptions, primary reading text |
+| `--afa-text-title` | 16px | 500 / 600 | 1.2 | Card titles, list-item titles (absorbs the 15–19px band) |
+| `--afa-text-heading` | 24px | 500 | 1.05 | H3/H4, section subheads (absorbs the 20–24px band) |
+
+Weight and line-height per level are likewise grepped, not guessed: `fontWeight` clusters at 700 (415), 600 (364), 500 (62), 400 (42); `lineHeight` clusters at 1.6 (51, body), 1 (31, tight/display), 1.5 (18), 1.4 (15), 1.2 (9).
+
+**Genuinely not covered — flagged, not silently folded in:**
+- Hero/display H1s (`Hero.tsx`, `VenueDetailClient.tsx`, `ArtistProfileClientPage.tsx`, `about/page.tsx`, 15+ more) — every one is its own bespoke `clamp()`, ranging clamp-min 16–48px to clamp-max 18–104px, no two pages share the same values. This is the still-open "Heading scale (H1–H4)" gap from audit Section 02 — a fluid display scale is its own follow-up, not something this 6-step body/UI scale should absorb.
+- `src/app/api/posters/**` (40/52/56/62/68/84px) — server-rendered OG/poster images, a canvas rendering surface, not UI.
+- One-off marketing display text: `ComingSoon.tsx` (36px), `CorporateInquiryModal.tsx` (40px), `FourRooms.tsx` (56px).
+
+### 8.2 Spacing / 8px grid
+
+Grep across the highest-traffic layout components (`EventCard.tsx`, `HomeHeader.tsx`, `SiteNav.tsx`, `DashboardShell.tsx`, `MobileTabBar.tsx`, `MobileTopBar.tsx`) found real `padding`/`margin`/`gap` values across the full `0–28px` range with no consistent base unit.
+
+Proposed 6-step, 8px-based scale (stops where the real data stops — no invented top end):
+
+| Token | px | Use |
+|---|---|---|
+| `--afa-space-1` | 4px | Icon-to-text gaps, tight inline spacing |
+| `--afa-space-2` | 8px | Default gap between related elements |
+| `--afa-space-3` | 12px | Card internal padding (top), stacked-block gaps |
+| `--afa-space-4` | 16px | Card padding, section gaps |
+| `--afa-space-5` | 20px | Page-section padding, larger gaps |
+| `--afa-space-6` | 24px | Wide layout gaps, generous section padding |
+
+**Named exceptions — real, repeated conventions, not one-off noise, so not silently rounded onto the grid above:**
+- `9px 16px` / `9px 20px` compact pill/menu-row padding — identical in `HomeHeader.tsx` and `SiteNav.tsx` (4+ sites)
+- `6px 0` dropdown-divider margin — identical in `HomeHeader.tsx` and `SiteNav.tsx` (4+ sites)
+- `1px 5px` / `1px 7px` / `2px 7px` notification-count badge padding — identical across `DashboardShell.tsx`, `SiteNav.tsx`, `MobileTabBar.tsx` (5+ sites)
+
+**Breakpoint / gutter note:** the only cross-codebase-confirmed breakpoint is the existing `1023px` mobile/desktop nav split (already documented, audit Section 04) — page-level side gutters aren't a real, repeated pattern the way the spacing values above are, so no gutter token is proposed here rather than inventing one. Container `maxWidth` values are wildly inconsistent (1400/1360/1240/1200/1000/900/800/760/700/680/640/600/560/520/480/440/420px, 38 occurrences, no repeating value) — a separate, larger problem than this grid spec addresses; flagged as its own follow-up, not attempted here.
+
+**Adoption note:** 11 files (`MobileTabBar.tsx`, `DashboardShell.tsx`, all `(auth)` pages, some admin pages) already use Tailwind utility spacing classes (`px-3`, `gap-2`, `mb-1.5`) alongside the inline `style={{ padding: "Npx" }}` convention used everywhere else — two coexisting mechanisms to account for when retrofitting, not just one.
+
+### 8.3 Affected components — follow-up scope, not touched in this pass
+
+Retrofitting is explicitly out of scope for this spec. Components with the heaviest off-scale usage, for whoever picks up the retrofit next:
+
+- `HomeHeader.tsx`, `SiteNav.tsx` — heaviest concentration of both off-grid spacing (9px/6px conventions above) and the full font-size range 10–24px in one file
+- `EventCard.tsx` — grid/list dual layout, its own `3px` corner-radius exception already noted in Section 3 above
+- `DashboardShell.tsx`, `MobileTabBar.tsx`, `MobileTopBar.tsx` — badge/pill micro-padding exceptions
+- `FeedbackTrends.tsx`, `FeedbackDetailPanel.tsx` — 25+ font-size declarations between them, no shared sizing today (also carries pre-existing legacy-token debt, per `HANDOFF.md`)
+- `RegisterForm.tsx`, `(auth)/login/page.tsx` — 20+ font-size declarations each, almost entirely 12–15px freehand values that would cleanly land on the new `--afa-text-small`/`--afa-text-body` tokens
+- All hero components (`Hero.tsx`, `VenueDetailClient.tsx`, `ArtistProfileClientPage.tsx`, `VenuesHero.tsx`, `ArtistHero.tsx`, `FourRooms.tsx`, `about/page.tsx`, `organisers/[id]/page.tsx`, `events/page.tsx`, `events/[id]/EventDetailClientPage.tsx`) — every H1 `clamp()`, blocked on the separate display-scale decision noted in 8.1
