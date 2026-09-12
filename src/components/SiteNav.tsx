@@ -544,6 +544,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               <div ref={menuRef} style={{ position: "relative" }}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
+                  aria-label="Account menu"
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
                   style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}

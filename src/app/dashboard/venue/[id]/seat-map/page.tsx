@@ -1504,6 +1504,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <button
                         onClick={() => removeLevel(lvl)}
                         title={`Remove ${levelLabel(lvl)}`}
+                        aria-label={`Remove ${levelLabel(lvl)}`}
                         style={{
                           padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
                           border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)', borderLeft: 'none',
@@ -1709,7 +1710,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                                 onChange={(e) => setZonePrice(rg.zoneName, e.target.value)}
                               />
                               <FreeToggle checked={zoneIsFree(rg.zoneName)} onChange={(free) => setZoneFree(rg.zoneName, free)} />
-                              {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
+                              {gridConfig.rowGroups.length > 1 && <button onClick={() => removeRowGroup(rg.id)} aria-label={`Remove Section ${i + 1}`} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>}
                             </div>
                             <div style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <IconAisleV size={12} style={{ opacity: 0.7 }} /> Vertical aisles for this section (0% = against the wall, 100% = after the last seat)
@@ -1720,7 +1721,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                                 <ClampedNumberInput min={0} max={100} style={{ ...inputStyle, width: '55px' }} value={Math.round(a.afterFraction * 100)} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'afterFraction', n / 100)} />
                                 <label style={{ fontSize: '12px' }}>Width:</label>
                                 <ClampedNumberInput style={{ ...inputStyle, width: '55px' }} value={a.gapPx} min={0} onCommit={(n) => updateVerticalAisleInGroup(rg.id, a.id, 'gapPx', n)} />
-                                <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                                <button onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} aria-label="Remove vertical aisle" style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                               </div>
                             ))}
                             <button onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: '11px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', marginTop: '2px' }}>
@@ -1764,7 +1765,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                             <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.afterRow} min={0} onCommit={(n) => updateAisle(a.id, 'afterRow', n)} />
                             <label style={{ fontSize: '12px' }}>Width:</label>
                             <ClampedNumberInput style={{ ...inputStyle, width: '60px' }} value={a.gapPx} min={0} onCommit={(n) => updateAisle(a.id, 'gapPx', n)} />
-                            <button onClick={() => removeAisle(a.id)} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
+                            <button onClick={() => removeAisle(a.id)} aria-label={`Remove Gangway ${i + 1}`} style={{ border: 'none', background: 'none', color: 'var(--afa-error)', cursor: 'pointer', fontSize: '16px' }}>×</button>
                           </div>
                         ))}
                         <button onClick={addAisle} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'none', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }}>

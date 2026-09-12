@@ -21,6 +21,7 @@ function Stars({ value, onChange }: { value: number; onChange: (n: number) => vo
           key={n}
           type="button"
           onClick={() => onChange(n)}
+          aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
           style={{ background: "none", border: "none", cursor: "pointer", fontSize: "32px", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
         >
           {value >= n ? "★" : "☆"}
@@ -198,6 +199,7 @@ export default function RatePromptClientPage({
                           <button
                             key={n}
                             onClick={() => setPerfDrafts((prev) => ({ ...prev, [p.id]: n }))}
+                            aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
                             style={{ background: "none", border: "none", cursor: "pointer", fontSize: "16px", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
                           >
                             {(perfDrafts[p.id] || 0) >= n ? "★" : "☆"}

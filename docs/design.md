@@ -2676,4 +2676,60 @@ Diff-reviewed and `tsc`-clean; the dispatch's own real Tab-key
 click-through verification on ≥2 of the 8 pages has **not** been run this
 turn - no browser/Playwright tool was available in this session. Flagged
 to Hitesh rather than claimed as done. Pending merge confirmation before
-this entry is finalized, per the standing rule.
+this entry is finalized, per the standing rule. Merged as `0ed4f48`/PR
+#612 - confirmed via `git fetch` at the start of the next dispatch, no
+collision.
+
+## Icon System Guidelines - Step 6, sub-spec 3/5 (built, not yet merged)
+
+Third of Step 6's five specs. New file: `docs/icon-system-guidelines.md` -
+a 3-system icon inventory (shared registry, Venue Portal, Admin Overview),
+an overlap diff, and an `aria-label` fix for icon-only buttons, same
+discipline as the first two specs.
+
+**Two corrections surfaced while independently re-deriving this
+dispatch's own numbers:**
+1. `VenuePortalUI.tsx` exports 19 `Icon*` functions, not 17 - the file's
+   own comment splits them into 11 standalone 24x24 icons and 8 inline
+   16x16 "Glyph" icons used next to text in the seat-map builder; counting
+   only one bucket undercounts by 8, counting the wrong total undercounts
+   by 2.
+2. The "5 overlapping icons are drifted" framing doesn't hold for all 5 -
+   re-diffing the actual path/line data per icon found 2 render pixel-
+   identical today (`plus`, `x` - same coordinates, same stroke width,
+   just line-vs-path authoring), 2 genuinely drifted in shape *and* stroke
+   weight (`calendar`, `tag`), and 1 (`map`) isn't drift at all - the
+   registry's `map` is a folded-paper-map icon, `VenuePortalUI`'s is a
+   location-pin marker, two unrelated pictograms sharing a name. Also
+   diffed the `IconClock` duplicate (`VenuePortalUI.tsx` vs.
+   `admin/page.tsx`) - independently drawn, not copy-pasted (different
+   radius, stroke weight, and API shape).
+
+**Shipped:** `aria-label` added to 15 icon-only button elements across 3
+files - `SiteNav.tsx`'s account-menu button (logged-out state renders
+only an SVG, zero text), 4 bare "×" remove buttons in the seat-map
+builder (one had a `title` but no `aria-label`, three had neither), and
+10 star-rating buttons across 2 rows in `RatePromptClientPage.tsx` (each
+renders a `★`/`☆` character - technically "text," but the glyph alone
+doesn't distinguish rating position for assistive tech, so treated as the
+same real gap). Label-only, no visual change. `tsc --noEmit` clean.
+
+**Flagged, not fixed - needs Hitesh's call:**
+- The 3-system fragmentation itself - documented the consolidation shape
+  (extend `IconName` to ~24 concepts, have the other two files import the
+  shared `Icon`) but not implemented; touches two full page contexts.
+- The real `calendar`/`tag` drift and `map`'s two-different-concepts case
+  - which version (if either) should win isn't this pass's call.
+- Sizing/`strokeWidth` convention - 4 different conventions documented
+  side by side; a standardization recommendation is flagged (reuse the
+  registry's `1.75`/`24x24`/`16px` convention, since that's what the two
+  already-identical icons happen to share) but not imposed.
+
+Built on `feat/gen-2609-040-icon-system-guidelines`, branched from `qa` at
+`0ed4f48` (synced first, no collision). The `aria-label` sweep covered
+every icon-heavy surface traced from the three icon systems (nav chrome,
+seat-map builder, rating flows, modals/sheets, save/follow toggles, admin
+feedback panel) rather than a literal read of all 287 `<button>` elements
+across 82 files - disclosed as such in the spec rather than overclaimed.
+Pending merge confirmation before this entry is finalized, per the
+standing rule.
