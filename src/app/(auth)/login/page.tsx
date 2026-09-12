@@ -165,22 +165,22 @@ function LoginForm() {
           </div>
         )}
         {wasSuspended && (
-          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
             {tr.authCommon.accountSuspendedMessage}
           </div>
         )}
         {wasIdle && !wasSuspended && (
-          <div style={{ background: "var(--afa-mist)", border: "1px solid rgba(14,12,10,0.15)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-ink)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-text-primary)" }}>
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}
         {error && (
-          <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
             {error}
           </div>
         )}
         {devOtp && mode === "otp-verify" && (
-          <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
+          <div style={{ background: "rgba(201,151,58,0.08)", border: "1px solid rgba(201,151,58,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-amber)" }}>
             QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
           </div>
         )}
