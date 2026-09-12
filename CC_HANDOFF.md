@@ -152,3 +152,25 @@ branch-deletion state disagree, before treating either as wrong.
 Working tree: clean, only the pre-existing untracked `Figma/` dir.
 No local commits anywhere that aren't already on `origin/qa` or one of
 its ancestors.
+
+## Update - 12 Sep, later same day (chat-side note for CC)
+
+6 more PRs merged this session (#605-610, `GEN-2609-032/033/035/037` +
+`BUG-2609-025/023`), each on its own single-purpose branch, each
+deleted immediately via the GitHub API right after squash-merge - no
+stacked-branch accumulation this time, nothing to clean up locally.
+
+Two things worth knowing for next session:
+
+**PAT path corrected:** `/home/claude/afa/token.txt` (chmod 600) is
+the real path used successfully all session - a prior handoff round
+had drifted to `/home/claude/afa_token/token.txt`, which was wrong.
+Use the `afa/token.txt` path.
+
+**Local dev-server gotcha (from GEN-2609-037's verification):**
+`pkill -f "next dev"` didn't reliably kill the process this session -
+a stale server kept serving old CSS across two restarts and a full
+cache clear, which looked exactly like an animation not being wired
+up. If a live-render check ever looks wrong after a restart, check
+the actually-served asset bytes before trusting the dev server logs;
+`taskkill //PID <pid-from-port-conflict-error>` is the reliable kill.
