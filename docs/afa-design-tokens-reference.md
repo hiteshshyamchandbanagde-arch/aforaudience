@@ -231,7 +231,7 @@ A fourth, real tier sitting between `--afa-text-heading` (24px) and the hero/dis
 
 **Size decision:** 28px, resolving the near-tie in favor of the value that already anchors the excluded brand-wordmark and stat-number hits below, rather than 30px which doesn't recur elsewhere in the scale.
 
-**Not yet done:** this is a spec decision only - no component files have been touched. Rollout to the 17 files is a separate dispatch to CC, not part of this doc update.
+**Built (GEN-2609-032, merged to qa in 5bab75e):** 16 hits across 14 files migrated - `admin/settings/page.tsx` (2), `admin/bookings/page.tsx`, `organiser/tours/page.tsx`, `admin/diary/page.tsx`, `organiser/payouts/page.tsx`, `dashboard/messages/page.tsx`, `verify-phone/page.tsx`, `venue/[id]/sales/page.tsx`, `admin/users/page.tsx`, `admin/revenue/page.tsx`, `admin/artists/page.tsx`, `organiser/sales/page.tsx`, `organiser/events/[id]/sales/page.tsx`, `organiser/events/[id]/lineup/page.tsx`. `RatePromptClientPage.tsx`'s hit was already compliant (since `6bb3e24`) - the original Sep-12 audit had misclassified it as still-Georgia. Verified via Contents API against `qa` post-merge (both the changed lines and the excluded same-file lines - `admin/settings` 20px h2s, `tours` 19px h3, `bookings` 24px h1, `artists` 17px stat div - confirmed untouched), Vercel deployment READY, zero runtime errors.
 
 **Excluded from this tier - related but different:**
 - **Brand-wordmark instances (2 hits, `RegisterForm.tsx` lines 326 and 378)** - the "AforAudience" logo lockup at the top of the OTP-verification card, also 28px. Not a heading at all (a logo, same register as the site's other wordmark instances) - excluded from `--afa-text-page-title` on purpose, not an oversight.

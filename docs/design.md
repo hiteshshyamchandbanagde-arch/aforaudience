@@ -2372,3 +2372,27 @@ Spec updated in `docs/afa-design-tokens-reference.md` Section 8.4.
 **Not yet built** - no component files touched, this is the decision
 only. Rollout to the 17 files is a separate dispatch, not yet sent to
 CC.
+
+## Page-title tier rollout - built and merged (GEN-2609-032, 12 Sep)
+
+Dispatched to CC with an exact per-line spec (14 files, 16 hits,
+before/after values and excluded same-file lines called out
+explicitly). CC branched `feat/gen-2609-032-page-title-font`, migrated
+all 16 buildable hits to `var(--font-display)`/28px/700, confirmed the
+17th (`RatePromptClientPage.tsx:145`) was already compliant since
+`6bb3e24` - the Sep-12 audit had misclassified it. `tsc --noEmit`
+clean; live-rendered two pages with computed styles confirmed.
+
+Chat opened PR #605, waited for Vercel preview success, re-fetched the
+head SHA immediately before squash-merging (`5bab75e`), deleted the
+branch, then independently verified real file content on `qa` via the
+Contents API rather than trusting the PR diff - both the 16 changed
+lines and the excluded same-file lines (`admin/settings` 20px h2s,
+`tours` 19px h3, `bookings` 24px h1, `artists` 17px stat div) came back
+exactly as expected. `qa`'s Vercel deployment reached READY with zero
+runtime errors in the 15 minutes after.
+
+Feedback ticket GEN-2609-032 moved to RESOLVED / `deployStage:
+DEPLOYED_QA`. Per the new standing rule (docs updated after merge +
+confirmed working), Section 8.4 of `docs/afa-design-tokens-reference.md`
+now reflects this as built, not spec-only.
