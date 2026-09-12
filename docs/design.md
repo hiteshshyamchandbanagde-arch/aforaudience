@@ -2120,9 +2120,7 @@ Not fixed in this pass (out of scope for the paired `BUG-2609-022`/
 `BUG-2609-024` PR). Filed as its own follow-up covering all 4 banner
 states together — they share one fix pattern (same treatment as
 `BUG-2609-024`'s error banner for the suspended/error pair, locked-
-palette equivalents for idle/dev-OTP) — and should be scoped alongside
-the still-open `#68D391` item from `GEN-2609-001` so this page gets
-fixed once, not across two more passes.
+palette equivalents for idle/dev-OTP).
 
 Logged to the Feedback table as `BUG-2609-025` (`NEW`, not yet queued
 for build).
@@ -2153,11 +2151,18 @@ verified instead via direct diff comparison against its
 `FeeSheet.tsx:102` source pattern and a manual hex-to-rgb cross-check
 of `--afa-error`/`--afa-amber`'s real `globals.css` values.
 
-Merged (`5f1f14e`), verified via Contents API, Vercel READY. This
-still leaves the `#68D391` "Account created!" banner from
-`GEN-2609-001` as the one remaining known gap on this page - not
-touched by this ticket, still open. `BUG-2609-025` moved to RESOLVED
-/ DEPLOYED_QA.
+Merged (`5f1f14e`), verified via Contents API, Vercel READY.
+
+**Correction (12 Sep, later same session):** the `#68D391` "Account
+created!" banner referenced above as a remaining gap was in fact
+already fixed back on 5 Sep - see the earlier entry in this file under
+that date. `GEN-2609-001`'s own ticket text was never updated after
+that fix landed, which is what led to it being flagged here as still
+open; a direct grep and code check confirmed zero `68D391` hits
+anywhere in the repo and both success banners already on the correct
+`rgba(39,103,73,0.15)`/`var(--afa-green-dark)` pattern. No code change
+needed - this page's known banner gaps are now fully closed.
+`BUG-2609-025` moved to RESOLVED / DEPLOYED_QA.
 
 ## Merge verification note (chat-side) — 12 Sep
 
