@@ -63,7 +63,7 @@ export default function VenuesViewToggle({
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-ui)",
                 fontSize: "20px",
                 letterSpacing: "-0.01em",
                 transition: "color 0.2s ease",

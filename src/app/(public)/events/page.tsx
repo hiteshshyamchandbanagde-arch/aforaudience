@@ -348,7 +348,7 @@ export default function EventsPage() {
         .afa-events-type-filter { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(245,245,240,0.4); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
         .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-type-filter.active { color: var(--afa-amber); }
-        .afa-events-mode-tab { font-family: var(--font-display); font-size: 18px; background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
+        .afa-events-mode-tab { font-family: var(--font-ui); font-size: 18px; background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
         .afa-events-mode-tab:hover { color: rgba(245,245,240,0.7); }
         .afa-events-mode-tab.active { color: var(--afa-cream); }
         .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-fill-solid); }
