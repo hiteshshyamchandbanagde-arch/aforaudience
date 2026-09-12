@@ -121,3 +121,34 @@ itself). Local branch cleanup: `feat/font-migration-01` through `-05`
 are all merged and remote-deleted - if any of these still exist as
 local branches on this machine, they're safe to delete, nothing on
 them is unmerged.
+
+## Update - 12 Sep, after chat's merge + handoff (CC-side confirmation)
+
+`git fetch && git reset --hard origin/qa` puts `qa` HEAD at `d0bfa90`
+(chat's `HANDOFF.md`/`CC_HANDOFF.md` commits, on top of the 5 squash-
+merged font-migration PRs #600-604). Read `HANDOFF.md` first for the
+full feature narrative - this note only covers git/session state.
+
+**Local branch cleanup done this session:** all 6 local
+`feat/font-migration-0{1..6}` branches deleted. `01`-`05` needed
+`-D` (force), not `-d` - `git merge-base --is-ancestor` reports "not
+merged" for squash-merged branches even when the content is fully
+landed, since a squash produces a new commit that isn't a descendant
+of the original branch tip. Verified real content parity first
+(`git diff qa <branch> -- <files-that-branch-touched>` came back
+empty for all 5) before force-deleting - don't `-D` a stacked branch
+on the ancestor check's say-so alone, confirm the diff is actually
+empty first. `06` was always local-only (zero code edits, never
+pushed) - deleted the same way, nothing lost.
+
+`git remote prune origin` also cleared ~26 stale remote-tracking refs
+(the 5 font-migration branches plus ~21 unrelated older ones already
+deleted on GitHub) - local `git branch -r` was showing them as still
+present only because the tracking refs hadn't been pruned yet, not
+because origin still had them. Worth a `git remote prune origin`
+early in any session where `git branch -r` and a handoff doc's claimed
+branch-deletion state disagree, before treating either as wrong.
+
+Working tree: clean, only the pre-existing untracked `Figma/` dir.
+No local commits anywhere that aren't already on `origin/qa` or one of
+its ancestors.
