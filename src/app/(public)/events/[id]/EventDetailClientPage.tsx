@@ -352,13 +352,13 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ marginTop: "28px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
               {isPast ? (
                 <div>
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
                   <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
                 </div>
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-cream)" }}>
+                    <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-cream)" }}>
                       {priceLabel}
                     </span>
                     <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
@@ -677,7 +677,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>
               {typeLabel}
             </div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "17px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "17px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {priceLabel}
             </div>
           </div>

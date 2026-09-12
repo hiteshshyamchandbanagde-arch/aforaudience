@@ -254,18 +254,18 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
         <div style={{ borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
           {contributionMoment ? null : isPast ? (
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
               <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
             </div>
           ) : reservedMessage ? (
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsReserved}</div>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsReserved}</div>
               <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)", lineHeight: 1.6 }}>{reservedMessage}</p>
             </div>
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", color: "var(--afa-cream)" }}>
+                <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-cream)" }}>
                   {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? tr.eventDetailPage.chooseSection : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
                 </span>
                 <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />

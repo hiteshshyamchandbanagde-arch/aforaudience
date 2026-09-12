@@ -275,7 +275,7 @@ export default function ArtistsPage() {
               onClick={() => setSelectedGenre(g)}
               className="afa-genre-filter"
               style={{
-                fontFamily: "var(--font-display)",
+                fontFamily: "var(--font-ui)",
                 fontStyle: "italic",
                 fontSize: "16px",
                 color: selectedGenre === g ? "var(--afa-cream)" : "rgba(245,245,240,0.4)",
