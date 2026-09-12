@@ -2,6 +2,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import Button from "@/components/ui/Button"
+import Input from "@/components/ui/Input"
 
 type AuthPromptSheetProps = {
   open: boolean
@@ -137,26 +139,21 @@ export default function AuthPromptSheet({
               <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                 {field.label}
               </label>
-              <input
+              <Input
                 name={field.name}
                 type={field.type}
                 placeholder={field.placeholder}
                 value={form[field.name as keyof typeof form]}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", outline: "none", boxSizing: "border-box" }}
               />
             </div>
           ))}
         </div>
 
-        <button
-          onClick={handleSignIn}
-          disabled={loading}
-          style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "12px" }}
-        >
+        <Button variant="primary" onClick={handleSignIn} disabled={loading} style={{ marginBottom: "12px" }}>
           {loading ? "Signing in..." : "Sign In & Continue"}
-        </button>
+        </Button>
 
         <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
           New here?{" "}
@@ -165,12 +162,9 @@ export default function AuthPromptSheet({
           </Link>
         </div>
 
-        <button
-          onClick={onClose}
-          style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-text-primary)", opacity: 0.4, fontSize: "13px", padding: "10px 0 0", cursor: "pointer" }}
-        >
+        <Button variant="secondary" onClick={onClose}>
           Keep browsing
-        </button>
+        </Button>
       </div>
     </div>
   )

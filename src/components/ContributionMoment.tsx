@@ -1,5 +1,7 @@
 'use client'
 
+import Button from '@/components/ui/Button'
+
 // The "contribution moment" - shown right after a user's seats are
 // confirmed (free/no-payment booking, or a paid booking's payment
 // success), replacing the old plain "booking confirmed" text with the
@@ -38,18 +40,9 @@ type ContributionMomentProps = {
 
 function CloseButton({ onClose }: { onClose: () => void }) {
   return (
-    <button
-      onClick={onClose}
-      aria-label="Close"
-      style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-        background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)',
-        border: 'none', cursor: 'pointer', fontSize: 16, fontFamily: 'var(--font-sans)',
-      }}
-    >
+    <Button variant="close" onClick={onClose} aria-label="Close">
       ×
-    </button>
+    </Button>
   )
 }
 
@@ -116,16 +109,9 @@ function EmailedTicketNote() {
 
 function ViewTicketButton({ onViewTicket }: { onViewTicket: () => void }) {
   return (
-    <button
-      onClick={onViewTicket}
-      style={{
-        width: '100%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)',
-        padding: 16, border: 'none', borderRadius: 999, fontSize: 16, fontWeight: 700,
-        fontFamily: 'var(--font-sans)', cursor: 'pointer', flexShrink: 0,
-      }}
-    >
+    <Button variant="primary" onClick={onViewTicket} style={{ flexShrink: 0 }}>
       View My Ticket
-    </button>
+    </Button>
   )
 }
 
