@@ -2018,3 +2018,111 @@ runtime errors in the 15 minutes post-deploy.
 
 Logged to the Feedback table as `GEN-2609-027` (`RESOLVED`,
 `deployStage: DEPLOYED_QA`).
+
+## BUG-2609-022 (partial): MobileTabBar active-tab color fix — 12 Sep
+
+Found via a repo-wide design-system audit (12 Sep) grepping every page/
+component under `src/app/` and `src/components/` against the locked
+4-token palette. `BUG-2609-022` was already tracked (icon style, label
+typography, active-tab color — three separate complaints, "reads
+childish"); this pass fixes exactly one of those three.
+
+**Fix:** `MobileTabBar.tsx` lines 439/484 — active-tab icon/label
+color `var(--afa-fill-solid)` (the CTA-orange, reserved for booking/
+payment/commit actions per the locked-palette rule) → `var(--afa-amber)`
+(the palette's quiet-accent token). The adjacent unread-count badge
+(line 452, also `--afa-fill-solid`) was checked and left untouched —
+it's a legitimate badge fill, not an active-nav-state use, and outside
+this fix's scope.
+
+**Not done here:** icon roundedness/weight and the 10px mono label
+typography — the other two complaints in the original ticket — are
+untouched. `GEN-2609-018` (mobile nav IA rework, still `UNDER_REVIEW`)
+explicitly says this ticket should fold into that rework rather than
+be dispatched/closed standalone, and the ticket itself asks for a
+Figma-Make style-direction pass before a unilateral fix. So `BUG-2609-022`
+stays `BUILD_QUEUE` in the Feedback table, not `RESOLVED` — this is
+logged as partial progress, not closure.
+
+**Verification:** repo-wide grep confirms this is the only remaining
+`--afa-fill-solid` usage tied to nav-active state anywhere in the
+codebase. Playwright `getComputedStyle` on the live `/saved` tab
+(mocked signed-in session) confirmed the active tab's color resolves
+to `rgb(201,151,58)` — `--afa-amber` exactly, not the orange
+`rgb(255,90,54)`. Viewport screenshot at 390×844 confirms the visual
+result matches. `tsc --noEmit` clean.
+
+Logged to the Feedback table as `BUG-2609-022` (`BUILD_QUEUE`,
+partial-fix note appended, not resolved).
+
+## BUG-2609-024: AuthPromptSheet / CorporateInquiryModal legacy-token cleanup — 12 Sep
+
+Same audit pass surfaced both shared modals as pure `--afa-terracotta`
+usage — 6 grep-hits each, 4 physical call sites per file (error banner,
+form inputs, primary CTA button, plus a secondary link in
+`AuthPromptSheet`). Both are mounted across multiple pages
+(`AuthPromptSheet`: artist/event/seats/rate pages; `CorporateInquiryModal`:
+the `/artists/[id]` route), so fixed per-element role rather than a
+blanket find-replace.
+
+**Fix, by role:**
+- Error banner (both files): `var(--afa-terracotta-tint)`/
+  `var(--afa-terracotta)` → `rgba(179,38,30,0.1)` background +
+  `rgba(179,38,30,0.3)` border + `var(--afa-error)` text — the exact
+  pattern already shipped in `src/components/ErrorBanner.tsx`
+  (`BUG-2608-092`/`095` lineage), reused rather than reinvented.
+- Form inputs (both files): `color: var(--afa-ink)`,
+  `background: "white"` (a hardcoded literal, not even a token) →
+  `color: var(--afa-text-primary)`, `background: var(--afa-surface-page)`
+  — the dark-input convention already live elsewhere (e.g.
+  `VenueOwnersGridEmbed.tsx`).
+- Primary CTA buttons (Sign In & Continue / Send Inquiry / Done):
+  `var(--afa-terracotta)` + hardcoded `"white"` text →
+  `var(--afa-fill-solid)` + `var(--afa-on-fill-solid)`, the locked
+  CTA-fill pair — appropriate here since both buttons commit a queued
+  booking-adjacent action.
+- Secondary link (`AuthPromptSheet`'s "Create an account"):
+  `var(--afa-terracotta)` → `var(--afa-amber)`, the quiet-accent token.
+
+**Verification:** repo-wide grep confirms zero remaining legacy-token
+hits in both files. `tsc --noEmit` clean. `CorporateInquiryModal` has
+exactly one real render call site (`ArtistProfileClientPage.tsx`) —
+screenshot-verified on 2 different real artist IDs (`qa-artist-001`,
+`qa-artist-080`) via a mocked signed-in session; both render legibly
+(dark inputs, legible placeholder text, orange CTA with legible dark
+text). `AuthPromptSheet` screenshot-verified live on the artist page,
+signed-out — the component takes no per-site styling props, so the
+same fixed markup renders identically at its other 3 mount sites.
+
+Not yet deployed — built and locally verified this session, not yet
+pushed/merged to `qa`. Logged to the Feedback table as `BUG-2609-024`
+(`BUILD_COMPLETE`).
+
+## BUG-2609-025 (correction): Login page banners still on legacy tokens — 12 Sep
+
+Same audit pass found `src/app/(auth)/login/page.tsx` lines 167–183
+still rendering 4 conditional banners (suspended, error, idle, dev-OTP)
+entirely on pre-dark-redesign tokens: `var(--afa-terracotta-tint)`/
+`var(--afa-terracotta)`, `var(--afa-mist)` + `var(--afa-ink)`, and
+`var(--afa-amber-tint)` + `var(--afa-ink)`. All four tokens are still
+defined in `globals.css`, so nothing is invisible — just off-palette.
+
+This is a correction, not new debt: `GEN-2609-001` (the Auth Pages Dark
+Theme Redesign, `RESOLVED`/`DEPLOYED_QA` via PR `#551`/`#552`) documents
+exactly one known-remaining gap on this page — the hardcoded `#68D391`
+"Account created!" banner, explicitly flagged there as intentionally
+left untouched. That ticket's own text never mentions the 4 banners
+found here, so this was never previously tracked anywhere — genuinely
+undiscovered scope on an old page, not a prior claim of "resolved"
+being walked back.
+
+Not fixed in this pass (out of scope for the paired `BUG-2609-022`/
+`BUG-2609-024` PR). Filed as its own follow-up covering all 4 banner
+states together — they share one fix pattern (same treatment as
+`BUG-2609-024`'s error banner for the suspended/error pair, locked-
+palette equivalents for idle/dev-OTP) — and should be scoped alongside
+the still-open `#68D391` item from `GEN-2609-001` so this page gets
+fixed once, not across two more passes.
+
+Logged to the Feedback table as `BUG-2609-025` (`NEW`, not yet queued
+for build).
