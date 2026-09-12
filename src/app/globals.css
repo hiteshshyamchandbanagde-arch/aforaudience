@@ -429,6 +429,30 @@ html {
 .afa-backdrop-mount {
   animation: afa-backdrop-in 0.2s ease-out;
 }
+
+/* Contribution-moment seal stamp-in (GEN-2609-037) - the audit's original
+   Step 5 "Booking-confirmation ticket stamp" moment, finally built. Same
+   fresh-mount-only reasoning as .afa-sheet-in above: ContributionMoment.tsx's
+   confirmation screen mounts fresh every time, no JS timing needed. */
+@keyframes afa-seal-stamp-in {
+  0% { transform: scale(1.35) rotate(-10deg); opacity: 0; }
+  55% { transform: scale(0.94) rotate(2deg); opacity: 1; }
+  75% { transform: scale(1.04) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes afa-seal-ring-pulse {
+  0% { transform: scale(1); opacity: 0; }
+  40% { opacity: 0; }
+  60% { transform: scale(1.35); opacity: 0.5; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+.afa-seal-stamp-mount {
+  animation: afa-seal-stamp-in 480ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.afa-seal-ring-mount {
+  animation: afa-seal-ring-pulse 480ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .afa-sheet-mount, .afa-backdrop-mount { animation: none; }
+  .afa-sheet-mount, .afa-backdrop-mount, .afa-seal-stamp-mount, .afa-seal-ring-mount { animation: none; }
 }

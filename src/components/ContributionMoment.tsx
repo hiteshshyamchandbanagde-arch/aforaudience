@@ -70,16 +70,26 @@ function ContributionBody({
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', margin: '32px 0' }}>
-        <div
-          style={{
-            width: 140, height: 140, borderRadius: '50%', flexShrink: 0,
-            background: 'var(--afa-fill-solid)', border: '3px solid var(--afa-amber)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 28, fontWeight: 800, color: 'var(--afa-on-fill-solid)' }}>
-            {supporterCount}
-          </span>
+        <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
+          <div
+            className="afa-seal-ring-mount"
+            style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: '2px solid var(--afa-amber)',
+            }}
+          />
+          <div
+            className="afa-seal-stamp-mount"
+            style={{
+              width: 140, height: 140, borderRadius: '50%',
+              background: 'var(--afa-fill-solid)', border: '3px solid var(--afa-amber)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 28, fontWeight: 800, color: 'var(--afa-on-fill-solid)' }}>
+              {supporterCount}
+            </span>
+          </div>
         </div>
       </div>
 
