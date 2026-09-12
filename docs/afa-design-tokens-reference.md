@@ -221,13 +221,17 @@ A fourth, real tier sitting between `--afa-text-heading` (24px) and the hero/dis
 
 `fontWeight`: 13 of 17 declare `700` explicitly; 3 declare no weight at all (falls through to the browser's default bold `<h1>`, effectively ~700-equivalent); 1 (`dashboard/admin/settings/page.tsx`'s real page heading) explicitly overrides to `900`. Effectively 16 of 17 render at weight ~700 - this split is not close.
 
-**Proposed token** (spec only - not applied to any file in this pass):
+**Decided token (12 Sep, post font-migration)**:
 
 | Token | Value | Note |
 |---|---|---|
-| `--afa-text-page-title` | `28px` / `fontWeight: 700` / `font-family: Georgia, serif` | Internal dashboard page `<h1>` titles only - not hero/display copy, not the 24px `--afa-text-heading` tier |
+| `--afa-text-page-title` | `28px` / `fontWeight: 700` / `font-family: var(--font-display)` (Young Serif) | Internal dashboard page `<h1>` titles only - not hero/display copy, not the 24px `--afa-text-heading` tier |
 
-**Open question, explicitly not decided here:** every other font-family in the app migrated off `Georgia, serif` to Archivo (`var(--font-display)`) under GEN-2609-003 - these 17 hits are the one place Georgia is still load-bearing (not just a stray leftover value, but the actual declared family on every one of these headings). Whether this tier should migrate to `var(--font-display)` alongside the rest of the app, or stay Georgia deliberately (a distinct "utility/dashboard" register vs. the public site's Archivo identity), is a real open call for whoever picks this up - not decided or acted on here.
+**Font-family decision:** migrates to `var(--font-display)` (Young Serif), not Schibsted Grotesk/`var(--font-ui)` and not staying on Georgia. Reviewed against both alternatives via side-by-side mockup before deciding - Georgia's serif warmth was preferred over Grotesk's sans treatment, and Young Serif was chosen over keeping Georgia so these 17 titles tie into the app's one post-migration serif identity (wordmark, hero/editorial content) rather than Georgia remaining the sole holdout from two font generations ago (Newsreader -> Archivo -> Young Serif/Schibsted Grotesk). Same caveat as the rest of the migration: Young Serif ships no italic cut via `next/font/google` - not a blocker today since none of the 17 hits use italic, but worth knowing if that ever changes.
+
+**Size decision:** 28px, resolving the near-tie in favor of the value that already anchors the excluded brand-wordmark and stat-number hits below, rather than 30px which doesn't recur elsewhere in the scale.
+
+**Not yet done:** this is a spec decision only - no component files have been touched. Rollout to the 17 files is a separate dispatch to CC, not part of this doc update.
 
 **Excluded from this tier - related but different:**
 - **Brand-wordmark instances (2 hits, `RegisterForm.tsx` lines 326 and 378)** - the "AforAudience" logo lockup at the top of the OTP-verification card, also 28px. Not a heading at all (a logo, same register as the site's other wordmark instances) - excluded from `--afa-text-page-title` on purpose, not an oversight.

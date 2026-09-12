@@ -2347,3 +2347,28 @@ intentionally-preserved italic taglines in the Venue Owner dashboard;
 Admin, Artist dashboard, or Organiser dashboard (explicitly
 out-of-scope, confirmed untouched); every Auth-page hit is exactly the
 wordmark line, nothing else.
+
+## Page-title tier (Section 8.4) font decision - Young Serif (12 Sep, docs-only)
+
+The open call left by the font-size audit's Section 8.4 (17 hits/16
+files, internal dashboard `<h1>` page titles, Georgia serif) is
+decided: migrates to `var(--font-display)` (Young Serif), size 28px,
+weight 700. Reviewed against the alternative of moving to
+`var(--font-ui)` (Schibsted Grotesk) - the argument for Grotesk was
+internal consistency with the Venue Owner dashboards' own Phase 3
+classification ("management tool, not a discovery surface"), but a
+side-by-side mockup of both against three real examples (Admin/
+Revenue, Organiser/Payouts, Venue Owner/Sales) showed Georgia's serif
+warmth read better than Grotesk's sans treatment for a page-level
+title specifically. Young Serif was then compared directly against
+keeping Georgia (same three examples) and preferred - it keeps the
+serif register while retiring Georgia as the app's last holdout from
+two font generations ago (Newsreader -> Archivo -> Young Serif/
+Schibsted Grotesk). 28px (not 30px) resolves the prior near-tie,
+matching the value that already anchors the excluded brand-wordmark
+and stat-number hits.
+
+Spec updated in `docs/afa-design-tokens-reference.md` Section 8.4.
+**Not yet built** - no component files touched, this is the decision
+only. Rollout to the 17 files is a separate dispatch, not yet sent to
+CC.
