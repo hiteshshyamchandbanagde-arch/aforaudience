@@ -2,6 +2,7 @@
 import { TYPE_META } from "@/components/EventCard"
 import { EventTypeIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only bottom sheet for
 // /events' filters (type/city/price/sort), replacing the desktop inline
@@ -188,24 +189,9 @@ export default function MobileEventFilterSheet({
           >
             {tr.eventsPage.filterSheetReset}
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              flex: 1,
-              borderRadius: "999px",
-              border: "none",
-              background: "var(--afa-amber)",
-              color: "var(--afa-on-fill-solid)",
-              padding: "14px",
-              fontFamily: "var(--font-display)",
-              fontSize: "15px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
+          <Button type="button" variant="primary" fullWidth={false} onClick={onClose} style={{ flex: 1 }}>
             {tr.eventsPage.showingCount.replace("{n}", String(resultCount))}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

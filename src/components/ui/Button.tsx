@@ -56,7 +56,11 @@ type ButtonProps = ButtonAsButton | ButtonAsLink
 
 const FONT_FAMILY = 'var(--font-sans)'
 
-function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number): React.CSSProperties {
+// Exported (not just used internally) so a caller that can't render a
+// literal <Button> - e.g. profile/page.tsx's avatar-upload control,
+// which has to be a <label> wrapping a hidden file input, not a
+// <button> - can still apply the exact same variant look directly.
+export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number): React.CSSProperties {
   switch (variant) {
     case 'primary':
       return {
