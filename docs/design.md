@@ -2158,3 +2158,53 @@ SHA it couldn't observe was the correct call, not a refusal to work.
 CC's own `CC_HANDOFF.md` (repo root) has the full local/session-state
 account, including its self-audit of git state and this incident in
 its own words.
+
+## GEN-2609-028 — Contribution-moment confirmation screen, SHIPPED (12 Sep, qa HEAD 0e9fe51)
+
+Session sequence: UI/UX audit (docs/afa-uiux-design-audit.md/.html) →
+Strategic Call #1 ("own one moment, not ten" - Section 11) → signature
+moment decided directly by Hitesh ("supporting a live art and artist
+to grow, and their contribution counts") → Figma mockups (mobile
+full-bleed sheet, desktop centered modal, file
+MqFVU52wiZtjkxMGsmC0d0) → built by CC against the real app, not the
+Figma Make prototype export (SeatMap.tsx/Checkout.tsx in
+`Figma/AFA Mobile App v3|v4` are prototype-only, correctly caught and
+flagged before building against them).
+
+Replaces the old confirmed-state screen (checkout/[bookingId]/page.tsx
+and SeatSelectionClientPage.tsx's free-booking path) with
+ContributionMoment.tsx: "You're going." headline, live supporter-count
+seal, contribution card naming the artist, payment-agnostic copy
+throughout - deliberately not receipt/payment-framed.
+
+Two real bugs caught during build/review, not shipped silently:
+- event.availableSeats is never decremented by POST /api/bookings
+  (only the unrelated +1-companion feature touches it) - would have
+  shown "0 people supporting" on every real booking, permanently.
+  Fixed: new getSupporterCount() aggregates live Booking rows the same
+  way POST /api/bookings' own capacity check already does. Verified
+  live via two real QA bookings (count went 3 -> 4).
+- tr.checkoutPage.emailedTicketNote existed on the old screen and was
+  dropped without being flagged as deliberate (unlike the PDF-download
+  link, which was correctly called out and confirmed non-regression
+  since /tickets has its own link). Restored as hardcoded English.
+
+Known, deliberate scope cut: all new copy on this screen is hardcoded
+English, not wired through the 11-locale tr.* system - same open
+question as GEN-2609-009's FeeSheet copy. Flagged, not silently
+decided; follow-up ticket if/when locale coverage is prioritized.
+
+Verified end-to-end via a real QA account (atul.audience@aforaudience.qa)
+booking a real free event twice, not just the isolated
+/dev/contribution-moment-preview route - that route (plus scratch
+screenshots/scripts) stayed on the branch through two review rounds
+per chat's request, to be removed in a follow-up commit.
+
+Merged via PR #596 (squash 0e9fe51), CI green, zero runtime errors
+30 min post-deploy. Logged to the Feedback table as GEN-2609-028
+(RESOLVED / DEPLOYED_QA).
+
+This closes Step 3 of the audit's 12-step sequence
+(docs/afa-uiux-design-audit.md, Section 12). Next: Step 4, component
+extraction from the worst legacy-token offenders, before any further
+Figma Make work per Section 07's caveat.
