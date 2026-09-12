@@ -5,6 +5,8 @@ import { useSession, getSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import ContributionMoment from "@/components/ContributionMoment"
+import Button from "@/components/ui/Button"
+import Input from "@/components/ui/Input"
 import SeatPicker from "@/components/SeatPicker"
 import { colorForZone } from "@/components/SeatLayoutPreview"
 import { SeatStateDot } from "@/components/EventCard"
@@ -235,10 +237,6 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
 
   return (
     <>
-      <style>{`
-        .afa-book-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--afa-fill-solid); color: var(--afa-on-fill-solid); padding: 14px; border-radius: 3px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: filter 0.2s ease; }
-        .afa-book-btn:hover { filter: brightness(1.08); }
-      `}</style>
       <SiteNav backHref={`/events/${event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", maxWidth: "560px", margin: "0 auto", padding: "32px 20px 64px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)" }}>
         <div style={{ marginBottom: "8px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
@@ -366,7 +364,8 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
                       <span style={{ fontSize: "14px", color: "var(--afa-cream)" }}>₹</span>
-                      <input
+                      <Input
+                        variant="compact"
                         type="number"
                         min={minBookingFee}
                         max={maxBookingFee}
@@ -378,7 +377,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                           if (!Number.isFinite(n)) return
                           setFeeInput(Math.max(minBookingFee, Math.min(Math.round(n), maxBookingFee)))
                         }}
-                        style={{ width: "64px", padding: "6px 8px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", fontSize: "14px", textAlign: "right" }}
+                        style={{ width: "64px", textAlign: "right" }}
                       />
                     </div>
                   </div>
@@ -394,10 +393,10 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 </div>
               )}
 
-              <button onClick={handleBookClick} disabled={reserving || status === "loading"} className="afa-book-btn" style={{ opacity: reserving || status === "loading" ? 0.7 : 1, cursor: reserving || status === "loading" ? "default" : "pointer" }}>
+              <Button variant="primary" onClick={handleBookClick} disabled={reserving || status === "loading"}>
                 <TicketIcon style={{ width: "18px", height: "18px" }} />
                 {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
-              </button>
+              </Button>
 
               <div style={{ marginTop: "12px", fontSize: "12px", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
                 {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}

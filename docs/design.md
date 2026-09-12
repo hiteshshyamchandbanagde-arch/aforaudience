@@ -2208,3 +2208,45 @@ This closes Step 3 of the audit's 12-step sequence
 (docs/afa-uiux-design-audit.md, Section 12). Next: Step 4, component
 extraction from the worst legacy-token offenders, before any further
 Figma Make work per Section 07's caveat.
+
+## Step 4 — Button/Input extraction, booking/checkout flow, BUILT (12 Sep, pushed for review)
+
+Scoped to exactly six files per the audit's own Step 4 ask (the flow
+containing GEN-2609-028's contribution moment): ContributionMoment.tsx,
+checkout/[bookingId]/page.tsx, SeatSelectionClientPage.tsx,
+AuthPromptSheet.tsx, CorporateInquiryModal.tsx, FeeSheet.tsx.
+
+Step 1 audit (reported and reviewed before any code was written) found
+6 different "primary CTA" looks, 3 "secondary" looks, and 3 "close"
+looks across these six files for what were really only 3 functional
+roles - plus 4 slightly different text-input styles for one role.
+Built `src/components/ui/Button.tsx` (variants: `primary`, `secondary`,
+`secondary-reveal`, `close`) and `src/components/ui/Input.tsx`
+(variants: `standard`, `compact`) against exactly those roles - no
+variant invented that wasn't already shipping somewhere in this flow.
+`primary` standardizes on ContributionMoment.tsx's pill-radius look
+(the reference pattern, built clean against the Step 1 token scale);
+`standard` input standardizes on AuthPromptSheet.tsx's treatment. Every
+Button variant sets `fontFamily` explicitly - the direct fix for the
+font bug GEN-2609-028 shipped with (a `<button>` doesn't inherit
+font-family from its ancestors; every ad hoc button in this flow
+except ContributionMoment's left it unset).
+
+Migrated all six files. Left three real, audited patterns untouched
+by design, not oversight: the seat/tier quantity stepper (6 instances,
+SeatSelectionClientPage.tsx - a real pattern, wrong role for this
+Button), the companion search-result row button (checkout page - a
+list row, not a CTA), and the native checkbox (checkout page,
+companion consent - a different control type). Grepped all six files
+post-migration for legacy-token hits (`--afa-terracotta` and other
+raw Phase-0 palette names used where a semantic token belongs) -
+zero remain.
+
+**Flagged, not fixed in this pass (adjacent finding from the Step 1
+audit, out of scope - buttons/inputs only, not headings):**
+hardcoded `"Georgia, serif"` still appears in AuthPromptSheet.tsx (1),
+CorporateInquiryModal.tsx (2), and checkout/[bookingId]/page.tsx (6) -
+every non-ContributionMoment heading in this same flow. Georgia was
+the pre-redesign display font, superseded first by Newsreader then by
+Archivo (GEN-2609-003) - these six hits never migrated. Real, worth a
+follow-up ticket; not a button/input issue so not touched here.

@@ -14,6 +14,8 @@ import {
 } from '@/lib/razorpay-checkout'
 import { FeeSheet } from '@/components/FeeSheet'
 import ContributionMoment from '@/components/ContributionMoment'
+import Button from '@/components/ui/Button'
+import Input from '@/components/ui/Input'
 
 // Checkout page — order summary + Pay button.
 //
@@ -464,20 +466,9 @@ export default function CheckoutPage() {
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
             {tr.checkoutPage.reservationExpiredBody}
           </p>
-          <Link
-            href={`/events/${state.booking.event.id}`}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '12px 20px',
-              borderRadius: 10,
-              fontWeight: 600,
-              textDecoration: 'none',
-              display: 'inline-block',
-            }}
-          >
+          <Button variant="primary" href={`/events/${state.booking.event.id}`} fullWidth={false}>
             {tr.checkoutPage.backToEventLabel}
-          </Link>
+          </Button>
         </main>
       </>
     )
@@ -651,16 +642,9 @@ export default function CheckoutPage() {
           </div>
 
           {state.booking.totalAmount > 0 && (
-            <button
-              onClick={() => setFeeSheetOpen(true)}
-              style={{
-                display: 'block', width: '100%', textAlign: 'right', marginTop: 10,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                fontSize: 12.5, fontWeight: 600, color: 'var(--afa-amber)',
-              }}
-            >
+            <Button variant="secondary-reveal" onClick={() => setFeeSheetOpen(true)} style={{ marginTop: 10 }}>
               See fee breakdown →
-            </button>
+            </Button>
           )}
         </div>
 
@@ -719,14 +703,16 @@ export default function CheckoutPage() {
                   <span style={{ opacity: 0.5, fontSize: 11 }}>
                     {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
                   </span>
-                  <button
+                  <Button
+                    variant="close"
+                    size={20}
                     onClick={() => removeCompanion(t.id)}
                     disabled={companionBusy}
                     aria-label={tr.checkoutPage.removeAriaLabelTemplate.replace('{name}', t.taggedUser.name)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, opacity: 0.5, padding: '0 4px' }}
+                    style={{ fontSize: 14 }}
                   >
                     ×
-                  </button>
+                  </Button>
                 </span>
               ))}
             </div>
@@ -741,17 +727,12 @@ export default function CheckoutPage() {
               )
             ) : (
             <div style={{ position: 'relative' }}>
-              <input
+              <Input
                 type="text"
                 value={companionQuery}
                 onChange={(e) => setCompanionQuery(e.target.value)}
                 placeholder={tr.checkoutPage.searchByNamePlaceholder}
                 disabled={companionBusy}
-                style={{
-                  width: '100%', padding: '10px 12px', fontSize: 13.5, borderRadius: 8,
-                  border: '1px solid rgba(245,245,240,0.12)', boxSizing: 'border-box',
-                  background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)',
-                }}
               />
               {companionSearching && (
                 <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>{tr.checkoutPage.searchingEllipsis}</div>
@@ -801,22 +782,7 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <button
-          onClick={handlePay}
-          disabled={paying || confirming}
-          style={{
-            width: '100%',
-            background: 'var(--afa-fill-solid)',
-            color: 'var(--afa-on-fill-solid)',
-            padding: 16,
-            border: 'none',
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: 700,
-            cursor: paying || confirming ? 'default' : 'pointer',
-            opacity: paying || confirming ? 0.7 : 1,
-          }}
-        >
+        <Button variant="primary" onClick={handlePay} disabled={paying || confirming}>
           {confirming
             ? tr.checkoutPage.confirmingYourBooking
             : paying
@@ -824,7 +790,7 @@ export default function CheckoutPage() {
               : state.booking.totalAmount > 0
                 ? `${tr.checkoutPage.payPrefix} ${formatDisplayMoney(state.booking.totalAmount, displayCurrency)}`
                 : tr.eventDetailPage.confirmFreeBooking}
-        </button>
+        </Button>
 
         <div
           style={{

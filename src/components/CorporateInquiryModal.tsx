@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react"
 import PresetSelectWithOther from "./PresetSelectWithOther"
 import CityAutocomplete from "./CityAutocomplete"
+import Button from "@/components/ui/Button"
+import Input, { INPUT_STYLES } from "@/components/ui/Input"
 
 type CorporateInquiryModalProps = {
   open: boolean
@@ -63,7 +65,12 @@ const FIELD_LIMITS: Record<string, number> = {
 const MESSAGE_LIMIT = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const INPUT_STYLE: React.CSSProperties = { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.15)", fontSize: "14px", color: "var(--afa-text-primary)", background: "var(--afa-surface-page)", outline: "none", boxSizing: "border-box" }
+// Shared standard Input style (src/components/ui/Input.tsx) - CityAutocomplete
+// and PresetSelectWithOther below take a plain style object via their own
+// `inputStyle` prop rather than the <Input> component itself (both are
+// outside this UI-components pass's scope), so the raw style constant is
+// what gets threaded through to them.
+const INPUT_STYLE: React.CSSProperties = INPUT_STYLES.standard
 
 // Small shared field renderer so the row-pairing below (19 Aug) doesn't
 // repeat the label+input markup five times over. wrapperStyle is how a
@@ -84,14 +91,13 @@ function FormField({ label, name, type, placeholder, value, onChange, maxLength,
       <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
         {label}
       </label>
-      <input
+      <Input
         name={name}
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         maxLength={maxLength}
-        style={INPUT_STYLE}
       />
     </div>
   )
@@ -178,12 +184,9 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
               {artistName} has been notified and will reach out to you directly at the email/phone you provided.
             </p>
-            <button
-              onClick={handleClose}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: "pointer" }}
-            >
+            <Button variant="primary" onClick={handleClose}>
               Done
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -278,20 +281,13 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               </div>
             </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: 700, cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, marginBottom: "10px" }}
-            >
+            <Button variant="primary" onClick={handleSubmit} disabled={loading} style={{ marginBottom: "10px" }}>
               {loading ? "Sending..." : "Send Inquiry"}
-            </button>
+            </Button>
 
-            <button
-              onClick={handleClose}
-              style={{ display: "block", width: "100%", background: "transparent", border: "none", color: "var(--afa-text-primary)", opacity: 0.4, fontSize: "13px", padding: "6px 0 0", cursor: "pointer" }}
-            >
+            <Button variant="secondary" onClick={handleClose}>
               Cancel
-            </button>
+            </Button>
           </>
         )}
       </div>

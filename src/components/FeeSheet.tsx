@@ -1,6 +1,7 @@
 'use client'
 
 import { formatDisplayMoney, type DisplayCurrency } from '@/lib/money-display'
+import Button from '@/components/ui/Button'
 
 // Mobile Redesign Phase 3 (GEN-2609-005) - ported from the Figma Make
 // export's FeeSheet.tsx. That mock hardcoded every row to a static ₹500
@@ -59,18 +60,9 @@ export function FeeSheet({
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
             Fee breakdown
           </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              height: 36, width: 36, borderRadius: '50%',
-              background: 'var(--afa-surface-page)', color: 'var(--afa-text-secondary)',
-              border: 'none', cursor: 'pointer', fontSize: 18,
-            }}
-          >
+          <Button variant="close" onClick={onClose} aria-label="Close">
             ×
-          </button>
+          </Button>
         </div>
         <p style={{ padding: '4px 20px 0', fontSize: 14, lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
           On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
