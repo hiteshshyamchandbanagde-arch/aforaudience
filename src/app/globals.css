@@ -305,10 +305,6 @@ html {
   outline: 2px solid var(--afa-amber);
   outline-offset: 2px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .hover-lift-card { transition: none; }
-  .hover-lift-card:hover { transform: none; }
-}
 
 /* Venue Owner Portal shared UI (src/components/dashboard/VenuePortalUI.tsx) -
    ported from the approved Figma Make export. Scoped under .avp- so these
@@ -400,9 +396,6 @@ html {
     animation: afa-push-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .afa-push-mount { animation: none; }
-}
 .afa-path-card:not(.afa-path-card-active):hover { border-color: rgba(245, 245, 240, 0.3); }
 
 /* GEN-2609-004 (Mobile Redesign Phase 2) - bottom-sheet mount animation,
@@ -453,6 +446,15 @@ html {
   animation: afa-seal-ring-pulse 480ms ease-out;
 }
 
+/* Consolidated reduced-motion block (docs/motion-guidelines.md) - was 3
+   separate @media (prefers-reduced-motion: reduce) blocks scattered across
+   this file (one per animation batch as each shipped). Merged into one on
+   audit Step 6 so future animations have a single place to register their
+   reduced-motion behaviour instead of adding a 4th/5th block. Mechanical
+   merge only - same selectors, same declarations, nothing added or dropped. */
 @media (prefers-reduced-motion: reduce) {
+  .hover-lift-card { transition: none; }
+  .hover-lift-card:hover { transform: none; }
+  .afa-push-mount { animation: none; }
   .afa-sheet-mount, .afa-backdrop-mount, .afa-seal-stamp-mount, .afa-seal-ring-mount { animation: none; }
 }

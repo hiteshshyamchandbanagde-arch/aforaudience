@@ -2575,3 +2575,51 @@ API, Vercel READY, zero runtime errors. `GEN-2609-037` moved to
 RESOLVED / DEPLOYED_QA. **Step 5 of the original 6-step sequence is now
 done; Step 6 (accessibility/motion-guidelines/icons/notifications/
 onboarding, one-page specs each) remains untouched.**
+
+## Motion Guidelines - Step 6, sub-spec 1/5 (built, not yet merged)
+
+First of Step 6's five one-page specs, written first because the audit's
+own Section 09 sequencing says motion guidance should have preceded
+Step 5's seal-stamp build - done retroactively now instead, informed by
+the one animation that actually exists. New file:
+`docs/motion-guidelines.md`, same discipline as Step 1's type-scale spec
+(`docs/afa-design-tokens-reference.md` Section 8) - every claim confirmed
+against real `globals.css` content via grep, not assumed.
+
+Catalogued all five `globals.css` mount/keyframe patterns (`seatIn`,
+`afa-push-in`, `afa-sheet-in`/`afa-backdrop-in`,
+`afa-seal-stamp-in`/`afa-seal-ring-pulse`) plus the two plain-`:hover`
+patterns with duration/easing/trigger for each, and the existing
+`.afa-<context>-mount` naming convention to carry forward.
+
+Fixed the fragmentation named in the dispatch: 3 separate
+`@media (prefers-reduced-motion: reduce)` blocks in `globals.css` (added
+one per animation batch as each shipped) merged into the single block at
+the end of the file. Mechanical only - diffed line-by-line, same five
+selector groups, same declarations, nothing dropped or changed.
+
+Three real gaps surfaced while confirming the catalog against file
+content (flagged in the new doc, not fixed - out of this pass's scope):
+`.afa-seat-anim` has no reduced-motion suppression at all; `.afa-path-card`'s
+hover transition is declared inline in `dashboard/venue/create/page.tsx`
+rather than in `globals.css` and is likewise uncovered; and
+`ContributionMoment.tsx` carries its own `styled-jsx`-scoped desktop-modal
+animation (`cm-modal-in`/`.cm-modal-mount`) with its own separate
+`prefers-reduced-motion` block that this pass's `globals.css`-only
+consolidation couldn't reach - a real 4th block, just not where the
+dispatch looked. Also flagged, not implemented: two recurring easing
+curves (`cubic-bezier(0.22,1,0.36,1)` x2, `cubic-bezier(0.34,1.4,0.64,1)`
+x1) as CSS custom-property candidates for whoever next needs one.
+
+Built on `feat/gen-2609-038-motion-guidelines`, branched from `qa` at
+`4c28487` (not off the stale `feat/gen-2609-037-seal-stamp-animation`
+branch - that one's own commit never reached `qa`; `GEN-2609-037` landed
+separately as `aa80ff7`/PR #610 by a concurrent session before this
+session re-synced, a `[[project_handoff_collision]]`-pattern repeat worth
+naming explicitly since it's the 8th time. Content was byte-identical
+between the two paths, so nothing to reconcile). Reduced-motion
+consolidation verified via diff only so far - the manual DevTools
+`prefers-reduced-motion: reduce` emulation check across all 5 patterns
+(dispatch's own verification step) has not been run yet this turn.
+Pending merge confirmation before Step 6's audit-tracking doc entry is
+finalized, per the standing rule.
