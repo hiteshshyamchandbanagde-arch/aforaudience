@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Archivo, Instrument_Sans, JetBrains_Mono,
+  Young_Serif, Schibsted_Grotesk, Instrument_Sans, JetBrains_Mono,
   Noto_Sans_Devanagari, Noto_Sans_Tamil, Noto_Sans_Telugu,
   Noto_Sans_Kannada, Noto_Sans_Malayalam, Noto_Sans_Gujarati, Noto_Sans_Bengali,
 } from "next/font/google";
@@ -33,7 +33,26 @@ import MobileTopBar from "@/components/mobile/MobileTopBar";
 // normal-only here would've left those rendering as browser-synthesized
 // fake-oblique Archivo instead - caught via the required before/after
 // screenshot pass (see GEN-2609-003 build notes), not assumed away.
-const archivo = Archivo({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+//
+// Font migration (12 Sep, GEN-2609-030 sequence, Phase B step 1 of 6):
+// Archivo -> two fonts, based on the v5 Figma Make exploration and the
+// full-app font-display footprint audit (docs/design.md). --font-display
+// keeps its name (third swap under this name: Newsreader -> Archivo ->
+// Young Serif) and now means Young Serif - editorial/hero/discovery/name
+// content. A new --font-ui carries Schibsted Grotesk - transactional/UI
+// content (buttons, tabs, dashboard-tool chrome, price/CTA-adjacent
+// text) that used to ride along on --font-display just because nothing
+// else existed for it. --font-sans (Instrument Sans, plain body copy)
+// and --font-mono are untouched - out of scope for this migration.
+// Young Serif ships no italic style via next/font/google (unlike
+// Archivo before it) - components applying fontStyle:"italic" to
+// var(--font-display) will get browser-synthesized fake-oblique, not a
+// real italic. Flagged in this migration's report, not silently
+// worked around - a handful of real components do this
+// (ArtistNoPhoto.tsx, ArtistProfileClientPage.tsx, artists/page.tsx,
+// FourRooms.tsx, PlatformGrowthStrip.tsx, HeroRotator.tsx).
+const youngSerif = Young_Serif({ subsets: ["latin"], weight: ["400"], style: ["normal"], variable: "--font-display", display: "swap" });
+const schibstedGrotesk = Schibsted_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], variable: "--font-ui", display: "swap" });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
 
@@ -150,7 +169,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${archivo.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
+      <body className={`${youngSerif.variable} ${schibstedGrotesk.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.

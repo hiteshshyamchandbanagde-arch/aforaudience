@@ -410,7 +410,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         <Link
           href="/"
           className="sitenav-logo"
-          style={{ fontFamily: "Georgia, serif", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}
+          style={{ fontFamily: "var(--font-display)", fontSize: isHome ? "22px" : "20px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}
         >
           <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
           <EnvBadge />

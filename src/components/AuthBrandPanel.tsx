@@ -60,7 +60,7 @@ export default function AuthBrandPanel() {
       />
 
       <div className="absolute inset-0 flex flex-col justify-between p-10 pointer-events-none">
-        <div className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)]">
+        <div className="text-[28px] font-bold text-[var(--afa-text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
           <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
         </div>
 
