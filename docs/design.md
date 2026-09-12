@@ -2396,3 +2396,43 @@ Feedback ticket GEN-2609-032 moved to RESOLVED / `deployStage:
 DEPLOYED_QA`. Per the new standing rule (docs updated after merge +
 confirmed working), Section 8.4 of `docs/afa-design-tokens-reference.md`
 now reflects this as built, not spec-only.
+
+## Font cleanup follow-up (GEN-2609-033) + italic-caveat scope correction (12 Sep)
+
+A post-GEN-2609-032 sweep found 4 more real hits the original Section
+8.4 audit missed: `my-feedback/page.tsx:324` and `dashboard/audience/
+page.tsx:40`/`:106` had either no `fontFamily` at all or sat outside
+the audit's 28-30px window; `admin/artists/page.tsx:344`'s stat value
+was also still Georgia. Resolved without inventing a new tier -
+personal-account content (`my-feedback`, both `audience/page.tsx`
+hits) went to `var(--font-display)`, internal Admin-tool content
+(`artists` stat) went to `var(--font-ui)`, matching the classification
+rule already used everywhere else in the migration.
+`VenueDetailClient.tsx`'s previously-flagged stat hits were checked
+and found already compliant (auto-inherited the token repoint) - the
+original "3 stat-number hits, possible 5th tier" framing in Section
+8.4 was itself partly stale.
+
+Dispatched to CC, branch `feat/gen-2609-033-font-cleanup`. Verified:
+`tsc --noEmit` clean, live-render via real QA login
+(`atul.audience@aforaudience.qa`) confirmed computed styles on both
+pages. Merged (`e74699a`), verified via Contents API, Vercel READY,
+zero runtime errors. GEN-2609-033 moved to RESOLVED / DEPLOYED_QA.
+
+**Separately, a correction to the italic-caveat's documented scope:**
+Section 8.4's Young Serif decision noted "no italic cut via
+`next/font/google`, not a blocker since none of the 17 [page-title]
+hits use italic." That's still true for the page-title tier
+specifically. But a full-app grep for `fontStyle: italic` combined
+with `var(--font-display)` found **14 locations across 9 files**
+(`PlatformGrowthStrip.tsx`, `ArtistNoPhoto.tsx`, `HeroRotator.tsx`,
+`FourRooms.tsx`, `VenueDetailClient.tsx`, the two Venue Owner
+brand-voice taglines in `seat-map/page.tsx` and `venue/create/
+page.tsx`, and 6 in `ArtistProfileClientPage.tsx`/`artists/page.tsx`)
+- not just the "2 preserved taglines" Phase 3's commit message
+described (that "2" was accurate only for Phase 3's own narrow scope,
+never an app-wide count). All 14 currently render as browser-
+synthesized faux-italic, not a true italic cut. No code change made -
+this is a documentation-accuracy correction, flagging the real
+footprint for whoever next weighs whether to accept the faux-italic
+permanently or swap to an italic-capable typeface for these moments.
