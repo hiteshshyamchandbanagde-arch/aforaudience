@@ -13,6 +13,7 @@ import {
   openRazorpayCheckout,
 } from '@/lib/razorpay-checkout'
 import { FeeSheet } from '@/components/FeeSheet'
+import ContributionMoment from '@/components/ContributionMoment'
 
 // Checkout page — order summary + Pay button.
 //
@@ -54,6 +55,9 @@ type BookingState = {
       startTime: string
       endTime: string
       venue: { name: string; city: string } | null
+      totalSeats: number
+      availableSeats: number
+      artistName: string
     }
   }
   payment: {
@@ -393,113 +397,36 @@ export default function CheckoutPage() {
       {} as Record<string, { tierLabel: string; level: string; count: number; price: number | null; seatLabels: string[] }>
     )
   )
-  const seatsSummaryText =
-    numberedGroups.length > 0
-      ? numberedGroups.map((g) => `${g.tierLabel}${g.level ? ` (${g.level})` : ''} (${g.seatLabels.join(', ')})`).join(', ')
-      : gaSeatEntries.map(([s, q]) => `${s} × ${q}`).join(', ')
-
   // --- Confirmed state
   if (confirmed) {
+    const seatSummary = state.booking.numberedSeats.length > 0
+      ? state.booking.numberedSeats.length === 1
+        // Single numbered seat - matches the contribution-moment mockup's
+        // "SEAT A7 · ROW A" format exactly.
+        ? `SEAT ${state.booking.numberedSeats[0].row}${state.booking.numberedSeats[0].number} · ROW ${state.booking.numberedSeats[0].row}`
+        // Multiple numbered seats - mockup only shows the single-seat
+        // case, so this generalizes rather than guessing a specific
+        // multi-seat layout: list every seat label, no single "ROW" to
+        // anchor to since a booking can span more than one.
+        : `SEATS ${state.booking.numberedSeats.map((s) => `${s.row}${s.number}`).join(', ')}`
+      // GA booking - no seat/row concept at all, same gap as above.
+      : `${gaSeatEntries.reduce((sum, [, q]) => sum + q, 0)} SEAT${gaSeatEntries.reduce((sum, [, q]) => sum + q, 0) === 1 ? '' : 'S'}`
+    const venueLabel = state.booking.event.venue
+      ? `${state.booking.event.venue.name}, ${state.booking.event.venue.city}`
+      : state.booking.event.title
+    const supporterCount = Math.max(0, state.booking.event.totalSeats - state.booking.event.availableSeats)
+
     return (
       <>
         <SiteNav />
-        <main
-          style={{
-            minHeight: '100vh',
-            background: 'var(--afa-surface-page)',
-            padding: '48px 24px',
-            maxWidth: 560,
-            margin: '0 auto',
-            fontFamily: 'system-ui, sans-serif',
-            color: 'var(--afa-text-primary)',
-          }}
-        >
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🎉</div>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 32, fontWeight: 900, marginBottom: 12 }}>
-            {tr.checkoutPage.youreIn}
-          </h1>
-          <p style={{ opacity: 0.7, lineHeight: 1.6, marginBottom: 24 }}>
-            {tr.checkoutPage.bookingConfirmedPrefix} <strong>{state.booking.event.title}</strong> {tr.checkoutPage.bookingConfirmedSuffix}
-            {state.booking.event.venue && (
-              <>
-                {' '}
-                {tr.checkoutPage.seeYouAtTemplate
-                  .replace('{venue}', state.booking.event.venue.name)
-                  .replace('{city}', state.booking.event.venue.city)}
-              </>
-            )}
-          </p>
-          <div
-            style={{
-              background: 'var(--afa-surface-raised)',
-              border: '1px solid rgba(245,245,240,0.08)',
-              borderRadius: 12,
-              padding: 20,
-              marginBottom: 24,
-            }}
-          >
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.checkoutPage.bookingIdLabel}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 14, marginBottom: 12 }}>
-              {state.booking.id}
-            </div>
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.eventDetailPage.seatsLabel}</div>
-            <div style={{ fontSize: 14, marginBottom: 12 }}>
-              {seatsSummaryText}
-            </div>
-            <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 6 }}>{tr.checkoutPage.amountPaidLabel}</div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>
-              {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <a
-              href={`/api/bookings/${state.booking.id}/ticket`}
-              style={{
-                background: 'var(--afa-fill-solid)',
-                color: 'var(--afa-on-fill-solid)',
-                padding: '12px 20px',
-                borderRadius: 10,
-                fontWeight: 600,
-                textDecoration: 'none',
-                display: 'inline-block',
-              }}
-            >
-              {tr.checkoutPage.downloadTicketPdf}
-            </a>
-            <Link
-              href="/tickets"
-              style={{
-                background: 'var(--afa-surface-inverse)',
-                color: 'var(--afa-text-primary)',
-                padding: '12px 20px',
-                borderRadius: 10,
-                fontWeight: 600,
-                textDecoration: 'none',
-                display: 'inline-block',
-                border: '1px solid rgba(245,245,240,0.12)',
-              }}
-            >
-              {tr.checkoutPage.viewMyTicketsArrow}
-            </Link>
-            <Link
-              href="/events"
-              style={{
-                color: 'var(--afa-text-primary)',
-                padding: '12px 20px',
-                borderRadius: 10,
-                fontWeight: 600,
-                textDecoration: 'none',
-                border: '1px solid rgba(245,245,240,0.15)',
-                display: 'inline-block',
-              }}
-            >
-              {tr.checkoutPage.browseMoreEvents}
-            </Link>
-          </div>
-          <p style={{ fontSize: 12, color: 'var(--afa-taupe)', marginTop: 16, lineHeight: 1.6 }}>
-            {tr.checkoutPage.emailedTicketNote}
-          </p>
-        </main>
+        <ContributionMoment
+          seatSummary={seatSummary}
+          venueLabel={venueLabel}
+          supporterCount={supporterCount}
+          artistName={state.booking.event.artistName}
+          onClose={() => router.push('/events')}
+          onViewTicket={() => router.push('/tickets')}
+        />
       </>
     )
   }

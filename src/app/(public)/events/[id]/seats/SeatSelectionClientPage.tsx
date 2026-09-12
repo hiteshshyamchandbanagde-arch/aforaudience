@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useSession, getSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import ContributionMoment from "@/components/ContributionMoment"
 import SeatPicker from "@/components/SeatPicker"
 import { colorForZone } from "@/components/SeatLayoutPreview"
 import { SeatStateDot } from "@/components/EventCard"
@@ -66,6 +67,12 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
   const [reserving, setReserving] = useState(false)
   const [reservedMessage, setReservedMessage] = useState("")
   const [bookingError, setBookingError] = useState("")
+  const [contributionMoment, setContributionMoment] = useState<{
+    seatSummary: string
+    venueLabel: string
+    supporterCount: number
+    artistName: string
+  } | null>(null)
 
   // Audience-adjustable booking fee (28 Jul) - unchanged from EventDetail,
   // see that file's own comment for the full rationale.
@@ -147,7 +154,39 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
         router.push(`/checkout/${data.booking.id}`)
         return
       }
+
+      // No payment step (free event, or Razorpay not configured in this
+      // env) - booking is already CONFIRMED. Show the contribution
+      // moment instead of the plain inline message, same screen the
+      // paid path's checkout page shows post-payment (see
+      // ContributionMoment.tsx). Reuses GET /api/bookings/[id] - the
+      // same endpoint the checkout page already calls - rather than a
+      // new one, since it already has everything this screen needs.
       setReservedMessage(data.message)
+      if (data.booking?.id) {
+        try {
+          const detailRes = await fetch(`/api/bookings/${data.booking.id}`)
+          const detail = await detailRes.json()
+          if (detailRes.ok) {
+            const b = detail.booking
+            const seatSummary = b.numberedSeats.length > 0
+              ? b.numberedSeats.length === 1
+                ? `SEAT ${b.numberedSeats[0].row}${b.numberedSeats[0].number} · ROW ${b.numberedSeats[0].row}`
+                : `SEATS ${b.numberedSeats.map((s: { row: string; number: string }) => `${s.row}${s.number}`).join(', ')}`
+              : `${totalSelected} SEAT${totalSelected === 1 ? '' : 'S'}`
+            setContributionMoment({
+              seatSummary,
+              venueLabel: b.event.venue ? `${b.event.venue.name}, ${b.event.venue.city}` : b.event.title,
+              supporterCount: Math.max(0, b.event.totalSeats - b.event.availableSeats),
+              artistName: b.event.artistName,
+            })
+          }
+        } catch {
+          // Booking already succeeded either way - the plain
+          // reservedMessage set above still shows, just without the
+          // richer contribution-moment screen.
+        }
+      }
     } catch (err: any) {
       setBookingError(err.message)
     } finally {
@@ -215,7 +254,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
         )}
 
         <div style={{ borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
-          {isPast ? (
+          {contributionMoment ? null : isPast ? (
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
               <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
@@ -378,6 +417,17 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
           reserveSeats()
         }}
       />
+
+      {contributionMoment && (
+        <ContributionMoment
+          seatSummary={contributionMoment.seatSummary}
+          venueLabel={contributionMoment.venueLabel}
+          supporterCount={contributionMoment.supporterCount}
+          artistName={contributionMoment.artistName}
+          onClose={() => router.push("/events")}
+          onViewTicket={() => router.push("/tickets")}
+        />
+      )}
     </>
   )
 }

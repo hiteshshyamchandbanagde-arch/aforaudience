@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { getPublicKeyId, refundPayment } from '@/lib/razorpay'
+import { getEventOccupancy, resolveArtistName } from '@/lib/event-occupancy'
 
 // GET /api/bookings/[id]
 //
@@ -36,6 +37,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           include: {
             venue: true,
             ticketTiers: true,
+            // Contribution-moment screen (post-confirm) - first confirmed
+            // lineup slot names the show, same "headliner" read as
+            // EventDetailClientPage.tsx. See resolveArtistName().
+            lineup: {
+              where: { cancelledAt: null },
+              include: { artist: { include: { user: { select: { displayName: true, name: true } } } } },
+              orderBy: { slot: 'asc' },
+              take: 1,
+            },
           },
         },
         payment: true,
@@ -83,6 +93,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       price: priceByTier.get(`${bs.seat.level || ''}::${bs.seat.tierLabel}`) ?? null,
     }))
 
+    // Contribution-moment screen (post-confirm) needs a live "N people
+    // supporting this show" count - never the Figma mockup's hardcoded 43.
+    const occupancy = await getEventOccupancy(booking.event, booking.event.venue?.seatingMode)
+    const artistName = resolveArtistName(booking.event)
+
     return NextResponse.json({
       booking: {
         id: booking.id,
@@ -107,6 +122,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
                 city: booking.event.venue.city,
               }
             : null,
+          totalSeats: occupancy.totalSeats,
+          availableSeats: occupancy.availableSeats,
+          artistName,
         },
       },
       payment: booking.payment
