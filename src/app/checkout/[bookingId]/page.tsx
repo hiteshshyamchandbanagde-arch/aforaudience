@@ -55,8 +55,7 @@ type BookingState = {
       startTime: string
       endTime: string
       venue: { name: string; city: string } | null
-      totalSeats: number
-      availableSeats: number
+      supporterCount: number
       artistName: string
     }
   }
@@ -414,7 +413,6 @@ export default function CheckoutPage() {
     const venueLabel = state.booking.event.venue
       ? `${state.booking.event.venue.name}, ${state.booking.event.venue.city}`
       : state.booking.event.title
-    const supporterCount = Math.max(0, state.booking.event.totalSeats - state.booking.event.availableSeats)
 
     return (
       <>
@@ -422,7 +420,7 @@ export default function CheckoutPage() {
         <ContributionMoment
           seatSummary={seatSummary}
           venueLabel={venueLabel}
-          supporterCount={supporterCount}
+          supporterCount={state.booking.event.supporterCount}
           artistName={state.booking.event.artistName}
           onClose={() => router.push('/events')}
           onViewTicket={() => router.push('/tickets')}

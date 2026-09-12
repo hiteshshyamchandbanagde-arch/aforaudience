@@ -177,7 +177,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
             setContributionMoment({
               seatSummary,
               venueLabel: b.event.venue ? `${b.event.venue.name}, ${b.event.venue.city}` : b.event.title,
-              supporterCount: Math.max(0, b.event.totalSeats - b.event.availableSeats),
+              supporterCount: b.event.supporterCount,
               artistName: b.event.artistName,
             })
           }

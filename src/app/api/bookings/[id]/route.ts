@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { getPublicKeyId, refundPayment } from '@/lib/razorpay'
-import { getEventOccupancy, resolveArtistName } from '@/lib/event-occupancy'
+import { getSupporterCount, resolveArtistName } from '@/lib/event-occupancy'
 
 // GET /api/bookings/[id]
 //
@@ -95,7 +95,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     // Contribution-moment screen (post-confirm) needs a live "N people
     // supporting this show" count - never the Figma mockup's hardcoded 43.
-    const occupancy = await getEventOccupancy(booking.event, booking.event.venue?.seatingMode)
+    const supporterCount = await getSupporterCount(booking.event, booking.event.venue?.seatingMode)
     const artistName = resolveArtistName(booking.event)
 
     return NextResponse.json({
@@ -122,8 +122,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
                 city: booking.event.venue.city,
               }
             : null,
-          totalSeats: occupancy.totalSeats,
-          availableSeats: occupancy.availableSeats,
+          supporterCount,
           artistName,
         },
       },

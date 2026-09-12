@@ -45,7 +45,7 @@ function CloseButton({ onClose }: { onClose: () => void }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
         background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)',
-        border: 'none', cursor: 'pointer', fontSize: 16,
+        border: 'none', cursor: 'pointer', fontSize: 16, fontFamily: 'var(--font-sans)',
       }}
     >
       ×
@@ -102,6 +102,18 @@ function ContributionBody({
   )
 }
 
+// Same copy as the old confirmed-state screen's tr.checkoutPage.emailedTicketNote
+// (src/lib/i18n/dictionaries/en.ts) - carried forward as hardcoded English,
+// matching the rest of this screen's copy, rather than wired through the
+// 11-locale dictionary (see build report's flagged i18n scope call).
+function EmailedTicketNote() {
+  return (
+    <p style={{ margin: '12px 0 0', fontFamily: 'var(--font-sans)', fontSize: 12, lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
+      We&rsquo;ve also emailed the ticket to you. Show the QR at the door — screen or print is fine.
+    </p>
+  )
+}
+
 function ViewTicketButton({ onViewTicket }: { onViewTicket: () => void }) {
   return (
     <button
@@ -109,7 +121,7 @@ function ViewTicketButton({ onViewTicket }: { onViewTicket: () => void }) {
       style={{
         width: '100%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)',
         padding: 16, border: 'none', borderRadius: 999, fontSize: 16, fontWeight: 700,
-        cursor: 'pointer', flexShrink: 0,
+        fontFamily: 'var(--font-sans)', cursor: 'pointer', flexShrink: 0,
       }}
     >
       View My Ticket
@@ -154,6 +166,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
         <ContributionBody {...props} />
         <div style={{ marginTop: 'auto', paddingTop: 24 }}>
           <ViewTicketButton onViewTicket={props.onViewTicket} />
+          <EmailedTicketNote />
         </div>
       </div>
 
@@ -176,6 +189,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           <ContributionBody {...props} />
           <div style={{ marginTop: 24 }}>
             <ViewTicketButton onViewTicket={props.onViewTicket} />
+            <EmailedTicketNote />
           </div>
         </div>
       </div>

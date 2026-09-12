@@ -1,26 +1,29 @@
 import prisma from '@/lib/prisma'
 
 // Contribution-moment screen (post-seat-confirm) needs a live "N people
-// supporting this show" count. Event.totalSeats/availableSeats are only
-// kept accurate on the GA/flat booking path - same NUMBERED-venue live-
-// occupancy correction as src/app/(public)/events/[id]/seats/page.tsx
-// (see that file's own comment for the full "Jaipur Mic Gala 100" bug
-// history this fixes), extracted here so both call sites share one
-// definition instead of re-deriving it.
-export async function getEventOccupancy(event: {
+// supporting this show" count - a real seats-taken tally, not a display
+// availability number.
+//
+// Event.availableSeats looks like it should already be this, but it
+// isn't: grepping every write site shows it's only ever set once at
+// event creation (POST /api/events) and decremented by the unrelated
+// "+1 companion" feature (src/lib/plus-one.ts) - POST /api/bookings
+// never touches it. Confirmed live (12 Sep) booking a real QA event
+// through the actual seat-confirm flow: the contribution card showed
+// "0 people supporting" right after a real booking, because this
+// helper's first version read that same stale field. Real capacity
+// checks in POST /api/bookings instead aggregate live Booking rows
+// (CONFIRMED + not-yet-expired PENDING) - same query this mirrors, so
+// the count here always matches what capacity checking already treats
+// as "taken".
+export async function getSupporterCount(event: {
   id: string
   venueId: string | null
-  totalSeats: number
-  availableSeats: number
-}, seatingMode: 'GENERAL_ADMISSION' | 'NUMBERED' | undefined) {
-  if (seatingMode !== 'NUMBERED' || !event.venueId) {
-    return { totalSeats: event.totalSeats, availableSeats: event.availableSeats }
-  }
-
+}, seatingMode: 'GENERAL_ADMISSION' | 'NUMBERED' | undefined): Promise<number> {
   const now = new Date()
-  const [seatTotal, heldCount] = await Promise.all([
-    prisma.seat.count({ where: { venueId: event.venueId } }),
-    prisma.bookingSeat.count({
+
+  if (seatingMode === 'NUMBERED' && event.venueId) {
+    return prisma.bookingSeat.count({
       where: {
         booking: {
           eventId: event.id,
@@ -30,9 +33,27 @@ export async function getEventOccupancy(event: {
           ],
         },
       },
-    }),
-  ])
-  return { totalSeats: seatTotal, availableSeats: Math.max(0, seatTotal - heldCount) }
+    })
+  }
+
+  // GA/flat bookings store `seats` as a { sectionName: qty } JSON map
+  // (empty for NUMBERED bookings, which is why those are counted via
+  // bookingSeat rows above instead) - same shape POST /api/bookings'
+  // own capacity check sums.
+  const bookings = await prisma.booking.findMany({
+    where: {
+      eventId: event.id,
+      OR: [
+        { status: 'CONFIRMED' },
+        { status: 'PENDING', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+      ],
+    },
+    select: { seats: true },
+  })
+  return bookings.reduce((sum, b) => {
+    const seats = (b.seats as Record<string, number>) || {}
+    return sum + Object.values(seats).reduce((s, qty) => s + Number(qty), 0)
+  }, 0)
 }
 
 // First (lowest-slot) confirmed lineup entry is this app's established
