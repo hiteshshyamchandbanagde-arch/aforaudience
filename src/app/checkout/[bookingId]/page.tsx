@@ -353,7 +353,7 @@ export default function CheckoutPage() {
       <>
         <SiteNav />
         <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 32, fontFamily: 'system-ui', maxWidth: 640, margin: '0 auto' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 16 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 16 }}>
             {tr.checkoutPage.somethingWrongTitle}
           </h1>
           <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
@@ -437,7 +437,7 @@ export default function CheckoutPage() {
       <>
         <SiteNav />
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.bookingCancelledTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
@@ -460,7 +460,7 @@ export default function CheckoutPage() {
       <>
         <SiteNav />
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.reservationExpiredTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
@@ -480,7 +480,7 @@ export default function CheckoutPage() {
       <>
         <SiteNav />
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'system-ui' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, marginBottom: 12 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
             {tr.checkoutPage.paymentsNotLiveTitle}
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
@@ -512,7 +512,7 @@ export default function CheckoutPage() {
           color: 'var(--afa-text-primary)',
         }}
       >
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
           {tr.checkoutPage.confirmYourBooking}
         </h1>
         <p style={{ opacity: 0.6, marginBottom: 24, fontSize: 14 }}>

@@ -235,7 +235,7 @@ export default function AdminCommandCenter() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
           Command Center
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>

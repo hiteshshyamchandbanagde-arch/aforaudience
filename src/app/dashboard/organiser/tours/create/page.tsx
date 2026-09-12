@@ -63,7 +63,7 @@ export default function CreateTourPage() {
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <BackLink href="/dashboard/organiser/tours" label="Back to Tours" />
 
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '20px', marginBottom: '8px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '20px', marginBottom: '8px' }}>
           Create a Tour
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '28px' }}>

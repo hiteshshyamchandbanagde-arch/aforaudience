@@ -280,7 +280,7 @@ export default function ArtistDashboard() {
               {/* BUG-2609-018: was profile.name (the API's raw username
                   field) - this heading is the public-profile preview, same
                   fallback chain as the rest of the app. */}
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 {profile.displayName || profile.name || profile.email}
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>

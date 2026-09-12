@@ -80,7 +80,7 @@ export default function OrganiserDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to become an Organiser from your profile to start creating events.</p>
             <BackLink href="/" label="Back to Home" />
           </div>
@@ -98,7 +98,7 @@ export default function OrganiserDashboard() {
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '24px', marginBottom: '12px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>
               {orgStatus.orgName ? `${orgStatus.orgName} is` : 'Your Organiser account is'} pending approval
             </h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -119,7 +119,7 @@ export default function OrganiserDashboard() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Your Events
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>

@@ -242,7 +242,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px 64px' }}>
           <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '14px', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '14px', marginBottom: '4px' }}>
             Check-In
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{eventTitle}</p>
