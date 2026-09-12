@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
     <AuthLayout>
       <div className="w-full max-w-[440px]">
         <div className="text-center mb-8">
-          <Link href="/" className="font-serif text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden">
+          <Link href="/" className="text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
             <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
             <EnvBadge />
           </Link>
