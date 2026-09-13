@@ -2733,3 +2733,56 @@ feedback panel) rather than a literal read of all 287 `<button>` elements
 across 82 files - disclosed as such in the spec rather than overclaimed.
 Pending merge confirmation before this entry is finalized, per the
 standing rule.
+
+## Notifications Guidelines - Step 6, sub-spec 4/5 (built, not merged - no code fix)
+
+Fourth of Step 6's five specs. New file: `docs/notifications-guidelines.md`
+- a push-notification send-site catalog, the service-worker's push
+contract, the opt-in flow's rules of engagement, and the badge-count
+endpoint's real role coverage.
+
+**Correction surfaced while independently re-deriving this dispatch's own
+starting numbers:** the brief cited 21 files / 25+ call sites using
+`sendPushToUser`/`sendPushToRole`. Re-grepping (excluding `src/lib/push.ts`
+itself, which only defines the two functions) found the real figures are
+**19 files, 31 individual call sites** - all confirmed hardcoded-English
+literals, none reading from `src/lib/i18n/dictionaries/*`.
+
+**Real fix scoped, then withdrawn on re-verification:** the dispatch asked
+for a like-for-like `--afa-terracotta` + hardcoded `white` swap in
+`NotificationOptIn.tsx`'s CTA button, following the exact precedent
+already shipped in `BUG-2609-024` (`--afa-terracotta` + `white` →
+`--afa-fill-solid` + `--afa-on-fill-solid`). Checking the component's real
+background context first found that precedent doesn't transfer: the
+banner's own container already sets `background: var(--afa-fill-solid)`,
+so retargeting the button to the same token would render it the identical
+hex as its own background - the button would visually disappear. No other
+locked-palette token reproduces the button's current color under a
+different name (`--afa-amber`, the usual non-commit-action alternative,
+has no existing precedent as a *solid filled-button* background anywhere
+in the codebase - every real usage is text/border/accent only). Left
+`--afa-terracotta`/`white` untouched rather than ship a swap that breaks
+the button's visibility or invents a new unprecedented pattern; full
+reasoning and the adjacent `rgba(247,243,238,0.6)` dismiss-color finding
+(matches an established untokenized convention used in 7+ other files,
+not a first-of-its-kind hardcode) are in the spec's Section 5.5.
+
+**Flagged, not fixed - needs Hitesh's call**, full detail in the spec:
+- Push-content localization for all 31 call sites + the SW's fallback
+  string - blocked on a `User.locale` column (doesn't exist) and a
+  decision on when the existing client-side-only `afa-locale`
+  (`localStorage`) choice gets persisted server-side.
+- `NotificationOptIn.tsx`'s 🔔 emoji vs. the shared icon registry - same
+  underlying gap as `docs/icon-system-guidelines.md`'s consolidation
+  section, not re-litigated here.
+- Badge-count endpoint's `0` for Artist/Audience/Admin - confirmed
+  deliberate scope, not a bug; whether any of those roles needs a real
+  count (and counting what) is a product question.
+- The CTA-button color question above.
+
+Built on `feat/gen-2609-041-notifications-guidelines`, branched from `qa`
+at `3f3e9ee` (synced via `git fetch` first - no collision this time; local
+`qa` was already exactly at `origin/qa`, unlike the prior three sub-specs'
+sessions). No `tsc`/build verification needed - zero source files changed,
+only the new doc. Pending merge confirmation before this entry is
+finalized, per the standing rule.
