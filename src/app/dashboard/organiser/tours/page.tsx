@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import Badge from '@/components/ui/Badge'
 
 interface TourItem {
   id: string
@@ -117,14 +118,7 @@ export default function OrganiserToursPage() {
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
                       )}
                     </div>
-                    <span
-                      style={{
-                        fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                        padding: '5px 10px', borderRadius: '999px', background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {statusStyle.label}
-                    </span>
+                    <Badge tone={statusStyle}>{statusStyle.label}</Badge>
                   </div>
 
                   <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
