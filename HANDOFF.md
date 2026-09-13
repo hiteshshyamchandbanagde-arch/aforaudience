@@ -63,8 +63,8 @@ The "which Feedback table" ambiguity from prior sessions is resolved: it's `afor
 - Cancelled/refunded ticket cards: stay non-interactive (current) or tap through to the past event? (`-068`)
 
 **Verification debt (not failures, just unconfirmed):**
-- `-069`'s button-row fix — no human/browser visual confirmation yet, only code-logic + CI.
-- `-068`'s WCAG contrast math for `--afa-sage-bright`/`--afa-error-bright` — chat trusted CC's reported ~5.4:1, didn't independently recompute. Worth a spot-check.
+- `-069`'s button-row fix — no human/browser visual confirmation yet, only code-logic + CI. Re-read the actual diff this session (CC-side): `flex: '1 1 auto'` → `flex: '1 1 0'` + `minWidth: 0` is the correct, standard fix for the diagnosed bug (each button was sizing to its own content instead of splitting the row) - confirms the fix should work, but "should work" per code reading is still not the same as seeing it render. Still needs real eyes on `qa.aforaudience.com/tickets/` at desktop width.
+- ~~`-068`'s WCAG contrast math for `--afa-sage-bright`/`--afa-error-bright` — chat trusted CC's reported ~5.4:1, didn't independently recompute.~~ **Resolved this session (CC-side):** independently recomputed via a fresh script (not reusing CC's original by-hand arithmetic), same WCAG relative-luminance formula, from scratch: sage @ real 0.12 alpha → **5.472:1**, sage @ hypothetical 0.20 alpha → **5.110:1**, error @ real 0.10 alpha → **5.444:1**, error @ hypothetical 0.20 alpha → **5.107:1** — all match the originally-reported ~5.4-5.5:1 range within rounding, all comfortably clear 4.5:1 AA. Cross-check reproduced too: `--afa-red-alt` (#EF4444) against the same error-tint background measures **4.170:1** (FAIL), confirming it genuinely wasn't fit for this role. Independent confirmation, not a re-trust of the original report.
 
 **Still open from the audit, not touched this session (see `-067` for full detail):**
 - `BUG-2609-026` — reduced-motion coverage gaps (seat-anim, path-card hover, `ContributionMoment`).
@@ -79,6 +79,14 @@ The "which Feedback table" ambiguity from prior sessions is resolved: it's `afor
 - 🔴 Razorpay + Google Maps/Places QA key rotation — still outstanding since 25 Aug.
 - 22 QA-project tables with RLS disabled — flagged repeatedly, no policy pass done. Supabase's own advisor surfaces this on every `list_tables` call; remediation SQL is known but deliberately not auto-applied (would break access without real policies).
 - Everything else in the 13 Sept "Open items" section below that isn't explicitly marked resolved above.
+
+## Session-start checklist
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `63c646e` (this handoff's own commit; `ee9e47c` is the last feature merge before it).
+2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
+3. Read this file, then `docs/design.md` for anything logged since.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 7+ sessions running.
+5. The one real product decision blocking nothing else: cancelled/refunded ticket cards, tappable or not (see above). Everything else this session flagged is either verification debt (get real eyes on `qa.aforaudience.com/tickets/`) or carried-forward items that need Hitesh directly (Razorpay/Maps, RLS policy pass).
 
 ---
 

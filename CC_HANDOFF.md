@@ -1,3 +1,14 @@
+# CC Local/Session Handoff — 14 Sep 2026, later same day (sync + independent verification, git state only)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `63c646e` — chat's own docs-handoff commit on top of `ee9e47c` (the last feature merge, `GEN-2609-069`). Synced fresh (`fetch` + `reset --hard`) before doing anything else this session, confirmed via `git log -1`, not assumed.
+- No branching, no code changes this session — picked up chat's handoff, read both merge diffs (`360e610`, `ee9e47c`) directly to understand what changed in code this session authored (the `--afa-border-resting` CI fixup and the `-069` flex-basis fix), and did one piece of real work: independently recomputed the WCAG contrast math for `--afa-sage-bright`/`--afa-error-bright` via a fresh Node script (not by-hand arithmetic, and not reusing the original session's calculation) - chat had explicitly flagged this as "trusted CC's report, didn't independently recompute" in its own open-items list. Result: sage 5.472:1 (real alpha) / 5.110:1 (hypothetical 20% alpha), error 5.444:1 / 5.107:1 - both match the originally-reported ~5.4-5.5:1 range and clear AA with margin. Cross-check reproduced too: `--afa-red-alt` genuinely fails (4.170:1) against the same background. Script wasn't checked in - one-off verification, deleted after use (`/tmp/contrast_check.js`).
+- Updated `HANDOFF.md`'s open-items list to mark that verification item resolved with the real numbers, added a `Session-start checklist` to the top (14 Sep) section (chat's own prepend hadn't included one), and re-read the `-069` diff closely enough to confirm the `flex: '1 1 auto'` → `flex: '1 1 0'` + `minWidth: 0` fix is the objectively correct pattern for the diagnosed bug - still flagged as needing real browser eyes, since reading the diff isn't the same as seeing it render and no browser tool is available here either.
+- Working tree clean, only the pre-existing untracked `Figma/` dir. `stash@{0}` still unclaimed.
+
+---
+
 # CC Local/Session Handoff — 14 Sep 2026 (update, git state only — see HANDOFF.md for GEN-2609-067/068/069 feature narrative)
 
 ## Git state as of this handoff
