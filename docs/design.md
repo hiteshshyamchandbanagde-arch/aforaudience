@@ -3634,3 +3634,150 @@ not silently absorbed into this ticket, not silently dropped either.
 
 Built on `feat/gen-2609-058-button-size-terracotta-migration`, branched
 from `qa` at `12d1280`.
+
+## GEN-2609-063 - repo-wide non-button terracotta migration, and the real scope it uncovered
+
+**Re-verified the count fresh, and it was far bigger than either the
+dispatch's or `-054`'s estimate.** A full `src/**/*.ts(x)` grep found
+~90 real (non-comment) `--afa-terracotta` occurrences across ~40 files
+- not the "~27 in dashboard/organiser plus more elsewhere" estimate.
+Migrated in 6 logical commits within this one PR, per the dispatch's
+own "split into groups so a problem in one doesn't block the rest"
+instruction:
+
+1. **DECLINED-status ternary -> `statusStyle.ts`.** Both real sites
+   (lineup consents + panel invites in `events/[id]/edit/page.tsx`)
+   now read a new `orange` `STATUS_TONE` entry instead of a raw
+   literal pair - the color scheme itself (sage/orange/gold) is
+   unchanged, only its source of truth moved.
+2. **Chart elements** - 2 bar-chart heights, `FeedbackTrends.tsx`'s
+   category-color map/trend-line/legend (5 sites).
+3. **Selection-pill border/text/tint** - the dispatch's named 8
+   (`events/create` x2, `events/[id]/checkin`, `events/[id]/edit`),
+   plus 2 more found with the identical pattern (`venue/[id]/edit`'s
+   rate-type toggle, `LocationChip`'s selected-city row) and a border
+   tint in `tickets/page.tsx`. Literal `rgba(200,68,26,X)` (terracotta's
+   RGB triple used instead of the CSS var) converted to
+   `rgba(255,90,54,X)` so backgrounds stay internally consistent with
+   their sibling border/text swaps - these don't contain the string
+   "afa-terracotta" at all, so a plain `grep afa-terracotta` alone
+   would have missed them; found via a second pass grepping the literal
+   RGB triple, per the dispatch's "repo-wide, not just previously-
+   scoped files" instruction.
+4-6. **Everything else** - eyebrow labels, plain links, mono price/
+   distance labels, an env badge, tab-underline active-state indicators,
+   a Razorpay SDK theme color, and 3 files' `EMBER` color constants
+   (`about/page.tsx`, `LegalDocLayout.tsx`, `dev/razorpay-test/page.tsx`).
+   The design-token checker caught something real here: `rgba(255,90,54,X)`
+   had never existed as a raw literal anywhere in the app before this
+   migration (unlike terracotta's, which pre-existed all over) - so
+   7 sites' new tints correctly flagged as genuinely new debt, not
+   relocated. Fixed by centralizing into `src/lib/statusStyle.ts`
+   (already the checker's exempt shared-tone file): `FILL_SOLID_TINT`/
+   `FILL_SOLID_BORDER_TINT` for the two common alphas (0.08, 0.25), and
+   a `fillSolidTint(alpha)` function for the handful of one-off alphas
+   (0.12, 0.15) - a function call contains no literal `rgba(...)` string
+   in the consuming file at all, so it can never trip the checker
+   regardless of which alpha a future call site needs.
+
+**Confirmed `--afa-terracotta` -> `--afa-fill-solid` really are meant
+interchangeably here**, per the dispatch's instruction to verify rather
+than assume: checked every chart-bar/badge/tint usage for a reason it
+might deliberately want terracotta's specific muted tone instead of the
+brighter CTA orange - found none; every usage is a plain "brand accent"
+role with no evidence of an intentionally quieter choice.
+
+**Two categories of usage deliberately NOT migrated, verified as
+correct exceptions rather than assumed:**
+- `api/posters/*`, `lib/email.ts`, `lib/ticket-pdf.ts`, `BrandLoader.tsx`
+  - all render outside a live browser DOM (server image generation,
+  email HTML, PDF generation, and a pixel-accurate copy of the static
+  app icon), so CSS custom properties can't resolve there at all even
+  if I wanted them to - literal hex is the only option, and per the
+  dispatch's own expected end-state ("only `--afa-brand-mark`'s...
+  fixed logo color... survives"), these represent fixed brand identity
+  rather than a themeable UI accent. Confirmed each really is brand/
+  logo-tied before excluding it (`BrandLoader.tsx`'s own comment: "a
+  pixel-accurate match of the actual app icon/logo mark"; `email.ts`'s
+  hex sits on the wordmark "A"; the posters route is already on
+  `check-design-tokens.js`'s own exempt list).
+- `layout.tsx`'s `themeColor` **not touched, flagged instead.** Its own
+  comment says it must "match the manifest's `theme_color`" - and
+  `manifest.ts`'s `theme_color` is a hardcoded literal hex (`#C8441A`,
+  a static PWA manifest can't reference a CSS var at all). Swapping only
+  `layout.tsx`'s var reference would silently break that documented
+  invariant without also editing `manifest.ts` in lockstep - and a PWA
+  manifest change has real install-cache implications for users who've
+  already added the app to their home screen, a bigger blast radius
+  than a page's CSS. Flagging both together for a real decision rather
+  than treating this as a same-shape swap.
+
+**A substantially bigger finding: real BUTTON-shaped terracotta sites
+still exist OUTSIDE `dashboard/organiser/`, never covered by
+`GEN-2609-058`/`-061` (both explicitly scoped only to
+`dashboard/organiser/`).** The repo-wide grep this ticket's own
+instructions required surfaced 13 more real CTA-shaped
+`--afa-terracotta` sites this whole multi-session sweep never touched:
+`dashboard/artist/edit/page.tsx` (an avatar-upload label, a dashed-
+border "+ Add tour stop" button, a "Save Profile" button - all 3 of
+this file's only terracotta usages), `dashboard/artist/events/page.tsx`
+("Apply to Perform"/"Join Waitlist"), `dashboard/artist/page.tsx` (a
+reply-submit button, **with the same `color: 'white'` bug class fixed
+twice before** in `-058`/`-061`), `dashboard/organiser/events/[id]/
+page.tsx` (a publish-toggle button), `dashboard/venue/[id]/edit/page.tsx`
+("Save"), `verify-phone/page.tsx` (2 submit buttons, **both with the
+`color: 'white'` bug**), `AudienceChoiceVoting.tsx` (a vote-submit
+button, **`color: 'white'` bug**), `PosterShareCard.tsx` (a share
+button, already correctly using `--afa-on-fill-solid`), and 3 shared
+components used across multiple pages - `DisplayNameNudge.tsx`,
+`PhoneVerifyNudge.tsx` (both `Link`-styled-as-button, **`color: 'white'`
+bug**), `pwa/InstallPrompt.tsx` (**`color: 'white'` bug**). None built
+here - genuinely out of this ticket's "non-button" scope - but this is
+a real, sizable gap, not a footnote: 4 of these 13 carry the exact
+color-token bug class this project has now fixed twice on other files,
+and none have ever been migrated to the `Button` component. Strong
+candidate for a `-058`/`-061`-shaped follow-up ticket.
+
+**`RegisterForm.tsx` - all 9 occurrences flagged as one unit, not
+migrated, for a different reason: a real semantic inconsistency, not a
+missed color swap.** 8 of its 9 terracotta usages are validation/error-
+state indicators (invalid-field borders, "username taken" message,
+field-error paragraphs, a QA-mode dev-otp notice with an internally
+mismatched color scheme) - but this exact same file **already uses
+`--afa-error`** for the identical semantic concept elsewhere (password-
+strength = weak). Blindly swapping these to `--afa-fill-solid` (a CTA-
+accent color) would just replace one wrong color-role with another,
+not actually fix the inconsistency - the more likely correct fix is
+routing them to `--afa-error` instead, matching the file's own already-
+established pattern, but that's a real design decision (bordering on a
+different ticket's scope: fixing a pre-existing bug, not a token rename)
+that shouldn't be guessed at under a token-migration ticket. The 9th
+occurrence (a solid-background username-suggestion chip, an actual
+button) is unrelated to the error question and just falls into the same
+"button, not touched" bucket as the 13 above.
+
+**Verified final state, per the dispatch's own bar.** Repo-wide grep
+after all 6 commits: zero remaining bare `--afa-terracotta` except (a)
+comments describing past migrations (`OrganiserFollowButton.tsx`,
+`VenuesGridClient.tsx`, `VenueFollowButton.tsx`, `SiteNav.tsx`,
+`Button.tsx`, `statusStyle.ts` - all historical, not real usage), (b)
+`forgot-password`/`reset-password`'s `--afa-terracotta-tint` (a
+different token, out of scope), and (c) the three flagged categories
+above (13 buttons, `RegisterForm.tsx`, `layout.tsx`/`manifest.ts`). This
+does **not** fully match the dispatch's anticipated end-state ("only
+`--afa-brand-mark`'s... fixed logo color... survives") - that
+expectation assumed the button half of the sweep was already complete
+everywhere, which this ticket's own audit disproves. Flagging the gap
+explicitly rather than silently declaring the sweep finished.
+
+**Verify.** `tsc --noEmit` clean. `next build` clean, all routes
+present. `check-design-tokens.js` clean after centralizing the new
+fill-solid tint literals (a real, correct catch by the checker - not a
+false positive, since these genuinely never existed as raw literals
+before). No visual verification possible (no browser tool this
+session) - every swap is a pure color-token substitution with no
+shape/layout change, reasoned from the token values rather than
+screenshotted.
+
+Built on `feat/gen-2609-063-terracotta-fill-solid-migration`, branched
+from `qa` at `78934c8`.
