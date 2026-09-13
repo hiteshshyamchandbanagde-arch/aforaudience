@@ -126,7 +126,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
-            <Link href="/dashboard/organiser/sales" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href="/dashboard/organiser/sales" style={{ fontSize: '14px', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
               All events →
             </Link>
           </div>
@@ -189,7 +189,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${t.seats} seats, ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-terracotta)', borderRadius: '3px 3px 0 0' }} />
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: '3px 3px 0 0' }} />
                     <span style={{ fontSize: '9px', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
