@@ -3634,3 +3634,59 @@ not silently absorbed into this ticket, not silently dropped either.
 
 Built on `feat/gen-2609-058-button-size-terracotta-migration`, branched
 from `qa` at `12d1280`.
+
+## GEN-2609-059 - VenueCard corner radius shipped; hover-treatment half is a wrong premise, not built
+
+**Corner radius: verified and shipped.** `EventCard`'s outer wrapper is
+`borderRadius: "3px"` (confirmed at `EventCard.tsx`, unchanged since
+`-053`'s original audit). `VenueCard` (inline JSX in
+`VenuesGridClient.tsx`) had no `borderRadius` anywhere on its card div
+or in `.afa-venue-card`'s CSS - genuinely 0, not an approximation.
+Added `borderRadius: "3px"` to the card's inline style; `overflow:
+"hidden"` was already present so the poster image inside correctly
+clips to the new rounded corner with no other change needed.
+
+**Hover treatment: re-verification found the dispatch's premise
+backwards, not built.** The dispatch describes "EventCard's hover
+treatment (translateY lift + shadow + amber-border/title-color
+transition)" as something `VenueCard` should adopt. Grepped both
+cards' actual current CSS fresh rather than trusting the description:
+
+- `EventCard`'s hover (`.afa-event-card:hover` in `(public)/events/
+  page.tsx`) is `border-color: rgba(201,151,58,0.3)` on a `0.2s ease`
+  transition - nothing else. No `transform`, no `box-shadow`, no
+  title-color change.
+- `VenueCard` already carries `hover-lift-card` (a shared global class
+  in `globals.css`: `transform: translateY(-4px)` +
+  `box-shadow: 0 12px 40px rgba(0,0,0,0.1)` on hover) **plus** its own
+  `.afa-venue-card`/`.afa-venue-card-title` rules (amber border-color
+  transition to `rgba(201,151,58,0.6)`, title color transition to
+  `--afa-amber`, and an arrow fade-in) - a strictly richer hover
+  treatment than `EventCard`'s today.
+
+This matches (word-for-word, on review) `GEN-2609-053`'s own earlier
+Card-audit finding, which characterized this exact gap the other way
+around: "hover treatment (translateY + shadow + amber-border/title-
+color transition **vs none**)" - i.e. `VenueCard` has it, `EventCard`
+doesn't. Literally executing this ticket as worded would mean
+stripping `VenueCard` down to `EventCard`'s plainer hover, the opposite
+of what "adopts EventCard's hover treatment" reads as intending. Given
+this session's own standing instruction to stop and report a wrong
+premise rather than build the wrong thing, this half is not built -
+flagging for Hitesh to confirm actual intent (most likely: `EventCard`
+should gain `VenueCard`'s richer treatment instead, i.e. the direction
+named in the ticket is swapped; but that's a guess, not something to
+build without confirmation, especially given the same dispatch batch's
+own "no deviation, centrally controlled" rule).
+
+The dimming-mechanism and grid/list layout-mode differences remain
+out of scope, as instructed - untouched.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session) - the radius
+change is a single, unambiguous property match to `EventCard`'s own
+value, reasoned rather than screenshotted.
+
+Built on `feat/gen-2609-059-venuecard-radius`, branched from `qa` at
+`78934c8`.

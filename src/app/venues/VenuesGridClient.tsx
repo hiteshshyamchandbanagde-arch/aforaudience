@@ -204,6 +204,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               display: "block",
               background: "var(--afa-surface-raised)",
               overflow: "hidden",
+              borderRadius: "3px",
               cursor: navigatingId ? "default" : "pointer",
               opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
               transition: "opacity 0.15s ease",
