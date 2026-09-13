@@ -380,3 +380,138 @@ Ran the new standing-rule sync at the start of this turn: `git checkout qa && gi
 Working tree otherwise clean; only pre-existing untracked `Figma/` present, unrelated and untouched.
 
 **Next session (CC or chat) should:** run the sync command above first (now standing practice, see this file's "Standing rules" section), read `HANDOFF.md` for the feature-work narrative and its updated open-items list, and decide on the stray stash above before it goes stale for a third session running.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-054/055/056)
+
+Ran the standing sync at the start of this turn and before every
+branch below: HEAD confirmed `33cc922` each time, matching the
+dispatch's stated expectation exactly (no repeat of the earlier
+staleness incident).
+
+Three separate branches, pushed individually per the dispatch's
+"own branch, squash-merged separately" instruction — none overlap on
+touched lines, confirmed by diffing each branch's file list against
+the other two before pushing:
+
+- `feat/gen-2609-056-spinner-overlay-extraction` (`8e2142d`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-056-spinner-overlay-extraction?expand=1
+- `feat/gen-2609-055-badge-migration` (`3a85543`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-055-badge-migration?expand=1
+- `feat/gen-2609-054-form-submit-migration` (`d227084`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-054-form-submit-migration?expand=1
+
+All three branched from the same `qa` commit (`33cc922`), not
+sequentially stacked — each is a small, independent diff, so this
+follows the "either approach works" note from the font-migration
+session rather than needing rebase-on-previous-merge.
+
+**`-056` built exactly as scoped** — the dispatch's "3x byte-for-byte"
+premise was re-verified against `-053`'s own prior audit (same
+document, same claim) rather than re-derived blind, then found to be
+almost-but-not-quite true (ring size/scrim/accent differed) once
+diffed line-by-line. See `docs/design.md` for the full comparison and
+the latent-keyframe-bug fix.
+
+**`-055` partially built** — 3 of the named files' pills matched an
+existing `Badge` variant closely enough to migrate with zero visual
+change (one via a documented `style` override for a single-property
+mismatch); 3 more turned out to be genuine third pill-shapes and were
+flagged rather than forced, per the dispatch's own explicit
+instruction to do so. Several interactive controls mixed into the same
+files (buttons, a select, a tab switcher) were correctly left alone —
+`Badge` is presentational only.
+
+**`-054` needed a real stop-and-report** — the dispatch's own count
+("11 occurrences/9 files") was off by roughly 4x just within
+`dashboard/organiser/` (41/13), and the actual usages are a genuine
+mix of button/non-button shapes with inconsistent button padding, not
+one shape reusable via `form-submit`. Per this session's dispatch
+instruction ("if a ticket's premise turns out wrong... stop, report,
+let chat re-scope before building the wrong thing"), did not guess at
+a new button variant's sizing. Built only the one sub-claim that
+checked out independently on its own merits (the `forgot-password`/
+`reset-password` `form-submit` migration, which doesn't depend on the
+terracotta framing at all).
+
+Verification available this session: `tsc --noEmit` (clean on all
+three branches) and `scripts/check-design-tokens.js` against each
+branch's diff from `origin/qa` (clean, 0 offenses, all three). No
+browser/Playwright tool available (same standing gap, now 6+ sessions
+running) — no visual verification possible; each branch's `docs/
+design.md` entry reasons from property-level comparison against the
+component's own style table instead, flagged as unverified rather than
+claimed done.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed this session.
+Same push-branch-then-hand-chat-a-compare-URL split as every prior
+session — chat opens/reviews/merges all three from its side.
+
+`HANDOFF.md`'s open-items list updated in the same commit as this note
+(docs-only, direct to `qa`, per the docs-only-vs-branch+PR convention)
+— folds in the 3 new flagged decisions (dashboard-CTA variant sizing,
+the 2 remaining `Badge`-shape questions, the wider `@keyframes
+afa-spin` duplication pattern) and marks `-054/055/056`'s real status
+(not simply "resolved," since `-054`/`-055` are partial).
+
+Working tree otherwise clean at end of session; only the pre-existing
+untracked `Figma/` dir. The unclaimed `stash@{0}` from the prior
+session's note is still untouched — still not resolved, still not
+mine to drop unasked.
+
+**Next session (CC or chat) should:** merge/review the three branches
+above (in any order — no shared lines), then take the dashboard-CTA
+variant sizing decision and the two `Badge`-shape questions back to
+Hitesh before dispatching any follow-up tickets against them.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-057)
+
+Ran the standing sync at the start of this turn: HEAD confirmed
+`6897714` exactly as the dispatch expected (`-054` and `-055` from the
+prior note above are now both merged into `qa` — `-055` squash-merged
+as `#622`, `-054` merged via a real merge commit; `-056` is still open
+as PR `#621`).
+
+**Confirmed the dispatch's premise before writing anything** (per
+standing convention): `git grep -F` for each of `-056`'s 3 flagged
+`rgba()` values against `origin/qa`'s `src/` tree found all 3 already
+present in multiple other files today — the check really was flagging
+relocated debt as new.
+
+One branch pushed:
+- `feat/gen-2609-057-design-token-check-relocated-literals` (`2813268`)
+  — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-057-design-token-check-relocated-literals?expand=1
+
+`scripts/check-design-tokens.js` now extracts the exact literal each
+rule matches and skips flagging it only if that exact string already
+exists somewhere in `BASE_REF`'s `src/` tree (via `git grep
+--fixed-strings`, memoized per literal, `execFileSync` with an args
+array so literal values needn't be shell-escaped). Verified three ways
+per the dispatch's "real history, not synthetic strings" instruction:
+the patched checker turns `-056`'s real 5 offenses into 0; re-run
+against `e110ebe` (a real historical commit that introduced 11
+genuinely new literals, confirmed via `git log -S` that this was each
+value's actual first appearance) still catches all 11, no regression;
+and the specific false-negative the dispatch flagged (editing a
+literal's value slightly should NOT be silently treated as relocated)
+was verified in an isolated scratch git repo outside this project
+(cleaned up after) since it doesn't occur naturally often enough in
+real history to isolate cleanly there — confirmed an edited value is
+still flagged and an unedited value moved to a new file is correctly
+skipped. Full trail in `docs/design.md`.
+
+Did not touch `-056`'s own branch/PR — per the dispatch, chat re-runs
+`#621` against this patched checker and merges both from its side.
+`HANDOFF.md` updated in the same commit as this note (docs-only,
+direct to `qa`): `-054`/`-055` marked resolved/merged, `-056` marked
+unblocked-pending-re-run, `-057` added with its compare link.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched, now across several
+sessions running — still not mine to resolve unasked.
+
+**Next session (CC or chat) should:** merge `-057` first (or at least
+before re-running `#621`'s CI), then re-run/merge `-056`, then return
+to the dashboard-CTA variant and `Badge`-shape decisions still open
+from the prior note above.

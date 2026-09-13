@@ -3309,5 +3309,229 @@ verification possible (no browser tool this session, same standing
 gap) - reasoned from the preserved per-site props instead of screenshot
 diffing; flagged as unverified, not claimed done.
 
+**Correction, added at merge time:** the "clean, 0 offenses" claim
+above was wrong - this branch's actual PR (#621) failed the real CI
+run with 5 offenses, all 3 preserved `rgba()` values getting
+false-flagged as new debt purely for landing on new lines during the
+extraction. Root cause and fix in `GEN-2609-057` below. Not silently
+edited out; kept as the original claim plus this correction, same
+convention as `-041`'s file-count fix and `-043`'s dashboard-usage
+recount.
+
 Built on `feat/gen-2609-056-spinner-overlay-extraction`, branched from
 `qa` at `33cc922`.
+
+## GEN-2609-055 - remaining status-pill migrations to Badge
+
+Scope named: admin feedback/bookings/diary, artist events/applications,
+organiser tours/lineup. **No standalone "artist applications" page
+exists** - `dashboard/artist/events/page.tsx` is the only artist-side
+file in scope; treated the dispatch's "events/applications" as
+referring to that one file's applications-related pills, not a second
+file.
+
+**Real mix found, same shape the dispatch anticipated - roughly half
+of the raw `borderRadius: '999px'` hits in these files aren't Badge
+candidates at all:**
+
+**Migrated (3, zero visual change):**
+- `dashboard/organiser/tours/page.tsx` - the tour status pill matched
+  `Badge`'s `status` variant chrome exactly (11px/700/uppercase/
+  0.05em/5px 10px/nowrap). Straight swap to `<Badge tone={statusStyle}>`.
+- `dashboard/organiser/events/[id]/lineup/page.tsx` - the compensation
+  pill matched `status-compact` exactly (11px/700/4px 10px/nowrap).
+  Straight swap to `<Badge variant="status-compact" tone={comp}>`.
+- `dashboard/admin/diary/page.tsx` - the diary-entry status pill
+  matched `status-compact` on every dimension except `fontWeight` (600
+  here vs. `Badge`'s 700) plus an extra `flexShrink: 0`. Used `Badge`'s
+  `style` override prop (same escape hatch `-043` used) to keep the
+  exact prior weight/shrink rather than silently bumping it to 700 -
+  no visual change, still de-duplicates the shared chrome.
+
+**Flagged, NOT migrated - genuine third shapes, forcing them into
+either Badge variant would be a visible change:**
+- `dashboard/admin/feedback/page.tsx`'s `CATEGORY_BADGE`/`SEVERITY_BADGE`
+  spans - 10px font (not 11px), 2px 8px padding (not 4-5px/10px),
+  0.03em letter-spacing (neither variant sets this). A third, smaller
+  pill chrome, undocumented until now.
+- `dashboard/admin/bookings/page.tsx`'s inline "FREE" tag - 11px font
+  but 2px 8px padding and `fontWeight: 500` (not 700), plus its tone is
+  a one-off literal `rgba(...)`/`--afa-text-secondary` pair, not drawn
+  from any status table - arguably not a "status" pill semantically
+  either, on top of the chrome mismatch.
+- `dashboard/artist/events/page.tsx`'s compensation pill and "Lineup
+  full - waitlist only" pill - 13px font, 5px 12px padding. A fourth
+  distinct pill size, larger than both existing `Badge` variants.
+
+**Skipped - these are interactive controls, not display badges, even
+though several reuse `borderRadius: '999px'` chrome:** `admin/bookings`'s
+tab-switcher buttons and "Retry" action button; `admin/diary`'s
+per-row status-change buttons (`disabled`/`cursor` logic, not pure
+display); `artist/events`'s city `<select>`; `organiser/lineup`'s
+Featured-vouch toggle button; `admin/feedback`'s "View full board" pill
+button. `Badge` is a presentational `<span>` with no click handling -
+mis-fitting any of these into it would either drop their interactivity
+or require bolting button semantics onto a component deliberately kept
+display-only.
+
+**Net: 3 real migrations, 3 new distinct pill shapes documented for the
+first time (not previously catalogued anywhere), 6 call sites correctly
+left as buttons/selects.** The 3 flagged shapes are a real follow-up
+candidate (a `status-badge-sm` variant, a `status-badge-lg` variant, and
+a decision on whether the "FREE"/count-tag pattern belongs in `Badge`
+at all) - not scheduled, not built this pass, per the dispatch's own
+"flag rather than mis-fit" instruction.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session) - the 3 migrations
+were checked property-by-property against `Badge`'s `CHROME` table
+instead of screenshot diffing; flagged as unverified, not claimed done.
+
+Built on `feat/gen-2609-055-badge-migration`, branched from `qa` at
+`33cc922`.
+
+## GEN-2609-054 - wrong premise on the terracotta sweep, split per the dispatch's own instruction
+
+The dispatch's count ("`--afa-terracotta` appears 11 times across 9
+dashboard/organiser files") was re-verified fresh rather than trusted,
+per this project's standing re-verification convention. **It's wrong,
+substantially:** a scoped grep of `dashboard/organiser/` alone found
+**41 occurrences across 13 files** - before counting `dashboard/artist/`,
+`dashboard/venue/`, every public/auth page, and `src/components/`,
+which push the repo-wide total well past 90 occurrences across 40+
+files. Not a rounding difference - the real footprint is roughly 4x
+the stated one, and it isn't concentrated in "dashboard/organiser" the
+way the dispatch implies.
+
+**More importantly, it's a real mix, exactly the shape the dispatch
+told this session to watch for and split rather than force:**
+- **~15-18 are genuine solid-background CTA/submit buttons** - but
+  their padding varies call-site to call-site (8px 16px, 9px 18px,
+  10px 22px, 11px 22px, 12px 24px, 12px 26px...) rather than being one
+  consistent shape. `Button.tsx`'s existing `form-submit` variant is
+  specifically the full-width, 16px-padding, 8px-radius auth-form
+  look - forcing these dashboard-inline buttons into it would be a
+  real visual change (wrong padding, wrong width behavior), not a
+  safe reuse. A dashboard-specific CTA variant might be the right
+  answer, but sizing/padding needs a real decision, not a guess made
+  under this dispatch.
+- **The rest are not buttons at all:** two chart-bar heights
+  (`organiser/events/[id]/sales/page.tsx`, `organiser/sales/page.tsx`),
+  8 selection-pill border/text pairs on toggle-style option cards
+  (`events/create/page.tsx`, `events/[id]/edit/page.tsx`,
+  `events/[id]/checkin/page.tsx` - these are `border`/`color` on
+  already-interactive radio-style buttons, not backgrounds), a
+  DECLINED-status color ternary sitting alongside `--afa-sage`/
+  `--afa-gold` in `events/[id]/edit/page.tsx` (the same shape
+  `GEN-2609-051` already extracted into `statusStyle.ts` for two other
+  files - a candidate for that file, not `Button`), and roughly a
+  dozen plain link/text-accent-color usages with no button shape at
+  all.
+
+**What was buildable without a new decision, and built:** the
+dispatch's own aside - "also in scope: `forgot-password`/
+`reset-password` - not yet migrated to `form-submit`" - checked out
+independently of the terracotta framing. Both pages' real submit
+buttons don't use terracotta at all (their only `--afa-terracotta`
+usage is an unrelated error-banner background/border); both already
+use raw inline `background: var(--afa-fill-solid)` styling that is
+byte-identical in shape to the `form-submit` variant `GEN-2609-053`
+extracted from `login`/`register` (matches the variant's own code
+comment: "byte-identical across all 8 occurrences in those 4 files" -
+these are 2 of those same 4 files, just not yet switched over to the
+component). Migrated both to `<Button variant="form-submit">`,
+preserving `forgot-password`'s extra `marginTop: 20px` via the
+`style` override prop. `color` moves from the literal `'white'` to
+`form-submit`'s `--afa-cream` (per `-053`'s own already-verified
+"visually indistinguishable, resolves the hardcoded literal" finding -
+not re-derived, reused). One minor, intentional behavior addition
+inherited from the shared component: both buttons now dim to 0.7
+opacity while `disabled`, which neither did before - consistent with
+every other `form-submit` consumer, not a regression.
+
+**Not built, needs re-scoping before anyone builds it:** the wider
+terracotta sweep. Recommend splitting into (a) a real design decision
+on a dashboard-CTA button variant's exact padding/sizing before
+touching any of the ~15-18 button call sites, and (b) routing the
+`DECLINED`-status ternary into `statusStyle.ts` as its own small
+follow-up, unrelated to buttons. The chart-bar and selection-pill/link
+usages are cosmetic accent-color uses, not component-extraction
+candidates at all - no action needed there.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session) - the two
+migrated buttons were checked property-by-property against
+`form-submit`'s `variantStyle` output instead of screenshot diffing;
+flagged as unverified, not claimed done.
+
+Built on `feat/gen-2609-054-form-submit-migration`, branched from `qa`
+at `33cc922`.
+
+## GEN-2609-057 - design-token check's relocated-literal blind spot
+
+`GEN-2609-056`'s own PR (#621) is what surfaced this: the check reported
+5 offenses purely from moving 3 existing `rgba()` values into a new
+shared `SpinnerOverlay.tsx`, none of them actually new debt. Verified
+the dispatch's claim before writing any fix (not taken on faith): `git
+grep -F` for each of the 3 flagged values (`rgba(20,20,20,0.7)`,
+`rgba(10,10,10,0.6)`, `rgba(245,245,240,0.15)`) against `origin/qa`'s
+`src/` tree found all 3 already present, unchanged, in multiple other
+files today.
+
+**Root cause:** the check only ever asked "is this line new in the
+diff," never "is this literal value new to the codebase." A pure
+extraction moves a literal onto a genuinely new line without changing
+its value - the diff can't tell that apart from real new debt.
+
+**Fix:** each rule now has an `extract(line)` alongside its existing
+`test(line)` - returns the exact literal substring(s) the rule matched
+(the hex token itself, the full `rgba(...)` text, or the font-family
+value). Before flagging, every extracted literal is checked against
+`BASE_REF`'s tree via `git grep --fixed-strings -e <literal> BASE_REF --
+src` (memoized per literal - many diffs repeat the same common value).
+Only if every literal on the line already exists verbatim somewhere in
+`src/` at the base ref is the line treated as relocated debt and
+skipped; if `extract` comes back empty for any reason, the line still
+fails open to being flagged rather than silently passing. Uses
+`execFileSync` (args array, not a shell string) for the grep call so
+literal values containing parens/commas/quotes need no manual escaping.
+
+**Verified against real history, not synthetic strings, per this
+script's standing convention:**
+1. Patched checker against `origin/feat/gen-2609-056-spinner-overlay-
+   extraction` (`BASE_REF=origin/qa`): 5 offenses -> 0. Confirms the
+   actual blocked PR.
+2. Patched checker against a genuine historical violation: `git log -S`
+   found `e110ebe` ("Checkpoint 3 - Ticket PDF + email delivery on
+   CONFIRMED") as the commit that introduced `src/lib/ticket-pdf.ts`'s
+   PDF-color constants (`rgb(0.055, 0.047, 0.039)` etc. - confirmed
+   unique in the current tree first, so this really is each value's
+   first-ever appearance, not a coincidental re-add). Running the
+   patched checker with `BASE_REF=e110ebe^ HEAD_REF=e110ebe` still
+   correctly reports 11 new literals (6 `rgb()` constants +
+   5 `#8a827a` hex hits in `checkout/page.tsx`/`email.ts`) - genuinely
+   new literals are caught exactly as before.
+3. The specific false-negative the dispatch flagged (editing an
+   existing value slightly, e.g. `rgba(20,20,20,0.7)` ->
+   `rgba(21,20,20,0.7)`, should NOT be silently treated as relocated)
+   doesn't occur naturally often enough in real history to isolate
+   cleanly, so verified it directly in an isolated scratch git repo
+   (not this project - cleaned up after): confirmed (a) an edited value
+   is still flagged (exit 1, 1 offense), and (b) the same unedited value
+   moved to a brand-new file is correctly skipped (exit 0). No unit-test
+   suite exists for this script (checked - none does); this project's
+   established pattern for it is exactly this kind of manual
+   dogfooding/verification pass, same as `-052`/`-053`'s own.
+4. No regression on the 3 existing rules or their own prior fixes (the
+   quoted-delimiter backreference for hex, the captured-value-only
+   font-family scoping) - both are untouched by this change, and step 2
+   above exercises the hex rule for real alongside the new rgba case.
+
+**Not touched:** `GEN-2609-056`'s own branch/PR #621 - per the
+dispatch, chat re-verifies against this patched checker and merges
+both from its side.
+
+Built on `feat/gen-2609-057-design-token-check-relocated-literals`,
+branched from `qa` at `6897714`.

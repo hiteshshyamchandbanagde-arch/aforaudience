@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
 import AuthLayout from '@/components/AuthLayout'
+import Button from "@/components/ui/Button"
 import { useLocale } from "@/lib/i18n/translate"
 
 // Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - same
@@ -125,13 +126,9 @@ function ResetPasswordForm() {
               ))}
             </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
-            >
+            <Button variant="form-submit" onClick={handleSubmit} disabled={loading}>
               {loading ? tr.resetPasswordPage.updatingEllipsis : tr.resetPasswordPage.updatePasswordButton}
-            </button>
+            </Button>
           </>
         )}
       </div>

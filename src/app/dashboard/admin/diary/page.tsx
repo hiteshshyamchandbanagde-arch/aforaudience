@@ -5,6 +5,7 @@ import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import Badge from '@/components/ui/Badge'
 
 // /dashboard/admin/diary — Admin Diary
 //
@@ -195,9 +196,9 @@ export default function AdminDiaryPage() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '6px' : '0' }}>
                   <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: meta.color, background: meta.bg, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
                     {meta.label}
-                  </span>
+                  </Badge>
                 </div>
                 {entry.notes && (
                   <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>{entry.notes}</div>

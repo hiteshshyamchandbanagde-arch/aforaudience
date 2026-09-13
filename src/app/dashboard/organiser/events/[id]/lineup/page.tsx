@@ -6,6 +6,7 @@ import { useEffect, useState, use, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
+import Badge from '@/components/ui/Badge'
 import {
   DndContext,
   closestCenter,
@@ -140,9 +141,7 @@ function SortableRow({
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
       </button>
 
-      <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: comp.bg, color: comp.color, whiteSpace: 'nowrap' }}>
-        {comp.label}{compAmount ? ` · ₹${compAmount}` : ''}
-      </span>
+      <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ₹${compAmount}` : ''}</Badge>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <input

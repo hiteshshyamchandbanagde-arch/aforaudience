@@ -141,7 +141,9 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 
 ## Open items for next session (updated)
 
-**Resolved this session, remove from any older list:** `GEN-2609-052`, `GEN-2609-053`.
+**Resolved, remove from any older list:** `GEN-2609-052`, `GEN-2609-053` (chat), `GEN-2609-054` (merged into `qa`), `GEN-2609-055` (merged as #622).
+
+**`GEN-2609-056` (spinner-overlay extraction) — built, PR #621 still open, was blocked, now unblocked:** the branch itself was fine (premise held up — see `docs/design.md`), but its PR got stuck on a real gap in `scripts/check-design-tokens.js` itself: the check flagged all 3 `rgba()` values `SpinnerOverlay.tsx` legitimately moved from existing call sites, because it only asked "is this line new," never "is this literal value new." That gap is now `GEN-2609-057`, fixed and pushed this session (`feat/gen-2609-057-design-token-check-relocated-literals`) — verified it turns #621's 5 reported offenses into 0 without losing the ability to catch genuinely new literals (re-run against a real historical violation-introducing commit, still catches all 11). **Next step: chat re-runs #621 against the patched checker and merges both `-056` and `-057`** — CC did not merge either itself, per the dispatch. `-056`'s own still-open follow-up notes (the wider 12+-file `@keyframes afa-spin` duplication pattern) are unaffected by this and still just flagged, not built.
 
 **Still open, unchanged:**
 - 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
@@ -155,12 +157,12 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 - `PhoneVerifyNudge.tsx` legacy tokens (`BUG-2609-029`, still open at last check).
 - e2e verification gap for `GEN-2609-042` — still genuinely inconclusive from the prior session, not re-attempted this session.
 - DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 5 sessions running.
-- **New, from this session's own component-library work:** the `--afa-terracotta` 11-occurrence pattern across 9 dashboard/organiser files (a stronger `Button` variant candidate than `form-submit`, deliberately not built this pass); `forgot-password/page.tsx`/`reset-password/page.tsx` not migrated to `form-submit` (same shape, lower traffic); the many other `borderRadius: '999px'` status pills elsewhere (admin feedback/bookings/diary, artist events/applications, organiser tours/lineup) not migrated to `Badge`; the `isNavigating` spinner-overlay markup (repeated byte-for-byte 3x across Venue/EventCard/EventRow) flagged as a narrow future extraction, not built.
+- Carried forward from `-054`/`-055`'s own dispatch: dashboard-CTA `Button` variant decision (padding/sizing) needed before the wider `GEN-2609-054` terracotta sweep can be built; 3 flagged third-shape pill patterns from `GEN-2609-055` (a possible `status-badge-sm`/`status-badge-lg` variant pair, plus a decision on whether the FREE/count-tag pattern belongs in `Badge` at all); the wider 12+-file `@keyframes afa-spin` duplicate-injection pattern from `GEN-2609-056`.
 
 ## Session-start checklist (updated)
 
-1. **`git checkout qa && git fetch origin && git reset --hard origin/qa`** — HEAD should be `4e7069b`. This step is now a hard requirement, not a suggestion — see `CC_HANDOFF.md`'s Standing rules section for why.
+1. **`git checkout qa && git fetch origin && git reset --hard origin/qa`** — HEAD should be `6897714` until `GEN-2609-056`/`-057` are merged. This step is now a hard requirement, not a suggestion — see `CC_HANDOFF.md`'s Standing rules section for why.
 2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item.
-5. Decide with Hitesh what's next from the open items list above — the component-library follow-ups (`--afa-terracotta` Button variant, remaining Badge migrations) are probably the highest-leverage next step given this session's pattern, but nothing is scheduled.
+5. Re-run PR #621 (`GEN-2609-056`) against the patched checker and merge both it and `GEN-2609-057` (compare URL in `CC_HANDOFF.md`), then decide with Hitesh on the dashboard-CTA variant and the two other flagged decisions above.
