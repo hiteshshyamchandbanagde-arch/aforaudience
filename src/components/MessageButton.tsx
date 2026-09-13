@@ -9,13 +9,20 @@ interface MessageButtonProps {
   contextId: string
   label?: string
   style?: React.CSSProperties
+  /** GEN-2609-068 - replaces the hardcoded 💬 emoji when provided (the
+   * /tickets/ page v6 redesign's secondary-action row uses a real
+   * MessageIcon, matching its Download/Cancel siblings, not an emoji).
+   * Optional and additive - the two existing call sites (lineup/bookings
+   * pages) pass neither `icon` nor `style` and keep their current
+   * emoji-prefixed look unchanged. */
+  icon?: React.ReactNode
 }
 
 // Drop this on any page that has a confirmed Performance / VenueBooking /
 // Booking record - it finds-or-creates the thread and takes the user
 // straight there. Idempotent server-side, so no need to check "does a
 // thread already exist" before rendering this.
-export default function MessageButton({ contextType, contextId, label = 'Message', style }: MessageButtonProps) {
+export default function MessageButton({ contextType, contextId, label = 'Message', style, icon }: MessageButtonProps) {
   const router = useRouter()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -46,6 +53,10 @@ export default function MessageButton({ contextType, contextId, label = 'Message
       onClick={handleClick}
       disabled={loading}
       style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: icon ? 6 : 4,
         padding: '8px 16px',
         borderRadius: '18px',
         border: '1px solid var(--afa-sage, #4a6741)',
@@ -59,7 +70,7 @@ export default function MessageButton({ contextType, contextId, label = 'Message
         ...style,
       }}
     >
-      💬 {label}
+      {icon ?? '💬'} {label}
     </button>
   )
 }

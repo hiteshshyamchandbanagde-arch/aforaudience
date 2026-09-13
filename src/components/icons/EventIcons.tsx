@@ -137,6 +137,67 @@ export function TicketIcon({ className, style }: IconProps) {
   )
 }
 
+// GEN-2609-068 - /tickets/ page v6 redesign's status-chip icons + the
+// secondary action row. None of these existed anywhere in this
+// codebase's icon sets (checked EventIcons/ArtistIcons/VenueIcons/
+// OrganiserIcons/MobileTab*Icons first) - added here alongside Calendar/
+// Clock/Pin/Ticket, which the tickets page already imports from this
+// file. Path shapes adapted from the Figma v6 export's own inlined
+// DownloadIcon/BanIcon/RefundIcon (src/screens/Tickets.tsx) into this
+// file's stroke convention (stroke="currentColor" strokeWidth 1.4,
+// className/style props, viewBox 24x24) rather than copying the
+// export's own size-prop/strokeWidth-1.8 convention verbatim.
+export function CheckIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function CloseIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M5 5l14 14M19 5 5 19" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function BanIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M6.5 6.5l11 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function RefundIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M3.5 12a8.5 8.5 0 1 1 2.5 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.5 16.5v-4.5H8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function DownloadIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M12 3.5v12M6.5 10.5 12 16l5.5-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 20h16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function MessageIcon({ className, style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">
+      <path d="M4 5.5h16v10H9l-4 3.5v-3.5H4v-10Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function TrophyIcon({ className, style }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} style={style} aria-hidden="true">

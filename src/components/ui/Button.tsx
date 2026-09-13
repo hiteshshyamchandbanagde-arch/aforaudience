@@ -23,7 +23,7 @@ import Link from 'next/link'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'form-submit'
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -206,6 +206,38 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         borderRadius: 999,
         fontSize: 16,
         fontWeight: 700,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'outline-neutral':
+      // GEN-2609-068 - the /tickets/ page's redesigned secondary action
+      // row (Download PDF / Message Organiser / Cancel) needs 3 equal-
+      // weight actions, none color-coded, none --afa-fill-solid - a real
+      // gap `outline` doesn't cover (that variant is CTA-weight: 999px
+      // pill, 16px font, 1.5px border, built for a single high-emphasis
+      // action on a --afa-fill-solid background, not a compact row of
+      // ordinary actions on a card). Neutral translucent-cream border/
+      // text, same alpha family as this app's other resting-state
+      // borders (`rgba(245,245,240, a)`, see afa-design-tokens-
+      // reference.md's Borders section) rather than a new one-off value.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        color: 'var(--afa-text-secondary)',
+        border: '1px solid rgba(245,245,240,0.15)',
+        // Own baseline chrome (not left to the `size` overlay alone) so
+        // this renders sensibly even if a future caller omits `size` -
+        // same defensive convention every other variant already follows.
+        // A `size` token (this ticket always passes `sm`) overrides these.
+        padding: '4px 10px',
+        borderRadius: 6,
+        fontSize: 12,
+        fontWeight: 600,
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
         textDecoration: 'none',

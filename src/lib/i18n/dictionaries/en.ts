@@ -675,6 +675,19 @@ const en = {
     sectionPast: "Past",
     attendedPill: "Attended",
     missedPill: "Missed",
+    // GEN-2609-068 - v6 redesign additions. `scanAtDoor`/`scannedLabel`
+    // replace what was previously plain hardcoded English with a
+    // comment flagging the gap (BUG-2609-006's pattern) - real keys now
+    // that this page is being rebuilt anyway.
+    pageKicker: "Your passes, ready to scan",
+    scanAtDoor: "Scan at door",
+    scannedLabel: "Scanned",
+    stubTierLabel: "Tier",
+    stubQtyLabel: "Qty",
+    stubRefLabel: "Ref",
+    paidLabel: "Paid",
+    emptyTitle: "No tickets yet",
+    emptyDescription: "Book an event and your passes will appear here, ready to scan.",
   },
   authCommon: {
     somethingWentWrong: "Something went wrong",

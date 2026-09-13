@@ -31,10 +31,18 @@ export interface StatusToneStyle {
 // (same reasoning as the rest of the repo-wide sweep this ticket did) -
 // not a redesign of the ACCEPTED/DECLINED/PENDING color scheme itself,
 // which stays sage/orange/gold exactly as before.
+// GEN-2609-068 - `sage`/`error`'s `color` moved to the new
+// `--afa-sage-bright`/`--afa-error-bright` tokens (globals.css) instead
+// of the base `--afa-sage`/`--afa-error` hues: the base hues fail WCAG
+// AA against these tones' own translucent `bg` (verified, not eyeballed
+// - see HANDOFF.md's GEN-2609-068 entry for the full contrast-math
+// trail). Every consumer of STATUS_TONE.sage/.error gets the legible
+// text color automatically - this was never a per-page bug, it was the
+// shared tone definition itself.
 export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange', StatusToneStyle> = {
   gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
+  sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage-bright)' },
+  error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error-bright)' },
   muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
   orange: { bg: 'rgba(255,90,54,0.1)', color: 'var(--afa-fill-solid)' },
 }
