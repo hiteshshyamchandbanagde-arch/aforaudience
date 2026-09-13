@@ -30,6 +30,8 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 - Button border: `1.5px solid rgba(201,151,58,0.5)` (Get Directions) or `1.5px solid var(--afa-fill-solid)` (Follow, when active)
 - Divider rule (footer of event card): `1px solid rgba(245,245,240,0.1)`
 
+**Enforcement (GEN-2609-052, 13 Sep):** the locked-palette rule above is now checked in CI, not just documented. `scripts/check-design-tokens.js` (run from `.github/workflows/design-tokens.yml` on every PR into `qa`/`main`) fails the build on any *added or changed* line in `src/**/*.ts(x)` containing a raw hex literal, a raw `rgb()`/`rgba()` literal, or a hardcoded `font-family` not using `var(--font-*)`. It's diff-only against the PR's base branch — the hand-authored border `rgba()` values documented just above are pre-existing and untouched by this check, but a *new* hand-authored border literal added from here on will now fail CI; route new border colors through a `--afa-*` token (or `var(--afa-amber)` / `rgba(201,151,58, α)` reference, not a fresh literal) instead. Exempt: `globals.css` itself, `src/lib/statusStyle.ts` (the tone source-of-truth), `src/app/api/posters/**` (Section 8.1's non-UI exception), and test files. See `docs/design.md`'s GEN-2609-052 entry for the full rationale and verification.
+
 ## 2. Typography
 
 Wired in [layout.tsx](../src/app/layout.tsx#L19-26) via `next/font`:
