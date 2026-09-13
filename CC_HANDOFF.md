@@ -462,3 +462,56 @@ mine to drop unasked.
 above (in any order — no shared lines), then take the dashboard-CTA
 variant sizing decision and the two `Badge`-shape questions back to
 Hitesh before dispatching any follow-up tickets against them.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-057)
+
+Ran the standing sync at the start of this turn: HEAD confirmed
+`6897714` exactly as the dispatch expected (`-054` and `-055` from the
+prior note above are now both merged into `qa` — `-055` squash-merged
+as `#622`, `-054` merged via a real merge commit; `-056` is still open
+as PR `#621`).
+
+**Confirmed the dispatch's premise before writing anything** (per
+standing convention): `git grep -F` for each of `-056`'s 3 flagged
+`rgba()` values against `origin/qa`'s `src/` tree found all 3 already
+present in multiple other files today — the check really was flagging
+relocated debt as new.
+
+One branch pushed:
+- `feat/gen-2609-057-design-token-check-relocated-literals` (`2813268`)
+  — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-057-design-token-check-relocated-literals?expand=1
+
+`scripts/check-design-tokens.js` now extracts the exact literal each
+rule matches and skips flagging it only if that exact string already
+exists somewhere in `BASE_REF`'s `src/` tree (via `git grep
+--fixed-strings`, memoized per literal, `execFileSync` with an args
+array so literal values needn't be shell-escaped). Verified three ways
+per the dispatch's "real history, not synthetic strings" instruction:
+the patched checker turns `-056`'s real 5 offenses into 0; re-run
+against `e110ebe` (a real historical commit that introduced 11
+genuinely new literals, confirmed via `git log -S` that this was each
+value's actual first appearance) still catches all 11, no regression;
+and the specific false-negative the dispatch flagged (editing a
+literal's value slightly should NOT be silently treated as relocated)
+was verified in an isolated scratch git repo outside this project
+(cleaned up after) since it doesn't occur naturally often enough in
+real history to isolate cleanly there — confirmed an edited value is
+still flagged and an unedited value moved to a new file is correctly
+skipped. Full trail in `docs/design.md`.
+
+Did not touch `-056`'s own branch/PR — per the dispatch, chat re-runs
+`#621` against this patched checker and merges both from its side.
+`HANDOFF.md` updated in the same commit as this note (docs-only,
+direct to `qa`): `-054`/`-055` marked resolved/merged, `-056` marked
+unblocked-pending-re-run, `-057` added with its compare link.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched, now across several
+sessions running — still not mine to resolve unasked.
+
+**Next session (CC or chat) should:** merge `-057` first (or at least
+before re-running `#621`'s CI), then re-run/merge `-056`, then return
+to the dashboard-CTA variant and `Badge`-shape decisions still open
+from the prior note above.
