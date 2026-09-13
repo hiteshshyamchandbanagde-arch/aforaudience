@@ -11,6 +11,7 @@ import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -862,8 +863,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         <span style={{ fontSize: '13px', fontWeight: 600, flex: 1 }}>{c.name}</span>
                         <span style={{
                           fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
-                          background: c.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : c.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
-                          color: c.status === 'ACCEPTED' ? 'var(--afa-sage)' : c.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                          background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
                           {c.status}
                         </span>
@@ -913,8 +914,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         </div>
                         <span style={{
                           fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
-                          background: p.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : p.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
-                          color: p.status === 'ACCEPTED' ? 'var(--afa-sage)' : p.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                          background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
                           {p.status}
                         </span>

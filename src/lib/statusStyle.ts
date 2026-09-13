@@ -23,9 +23,18 @@ export interface StatusToneStyle {
   color: string
 }
 
-export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted', StatusToneStyle> = {
+// GEN-2609-063 - `orange` added for the DECLINED-status ternary in
+// organiser/events/[id]/edit/page.tsx (both the lineup-consent and
+// panel-invite lists), previously a raw `--afa-terracotta`/
+// `rgba(200,68,26,0.1)` literal pair, not routed through this file at
+// all. Value carries forward the terracotta->fill-solid retarget
+// (same reasoning as the rest of the repo-wide sweep this ticket did) -
+// not a redesign of the ACCEPTED/DECLINED/PENDING color scheme itself,
+// which stays sage/orange/gold exactly as before.
+export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange', StatusToneStyle> = {
   gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
   sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
   muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
+  orange: { bg: 'rgba(255,90,54,0.1)', color: 'var(--afa-fill-solid)' },
 }
