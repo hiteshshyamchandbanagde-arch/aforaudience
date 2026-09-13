@@ -2963,3 +2963,69 @@ GEN-2609-047 → RESOLVED/DEPLOYED_QA. Built on
 `fix/gen-2609-043-047-contrast-and-button`, branched from `qa` at
 `cbee0e6` (synced via `git fetch` first - no collision). Pending merge
 confirmation before this entry is finalized, per the standing rule.
+
+## GEN-2609-050 + GEN-2609-051: tickets/page.tsx font migration + status-badge consolidation
+
+**GEN-2609-050 - font migration, `tickets/page.tsx`.** Re-verified both
+findings fresh before touching anything:
+
+- 3 `fontFamily: 'Georgia, serif'` hits at the "Today"/"Upcoming"/"Past"
+  section `<h2>`s (confirmed via grep - exactly 3, no others in the
+  file) → `var(--font-display)`, no other property touched.
+- The companion-guest card's event-title `<Link>` had no `fontFamily` at
+  all, confirmed silently inheriting `<main>`'s `fontFamily: 'system-ui,
+  sans-serif'` (line 314) instead of the intended serif - confirmed this
+  is the *only* such `Link` in the file (the real booking cards'
+  equivalent title, in the separate `renderCard` function, already
+  correctly used `var(--font-display)`). Added it explicitly.
+
+**GEN-2609-051 - status-badge consolidation, corrected scope.** The
+ticket asked to "extract `STATUS_STYLE` from
+`dashboard/organiser/page.tsx`... have `tickets/page.tsx`'s local
+`STATUS_STYLE` import it instead of redefining `CONFIRMED`/etc." Checked
+both objects fresh before extracting anything: **they don't actually
+share a key set.** `dashboard/organiser/page.tsx`'s `STATUS_STYLE` keys
+are event-lifecycle states (`DRAFT`/`APPROVED`/`PENDING_APPROVAL`/
+`CANCELLED`/`COMPLETED`) with a `label` field; `tickets/page.tsx`'s are
+booking-lifecycle states (`PENDING`/`EXPIRED`/`CONFIRMED`/`CANCELLED`/
+`REFUNDED`) with no `label` field. There is no `CONFIRMED` key in the
+organiser object to redefine - importing that object wholesale into
+`tickets/page.tsx` would have given it the wrong statuses entirely, not
+consolidated anything.
+
+What genuinely is duplicated, byte-for-byte, between the two: **all four
+of the underlying `{bg, color}` tone pairs** (gold/sage/error/muted) -
+`tickets.CONFIRMED` really is hex-for-hex identical to
+`organiser.APPROVED`, `tickets.CANCELLED` to `organiser.CANCELLED`, etc.,
+just applied to different-named states in each domain. Built the
+consolidation around that instead: new `src/lib/statusStyle.ts` exports
+a `STATUS_TONE` record with the 4 shared pairs; both files now build
+their own domain-specific `STATUS_STYLE` object from `STATUS_TONE`
+(organiser's spreads in its own `label` per key) rather than re-typing
+the literal rgba/token values. Same file path the ticket suggested
+(`src/lib/statusStyle.ts`), corrected export shape. No visual change -
+every value is the same literal, just referenced once instead of typed
+twice. Scoped to exactly the two files the ticket named; several other
+files reusing the same 4 tones (`dashboard/artist/page.tsx`'s
+`APPLICATION_STYLE`, `dashboard/organiser/tours/page.tsx`, etc.) are
+out of scope here.
+
+**Verification:** `tsc --noEmit` clean, `next build` clean, zero
+`Georgia` hits remain in `tickets/page.tsx` (grep-confirmed). **No
+before/after screenshot** - no browser/Playwright tool was available
+this session (checked via `ToolSearch`; only Figma-design tools came
+back, not applicable to a running dev server), same standing gap as the
+motion/accessibility specs' unperformed DevTools/Tab-key checks earlier
+in Step 6. Flagged rather than claimed.
+
+**Feedback table deliberately not touched this pass** - the dispatch's
+own instruction was to log GEN-2609-050/051 to RESOLVED/DEPLOYED_QA
+"only after Vercel READY + runtime-error check, not before," which is
+chat's step in the established verification chain, not something to
+do from this session (no Vercel access here). Both rows left at
+`BUILD_QUEUE` for chat to move once its own checks pass.
+
+Built on `fix/gen-2609-050-051-tickets-font-status-style`, branched from
+`qa` at `319d541` (synced via `git fetch` first - no collision). Pending
+merge confirmation before this entry is finalized, per the standing
+rule.

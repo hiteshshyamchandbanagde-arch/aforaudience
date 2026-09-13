@@ -13,6 +13,7 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import { EventPoster } from '@/components/EventCard'
 import { CalendarIcon, PinIcon } from '@/components/icons/EventIcons'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
 // than the Figma mock's decorative QrIcon glyph. Encodes the raw
@@ -167,11 +168,11 @@ function getSection(b: BookingItem): TicketSection {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  EXPIRED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
-  CONFIRMED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
-  REFUNDED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
+  PENDING: STATUS_TONE.gold,
+  EXPIRED: STATUS_TONE.muted,
+  CONFIRMED: STATUS_TONE.sage,
+  CANCELLED: STATUS_TONE.error,
+  REFUNDED: STATUS_TONE.muted,
 }
 
 // A booking's display status can differ from its DB status: an expired
@@ -329,7 +330,7 @@ export default function MyTicketsPage() {
               response, unlike the tickets below which are just informational. */}
           {pendingTags.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
@@ -369,13 +370,13 @@ export default function MyTicketsPage() {
               to attend as someone else's guest. */}
           {acceptedTags.length > 0 && (
             <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
                 <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(245,245,240,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${t.booking.event.id}`} style={{ fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
+                    <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
                     </Link>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', whiteSpace: 'nowrap' }}>
@@ -410,7 +411,7 @@ export default function MyTicketsPage() {
               }[section]
               return (
                 <div key={section} style={{ marginBottom: '24px' }}>
-                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
                     {heading}
                   </h2>
                   {items.map((b) => renderCard(b))}

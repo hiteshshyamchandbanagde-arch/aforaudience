@@ -9,6 +9,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 interface EventItem {
   id: string
@@ -24,11 +25,11 @@ interface EventItem {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Draft' },
-  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Published' },
-  PENDING_APPROVAL: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
-  COMPLETED: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', label: 'Completed' },
+  DRAFT: { ...STATUS_TONE.gold, label: 'Draft' },
+  APPROVED: { ...STATUS_TONE.sage, label: 'Published' },
+  PENDING_APPROVAL: { ...STATUS_TONE.gold, label: 'Pending' },
+  CANCELLED: { ...STATUS_TONE.error, label: 'Cancelled' },
+  COMPLETED: { ...STATUS_TONE.muted, label: 'Completed' },
 }
 
 export default function OrganiserDashboard() {
