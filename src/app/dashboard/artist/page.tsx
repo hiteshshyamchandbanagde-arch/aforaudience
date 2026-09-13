@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { fillSolidTint, FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 interface Application {
   id: string
@@ -466,17 +467,19 @@ export default function ArtistDashboard() {
                             maxLength={500}
                             style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                           />
-                          <button
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            fullWidth={false}
                             onClick={() => submitReply(r.id)}
                             disabled={replySubmitting === r.id || !(replyDrafts[r.id] || '').trim()}
                             style={{
-                              fontSize: '12px', fontWeight: 600, padding: '8px 16px', borderRadius: '6px', border: 'none',
-                              background: 'var(--afa-terracotta)', color: 'white', cursor: replySubmitting === r.id ? 'default' : 'pointer',
+                              padding: '8px 16px',
                               opacity: replySubmitting === r.id || !(replyDrafts[r.id] || '').trim() ? 0.6 : 1,
                             }}
                           >
                             {replySubmitting === r.id ? 'Sending...' : 'Reply'}
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>

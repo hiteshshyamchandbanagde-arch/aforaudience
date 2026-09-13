@@ -9,6 +9,7 @@ import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 interface EventItem {
   id: string
@@ -284,18 +285,23 @@ export default function BrowseEventsToApplyPage() {
                           rows={2}
                           style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          fullWidth={false}
                           onClick={() => apply(event.id)}
                           disabled={applying === event.id}
                           style={{
-                            fontSize: '13px', fontWeight: 600, color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                            background: full ? 'transparent' : 'var(--afa-terracotta)',
+                            fontSize: '13px',
+                            color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
+                            background: full ? 'transparent' : undefined,
                             border: full ? '1.5px solid rgba(245,245,240,0.2)' : 'none',
-                            borderRadius: '6px', padding: '8px 20px', cursor: 'pointer', opacity: applying === event.id ? 0.6 : 1,
+                            padding: '8px 20px',
+                            opacity: applying === event.id ? 0.6 : 1,
                           }}
                         >
                           {applying === event.id ? 'Submitting...' : full ? 'Join Waitlist' : 'Apply to Perform'}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

@@ -10,6 +10,7 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
 import { useOtpVerification } from '@/lib/useOtpVerification'
 import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
@@ -118,13 +119,14 @@ function VerifyPhoneInner() {
               )}
 
               {!codeSent ? (
-                <button
+                <Button
+                  variant="form-submit"
                   onClick={sendCode}
                   disabled={submitting || !phone}
-                  style={{ width: '100%', background: 'var(--afa-terracotta)', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', opacity: submitting || !phone ? 0.6 : 1 }}
+                  style={{ opacity: submitting || !phone ? 0.6 : 1 }}
                 >
                   {submitting ? tr.loginPage.sendingEllipsis : tr.verifyPhonePage.sendVerificationCodeButton}
-                </button>
+                </Button>
               ) : (
                 <>
                   <input
@@ -135,13 +137,14 @@ function VerifyPhoneInner() {
                     onKeyDown={(e) => e.key === 'Enter' && verifyCode()}
                     style={{ ...inputStyle, marginBottom: '16px' }}
                   />
-                  <button
+                  <Button
+                    variant="form-submit"
                     onClick={verifyCode}
                     disabled={submitting || otpCode.length !== 6}
-                    style={{ width: '100%', background: 'var(--afa-terracotta)', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', opacity: submitting || otpCode.length !== 6 ? 0.6 : 1, marginBottom: '10px' }}
+                    style={{ opacity: submitting || otpCode.length !== 6 ? 0.6 : 1, marginBottom: '10px' }}
                   >
                     {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
-                  </button>
+                  </Button>
                   <button
                     onClick={sendCode}
                     disabled={submitting}

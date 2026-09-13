@@ -15,6 +15,7 @@ import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 interface Venue {
   id: string
@@ -491,14 +492,17 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
             </section>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth={false}
                 type="button"
                 disabled={saving}
                 onClick={() => save(true)}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Saving...' : venue.isApproved ? 'Save Changes' : 'Save & Publish'}
-              </button>
+              </Button>
               {venue.isApproved ? (
                 <button
                   type="button"
