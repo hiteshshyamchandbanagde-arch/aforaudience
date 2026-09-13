@@ -174,3 +174,78 @@ cache clear, which looked exactly like an animation not being wired
 up. If a live-render check ever looks wrong after a restart, check
 the actually-served asset bytes before trusting the dev server logs;
 `taskkill //PID <pid-from-port-conflict-error>` is the reliable kill.
+
+## Update — 13 Sep 2026 (CC-side, Step 6 sub-specs 1-3)
+
+Three dispatches this session, each its own branch → push → compare-URL
+(chat opened/merged all three with its own PAT, same split as always):
+`GEN-2609-038` (motion guidelines, PR #611), `GEN-2609-039`
+(accessibility guidelines + focus-visible fix, PR #612), `GEN-2609-040`
+(icon system guidelines + aria-label fix, PR #613). All three confirmed
+merged via `git fetch origin qa` before being reported done here - not
+assumed from the dispatch text. `qa` HEAD right after the third merge:
+`48c3f43` - since moved to `db41a39` by chat's own `HANDOFF.md` session-
+handoff commit (docs-only, no PR, same as this file's own convention),
+fast-forwarded into this local branch before writing this note.
+
+**Handoff collision, re-confirmed at session start (this makes it the
+8th time - see `[[project_handoff_collision]]`):** the dispatch that
+opened this session described `feat/gen-2609-037-seal-stamp-animation`
+as "pushed, needs a PR opened." `git fetch origin qa` at the very start
+showed `GEN-2609-037` had already landed - squash-merged as `aa80ff7`/
+PR #610 by a concurrent session, under a different commit hash than
+this session's own local `9b0245f`. Verified content was byte-identical
+between the two paths (diffed the specific files, not just trusted the
+claim) before treating the old branch as redundant. **Standing practice
+this confirms, not just a one-off:** `git fetch origin qa` before
+touching anything, and branch every new dispatch fresh off
+`origin/qa` rather than off whatever branch a prior handoff named -
+this avoided silently rebuilding already-shipped work all three times
+this session.
+
+**No browser/Playwright tool was available in this session.** Two
+dispatch-specified verification steps could not be run and were
+reported as pending rather than claimed done: the motion spec's manual
+DevTools `prefers-reduced-motion` emulation check (all 5 patterns), and
+the accessibility spec's real Tab-key click-through on ≥2 of the 8
+newly-focusable pages. Both are flagged in their respective docs and in
+`docs/design.md`. If a browser tool is available next session, these
+are the two concrete things to go run and then mark done - they were
+never skipped by choice.
+
+**Local branch cleanup done this session (not just flagged):**
+`feat/gen-2609-037-seal-stamp-animation`, `-038-motion-guidelines`,
+`-039-accessibility-guidelines`, `-040-icon-system-guidelines` all
+force-deleted (`-D`) after verifying empty diffs against `qa` on each
+branch's own stable files (not `docs/design.md`, which every branch
+touches and which accumulates later branches' appends - diffing that
+file specifically would show false "missing content" noise; checked
+each branch's other owned files instead, e.g. `docs/motion-guidelines.md`
+for 038, `SiteNav.tsx` for 040). `037` needed the content-verification
+approach rather than a clean diff, since `038` reformatted the same
+region of `globals.css` afterward - confirmed byte-identical seal-stamp
+keyframes before deleting, not assumed. `git remote prune origin` also
+cleared the now-stale tracking refs for all 4 plus 5 more from earlier
+in the week. Local branch count: 112 → 108. The larger pre-existing
+backlog of ~100 older stale branches (flagged in an earlier session's
+handoff, untouched since) is still untouched - out of scope here, ask
+before touching.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed this session.
+Every PR this session went through the standing push-branch-then-hand-
+chat-a-compare-URL pattern with zero friction, same as prior sessions -
+this gap continues to not need re-litigating, just a cheap recheck.
+
+Working tree: clean, only the pre-existing untracked `Figma/` dir.
+Local `qa` fast-forwarded to match `origin/qa` at the end of this
+session - no commits anywhere that aren't already upstream.
+
+**Step 6 status:** 3 of 5 one-page specs shipped
+(`docs/motion-guidelines.md`, `docs/accessibility-guidelines.md`,
+`docs/icon-system-guidelines.md`). Notifications and onboarding remain -
+no dispatch received for either as of this note. Every flagged decision
+from all three specs (the `--afa-error`/`--afa-red-alt` retarget shape,
+the icon-system consolidation shape, the `calendar`/`tag`/`map`
+visual-winner calls, the icon sizing/strokeWidth convention) is sitting
+in `docs/design.md` awaiting Hitesh's call - not re-summarized here,
+that's `docs/design.md`/`HANDOFF.md`'s job, this note is git state only.
