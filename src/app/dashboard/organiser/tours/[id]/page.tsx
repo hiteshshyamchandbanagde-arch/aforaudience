@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import Button from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
@@ -261,12 +262,9 @@ export default function TourDetailPage() {
         {/* Stops */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Stops</h2>
-          <button
-            onClick={() => setShowAddStop((v) => !v)}
-            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '9px 18px', borderRadius: '8px', cursor: 'pointer' }}
-          >
+          <Button variant="primary" size="md" fullWidth={false} onClick={() => setShowAddStop((v) => !v)}>
             {showAddStop ? 'Cancel' : '+ Add Stop'}
-          </button>
+          </Button>
         </div>
 
         {showAddStop && (
@@ -349,13 +347,16 @@ export default function TourDetailPage() {
                 </div>
               </div>
             </div>
-            <button
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth={false}
               onClick={handleAddStop}
               disabled={savingStop}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '11px 22px', borderRadius: '8px', cursor: savingStop ? 'default' : 'pointer', opacity: savingStop ? 0.6 : 1 }}
+              style={{ opacity: savingStop ? 0.6 : 1 }}
             >
               {savingStop ? 'Saving...' : 'Save Stop as Draft'}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -414,13 +415,15 @@ export default function TourDetailPage() {
                     {filteredArtists.slice(0, 5).map((a) => (
                       <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', padding: '6px 0' }}>
                         <span>{a.user.displayName || a.user.name}</span>
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          fullWidth={false}
                           onClick={() => handleAddArtist(stop.id, a.id)}
                           disabled={addingArtist === stop.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer' }}
                         >
                           Add
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>

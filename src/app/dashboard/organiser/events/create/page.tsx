@@ -11,6 +11,7 @@ import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -954,14 +955,17 @@ export default function CreateEventPage() {
               </p>
             )}
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth={false}
                 type="button"
                 disabled={saving}
                 onClick={() => submit(true)}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Publishing...' : 'Publish Event'}
-              </button>
+              </Button>
               <button
                 type="button"
                 disabled={saving}

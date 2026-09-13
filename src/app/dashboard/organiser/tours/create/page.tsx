@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
+import Button from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
@@ -93,13 +94,16 @@ export default function CreateTourPage() {
               style={{ ...inputStyle, resize: 'vertical' as const }}
             />
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth={false}
             onClick={handleCreate}
             disabled={saving}
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{ opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Creating...' : 'Create Tour'}
-          </button>
+          </Button>
         </div>
         </div>
       </main>

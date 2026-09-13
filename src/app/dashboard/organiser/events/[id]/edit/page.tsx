@@ -10,6 +10,7 @@ import { useToast } from '@/components/Toast'
 import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
+import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -993,14 +994,17 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
+                      <Button
+                        variant="primary"
+                        size="md"
+                        fullWidth={false}
                         type="button"
                         onClick={() => saveVoteWeights(false)}
                         disabled={voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight}
-                        style={{ fontSize: '13px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: voteWeightSaving ? 'default' : 'pointer', opacity: voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight ? 0.5 : 1 }}
+                        style={{ opacity: voteWeightSaving || !audienceVoteWeight || !panelistVoteWeight || !celebrityVoteWeight ? 0.5 : 1 }}
                       >
                         {voteWeightSaving ? 'Saving…' : 'Save override'}
-                      </button>
+                      </Button>
                       <button
                         type="button"
                         onClick={() => saveVoteWeights(true)}
@@ -1172,14 +1176,17 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </section>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth={false}
                 type="button"
                 disabled={saving}
                 onClick={() => save(event.status === 'APPROVED' ? true : undefined)}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ opacity: saving ? 0.6 : 1 }}
               >
                 {saving ? 'Saving...' : event.status === 'APPROVED' ? 'Save Changes' : 'Save & Publish'}
-              </button>
+              </Button>
               {event.status !== 'APPROVED' && (
                 <button
                   type="button"

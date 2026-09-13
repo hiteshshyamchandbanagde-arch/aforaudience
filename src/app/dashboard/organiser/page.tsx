@@ -10,6 +10,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 
 interface EventItem {
@@ -160,12 +161,9 @@ export default function OrganiserDashboard() {
             <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(245,245,240,0.08)' }}>
               <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No events yet</p>
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Create your first event to start booking venues and artists</p>
-              <Link
-                href="/dashboard/organiser/events/create"
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
-              >
+              <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/events/create">
                 Create Event
-              </Link>
+              </Button>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
