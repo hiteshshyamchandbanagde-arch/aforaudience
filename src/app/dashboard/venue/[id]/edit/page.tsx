@@ -14,6 +14,7 @@ import CityAutocomplete from '@/components/CityAutocomplete'
 import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface Venue {
   id: string
@@ -373,7 +374,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       border: rateType === t ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                      background: rateType === t ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                      background: rateType === t ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                       color: rateType === t ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >

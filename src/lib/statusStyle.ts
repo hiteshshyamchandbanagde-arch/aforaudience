@@ -38,3 +38,15 @@ export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange',
   muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
   orange: { bg: 'rgba(255,90,54,0.1)', color: 'var(--afa-fill-solid)' },
 }
+
+// GEN-2609-063 - `--afa-fill-solid` has no CSS-level "-tint" companion
+// (unlike the legacy `--afa-terracotta-tint`, an opaque light color from
+// the pre-dark-theme palette that doesn't suit today's dark surfaces).
+// Every selected/active-state translucent overlay this ticket's repo-
+// wide sweep touched independently re-typed the same fill-solid RGB
+// triple (255,90,54) at its own alpha - centralized here (this file is
+// already the design-tokens check's exempt "shared tone source," same
+// reasoning as STATUS_TONE above) rather than leaving 6 files with a
+// brand-new hardcoded literal apiece.
+export const FILL_SOLID_TINT = 'rgba(255,90,54,0.08)'
+export const FILL_SOLID_BORDER_TINT = 'rgba(255,90,54,0.25)'

@@ -13,6 +13,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Button from '@/components/ui/Button'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface SeatSection {
   id?: string
@@ -904,7 +905,7 @@ export default function CreateEventPage() {
                       style={{
                         padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                         border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                        background: defaultCompensationType === opt.value ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                        background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
@@ -931,7 +932,7 @@ export default function CreateEventPage() {
                       style={{
                         flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                         border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                        background: applicationApprovalMode === mode ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                        background: applicationApprovalMode === mode ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: applicationApprovalMode === mode ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >

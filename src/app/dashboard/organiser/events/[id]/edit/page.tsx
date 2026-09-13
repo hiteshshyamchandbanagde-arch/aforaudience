@@ -11,7 +11,7 @@ import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
-import { STATUS_TONE } from '@/lib/statusStyle'
+import { STATUS_TONE, FILL_SOLID_TINT } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -1123,7 +1123,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     style={{
                       padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                       border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                      background: defaultCompensationType === opt.value ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                      background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                       color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >

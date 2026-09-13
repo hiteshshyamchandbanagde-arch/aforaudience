@@ -13,7 +13,7 @@ import { ErrorBanner } from '@/components/ErrorBanner'
 import { EventPoster } from '@/components/EventCard'
 import { CalendarIcon, PinIcon } from '@/components/icons/EventIcons'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
-import { STATUS_TONE } from '@/lib/statusStyle'
+import { STATUS_TONE, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 import Badge from '@/components/ui/Badge'
 
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
@@ -335,7 +335,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(255,90,54,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
                   <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
