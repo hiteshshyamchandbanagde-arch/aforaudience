@@ -32,7 +32,13 @@ type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'o
 // via the `size` prop's union type below rather than colliding, since
 // only `close` ever reads the numeric form and no other variant reads
 // the numeric form at all.
-type ButtonSizeToken = 'sm' | 'md' | 'lg'
+// GEN-2609-066 - `pill-sm`/`pill-md` added for a real, recurring
+// solid-fill pill shape (borderRadius 999) found independently across
+// 4 sites during the terracotta sweep - none fit `sm`/`md`/`lg`'s
+// 6/8/8 radius scheme at all. See `SIZE_CHROME` below for the full
+// reasoning on which 2 of the 4 sites share a shape and which is
+// genuinely distinct.
+type ButtonSizeToken = 'sm' | 'md' | 'lg' | 'pill-sm' | 'pill-md'
 
 type BaseProps = {
   variant: ButtonVariant
@@ -41,7 +47,8 @@ type BaseProps = {
   /** For `close`: the shared circle's pixel diameter (36px everywhere it
    * floats over a sheet/modal; a small inline use needs a smaller
    * footprint instead of literally 36px breaking that layout). For every
-   * other variant: one of the 3 shared size tokens (`sm`/`md`/`lg`) -
+   * other variant: one of the shared size tokens (`sm`/`md`/`lg`/
+   * `pill-sm`/`pill-md`) -
    * see `SIZE_CHROME` below. Leaving it unset on a non-`close` variant
    * keeps that variant's own hardcoded padding/font-size/radius exactly
    * as they were before this prop existed - no default size token is
@@ -56,14 +63,16 @@ type ButtonAsButton = BaseProps &
     href?: undefined
   }
 
-type ButtonAsLink = BaseProps & {
-  /** Renders as a Next Link instead of a <button> - same visual
-   * treatment, real navigation instead of an onClick handler. Only the
-   * checkout page's expired-state "Back to event" needs this today (it
-   * was a <Link> styled inline before this extraction); every other
-   * primary-CTA site keeps its onClick-driven <button>. */
-  href: string
-}
+type ButtonAsLink = BaseProps &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'style' | 'className' | 'children' | 'href'> & {
+    /** Renders as a Next Link instead of a <button> - same visual
+     * treatment, real navigation. `onClick` still fires (Next `Link`
+     * supports it natively for side effects alongside navigation, e.g.
+     * GEN-2609-066's `DisplayNameNudge`/`PhoneVerifyNudge` dismissing
+     * their own banner on click-through) - it doesn't replace
+     * navigation the way a plain `<button>`'s `onClick` would. */
+    href: string
+  }
 
 type ButtonProps = ButtonAsButton | ButtonAsLink
 
@@ -83,10 +92,25 @@ const FONT_FAMILY = 'var(--font-sans)'
 // a deliberate, documented consequence of consolidating onto one shared
 // scale (same tradeoff class as GEN-2609-055's Badge variants) - not an
 // oversight.
+// GEN-2609-066 - re-verified all 4 flagged sites fresh, not trusted
+// from the prior audit. `DisplayNameNudge.tsx`/`PhoneVerifyNudge.tsx`
+// were byte-identical on every property (padding, radius, font-size/
+// weight) - one real shape, `pill-sm`. `pwa/InstallPrompt.tsx`'s
+// "Install" button is genuinely different (bigger padding, 1px larger
+// font) - its own `pill-md`, not forced into `pill-sm`. The would-be
+// 4th instance - `RegisterForm.tsx`'s username-suggestion chip - turned
+// out NOT to belong here at all once checked: it's a translucent-tint
+// utility chip (8%/25%-alpha background/border, text-colored, no solid
+// fill), the same architectural pattern as the selection-pills
+// GEN-2609-063 already centralized via `statusStyle.ts`'s
+// `FILL_SOLID_TINT`/`fillSolidTint()` - not a `Button`-shaped CTA, so
+// it's fixed there instead of getting a 3rd pill size here.
 const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: number; fontSize: number; fontWeight: number }> = {
   sm: { padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600 },
   md: { padding: '9px 17px', borderRadius: 8, fontSize: 13, fontWeight: 600 },
   lg: { padding: '12px 24px', borderRadius: 8, fontSize: 14, fontWeight: 600 },
+  'pill-sm': { padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600 },
+  'pill-md': { padding: '10px 18px', borderRadius: 999, fontSize: 14, fontWeight: 600 },
 }
 
 // Exported (not just used internally) so a caller that can't render a
@@ -252,8 +276,9 @@ export default function Button(props: ButtonProps) {
   }
 
   if ('href' in props && props.href) {
+    const { variant: _v, children: _c, fullWidth: _fw, size: _s, style: _st, className: _cl, href, ...anchorRest } = props as ButtonAsLink
     return (
-      <Link href={props.href} style={merged} className={className}>
+      <Link href={href} style={merged} className={className} {...anchorRest}>
         {children}
       </Link>
     )

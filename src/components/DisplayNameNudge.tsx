@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 /**
  * "Add your display name" nudge for existing users whose `displayName`
@@ -115,26 +115,20 @@ export default function DisplayNameNudge() {
       <span style={{ flex: 1, minWidth: 0 }}>
         Add your name so tickets say your name, not your username.
       </span>
-      <Link
+      <Button
+        variant="primary"
+        size="pill-sm"
+        fullWidth={false}
         href="/profile"
         onClick={() => {
           // Dismiss on click-through too — user is going to fix it now,
           // so we don't need to keep the banner around after they return.
           onDismiss();
         }}
-        style={{
-          background: 'var(--afa-terracotta)',
-          color: 'white',
-          padding: '6px 14px',
-          borderRadius: 999,
-          textDecoration: 'none',
-          fontWeight: 600,
-          fontSize: 13,
-          whiteSpace: 'nowrap',
-        }}
+        style={{ whiteSpace: 'nowrap' }}
       >
         Add name
-      </Link>
+      </Button>
       <button
         onClick={onDismiss}
         aria-label="Dismiss"

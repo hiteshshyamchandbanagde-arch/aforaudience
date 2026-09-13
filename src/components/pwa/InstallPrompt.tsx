@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Button from '@/components/ui/Button';
 
 /**
  * "Add to Home Screen" prompt.
@@ -149,21 +150,9 @@ export default function InstallPrompt() {
       >
         Not now
       </button>
-      <button
-        onClick={onInstall}
-        style={{
-          background: 'var(--afa-terracotta)',
-          color: 'white',
-          border: 'none',
-          borderRadius: 999,
-          padding: '10px 18px',
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: 'pointer',
-        }}
-      >
+      <Button variant="primary" size="pill-md" fullWidth={false} onClick={onInstall}>
         Install
-      </button>
+      </Button>
     </div>
   );
 }

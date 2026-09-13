@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
+import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
 
 const inputStyle = (hasError?: boolean) => ({
   width: "100%",
@@ -455,9 +456,9 @@ export default function RegisterForm() {
                         style={{
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "var(--afa-terracotta)",
-                          background: "rgba(196,90,52,0.08)",
-                          border: "1px solid rgba(196,90,52,0.25)",
+                          color: "var(--afa-fill-solid)",
+                          background: FILL_SOLID_TINT,
+                          border: `1px solid ${FILL_SOLID_BORDER_TINT}`,
                           borderRadius: "999px",
                           padding: "4px 12px",
                           cursor: "pointer",
