@@ -5,6 +5,36 @@ hygiene, what's pushed vs merged, and what CC could/couldn't do in this
 environment. It does not re-describe feature work; that's HANDOFF.md's
 job. Read both.
 
+## Standing rules (read every session, survives context resets)
+
+- **Sync local `qa` before branching, every session — no exceptions.**
+  Before running `git checkout -b feat/...` or `fix/...`, always run:
+  ```
+  git checkout qa
+  git fetch origin
+  git reset --hard origin/qa
+  ```
+  Do this even if local `qa` "looks recent" — do not skip it based on a
+  guess. 13 Sep incident: local `qa` was still on `8cecbe9` from before
+  chat had merged PRs #616-#619 in between sessions. Working from that
+  stale base caused (1) GEN-2609-052 (a CI check) being rebuilt from
+  scratch, unaware it had already shipped, and (2) a genuine merge
+  conflict on GEN-2609-053's branch that chat had to resolve manually
+  at merge time instead of catching it earlier.
+- If a branch is later found to be based on a stale `qa` — check via
+  `git merge-base <branch> origin/qa` differing from `origin/qa`'s own
+  HEAD — rebase or merge `origin/qa` into it and resolve conflicts
+  BEFORE reporting the branch as pushed/ready-for-review, not after.
+- Working tree must be clean (or intentionally stashed) before the
+  `reset --hard` above — run `git status` first per the standing git
+  safety protocol; never reset through uncommitted work.
+- Local feature branches that are squash-merged still fail `git branch
+  -d`'s ancestor check ("not fully merged") even though the content
+  landed — verify via the merge commit's message/PR number in `git log
+  qa --oneline`, not via `git diff qa <branch>` (that diff is non-empty
+  once `qa` has moved past the branch's own snapshot, which is normal,
+  not a sign of an unmerged branch) — then delete with `-D`.
+
 ## Git state as of this handoff
 
 - `origin/qa` HEAD (as of this file's writing, before chat's merge):
