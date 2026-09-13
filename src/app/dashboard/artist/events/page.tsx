@@ -8,6 +8,7 @@ import PosterShareCard from '@/components/PosterShareCard'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import Badge from '@/components/ui/Badge'
 
 interface EventItem {
   id: string
@@ -235,13 +236,11 @@ export default function BrowseEventsToApplyPage() {
                     </div>
 
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                      <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: comp.bg, color: comp.color }}>
-                        {comp.label}
-                      </div>
+                      <Badge variant="pill" tone={comp}>{comp.label}</Badge>
                       {full && !existingStatus && (
-                        <div style={{ display: 'inline-block', fontSize: '13px', fontWeight: 700, padding: '5px 12px', borderRadius: '999px', background: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' }}>
+                        <Badge variant="pill" tone={{ bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' }}>
                           Lineup full - waitlist only
-                        </div>
+                        </Badge>
                       )}
                     </div>
 
