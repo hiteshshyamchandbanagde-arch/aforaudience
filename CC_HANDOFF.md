@@ -1,3 +1,19 @@
+# CC Local/Session Handoff — 14 Sep 2026 (update, git state only — see HANDOFF.md for GEN-2609-067/068/069 feature narrative)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `ee9e47caaa17f27f63cb89110d5af5561c4abc8b`. Confirmed via `git/refs/heads/qa` API immediately before writing this, not assumed.
+- Merged since the last CC_HANDOFF.md entry, all by chat via direct GitHub API access (fresh PAT this session, not the usual CC-builds/chat-merges split):
+  - PR #635 (`GEN-2609-067` items 1-7) → squashed as `6a26557`
+  - PR #634 (`GEN-2609-067` item 8, docs) → squashed as `a0754b6`
+  - PR #636 (`GEN-2609-068`, tickets-page v6 rebuild) → squashed as `360e610`
+  - PR #637 (`GEN-2609-069`, action-row wrap fix) → squashed as `ee9e47c`
+- All 4 branches deleted post-merge (`fix/gen-2609-067-ui-centralization-audit`, `docs/gen-2609-067-status-tone-reference`, `feat/gen-2609-068-tickets-page-v6-redesign`, `fix/gen-2609-069-tickets-action-row-wrap`).
+- **New standing fact worth checking every session from now on:** `.github/workflows/` has a `design-tokens` check that triggers **only on `pull_request` to `qa`/`main`, not on push**. A local `node scripts/check-design-tokens.js` run before pushing is diff-against-`origin/qa`, same logic as CI — but the PR-triggered workflow is the only way to see the actual pass/fail. If a next session pushes a branch and doesn't open a PR before ending the session, CI status is genuinely unknown, not "probably fine because the local script passed."
+- One direct-to-branch fixup commit landed mid-PR this session (not a squash-merge, a regular push to an open PR's branch before merging it): `d4cf58e` on `feat/gen-2609-068-tickets-page-v6-redesign`, adding `--afa-border-resting` and fixing a CI failure. Worth knowing this pattern exists (push more commits to an open PR branch rather than opening a second PR) if a future session finds an open PR with unexpected extra commits.
+
+---
+
 # CC Local/Session Handoff — 12 Sep 2026
 
 Scope note: this file is CC's own local/session-state record — branch

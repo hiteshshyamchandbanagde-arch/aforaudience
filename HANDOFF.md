@@ -1,3 +1,87 @@
+# Session Handoff — 14 Sept 2026 (GEN-2609-067/068/069 — UI centralization audit, tickets-page v6 rebuild, live-bug fix)
+
+## qa HEAD: `ee9e47c` — GEN-2609-067 (both PRs), -068, and -069 all merged and verified. Supersedes, does not delete, the 13 Sept handoff below — its still-open items are folded forward unchanged except where resolved here.
+
+## Session narrative — how it ran
+
+Chat-side session, but with a real capability change worth flagging up front: **chat had full git/GitHub-API/Vercel-MCP/Supabase-MCP access this session** (fresh PAT pasted into chat, stored at `/home/claude/afa/token.txt`) and did the entire dispatch → build → PR → CI → merge → deploy-verify → Feedback-log loop itself for two of the three tickets below, not just the merge step. This is beyond chat's usual "merge CC's finished PR" role — worth knowing so a future session doesn't assume all code changes in this history came from CC.
+
+Three tickets, one continuous thread:
+1. **`GEN-2609-067`** — dispatched to CC: full single-pass fix of an 8-item UI-centralization audit chat had run directly against the repo (cloned locally, real grep, not assumed).
+2. **`GEN-2609-068`** — dispatched to CC: rebuild `/tickets/page.tsx` against a Figma Make "AFA Mobile App v6" export, used as visual/structural reference only.
+3. **`GEN-2609-069`** — found and fixed by chat directly (not dispatched to CC) from a live screenshot Hitesh sent after `-068` shipped.
+
+## `GEN-2609-067` — 8-item UI-centralization audit (PRs #635, #634)
+
+Chat cloned the repo itself and ran real repo-wide greps rather than trusting the standing "locked 4-token palette" doc, which turned out to be stale (see item 8). Found and dispatched 8 items:
+
+1. PWA `theme_color` in `layout.tsx`/`manifest.ts` still wired to legacy `--afa-terracotta` — this **was** the open "PWA theme_color coupling" decision from the terracotta sweep, not a separate item. Retargeted to `--afa-fill-solid`.
+2. Dashed "+ Add tour stop" button (`dashboard/artist/edit/page.tsx`) — also a resolved open decision, same retarget.
+3. `/tickets/page.tsx`'s "Download ticket (PDF)" button used `--afa-fill-solid` (CTA-only token) — same weight as "Pay Now". Demoted to an amber outline. **Note: this exact button was fully rebuilt again in `-068` below — the amber-outline fix here was superseded, not wasted; `-068`'s 3-button row reconciles it.**
+4. Seat-map editor (`dashboard/venue/[id]/seat-map/page.tsx`) — 11 live hits of legacy `--afa-ink`/`--afa-white`, the single largest concentration in the repo. Full migration; **surfaced 3 real inverted-visibility bugs** (selected state was less visible than unselected) as a side effect.
+5. 3 auth-page banners (`forgot-password`, `reset-password`, `RegisterForm`) still on `--afa-terracotta-tint`/`--afa-amber-tint`.
+6. 14 files with light-mode leftovers (hardcoded `background: white` + `--afa-ink` text) — `SearchBox`, `OrganisersGridEmbed`, `VenueOwnersGridEmbed`, public organisers/venue-owners pages, `RatePromptClientPage`, `LegalDocLayout`, `EnvBadge`, `SeatLayoutPreview`, `SeatPicker`, `dev/razorpay-test`, `about/page.tsx`, `PhoneVerifyNudge`, `DisplayNameNudge`, others. **`FourRooms.tsx`/`PhotoCrossfadeBackdrop.tsx` confirmed false positives** (radial-gradient stop, not text/bg color) and correctly left untouched.
+7. Shadow `--afa-red-alt` token (independent of `STATUS_TONE.error`) in `availability.ts` and `tickets/page.tsx` — folded into `--afa-error`.
+8. **The standing "locked 4-token palette" doc was itself wrong/incomplete** — `src/lib/statusStyle.ts`'s `STATUS_TONE` (gold/sage/error/muted/orange) plus `Badge.tsx`'s 5 chrome variants are an equally-real, equally-governed second palette, exempt from `check-design-tokens.js` as the shared tone source, that the doc never mentioned. Added `docs/afa-design-tokens-reference.md` Section 5.1 documenting it from shipped code. **This is likely part of why deviations get missed** — Claude Code checks against the published spec, and the spec undersold reality.
+
+Two PRs (items 1-7 in #635, item 8 in #634 per the dispatch's own sequencing) both opened, CI'd, and squash-merged **by chat**, `qa` confirmed, Vercel READY, 0 runtime errors both times. Both logged to Feedback (`BUG-2609-030` through `037`).
+
+**Bonus, found during merge verification, not part of the original dispatch:** two pre-existing Feedback tickets (`GEN-2609-016` "SeatLayoutPreview deprecated --afa-white", `BUG-2609-029` "PhoneVerifyNudge legacy tokens") turned out to be resolved as a side effect of item 6's sweep — verified against live code, corrected their status to `RESOLVED` (the i18n half of `-029` is unrelated and still open).
+
+## `GEN-2609-068` — `/tickets/page.tsx` rebuild against Figma Make v6 reference (PR #636 + 1 direct fixup)
+
+Full UI/UX design loop this session, worth reading in order if picking this thread back up:
+
+1. Hitesh asked for a better `/tickets/` presentation. Chat recommended against trusting Figma Make's *code* directly (per this project's own established finding that Figma Make output doesn't reliably match rendered reality) but recommended it for *visual* exploration, anchored to an **existing** Figma project rather than a fresh one (his "AFA Mobile App v5" already fed the current live font system — confirmed by grepping `layout.tsx`'s own comments).
+2. Wrote a token/font-locked prompt for Figma Make. Hitesh duplicated v5 → renamed v6, uploaded the zip. Chat inspected the actual generated code (not just the rendered screenshot) before approving it as a reference: found 2 real deviations — invented colors `#7db873`/`#e05c55` for status-chip text (should trace to real tokens) and 3 near-duplicate micro-label sizes (8/9/10px, conceptually 2 roles).
+3. Dispatched `-068` to CC with those 2 corrections baked into the brief (don't inherit the mockup's bugs). CC built it: new `StubRow` component, `Badge` `icon` prop, `Button` `outline-neutral` variant, `MessageButton` `icon` prop, 6 icons, 9 i18n keys × 11 locales, and (per the brief) new `--afa-sage-bright`/`--afa-error-bright` tokens wired into `STATUS_TONE`.
+4. **Chat opened the PR itself and found `design-tokens` CI actually fails on this repo only on `pull_request`, not on push** — meaning CC's own pre-push local run of `check-design-tokens.js` can look clean (it diffs against `origin/qa`, same as CI does) but **CC never sees the PR-triggered run's result unless a PR is already open**. This is a real workflow gap worth internalizing: verifying green locally is necessary but not sufficient confirmation that CI will pass — a PR must actually be opened to know for sure. Real failure this time: `Button.tsx`'s new `outline-neutral` variant had a raw `rgba(245,245,240,0.15)` border literal (this exact alpha had **no** named token anywhere in the app despite being the de facto standard resting-border color — see `.afa-search-box` in `globals.css`). **Chat fixed it directly** (not re-dispatched): added `--afa-border-resting` to `globals.css`, routed the new variant through it. First attempt still failed — the *explanatory comment* itself quoted the same rgba string in backticks, and the checker's text-based match caught it even inside a comment; reworded the comment to reference the token by name instead (also just correct now that the token exists). Verified clean, pushed, CI green, merged.
+5. **Live QA data notes from CC's session, worth knowing:** `ticketCode` is always null in the current QA data (handled gracefully, not a bug); no multi-tier/numbered-seat bookings exist yet to test that path against.
+6. **Open product question, not decided yet:** should cancelled/refunded ticket cards stay non-interactive (current behavior, matches the v6 reference) or tap through to view the past event? Flagged by CC as a real product call, not a build decision. **Still unanswered as of this handoff.**
+
+WCAG contrast for the 2 new bright tokens: ~5.4:1 against the translucent tinted backgrounds, comfortably over the 4.5:1 AA floor (full math should be in `docs/design.md`'s `GEN-2609-068` entry — verify it's actually there next session, chat did not independently re-derive the contrast math itself, only confirmed CC reported doing it).
+
+## `GEN-2609-069` — live-bug fix, found by chat from a screenshot (PR #637)
+
+Hitesh sent a live screenshot of `qa.aforaudience.com/tickets/` after `-068` deployed: the 3-button row (Download PDF/Message Organiser/Cancel) was rendering as 3 stacked full-width lines instead of a row, in the 2-up desktop grid specifically.
+
+**Root cause, found by reading the actual shipped code, not guessing from the pixels:** all 3 buttons used `flex: '1 1 auto'`, which makes each button's flex-basis its own natural content width. In the 2-up desktop grid — narrower per-card than the mobile-first v6 mockup assumed — the 3 buttons' combined natural width exceeded the available row width, so `flexWrap: 'wrap'` dropped each onto its own line.
+
+**Fix:** `flex: '1 1 0'` + `minWidth: 0` on all 3, so they split the row equally and wrap their own label text if genuinely constrained, instead of each claiming full width first. **Also found a second, unnoticed copy of the exact same `rgba(245,245,240,0.15)` border literal** sitting in `MessageButton`'s inline override in this same block — the `-068` CI fixup only tokenized `Button.tsx`'s copy, not this one. Routed through `--afa-border-resting` too.
+
+Chat did the full branch → PR → CI-wait → merge → Vercel-wait → runtime-error-check → Feedback-log loop itself, same as `-067`/`-068`'s merge steps. Confirmed `design-tokens` clean, `qa` READY, 0 runtime errors. Logged `BUG-2609-040`.
+
+**Not yet visually re-confirmed by a human** — chat has no browser/screenshot tool, so this fix is verified by code logic + CI, not by seeing the actual rendered result. Worth a real look next time anyone's on the live page.
+
+## Feedback-table logging — process note
+
+The "which Feedback table" ambiguity from prior sessions is resolved: it's `aforaudience-qa`'s (Supabase project `nqiyrypmjtogoocerxtu`) real `Feedback` table, `displayId` format `BUG-2609-0NN` per the `CodeCounter` table (`prefix='BUG', yearMonth='2609'`), currently at `currentSeq=40`. Chat logged all of `-067` (8 items, `030`-`037`), `-068`'s CI-fixup (`038`/`039` — logged by CC, note-appended by chat with merge details), and `-069` (`040`) directly via `execute_sql`, not left for a future session to backfill.
+
+## Open items for next session
+
+**Real product decision needed:**
+- Cancelled/refunded ticket cards: stay non-interactive (current) or tap through to the past event? (`-068`)
+
+**Verification debt (not failures, just unconfirmed):**
+- `-069`'s button-row fix — no human/browser visual confirmation yet, only code-logic + CI.
+- `-068`'s WCAG contrast math for `--afa-sage-bright`/`--afa-error-bright` — chat trusted CC's reported ~5.4:1, didn't independently recompute. Worth a spot-check.
+
+**Still open from the audit, not touched this session (see `-067` for full detail):**
+- `BUG-2609-026` — reduced-motion coverage gaps (seat-anim, path-card hover, `ContributionMoment`).
+- `BUG-2609-027` — `--afa-text-muted` misused for real 13-14px body copy (AA contrast fail) in 5 places: `OrganisersGridEmbed.tsx`, `venue-requests/page.tsx`, `venue/sales/page.tsx` (×2), `venue/bookings/page.tsx`.
+- `BUG-2609-028` — `NotificationOptIn.tsx` bare 🔔 emoji instead of registry icon.
+- `BUG-2609-029` — PhoneVerifyNudge i18n half only (token half now resolved, see above).
+- `GEN-2609-015` — seat picker illegible tier legend + squished seats, `IN_TEST`, token half looks resolved by `-067` item 6 (unverified this session — someone else may be mid-fix).
+
+**New workflow knowledge worth internalizing (see `-068` step 4):** `design-tokens` CI only triggers on `pull_request`, not push. A local clean run of `check-design-tokens.js` before pushing is NOT proof CI will pass — the PR has to actually be open to see the real result. Consider whether this should become a standing rule in this file's "session-start protocol" (ways-of-working equivalent) rather than tribal knowledge from one incident.
+
+**Carried forward, unchanged (see 13 Sept section below for full context):**
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still outstanding since 25 Aug.
+- 22 QA-project tables with RLS disabled — flagged repeatedly, no policy pass done. Supabase's own advisor surfaces this on every `list_tables` call; remediation SQL is known but deliberately not auto-applied (would break access without real policies).
+- Everything else in the 13 Sept "Open items" section below that isn't explicitly marked resolved above.
+
+---
+
 # Session Handoff — 13 Sept 2026, later same day (two follow-up fix dispatches after Step 6 closed)
 
 ## qa HEAD: `6d03b48` — GEN-2609-043/047/050/051 all merged and verified. This replaces the earlier 13 Sept handoff (`5776e964`) — supersedes, does not delete, per this project's "fold in rather than discard" convention. That handoff's open items are folded forward below, unchanged except where explicitly resolved this session. The original section immediately below (audit narrative for `-041`/`-042`) is kept intact as history; this session's own work is summarized first.
