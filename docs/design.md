@@ -3030,6 +3030,91 @@ Built on `fix/gen-2609-050-051-tickets-font-status-style`, branched from
 merge confirmation before this entry is finalized, per the standing
 rule.
 
+## GEN-2609-052: CI check blocking new hardcoded design-token literals
+
+The last two tickets (GEN-2609-043/047, -050/051) all found the same
+underlying pattern - a Georgia font-family, a duplicated `{bg, color}`
+literal pair, a stray hex/rgba - screen by screen, after the fact. This
+ticket adds a check that fails the PR itself instead: `scripts/check-
+design-tokens.js`, run from a new `.github/workflows/design-tokens.yml`
+on every pull request into `qa`/`main`.
+
+**Diff-only, deliberately.** The check runs `git diff --unified=0
+<base>...<head> -- src` and only inspects lines the diff marks as
+*added*, using the base branch (`origin/${{ github.base_ref }}` in CI)
+as the comparison point. Pre-existing literals elsewhere in `src/` -
+the hand-authored `rgba()` borders documented in Section 1 of
+`docs/afa-design-tokens-reference.md`, for instance - are real, known
+debt and are explicitly not this check's job; sweeping those is a
+separate future ticket, not something to fail today's unrelated PRs
+over.
+
+**Three rules**, each applied per added line in `src/**/*.ts(x)`:
+
+1. a raw hex literal (`#`+3-8 hex chars)
+2. a raw `rgb()`/`rgba()` literal
+3. a hardcoded font-family value (`fontFamily:`/`font-family:` whose
+   quoted value doesn't contain `var(`)
+
+**Exemptions** (by file path, not by rule): `src/app/globals.css` (the
+actual token source), `src/lib/statusStyle.ts` (the tone source-of-
+truth GEN-2609-051 just added - it exists specifically to hold these
+literals once), anything under `src/app/api/posters/**` (server-
+rendered OG/poster canvas images, already carved out as non-UI in
+Section 8.1), and `*.test.ts(x)` files.
+
+**A real bug found via its own verification pass.** The dispatch's
+suggested font-family regex (`/font-?[Ff]amily:\s*['"](?!.*var\()/`)
+uses a lookahead that scans to the end of the line, not just to the
+end of the quoted value. Every one of the actual pre-fix Georgia hits
+on `/tickets` was written as `fontFamily: 'Georgia, serif', ...,
+color: 'var(--afa-text-primary)', ...}}` - one inline-style object,
+several properties on one line - so the literal regex's lookahead
+would have found `var(` later in the same line (from `color`) and
+*skipped* the exact case this ticket exists to catch. Caught only
+because the verify step (below) checked the real historical line, not
+a hand-written test string. Fixed by scoping the "no `var(`" check to
+just the captured font-family value instead of the rest of the line.
+
+**A second bug, same root cause.** The dispatch's hex regex
+(`/#[0-9a-fA-F]{3,8}\b/`) also collides with this codebase's own PR-
+reference comment convention - `// ... (#261)`, `PR #212`, etc. (20+
+files already do this) - because an all-digit PR number is, by
+definition, a valid 3-8 char hex string. Left as-is, the check would
+have failed on almost every future commit's own header comment. Fixed
+by requiring the hex match to sit inside a quoted string
+(`['"`][^'"`]*#[0-9a-fA-F]{3,8}\b[^'"`]*['"`]`) - real hex literals in
+this codebase are always quoted string values (`fill="#4285F4"`,
+`background: "#241a10"`), PR-reference comments never are, so this
+removes the false positive without missing a real hit. Confirmed both
+directions with a synthetic added line: a bare `PR #618`/`(#619)`
+comment doesn't flag, a real `"#abc123"` on the next line does.
+
+**Verify.** Ran the script against the two already-merged commits this
+session produced:
+
+- `319d541` (#616) and `6d03b48` (#617), each diffed against its own
+  parent - both come back clean (0 offenses), confirming their new
+  code already uses `var(--afa-*)`/`var(--font-*)` correctly.
+- A throwaway local branch checked out `319d541`'s (pre-fix) versions
+  of `tickets/page.tsx` and `dashboard/organiser/page.tsx` on top of
+  current `qa`, committed, diffed, and deleted - a real git diff, not
+  a hand-simulated one. It correctly flags all 5 `STATUS_TONE`-style
+  `rgba()` pairs in each file (10 total) and all 3 Georgia
+  `fontFamily` hits, confirming the fix above actually closes the gap.
+
+No ESLint plugin - a ~110-line Node script parsing `git diff` output
+was enough, and is easier to read and adjust than a custom lint rule.
+`design-tokens.yml` is the first `pull_request`-triggered workflow in
+this repo; the existing `e2e*.yml` files are push-to-qa/nightly/manual
+only, so this check runs nowhere else in the current pipeline until
+this PR adds it.
+
+Enforcement note added to `docs/afa-design-tokens-reference.md`
+Section 1. This is a new check on new code only - it does not touch or
+claim to fix any of the pre-existing literal usages already documented
+elsewhere in that file.
+
 ## GEN-2609-053: Component library extraction (Button / Badge / Card)
 
 Goal per the dispatch: give screens one real component to import for
@@ -3138,21 +3223,25 @@ pass - it's a smaller, different-shaped piece than "a shared Card,"
 and the dispatch's Card question was specifically about the outer
 shell.
 
-**A bug found in GEN-2609-052's own (still-unmerged) CI check, fixed
-separately.** While writing this entry's own comments, a real one
-tripped GEN-2609-052's hex-literal rule: `` `--afa-cream` (#F7F3EE) is
-used instead: this repo's own `` - the rule's quoted-string check used
-two independent `['"`]` classes for its open/close delimiter rather
-than a backreference, so a backtick-quoted code term followed later by
-an unrelated apostrophe (a plain contraction) could pair up as a false
-open/close, with any hex-looking text in between false-flagged. Not
-part of this ticket's scope, but the fix (`(['"`])[^'"`]*#[0-9a-fA-F]
-{3,8}\b[^'"`]*\1`) was committed and pushed directly to
-`feat/gen-2609-052-design-token-ci-check` (still open, not yet
-reviewed) rather than left for a separate ticket, since it's a
-correctness bug in an unmerged PR, not a new feature. Re-verified
-clean against #616/#617's real diffs plus all prior + this new regex
-unit case.
+**A bug found in GEN-2609-052's own CI check, fixed separately.**
+While writing this entry's own comments, a real one tripped
+GEN-2609-052's hex-literal rule: `` `--afa-cream` (#F7F3EE) is used
+instead: this repo's own `` - the rule's quoted-string check used two
+independent `['"`]` classes for its open/close delimiter rather than a
+backreference, so a backtick-quoted code term followed later by an
+unrelated apostrophe (a plain contraction) could pair up as a false
+open/close, with any hex-looking text in between false-flagged. By the
+time this was found, GEN-2609-052 had already been merged (#618) in
+the same session on the chat side, working from a checkout ahead of
+this branch's own `8cecbe9` base - so this branch's local recreation
+of the (already-shipped) script and workflow files was redundant with
+what's now on `qa`. Chat extracted just the regex fix as its own
+minimal patch (`(['"`])[^'"`]*#[0-9a-fA-F]{3,8}\b[^'"`]*\1`), merged
+as #619, and deleted the redundant duplicate branch. This branch's
+own copies of `scripts/check-design-tokens.js` and
+`.github/workflows/design-tokens.yml` are confirmed byte-identical to
+what's on `qa` post-#619, so merging this branch does not reintroduce
+the stale pre-fix version.
 
 **Verify.** `tsc --noEmit` clean. `next build` clean (first attempt hit
 a `JavaScript heap out of memory` crash during static-page generation
