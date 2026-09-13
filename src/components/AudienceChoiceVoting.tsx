@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import Button from '@/components/ui/Button'
 
 // Audience Choice voting (§6, session 58). Scoped to Competition Show
 // events. Three cases handled: cast a ballot (voting open + eligible),
@@ -118,13 +119,16 @@ function Ballot({
         </div>
       ))}
       {error && <div style={{ fontSize: '12px', color: 'var(--afa-fill-solid)', marginBottom: '8px' }}>{error}</div>}
-      <button
+      <Button
+        variant="primary"
+        size="md"
+        fullWidth={false}
         onClick={handleSubmit}
         disabled={submitting}
-        style={{ fontSize: '13px', fontWeight: 700, color: 'white', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: submitting ? 'default' : 'pointer', opacity: submitting ? 0.6 : 1 }}
+        style={{ opacity: submitting ? 0.6 : 1 }}
       >
         {submitting ? 'Submitting…' : alreadyVoted ? 'Update vote' : 'Submit vote'}
-      </button>
+      </Button>
     </div>
   )
 }

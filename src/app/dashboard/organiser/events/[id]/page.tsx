@@ -11,6 +11,7 @@ import { formatEventTimeRange } from '@/lib/eventTime'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import Button from '@/components/ui/Button'
 
 interface Application {
   id: string
@@ -504,7 +505,10 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             >
               📊 Sales
             </Link>
-            <button
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth={false}
               onClick={togglePublish}
               disabled={toggling}
               title={
@@ -513,10 +517,10 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                   : undefined
               }
               style={{
-                fontSize: '14px', fontWeight: 600, color: event.status === 'APPROVED' ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                background: event.status === 'APPROVED' ? 'transparent' : 'var(--afa-terracotta)',
+                color: event.status === 'APPROVED' ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
+                background: event.status === 'APPROVED' ? 'transparent' : undefined,
                 border: event.status === 'APPROVED' ? '1px solid rgba(245,245,240,0.2)' : 'none',
-                padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', opacity: toggling ? 0.6 : 1,
+                opacity: toggling ? 0.6 : 1,
               }}
             >
               {toggling
@@ -526,7 +530,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                 : event.status === 'PENDING_APPROVAL'
                 ? 'Check approval status'
                 : 'Publish Event'}
-            </button>
+            </Button>
           </div>
         </div>
       </main>

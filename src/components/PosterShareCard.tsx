@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Button from '@/components/ui/Button'
 
 // Session 39 (Feedback ec6e4adf) - shared between organiser and artist
 // dashboards. Web Share API (with the image as a file) for the native
@@ -47,13 +48,16 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
         alt={title}
         style={{ width: '100%', maxWidth: '260px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.1)', display: 'block', marginBottom: '14px' }}
       />
-      <button
+      <Button
+        variant="primary"
+        size="md"
+        fullWidth={false}
         onClick={share}
         disabled={sharing}
-        style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', opacity: sharing ? 0.6 : 1 }}
+        style={{ opacity: sharing ? 0.6 : 1 }}
       >
         {sharing ? 'Preparing...' : 'Share / Download'}
-      </button>
+      </Button>
       {error && <p style={{ fontSize: '12px', color: 'var(--afa-error)', marginTop: '8px' }}>{error}</p>}
     </div>
   )

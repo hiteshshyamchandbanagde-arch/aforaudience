@@ -4006,3 +4006,45 @@ value, reasoned rather than screenshotted.
 
 Built on `feat/gen-2609-059-venuecard-radius`, branched from `qa` at
 `78934c8`.
+
+## GEN-2609-064 - remaining button-shaped terracotta sites, and a real recount
+
+**Re-verified fresh rather than trusting the dispatch's own tally:**
+found **14 real sites, not 13.** The dispatch's own list undercounted
+`dashboard/artist/edit/page.tsx` by omitting one row (it names the
+avatar-upload label and "Save Profile" alongside "3 of this file's
+only terracotta usages," which is internally correct - 3 - but the
+list above it separately loses count elsewhere). Recounted directly
+from a fresh grep rather than trying to reconcile the prior text.
+
+**10 sites migrated to `Button` (or `variantStyle` directly for the
+one `<label>`), same pattern as `-058`/`-061`:**
+- `artist/edit/page.tsx`'s avatar-upload label -> `variantStyle('primary', false, 'md')` (exact match, same treatment as `organiser/edit`'s identical pattern in `-058`).
+- `artist/edit/page.tsx`'s "Save Profile" -> `size="lg"` (12/26 -> 12/24, standard 2px rounding).
+- `dashboard/organiser/events/[id]/page.tsx`'s publish-toggle button -> `size="lg"` + a `style` override for its `APPROVED`-vs-not two-state background/border/color, same escape hatch `-061`'s "Save Lineup" established for a background gated on an unrelated boolean rather than the button's own `disabled` state.
+- `venue/[id]/edit/page.tsx`'s "Save" -> `size="lg"` (12/26 -> 12/24).
+- `AudienceChoiceVoting.tsx`'s vote-submit -> `size="md"` (weight 700->600, padding 8/16->9/17 - both within established rounding tolerance) - fixes its `color: 'white'` bug for free.
+- `PosterShareCard.tsx`'s share button -> `size="md"` (9/18 vs 9/17, near-exact) - confirmed it needed nothing but the background swap, already correctly on `--afa-on-fill-solid`, per the dispatch's own instruction to verify rather than assume.
+- `artist/page.tsx`'s reply button -> `size="sm"` + a `style` override preserving its real `8px 16px` padding (sm's canonical 4px 10px would have been a materially bigger visual change than the usual 1-2px rounding, so overridden instead of accepted) - fixes its `color: 'white'` bug for free.
+- `artist/events/page.tsx`'s Apply/Waitlist button -> `size="sm"` + `style` overrides for its own two-state color/background/border (mirrors the same `full`-gated pattern as the publish-toggle button above) and its real `8px 20px`/`13px` padding/font-size.
+- `verify-phone/page.tsx`'s 2 submit buttons -> **`variant="form-submit"`, not `primary size="lg"` as the dispatch suggested.** Checked both real buckets before assuming: full-width, `padding: 14px` (form-submit's is 16, a 2px rounding), `fontSize: 15px` (form-submit's exact value; `lg`'s is 14, further off) - these are auth-flow OTP-verification buttons in the same shape family as `login`/`register`/`forgot-password`/`reset-password`'s already-`form-submit` buttons, not `dashboard/organiser`'s boxy CTA family. `size="lg"` would have been the "don't force a mismatch" violation this ticket's own dispatch warned against; `form-submit` is the real fit.
+
+**4 sites flagged, not migrated - genuine shape mismatches, same
+discipline as `GEN-2609-060`'s Badge work:**
+- `artist/edit/page.tsx`'s "+ Add tour stop" - a dashed-outline button (`background: transparent`, `border: 1px dashed`). No existing `Button` variant renders a dashed border; `outline`'s solid `1.5px` border and on-fill-solid-container assumption don't fit a standalone dashed CTA. Needs a real decision (a new variant, or confirmation this one stays custom), not a forced substitution.
+- `DisplayNameNudge.tsx` and `PhoneVerifyNudge.tsx` - **identical shape, found together**: `padding: 6px 14px`, `borderRadius: 999` (a full pill), `fontSize: 13`, `color: 'white'` bug on both. `999` doesn't match any `size` bucket's radius (6/8/8) - this is a real, recurring "nudge-banner pill CTA" shape distinct from dashboard's boxy buttons, with 2 real consumers already. A genuine size/variant addition candidate (similar to how `-060` added `Badge` sizes when a shape recurred), not something to invent unilaterally here.
+- `pwa/InstallPrompt.tsx`'s "Install" button - also pill-radius (999), but with different padding (`10px 18px`) and font-size (`14px`) than the nudge duo above - a *third* distinct pill variant, not the same shape as the other two. Also has the `color: 'white'` bug. Flagged separately since forcing it into the same hypothetical new size as the nudge pair would itself be a mismatch.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff: clean, 0 offenses. Real `next build`: clean, all touched
+routes present (`/dashboard/artist/edit`, `/dashboard/artist/events`,
+`/dashboard/artist`, `/dashboard/organiser/events/[id]`, `/dashboard/
+venue/[id]/edit`, `/verify-phone`). Repo-wide grep after the change:
+the 10 migrated sites show zero remaining `--afa-terracotta`; the 4
+flagged sites are the only real button-shaped occurrences left
+anywhere in the repo. No visual verification possible (no browser tool
+this session) - every site's property delta from its pre-migration
+value is quantified above instead of screenshot-diffed.
+
+Built on `feat/gen-2609-064-remaining-terracotta-buttons`, branched
+from `qa` at `3decea2`.
