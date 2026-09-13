@@ -12,7 +12,7 @@ const inputStyle = (hasError?: boolean) => ({
   width: "100%",
   padding: "12px 14px",
   borderRadius: "8px",
-  border: `1.5px solid ${hasError ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`,
+  border: `1.5px solid ${hasError ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`,
   fontSize: "14px",
   color: "var(--afa-text-primary)",
   background: "transparent",
@@ -336,12 +336,12 @@ export default function RegisterForm() {
 
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
             {devOtp && (
-              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
+              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-amber)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
             {error && (
-              <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
+              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
                 {error}
               </div>
             )}
@@ -413,7 +413,7 @@ export default function RegisterForm() {
           )}
 
           {error && (
-            <div style={{ background: "var(--afa-terracotta-tint)", border: "1px solid var(--afa-terracotta)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-terracotta)" }}>
+            <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
               {error}
             </div>
           )}
@@ -495,13 +495,13 @@ export default function RegisterForm() {
                 </p>
               )}
               {usernameStatus === "taken" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-terracotta)" }}>
+                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-error)" }}>
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-terracotta)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
+                      style={{ color: "var(--afa-error)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </button>
@@ -509,7 +509,7 @@ export default function RegisterForm() {
                 </p>
               )}
               {fieldErrors.username && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.username}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.username}</p>
               )}
             </div>
 
@@ -524,7 +524,7 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.email)}
               />
               {fieldErrors.email && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.email}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.email}</p>
               )}
             </div>
 
@@ -534,7 +534,7 @@ export default function RegisterForm() {
                   bordered container replacing the old two-separate-boxes
                   look; +91 prefix and the number input now share one
                   border with an internal divider, per Figma. */}
-              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-terracotta)" : "rgba(245,245,240,0.12)"}`, borderRadius: "8px", overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`, borderRadius: "8px", overflow: "hidden" }}>
                 <div style={{ display: "flex", alignItems: "center", padding: "0 14px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid rgba(245,245,240,0.12)" }}>
                   +91
                 </div>
@@ -551,7 +551,7 @@ export default function RegisterForm() {
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-terracotta)" }}>{fieldErrors.phone}</p>
+                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.phone}</p>
               )}
             </div>
 
