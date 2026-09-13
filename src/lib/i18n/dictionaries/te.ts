@@ -322,6 +322,18 @@ const te: Dictionary = {
     ariaLabel: "నోటిఫికేషన్‌లను ఆన్ చేయండి",
     dismissAriaLabel: "మూసివేయండి",
   },
+  welcomeSequence: {
+    step1Heading: "AforAudience కి స్వాగతం",
+    step1Subtitle: "లైవ్ షోలను కనుగొనండి, మీకు ఇష్టమైన కళాకారులను ఫాలో అవ్వండి, ఏ క్షణాన్ని మిస్ కావద్దు.",
+    getStartedButton: "ప్రారంభించండి",
+    step2Heading: "మీ ఫోన్‌ని ధృవీకరించండి",
+    step2Intro: "ఒక త్వరిత కోడ్ మీ ఖాతాను సురక్షితంగా ఉంచుతుంది.",
+    skipButton: "ఇప్పుడు కాదు",
+    noPhoneOnFileMessage: "ఇంకా ఫోన్ నంబర్ నమోదు కాలేదు — మీరు దీన్ని ఎప్పుడైనా మీ ప్రొఫైల్ నుండి జోడించవచ్చు.",
+    step4Heading: "మీరు సిద్ధంగా ఉన్నారు",
+    step4FallbackCta: "ఈవెంట్‌లను బ్రౌజ్ చేయడం ప్రారంభించండి",
+    step4RoleCtaTemplate: "{role} గా దరఖాస్తు చేయండి",
+  },
   messagesInboxPage: {
     heading: "సందేశాలు",
     emptyState: "ఇంకా సంభాషణలు లేవు. స్పాట్, వేదిక బుకింగ్, లేదా టికెట్ నిర్ధారించబడిన వెంటనే థ్రెడ్‌లు వాటంతట అవే తెరుచుకుంటాయి.",

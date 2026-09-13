@@ -19,7 +19,17 @@ import { isValidEmailFormat } from "@/lib/validation"
 // Only +91 numbers actually receive an OTP right now (MSG91 is India-only).
 export async function POST(req: NextRequest) {
   try {
-    const { username, email, phone, password, fullName } = await req.json()
+    const { username, email, phone, password, fullName, intendedRole } = await req.json()
+    // GEN-2609-042 - purely informational, never the account's real role
+    // (see the browse-first note above - that still holds, role is always
+    // AUDIENCE). Whitelisted against the same 3 values the "Join As X"
+    // landing links and RegisterForm's own copy already use; anything else
+    // (missing, garbage, tampered) is silently dropped to null rather than
+    // rejecting the whole signup over a cosmetic field.
+    const normalizedIntendedRole =
+      intendedRole === "artist" || intendedRole === "organiser" || intendedRole === "venue"
+        ? intendedRole
+        : null
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : email
     const normalizedUsername = typeof username === "string" ? username.trim() : username
     const normalizedPhone = typeof phone === "string" ? phone.trim() : phone
@@ -119,6 +129,7 @@ export async function POST(req: NextRequest) {
         role: "AUDIENCE",
         isVerified: false,
         isApproved: true,
+        intendedRole: normalizedIntendedRole,
       }
     })
 

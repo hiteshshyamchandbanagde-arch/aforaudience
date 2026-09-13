@@ -361,6 +361,37 @@ model User {
   // validating in the NextAuth session callback.
   tokenVersion Int @default(0)
 
+  // GEN-2609-042 - Step 6's onboarding welcome sequence. Null means "has
+  // not completed (or skipped past) the sequence yet" - gates whether the
+  // full-screen takeover shows on next login. Set once, on the sequence's
+  // final screen (PATCH onboardedAt = now()) regardless of whether every
+  // step was completed or skipped - the sequence itself is never
+  // skippable as a whole (browse-first/never-block still applies via each
+  // step's own "not now"), only re-entered. Every pre-existing row was
+  // backfilled to its own createdAt at migration time (not `now()`, which
+  // would falsely cluster 233 real users into one instant and corrupt any
+  // future cohort/analytics query on this column) so no pre-existing user
+  // sees the sequence retroactively.
+  onboardedAt DateTime?
+
+  // GEN-2609-042 - captured once at registration from the `?role=` query
+  // param RegisterForm.tsx already reads (artist/organiser/venue,
+  // lowercase - matches the query-param vocabulary already threaded
+  // through register -> login -> profile, not the Role enum's
+  // ARTIST/ORGANISER/VENUE_OWNER naming). Every account is created with
+  // role AUDIENCE regardless (see register/route.ts) - becoming
+  // Artist/Organiser/Venue Owner only ever happens later via the
+  // apply-and-admin-approve flow, so this is purely the "what did they
+  // click through to get here" signal for the onboarding sequence's final
+  // card, never a real role and never changed after registration.
+  // Previously this survived only as a URL query param through the
+  // register -> login -> profile redirect chain, which works for an
+  // immediate first login but is lost on any delayed one (e.g. a user who
+  // registers, closes the tab, and logs in fresh days later) - persisted
+  // here since the onboarding sequence's last screen needs it to still be
+  // there whenever that first login actually happens.
+  intendedRole String?
+
   artist                Artist?
   organiser              Organiser?
   venueOwner             VenueOwner?

@@ -62,7 +62,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null } = {}
+    const updates: { displayName?: string | null; avatar?: string | null; displayCurrency?: string | null; bio?: string | null; onboardedAt?: Date } = {}
 
     // Only touch displayName if it appears in the body. Undefined means
     // "not touched"; null/empty string means "clear". A trimmed non-empty
@@ -136,6 +136,19 @@ export async function PATCH(req: Request) {
         updates.bio = raw.trim().slice(0, 500)
       } else {
         return NextResponse.json({ error: 'bio must be a string or null' }, { status: 400 })
+      }
+    }
+
+    // GEN-2609-042 - onboarding welcome sequence's completion marker.
+    // Deliberately a boolean flag, not a client-supplied date: the
+    // server always stamps its own `now()` rather than trusting whatever
+    // timestamp a client might send. Only ever moves null -> a real date,
+    // never cleared or moved backward from here.
+    if (Object.prototype.hasOwnProperty.call(body, 'onboardingComplete')) {
+      if (body.onboardingComplete === true) {
+        updates.onboardedAt = new Date()
+      } else {
+        return NextResponse.json({ error: 'onboardingComplete must be true' }, { status: 400 })
       }
     }
 

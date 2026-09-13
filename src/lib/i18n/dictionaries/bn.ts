@@ -322,6 +322,18 @@ const bn: Dictionary = {
     ariaLabel: "বিজ্ঞপ্তি সক্ষম করুন",
     dismissAriaLabel: "খারিজ করুন",
   },
+  welcomeSequence: {
+    step1Heading: "AforAudience-এ স্বাগতম",
+    step1Subtitle: "লাইভ শো আবিষ্কার করুন, আপনার প্রিয় শিল্পীদের ফলো করুন, এবং কোনো মুহূর্ত মিস করবেন না।",
+    getStartedButton: "শুরু করুন",
+    step2Heading: "আপনার ফোন যাচাই করুন",
+    step2Intro: "একটি দ্রুত কোড আপনার অ্যাকাউন্ট সুরক্ষিত রাখে।",
+    skipButton: "এখন নয়",
+    noPhoneOnFileMessage: "এখনও কোনো ফোন নম্বর নেই — আপনি যেকোনো সময় আপনার প্রোফাইল থেকে একটি যোগ করতে পারেন।",
+    step4Heading: "আপনি প্রস্তুত",
+    step4FallbackCta: "ইভেন্ট ব্রাউজ করা শুরু করুন",
+    step4RoleCtaTemplate: "{role} হিসেবে আবেদন করুন",
+  },
   messagesInboxPage: {
     heading: "বার্তা",
     emptyState: "এখনও কোনো কথোপকথন নেই। স্পট, ভেন্যু বুকিং, বা টিকিট নিশ্চিত হওয়া মাত্র থ্রেড স্বয়ংক্রিয়ভাবে খুলে যায়।",

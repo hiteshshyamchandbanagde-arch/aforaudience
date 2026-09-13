@@ -321,6 +321,18 @@ const hi: Dictionary = {
     ariaLabel: "सूचनाएं चालू करें",
     dismissAriaLabel: "बंद करें",
   },
+  welcomeSequence: {
+    step1Heading: "AforAudience में आपका स्वागत है",
+    step1Subtitle: "लाइव शो खोजें, अपने पसंदीदा कलाकारों को फॉलो करें, और कोई भी पल न चूकें।",
+    getStartedButton: "शुरू करें",
+    step2Heading: "अपना फ़ोन सत्यापित करें",
+    step2Intro: "एक त्वरित कोड आपके खाते को सुरक्षित रखता है।",
+    skipButton: "अभी नहीं",
+    noPhoneOnFileMessage: "अभी तक कोई फ़ोन नंबर दर्ज नहीं है — आप इसे कभी भी अपनी प्रोफ़ाइल से जोड़ सकते हैं।",
+    step4Heading: "आप तैयार हैं",
+    step4FallbackCta: "इवेंट्स देखना शुरू करें",
+    step4RoleCtaTemplate: "{role} के रूप में आवेदन करें",
+  },
   messagesInboxPage: {
     heading: "संदेश",
     emptyState: "अभी तक कोई बातचीत नहीं है। स्पॉट, स्थल बुकिंग, या टिकट पुष्ट होते ही थ्रेड अपने आप खुल जाते हैं।",

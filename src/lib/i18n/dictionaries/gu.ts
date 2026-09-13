@@ -322,6 +322,18 @@ const gu: Dictionary = {
     ariaLabel: "સૂચનાઓ સક્ષમ કરો",
     dismissAriaLabel: "કાઢી નાખો",
   },
+  welcomeSequence: {
+    step1Heading: "AforAudience માં આપનું સ્વાગત છે",
+    step1Subtitle: "લાઇવ શો શોધો, તમારા મનપસંદ કલાકારોને ફોલો કરો, અને કોઈ પણ ક્ષણ ચૂકશો નહીં.",
+    getStartedButton: "શરૂ કરો",
+    step2Heading: "તમારો ફોન વેરિફાય કરો",
+    step2Intro: "એક ઝડપી કોડ તમારા ખાતાને સુરક્ષિત રાખે છે.",
+    skipButton: "અત્યારે નહીં",
+    noPhoneOnFileMessage: "હજુ સુધી કોઈ ફોન નંબર નોંધાયેલ નથી — તમે તેને ગમે ત્યારે તમારી પ્રોફાઇલમાંથી ઉમેરી શકો છો.",
+    step4Heading: "તમે તૈયાર છો",
+    step4FallbackCta: "ઇવેન્ટ્સ બ્રાઉઝ કરવાનું શરૂ કરો",
+    step4RoleCtaTemplate: "{role} તરીકે અરજી કરો",
+  },
   messagesInboxPage: {
     heading: "સંદેશા",
     emptyState: "હજુ સુધી કોઈ વાતચીત નથી. સ્પોટ, સ્થળ બુકિંગ, અથવા ટિકિટની પુષ્ટિ થતાં જ થ્રેડ્સ આપમેળે ખુલે છે.",

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/i18n/translate';
+import { subscribeAndSave } from '@/lib/push-subscribe';
 
 /**
  * "Enable notifications" nudge. Any logged-in role can benefit (admin
@@ -27,41 +28,6 @@ import { useLocale } from '@/lib/i18n/translate';
 
 const EXCLUDED_PATH_PREFIXES = ['/auth', '/checkout', '/verify-phone', '/api'];
 const DISMISSED_KEY = 'afora-notif-nudge-dismissed';
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
-}
-
-async function subscribeAndSave() {
-  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!vapidKey) {
-    console.warn('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not set');
-    return;
-  }
-
-  const reg = await navigator.serviceWorker.ready;
-  const existing = await reg.pushManager.getSubscription();
-  // Permission being 'granted' does NOT guarantee a subscription object
-  // exists on this device - e.g. if permission was granted at some point
-  // before the VAPID public key was available client-side, subscribe()
-  // was never actually called. Create one now if that's the case; since
-  // permission is already decided, this won't show any prompt.
-  const sub =
-    existing ||
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidKey),
-    }));
-
-  await fetch('/api/push/subscribe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ subscription: sub.toJSON() }),
-  });
-}
 
 export default function NotificationOptIn() {
   const { data: session, status } = useSession();

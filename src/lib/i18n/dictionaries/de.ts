@@ -331,6 +331,18 @@ const de: Dictionary = {
     ariaLabel: "Benachrichtigungen aktivieren",
     dismissAriaLabel: "Schließen",
   },
+  welcomeSequence: {
+    step1Heading: "Willkommen bei AforAudience",
+    step1Subtitle: "Entdecke Live-Shows, folge deinen Lieblingskünstlern und verpasse keinen Moment.",
+    getStartedButton: "Loslegen",
+    step2Heading: "Bestätige deine Telefonnummer",
+    step2Intro: "Ein kurzer Code schützt dein Konto.",
+    skipButton: "Jetzt nicht",
+    noPhoneOnFileMessage: "Noch keine Telefonnummer hinterlegt — du kannst jederzeit eine über dein Profil hinzufügen.",
+    step4Heading: "Du bist startklar",
+    step4FallbackCta: "Events durchstöbern",
+    step4RoleCtaTemplate: "Als {role} bewerben",
+  },
   messagesInboxPage: {
     heading: "Nachrichten",
     emptyState: "Noch keine Unterhaltungen. Threads öffnen sich automatisch, sobald ein Slot, eine Standortbuchung oder ein Ticket bestätigt wurde.",

@@ -326,6 +326,18 @@ const es: Dictionary = {
     ariaLabel: "Activar notificaciones",
     dismissAriaLabel: "Descartar",
   },
+  welcomeSequence: {
+    step1Heading: "Bienvenido a AforAudience",
+    step1Subtitle: "Descubre espectáculos en vivo, sigue a tus artistas favoritos y no te pierdas ningún momento.",
+    getStartedButton: "Empezar",
+    step2Heading: "Verifica tu teléfono",
+    step2Intro: "Un código rápido protege tu cuenta.",
+    skipButton: "Ahora no",
+    noPhoneOnFileMessage: "Aún no hay un número de teléfono registrado — puedes añadir uno en cualquier momento desde tu perfil.",
+    step4Heading: "Ya estás listo",
+    step4FallbackCta: "Empezar a explorar eventos",
+    step4RoleCtaTemplate: "Postularme como {role}",
+  },
   messagesInboxPage: {
     heading: "Mensajes",
     emptyState: "Aún no hay conversaciones. Los hilos se abren automáticamente en cuanto se confirma un cupo, una reserva de recinto o una entrada.",
