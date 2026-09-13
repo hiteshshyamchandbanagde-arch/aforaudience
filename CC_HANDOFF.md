@@ -779,3 +779,38 @@ Hitesh that the terracotta/button-centralization sweep is otherwise
 done, then take the 2 remaining flagged items (dashed button,
 `layout.tsx`/`manifest.ts` PWA coupling) and `-059`'s hover direction
 as the next real decisions.
+
+## Chat-side session note — 13 Sep, later session (git/session state only)
+
+Merged `#626` (`-060`) through `#633` (`-066`) in sequence: `-060`
+clean, `-061` conflicted (real local merge, docs/design.md prose
+only), `-062` conflicted same way, `-063` conflicted same way (the
+flagged `-062`/`-063` overlap on `dashboard/artist/page.tsx` was
+pre-tested in an isolated throwaway merge before touching `qa` for
+real - confirmed clean, adjacent but non-overlapping lines - then
+merged for real with the same result), `-059` conflicted same way
+(also independently re-verified its hover-direction finding against
+the real CSS before merging - confirmed `EventCard`'s hover really is
+just a border-color transition, `VenueCard`'s really is richer),
+`-064` clean, `-065` conflicted same way, `-066` clean. Every
+conflict was the same shape throughout: only `docs/design.md`'s
+changelog prose, code always auto-merged clean. `qa` HEAD at end of
+this session: `c2ad606136...` (`GEN-2609-066`'s squash merge,
+confirmed via GitHub API before writing this note, not assumed).
+
+Fresh PAT pasted directly into chat this session, stored at
+`/home/claude/afa/token.txt` (chmod 600), sandbox-local as always.
+`which gh`/`$GITHUB_TOKEN`: not checked from chat's side this session
+(no local dev environment access). No local commits anywhere ahead of
+`origin/qa` at end of session - every merge pushed immediately after
+resolving.
+
+The unclaimed `stash@{0}` is still untouched, now spanning several
+sessions across both chat and CC. Worth a direct decision from Hitesh
+soon rather than continuing to flag it indefinitely.
+
+**Next session (CC or chat) should:** run the standing sync, read
+`HANDOFF.md`'s updated open-items list, and take the 3 real open
+decisions (dashed-outline button, PWA `theme_color` coupling,
+`GEN-2609-059`'s hover direction) to Hitesh - none of them need more
+investigation, only his call.

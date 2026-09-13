@@ -170,3 +170,50 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item.
 5. Merge `GEN-2609-066` (compare URL in `CC_HANDOFF.md`), then take the 2 remaining sweep items and `GEN-2609-059`'s hover direction back to Hitesh — the terracotta/button-centralization sweep itself is otherwise done.
+
+---
+
+# Session update (chat, 13 Sep, later session) — merged GEN-2609-060 through -066, closes the terracotta/button-centralization sweep
+
+**Ships this session:** chat merged `GEN-2609-060` (Badge `micro`/`tag`/`pill` sizes), `-061` (3 remaining terracotta buttons), `-062` (13 duplicate `@keyframes afa-spin` → 1, in `globals.css`), `-063` (repo-wide non-button terracotta migration, real scope ~90 occurrences/~40 files vs the ~27 estimated), `-059` (VenueCard radius fix; hover half correctly stopped on a backwards premise), `-064` (14 remaining button-shaped terracotta sites outside `dashboard/organiser/`, not 13), `-065` (`RegisterForm.tsx`'s real error-color bug, routed to `--afa-error`), and `-066` (pill-shaped `Button` sizes, the sweep's actual close). `qa` HEAD now `c2ad606`. All verified `READY` on Vercel, zero runtime errors after each merge.
+
+**Six real `docs/design.md` merge conflicts, all resolved the same way** — a real local `git clone`+`git merge` (never API guesswork), only the changelog prose ever conflicted, code always auto-merged clean. One flagged cross-branch risk (`-062`/`-063` both touching `dashboard/artist/page.tsx`) was pre-tested locally in an isolated throwaway merge *before* touching `qa` for real — confirmed clean (adjacent but non-overlapping lines), then merged for real with the same result.
+
+**A correction on chat's own earlier work, for the record:** the comparison mockup shown to Hitesh mid-session (before `-059` was dispatched) depicting `EventCard` with a rich hover treatment (lift, shadow, amber) was wrong — built from a stale docs description, not the real code. Verified fresh before merging `-059`: `EventCard`'s hover is a bare border-color transition in `(public)/events/page.tsx`; `VenueCard` already has the richer treatment (`hover-lift-card`'s translateY+shadow plus its own amber border/title-color transition). `-059`'s dispatch had the direction backwards as a direct result of this — CC caught it on re-verification rather than building the wrong thing, and chat independently re-confirmed before merging rather than taking either its own prior mockup or CC's correction on faith.
+
+**Every ticket's own real findings, not re-summarized here** — see `docs/design.md`'s `GEN-2609-059` through `-066` entries for the full detail (wrong-premise corrections, exact per-site before/after values, the `Button` `onClick`/`ButtonAsLink` API gap `-066` found and fixed).
+
+## Open items for next session (updated)
+
+**Resolved, remove from any older list:** `GEN-2609-052` through `-066`, all merged into `qa` (`c2ad606`). The terracotta/button-centralization sweep is done except the 2 items below.
+
+**Still genuinely open — 3 real decisions, not busywork:**
+1. `dashboard/artist/edit/page.tsx`'s dashed-outline "+ Add tour stop" button — no `Button` variant supports a dashed border. Needs a decision: add dashed-border support to `Button`, or leave as a documented one-off exception.
+2. `layout.tsx`'s `themeColor` / `manifest.ts`'s `theme_color` — coupled to a hardcoded PWA-manifest hex; swapping one side alone breaks a documented invariant. Needs Hitesh's call given the bigger blast radius (anyone who's already installed the PWA).
+3. `GEN-2609-059`'s hover-treatment direction — confirmed backwards from what was dispatched (`VenueCard` already has the richer hover; `EventCard`'s is plainer). Needs Hitesh to confirm actual intent before any hover CSS changes are made — most likely direction: give `EventCard` `VenueCard`'s treatment, but that's a guess, not a decision.
+
+**New this session, unrelated to terracotta, not investigated:** `DisplayNameNudge.tsx`'s own outer banner sits on `--afa-orange-tint`/`--afa-brown-dark` plus a literal `#F0D9BF` border — noticed only because its pill button (now dark-themed) sits right next to it. Looks like a pre-dark-theme-migration leftover. Flagged, not scoped.
+
+**Still open, unchanged from before this session:**
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
+- `GEN-2609-005` — blocked purely on the above.
+- `GEN-2609-009`, `GEN-2609-016` — ready to dispatch, not yet sent.
+- `GEN-2609-022` — `BUILD_COMPLETE`, live click-through still not confirmed.
+- `GEN-2609-036` — scoped, not dispatched.
+- Residual card/sheet-context `--afa-error` gap (4 files, 4.17:1) — needs a decision beyond a text-color swap.
+- Icon system consolidation, `calendar`/`tag`/`map` naming collision, icon sizing/strokeWidth standardization — all documented, none scheduled.
+- Push-content localization foundation (`User.locale` column + server-side persistence decision) — nobody's call made yet.
+- e2e verification gap for `GEN-2609-042` — still genuinely inconclusive, not re-attempted.
+- DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 6 sessions running.
+- IA question (hamburger drawer duplicating tab-bar items) — still waiting on Hitesh's go-ahead to dispatch.
+- The stray `stash@{0}` — still unresolved, now spanning multiple sessions.
+- Card (`VenueCard` vs `EventCard.tsx`) — still deliberately unmerged, 2 real differences remain after `-059` (dimming mechanism, grid/list layout mode); documented, not re-opened.
+- New central-control standing rule (per Hitesh, this session): all UI/UX elements must be centrally controlled, the app follows the design system as-is — no deviation expected. Filed in the project's design-system notes. Any future "genuine difference, left as documented exception" finding should be treated as needing an actual resolution under this rule, not a permanent shrug.
+
+## Session-start checklist (this session's version)
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `c2ad606`.
+2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
+3. Read this file, then `docs/design.md` for anything logged since.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 4+ sessions running.
+5. Take the 3 real open decisions above (dashed button, PWA theme-color coupling, `-059` hover direction) to Hitesh — nothing is blocked on investigation, only on his call.
