@@ -13,7 +13,7 @@ correcting; see Section 1 and Section 4.
 ## 1. Push send-site catalog
 
 `sendPushToUser`/`sendPushToRole` (`src/lib/push.ts`) are the only two
-functions that send a push. **Real count: 19 call-site files (not
+functions that send a push. **Real count: 20 call-site files (not
 `src/lib/push.ts` itself, which only defines them), 31 individual call
 sites (not "21 files / 25+ call sites")** - re-verified via
 `grep -rn "sendPushToUser(\|sendPushToRole(" --include="*.ts" --include="*.tsx" src`
