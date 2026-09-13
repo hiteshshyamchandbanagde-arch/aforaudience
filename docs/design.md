@@ -3406,3 +3406,70 @@ flagged as unverified, not claimed done.
 
 Built on `feat/gen-2609-054-form-submit-migration`, branched from `qa`
 at `33cc922`.
+
+## GEN-2609-057 - design-token check's relocated-literal blind spot
+
+`GEN-2609-056`'s own PR (#621) is what surfaced this: the check reported
+5 offenses purely from moving 3 existing `rgba()` values into a new
+shared `SpinnerOverlay.tsx`, none of them actually new debt. Verified
+the dispatch's claim before writing any fix (not taken on faith): `git
+grep -F` for each of the 3 flagged values (`rgba(20,20,20,0.7)`,
+`rgba(10,10,10,0.6)`, `rgba(245,245,240,0.15)`) against `origin/qa`'s
+`src/` tree found all 3 already present, unchanged, in multiple other
+files today.
+
+**Root cause:** the check only ever asked "is this line new in the
+diff," never "is this literal value new to the codebase." A pure
+extraction moves a literal onto a genuinely new line without changing
+its value - the diff can't tell that apart from real new debt.
+
+**Fix:** each rule now has an `extract(line)` alongside its existing
+`test(line)` - returns the exact literal substring(s) the rule matched
+(the hex token itself, the full `rgba(...)` text, or the font-family
+value). Before flagging, every extracted literal is checked against
+`BASE_REF`'s tree via `git grep --fixed-strings -e <literal> BASE_REF --
+src` (memoized per literal - many diffs repeat the same common value).
+Only if every literal on the line already exists verbatim somewhere in
+`src/` at the base ref is the line treated as relocated debt and
+skipped; if `extract` comes back empty for any reason, the line still
+fails open to being flagged rather than silently passing. Uses
+`execFileSync` (args array, not a shell string) for the grep call so
+literal values containing parens/commas/quotes need no manual escaping.
+
+**Verified against real history, not synthetic strings, per this
+script's standing convention:**
+1. Patched checker against `origin/feat/gen-2609-056-spinner-overlay-
+   extraction` (`BASE_REF=origin/qa`): 5 offenses -> 0. Confirms the
+   actual blocked PR.
+2. Patched checker against a genuine historical violation: `git log -S`
+   found `e110ebe` ("Checkpoint 3 - Ticket PDF + email delivery on
+   CONFIRMED") as the commit that introduced `src/lib/ticket-pdf.ts`'s
+   PDF-color constants (`rgb(0.055, 0.047, 0.039)` etc. - confirmed
+   unique in the current tree first, so this really is each value's
+   first-ever appearance, not a coincidental re-add). Running the
+   patched checker with `BASE_REF=e110ebe^ HEAD_REF=e110ebe` still
+   correctly reports 11 new literals (6 `rgb()` constants +
+   5 `#8a827a` hex hits in `checkout/page.tsx`/`email.ts`) - genuinely
+   new literals are caught exactly as before.
+3. The specific false-negative the dispatch flagged (editing an
+   existing value slightly, e.g. `rgba(20,20,20,0.7)` ->
+   `rgba(21,20,20,0.7)`, should NOT be silently treated as relocated)
+   doesn't occur naturally often enough in real history to isolate
+   cleanly, so verified it directly in an isolated scratch git repo
+   (not this project - cleaned up after): confirmed (a) an edited value
+   is still flagged (exit 1, 1 offense), and (b) the same unedited value
+   moved to a brand-new file is correctly skipped (exit 0). No unit-test
+   suite exists for this script (checked - none does); this project's
+   established pattern for it is exactly this kind of manual
+   dogfooding/verification pass, same as `-052`/`-053`'s own.
+4. No regression on the 3 existing rules or their own prior fixes (the
+   quoted-delimiter backreference for hex, the captured-value-only
+   font-family scoping) - both are untouched by this change, and step 2
+   above exercises the hex rule for real alongside the new rgba case.
+
+**Not touched:** `GEN-2609-056`'s own branch/PR #621 - per the
+dispatch, chat re-verifies against this patched checker and merges
+both from its side.
+
+Built on `feat/gen-2609-057-design-token-check-relocated-literals`,
+branched from `qa` at `6897714`.
