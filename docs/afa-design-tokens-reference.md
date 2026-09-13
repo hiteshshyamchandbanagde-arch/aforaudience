@@ -131,6 +131,32 @@ The visible "PUBLISHED" label in data (venue `status` field, per `docs/design.md
 
 **Not migrated this pass:** the many other `borderRadius: '999px'` pill `<span>`s elsewhere (admin feedback/bookings/diary pages, artist events/applications, organiser tours/lineup) each carry their own one-off tone map (e.g. `dashboard/artist/page.tsx`'s `APPLICATION_STYLE`) — real duplication of the same pattern, already flagged out of scope by GEN-2609-051's own header comment in `statusStyle.ts`, still out of scope here.
 
+## 5.1 Status tone system (GEN-2609-067 — the actual governed palette)
+
+Section 1's "core tokens" list undersells what's real and load-bearing: `STATUS_TONE` in [src/lib/statusStyle.ts](../src/lib/statusStyle.ts) is a second, equally-governed palette — 5 tones, each a `{ bg, color }` pair — that every status-badge site in the app is meant to draw from, rather than hand-typing its own `rgba()`/hex pair per status. It's exempt from `check-design-tokens.js`'s literal-check for exactly this reason (Section 1 above already lists it among the exemptions) — this is where new tone literals are *supposed* to live, not a gap in the checker.
+
+```js
+gold:   { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' }         // pending / draft / awaiting-action
+sage:   { bg: 'rgba(74,103,65,0.12)',  color: 'var(--afa-sage)' }         // approved / published / confirmed / accepted
+error:  { bg: 'rgba(179,38,30,0.1)',   color: 'var(--afa-error)' }        // cancelled / declined / failed
+muted:  { bg: 'rgba(245,245,240,0.08)',color: 'var(--afa-text-primary)' }// completed / neutral end-state
+orange: { bg: 'rgba(255,90,54,0.1)',   color: 'var(--afa-fill-solid)' }   // declined-with-emphasis (fill-solid hue, not error's red)
+```
+
+**Scoping rule, stated explicitly in the file's own header comment (GEN-2609-051):** each page owns its own `status → tone` mapping, keyed by that page's real domain statuses (a booking's lifecycle ≠ an event's — there's no `CONFIRMED` event status, no `DRAFT` booking status). What's shared is the *tone*, not a single cross-domain status table. Don't build a unified `STATUS_TONE.CANCELLED`-style export that tries to cover every domain's statuses at once — that would force domains that don't actually correspond into a false shared shape. `dashboard/organiser/page.tsx`'s `STATUS_STYLE` (event statuses) and `tickets/page.tsx`'s booking-status map are the two real, currently-scoped consumers; several other status-badge objects elsewhere (`dashboard/artist/page.tsx`'s `APPLICATION_STYLE`, `dashboard/organiser/tours/page.tsx`, etc.) reuse the same 5 tones but aren't migrated onto this table yet — real duplication, already flagged out of scope by the file's own header, not an oversight.
+
+**`Badge` component variants** ([src/components/ui/Badge.tsx](../src/components/ui/Badge.tsx), GEN-2609-053/-060) — render a tone via `<Badge variant="..." tone={STATUS_TONE.x}>{label}</Badge>`. The component owns only pill *chrome* (font-size/padding/radius); tone stays the caller's own domain-scoped value per the rule above. 5 variants exist because the real shipped chrome genuinely differs by call site — audited before assuming any two matched, not merged on a guess:
+
+| Variant | Chrome | Real call sites |
+|---|---|---|
+| `status` (default) | `11px` / `700` / uppercase / `0.05em` letter-spacing / `5px 10px` padding / `999px` radius | `dashboard/organiser/page.tsx` event-status pills |
+| `status-compact` | `11px` / `700` / no uppercase / `4px 10px` padding / `999px` radius | `tickets/page.tsx` booking-status, attended/missed, confirmed pills |
+| `micro` | `10px` / `700` / `2px 8px` padding / `999px` radius | `admin/feedback` category/severity badges |
+| `tag` | `11px` / `500` / `2px 8px` padding / `999px` radius | `admin/bookings`'s "FREE" tag — a fixed fact, not a lifecycle state |
+| `pill` | `13px` / `700` / `5px 12px` padding / `999px` radius | `artist/events`' compensation pill, "Lineup full" pill |
+
+**Related, but deliberately not part of `STATUS_TONE`:** `FILL_SOLID_TINT` (`rgba(255,90,54,0.08)`) and `FILL_SOLID_BORDER_TINT` (`rgba(255,90,54,0.25)`), plus the `fillSolidTint(alpha)` helper, live in the same file (GEN-2609-063/-066) but aren't a 6th tone — they're the translucent-selected-state companion to `--afa-fill-solid`, which (unlike `--afa-error`/`--afa-gold`/`--afa-sage`) has no CSS-level "-tint" variable of its own.
+
 ## 6. Illustrated no-photo fallback (reuse candidate for dashboard empty states)
 
 [VenueNoPhoto.tsx](../src/components/VenueNoPhoto.tsx) (venues) and the equivalent `ArtistNoPhoto.tsx` (artists) — **not** literally named "VenueFallback" in current source (that was the Figma export's name; the shipped component is `VenueNoPhoto`, default export).
