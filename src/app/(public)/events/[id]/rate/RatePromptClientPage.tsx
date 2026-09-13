@@ -153,7 +153,7 @@ export default function RatePromptClientPage({
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
               placeholder={tr.ratePromptPage.commentPlaceholder}
-              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "white", color: "var(--afa-ink)" }}
+              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
             {overallError && <p style={{ color: "var(--afa-error)", fontSize: "13px", marginTop: "8px" }}>{overallError}</p>}
             <button
@@ -209,7 +209,7 @@ export default function RatePromptClientPage({
                       <button
                         onClick={() => submitPerformer(p.id)}
                         disabled={!perfDrafts[p.id] || perfSubmitting === p.id}
-                        style={{ fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-fill-solid)", color: "white", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
+                        style={{ fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
                       >
                         {tr.ratePromptPage.rateBtn}
                       </button>

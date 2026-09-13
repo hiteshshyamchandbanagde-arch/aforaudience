@@ -327,7 +327,7 @@ export default function EditArtistProfilePage() {
             ))}
             <button
               onClick={addTourStop}
-              style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', background: 'transparent', border: '1px dashed var(--afa-terracotta)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
+              style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-fill-solid)', background: 'transparent', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
             >
               + Add tour stop
             </button>

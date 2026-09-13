@@ -98,9 +98,9 @@ export default function DisplayNameNudge() {
       role="status"
       aria-label="Add your display name"
       style={{
-        background: 'var(--afa-orange-tint)',
-        color: 'var(--afa-brown-dark)',
-        borderBottom: '1px solid #F0D9BF',
+        background: 'rgba(201,151,58,0.15)',
+        color: 'var(--afa-text-primary)',
+        borderBottom: '1px solid var(--afa-amber)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -135,7 +135,7 @@ export default function DisplayNameNudge() {
         style={{
           background: 'transparent',
           border: 'none',
-          color: 'var(--afa-brown-dark)',
+          color: 'var(--afa-text-primary)',
           padding: '4px 8px',
           fontSize: 18,
           opacity: 0.6,

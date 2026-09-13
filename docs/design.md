@@ -4192,3 +4192,145 @@ re-discovered here, just still genuinely unresolved:**
 
 Built on `feat/gen-2609-066-pill-button-sizes`, branched from `qa` at
 `0621ed1`.
+
+## GEN-2609-067 - single-pass fix of an 8-item repo audit (items 1-7; item 8 follow-up)
+
+A full repo audit against `qa` HEAD `4c8393e`, dispatched as one batch
+with exact file:line locations. Re-verified every file fresh before
+editing, per standing convention - premises held up this time, no
+count corrections needed.
+
+**1. PWA `theme_color` (resolves the open item from `-066`).**
+`layout.tsx:119`'s `themeColor` retargeted from `var(--afa-terracotta)`
+to `var(--afa-fill-solid)`; `manifest.ts`'s hardcoded `theme_color` hex
+(manifests can't use CSS vars) moved from `#C8441A` to `#FF5A36` to
+match. Both sides now point at the same color again - previously
+flagged as a "swapping one side alone breaks the pair" trap.
+
+**2. Dashed-button decision (resolves the other open item from
+`-064`).** No `design.md` note argued for amber on `artist/edit/
+page.tsx:330`'s "+ Add tour stop" button, so it retargeted to
+`--afa-fill-solid` for consistency with the rest of the sweep, same as
+every other bare terracotta swap.
+
+**3. `/tickets/` page CTA-orange misuse.** `--afa-fill-solid` is
+reserved for CTA/payment/booking-commit only. "Pay now" (~line 583) is
+correctly fill-solid and untouched. "Download ticket (PDF)" (~line
+601) and the tag-confirm button (~line 349) were also fill-solid -
+same visual weight as a payment button for actions that aren't
+payments. Both changed to a translucent amber outline (`color:
+var(--afa-amber)`, `background: transparent`, `border: 1px solid
+rgba(201,151,58,0.4)`), matching the existing secondary/outline
+pattern elsewhere on the page rather than inventing a new one.
+
+**4. Seat-map editor - the real migration gap, budgeted the most
+time.** `dashboard/venue/[id]/seat-map/page.tsx` had 11 live
+`--afa-ink`/`--afa-white` hits, confirmed on a fresh grep (matched the
+dispatch's count this time). Full migration to `--afa-surface-*`/
+`--afa-text-*`/`--afa-fill-solid`. Three of the eleven were more than a
+token rename: selection/marker outlines used near-black `--afa-ink` on
+the already-dark `--afa-surface-page` canvas, so the "selected" state
+was *less* visible than "unselected" - a real inverted-visibility bug,
+not just a wrong token name. Fixed with `--afa-fill-solid`/`--afa-cream`
+(bright, unambiguous) instead of another dark-ish token that would
+have preserved the same bug under a new name.
+
+**5. Auth-page legacy banners.** `forgot-password/page.tsx:72` and
+`reset-password/page.tsx:93`'s identical error banners moved from
+`var(--afa-terracotta-tint)`/`var(--afa-terracotta)` to
+`rgba(179,38,30,0.1)` / `rgba(179,38,30,0.3)` border / `var(--afa-error)`
+text - the same tint-ratio pattern already used elsewhere in the dark
+theme, not a new one. `RegisterForm.tsx:340`'s QA-mode dev-otp notice
+moved from `var(--afa-amber-tint)`/`var(--afa-ink)` to
+`rgba(201,151,58,0.15)`/`var(--afa-text-primary)` (border was already
+`--afa-amber` from a prior ticket).
+
+**6. Light-mode leftovers - the long tail.** Migrated every file on
+the dispatch's list: `SearchBox.tsx`, `OrganisersGridEmbed.tsx`,
+`VenueOwnersGridEmbed.tsx`, `AudienceChoiceVoting.tsx`, `organisers/
+page.tsx`, `venue-owners/page.tsx`, `RatePromptClientPage.tsx`,
+`PhoneVerifyNudge.tsx`, `LegalDocLayout.tsx`, `EnvBadge.tsx`,
+`SeatLayoutPreview.tsx`, `SeatPicker.tsx`, `dev/razorpay-test/page.tsx`,
+`about/page.tsx`. `OrganisersGridEmbed.tsx`/`VenueOwnersGridEmbed.tsx`
+were also moved off `--afa-error-bg`/`--afa-error-border` onto the same
+translucent-error pattern as item 5.
+
+Several bugs found beyond the dispatch's own list, each confirmed by
+reading full context before fixing rather than blind token-swapping:
+- `AudienceChoiceVoting.tsx` had a white card behind already-dark
+  `--afa-text-primary` text - invisible text, not just off-palette.
+- `RatePromptClientPage.tsx:212` had an unlisted `color: 'white'` on a
+  fill-solid button; fixed to `var(--afa-on-fill-solid)` to match the
+  rest of the file's own already-correct buttons.
+- `SeatLayoutPreview.tsx`'s canvas container (~line 81) was itself an
+  unlisted light-cream background (`var(--afa-cream, #f7f2ea)`), fixed
+  to `var(--afa-surface-page)` to match the seat-map editor it's a
+  preview of. That change made `TIER_COLORS`'s 6th entry
+  (`var(--afa-ink)`, near-black) newly near-invisible against its own
+  now-dark canvas, so it moved to `var(--afa-cream)` - checked
+  `SeatPicker.tsx`, the other `colorForZone` consumer, and confirmed it
+  was already fully dark-themed, so this shared fix is correct for
+  both call sites, not just one.
+- `FourRooms.tsx:62` and `PhotoCrossfadeBackdrop.tsx:46` were
+  investigated and are **false positives**, left untouched: a
+  near-black-to-near-black (`--afa-ink` to `--afa-surface-inverse`)
+  radial gradient is a legitimate dark-theme decorative technique, not
+  a light-theme leftover - confirmed by reading full context and
+  verifying the light-colored foreground content sits correctly
+  against it either way.
+- `about/page.tsx` and `dev/razorpay-test/page.tsx` were each an
+  **entire page** still on the legacy light "paper" theme (shared
+  `INK`/`PAPER`/`MIST`/`EMBER`/`SERIF` constants, not scattered
+  one-offs) - confirmed via `design.md`'s own text that the dark
+  editorial theme is final, so this is a real migration, not an
+  intentional divergent design. Redefined the shared constants at their
+  declaration in both files. A blind redefinition would have silently
+  broken 2 real CTA buttons that relied on the *old* inverted
+  ink-on-paper pairing to read as "dark button on a light page" -
+  caught by re-scanning both files for `background:.*INK|
+  background:.*PAPER` after redefining, and fixed those 2 call sites to
+  the correct `EMBER`/`--afa-on-fill-solid` CTA pairing instead of the
+  now-dark body-text constants.
+
+**7. Shadow error-red token.** `availability.ts`'s `filling-fast`
+badge and `tickets/page.tsx:326`'s `ErrorBanner` override both used
+`--afa-red-alt` (#EF4444), a second "error red" independent of
+`STATUS_TONE.error`'s `--afa-error` (#B3261E). `tickets/page.tsx`'s
+override was pure redundancy - `ErrorBanner`'s own default `color` is
+already `var(--afa-error)` - so it was deleted outright rather than
+rewritten. `availability.ts` could not cleanly import
+`STATUS_TONE.error` itself: that badge is a real domain mismatch with
+`STATUS_TONE`'s own convention (a bold, solid, high-urgency "seats
+running out" badge vs. `STATUS_TONE`'s subtle translucent-tint pills
+for admin/dashboard labels), so forcing the literal `STATUS_TONE.error`
+object would have blunted the urgency this badge exists for. Kept a
+distinct value, documented why in a code comment per the dispatch's
+own escape hatch (matching the `-051` style of documenting deliberate
+non-sharing), but pointed it at `--afa-error` instead of `--afa-red-alt`
+so there's one real error-red, not two. Also fixed an incidental bug
+found in the same object: `sold-out`'s `bg: var(--afa-ink), color:
+var(--afa-white)` was the same light-theme-legacy pairing as item 6,
+nearly invisible against the dark page background - moved to
+`var(--afa-brown-black)`/`var(--afa-cream)`, the same dark-solid/
+light-text pairing already established as `--afa-on-fill-solid`.
+
+**Full-batch verification, not just per-file greps:** `tsc --noEmit`
+clean, `check-design-tokens.js` clean, a real `next build` succeeded,
+and the dispatch's own repo-wide regex
+(`--afa-terracotta|--afa-white|--afa-cream-tint|--afa-error-bg|
+--afa-success-bg|--afa-amber-tint|--afa-ink\b`) across all of `src/`
+returns zero hits outside `globals.css`'s own definitions, prose
+comments documenting past migrations, and the two confirmed
+false-positive dark-gradient sites (each carrying its own explanatory
+comment).
+
+**Item 8 (docs correction to `afa-design-tokens-reference.md`) is
+deliberately not in this batch** - the dispatch explicitly sequenced it
+"after 1-7 are merged and verified," and it's a distinct
+deliverable (documenting `STATUS_TONE`) rather than a token swap, so it
+follows as its own small branch/PR once this one lands, per the
+dispatch's own "one PR (or logically split PRs if CI needs it)"
+framing.
+
+Built on `fix/gen-2609-067-ui-centralization-audit`, branched from
+`qa` at `4c8393e`.

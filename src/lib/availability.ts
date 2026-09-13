@@ -24,8 +24,26 @@ export function getAvailabilityStatus(totalSeats: number, availableSeats: number
   return 'available'
 }
 
+// GEN-2609-067 - `filling-fast` used to hardcode `--afa-red-alt`
+// (#EF4444), a second, independent "error red" alongside
+// `STATUS_TONE.error`'s `--afa-error` (#B3261E) - two reds doing the
+// same semantic job. Not a literal `STATUS_TONE.error` import though:
+// this badge is a real domain mismatch with `STATUS_TONE`'s own
+// convention (a bold, solid, high-urgency badge - "seats running out,
+// act now" - vs `STATUS_TONE`'s subtle translucent-tint pills used for
+// admin/dashboard status labels). Keeping the solid-badge shape but
+// pointing it at the app's one real error red (`--afa-error`) closes
+// the duplicate-token gap without forcing a visual-weight change that
+// would blunt the urgency this badge exists for.
+// `sold-out` had the same class of bug in miniature: `--afa-ink`/
+// `--afa-white` are the legacy light-theme palette - `--afa-ink` is
+// barely distinguishable from the page's own dark background, and
+// literal white doesn't match the app's established "light text on a
+// dark solid" token (`--afa-cream`). Swapped to keep the same solid-
+// badge look with tokens that are actually visible and named for their
+// role in the current dark theme.
 export const AVAILABILITY_BADGE: Record<AvailabilityStatus, { label: string; bg: string; color: string }> = {
-  'sold-out': { label: 'Sold Out', bg: 'var(--afa-ink)', color: 'var(--afa-white)' },
-  'filling-fast': { label: 'Filling Fast', bg: 'var(--afa-red-alt)', color: 'var(--afa-white)' },
+  'sold-out': { label: 'Sold Out', bg: 'var(--afa-brown-black)', color: 'var(--afa-cream)' },
+  'filling-fast': { label: 'Filling Fast', bg: 'var(--afa-error)', color: 'var(--afa-cream)' },
   available: { label: 'Spots Available', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
 }

@@ -100,7 +100,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
   }
 
   if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-bg)", border: "1px solid var(--afa-error-border)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
+  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
   if (organisers.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
@@ -132,7 +132,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
           placeholder={tr.organisersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(14,12,10,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "white", color: "var(--afa-ink)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
       )}

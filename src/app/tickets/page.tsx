@@ -323,7 +323,7 @@ export default function MyTicketsPage() {
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
           )}
 
           {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been
@@ -346,7 +346,7 @@ export default function MyTicketsPage() {
                     <button
                       onClick={() => respondToTag(t.id, true)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
+                      style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
                       {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
                     </button>
@@ -598,7 +598,7 @@ export default function MyTicketsPage() {
                     <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <a
                         href={`/api/bookings/${b.id}/ticket`}
-                        style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
+                        style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
                       >
                         {tr.checkoutPage.downloadTicketPdf}
                       </a>
