@@ -618,7 +618,6 @@ export default function ArtistDashboard() {
                               animation: 'afa-spin 0.7s linear infinite',
                             }}
                           />
-                          <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>

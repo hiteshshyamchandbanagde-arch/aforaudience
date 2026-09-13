@@ -148,7 +148,6 @@ export default function ArtistsPage() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
-        @keyframes afa-spin { to { transform: rotate(360deg); } }
         .afa-artist-card { transition: transform 0.25s ease, border-color 0.25s ease; }
         .afa-artist-card:hover, .afa-artist-card:focus-visible { transform: translateY(-3px); border-color: rgba(201,151,58,0.45) !important; outline: none; }
         .afa-genre-filter { position: relative; padding-bottom: 4px; background: none; border: none; cursor: pointer; }

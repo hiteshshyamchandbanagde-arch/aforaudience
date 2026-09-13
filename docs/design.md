@@ -3751,3 +3751,55 @@ property delta is quantified above instead of screenshot-diffed.
 
 Built on `feat/gen-2609-061-remaining-terracotta-buttons`, branched
 from `qa` at `78934c8`.
+
+## GEN-2609-062 - consolidated the duplicate @keyframes afa-spin injections
+
+Re-grepped fresh rather than trusting `GEN-2609-056`'s list as
+exhaustive - it was: same 10 files, 13 real injections (`wall-of-fame`
+alone had 3, `SpinnerOverlay.tsx` 1 - its 2nd grep hit was just a code
+comment mentioning the keyframe by name, not a real duplicate).
+Confirmed `globals.css` didn't already define it before adding.
+
+Moved the single definition into `globals.css`, right after the
+existing `afa-seal-ring-pulse`/`afa-seal-stamp-in` keyframes (same
+file already has precedent for component-animation keyframes living
+there). Removed all 13 duplicates: 8 files had a standalone `<style>`
+tag holding nothing but the keyframe (straightforward full-tag
+removal) - `organisers/page.tsx`, `venue-owners/page.tsx`,
+`dashboard/artist/page.tsx`, `OrganisersGridEmbed.tsx`,
+`VenueOwnersGridEmbed.tsx`, `SpinnerOverlay.tsx`, and `wall-of-fame/
+page.tsx`'s 3 occurrences. 3 files (`artists/page.tsx`, `events/
+page.tsx`, `organisers/[id]/page.tsx`) shared their `<style>` block
+with other real CSS rules (`.afa-artist-card`, `@keyframes afa-ping`,
+`.afa-organiser-event-card`, etc.) - removed only the `afa-spin` line
+from each, verified the rest of each block is untouched.
+
+**Checked each file for injection-order side effects before removing,
+per the dispatch's instruction** - `GEN-2609-056` already found and
+fixed the one real case of this (`EventCard`/`EventRow` depending on
+some other page-mounted component injecting the keyframe first).
+Every other file's own copy was self-contained (defined and consumed
+within the same component, no cross-component dependency), so removing
+them is safe now that the keyframe is guaranteed to exist globally -
+nothing else depended on injection order.
+
+**One incidental finding, in scope for `GEN-2609-063` not this
+ticket:** `dashboard/artist/page.tsx`'s spinner ring used
+`borderTopColor: 'var(--afa-terracotta)'` - every other spinner in this
+same audit uses `--afa-fill-solid`. Left as-is here (pure keyframe
+cleanup, zero other changes intended) but flagging it as a repo-wide
+terracotta occurrence `GEN-2609-063`'s fresh grep should catch.
+
+**Verify.** `grep -rn "keyframes afa-spin" src/` outside `globals.css`:
+zero remaining. `tsc --noEmit` clean. `check-design-tokens.js` against
+this branch's diff: clean (`globals.css` is on the check's own exempt
+list, so the new keyframe there was never at risk of a false
+positive). Real `next build`: clean, all touched routes present. No
+visual verification possible (no browser tool this session) - reasoned
+from CSS cascade/specificity (a global keyframe definition is
+referenced by name from any file's `animation` property regardless of
+where it's declared, so nothing about *how* the animation renders
+changes) rather than screenshotted; flagged as unverified.
+
+Built on `feat/gen-2609-062-spin-keyframe-consolidation`, branched
+from `qa` at `78934c8`.

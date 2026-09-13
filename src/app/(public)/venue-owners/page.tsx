@@ -129,7 +129,6 @@ export default function VenueOwnersPage() {
                   {isNavigatingThis && (
                     <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
-                      <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                   )}
                   <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>

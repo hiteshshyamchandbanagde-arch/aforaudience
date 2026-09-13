@@ -7,15 +7,12 @@
 // those as props rather than hardcoding one look, preserving each
 // site's exact current appearance (no visual change is the bar).
 //
-// Also closes a latent fragility: EventCard/EventRow used
-// `animation: "afa-spin ..."` without ever defining `@keyframes afa-spin`
-// themselves - it only worked because some other component on the same
-// page (there are 12+ across the app) happened to inject the keyframe
-// via its own inline <style> tag first. This component is self-
-// contained so that dependency is gone for these three consumers. The
-// other 12+ duplicate keyframe injections elsewhere are a separate,
-// wider pattern - flagged in docs/design.md, not touched here (out of
-// this ticket's stated 3-file scope).
+// GEN-2609-062 - `@keyframes afa-spin` now lives once in globals.css
+// (was independently duplicated via inline <style> tags in 10 files,
+// this one included) - the own-copy fallback this component originally
+// carried (to avoid depending on some other page-mounted component
+// injecting the keyframe first) is no longer needed now that the
+// keyframe is guaranteed to exist globally.
 export default function SpinnerOverlay({
   isNavigating,
   size,
@@ -31,7 +28,6 @@ export default function SpinnerOverlay({
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 2, background: scrimBackground, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ width: `${size}px`, height: `${size}px`, borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: accentColor, animation: "afa-spin 0.7s linear infinite" }} />
-      <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

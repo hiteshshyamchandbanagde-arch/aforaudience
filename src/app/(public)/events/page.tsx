@@ -344,7 +344,6 @@ function EventsPageContent() {
         .afa-event-card-list .afa-event-card-poster { width: 9rem; aspect-ratio: 3 / 4; }
         @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
         @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
-        @keyframes afa-spin { to { transform: rotate(360deg); } }
         .afa-events-search-box { flex: 1; min-width: 220px; }
         .afa-events-type-filter { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(245,245,240,0.4); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
         .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
