@@ -5,6 +5,7 @@ import { useLocale } from "@/lib/i18n/translate"
 import Photo from "@/components/Photo"
 import { EventTypeIcon, CalendarIcon, ClockIcon, PinIcon } from "@/components/icons/EventIcons"
 import { EventSaveHeartButton } from "@/components/EventSaveButton"
+import SpinnerOverlay from "@/components/SpinnerOverlay"
 
 export interface EventItem {
   id: string
@@ -260,11 +261,7 @@ export function EventCard({
         padding: view === "list" ? "16px" : 0,
       }}
     >
-      {isNavigating && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: "26px", height: "26px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-amber)", animation: "afa-spin 0.7s linear infinite" }} />
-        </div>
-      )}
+      <SpinnerOverlay isNavigating={isNavigating} size={26} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
 
       <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "3px", flexShrink: 0 }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} />
@@ -363,11 +360,7 @@ export function EventRow({
         transition: "opacity 0.15s ease",
       }}
     >
-      {isNavigating && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-amber)", animation: "afa-spin 0.7s linear infinite" }} />
-        </div>
-      )}
+      <SpinnerOverlay isNavigating={isNavigating} size={24} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
 
       <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "8px" }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
