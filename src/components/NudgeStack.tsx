@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import OfflineBanner from './OfflineBanner';
 import PhoneVerifyNudge from './PhoneVerifyNudge';
 import DisplayNameNudge from './DisplayNameNudge';
 import NotificationOptIn from './NotificationOptIn';
+import { isOnboardingSequenceDue } from '@/lib/onboarding';
 
 /**
  * Wraps the top-of-page nudge banners (phone verify, display name,
@@ -28,6 +31,17 @@ import NotificationOptIn from './NotificationOptIn';
  */
 export default function NudgeStack() {
   const ref = useRef<HTMLDivElement>(null);
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  // GEN-2609-042 - suppress the whole stack while WelcomeSequence's
+  // full-screen takeover is showing for this user, so none of the four
+  // banners stack (or even flash) underneath it. Same gate the takeover
+  // itself uses (see lib/onboarding.ts) - kept in one place so the two
+  // can't drift apart.
+  const suppressed =
+    status === 'authenticated' &&
+    isOnboardingSequenceDue((session?.user as any)?.onboardedAt, pathname);
 
   useEffect(() => {
     const el = ref.current;
@@ -46,10 +60,14 @@ export default function NudgeStack() {
 
   return (
     <div ref={ref} style={{ position: 'sticky', top: 0, zIndex: 100 }}>
-      <OfflineBanner />
-      <PhoneVerifyNudge />
-      <DisplayNameNudge />
-      <NotificationOptIn />
+      {!suppressed && (
+        <>
+          <OfflineBanner />
+          <PhoneVerifyNudge />
+          <DisplayNameNudge />
+          <NotificationOptIn />
+        </>
+      )}
     </div>
   );
 }

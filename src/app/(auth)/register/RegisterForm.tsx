@@ -234,6 +234,7 @@ export default function RegisterForm() {
           email: form.email,
           phone,
           password: form.password,
+          intendedRole,
         })
       })
       const data = await res.json()

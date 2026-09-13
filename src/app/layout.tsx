@@ -8,6 +8,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
+import WelcomeSequence from "@/components/WelcomeSequence";
 import SupportWidget from "@/components/SupportWidget";
 import MobileTabBar from "@/components/mobile/MobileTabBar";
 import MobileTopBar from "@/components/mobile/MobileTopBar";
@@ -291,6 +292,7 @@ export default function RootLayout({
           }}
         />
         <Providers>
+          <WelcomeSequence />
           <NudgeStack />
           <MobileTopBar />
           {children}

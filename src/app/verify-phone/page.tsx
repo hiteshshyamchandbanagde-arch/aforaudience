@@ -8,6 +8,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
+import { useOtpVerification } from '@/lib/useOtpVerification'
 
 const inputStyle = {
   width: '100%',
@@ -28,7 +29,7 @@ const inputStyle = {
 // This reuses the same /api/auth/otp/request + /api/auth/otp/verify
 // endpoints (purpose: SIGNUP_VERIFY), just from a page reachable any time.
 function VerifyPhoneInner() {
-  const { data: session, status, update } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/profile'
@@ -38,12 +39,9 @@ function VerifyPhoneInner() {
   const [phone, setPhone] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [alreadyVerified, setAlreadyVerified] = useState(false)
-
   const [otpCode, setOtpCode] = useState('')
-  const [devOtp, setDevOtp] = useState<string | null>(null)
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [codeSent, setCodeSent] = useState(false)
+
+  const { submitting, devOtp, error, codeSent, sendCode: hookSendCode, verifyCode: hookVerifyCode, setError } = useOtpVerification()
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push(`/login?next=${encodeURIComponent(`/verify-phone?next=${next}`)}`)
@@ -69,53 +67,16 @@ function VerifyPhoneInner() {
 
   const sendCode = async () => {
     if (!phone) return
-    setSubmitting(true)
-    setError('')
-    try {
-      const res = await fetch('/api/auth/otp/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ purpose: 'SIGNUP_VERIFY', phone }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        // See BUG-2608-038 - prefer the translated message for the
-        // server's stable error `code` over the raw English `error` string.
-        const code = typeof data.code === 'string' ? data.code : undefined
-        const authErrors = tr.authErrors as Record<string, string>
-        throw new Error((code && authErrors[code]) || data.error || tr.loginPage.couldNotSendCodeError)
-      }
-      setDevOtp(data.devOtp ?? null)
-      setCodeSent(true)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setSubmitting(false)
-    }
+    await hookSendCode(phone, tr.loginPage.couldNotSendCodeError, tr.authErrors as Record<string, string>)
   }
 
   const verifyCode = async () => {
     if (!phone || !userId) return
-    setSubmitting(true)
-    setError('')
-    try {
-      const res = await fetch('/api/auth/otp/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, userId, code: otpCode }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || tr.registerPage.invalidCodeFallback)
-      // Refresh the session so isVerified is current without re-login,
-      // then continue wherever the user was trying to go (e.g. back to
-      // checkout).
-      await update()
-      router.push(next)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setSubmitting(false)
-    }
+    const ok = await hookVerifyCode(phone, userId, otpCode, tr.registerPage.invalidCodeFallback)
+    // hookVerifyCode already refreshed the session (isVerified) via
+    // update() - continue wherever the user was trying to go (e.g. back
+    // to checkout) only once that's confirmed successful.
+    if (ok) router.push(next)
   }
 
   if (status === 'loading' || loading) {

@@ -218,7 +218,7 @@ export const authOptions: NextAuthOptions = {
         // rather than trusting a stale token for its full 7-day life.
         const currentUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, tokenVersion: true, displayName: true, isVerified: true, isSuspended: true, phone: true },
+          select: { role: true, tokenVersion: true, displayName: true, isVerified: true, isSuspended: true, phone: true, onboardedAt: true, intendedRole: true },
         })
 
         // Refresh displayName, isVerified, role, and phone on every session
@@ -233,12 +233,17 @@ export const authOptions: NextAuthOptions = {
         // Audience, never laterally between the elevated roles, so this
         // can't downgrade an already-elevated session - it only ever
         // catches the session up to a legitimate approval that happened
-        // after login.
+        // after login. onboardedAt/intendedRole (GEN-2609-042) follow the
+        // same "refresh every check" reasoning - the welcome sequence's
+        // own final-screen PATCH calls update() to see onboardedAt flip
+        // to non-null immediately, same pattern /verify-phone already uses.
         if (currentUser) {
           (session.user as any).displayName = currentUser.displayName
           ;(session.user as any).isVerified = currentUser.isVerified
           ;(session.user as any).role = currentUser.role
           ;(session.user as any).phone = currentUser.phone
+          ;(session.user as any).onboardedAt = currentUser.onboardedAt
+          ;(session.user as any).intendedRole = currentUser.intendedRole
         }
 
         // H3 - a suspension applied mid-session shouldn't wait out the

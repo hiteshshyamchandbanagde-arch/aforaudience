@@ -327,6 +327,18 @@ const fr: Dictionary = {
     ariaLabel: "Activer les notifications",
     dismissAriaLabel: "Fermer",
   },
+  welcomeSequence: {
+    step1Heading: "Bienvenue sur AforAudience",
+    step1Subtitle: "Découvrez des spectacles en direct, suivez vos artistes préférés et ne manquez aucun moment.",
+    getStartedButton: "Commencer",
+    step2Heading: "Vérifiez votre téléphone",
+    step2Intro: "Un code rapide protège votre compte.",
+    skipButton: "Pas maintenant",
+    noPhoneOnFileMessage: "Aucun numéro de téléphone enregistré pour l'instant — vous pouvez en ajouter un à tout moment depuis votre profil.",
+    step4Heading: "Vous êtes prêt",
+    step4FallbackCta: "Parcourir les événements",
+    step4RoleCtaTemplate: "Postuler en tant que {role}",
+  },
   messagesInboxPage: {
     heading: "Messages",
     emptyState: "Pas encore de conversations. Les fils de discussion s'ouvrent automatiquement dès qu'une place, une réservation de lieu ou un billet est confirmé.",

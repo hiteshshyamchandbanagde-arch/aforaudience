@@ -2786,3 +2786,90 @@ at `3f3e9ee` (synced via `git fetch` first - no collision this time; local
 sessions). No `tsc`/build verification needed - zero source files changed,
 only the new doc. Pending merge confirmation before this entry is
 finalized, per the standing rule.
+
+**Follow-up, same day:** chat's own re-verification of this PR's own
+numbers (the third-verification-layer discipline) caught a real off-by-one
+- 20 real call-site files, not 19 (the "excluding push.ts" subtraction was
+done from the wrong starting total). Fixed directly on `qa`
+(`05cac1f`), not via a new branch. `sendPushToUser`/`sendPushToRole`'s 31
+individual call-site count was unaffected.
+
+## Onboarding Guidelines - Step 6, sub-spec 5/5, closes the six-step audit (built, migration pending approval)
+
+Last of Step 6's five specs, and the biggest - a real feature build, not
+a docs-catalog-plus-mechanical-fix pass like `-038`/`-039`/`-040`/`-041`.
+New full-screen welcome sequence (Welcome → Verify phone → Enable
+notifications → next-step card), shown once after signup, replacing
+phone verification's old spot in `NudgeStack`'s persistent-banner
+treatment. Full detail in `docs/onboarding-guidelines.md`; summary here.
+
+**8th `[[project_handoff_collision]]`-pattern repeat, new wrinkle:** this
+session's own opening dispatch described
+`feat/gen-2609-037-seal-stamp-animation` as needing a PR - `git fetch`
+before acting on it showed the work had already landed separately under a
+different commit hash via a concurrent session. Byte-verified identical
+before force-deleting the stale local branch. Not a new mechanism (same
+as recurrence #7), but confirms the stale-claim failure mode isn't
+limited to docs a session wrote itself - an inherited opening dispatch can
+already be stale before the session takes its first action.
+
+**Three real corrections surfaced on independent re-verification**, full
+reasoning in the spec:
+1. `intendedRole` wasn't actually dropped after `/login` the way the
+   dispatch assumed - it already survives as a query param through
+   register → login → profile for an *immediate* first login. The real
+   gap is a *delayed* one (register, close the tab, log in days later) -
+   persisted it as a `User` column instead of threading it through as a
+   query param, since the `User` table was already being touched for
+   `onboardedAt` anyway.
+2. Registration already has a mandatory OTP-verification stage before
+   ever redirecting to `/login` - confirmed against real data (232 of 233
+   `aforaudience-qa` users already `isVerified: true`). Screen 2 only
+   meaningfully applies to registration-abandoners and Google sign-ups
+   (who never collect a phone at all, found independently, not in the
+   dispatch) - branches into three real cases instead of one OTP form.
+3. The dispatch's flagged "needs Hitesh's call" question (is the
+   registration-time OTP still valid by Screen 2) has a clear technical
+   answer given finding #2 above (5-minute TTL, indeterminate gap before
+   an abandoner returns) - always re-sends fresh rather than punting a
+   question that doesn't actually depend on taste.
+
+**Shipped:** `onboardedAt`/`intendedRole` added to `schema.prisma`;
+`WelcomeSequence.tsx` (4 screens, reusing `.afa-backdrop-mount`/
+`.afa-sheet-mount` per `docs/motion-guidelines.md` and the shared
+`Button.tsx` primary/secondary variants from Step 4 of the original
+audit - locked-palette by construction); `subscribeAndSave()` extracted
+from `NotificationOptIn.tsx` into `src/lib/push-subscribe.ts` and the OTP
+request/verify calls extracted from `verify-phone/page.tsx` into
+`src/lib/useOtpVerification.ts`, both reused rather than forked;
+`NudgeStack.tsx` suppresses all four of its banners while the takeover is
+due, via a shared `lib/onboarding.ts` gate so the two conditions can't
+drift apart; `/api/users/me` PATCH gained an `onboardingComplete`
+boolean flag (server always stamps its own `now()`, never a
+client-supplied date); full `welcomeSequence` i18n namespace (9-10 keys)
+added across all 11 locale dictionaries. `tsc --noEmit` and `next build`
+both clean.
+
+**Not yet applied - blocked on approval, not on anything technical:** the
+migration (`prisma/migrations/20260913100000_...`) hit the Claude Code
+auto-mode classifier's "Cloud Storage Mass Delete" guard - a false
+positive (additive `ALTER TABLE` + a backfill `UPDATE`, nothing deleted)
+- and needs explicit approval before running against `aforaudience-qa`.
+Row-count (233) and a 5-row backfill-effect sample shown in the spec per
+the standing destructive-change convention, even though this is an
+UPDATE not a DELETE. Backfills pre-existing rows' `onboardedAt` to their
+own `createdAt`, not `now()` - avoids falsely clustering all 233 real
+users into one instant on any future cohort/analytics query against the
+column.
+
+**Flagged, not built - needs Hitesh's call:** a distinct "you're
+approved" welcome moment for when a user's role-upgrade application is
+actually approved (a different moment entirely from this signup-time
+sequence) - logged as a follow-up idea only, per the dispatch's own
+instruction.
+
+Built on `feat/gen-2609-042-onboarding-welcome-sequence`, branched from
+`qa` at `05cac1f` (synced via `git fetch` first - no collision). This
+closes Step 6 (5/5) and the original six-step UI/UX audit sequence in
+full, once the migration lands. Pending merge confirmation before this
+entry is finalized, per the standing rule.

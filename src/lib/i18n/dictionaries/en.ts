@@ -344,6 +344,18 @@ const en = {
     ariaLabel: "Enable notifications",
     dismissAriaLabel: "Dismiss",
   },
+  welcomeSequence: {
+    step1Heading: "Welcome to AforAudience",
+    step1Subtitle: "Discover live shows, follow your favorite artists, and never miss a moment.",
+    getStartedButton: "Get started",
+    step2Heading: "Verify your phone",
+    step2Intro: "A quick code keeps your account secure.",
+    skipButton: "Not now",
+    noPhoneOnFileMessage: "No phone number on file yet — you can add one anytime from your profile.",
+    step4Heading: "You're all set",
+    step4FallbackCta: "Start browsing events",
+    step4RoleCtaTemplate: "Apply as {role}",
+  },
   messagesInboxPage: {
     heading: "Messages",
     emptyState: "No conversations yet. Threads open automatically once a spot, venue booking, or ticket is confirmed.",
