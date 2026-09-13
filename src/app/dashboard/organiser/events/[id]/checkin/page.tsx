@@ -255,15 +255,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
             {!cameraOn ? (
-              <button
-                onClick={() => { setCameraError(''); setCameraOn(true) }}
-                style={{
-                  width: '100%', fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)',
-                  border: 'none', borderRadius: '8px', padding: '14px', cursor: 'pointer',
-                }}
-              >
+              <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
                 📷 Start Camera Scan
-              </button>
+              </Button>
             ) : (
               <>
                 <div id="checkin-camera" style={{ width: '100%', borderRadius: '8px', overflow: 'hidden' }} />
