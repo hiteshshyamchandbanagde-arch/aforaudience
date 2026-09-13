@@ -577,3 +577,77 @@ The unclaimed `stash@{0}` is still untouched.
 **Next session (CC or chat) should:** merge `-058`, then decide with
 Hitesh on the 3 newly-found terracotta button sites and the still-open
 `Badge`-shape/`@keyframes afa-spin` items from the prior notes above.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-059 through -063)
+
+Ran the standing sync: HEAD confirmed `78934c8` (`-058` from the prior
+note is merged). Five separate tickets this dispatch, each its own
+branch off the same base, none bundled:
+
+- `feat/gen-2609-059-venuecard-radius` (`e06cb6c`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-059-venuecard-radius?expand=1
+- `feat/gen-2609-060-badge-sizes` (`7c8d184`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-060-badge-sizes?expand=1
+- `feat/gen-2609-061-remaining-terracotta-buttons` (`7628e1e`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-061-remaining-terracotta-buttons?expand=1
+- `feat/gen-2609-062-spin-keyframe-consolidation` (`9f392ad`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-062-spin-keyframe-consolidation?expand=1
+- `feat/gen-2609-063-terracotta-fill-solid-migration` (`997eeb0`) —
+  compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-063-terracotta-fill-solid-migration?expand=1
+
+**Checked every file list against every other before pushing, per the
+dispatch's own "report before merging if so, don't bundle silently"
+instruction.** One real overlap found: `dashboard/artist/page.tsx` is
+touched by both `-062` (removes a duplicate `@keyframes afa-spin`
+`<style>` tag) and `-063` (changes that same spinner's `borderTopColor`
+a few lines away, in the same JSX block). Both diffs are small and
+compatible - nothing about applying one depends on the other being
+absent - but they sit close enough in one 3-line-context hunk that a
+clean automatic 3-way merge isn't guaranteed if both land without one
+being rebased onto the other first. Flagging this explicitly rather
+than assuming it'll resolve itself; whoever merges second should check
+the diff lands cleanly (or fix the small conflict by hand: it's just
+"keep the terracotta→fill-solid color change, drop the `<style>` line
+underneath it").
+
+**`-059`'s hover-treatment half needed a real stop-and-report** - fresh
+grep of both cards' actual CSS found the dispatch's premise backwards
+(`VenueCard` already has the richer hover the ticket describes as
+`EventCard`'s to copy from; `EventCard`'s is actually the plainer one).
+Built only the independently-correct radius fix; did not touch hover
+CSS on either card without a real decision from Hitesh first.
+
+**`-063` turned into the largest single finding this session:** the
+real terracotta count was ~90 occurrences/~40 files, not ~27. Beyond
+the mechanical migration (6 commits, see `docs/design.md`), it
+surfaced two decisions genuinely outside a token-migration ticket's
+scope: 13 real unmigrated button-shaped terracotta sites living outside
+`dashboard/organiser/` (never covered by `-058`/`-061`, since both were
+explicitly scoped only to that directory) - 4 of them with the same
+`color: 'white'` bug fixed twice before on other files - and
+`RegisterForm.tsx`'s internally-inconsistent error-color usage (should
+likely route to `--afa-error`, not `--afa-fill-solid` - a real bug, not
+a rename). Neither built; both flagged clearly rather than guessed at
+or silently dropped.
+
+Verification across all five: `tsc --noEmit` clean, `check-design-
+tokens.js` clean (including a real catch on `-063` - `rgba(255,90,54,X)`
+had never existed as a literal before this migration, so 7 new tint
+sites correctly flagged as genuinely new debt; fixed by centralizing
+into `statusStyle.ts` rather than suppressing), real `next build` clean
+on the branches with heavier JSX restructuring (`-061`, `-063`). No
+browser tool available - every visual claim in `docs/design.md` is
+reasoned from token/property values, flagged as unverified rather than
+screenshotted.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched, now across many sessions
+running.
+
+**Next session (CC or chat) should:** merge `-059` through `-063`
+(watch the `artist/page.tsx` overlap between `-062`/`-063`), then bring
+Hitesh the 4 flagged decisions: `-059`'s real hover direction, the
+13-site button-migration follow-up, `RegisterForm.tsx`'s error-color
+question, and the `layout.tsx`/`manifest.ts` PWA theme-color coupling.
