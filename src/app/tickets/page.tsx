@@ -335,7 +335,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(200,68,26,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(255,90,54,0.25)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
                   <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate

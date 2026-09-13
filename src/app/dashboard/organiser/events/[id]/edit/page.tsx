@@ -741,7 +741,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
-                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
+                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
                 </p>
 
                 <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
@@ -961,7 +961,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -972,7 +972,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -983,7 +983,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -1122,9 +1122,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     onClick={() => setDefaultCompensationType(opt.value)}
                     style={{
                       padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                      background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                      color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                      background: defaultCompensationType === opt.value ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                      color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {opt.label}

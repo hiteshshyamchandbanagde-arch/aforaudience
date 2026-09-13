@@ -316,7 +316,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                       })}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-terracotta)', fontWeight: 600 }}
+                      style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--afa-fill-solid)', fontWeight: 600 }}
                     >
                       📍 Directions
                     </a>
@@ -372,9 +372,9 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                     onClick={() => setRateType(t)}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: rateType === t ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                      background: rateType === t ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                      color: rateType === t ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                      border: rateType === t ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                      background: rateType === t ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                      color: rateType === t ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}

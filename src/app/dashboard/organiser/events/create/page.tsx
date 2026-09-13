@@ -651,7 +651,7 @@ export default function CreateEventPage() {
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
-                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
+                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
                 </p>
 
                 <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
@@ -903,9 +903,9 @@ export default function CreateEventPage() {
                       onClick={() => setDefaultCompensationType(opt.value)}
                       style={{
                         padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                        background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                        color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        background: defaultCompensationType === opt.value ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                        color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {opt.label}
@@ -930,9 +930,9 @@ export default function CreateEventPage() {
                       onClick={() => setApplicationApprovalMode(mode)}
                       style={{
                         flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: applicationApprovalMode === mode ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                        background: applicationApprovalMode === mode ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                        color: applicationApprovalMode === mode ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                        border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        background: applicationApprovalMode === mode ? 'rgba(255,90,54,0.08)' : 'var(--afa-surface-raised)',
+                        color: applicationApprovalMode === mode ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {mode === 'MANUAL' ? 'Manual — I review each one' : 'Auto — verified artists only'}
