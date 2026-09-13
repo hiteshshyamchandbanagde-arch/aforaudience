@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import { fillSolidTint, FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface Application {
   id: string
@@ -341,7 +342,7 @@ export default function ArtistDashboard() {
               numbers (not a low-but-nonzero score) so it never contradicts actual
               stats once the artist has any real activity. */}
           {profile.performances.length === 0 && profile.followers.length === 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(255,90,54,0.15)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: `1px solid ${fillSolidTint(0.15)}` }}>
               <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
                 Today is just the beginning 🎤
               </p>
@@ -379,7 +380,7 @@ export default function ArtistDashboard() {
                   <span key={g} style={{ fontSize: '12px', padding: '5px 12px', background: 'var(--afa-surface-raised)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>{g}</span>
                 ))}
                 {profile.styleTag.map((s) => (
-                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: 'rgba(255,90,54,0.08)', borderRadius: '999px', color: 'var(--afa-fill-solid)' }}>{s}</span>
+                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: FILL_SOLID_TINT, borderRadius: '999px', color: 'var(--afa-fill-solid)' }}>{s}</span>
                 ))}
               </div>
             )}

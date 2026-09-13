@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
 import { useOtpVerification } from '@/lib/useOtpVerification'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 const inputStyle = {
   width: '100%',
@@ -111,7 +112,7 @@ function VerifyPhoneInner() {
                 <ErrorBanner style={{ marginBottom: '18px', fontSize: '13px' }}>{error}</ErrorBanner>
               )}
               {devOtp && (
-                <div style={{ background: 'rgba(255,90,54,0.08)', border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}

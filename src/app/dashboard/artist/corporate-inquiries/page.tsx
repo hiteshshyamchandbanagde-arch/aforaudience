@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import { fillSolidTint } from '@/lib/statusStyle'
 
 interface Inquiry {
   id: string
@@ -24,7 +25,7 @@ interface Inquiry {
 }
 
 const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color: string }> = {
-  NEW: { label: 'New', bg: 'rgba(255,90,54,0.12)', color: 'var(--afa-fill-solid)' },
+  NEW: { label: 'New', bg: fillSolidTint(0.12), color: 'var(--afa-fill-solid)' },
   CONTACTED: { label: 'Contacted', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   CLOSED: { label: 'Closed', bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
 }

@@ -50,3 +50,11 @@ export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange',
 // brand-new hardcoded literal apiece.
 export const FILL_SOLID_TINT = 'rgba(255,90,54,0.08)'
 export const FILL_SOLID_BORDER_TINT = 'rgba(255,90,54,0.25)'
+
+// A handful of sites needed a one-off alpha (0.12, 0.15, ...) rather
+// than the two common ones above - a function call instead of another
+// named constant per alpha value, since the actual set of alphas in use
+// isn't fixed or meaningful on its own (unlike STATUS_TONE's palette).
+export function fillSolidTint(alpha: number): string {
+  return `rgba(255,90,54,${alpha})`
+}
