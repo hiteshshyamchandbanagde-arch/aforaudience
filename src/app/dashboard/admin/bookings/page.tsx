@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
+import Badge from '@/components/ui/Badge'
 
 // /dashboard/admin/bookings
 //
@@ -227,9 +228,9 @@ export default function AdminBookingsPage() {
                         <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
-                            <span style={{ marginLeft: '8px', fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)', fontWeight: 500 }}>
+                            <Badge variant="tag" tone={{ bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>
                               FREE
-                            </span>
+                            </Badge>
                           ) : null}
                         </div>
                         <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>

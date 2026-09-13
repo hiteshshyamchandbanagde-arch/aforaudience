@@ -3634,3 +3634,62 @@ not silently absorbed into this ticket, not silently dropped either.
 
 Built on `feat/gen-2609-058-button-size-terracotta-migration`, branched
 from `qa` at `12d1280`.
+
+## GEN-2609-060 - Badge sizes for the 3 flagged third-shapes
+
+Re-verified all 3 fresh against `qa`, not trusted from the earlier
+flag - all still real, values unchanged since the original audit.
+
+**3 new additive `Badge` variants**, same pattern as `GEN-2609-058`'s
+`Button` sizes - each chosen to exactly match its real call site(s), no
+rounding needed (unlike Button's 14-site consolidation, each of these
+shapes only has 1-2 real consumers):
+- `micro` (10px/700/2px 8px) - `admin/feedback`'s category + severity
+  badges. The two real sites differ only in `letterSpacing` (category:
+  `0.03em`, severity: none) - baseline matches severity, category
+  applies its `0.03em` via a `style` override rather than picking one
+  and silently changing the other.
+- `tag` (11px/500/2px 8px) - `admin/bookings`'s "FREE" tag. **Checked
+  the dispatch's own question - is this really a "status"?** No: it's
+  a fixed fact about an event (`isFree`), not a lifecycle state with
+  multiple tone-driven values. Still Badge-shaped (a `{bg,color}` pill),
+  just not a `status-*` name - named `tag` instead of forcing it under
+  the status umbrella. Migrated with an inline tone object (no shared
+  tone table exists for a single fixed value, same as how
+  `CATEGORY_BADGE` above is also a single fixed tone, not an enum).
+- `pill` (13px/700/5px 12px) - `artist/events`'s compensation badge and
+  "Lineup full - waitlist only" badge. Identical chrome on both real
+  sites, no override needed.
+
+**One small, deliberate behavior tightening on `admin/feedback`'s
+severity badge:** the original span read
+`SEVERITY_BADGE[item.severity]?.color` with optional chaining,
+defensively guarding against `item.severity` not being a real key
+(background/color would silently render `undefined` = invisible pill
+chrome around visible text). `Badge`'s `tone` prop can't accept
+`undefined`, so the guard moved to the surrounding condition
+(`item.severity && SEVERITY_BADGE[item.severity] && (...)`) - for any
+value that isn't a real key, the badge now doesn't render at all
+instead of rendering with broken/invisible styling. Strictly a bug fix
+for an edge case that real data shouldn't hit (severity is always one
+of `LOW`/`MEDIUM`/`HIGH`/`CRITICAL`), not a behavior change intended to
+matter in practice.
+
+**One rendering nuance, flagged not fixed:** `artist/events`'s two
+pills used `display: 'inline-block'` explicitly; `Badge` renders a bare
+`<span>` (default `display: inline`, same as every other `Badge`
+consumer). No visual difference expected for these single-line text
+pills, but noting the change in display value for completeness rather
+than silently dropping it.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses - including the new
+inline `rgba(245,245,240,0.08)`/`rgba(245,245,240,0.06)` tone objects,
+correctly recognized as relocated (pre-existing elsewhere in `src/`)
+rather than new, per `GEN-2609-057`'s fix. No visual verification
+possible (no browser tool this session) - each new variant's chrome
+was checked property-by-property against its real call site(s) instead
+of screenshot-diffed.
+
+Built on `feat/gen-2609-060-badge-sizes`, branched from `qa` at
+`78934c8`.

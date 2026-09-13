@@ -9,6 +9,7 @@ import { useToast } from '@/components/Toast'
 import FeedbackTrends from '@/components/admin/FeedbackTrends'
 import FeedbackDetailPanel, { type FeedbackDetailItem } from '@/components/admin/FeedbackDetailPanel'
 import BrandLoader from '@/components/BrandLoader'
+import Badge from '@/components/ui/Badge'
 
 // /dashboard/admin/feedback — Admin Dashboard v1 (design.md §9.1)
 //
@@ -502,32 +503,13 @@ function AdminFeedbackBoard() {
     <div key={item.id} style={cardStyle} onClick={() => setSelectedId(item.id)}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '6px', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 700,
-              letterSpacing: '0.03em',
-              color: CATEGORY_BADGE.color,
-              background: CATEGORY_BADGE.bg,
-              padding: '2px 8px',
-              borderRadius: '999px',
-            }}
-          >
+          <Badge variant="micro" tone={CATEGORY_BADGE} style={{ letterSpacing: '0.03em' }}>
             {CATEGORY_LABELS[item.category] || item.category}
-          </span>
-          {item.severity && (
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                color: SEVERITY_BADGE[item.severity]?.color,
-                background: SEVERITY_BADGE[item.severity]?.bg,
-                padding: '2px 8px',
-                borderRadius: '999px',
-              }}
-            >
+          </Badge>
+          {item.severity && SEVERITY_BADGE[item.severity] && (
+            <Badge variant="micro" tone={SEVERITY_BADGE[item.severity]}>
               {labelize(item.severity)}
-            </span>
+            </Badge>
           )}
         </div>
         <span style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
