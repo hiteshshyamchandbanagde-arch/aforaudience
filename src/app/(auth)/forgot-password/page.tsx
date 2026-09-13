@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import EnvBadge from "@/components/EnvBadge"
 import AuthLayout from "@/components/AuthLayout"
+import Button from "@/components/ui/Button"
 import { useLocale } from "@/lib/i18n/translate"
 
 export default function ForgotPasswordPage() {
@@ -85,13 +86,14 @@ export default function ForgotPasswordPage() {
                 style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
 
-              <button
+              <Button
+                variant="form-submit"
                 onClick={handleSubmit}
                 disabled={loading || !email}
-                style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "20px" }}
+                style={{ marginTop: "20px" }}
               >
                 {loading ? tr.loginPage.sendingEllipsis : tr.forgotPasswordPage.sendResetLinkButton}
-              </button>
+              </Button>
             </div>
           )}
         </div>
