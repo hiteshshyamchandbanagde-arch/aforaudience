@@ -122,3 +122,45 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the single oldest open item on the board.
 5. The six-step UI/UX audit is done, plus two follow-up fix dispatches (`GEN-2609-043`/`-047`/`-050`/`-051`) off its flagged decisions. Decide with Hitesh what's next: the residual card/sheet-context `--afa-error` gap, icon consolidation, `calendar`/`tag`/`map` winner, `GEN-2609-052` (CI enforcement, needs scoping), a real e2e re-run/investigation for `-042`, `GEN-2609-036`, one of the two ready-to-dispatch quick fixes (`GEN-2609-009`/`-016`), the Razorpay rotation (needs Hitesh directly), or a new priority entirely.
+
+---
+
+# Session update (chat, 13 Sep, later session) — GEN-2609-052/053, a real merge conflict, and a process fix
+
+**Ships this session:** `GEN-2609-052` (CI enforcement — diff-only check blocking new hardcoded hex/rgba/font-family literals, `.github/workflows/design-tokens.yml` + `scripts/check-design-tokens.js`) and `GEN-2609-053` (component library extraction — `Button`'s new `form-submit` variant, new `Badge` component, `Card` audited with reasons documented for staying unmerged). Both `RESOLVED`/`DEPLOYED_QA`, verified live on `qa.aforaudience.com`, zero runtime errors.
+
+**Real bugs caught in `-052`'s own verification, not just happy-path testing:** the font-family regex's lookahead scanned past the captured value to end-of-line, missing the actual pre-fix Georgia hits (which shared a line with a `var()`-using `color` property); the hex regex collided with this repo's own `// ... (#261)`/`PR #212` comment convention (an all-digit PR number is hex-shaped). Both fixed — quoted-string scoping for hex, captured-value-only scoping for font-family.
+
+**`-053`'s real findings:** `--afa-on-fill-solid` resolves to `--afa-brown-black` (#1A1000, near-black) despite its name — using it for the new `form-submit` button text would have been a real visible regression; used `--afa-cream` instead (verified visually identical to the literal `white` it replaces). `Badge` shipped as two variants (`status`/`status-compact`) after confirming organiser's and tickets' pill chrome genuinely differ, rather than forcing one shape and silently changing whichever file didn't already look that way. `Card` (VenueCard vs `EventCard.tsx`) has 4 real, deliberate differences — documented why it stays unmerged rather than forced.
+
+**A real merge conflict, resolved properly.** CC's local `qa` was stale at `8cecbe9` (predating chat's earlier `#616`–`#619` merges in the same session), so CC independently rebuilt a chunk of `-052`'s own script from scratch, unaware it had already shipped, and `-053`'s branch genuinely conflicted with what `#617`'s `STATUS_TONE` work had already changed in `organiser/page.tsx`/`tickets/page.tsx`. Chat resolved this with an actual local `git clone` + `git merge` (not API guesswork) — only `docs/design.md`'s changelog prose conflicted (both entries kept, in order, plus a correction to a stale cross-reference in `-053`'s entry pointing at the now-deleted duplicate branch); the code files auto-merged clean since the underlying edits didn't overlap. Verified `tsc`-equivalent/design-tokens-check clean on the merge itself before pushing, not assumed.
+
+**Process fix, the actual point of this note:** the root cause of both the wasted duplicate work and the merge conflict was the same thing — CC's local `qa` drifting behind the remote across a mid-session laptop restart. A standing rule (`git checkout qa && git fetch origin && git reset --hard origin/qa` before branching, every session, no exceptions) is now in `CC_HANDOFF.md`'s "Standing rules" section and in CC's own memory (`feedback_sync_qa_before_branching`). Two durable copies on purpose — the file survives even without memory loaded.
+
+**Two now-orphaned duplicate branches deleted** (`feat/gen-2609-052-design-token-ci-check`'s two pushes) — their content is superseded by `#619`'s merged fix; nothing lost, just cleaned up so they don't cause confusion in a future session.
+
+## Open items for next session (updated)
+
+**Resolved this session, remove from any older list:** `GEN-2609-052`, `GEN-2609-053`.
+
+**Still open, unchanged:**
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
+- `GEN-2609-005` — blocked purely on the above.
+- `GEN-2609-009`, `GEN-2609-016` — ready to dispatch, not yet sent.
+- `GEN-2609-022` — `BUILD_COMPLETE`, live click-through still not confirmed.
+- `GEN-2609-036` — scoped, not dispatched.
+- Residual card/sheet-context `--afa-error` gap (4 files, 4.17:1) — needs a decision beyond a text-color swap.
+- Icon system consolidation, `calendar`/`tag`/`map` naming collision, icon sizing/strokeWidth standardization — all documented, none scheduled.
+- Push-content localization foundation (`User.locale` column + server-side persistence decision) — nobody's call made yet.
+- `PhoneVerifyNudge.tsx` legacy tokens (`BUG-2609-029`, still open at last check).
+- e2e verification gap for `GEN-2609-042` — still genuinely inconclusive from the prior session, not re-attempted this session.
+- DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 5 sessions running.
+- **New, from this session's own component-library work:** the `--afa-terracotta` 11-occurrence pattern across 9 dashboard/organiser files (a stronger `Button` variant candidate than `form-submit`, deliberately not built this pass); `forgot-password/page.tsx`/`reset-password/page.tsx` not migrated to `form-submit` (same shape, lower traffic); the many other `borderRadius: '999px'` status pills elsewhere (admin feedback/bookings/diary, artist events/applications, organiser tours/lineup) not migrated to `Badge`; the `isNavigating` spinner-overlay markup (repeated byte-for-byte 3x across Venue/EventCard/EventRow) flagged as a narrow future extraction, not built.
+
+## Session-start checklist (updated)
+
+1. **`git checkout qa && git fetch origin && git reset --hard origin/qa`** — HEAD should be `4e7069b`. This step is now a hard requirement, not a suggestion — see `CC_HANDOFF.md`'s Standing rules section for why.
+2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
+3. Read this file, then `docs/design.md` for anything logged since.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item.
+5. Decide with Hitesh what's next from the open items list above — the component-library follow-ups (`--afa-terracotta` Button variant, remaining Badge migrations) are probably the highest-leverage next step given this session's pattern, but nothing is scheduled.

@@ -358,3 +358,15 @@ No local commits anywhere not already on `origin/qa`.
 audit produced, not additional audit steps. See `HANDOFF.md` for the
 full feature narrative and remaining flagged decisions - this note is
 git/session state only, per this file's own scope split.
+
+---
+
+## Chat-side session note — 13 Sep, later session (git/session state only)
+
+Merged `#618` (`GEN-2609-052`), then `#619` (a small regex-fix patch extracted from a redundant duplicate branch CC had pushed while working off the stale `8cecbe9` base), then `#620` (`GEN-2609-053`) — the last one required a real local `git clone` + `git merge` by chat, not API-only merging, because the branch had genuinely diverged (conflict in `docs/design.md`'s changelog prose; code files auto-merged clean). Full reasoning in `HANDOFF.md`'s session update above.
+
+Two now-superseded duplicate branches deleted: both pushes to `feat/gen-2609-052-design-token-ci-check` (`03b3a7b`, `bb5313f`) — their content is subsumed by `#619`'s merged fix, confirmed byte-identical before deleting anything.
+
+`qa` HEAD at end of this chat session: `4e7069b` (CC's own sync + standing-rules commit, verified by chat via GitHub API before ending the session).
+
+`which gh` / `$GITHUB_TOKEN`: not checked this session from chat's side (no local dev environment access) — CC's own note above still stands.
