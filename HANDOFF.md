@@ -217,3 +217,72 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 4+ sessions running.
 5. Take the 3 real open decisions above (dashed button, PWA theme-color coupling, `-059` hover direction) to Hitesh — nothing is blocked on investigation, only on his call.
+
+---
+
+# Session update (CC, 13 Sep, later session) — GEN-2609-067, single-pass fix of an 8-item audit; both PRs pushed, awaiting merge
+
+**Ships this session:** all 8 items from a single dispatch framed as "not new investigation — every item already located with exact file:line," fixed in one pass. Re-verified every file fresh against `qa` HEAD `4c8393e` before editing, per standing convention — every count/line-number premise held up this time (no corrections needed, a first for this sweep). Two branches pushed, **neither merged yet** (no `gh` CLI/`GITHUB_TOKEN` in this environment — hand off both compare URLs below rather than merging):
+
+- `fix/gen-2609-067-ui-centralization-audit` (items 1-7): `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/fix/gen-2609-067-ui-centralization-audit?expand=1`
+- `docs/gen-2609-067-status-tone-reference` (item 8, its own branch per the dispatch's own sequencing + "one PR or logically split PRs" framing — content is independent of items 1-7's edits, so it branches from the same `qa` point rather than waiting on 1-7's merge): `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/docs/gen-2609-067-status-tone-reference?expand=1`
+
+**Full before/after for all 8 items:**
+
+**1. PWA `theme_color` — resolves the open item flagged since `-063`.** `layout.tsx:119`'s `themeColor` was `var(--afa-terracotta)`, now `var(--afa-fill-solid)`. `manifest.ts`'s hardcoded hex (manifests can't use CSS vars) moved `#C8441A` → `#FF5A36` to match — the two sides are coupled (a documented "swap one side alone and you break the pair" invariant) and both are now on the same value again.
+
+**2. Dashed-button decision — resolves the open item flagged since `-064`.** `artist/edit/page.tsx:330`'s "+ Add tour stop" button: no `design.md` note argued for amber, so `border: 1px dashed var(--afa-terracotta)` / `color: var(--afa-terracotta)` → `var(--afa-fill-solid)` for both, consistent with the rest of the sweep.
+
+**3. `/tickets/` page CTA-orange misuse.** `--afa-fill-solid` is CTA/payment/booking-commit only. "Pay now" (~line 583) was already correct, untouched. "Download ticket (PDF)" (~line 601) and the tag-confirm button (~line 349) were wrongly fill-solid (same visual weight as a payment button) — both changed to a translucent amber outline (`color: var(--afa-amber)`, transparent background, `1px solid rgba(201,151,58,0.4)` border), matching the page's own existing secondary/outline pattern.
+
+**4. Seat-map editor — the real migration gap, most time budgeted here.** `dashboard/venue/[id]/seat-map/page.tsx` had 11 live `--afa-ink`/`--afa-white` hits (count matched the dispatch exactly, unusual for this project). Full migration to dark tokens. **3 of the 11 were real bugs, not just wrong token names:** selection/marker outlines used near-black `--afa-ink` against the already-dark canvas, so "selected" rendered *less* visible than "unselected" — fixed with `--afa-fill-solid`/`--afa-cream` (unambiguous) rather than another dark-ish token that would have kept the same bug under a new name.
+
+**5. Auth-page legacy banners.** `forgot-password/page.tsx:72` + `reset-password/page.tsx:93`'s identical error banners: `var(--afa-terracotta-tint)`/`var(--afa-terracotta)` → `rgba(179,38,30,0.1)` bg / `rgba(179,38,30,0.3)` border / `var(--afa-error)` text. `RegisterForm.tsx:340`'s dev-otp notice: `var(--afa-amber-tint)`/`var(--afa-ink)` → `rgba(201,151,58,0.15)`/`var(--afa-text-primary)`.
+
+**6. Light-mode leftovers — 14 files migrated, plus several bugs found beyond the dispatch's own list** (each confirmed by reading full context first, not blind token-swapping):
+- `AudienceChoiceVoting.tsx` had a white card behind already-dark text — invisible text, an actual bug.
+- `RatePromptClientPage.tsx:212` had an unlisted `color: 'white'` on a fill-solid button, fixed to `var(--afa-on-fill-solid)`.
+- `SeatLayoutPreview.tsx`'s canvas (~line 81) was itself an unlisted light-cream background, fixed to `var(--afa-surface-page)`; that made `TIER_COLORS`'s 6th entry (`var(--afa-ink)`) newly near-invisible, moved to `var(--afa-cream)` — cross-checked against `SeatPicker.tsx` (the other consumer) to confirm the shared fix is correct for both.
+- **`FourRooms.tsx:62` / `PhotoCrossfadeBackdrop.tsx:46` are false positives, left untouched** — a near-black-to-near-black radial gradient is a legitimate dark-theme decorative technique, confirmed by reading full context.
+- `about/page.tsx` and `dev/razorpay-test/page.tsx` turned out to be **entire pages** still on a legacy light "paper" theme (shared `INK`/`PAPER`/`MIST`/`EMBER` constants), not scattered one-offs — redefined at declaration; a blind redefinition would have silently broken 2 real CTA buttons relying on the old inverted pairing, caught by re-scanning both files after redefining and fixed those 2 sites to the correct `EMBER`/`--afa-on-fill-solid` CTA pairing.
+- **Unlisted bonus: closes a previously-flagged open item.** `DisplayNameNudge.tsx`'s outer banner (`--afa-orange-tint`/`--afa-brown-dark`/literal `#F0D9BF` border) — flagged as a leftover in the `-065`/`-066` handoff notes, not on this dispatch's list, fixed anyway as the same family of legacy tokens: → `rgba(201,151,58,0.15)` / `var(--afa-text-primary)` / `var(--afa-amber)` border.
+
+**7. Shadow error-red token.** `availability.ts`'s `filling-fast` badge and `tickets/page.tsx:326`'s `ErrorBanner` both used `--afa-red-alt` (#EF4444), independent of `STATUS_TONE.error`'s `--afa-error` (#B3261E). `tickets/page.tsx`'s override was pure redundancy (`ErrorBanner`'s own default is already `var(--afa-error)`) — deleted outright. `availability.ts` couldn't cleanly import `STATUS_TONE.error` itself (real domain mismatch: this badge is bold/solid/high-urgency, `STATUS_TONE`'s pills are subtle tints for admin/dashboard labels) — kept a distinct value, documented why in a code comment per the dispatch's own escape hatch, pointed at `--afa-error` instead of `--afa-red-alt`. Also fixed an incidental bug in the same object: `sold-out`'s `bg: var(--afa-ink), color: var(--afa-white)` (same light-theme-legacy pairing as item 6) → `var(--afa-brown-black)`/`var(--afa-cream)`, the same pairing already established as `--afa-on-fill-solid`.
+
+**8. Docs correction.** Added a "Status tone system" section (5.1) to `docs/afa-design-tokens-reference.md` documenting `STATUS_TONE`'s 5 real tones (gold/sage/error/muted/orange), its per-domain scoping rule (each page owns its own status→tone map; only the tone is shared), and `Badge.tsx`'s 5 chrome variants with real call sites.
+
+**Full-batch verification:** `tsc --noEmit` clean, `check-design-tokens.js` clean, a real `next build` succeeded, and the dispatch's own repo-wide regex (`--afa-terracotta|--afa-white|--afa-cream-tint|--afa-error-bg|--afa-success-bg|--afa-amber-tint|--afa-ink\b`) across all of `src/` returns zero hits outside `globals.css`'s own definitions, prose comments documenting past migrations, and the 2 confirmed false-positive dark-gradient sites (each carrying its own explanatory comment).
+
+**Not done this session, flagged rather than silently skipped:** the dispatch asked to "log each fixed item to the Feedback table as you go." Supabase MCP tools are available this session, but no project_id or "Feedback" table was identified/confirmed as part of this dispatch — rather than guess at a project or table shape, this is left undone and flagged here for Hitesh or a future session with the right project context to either do or explicitly wave off.
+
+## Open items for next session (updated)
+
+**Resolved, remove from any older list:** the 2 real decisions carried forward since `-064`/`-066` (dashed button, PWA theme-color coupling) are both fixed in `GEN-2609-067` above — pending merge, not pending decision, so drop them from the "needs Hitesh's call" framing once merged. `DisplayNameNudge.tsx`'s orange-tint banner leftover (flagged 2 sessions ago) is also fixed above.
+
+**New, blocking nothing but needs action:**
+- Both `GEN-2609-067` branches need review + merge (see compare URLs above) — no CI/Vercel status has been checked from this session since there's no way to watch a PR without `gh`.
+- Feedback-table logging for this dispatch's 8 items was not done — see note above, needs either the right Supabase project context or an explicit "skip it" from Hitesh.
+
+**Still open, unchanged from before this session:**
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
+- `GEN-2609-005` — blocked purely on the above.
+- `GEN-2609-009`, `GEN-2609-016` — ready to dispatch, not yet sent.
+- `GEN-2609-022` — `BUILD_COMPLETE`, live click-through still not confirmed.
+- `GEN-2609-036` — scoped, not dispatched.
+- Residual card/sheet-context `--afa-error` gap (4 files, 4.17:1) — needs a decision beyond a text-color swap.
+- Icon system consolidation, `calendar`/`tag`/`map` naming collision, icon sizing/strokeWidth standardization — all documented, none scheduled.
+- Push-content localization foundation (`User.locale` column + server-side persistence decision) — nobody's call made yet.
+- e2e verification gap for `GEN-2609-042` — still genuinely inconclusive, not re-attempted.
+- DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 7 sessions running.
+- IA question (hamburger drawer duplicating tab-bar items) — still waiting on Hitesh's go-ahead to dispatch.
+- The stray `stash@{0}` — still unresolved, now spanning multiple sessions.
+- `GEN-2609-059`'s hover-treatment direction — still needs Hitesh's confirmation, unrelated to this session's work.
+- Card (`VenueCard` vs `EventCard.tsx`) — still deliberately unmerged, documented, not re-opened.
+
+## Session-start checklist (this session's version)
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD is still `4c8393e` as of this session's end (neither `GEN-2609-067` branch has merged).
+2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
+3. Read this file, then `docs/design.md` for anything logged since.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 5+ sessions running.
+5. Merge both `GEN-2609-067` branches (compare URLs above) — merge the item 1-7 branch first since item 8's doc content, while independent, documents the fuller "governed palette" picture the audit's items 1-7 are also about. Then take the remaining open items (Feedback-table logging, `-059` hover direction, Razorpay rotation) back to Hitesh.

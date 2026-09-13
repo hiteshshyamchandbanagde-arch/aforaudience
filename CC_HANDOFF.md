@@ -814,3 +814,64 @@ soon rather than continuing to flag it indefinitely.
 decisions (dashed-outline button, PWA `theme_color` coupling,
 `GEN-2609-059`'s hover direction) to Hitesh - none of them need more
 investigation, only his call.
+
+## CC-side session note - 13 Sep, later session (git/session state only)
+
+Dispatched as one large, pre-located 8-item audit fix (`GEN-2609-067`)
+against `qa` HEAD `4c8393e` - explicitly framed as "not new
+investigation," and this time the framing held: every file:line
+premise re-verified clean on a fresh read/grep before editing, no
+count corrections needed anywhere in the batch (first time this whole
+sweep's runs, across many tickets, all came back accurate on
+re-verification).
+
+Two branches, both pushed, **neither merged by end of session** (no
+`gh`/`$GITHUB_TOKEN` in this environment, re-confirmed):
+- `fix/gen-2609-067-ui-centralization-audit` (items 1-7, branched from
+  `qa` at `4c8393e`, commit `d4eba61`)
+- `docs/gen-2609-067-status-tone-reference` (item 8, branched
+  separately from the same `qa` point rather than stacked on the item
+  1-7 branch, since its content - documenting the pre-existing
+  `STATUS_TONE` system - doesn't depend on anything items 1-7 changed;
+  commit `ff26c42`)
+
+Full technical detail (before/after per item, the several bugs found
+beyond the dispatch's own list) is in `docs/design.md`'s
+`GEN-2609-067` entry and `HANDOFF.md`'s matching session section - not
+re-duplicated here.
+
+**One instruction explicitly not completed, flagged rather than
+silently dropped:** the dispatch asked for each fixed item to be
+logged to a "Feedback table" as work progressed (~30 min cadence).
+Supabase MCP tools (`mcp__claude_ai_Supabase__*`) are loadable this
+session, confirmed via `ToolSearch`, but no project_id or a table
+actually named "Feedback" was identified as part of this dispatch -
+rather than guess at which Supabase project/table this refers to (this
+repo's own DB access has historically gone through `apply_migration`/
+direct SQL against a named `aforaudience-qa` project, not this MCP
+route), left undone. Flagged in `HANDOFF.md` for whoever has the right
+project context next.
+
+Verification: `tsc --noEmit` clean, `check-design-tokens.js` clean,
+real `next build` succeeded, full repo-wide regex re-grep (the exact
+one the dispatch specified) came back clean outside `globals.css`,
+prose comments, and the 2 confirmed false-positive dark-gradient
+sites. No browser tool available this session either - seat-map
+editor's 3 real inverted-visibility fixes and the `about`/
+`razorpay-test` full-page migrations were reasoned from token values
+and cross-file comparison (e.g. checking `SeatPicker.tsx`'s already-
+dark-themed state before reusing its shared `colorForZone` palette),
+not screenshotted.
+
+Working tree clean at end of session except the pre-existing untracked
+`Figma/` dir (never staged, confirmed via `git status` before every
+commit). The unclaimed `stash@{0}` is still untouched, now spanning
+even more sessions - still worth a direct decision from Hitesh rather
+than continuing to carry it forward silently.
+
+**Next session (CC or chat) should:** merge both `GEN-2609-067`
+branches (item 1-7 branch first - see `HANDOFF.md` for the reasoning
+and both compare URLs), then either resolve or explicitly wave off the
+Feedback-table logging gap, then take `GEN-2609-059`'s hover direction
+and the Razorpay/Maps key rotation back to Hitesh as the next real
+open decisions.
