@@ -321,7 +321,7 @@ export default function MyTicketsPage() {
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been

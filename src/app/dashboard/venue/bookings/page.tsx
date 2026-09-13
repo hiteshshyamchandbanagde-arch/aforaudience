@@ -147,7 +147,7 @@ export default function VenueBookingsPage() {
           </div>
 
           {loadError && (
-            <ErrorBanner style={{ marginBottom: '24px' }}>{loadError}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{loadError}</ErrorBanner>
           )}
 
           {/* F3 - Revenue summary */}

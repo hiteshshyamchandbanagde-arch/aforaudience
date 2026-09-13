@@ -133,7 +133,7 @@ export default function VenueRequestsPage() {
           </div>
 
           {loadError && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{loadError}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{loadError}</ErrorBanner>
           )}
 
           {requests.length === 0 ? (

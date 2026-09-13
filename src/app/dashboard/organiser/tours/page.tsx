@@ -82,7 +82,7 @@ export default function OrganiserToursPage() {
         </div>
 
         {error && (
-          <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
+          <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
         )}
 
         {tours.length === 0 ? (
