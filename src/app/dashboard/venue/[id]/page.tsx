@@ -163,7 +163,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           <Card style={{ padding: '28px', marginBottom: '20px' }}>

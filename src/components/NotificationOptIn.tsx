@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/i18n/translate';
 import { subscribeAndSave } from '@/lib/push-subscribe';
+import Button from '@/components/ui/Button';
 
 /**
  * "Enable notifications" nudge. Any logged-in role can benefit (admin
@@ -101,24 +102,15 @@ export default function NotificationOptIn() {
       <span style={{ flex: 1, minWidth: 0 }}>
         {tr.notificationOptIn.message}
       </span>
-      <button
+      <Button
+        variant="outline"
+        fullWidth={false}
         onClick={enable}
         disabled={busy}
-        style={{
-          background: 'var(--afa-terracotta)',
-          color: 'white',
-          padding: '6px 14px',
-          borderRadius: 999,
-          border: 'none',
-          fontWeight: 600,
-          fontSize: 13,
-          whiteSpace: 'nowrap',
-          cursor: busy ? 'default' : 'pointer',
-          opacity: busy ? 0.7 : 1,
-        }}
+        style={{ padding: '6px 14px', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}
       >
         {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
-      </button>
+      </Button>
       <button
         onClick={dismiss}
         aria-label={tr.notificationOptIn.dismissAriaLabel}

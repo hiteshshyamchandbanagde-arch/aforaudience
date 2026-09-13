@@ -23,7 +23,7 @@ import Link from 'next/link'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close'
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline'
 
 type BaseProps = {
   variant: ButtonVariant
@@ -116,6 +116,33 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
         color: 'var(--afa-amber)',
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
+      }
+    case 'outline':
+      // GEN-2609-047 - a CTA-weight action that needs to read as clearly
+      // distinct from its own container when that container is ALREADY
+      // `--afa-fill-solid` (NotificationOptIn.tsx's banner background) -
+      // `primary`'s solid fill would render identically to the banner
+      // behind it. Transparent fill + `--afa-on-fill-solid`
+      // border/text reuses the exact same token this component's own
+      // message text already sits on `--afa-fill-solid` with (line 88 at
+      // the time this was added), so it's a proven-legible pair on this
+      // background, not a new one.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        color: 'var(--afa-on-fill-solid)',
+        padding: 16,
+        border: '1.5px solid var(--afa-on-fill-solid)',
+        borderRadius: 999,
+        fontSize: 16,
+        fontWeight: 700,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
       }
     case 'close':
       return {

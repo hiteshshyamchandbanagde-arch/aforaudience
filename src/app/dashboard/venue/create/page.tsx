@@ -276,7 +276,7 @@ export default function CreateVenuePage() {
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>

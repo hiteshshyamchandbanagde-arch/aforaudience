@@ -196,7 +196,7 @@ export default function VenueDashboard() {
           <PageHead eyebrow="Portfolio" title="Your Venues" />
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           {venues.length === 0 ? (

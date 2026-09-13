@@ -2873,3 +2873,93 @@ Built on `feat/gen-2609-042-onboarding-welcome-sequence`, branched from
 closes Step 6 (5/5) and the original six-step UI/UX audit sequence in
 full, once the migration lands. Pending merge confirmation before this
 entry is finalized, per the standing rule.
+
+## GEN-2609-043 + GEN-2609-047: targeted contrast fix + Enable button restyle - built
+
+Two small, independent fixes off the accessibility/notifications specs'
+own "flagged, needs Hitesh's call" items - both now resolved with an
+actual decision instead of staying open.
+
+**GEN-2609-043 - `--afa-error` targeted retarget, not a global swap.**
+`--afa-error` the CSS variable is untouched; only the specific failing
+usages `docs/accessibility-guidelines.md` Section 1 identified move to
+`--afa-red-alt` (`#EF4444`), each independently:
+
+- `dashboard/admin/feedback/page.tsx`'s CRITICAL severity badge -
+  background `var(--afa-error)` → `var(--afa-red-alt)`, text
+  `var(--afa-on-fill-solid)` unchanged. Recomputed via the same
+  relative-luminance method the spec used: 2.87:1 → **4.99:1**, matches
+  the spec's own prediction exactly.
+- The dashboard-context `ErrorBanner` usages (background stays the
+  existing `rgba(179,38,30,0.1)` tint, only the text `color` prop moves)
+  - `var(--afa-error)` → `var(--afa-red-alt)` via each call site's own
+    `style` prop (the component's own default color is left alone, so
+    the 4 card/sheet-context callers - see below - are structurally
+    unaffected without needing their own opt-out). Recomputed: 2.68:1 →
+    **4.65:1**, clears AA normal text by a narrow margin, matches the
+    spec's 4.66:1 within rounding.
+
+**Correction to this dispatch's own count:** independently re-grepping
+every `<ErrorBanner>` usage and classifying each by its real background
+(`DashboardShell`'s `--afa-surface-page`, or a page setting the same
+background directly without the shell component, e.g.
+`dashboard/venue/[id]/page.tsx`) found **14 real dashboard-context
+usages, not "~20."** Fixed all 14: `tickets/page.tsx`, `profile/page.tsx`,
+`dashboard/venue/page.tsx`, `dashboard/organiser/page.tsx`,
+`dashboard/organiser/events/create/page.tsx`,
+`dashboard/organiser/edit/page.tsx`, `dashboard/organiser/tours/page.tsx`,
+`dashboard/organiser/payouts/page.tsx`, `dashboard/admin/settings/page.tsx`,
+`dashboard/venue/create/page.tsx`, `dashboard/venue/bookings/page.tsx`,
+`dashboard/venue/edit/page.tsx`, `dashboard/venue-requests/page.tsx`,
+`dashboard/venue/[id]/page.tsx`.
+
+**`OfflineBanner.tsx` confirmed untouched** - still `background:
+var(--afa-error)` / `color: 'white'` when offline, unaffected since
+neither the file nor the `--afa-error` variable itself was touched;
+ratio unchanged by construction, not just by claim.
+
+**Residual gap, noted not solved (per this dispatch's own instruction):**
+the 3 card/sheet-context banners the spec named
+(`(auth)/login/page.tsx`, `AuthPromptSheet.tsx`,
+`CorporateInquiryModal.tsx`) plus a 4th found independently this pass
+(`verify-phone/page.tsx`, which sits on `--afa-surface-raised` via its
+own `<main>` background, same context class) all still render at
+`--afa-error`'s 2.40:1 - even `--afa-red-alt` only reaches 4.17:1 there
+per the spec's own table, still short of AA. Left alone, exactly as
+instructed - a real, still-open gap for whoever picks up a full
+card/sheet-context fix next.
+
+**GEN-2609-047 - `NotificationOptIn.tsx`'s Enable button.** The dispatch
+described this as reusing "the existing secondary/outline Button.tsx
+variant... extracted during the GEN-2609-042 onboarding build" - checked
+`Button.tsx` fresh before touching anything and **no such variant
+existed**: GEN-2609-042 only ever consumed the pre-existing `primary`/
+`secondary` variants, never added a new one. Added a new `outline`
+variant instead of guessing at which existing one was meant - transparent
+fill, `1.5px solid var(--afa-on-fill-solid)` border, same color text.
+Chosen deliberately over reusing `primary` (`--afa-fill-solid` fill),
+which would render identically to `NotificationOptIn`'s own banner
+background and make the button disappear into its own container - the
+exact failure mode flagged and deliberately avoided when this same
+button was left alone during GEN-2609-042 (see `docs/onboarding-
+guidelines.md` Section 5.5's "the dispatch's proposed token swap does not
+hold"). `--afa-on-fill-solid` was chosen because the banner's own message
+text already uses that exact token on this exact background (line 88) -
+a proven-legible pair here, not a new guess. Dismiss `×`
+(`rgba(247,243,238,0.6)`) left untouched, per instruction and per the
+established convention `docs/notifications-guidelines.md` Section 5.5
+already documented (7+ other files use the identical untokenized value).
+
+**Not verified this pass:** the dispatch's own visual-check step (banner
+vs. button contrast at 360/375/414px) - no browser/Playwright tool was
+available this session, same gap as the motion/accessibility specs'
+unperformed DevTools/Tab-key checks. `tsc --noEmit` and `next build` both
+clean; the color/border values were reasoned from the same token pairing
+already proven legible elsewhere in this exact component, not asserted
+from a screenshot.
+
+Both logged to the Feedback table: GEN-2609-043 → RESOLVED/DEPLOYED_QA,
+GEN-2609-047 → RESOLVED/DEPLOYED_QA. Built on
+`fix/gen-2609-043-047-contrast-and-button`, branched from `qa` at
+`cbee0e6` (synced via `git fetch` first - no collision). Pending merge
+confirmation before this entry is finalized, per the standing rule.
