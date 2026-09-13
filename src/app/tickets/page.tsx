@@ -665,11 +665,18 @@ export default function MyTicketsPage() {
                               </div>
                             )}
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              {/* GEN-2609-069 - flex: '1 1 auto' let each button claim
+                                  its own natural content width first, so in the 2-up
+                                  desktop grid (narrower per-card than the mobile-first
+                                  reference design assumed) all 3 overflowed and each
+                                  wrapped onto its own full-width line instead of
+                                  sharing the row. flex-basis 0 makes them split the
+                                  row equally and wrap their own label text instead. */}
                               <Button
                                 variant="outline-neutral"
                                 size="sm"
                                 href={`/api/bookings/${b.id}/ticket`}
-                                style={{ flex: '1 1 auto' }}
+                                style={{ flex: '1 1 0', minWidth: 0 }}
                               >
                                 <DownloadIcon style={{ width: 13, height: 13 }} />
                                 {tr.checkoutPage.downloadTicketPdf}
@@ -680,12 +687,13 @@ export default function MyTicketsPage() {
                                 label={tr.ticketsPage.messageOrganiser}
                                 icon={<MessageIcon style={{ width: 13, height: 13 }} />}
                                 style={{
-                                  flex: '1 1 auto',
+                                  flex: '1 1 0',
+                                  minWidth: 0,
                                   padding: '4px 10px',
                                   borderRadius: 6,
                                   fontSize: 12,
                                   fontWeight: 600,
-                                  border: '1px solid rgba(245,245,240,0.15)',
+                                  border: '1px solid var(--afa-border-resting)',
                                   color: 'var(--afa-text-secondary)',
                                   fontFamily: 'var(--font-sans)',
                                 }}
@@ -697,7 +705,7 @@ export default function MyTicketsPage() {
                                   onClick={() => cancelBooking(b)}
                                   disabled={cancelling === b.id}
                                   title={previewRefund(b, tr).label}
-                                  style={{ flex: '1 1 auto', opacity: cancelling === b.id ? 0.6 : 1 }}
+                                  style={{ flex: '1 1 0', minWidth: 0, opacity: cancelling === b.id ? 0.6 : 1 }}
                                 >
                                   {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
                                 </Button>
