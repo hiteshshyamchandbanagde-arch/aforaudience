@@ -11,10 +11,12 @@ import DashboardShell from '@/components/DashboardShell'
 import MessageButton from '@/components/MessageButton'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { EventPoster } from '@/components/EventCard'
-import { CalendarIcon, PinIcon } from '@/components/icons/EventIcons'
+import { CalendarIcon, PinIcon, ClockIcon, CheckIcon, BanIcon, RefundIcon, DownloadIcon, MessageIcon, TicketIcon } from '@/components/icons/EventIcons'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { STATUS_TONE, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import StubRow from '@/components/ui/StubRow'
 
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
 // than the Figma mock's decorative QrIcon glyph. Encodes the raw
@@ -176,6 +178,18 @@ const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   REFUNDED: STATUS_TONE.muted,
 }
 
+// GEN-2609-068 - v6 redesign's status chip is icon + label, not
+// color-only (task item 1). One icon per effective status, reusing
+// EventIcons.tsx's new Check/Clock/Ban/Refund icons rather than the
+// Figma export's own inlined glyphs.
+const STATUS_ICON: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  PENDING: ClockIcon,
+  EXPIRED: ClockIcon,
+  CONFIRMED: CheckIcon,
+  CANCELLED: BanIcon,
+  REFUNDED: RefundIcon,
+}
+
 // A booking's display status can differ from its DB status: an expired
 // PENDING is functionally dead even though the row still says PENDING.
 function effectiveStatus(b: BookingItem): string {
@@ -183,6 +197,58 @@ function effectiveStatus(b: BookingItem): string {
     return 'EXPIRED'
   }
   return b.status
+}
+
+// GEN-2609-068 - the redesigned "ticket stub" row's real-data mapping.
+// Booking has no single "tier" field - `seats` is a tier/section name ->
+// qty record (multi-tier bookings are real, e.g. 2 VIP + 1 General), and
+// `seatLabels` is only populated for numbered-seat venues. Tier shows
+// the section name(s); Qty prefers the actual seat count (seatLabels)
+// when the venue is numbered, falling back to summed `seats` quantities
+// otherwise; Ref is the same ticketCode already shown elsewhere on this
+// page. StubRow's own `whiteSpace: nowrap` + ellipsis handles a long
+// multi-tier name list without needing truncation logic here.
+function stubCells(b: BookingItem, tr: Dictionary) {
+  const tierNames = Object.keys(b.seats)
+  const qty = b.seatLabels && b.seatLabels.length > 0 ? b.seatLabels.length : Object.values(b.seats).reduce((sum, n) => sum + n, 0)
+  return [
+    { label: tr.ticketsPage.stubTierLabel, value: tierNames.length > 0 ? tierNames.join(', ') : '—' },
+    { label: tr.ticketsPage.stubQtyLabel, value: qty || '—', align: 'center' as const },
+    { label: tr.ticketsPage.stubRefLabel, value: b.ticketCode || '—', align: 'right' as const },
+  ]
+}
+
+// GEN-2609-068 - shared 10px mono/uppercase/amber section-header
+// treatment (page kicker + "Today"/"This weekend"/etc.), collapsing
+// what the v6 mockup drew as 3 near-duplicate micro-label sizes down to
+// exactly 2 roles across this page - this is the section-level role: a
+// rule line after the label, reused across all 4 real date-based
+// sections (this page's actual grouping, kept as the more useful real
+// logic rather than the mock's simpler confirmed/pending/past split -
+// see docs/design.md's GEN-2609-068 entry).
+function SectionLabel({ label }: { label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
+      <div style={{ height: 1, flex: 1, background: 'rgba(245,245,240,0.08)' }} />
+    </div>
+  )
+}
+
+// GEN-2609-068 - the CONFIRMED-only perforated divider, matching the
+// v6 mockup's "torn ticket stub" visual. The punch-circles use
+// --afa-surface-page (the real PAGE background) against a card that
+// sits on --afa-surface-raised, the same page/card relationship the
+// mockup's own #141414-on-#1F1F1F pairing relied on to read as an
+// actual cutout rather than a plain dashed line.
+function PerfDivider() {
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <div style={{ position: 'absolute', left: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
+      <div style={{ flex: 1, borderTop: '1px dashed rgba(245,245,240,0.12)' }} />
+      <div style={{ position: 'absolute', right: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
+    </div>
+  )
 }
 
 export default function MyTicketsPage() {
@@ -314,7 +380,14 @@ export default function MyTicketsPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+        <style>{`
+          .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+          @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
+        `}</style>
         <div style={{ maxWidth: '800px', padding: '48px 24px' }}>
+          <p style={{ margin: '0 0 6px', fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
+            {tr.ticketsPage.pageKicker}
+          </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
@@ -397,8 +470,17 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
-              {tr.ticketsPage.noTicketsYet} <Link href="/events" style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>{tr.ticketsPage.browseEventsLink}</Link>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '64px 32px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 16, border: '1px solid rgba(245,245,240,0.08)', background: 'var(--afa-surface-raised)' }}>
+                <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
+                <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{tr.ticketsPage.emptyDescription}</p>
+                <Link href="/events" style={{ display: 'inline-block', marginTop: '14px', fontSize: '13px', color: 'var(--afa-amber)', fontWeight: 600 }}>
+                  {tr.ticketsPage.browseEventsLink}
+                </Link>
+              </div>
             </div>
           ) : (
             (['today', 'weekend', 'upcoming', 'past'] as TicketSection[]).map((section) => {
@@ -411,11 +493,11 @@ export default function MyTicketsPage() {
                 past: tr.ticketsPage.sectionPast,
               }[section]
               return (
-                <div key={section} style={{ marginBottom: '24px' }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
-                    {heading}
-                  </h2>
-                  {items.map((b) => renderCard(b))}
+                <div key={section} style={{ marginBottom: '28px' }}>
+                  <SectionLabel label={heading} />
+                  <div className="afa-tickets-grid">
+                    {items.map((b) => renderCard(b))}
+                  </div>
                 </div>
               )
             })
@@ -431,14 +513,21 @@ export default function MyTicketsPage() {
   function renderCard(b: BookingItem) {
               const eff = effectiveStatus(b)
               const s = STATUS_STYLE[eff] || STATUS_STYLE.PENDING
+              const StatusIcon = STATUS_ICON[eff] || ClockIcon
               const isLivePending = eff === 'PENDING'
               const showAttendancePill = eff === 'CONFIRMED' && isPastEvent(b)
-              // Mobile Redesign Phase 4a (GEN-2609-006) - poster header +
-              // QR stub per the Figma v2 export's Tickets.tsx. That mock
-              // only had a binary upcoming/used split; the real statuses
-              // above (PENDING/CONFIRMED/CANCELLED/REFUNDED/EXPIRED, plus
-              // attended-vs-missed) are richer and are kept as-is, just
-              // repositioned onto the poster overlay instead of dropped.
+              // GEN-2609-068 - v6 redesign: cancelled/refunded cards are
+              // ghosted (55% opacity) and non-interactive, matching the
+              // v6 mockup exactly - a deliberate decision, not a silent
+              // copy. Flagged in docs/design.md/HANDOFF.md as worth
+              // Hitesh's explicit confirmation: the event itself already
+              // happened or the booking is dead either way, so there's
+              // an argument a still-tappable card (to see the past event
+              // page / who else went) is more useful than a fully inert
+              // one. Kept matching the mockup for this pass since it's
+              // the simpler, lower-risk default - easy to reverse if
+              // that confirmation comes back the other way.
+              const isGhosted = eff === 'CANCELLED' || eff === 'REFUNDED'
               const typeKey = (b.event.type in tr.eventTypes ? b.event.type : 'OPEN_MIC') as keyof typeof tr.eventTypes
               const typeLabel = tr.eventTypes[typeKey]
               const isNavigating = navigatingId === b.event.id
@@ -451,26 +540,29 @@ export default function MyTicketsPage() {
               return (
                 <div
                   key={b.id}
-                  role="link"
-                  tabIndex={0}
+                  role={isGhosted ? undefined : 'link'}
+                  tabIndex={isGhosted ? undefined : 0}
                   aria-busy={isNavigating}
-                  onClick={() => goToEvent(b.event.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      goToEvent(b.event.id)
-                    }
-                  }}
-                  className="afa-focusable"
+                  onClick={isGhosted ? undefined : () => goToEvent(b.event.id)}
+                  onKeyDown={
+                    isGhosted
+                      ? undefined
+                      : (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            goToEvent(b.event.id)
+                          }
+                        }
+                  }
+                  className={isGhosted ? undefined : 'afa-focusable'}
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
                     background: 'var(--afa-surface-raised)',
-                    borderRadius: '12px',
-                    marginBottom: '14px',
-                    border: '1px solid rgba(245,245,240,0.08)',
-                    cursor: navigatingId && !isNavigating ? 'default' : 'pointer',
-                    opacity: (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.7 : 1),
+                    borderRadius: '16px',
+                    border: isGhosted ? '1px solid rgba(245,245,240,0.06)' : '1px solid rgba(245,245,240,0.1)',
+                    cursor: isGhosted ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
+                    opacity: (isGhosted ? 0.55 : 1) * (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.85 : 1),
                     transition: 'opacity 0.15s ease',
                   }}
                 >
@@ -480,30 +572,29 @@ export default function MyTicketsPage() {
                     </div>
                   )}
 
-                  <div style={{ position: 'relative', height: '132px', overflow: 'hidden' }}>
+                  {/* Hero: 112px (down from 132px), bottom-up gradient,
+                      category + title over the image, status chip
+                      top-right. EventPoster already builds on Photo.tsx
+                      (grayscale+amber-duotone real photos) with an
+                      illustrated fallback for a missing/broken
+                      posterImage - kept as-is rather than calling
+                      Photo.tsx directly and losing that fallback. */}
+                  <div style={{ position: 'relative', height: '112px', overflow: 'hidden' }}>
                     <EventPoster posterImage={b.event.posterImage} title={b.event.title} type={b.event.type} typeLabel={typeLabel} hideCaption />
                     <div
                       style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.85) 100%)',
+                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, rgba(10,10,10,0.88) 100%)',
                       }}
                     />
-                    <div style={{ position: 'absolute', left: 14, right: 14, bottom: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
-                          {typeLabel}
-                        </div>
-                        <h3
-                          style={{
-                            marginTop: 2, fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: 'var(--afa-text-primary)',
-                            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                          }}
+                    <div style={{ position: 'absolute', right: 10, top: 10 }}>
+                      <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <Badge
+                          variant="status-compact"
+                          tone={s}
+                          icon={<StatusIcon style={{ width: 11, height: 11 }} />}
+                          style={{ whiteSpace: 'normal', textAlign: 'right', maxWidth: '150px' }}
                         >
-                          {b.event.title}
-                        </h3>
-                      </div>
-                      <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
-                        <Badge variant="status-compact" tone={s}>
                           {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
                         </Badge>
                         {showAttendancePill && (
@@ -513,115 +604,154 @@ export default function MyTicketsPage() {
                         )}
                       </span>
                     </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                    <div style={{ flex: 1, minWidth: 0, padding: '16px 20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 6 }}>
-                        <CalendarIcon style={{ width: 14, height: 14, color: 'rgba(245,245,240,0.4)', flexShrink: 0 }} />
-                        <span>
-                          {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {b.event.startTime}
-                        </span>
+                    <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10 }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                        {typeLabel}
                       </div>
-                      {b.event.venue && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 10 }}>
-                          <PinIcon style={{ width: 14, height: 14, color: 'rgba(245,245,240,0.4)', flexShrink: 0 }} />
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.event.venue.name}, {b.event.venue.city}</span>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
-                        <span>
-                          {b.seatLabels && b.seatLabels.length > 0
-                            ? tr.ticketsPage.seatsListTemplate.replace('{labels}', b.seatLabels.join(', '))
-                            : Object.entries(b.seats).map(([section, qty]) => `${qty} × ${section}`).join(', ')}
-                          {b.ticketCode && <span style={{ opacity: 0.5 }}> · {b.ticketCode}</span>}
-                        </span>
-                        <span style={{ fontWeight: 600 }}>{b.totalAmount > 0 ? `₹${b.totalAmount.toLocaleString('en-IN')}` : tr.eventDetailPage.freeAmount}</span>
-                      </div>
-                    </div>
-
-                    {showQr && (
-                      <div
+                      <h3
                         style={{
-                          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
-                          width: 100, flexShrink: 0, padding: 12,
-                          borderLeft: '1px dashed rgba(245,245,240,0.15)', background: 'var(--afa-surface-inverse)',
+                          marginTop: 2, fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         }}
                       >
-                        <div style={{ padding: 4, borderRadius: 8, background: 'var(--afa-text-primary)' }}>
-                          <TicketQr value={b.id} size={56} />
-                        </div>
-                        {/* No existing i18n dictionary key for either state (same
-                            flagged gap as MobileTabBar's Discover/Saved labels,
-                            BUG-2609-006) - plain English rather than guessing a
-                            translation key that doesn't exist. */}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
-                          {used ? 'Scanned' : 'Scan at door'}
-                        </span>
-                      </div>
+                        {b.event.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Meta row: date/time + venue, font-sans 12px. */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 16, rowGap: 4, padding: '10px 14px 0' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--afa-text-secondary)' }}>
+                      <CalendarIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                      {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {b.event.startTime}
+                    </span>
+                    {b.event.venue && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--afa-text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <PinIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
+                        {b.event.venue.name}, {b.event.venue.city}
+                      </span>
                     )}
                   </div>
 
-                  <div style={{ padding: '0 20px 16px' }} onClick={(e) => e.stopPropagation()}>
-                  {b.companionTags && b.companionTags.length > 0 && (
-                    <p style={{ fontSize: '12.5px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: '8px 0 0' }}>
-                      {tr.ticketsPage.goingWith}{' '}
-                      {b.companionTags.map((t, i) => (
-                        <span key={t.id}>
-                          {i > 0 && ', '}
-                          {t.taggedUser.displayName || t.taggedUser.name}{' '}
-                          {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
-                        </span>
-                      ))}
-                    </p>
-                  )}
-                  {isLivePending && (
-                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {b.totalAmount > 0 && (
-                        <Link
-                          href={`/checkout/${b.id}`}
-                          style={{ fontSize: '12px', fontWeight: 700, color: 'white', background: 'var(--afa-fill-solid)', border: 'none', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
-                        >
-                          {tr.ticketsPage.payNowArrow}
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => cancelBooking(b)}
-                        disabled={cancelling === b.id}
-                        style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
-                      >
-                        {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelButton}
-                      </button>
-                    </div>
-                  )}
-                  {eff === 'CONFIRMED' && (
-                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <a
-                        href={`/api/bookings/${b.id}/ticket`}
-                        style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: '6px', padding: '6px 14px', textDecoration: 'none' }}
-                      >
-                        {tr.checkoutPage.downloadTicketPdf}
-                      </a>
-                      <MessageButton contextType="BOOKING" contextId={b.id} label={tr.ticketsPage.messageOrganiser} />
-                      {!isPastEvent(b) && (
-                        <button
+                  {/* Ticket stub row (Tier / Qty / Ref) - new shared
+                      StubRow component (src/components/ui/StubRow.tsx),
+                      inset on --afa-surface-inverse. */}
+                  <div style={{ margin: '10px 14px 0' }}>
+                    <StubRow cells={stubCells(b, tr)} />
+                  </div>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {/* CONFIRMED: perforated divider, QR inline with
+                        price, 3-button equal-weight outline row. */}
+                    {eff === 'CONFIRMED' && (
+                      <>
+                        <div style={{ padding: '14px 14px 0' }}>
+                          <PerfDivider />
+                        </div>
+                        <div style={{ display: 'flex', gap: 14, padding: '12px 14px 14px', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 12, background: 'var(--afa-cream)' }}>
+                              <TicketQr value={b.id} size={60} />
+                            </div>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
+                              {used ? tr.ticketsPage.scannedLabel : tr.ticketsPage.scanAtDoor}
+                            </span>
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {b.totalAmount > 0 && (
+                              <div style={{ marginBottom: 8 }}>
+                                <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
+                                <p style={{ margin: '2px 0 0', fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                              </div>
+                            )}
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <Button
+                                variant="outline-neutral"
+                                size="sm"
+                                href={`/api/bookings/${b.id}/ticket`}
+                                style={{ flex: '1 1 auto' }}
+                              >
+                                <DownloadIcon style={{ width: 13, height: 13 }} />
+                                {tr.checkoutPage.downloadTicketPdf}
+                              </Button>
+                              <MessageButton
+                                contextType="BOOKING"
+                                contextId={b.id}
+                                label={tr.ticketsPage.messageOrganiser}
+                                icon={<MessageIcon style={{ width: 13, height: 13 }} />}
+                                style={{
+                                  flex: '1 1 auto',
+                                  padding: '4px 10px',
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  border: '1px solid rgba(245,245,240,0.15)',
+                                  color: 'var(--afa-text-secondary)',
+                                  fontFamily: 'var(--font-sans)',
+                                }}
+                              />
+                              {!isPastEvent(b) && (
+                                <Button
+                                  variant="outline-neutral"
+                                  size="sm"
+                                  onClick={() => cancelBooking(b)}
+                                  disabled={cancelling === b.id}
+                                  title={previewRefund(b, tr).label}
+                                  style={{ flex: '1 1 auto', opacity: cancelling === b.id ? 0.6 : 1 }}
+                                >
+                                  {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* PENDING: single fill-solid Pay Now + outline
+                        Cancel - matches current behavior, restyled. */}
+                    {isLivePending && (
+                      <div style={{ display: 'flex', gap: 8, padding: '12px 14px 14px' }}>
+                        {b.totalAmount > 0 && (
+                          <Button variant="primary" size="sm" href={`/checkout/${b.id}`} style={{ flex: 1 }}>
+                            {tr.ticketsPage.payNowArrow}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline-neutral"
+                          size="sm"
                           onClick={() => cancelBooking(b)}
                           disabled={cancelling === b.id}
-                          title={previewRefund(b, tr).label}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: cancelling === b.id ? 0.6 : 1 }}
+                          style={{ flex: b.totalAmount > 0 ? 1 : undefined, opacity: cancelling === b.id ? 0.6 : 1 }}
                         >
-                          {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelTicketButton}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  {(eff === 'CANCELLED' || eff === 'REFUNDED') && b.cancelledAt && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '10px' }}>
-                      {eff === 'REFUNDED'
-                        ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
-                        : tr.ticketsPage.cancelledNoRefund}
-                    </p>
-                  )}
+                          {cancelling === b.id ? tr.ticketsPage.cancellingEllipsis : tr.ticketsPage.cancelButton}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* CANCELLED / REFUNDED: status note only, no
+                        actions - card itself is ghosted/non-interactive
+                        above. */}
+                    {isGhosted && b.cancelledAt && (
+                      <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, padding: '0 14px 14px' }}>
+                        {eff === 'REFUNDED'
+                          ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
+                          : tr.ticketsPage.cancelledNoRefund}
+                      </p>
+                    )}
+
+                    {b.companionTags && b.companionTags.length > 0 && (
+                      <p style={{ fontSize: '12.5px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 14px 14px' : '0 14px 14px' }}>
+                        {tr.ticketsPage.goingWith}{' '}
+                        {b.companionTags.map((t, i) => (
+                          <span key={t.id}>
+                            {i > 0 && ', '}
+                            {t.taggedUser.displayName || t.taggedUser.name}{' '}
+                            {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
+                          </span>
+                        ))}
+                      </p>
+                    )}
                   </div>
                 </div>
               )

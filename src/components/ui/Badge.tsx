@@ -21,6 +21,12 @@ import type { StatusToneStyle } from '@/lib/statusStyle'
 // differ) - so each gets its own variant instead, additive only.
 export type BadgeVariant = 'status' | 'status-compact' | 'micro' | 'tag' | 'pill'
 
+// GEN-2609-068 - every variant gets `display: inline-flex, alignItems:
+// center` as a base (below, applied uniformly rather than per-variant)
+// so a leading `icon` lays out correctly next to the label. Harmless
+// for every existing text-only consumer: inline-flex with one child
+// renders identically to inline-block, and `gap` only has an effect
+// once there's more than one child.
 const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   status: {
     fontSize: '11px',
@@ -72,16 +78,23 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
 export default function Badge({
   variant = 'status',
   tone,
+  icon,
   children,
   style,
 }: {
   variant?: BadgeVariant
   tone: StatusToneStyle
+  /** GEN-2609-068 - optional leading icon (e.g. a status chip that
+   * shouldn't rely on color alone). Sized/positioned by the caller -
+   * Badge only lays it out via the shared inline-flex/gap base below,
+   * it doesn't impose a fixed icon size since that varies by variant. */
+  icon?: React.ReactNode
   children: React.ReactNode
   style?: React.CSSProperties
 }) {
   return (
-    <span style={{ ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', ...CHROME[variant], background: tone.bg, color: tone.color, ...style }}>
+      {icon}
       {children}
     </span>
   )

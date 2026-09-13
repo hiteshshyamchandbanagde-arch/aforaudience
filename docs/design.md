@@ -4334,3 +4334,188 @@ framing.
 
 Built on `fix/gen-2609-067-ui-centralization-audit`, branched from
 `qa` at `4c8393e`.
+
+## GEN-2609-068 - /tickets/ page rebuilt against the v6 Figma Make export (reference only, not copied code)
+
+Dispatch: implement the redesigned `/tickets/` page using the AFA
+Mobile App v6 export's `src/screens/Tickets.tsx` as visual/structural
+reference only, per the standing Mobile Redesign rule that Figma Make
+output isn't trusted as code - rebuilt against this repo's own real
+components and data shapes instead. Two known issues in the reference
+design were explicitly called out to fix, not copy.
+
+**WCAG fix - two invented off-palette hex values in the mockup became
+two real, verified tokens.** The v6 export's status chips hardcoded
+`#7db873` (confirmed-text) and `#e05c55` (cancelled-text) - a
+workaround, not a fix, for the fact that `STATUS_TONE.sage`/`.error`'s
+own base hues fail contrast against their own tinted backgrounds.
+Computed real WCAG relative-luminance contrast (not eyeballed): the
+sage tint (`rgba(74,103,65,0.12)` over `--afa-surface-raised` #1F1F1F)
+composites to ~rgb(36,40,35), luminance ~0.0201; `--afa-sage`'s own hue
+measures well under the 4.5:1 AA floor against it. Added
+`--afa-sage-bright` (#7AA86E) and `--afa-error-bright` (#E67870) to
+`globals.css` (`-bright` naming matches the existing, currently-unused
+`--afa-gold-bright` precedent), and repointed `STATUS_TONE.sage/.error`'s
+`color` at them in `src/lib/statusStyle.ts` - every consumer (dashboard/
+organiser status pills, the companion-status pills in `organiser/events/
+[id]/edit/page.tsx`, and this page's own status chips) gets the fix for
+free, not just this page. Measured: sage ~5.46:1, error ~5.43:1 at the
+tones' real alpha (0.12/0.10), both still >5:1 even re-checked at a
+hypothetical 20% alpha (the dispatch's own upper estimate) - comfortable
+margin, not a razor-thin pass. Full numeric trail in HANDOFF.md, since
+that's a decision worth tracing back to later. For reference: the
+existing `--afa-red-alt` (#EF4444, already folded into `--afa-error`
+elsewhere per GEN-2609-067 item 7) measures only ~4.16:1 against this
+same tinted background and would not have passed here either -
+independent confirmation that red-alt was never fit for this exact
+text-on-tint role.
+
+**Micro-label size collapse - 3 near-duplicate sizes down to 2 real
+roles.** The mockup used 8px (QR caption), 9px (most in-card labels),
+and 10px (section headers/kicker) - audited as 2 conceptual roles, not
+3, so no 8px size exists anywhere on the rebuilt page: 10px for
+section-level labels (page kicker, the 4 real date-based section
+headers), 9px for every in-card micro-label (category tag, Tier/Qty/Ref,
+"scan at door"/"scanned", status chip text).
+
+**New shared component: `StubRow`** ([src/components/ui/StubRow.tsx]) -
+the Tier/Qty/Ref "ticket stub" strip (mono micro-label over value, N
+cells, inset on `--afa-surface-inverse`). Generalized to an arbitrary
+cell array rather than a hardcoded Tier/Qty/Ref shape, per the
+dispatch's own instruction to check reusability first. Real candidates
+spotted but deliberately **not** migrated this pass (their own existing,
+already-shipped patterns would need their own audit before forcing onto
+this shape): the seat-tier legend in `SeatLayoutPreview.tsx`/
+`SeatPicker.tsx`, and the booking-summary line in `checkout/[bookingId]/
+page.tsx`.
+
+**New `Badge` `icon` prop** - status chips are now icon+label, not
+color-only (task's own accessibility point). Additive: every existing
+text-only `Badge` consumer is unaffected (`display: inline-flex` with
+one child renders identically to the previous implicit `inline`).
+
+**New `Button` `outline-neutral` variant** - the redesigned CONFIRMED
+card's 3 equal-weight actions (Download PDF / Message Organiser /
+Cancel) needed a compact, uncolored outline shape that didn't already
+exist: `outline` (GEN-2609-047) is CTA-weight (999px pill, 16px font,
+built for a single high-emphasis action on a `--afa-fill-solid`
+background), not this. **Reconciles GEN-2609-067 item 3's Download-PDF
+fix**, per this dispatch's explicit instruction to check for
+consistency: that ticket gave Download PDF its own amber-outline
+treatment (right call at the time, in isolation); this dispatch's 3-
+button row needs uniform, uncolored weight across all three actions, so
+Download PDF's amber outline is superseded by `outline-neutral` here.
+The *other* amber-outline site from that same ticket - the companion
+tag-confirm button in the "you've been tagged" inbox - is a different,
+unrelated feature and was intentionally left untouched.
+
+**`MessageButton` gets an optional `icon` prop** (additive - replaces
+its hardcoded 💬 emoji only when passed; its other 2 call sites,
+`lineup`/`bookings` pages, pass neither `icon` nor `style` and are
+visually unchanged) so the 3-button row's "Message" action uses a real
+icon consistent with its Download/Cancel siblings instead of an emoji
+sitting next to two icon components.
+
+**6 new icons added to `EventIcons.tsx`** (Check/Close/Ban/Refund/
+Download/Message) - none existed anywhere in this codebase's icon sets
+before (checked all 5 icon files first). Path shapes adapted from the
+v6 export's own inlined icons into this file's established stroke
+convention (`stroke="currentColor" strokeWidth="1.4"`, `className`/
+`style` props), not copied verbatim in the export's own convention.
+
+**Real booking-data mapping, verified against live QA rows via direct
+DB query (Supabase MCP against project `aforaudience-qa`), not
+assumed.** Queried `atul.audience@aforaudience.qa`'s (25 real bookings)
+and `amit.audience@aforaudience.qa`'s (0 bookings - confirmed as the
+real exercise path for the empty state) rows directly:
+- Every live booking's `ticketCode` is currently `null` - the Ref cell's
+  em-dash fallback is the live, common case today, not a rare edge case.
+  Not a bug introduced here (the field has always been nullable and
+  never populated in practice); flagged since it's worth knowing.
+- No booking currently has multiple `seats` tier keys, and no
+  numbered-seat (`seatLabels`-populated) booking exists yet - the
+  Tier/Qty cell's multi-tier-join and seatLabels-preferred-count logic
+  is real and correct for the schema's full range, but only the
+  single-tier/GA path is exercised by live data today.
+- No live `PENDING` booking exists at all right now (they expire or get
+  confirmed quickly) - the PENDING card path is a straightforward
+  restyle of already-shipped, previously-tested behavior, so this is
+  lower risk, but flagged as genuinely unverified against a live row
+  this session.
+
+**Real bug fixed for free**: PENDING's "Pay Now" had a hardcoded
+`color: 'white'` literal - moved onto `Button variant="primary"
+size="sm"`, same fix pattern as every other white-text bug this sweep
+has found.
+
+**Decision flagged, not silently adopted**: cancelled/refunded cards
+are ghosted (55% opacity) and fully non-interactive (no tap-through to
+the past event), matching the v6 mockup exactly. The dispatch explicitly
+asked to confirm rather than copy this - there's a real argument a
+past/dead booking's card being tappable (to see the event page, who
+else went) is more useful than fully inert. Kept matching the mockup
+for this pass since it's the lower-risk default and easy to reverse;
+needs Hitesh's actual call, see HANDOFF.md.
+
+**9 new i18n keys, all 11 locales, real translations** (not English
+duplicated as a fallback): `pageKicker`, `scanAtDoor`, `scannedLabel`,
+`stubTierLabel`, `stubQtyLabel`, `stubRefLabel`, `paidLabel`,
+`emptyTitle`, `emptyDescription`. `scanAtDoor`/`scannedLabel` replace
+what was previously plain hardcoded English with a flagged-gap comment
+(the same pattern as `BUG-2609-006`) - real keys now that this page was
+being rebuilt anyway. `Dictionary = typeof en` structurally enforces
+all 11 locale files stay in sync - confirmed via a clean `tsc`, not
+just visually diffed.
+
+**Desktop 2-up grid** via the codebase's existing `<style>{`@media
+(min-width: 640px) {...}`}</style>` convention (same mechanism as
+`EventDetailClientPage.tsx`'s responsive grids) - not a new breakpoint
+mechanism, and not Tailwind's `sm:` classes (this file, like most of
+the app, styles via inline `style` objects).
+
+**Kept intentionally different from the mockup, not silently
+matched:**
+- PENDING's chip label uses the existing, more informative
+  `tr.bookingStatus.PENDING` ("Reserved — pay to confirm"), not the
+  mockup's compact "Awaiting payment" - shortening real, already-shipped
+  dictionary copy wasn't asked for, so the top-right status chip gets a
+  `style` override (`whiteSpace: 'normal', maxWidth: '150px'`) to wrap
+  gracefully instead.
+- Kept the app's real date-based section grouping (Today / This
+  weekend / Upcoming / Past, from `FEAT-2608-006`) rather than the
+  mockup's simpler confirmed/pending/past split - more useful, already
+  shipped, and the dispatch's own context note says real booking-state
+  logic should be kept, just reskinned.
+- The mockup's page-footer "Transfer or request a refund" link has no
+  backing feature anywhere in this codebase - not added, rather than
+  shipping a dead link.
+- The empty state kept a real `browseEventsLink` under the mockup's
+  simpler icon+title+description treatment (item 8 asked to match the
+  simpler treatment, not to remove the only path back to `/events` from
+  a page with zero tickets).
+
+**Full verification**: `tsc --noEmit` clean (confirms all 11 dictionary
+files stay structurally in sync with `Dictionary = typeof en`),
+`check-design-tokens.js` clean, real `next build` succeeded, and a grep
+of every touched file for `#[0-9A-Fa-f]{3,6}` found zero live hex
+literals (only pre-existing comments and `MessageButton.tsx`'s
+pre-existing `var(--afa-sage, #4a6741)` fallback, unrelated to this
+change). No browser tool available this session (same standing gap as
+many prior sessions) - real-data verification instead came from direct
+Supabase MCP queries against `aforaudience-qa`, not visual review;
+flagged as genuinely unverified visually, not claimed as browser-tested.
+
+**Feedback-table capability gap from GEN-2609-067, resolved**: a
+concurrent session had already located the table (`public.Feedback` in
+the `aforaudience-qa` Supabase project) and logged all 8 of that
+ticket's items retroactively - this session found those rows already
+present. `displayId` is a real, atomically-incrementing sequence
+(`src/lib/codeCounter.ts`'s `nextSequentialCode`, category -> `BUG`/
+`GEN`/etc. prefix + yearMonth + zero-padded seq) backed by the
+`CodeCounter` table, not a free-text field - this ticket's own 2 log
+entries (`BUG-2609-038`, `BUG-2609-039`) were written by replicating
+that exact atomic upsert in SQL rather than guessing a number, to avoid
+colliding with a real, concurrently-submitted user bug report.
+
+Built on `feat/gen-2609-068-tickets-page-v6-redesign`, branched from
+`qa` at `6a26557`.
