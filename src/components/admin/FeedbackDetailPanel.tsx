@@ -195,7 +195,7 @@ export default function FeedbackDetailPanel({
                 {item.category}
               </span>
               {item.displayId && (
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', fontFamily: 'monospace' }}>
                   {item.displayId}
                 </span>
               )}

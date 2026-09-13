@@ -119,7 +119,7 @@ export default function OrganiserToursPage() {
                     <span><strong>{tour.stops.length}</strong> stop{tour.stops.length !== 1 ? 's' : ''}</span>
                     <span><strong>{liveStops}</strong> live</span>
                     {pendingConsents > 0 && (
-                      <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{pendingConsents} awaiting response</span>
+                      <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingConsents} awaiting response</span>
                     )}
                   </div>
                 </div>

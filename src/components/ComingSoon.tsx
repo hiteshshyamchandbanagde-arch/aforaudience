@@ -25,7 +25,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           padding: "48px 24px",
         }}
       >
-        <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-terracotta)", textTransform: "uppercase", marginBottom: "20px" }}>
+        <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
           {tr.comingSoon.badge}
         </div>
         <h1 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>

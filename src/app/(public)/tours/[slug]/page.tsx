@@ -46,7 +46,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
     <>
       <SiteNav />
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px 100px' }}>
-        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-terracotta)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-fill-solid)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
           Tour · {tour.organiser.orgName}
         </p>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '34px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>

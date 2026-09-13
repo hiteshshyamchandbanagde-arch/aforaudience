@@ -383,7 +383,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               </div>
             ) : (
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No venue booked yet. <Link href={`/dashboard/organiser/events/${event.id}/edit`} style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Add one from the edit page.</Link>
+                No venue booked yet. <Link href={`/dashboard/organiser/events/${event.id}/edit`} style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Add one from the edit page.</Link>
               </p>
             )}
           </div>

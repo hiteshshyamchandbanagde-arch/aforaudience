@@ -3,7 +3,7 @@ import SiteNav from "@/components/SiteNav"
 
 const INK = "var(--afa-ink)"
 const PAPER = "var(--afa-cream)"
-const EMBER = "var(--afa-terracotta)"
+const EMBER = "var(--afa-fill-solid)"
 const MIST = "var(--afa-mist)"
 const SERIF = "Georgia, 'Playfair Display', serif"
 const SANS = "system-ui, -apple-system, sans-serif"

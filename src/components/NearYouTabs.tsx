@@ -125,13 +125,13 @@ export default function NearYouTabs() {
       <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <button
           onClick={() => setTab('events')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-terracotta)' : '2px solid transparent' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-fill-solid)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabEvents}
         </button>
         <button
           onClick={() => setTab('artists')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-terracotta)' : '2px solid transparent' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-fill-solid)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabArtists}
         </button>
@@ -182,7 +182,7 @@ export default function NearYouTabs() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
                 <div style={{ fontSize: '10px', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-terracotta)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(ev.date, ev.startTime)}
               </div>
             </Link>
@@ -217,7 +217,7 @@ export default function NearYouTabs() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
                 <div style={{ fontSize: '10px', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-terracotta)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}
               </div>
             </Link>

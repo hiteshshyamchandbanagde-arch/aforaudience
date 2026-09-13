@@ -138,7 +138,7 @@ export default function ArtistsNearYou() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
                 <div style={{ fontSize: '10px', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-terracotta)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}
               </div>
             </Link>
