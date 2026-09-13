@@ -446,6 +446,17 @@ html {
   animation: afa-seal-ring-pulse 480ms ease-out;
 }
 
+/* GEN-2609-062 - was independently defined inline via its own <style>
+   tag in 10 files (13 real injections - wall-of-fame alone had 3, one
+   per loading-spinner instance), the same @keyframes text copy-pasted
+   every time a new spinner needed it. Consolidated to this single
+   definition; every duplicate removed from its call site. Pure cleanup
+   - the animation itself (0.7s linear infinite, applied via inline
+   `animation: "afa-spin ..."` at each spinner div) is unchanged. */
+@keyframes afa-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Consolidated reduced-motion block (docs/motion-guidelines.md) - was 3
    separate @media (prefers-reduced-motion: reduce) blocks scattered across
    this file (one per animation batch as each shipped). Merged into one on

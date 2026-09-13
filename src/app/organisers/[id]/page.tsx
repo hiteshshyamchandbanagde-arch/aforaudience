@@ -342,7 +342,6 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         .afa-organiser-event-card:hover .afa-organiser-event-title { color: var(--afa-amber); }
         .afa-organiser-event-card:hover .afa-organiser-event-details { text-decoration: underline; text-underline-offset: 3px; }
         .afa-organiser-view-all:hover { opacity: 0.8; }
-        @keyframes afa-spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <SiteNav backHref="/events" backLabel={tr.organiserDetailPage.backToEvents} />

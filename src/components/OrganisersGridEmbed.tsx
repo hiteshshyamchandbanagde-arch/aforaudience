@@ -166,7 +166,6 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
             {isNavigatingThis && (
               <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
-                <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>

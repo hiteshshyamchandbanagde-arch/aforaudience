@@ -222,7 +222,6 @@ export default function WallOfFamePage() {
               {navigatingKey === "artist-of-month" && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
-                  <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                 </div>
               )}
               <MonthCardHeader
@@ -383,7 +382,6 @@ export default function WallOfFamePage() {
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}
                               />
-                              <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                             </div>
                           )}
                           <div style={{ fontFamily: "var(--font-mono)", fontSize: "16px", fontWeight: 700, color: "var(--afa-amber)", width: "20px" }}>{i + 1}</div>
@@ -455,7 +453,6 @@ export default function WallOfFamePage() {
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}
                               />
-                              <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
                             </div>
                           )}
                           <div style={{ fontFamily: "var(--font-mono)", fontSize: "16px", fontWeight: 700, color: "var(--afa-amber)", width: "20px" }}>{i + 1}</div>
