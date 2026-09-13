@@ -717,3 +717,65 @@ bring Hitesh the now-4-instance pill-shaped `Button` pattern (probably
 the highest-leverage remaining decision, since it keeps resurfacing
 piecemeal across tickets) alongside the still-open `-059` hover
 direction and `layout.tsx`/`manifest.ts` PWA coupling.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-066)
+
+Ran the standing sync: HEAD confirmed `0621ed1` (`-064`/`-065` from the
+prior note are both merged). One branch, closing out the last known
+gap from the terracotta/button-centralization sweep:
+
+- `feat/gen-2609-066-pill-button-sizes` (`dfc0845`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-066-pill-button-sizes?expand=1
+
+**Re-verified all 4 flagged sites fresh, confirming 2 real shapes, not
+4.** `DisplayNameNudge`/`PhoneVerifyNudge` are byte-identical -> one
+new `pill-sm` size. `InstallPrompt` is genuinely different -> `pill-md`.
+The 4th "instance" (`RegisterForm`'s suggestion chip) wasn't a `Button`
+candidate at all once its real chrome was checked - it's a
+translucent-tint utility chip matching `GEN-2609-063`'s already-
+centralized selection-pill pattern exactly (`FILL_SOLID_TINT`/
+`FILL_SOLID_BORDER_TINT`'s alphas match its real values to the decimal).
+Fixed there instead of inventing an unneeded 3rd `Button` size - this
+also closed its separate `rgba(196,90,52,...)` off-brand color bug for
+free, in the same fix.
+
+**A real `Button` API gap found and fixed properly, not worked
+around:** `DisplayNameNudge`'s link needs `onClick` (dismiss on click-
+through) alongside `href` - `ButtonAsLink`'s type never allowed it
+(its own comment said "real navigation instead of an onClick handler").
+Extended the type to spread `AnchorHTMLAttributes`, matching how
+`ButtonAsButton` already spreads `ButtonHTMLAttributes` - then found
+the render branch wasn't spreading anchor props onto `<Link>` at all
+even after the type allowed it, so `onClick` would've silently done
+nothing. Fixed both. Confirmed via `tsc`+build that every existing
+`href`-only consumer from `-058`/`-064` is unaffected.
+
+**Repo-wide grep confirms this really is the close of the sweep's
+pill-button sub-problem** - zero remaining pill-shaped
+`--afa-terracotta` or `rgba(196,90,52,...)` anywhere. The wider
+`GEN-2609-052`-through-`-066` sweep still has 2 already-flagged items
+standing (the dashed-outline button, the `layout.tsx`/`manifest.ts`
+PWA coupling) - not new, called out explicitly in `HANDOFF.md` rather
+than letting "the sweep is done" read as more finished than it is.
+
+One incidental, unrelated finding logged in `HANDOFF.md` rather than
+acted on: `DisplayNameNudge.tsx`'s own outer banner sits on
+`--afa-orange-tint`/`--afa-brown-dark` plus a literal `#F0D9BF` border
+- looks like a pre-dark-theme-migration leftover, noticed only because
+its pill button (now dark-theme `--afa-fill-solid`) sits right next to
+it. Out of this ticket's scope, flagged so it isn't lost.
+
+Verification: `tsc --noEmit` clean (including the real type-and-render
+gap above), `check-design-tokens.js` clean, real `next build` clean.
+No browser tool available - reasoned from property values as usual for
+this whole sweep, flagged as unverified rather than screenshotted.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched.
+
+**Next session (CC or chat) should:** merge `-066`, confirm with
+Hitesh that the terracotta/button-centralization sweep is otherwise
+done, then take the 2 remaining flagged items (dashed button,
+`layout.tsx`/`manifest.ts` PWA coupling) and `-059`'s hover direction
+as the next real decisions.
