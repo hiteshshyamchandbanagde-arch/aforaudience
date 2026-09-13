@@ -249,3 +249,82 @@ the icon-system consolidation shape, the `calendar`/`tag`/`map`
 visual-winner calls, the icon sizing/strokeWidth convention) is sitting
 in `docs/design.md` awaiting Hitesh's call - not re-summarized here,
 that's `docs/design.md`/`HANDOFF.md`'s job, this note is git state only.
+
+## Update — 13 Sep 2026, later same day (CC-side: notifications, onboarding, then two follow-up fix dispatches)
+
+Four dispatches this session, each its own branch → push → compare-URL,
+chat merged all four with its own PAT: `GEN-2609-041` (notifications
+guidelines, PR #614), `GEN-2609-042` (onboarding welcome sequence, PR
+#615), `GEN-2609-043`+`GEN-2609-047` (contrast retarget + Enable-button
+restyle, one PR #616), `GEN-2609-050`+`GEN-2609-051` (tickets font fix +
+status-tone extraction, one PR #617). All four confirmed merged via
+`git fetch origin qa` before being reported done - `qa` HEAD after the
+last one: `6d03b48`. Feedback rows for all of `-043`/`-047`/`-050`/`-051`
+independently re-queried via Supabase and confirmed `RESOLVED`/
+`DEPLOYED_QA` - chat's own post-merge Vercel/runtime check already ran,
+not just assumed from the dispatch text.
+
+**`GEN-2609-042` needed a live-DB migration approval mid-session** - the
+`onboardedAt`/`intendedRole` columns hit the Claude Code auto-mode
+classifier's "Cloud Storage Mass Delete" guard (false positive: additive
+`ALTER TABLE` + a backfill `UPDATE`, nothing deleted). Stopped, showed
+Hitesh the row-count (233) and a 5-row backfill sample, got explicit
+go-ahead, then applied via Supabase MCP directly and independently
+re-verified the result (`information_schema.columns` for both new
+columns, `count(*) FILTER (WHERE "onboardedAt" = "createdAt")` = 233/233)
+before reporting done - not just trusting the "it ran" claim. **Worth
+carrying forward as a pattern:** if a future dispatch touches the `User`
+table (or any live-data UPDATE) and hits this same classifier guard,
+that's expected behavior for this environment, not a real blocker - stop,
+show the preview, wait for an explicit yes, then proceed the same way.
+
+**Two dispatches this session had wrong premises, caught before
+building, not after:**
+- `GEN-2609-047` described an "existing secondary/outline `Button.tsx`
+  variant... extracted during the `GEN-2609-042` onboarding build." Read
+  `Button.tsx` fresh - no such variant existed; `-042` only ever consumed
+  the pre-existing `primary`/`secondary` ones. Added a new `outline`
+  variant instead of reusing something that wasn't there.
+- `GEN-2609-051` described `dashboard/organiser/page.tsx`'s
+  `STATUS_STYLE` as directly importable into `tickets/page.tsx` "instead
+  of redefining `CONFIRMED`/etc." Read both objects fresh - they don't
+  share a key set at all (event-lifecycle states with a `label` field vs.
+  booking-lifecycle states without one; no `CONFIRMED` key exists on the
+  organiser side). Importing it wholesale would have broken tickets'
+  status badges. What's actually duplicated is the 4 underlying
+  `{bg,color}` tone pairs - extracted those into `src/lib/statusStyle.ts`
+  instead, each file still owns its own domain-specific status map.
+
+Also independently recounted `docs/accessibility-guidelines.md`'s
+"~20 dashboard-context `ErrorBanner` usages" claim (`-043`'s scope) by
+classifying every real usage's actual background - **14, not ~20**.
+Fixed all 14. Documented as a correction in `docs/design.md`, not
+silently adjusted.
+
+**No browser/Playwright tool was available this session either** (now 4
+sessions running, `ToolSearch` confirmed only Figma-design tools are
+registered, nothing applicable to a running dev server) - `GEN-2609-047`'s
+360/375/414px visual-separation check and `GEN-2609-050`'s before/after
+screenshot were both reasoned from token values and existing on-page
+precedent instead, flagged as unverified rather than claimed done. Same
+standing gap as the motion/accessibility Tab-key/DevTools checks from
+the earlier session in this file - still nobody has picked those up
+either.
+
+**New follow-up ticket chat logged from this session's pattern:**
+`GEN-2609-052` - CI enforcement (diff-scoped, not full-repo) to block a
+new raw hex/rgba literal or hardcoded font-family string outside
+`globals.css`/`statusStyle.ts` from landing at all, reacting to Georgia/
+`--afa-terracotta`/duplicated-literal gaps recurring across sessions
+despite each individually being "legal at write-time." `BUILD_QUEUE`,
+not yet scoped further.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+No local commits anywhere not already on `origin/qa`.
+
+**Step 6 status: now fully closed (5 of 5)** as of `-042`'s merge -
+`-043`/`-047`/`-050`/`-051` are separate follow-up fixes off specs the
+audit produced, not additional audit steps. See `HANDOFF.md` for the
+full feature narrative and remaining flagged decisions - this note is
+git/session state only, per this file's own scope split.

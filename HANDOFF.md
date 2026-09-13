@@ -1,6 +1,28 @@
-# Session Handoff — 13 Sept 2026 (Step 6, sub-specs 4-5 of 5: notifications → onboarding — audit complete)
+# Session Handoff — 13 Sept 2026, later same day (two follow-up fix dispatches after Step 6 closed)
 
-## qa HEAD: `5776e964` — GEN-2609-041/042 both merged and verified. This replaces the earlier 13 Sept handoff (`db41a39`) — supersedes, does not delete, per this project's "fold in rather than discard" convention. That handoff's open items are folded forward below, unchanged except where explicitly resolved this session.
+## qa HEAD: `6d03b48` — GEN-2609-043/047/050/051 all merged and verified. This replaces the earlier 13 Sept handoff (`5776e964`) — supersedes, does not delete, per this project's "fold in rather than discard" convention. That handoff's open items are folded forward below, unchanged except where explicitly resolved this session. The original section immediately below (audit narrative for `-041`/`-042`) is kept intact as history; this session's own work is summarized first.
+
+## This session, in full: two follow-up fix dispatches, both off specs the audit produced
+
+With Step 6 (and the six-step UI/UX audit) closed by the previous session, two more dispatches landed against decisions the audit's own specs had flagged as needing Hitesh's call:
+
+**`GEN-2609-043` + `GEN-2609-047`** (one PR, #616) — `--afa-error` contrast retarget (targeted, not a global swap) + `NotificationOptIn.tsx`'s Enable button restyle. Both were "needs Hitesh's call" items from `-039`/`-041`; both got an actual decision this round, dispatched together.
+- `-043`: `--afa-error` the variable stays untouched (`OfflineBanner.tsx` keeps its 6.54:1 pass). Only the CRITICAL severity badge background and dashboard-context `ErrorBanner` usages move to `--afa-red-alt`, per-usage via `style` overrides. **Correction found:** independently reclassifying every `<ErrorBanner>` usage by its real background found **14 real dashboard-context usages, not "~20"** as `docs/accessibility-guidelines.md` estimated — all 14 fixed. Recomputed ratios match the spec's predictions (CRITICAL badge 2.87→4.99:1, banners 2.68→4.65:1). **Residual gap, not solved, documented:** the 3 card/sheet-context banners the spec named (login page, `AuthPromptSheet`, `CorporateInquiryModal`) plus a 4th found independently (`verify-phone/page.tsx`, same `--afa-surface-raised` context) still sit at 4.17:1 even with `--afa-red-alt` — still open, needs a different fix eventually.
+- `-047`: the dispatch described reusing "the existing secondary/outline `Button.tsx` variant... extracted during `GEN-2609-042`." **Wrong premise, caught before building:** no such variant existed — `-042` only ever used the pre-existing `primary`/`secondary` ones. Added a new `outline` variant (transparent fill, `--afa-on-fill-solid` border/text — the same token the banner's own message text already sits on) instead of reusing something that wasn't there.
+
+**`GEN-2609-050` + `GEN-2609-051`** (one PR, #617) — `tickets/page.tsx` font migration (3 Georgia hits + 1 missing `fontFamily`) + status-badge color consolidation.
+- `-050`: mechanical, confirmed exactly as scoped — 3 section-header `<h2>`s Georgia→`var(--font-display)`, and the companion-guest card's event-title `Link` (which had no `fontFamily` at all, silently inheriting `<main>`'s `system-ui` fallback) got one added. Confirmed it's the only such `Link` in the file.
+- `-051`: **wrong premise, caught before building.** The dispatch said `dashboard/organiser/page.tsx`'s `STATUS_STYLE` could be extracted and imported wholesale into `tickets/page.tsx` "instead of redefining `CONFIRMED`/etc." Checked both objects fresh: they don't share a key set at all — organiser's are event-lifecycle states with a `label` field (`DRAFT`/`APPROVED`/`PENDING_APPROVAL`/`CANCELLED`/`COMPLETED`), tickets' are booking-lifecycle states without one (`PENDING`/`EXPIRED`/`CONFIRMED`/`CANCELLED`/`REFUNDED`) — there is no `CONFIRMED` key on the organiser side to redefine. Importing it wholesale would have given tickets the wrong statuses, not consolidated anything. What's genuinely duplicated is the 4 underlying `{bg,color}` tone pairs (gold/sage/error/muted) — extracted those into new `src/lib/statusStyle.ts`, each file still owns its own domain-specific status map built from the shared tones. Zero visual change.
+
+**Verification held for both merges** — PR opened by chat, CI/Vercel green, fresh head-SHA re-fetch before squash-merge, branch deleted, real content re-verified, `qa` deployment READY, zero runtime errors. Both Feedback pairs confirmed `RESOLVED`/`DEPLOYED_QA` (independently re-queried, not assumed).
+
+**No browser/Playwright tool available this session either** (4th session running with this gap) — `-047`'s 360/375/414px visual-separation check and `-050`'s before/after screenshot were reasoned from token values and existing on-page precedent instead of visually confirmed. Flagged, not claimed done.
+
+**New follow-up ticket this session surfaced:** `GEN-2609-052` (`BUILD_QUEUE`, not yet scoped) — CI enforcement, diff-scoped only, to block a new raw hex/rgba literal or hardcoded font-family string outside `globals.css`/`statusStyle.ts` from landing at all. Direct reaction to the pattern across several sessions now (Georgia, `--afa-terracotta`, duplicated status-color literals) where each individual instance was legal at write-time and nothing caught it before merge.
+
+---
+
+# Original session narrative below (13 Sept 2026, Step 6 sub-specs 4-5 of 5: notifications → onboarding — audit complete)
 
 ## Session narrative — how it ran
 
@@ -48,11 +70,16 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 - `PhoneVerifyNudge` remains live as the fallback banner for pre-existing unverified users (the 1 real unverified QA user, plus any future account that somehow skips the new sequence) — this is intentional, not a leftover to clean up.
 
 **Flagged in `-041`, still needs Hitesh's call:**
-- `--afa-error`'s contrast failure (54-file text footprint, background-fill conflict) — likely wants a separate `--afa-error-text` variable, still undecided.
+- `--afa-error`'s contrast failure — **partially resolved this session** (`GEN-2609-043`): the CRITICAL badge and 14 dashboard-context `ErrorBanner` usages now retarget to `--afa-red-alt` per-usage. **Still open:** 4 card/sheet-context banners (login page, `AuthPromptSheet`, `CorporateInquiryModal`, `verify-phone/page.tsx`) still sit at 4.17:1 even with the retarget — a real fix here needs something beyond a text-color swap (background context itself may need to change), still undecided.
 - `--afa-text-muted`'s AA failure for normal-text use — usage-rule documented, no misuse confirmed yet.
 - Icon system consolidation shape, and which version of `calendar`/`tag` should win, and what to do about `map` being two different pictograms under one name — all documented in `docs/icon-system-guidelines.md` Section 5, none scheduled.
 - Icon sizing/strokeWidth standardization (4 conventions found, one recommended).
 - Emoji-vs-icon-registry crossover (see above, now a 2-instance pattern).
+- ~~`NotificationOptIn.tsx`'s Enable button color~~ — **resolved this session** (`GEN-2609-047`, new `Button.tsx` `outline` variant).
+
+**New this later session:**
+- `GEN-2609-052` — CI enforcement to block new hardcoded design-token literals (diff-scoped). `BUILD_QUEUE`, not yet scoped further — needs a decision on grep-based vs. ESLint-custom-rule implementation before dispatching.
+- The residual card/sheet-context `--afa-error` gap above (4 files, 4.17:1).
 
 **Carried forward, unchanged from before this session:**
 - 🔴 **Razorpay + Google Maps/Places QA key rotation** — outstanding since 25 Aug, still the single oldest item on the whole board and the sole blocker on `GEN-2609-005`'s live verification. Needs Hitesh directly.
@@ -90,8 +117,8 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 
 ## Session-start checklist
 
-1. `git fetch && git reset --hard origin/qa` — HEAD should be `5776e964`.
+1. `git fetch && git reset --hard origin/qa` — HEAD should be `6d03b48`.
 2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md` for its stored-path convention.
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the single oldest open item on the board.
-5. The six-step UI/UX audit is done. Decide with Hitesh what's next: one of the flagged design decisions above (`--afa-error` retarget shape, icon consolidation, `calendar`/`tag`/`map` winner), a real e2e re-run/investigation for `-042`, `GEN-2609-036`, one of the two ready-to-dispatch quick fixes (`GEN-2609-009`/`-016`), the Razorpay rotation (needs Hitesh directly), or a new priority entirely now that the audit's closed.
+5. The six-step UI/UX audit is done, plus two follow-up fix dispatches (`GEN-2609-043`/`-047`/`-050`/`-051`) off its flagged decisions. Decide with Hitesh what's next: the residual card/sheet-context `--afa-error` gap, icon consolidation, `calendar`/`tag`/`map` winner, `GEN-2609-052` (CI enforcement, needs scoping), a real e2e re-run/investigation for `-042`, `GEN-2609-036`, one of the two ready-to-dispatch quick fixes (`GEN-2609-009`/`-016`), the Razorpay rotation (needs Hitesh directly), or a new priority entirely.
