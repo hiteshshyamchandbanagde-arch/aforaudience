@@ -651,3 +651,69 @@ running.
 Hitesh the 4 flagged decisions: `-059`'s real hover direction, the
 13-site button-migration follow-up, `RegisterForm.tsx`'s error-color
 question, and the `layout.tsx`/`manifest.ts` PWA theme-color coupling.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-064/065)
+
+Ran the standing sync: HEAD confirmed `3decea2` (`-059` through `-063`
+from the prior note are all merged - the flagged `artist/page.tsx`
+overlap between `-062`/`-063` resolved cleanly on chat's side, no
+issue). Two tickets this dispatch, closing out what `-063` surfaced:
+
+- `feat/gen-2609-064-remaining-terracotta-buttons` (`01fefa0`) —
+  compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-064-remaining-terracotta-buttons?expand=1
+- `feat/gen-2609-065-registerform-error-color` (`5edba08`) — compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-065-registerform-error-color?expand=1
+
+No overlap between these two (entirely different files) or with
+anything already merged.
+
+**Both dispatch tallies were off again, re-verified fresh instead of
+trusted, per the dispatch's own explicit warning that this has now
+happened on 3 of the last 5 tickets.** `-064`: 14 real sites, not 13.
+`-065`: 11 real lines, not 9 - the prior write-up's "8 error + 1
+button" missed that `RegisterForm.tsx` renders two different screens
+each with their own `{error}` banner (so there are genuinely 2 banners,
+not 1), and folded the QA-mode dev-otp notice into the wrong bucket
+entirely (it's not an error at all, it's a different, unrelated color-
+mismatch bug the dispatch's own "check what's genuinely broken beyond
+terracotta-vs-error" instruction was specifically written to catch).
+
+**`-064`'s one real judgment call:** `verify-phone/page.tsx`'s 2 submit
+buttons were dispatched as `primary size="lg"` candidates, but checked
+against both real size buckets before building - they're full-width,
+`padding: 14px`, `fontSize: 15px`, matching `form-submit`'s shape
+(same family as `login`/`register`/`forgot-password`) far more closely
+than `lg`'s boxy dashboard-CTA shape. Used `form-submit` instead -
+exactly the "don't force a mismatch" case this ticket's own dispatch
+asked for, not a deviation from instructions.
+
+**A real cross-ticket finding, flagged rather than fixed twice:** the
+pill-radius (999-radius, doesn't fit any `Button` `size` bucket)
+mismatch first flagged in `-064` on 3 files turned out to have a 4th
+instance - `RegisterForm.tsx`'s username-suggestion chip, found during
+`-065`'s own fresh recount, explicitly out of `-065`'s scope per the
+dispatch and not folded back into the already-pushed `-064` branch.
+Flagged once, clearly, in both `docs/design.md` and `HANDOFF.md`
+instead of scattering a 4th near-duplicate note - this is now a real,
+recurring pattern (4 instances) worth its own decision rather than
+another one-off flag.
+
+Verification on both: `tsc --noEmit` clean, `check-design-tokens.js`
+clean (including confirming `-065`'s new `rgba(179,38,30,X)` literals
+correctly register as relocated - they already exist in `login.tsx`/
+`reset-password.tsx`/`verify-email.tsx`), real `next build` clean on
+both (not just typecheck, given `-064`'s file count and JSX
+restructuring). No browser tool available - `-065`'s color choice is
+reasoned from `--afa-error`'s actual hex already proving legible in
+`login.tsx`'s identical banner shape/background, not screenshotted.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched.
+
+**Next session (CC or chat) should:** merge `-064` and `-065`, then
+bring Hitesh the now-4-instance pill-shaped `Button` pattern (probably
+the highest-leverage remaining decision, since it keeps resurfacing
+piecemeal across tickets) alongside the still-open `-059` hover
+direction and `layout.tsx`/`manifest.ts` PWA coupling.
