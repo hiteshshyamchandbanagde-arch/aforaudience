@@ -370,3 +370,13 @@ Two now-superseded duplicate branches deleted: both pushes to `feat/gen-2609-052
 `qa` HEAD at end of this chat session: `4e7069b` (CC's own sync + standing-rules commit, verified by chat via GitHub API before ending the session).
 
 `which gh` / `$GITHUB_TOKEN`: not checked this session from chat's side (no local dev environment access) — CC's own note above still stands.
+
+## Update — 13 Sep 2026, later same day (CC-side: sync confirmation + stray stash flagged)
+
+Ran the new standing-rule sync at the start of this turn: `git checkout qa && git fetch origin && git reset --hard origin/qa`. Local `qa` is now at `ddbff1c` (chat's own `#618`/`#619`/`#620` merge-conflict handoff commit, one past the `4e7069b` chat's note above cites — that note was written just before its own commit landed, same self-referential lag as past handoffs' "since superseded" notes, not a discrepancy). No local commits anywhere ahead of `origin/qa`; the two duplicate `feat/gen-2609-052-*` branches chat mentions were already deleted locally in the prior session, confirmed still gone.
+
+**Unclaimed stash found, not touched:** `stash@{0}` — `"WIP on qa: bb8613e Merge pull request #50..."` — has existed across at least the last two sessions with nobody claiming or resolving it. Inspected read-only (`git stash show -p`, no pop/drop): a trivial 2-line `.gitignore` change adding `HANDOFF.md` to the ignore list, stashed against a `qa` commit (`bb8613e`, a `#50` merge) from long enough ago that it predates essentially everything in this file. Contents are stale and arguably obsolete on their face — `HANDOFF.md` is very much tracked and actively maintained today, the opposite of what this stash would do — but it's not mine to drop without being asked (not something I created this session or last). Flagging for Hitesh: either `git stash drop` it if it's dead, or `git stash pop` it if someone recognizes it as real in-progress work worth finishing.
+
+Working tree otherwise clean; only pre-existing untracked `Figma/` present, unrelated and untouched.
+
+**Next session (CC or chat) should:** run the sync command above first (now standing practice, see this file's "Standing rules" section), read `HANDOFF.md` for the feature-work narrative and its updated open-items list, and decide on the stray stash above before it goes stale for a third session running.
