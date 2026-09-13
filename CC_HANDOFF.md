@@ -515,3 +515,65 @@ sessions running — still not mine to resolve unasked.
 before re-running `#621`'s CI), then re-run/merge `-056`, then return
 to the dashboard-CTA variant and `Badge`-shape decisions still open
 from the prior note above.
+
+## Update — 13 Sep 2026, later same day (CC-side: GEN-2609-058)
+
+Ran the standing sync: HEAD confirmed `12d1280` (both `-056` and `-057`
+from the prior note above are merged - `#621` and `#624`).
+
+One branch pushed:
+- `feat/gen-2609-058-button-size-terracotta-migration` (`0b752f3`) —
+  compare:
+  https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-058-button-size-terracotta-migration?expand=1
+
+Re-verified the dispatch's 14 call sites fresh against `qa` (not
+trusted) before building - all 14 real, distribution matched exactly
+(2 sm/3 md/9 lg). Found a real prop collision before writing code:
+`Button.tsx` already had a `size?: number` prop with unrelated
+semantics (the `close` variant's circle diameter) - resolved via a
+union type (`number | 'sm'|'md'|'lg'`) rather than a rename, `close`'s
+existing behavior unaffected (guarded so a stray string can't reach
+its `width`/`height`). Confirmed via `globals.css`'s own Phase-0/
+Phase-2c comments that `--afa-terracotta` → `--afa-fill-solid` (what
+`Button`'s `primary` variant uses) is the established, intended
+migration direction here, not an accidental color swap - same pattern
+as `GEN-2608-074`'s prior work elsewhere in the app. Fixed the
+dispatch's flagged `color: 'white'` bug on "Save override" for free by
+using the same variant as its siblings.
+
+**Real, precisely-quantified deltas, not just "should be close":** the
+3 size buckets' canonical values were chosen by finding where the 14
+real sites already agreed (most properties matched exactly across each
+bucket) and rounding only the properties that genuinely varied
+site-to-site - full breakdown with every site's actual before/after
+values in `docs/design.md`. Each site's disabled-state opacity (which
+varies 0.5/0.6 across sites, not `Button`'s own built-in 0.7) was
+preserved via a `style` override rather than silently accepted as a
+side effect of adopting the shared component.
+
+**Found 3 more real terracotta button sites during verification, not
+in the dispatch's 14** - flagged, deliberately left untouched (one has
+its own separate `#fff` hex-literal bug, one is a genuinely different
+conditional-background shape). Full detail in `docs/design.md`.
+
+Verified: `check-design-tokens.js` against this branch's diff (clean, 0
+offenses), `tsc --noEmit` (clean), a real `next build` (clean, all 9
+touched routes present in the route list - not just relying on
+typecheck, given the JSX restructuring across 14 call sites). No
+browser tool available - every site's property delta is quantified in
+`docs/design.md` instead of screenshot-diffed, flagged as unverified.
+
+**A near-miss worth logging:** an early `git add -A` staged the entire
+pre-existing untracked `Figma/` directory along with the intended
+files. Caught before committing (`git status` review, per the standing
+git safety protocol) - `git reset` to unstage, then staged the exact 11
+intended files by name. `Figma/` remains untouched, as every prior
+session's handoff has left it.
+
+`which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed. Working tree
+clean at end of session, only the pre-existing untracked `Figma/` dir.
+The unclaimed `stash@{0}` is still untouched.
+
+**Next session (CC or chat) should:** merge `-058`, then decide with
+Hitesh on the 3 newly-found terracotta button sites and the still-open
+`Badge`-shape/`@keyframes afa-spin` items from the prior notes above.

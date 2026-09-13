@@ -141,9 +141,9 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 
 ## Open items for next session (updated)
 
-**Resolved, remove from any older list:** `GEN-2609-052`, `GEN-2609-053` (chat), `GEN-2609-054` (merged into `qa`), `GEN-2609-055` (merged as #622).
+**Resolved, remove from any older list:** `GEN-2609-052`/`-053` (chat), `GEN-2609-054`/`-055` (merged into `qa`), `GEN-2609-056`/`-057` (both merged as #621/#624 — the checker fix unblocked the spinner-overlay PR as intended).
 
-**`GEN-2609-056` (spinner-overlay extraction) — built, PR #621 still open, was blocked, now unblocked:** the branch itself was fine (premise held up — see `docs/design.md`), but its PR got stuck on a real gap in `scripts/check-design-tokens.js` itself: the check flagged all 3 `rgba()` values `SpinnerOverlay.tsx` legitimately moved from existing call sites, because it only asked "is this line new," never "is this literal value new." That gap is now `GEN-2609-057`, fixed and pushed this session (`feat/gen-2609-057-design-token-check-relocated-literals`) — verified it turns #621's 5 reported offenses into 0 without losing the ability to catch genuinely new literals (re-run against a real historical violation-introducing commit, still catches all 11). **Next step: chat re-runs #621 against the patched checker and merges both `-056` and `-057`** — CC did not merge either itself, per the dispatch. `-056`'s own still-open follow-up notes (the wider 12+-file `@keyframes afa-spin` duplication pattern) are unaffected by this and still just flagged, not built.
+**`GEN-2609-058` (Button `size` prop + terracotta button migration) — built, pushed, not yet merged:** closes out the button half of the terracotta sweep `GEN-2609-054` stopped and re-scoped. Added a `sm`/`md`/`lg` `size` prop to `Button.tsx` (a real collision with the existing `size?: number` prop used only by `close`'s circle diameter, resolved via a union type rather than a rename) and migrated all 14 real `--afa-terracotta` button-shaped sites in `dashboard/organiser/` onto `<Button variant="primary" size="...">`. Confirmed via `globals.css`'s own comments that terracotta→fill-solid is the established legacy-to-current migration direction, not an accidental color change. Fixed `events/[id]/edit`'s "Save override" button's raw `color: 'white'` bug for free, as instructed. **3 more real terracotta button sites turned up during verification that weren't in the dispatch's 14** (checkin's "Start Camera Scan," lineup's "Send to all" — which has its own `#fff` hex-literal bug — and lineup's dirty-conditional "Save Lineup" button) — flagged in `docs/design.md`, deliberately left untouched, a real follow-up candidate. Compare URL in `CC_HANDOFF.md`.
 
 **Still open, unchanged:**
 - 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
@@ -157,12 +157,13 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 - `PhoneVerifyNudge.tsx` legacy tokens (`BUG-2609-029`, still open at last check).
 - e2e verification gap for `GEN-2609-042` — still genuinely inconclusive from the prior session, not re-attempted this session.
 - DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 5 sessions running.
-- Carried forward from `-054`/`-055`'s own dispatch: dashboard-CTA `Button` variant decision (padding/sizing) needed before the wider `GEN-2609-054` terracotta sweep can be built; 3 flagged third-shape pill patterns from `GEN-2609-055` (a possible `status-badge-sm`/`status-badge-lg` variant pair, plus a decision on whether the FREE/count-tag pattern belongs in `Badge` at all); the wider 12+-file `@keyframes afa-spin` duplicate-injection pattern from `GEN-2609-056`.
+- 3 flagged third-shape pill patterns from `GEN-2609-055` (a possible `status-badge-sm`/`status-badge-lg` variant pair, plus a decision on whether the FREE/count-tag pattern belongs in `Badge` at all); the wider 12+-file `@keyframes afa-spin` duplicate-injection pattern from `GEN-2609-056`.
+- **New this session:** the ~27 remaining non-button `--afa-terracotta` occurrences in `dashboard/organiser/` (chart bars, selection pills, the `DECLINED`-status ternary, plain links — already flagged in `GEN-2609-054`'s original audit, no re-discovery needed) plus the 3 newly-found button-shaped sites from `-058` above.
 
 ## Session-start checklist (updated)
 
-1. **`git checkout qa && git fetch origin && git reset --hard origin/qa`** — HEAD should be `6897714` until `GEN-2609-056`/`-057` are merged. This step is now a hard requirement, not a suggestion — see `CC_HANDOFF.md`'s Standing rules section for why.
+1. **`git checkout qa && git fetch origin && git reset --hard origin/qa`** — HEAD should be `12d1280` until `GEN-2609-058` is merged. This step is now a hard requirement, not a suggestion — see `CC_HANDOFF.md`'s Standing rules section for why.
 2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item.
-5. Re-run PR #621 (`GEN-2609-056`) against the patched checker and merge both it and `GEN-2609-057` (compare URL in `CC_HANDOFF.md`), then decide with Hitesh on the dashboard-CTA variant and the two other flagged decisions above.
+5. Merge `GEN-2609-058` (compare URL in `CC_HANDOFF.md`), then decide with Hitesh on the 3 newly-found terracotta button sites and the other flagged decisions above.
