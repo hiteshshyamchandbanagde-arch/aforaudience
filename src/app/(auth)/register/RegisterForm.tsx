@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
 
 const inputStyle = (hasError?: boolean) => ({
   width: "100%",
@@ -354,13 +355,13 @@ export default function RegisterForm() {
               style={{ ...inputStyle(), marginBottom: "20px" }}
             />
 
-            <button
+            <Button
+              variant="form-submit"
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
-            </button>
+            </Button>
             <button
               onClick={handleResendOtp}
               disabled={loading}
@@ -636,13 +637,14 @@ export default function RegisterForm() {
             </p>
           )}
 
-          <button
+          <Button
+            variant="form-submit"
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken"}
-            style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer", marginTop: "24px" }}
+            style={{ marginTop: "24px" }}
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
-          </button>
+          </Button>
           <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px" }}>
             <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.agreeToTermsPrefix}</span>{" "}
             <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.andConjunction}</span>{" "}

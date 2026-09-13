@@ -62,6 +62,17 @@ Real card values:
 - **Hover state**: `.hover-lift-card` class → `transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1)`, transition `transform 0.2s, box-shadow 0.2s` ([globals.css:283](../src/app/globals.css#L283)); title color transitions to `--afa-amber`; a hidden arrow icon fades to `opacity: 1`
 - Background fill: `var(--afa-surface-raised)`
 
+**GEN-2609-053 audit: no shared `Card` base extracted, deliberately.** "VenueCard" isn't actually its own component today — it's inline JSX in [VenuesGridClient.tsx](../src/app/venues/VenuesGridClient.tsx#L188), styled via the `.afa-venue-card` class. [EventCard.tsx](../src/components/EventCard.tsx#L216) is a real, separate, reusable component. Compared their actual chrome (not assumed) before deciding whether to merge:
+
+| | Venue card | EventCard |
+|---|---|---|
+| Corner radius | `0` (sharp, house convention above) | `3px` (own export's signature, already noted above) |
+| Hover treatment | `.hover-lift-card` translateY + shadow + amber border/title-color transition | none |
+| Dimming mechanism | `navigatingId` state shared across the whole grid — every OTHER card dims while one navigates | `disabled` prop passed to each card individually |
+| Layout modes | one (grid only) | two (`view: "grid" \| "list"`, different flex direction/padding) |
+
+Every one of these is a real, already-documented difference (the radius split is called out two lines above; `EventCard`'s own header comment says it was independently verified against a different Figma export, "not assumed to share Venues' zero-radius sharp-corner rule"), not incidental drift. The only literally-identical piece across the two (plus `EventRow`) is the `isNavigating` spinner overlay markup (`position:absolute, inset:0, z-index:2, dark scrim + spinning ring`) — repeated 3x byte-for-byte at 24-26px. Flagged as a real, narrow extraction candidate for a future pass; not built here, since forcing the two cards' outer shells into one parameterized component would mean re-exposing every one of the four differences above as a prop, which is indirection, not consolidation.
+
 ## 4. Button conventions
 
 **Follow / Get Directions chrome** (BUG-2608-076 — the pattern both were normalized to):
@@ -87,9 +98,13 @@ Hover: `filter: brightness(1.1)` (not a color/border change).
 
 No `.afa-cta-outline` class currently exists in `src/` — only `.afa-cta-solid` is a real, reusable class name.
 
+**Shared component (GEN-2609-053):** [src/components/ui/Button.tsx](../src/components/ui/Button.tsx) is the real, importable version of the roles above — `variant="primary" | "secondary" | "secondary-reveal" | "close" | "outline" | "form-submit"`. Renders a `<button>`, or a `<Link>` when given an `href`. Added `form-submit` this pass: a distinct full-width, 8px-radius solid-fill role (`login`/`register`'s form submit buttons) found byte-identical across 8 call sites in 4 files — a real, repeated pattern, not `primary`'s pill shape re-derived, same discipline as the `outline` variant added in GEN-2609-047. Migrated `login/page.tsx` (3 buttons) and `RegisterForm.tsx` (2 buttons) this pass; `forgot-password/page.tsx:91` and `reset-password/page.tsx:131` have the identical shape but weren't touched (lower-traffic recovery flows, follow-up scope). A second strong candidate found but **not** built this pass — do not invent a second variant in the same sweep: 11 occurrences across 9 dashboard/organiser files (e.g. [dashboard/organiser/edit/page.tsx:174](../src/app/dashboard/organiser/edit/page.tsx#L174), [dashboard/organiser/tours/page.tsx:78,96](../src/app/dashboard/organiser/tours/page.tsx#L78)) share one exact `background: var(--afa-terracotta); borderRadius: 8px; fontSize 14px; fontWeight 600` solid-action chrome — the next Button pass's highest-confidence match.
+
 ## 5. Status badge / pill pattern
 
-Live in the **Organiser dashboard** ([dashboard/organiser/page.tsx:24-30](../src/app/dashboard/organiser/page.tsx#L24)) — a `STATUS_STYLE` lookup keyed by backend status, each with its own `bg`/`color`/`label`:
+**Shared component (GEN-2609-053):** [src/components/ui/Badge.tsx](../src/components/ui/Badge.tsx) renders the tone values below — `<Badge tone={...}>{label}</Badge>`. Tone values (`bg`/`color`) come from [src/lib/statusStyle.ts](../src/lib/statusStyle.ts)'s `STATUS_TONE` (GEN-2609-051) and stay domain-specific per caller; only the pill chrome is shared, and it's genuinely **not** one chrome — audited before assuming so, per the pattern below.
+
+Live in the **Organiser dashboard** ([dashboard/organiser/page.tsx:27-32](../src/app/dashboard/organiser/page.tsx#L27)) — a `STATUS_STYLE` lookup keyed by backend status, each with its own `bg`/`color`/`label`:
 
 ```js
 DRAFT:            { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)',        label: 'Draft' }
@@ -98,7 +113,7 @@ PENDING_APPROVAL: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)',      
 CANCELLED:        { bg: 'rgba(179,38,30,0.1)',   color: 'var(--afa-error)',       label: 'Cancelled' }
 COMPLETED:        { bg: 'rgba(245,245,240,0.08)',color: 'var(--afa-text-primary)',label: 'Completed' }
 ```
-Pill chrome (shared, applied inline at the call site — not its own reusable class):
+`<Badge variant="status">` chrome (the default — dashboard/organiser's shape):
 ```css
 font-size: 11px;
 font-weight: 700;
@@ -108,7 +123,11 @@ padding: 5px 10px;
 border-radius: 999px;   /* NOTE: fully rounded pill — dashboard badges are NOT under the sharp-corner card rule */
 white-space: nowrap;
 ```
+`<Badge variant="status-compact">` chrome (`tickets/page.tsx`'s shape — **not** the same as the above, confirmed by diffing the two files' actual JSX rather than assumed): no `text-transform`/`letter-spacing`, `padding: 4px 10px` instead of `5px 10px`. Migrated this pass: `tickets/page.tsx`'s booking-status pill, its "attended"/"missed" pill (previously re-typing `STATUS_TONE.sage`/`.muted`'s literal rgba values inline instead of importing them), and its companion "confirmed" pill (same sage tone, hardcoded a third time) — three separate inline duplicates in one file, all now `<Badge variant="status-compact">`.
+
 The visible "PUBLISHED" label in data (venue `status` field, per `docs/design.md`'s incident notes) maps to this same badge family — the dashboard's `APPROVED` → `"Published"` row is the shipped analog; there's no separate literal `PUBLISHED`-labeled badge component.
+
+**Not migrated this pass:** the many other `borderRadius: '999px'` pill `<span>`s elsewhere (admin feedback/bookings/diary pages, artist events/applications, organiser tours/lineup) each carry their own one-off tone map (e.g. `dashboard/artist/page.tsx`'s `APPLICATION_STYLE`) — real duplication of the same pattern, already flagged out of scope by GEN-2609-051's own header comment in `statusStyle.ts`, still out of scope here.
 
 ## 6. Illustrated no-photo fallback (reuse candidate for dashboard empty states)
 

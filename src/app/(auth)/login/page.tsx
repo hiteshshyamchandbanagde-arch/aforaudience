@@ -7,6 +7,7 @@ import EnvBadge from "@/components/EnvBadge"
 import BrandLoader from '@/components/BrandLoader'
 import AuthLayout from '@/components/AuthLayout'
 import { useLocale } from '@/lib/i18n/translate'
+import Button from '@/components/ui/Button'
 
 type Mode = "password" | "otp-request" | "otp-verify"
 
@@ -225,13 +226,13 @@ function LoginForm() {
                 </button>
               </div>
             </div>
-            <button
+            <Button
+              variant="form-submit"
               onClick={handleLogin}
               disabled={loading || !identifier || !password}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
-            </button>
+            </Button>
             <button
               onClick={() => { setMode("otp-request"); setError("") }}
               style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
@@ -243,13 +244,13 @@ function LoginForm() {
 
         {mode === "otp-request" && (
           <>
-            <button
+            <Button
+              variant="form-submit"
               onClick={handleRequestOtp}
               disabled={loading || !identifier}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
-            </button>
+            </Button>
             <button
               onClick={() => { setMode("password"); setError("") }}
               style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
@@ -273,13 +274,13 @@ function LoginForm() {
                 style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
             </div>
-            <button
+            <Button
+              variant="form-submit"
               onClick={handleVerifyOtp}
               disabled={loading || otpCode.length !== 6}
-              style={{ width: "100%", background: "var(--afa-fill-solid)", color: "white", padding: "16px", borderRadius: "8px", border: "none", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
-            </button>
+            </Button>
             <button
               onClick={handleRequestOtp}
               disabled={loading}

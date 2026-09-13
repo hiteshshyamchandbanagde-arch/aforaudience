@@ -23,7 +23,7 @@ import Link from 'next/link'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline'
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'form-submit'
 
 type BaseProps = {
   variant: ButtonVariant
@@ -143,6 +143,39 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
         textDecoration: 'none',
+      }
+    case 'form-submit':
+      // GEN-2609-053 - not a re-derivation of `primary`, an actual
+      // second solid-fill role found by audit: `primary` is the pill-
+      // shaped (999px) inline CTA from the booking/checkout flow;
+      // login/register/forgot-password/reset-password's full-width
+      // form submit buttons are a distinct, separately-shipped 8px-
+      // radius look, byte-identical across all 8 occurrences in those
+      // 4 files (own padding/font-size/font-weight, not primary's).
+      // Real, repeated pattern - same discipline as the `outline`
+      // variant added in GEN-2609-047, not invented from nothing.
+      // `color` was hardcoded 'white' at every call site - NOT swapped
+      // to `--afa-on-fill-solid` (that's `primary`'s text token here,
+      // but it resolves to `--afa-brown-black` / #1A1000, a near-black
+      // that would be a real, debatable text-color change on this
+      // background, not a safe extraction - caught only by checking the
+      // token's actual resolved value in globals.css before using it).
+      // `--afa-cream` (#F7F3EE) is used instead: this repo's own
+      // documented "primary text-on-dark" token, visually
+      // indistinguishable from literal white against `--afa-fill-solid`,
+      // so this removes the hardcoded literal with no visible change.
+      return {
+        display: 'block',
+        width: fullWidth ? '100%' : undefined,
+        background: 'var(--afa-fill-solid)',
+        color: 'var(--afa-cream)',
+        padding: 16,
+        border: 'none',
+        borderRadius: 8,
+        fontSize: 15,
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
       }
     case 'close':
       return {

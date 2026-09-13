@@ -14,6 +14,7 @@ import { EventPoster } from '@/components/EventCard'
 import { CalendarIcon, PinIcon } from '@/components/icons/EventIcons'
 import { useLocale, type Dictionary } from '@/lib/i18n/translate'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import Badge from '@/components/ui/Badge'
 
 // Mobile Redesign Phase 4a (GEN-2609-006) - real, scannable QR rather
 // than the Figma mock's decorative QrIcon glyph. Encodes the raw
@@ -379,9 +380,9 @@ export default function MyTicketsPage() {
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
                     </Link>
-                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', whiteSpace: 'nowrap' }}>
+                    <Badge variant="status-compact" tone={STATUS_TONE.sage}>
                       {tr.ticketsPage.companionConfirmedPill}
-                    </span>
+                    </Badge>
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 10px' }}>
                     {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {t.booking.event.startTime}
@@ -502,17 +503,13 @@ export default function MyTicketsPage() {
                         </h3>
                       </div>
                       <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap', background: s.bg, color: s.color }}>
+                        <Badge variant="status-compact" tone={s}>
                           {tr.bookingStatus[eff as keyof typeof tr.bookingStatus] || tr.bookingStatus.PENDING}
-                        </span>
+                        </Badge>
                         {showAttendancePill && (
-                          <span style={{
-                            fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
-                            background: b.checkedInAt ? 'rgba(74,103,65,0.12)' : 'rgba(245,245,240,0.08)',
-                            color: b.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)',
-                          }}>
+                          <Badge variant="status-compact" tone={b.checkedInAt ? STATUS_TONE.sage : STATUS_TONE.muted}>
                             {b.checkedInAt ? tr.ticketsPage.attendedPill : tr.ticketsPage.missedPill}
-                          </span>
+                          </Badge>
                         )}
                       </span>
                     </div>

@@ -10,6 +10,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { STATUS_TONE } from '@/lib/statusStyle'
+import Badge from '@/components/ui/Badge'
 
 interface EventItem {
   id: string
@@ -184,14 +185,7 @@ export default function OrganiserDashboard() {
                           {new Date(event.date).toLocaleDateString()} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
                         </p>
                       </div>
-                      <span
-                        style={{
-                          fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                          padding: '5px 10px', borderRadius: '999px', background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {statusStyle.label}
-                      </span>
+                      <Badge tone={statusStyle}>{statusStyle.label}</Badge>
                     </div>
 
                     <div style={{ display: 'flex', gap: '16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>

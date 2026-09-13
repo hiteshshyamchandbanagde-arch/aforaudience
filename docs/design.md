@@ -3029,3 +3029,143 @@ Built on `fix/gen-2609-050-051-tickets-font-status-style`, branched from
 `qa` at `319d541` (synced via `git fetch` first - no collision). Pending
 merge confirmation before this entry is finalized, per the standing
 rule.
+
+## GEN-2609-053: Component library extraction (Button / Badge / Card)
+
+Goal per the dispatch: give screens one real component to import for
+the three patterns that keep drifting, instead of a bespoke inline-
+styled element per file - GEN-2609-052 stops new literals, this gives
+people something correct to reach for. Scope was explicitly a proof
+pass (2-3 call sites per piece), not an app-wide sweep.
+
+**Button - new `form-submit` variant, not a re-derivation of
+`primary`.** Audited `src/` for inline `<button>`/`<Link>` elements
+duplicating `src/components/ui/Button.tsx`'s existing 5 variants
+exactly, per the dispatch's own instruction to migrate onto an
+existing variant first. Found none that matched byte-for-byte - the
+closest, login/register's full-width form-submit buttons, share
+`background: var(--afa-fill-solid)` with `primary` but differ in
+radius (8px vs `primary`'s 999px pill), font-size (15px vs 16px), and
+weight (600 vs 700). Real, repeated pattern instead (8 identical
+occurrences across `login/page.tsx` x3, `RegisterForm.tsx` x2,
+`forgot-password/page.tsx`, `reset-password/page.tsx`) - same
+discipline as the `outline` variant added in GEN-2609-047, added
+`form-submit` rather than stretching `primary` to cover a shape it
+doesn't actually have.
+
+Caught before shipping: every one of those 8 call sites hardcoded
+`color: 'white'`. The obvious "just use the token `primary` already
+uses on this background" instinct is wrong - `--afa-on-fill-solid`
+resolves (`globals.css`) to `--afa-brown-black` / `#1A1000`, a
+near-black. Swapping to it would have been a real, undiscussed text-
+color change on every migrated button, not a safe extraction. Checked
+the token's actual resolved value before using it (not just its name -
+[[feedback_verify_css_tokens_by_value]]'s lesson, again) and used
+`--afa-cream` (`#F7F3EE`) instead - this repo's own documented
+"primary text-on-dark" token, visually indistinguishable from literal
+white against `--afa-fill-solid`. Removes the hardcoded literal with
+no visible change.
+
+Migrated: `login/page.tsx` (all 3: password sign-in, OTP request, OTP
+verify) and `RegisterForm.tsx` (2: OTP verify, create account) - the
+two highest-traffic auth surfaces. **Not migrated**, same shape,
+lower-traffic recovery flows: `forgot-password/page.tsx:91`,
+`reset-password/page.tsx:131`. Side effect of the migration, not
+requested but correct: `Button`'s existing disabled handling
+(`opacity: 0.7`, `cursor: 'default'`) now actually applies to these 5
+buttons - previously none of them visibly dimmed when disabled despite
+already passing a `disabled` prop.
+
+**Second Button candidate found, deliberately not built this pass:**
+11 occurrences across 9 dashboard/organiser files
+(`dashboard/organiser/edit/page.tsx:174` and 10 others) share one
+exact `background: var(--afa-terracotta); borderRadius: 8px; fontSize:
+14px; fontWeight: 600` solid-action chrome - arguably an even stronger
+case than `form-submit` (more repeats). Not added here: inventing two
+new variants in one pass, on top of the one already justified, starts
+looking like redesigning rather than deduplicating. Flagged in
+`docs/afa-design-tokens-reference.md` Section 4 as the next pass's
+highest-confidence target.
+
+**Badge - new component, built on `STATUS_TONE` (GEN-2609-051).**
+`src/components/ui/Badge.tsx` renders `<Badge tone={...}>{label}</Badge>`.
+The dispatch described dashboard/organiser's and tickets' pill chrome
+as one shared shape to extract - checked both files' actual JSX before
+building anything and they're **not** identical: organiser's pill is
+uppercase + letter-spaced + `5px 10px` padding, tickets' is plain-case
++ `4px 10px`. Built two variants instead of unifying them into one
+(which would have been a real, undiscussed visual change to whichever
+file didn't already look that way): `variant="status"` (organiser's
+shape, the default) and `variant="status-compact"` (tickets' shape).
+
+Migrated: `dashboard/organiser/page.tsx`'s event-status pill (the
+dispatch's named target), and - found while in the file, same tone
+values, same chrome, same file - two more `tickets/page.tsx` pills
+that weren't in the dispatch's explicit scope but were literally
+re-typing `STATUS_TONE`'s values a second and third time: the
+"attended"/"missed" attendance pill (previously hardcoded
+`rgba(74,103,65,0.12)`/`rgba(245,245,240,0.08)` inline instead of
+importing `STATUS_TONE.sage`/`.muted`) and the companion "confirmed"
+pill (same sage tone, hardcoded a third time in the same file). All
+three now render through `Badge`.
+
+**Not migrated:** the many other `borderRadius: '999px'` status pills
+elsewhere (admin feedback/bookings/diary, artist events/applications,
+organiser tours/lineup) - each carries its own tone map already
+flagged out of scope by GEN-2609-051's own header comment in
+`statusStyle.ts`; unchanged here too.
+
+**Card - audited, no extraction, documented why.** Compared "VenueCard"
+(not actually its own component - inline JSX in
+`VenuesGridClient.tsx`, styled via `.afa-venue-card`) against the real
+`EventCard.tsx` component before assuming a shared base was possible.
+Four real, already-individually-documented differences: corner radius
+(0 vs `EventCard`'s own-signature 3px), hover treatment (translateY +
+shadow + amber-border/title-color transition vs none), the dimming
+mechanism (a shared `navigatingId` state that dims every OTHER card in
+the grid vs a per-card `disabled` prop), and layout modes (Venue: grid
+only; `EventCard`: grid + list). Forcing one parameterized `Card` base
+over this would mean re-exposing all four as props - indirection, not
+consolidation - so didn't build one. Documented in
+`docs/afa-design-tokens-reference.md` Section 3, with the comparison
+table.
+
+The one genuinely identical piece found across Venue/EventCard/
+`EventRow`: the `isNavigating` spinner-overlay markup (absolute-inset
+dark scrim + spinning ring), repeated byte-for-byte 3x at 24-26px.
+Flagged as a real, narrow future extraction candidate, not built this
+pass - it's a smaller, different-shaped piece than "a shared Card,"
+and the dispatch's Card question was specifically about the outer
+shell.
+
+**A bug found in GEN-2609-052's own (still-unmerged) CI check, fixed
+separately.** While writing this entry's own comments, a real one
+tripped GEN-2609-052's hex-literal rule: `` `--afa-cream` (#F7F3EE) is
+used instead: this repo's own `` - the rule's quoted-string check used
+two independent `['"`]` classes for its open/close delimiter rather
+than a backreference, so a backtick-quoted code term followed later by
+an unrelated apostrophe (a plain contraction) could pair up as a false
+open/close, with any hex-looking text in between false-flagged. Not
+part of this ticket's scope, but the fix (`(['"`])[^'"`]*#[0-9a-fA-F]
+{3,8}\b[^'"`]*\1`) was committed and pushed directly to
+`feat/gen-2609-052-design-token-ci-check` (still open, not yet
+reviewed) rather than left for a separate ticket, since it's a
+correctness bug in an unmerged PR, not a new feature. Re-verified
+clean against #616/#617's real diffs plus all prior + this new regex
+unit case.
+
+**Verify.** `tsc --noEmit` clean. `next build` clean (first attempt hit
+a `JavaScript heap out of memory` crash during static-page generation
+after both compile and typecheck had already passed - a local Node
+memory ceiling, not a code issue; retried with
+`NODE_OPTIONS=--max-old-space-size=6144` and it completed cleanly,
+`/login`/`/register`/`/tickets`/`/dashboard/organiser` all present in
+the route list). GEN-2609-052's design-token check (the now-fixed
+version) run against this branch's own diff from `qa`: clean, 0
+offenses.
+
+Built on `feat/gen-2609-053-component-library-extraction`, branched
+from `qa` at `8cecbe9`. Logging to the Feedback table as
+`BUILD_COMPLETE` per the dispatch - chat moves it to
+RESOLVED/DEPLOYED_QA after merge + Vercel verification, same split as
+recent tickets.
