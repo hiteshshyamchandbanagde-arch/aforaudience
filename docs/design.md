@@ -3535,3 +3535,102 @@ both from its side.
 
 Built on `feat/gen-2609-057-design-token-check-relocated-literals`,
 branched from `qa` at `6897714`.
+
+## GEN-2609-058 - Button `size` prop + terracotta button-shape migration
+
+**Re-verified the 14 sites fresh against `qa` before building** (not
+trusted from the dispatch): all 14 real, all in `dashboard/organiser/`,
+distribution matched exactly (2 sm / 3 md / 9 lg).
+
+**A real prop collision found before writing any code.** `Button.tsx`
+already has a `size?: number` prop - but it means something completely
+different (the `close` variant's circle pixel diameter, default 36,
+one real caller passing `20`). Adding a `size: 'sm'|'md'|'lg'` prop
+under the same name would have collided outright. Resolved via a union
+type (`number | 'sm' | 'md' | 'lg'`) rather than renaming the existing
+prop (only 3 consumers of `close`, but renaming is still a real API
+break for no benefit) - `close` keeps reading it as a number exactly as
+before (guarded with `typeof size === 'number' ? size : 36` so a stray
+string can never silently render `width: 'sm'`), every other variant
+only applies the new `SIZE_CHROME` overlay when `size` is a string. The
+overlay lives inside `variantStyle` itself (not just the `Button`
+component) so `profile/page.tsx`'s existing direct `variantStyle(...)`
+caller (a `<label>`, can't render `<Button>`) and this ticket's own new
+`<label>` call site (see below) both get it for free from one source
+of truth.
+
+**A real background-color question, checked before assuming either
+answer.** `--afa-terracotta` (`#C8441A`) and `--afa-fill-solid`
+(`#FF5A36`, what every `Button` variant actually uses) are genuinely
+different colors, not aliases - so migrating onto `variant="primary"`
+is a real, intended color change, not an accidental one. Confirmed
+this is correct via `globals.css`'s own comments: `--afa-terracotta`
+is explicitly Phase-0 legacy palette; `--afa-fill-solid` is the
+Phase-2c dark-theme replacement "so buttons actually pop against the
+dark page" - and this exact terracotta-to-fill-solid retarget is the
+established pattern from `GEN-2608-074`'s and `OrganiserFollowButton`'s
+own prior migrations elsewhere in the app. No new variant needed -
+`primary`'s non-size properties (background, text color, cursor,
+border) were already exactly right; only its size-controlled
+properties (padding/font-size/radius, pill-shaped 999px by default)
+needed the new `size` override, plus `fullWidth={false}` on every site
+(`primary`/`Button`'s own default is full-width, which none of these
+14 auto-width dashboard buttons want).
+
+**Real bug fixed in the same pass, as instructed:** `events/[id]/edit
+page.tsx`'s "Save override" button used raw `color: 'white'` instead of
+the token every sibling uses. Migrating to `variant="primary"` fixes it
+for free - `primary`'s own `color: var(--afa-on-fill-solid)` replaces
+the hardcoded literal, no separate override needed.
+
+**Size-bucket deltas, precisely quantified, not just "should be
+close":** `sm`'s 2 real sites already matched exactly on padding (4px
+10px) and radius (6px) - only font-size/weight differed (11px/700 vs
+12px/600), canonicalized to 12px/600. `md`'s 3 sites already matched on
+font-size (13px) and radius (8px) - padding varied 8-9px/16-18px,
+canonicalized to 9px/17px per the approved rounding; weight was 600 on
+2 of 3 ("Save override" was 700, now 600 alongside its color fix).
+`lg`'s 9 sites already matched on font-size (14px), weight (600), and
+radius (8px) - only padding varied 10-12px/22-26px, canonicalized to
+12px/24px (4 of the 9 already sat exactly on this value, so those 4
+have zero delta at all). Every other property (disabled-state opacity,
+which varies 0.5/0.6 site-to-site and doesn't match `Button`'s own
+built-in 0.7 disabled-dim) was preserved via a `style` override per
+site rather than accepted as a side effect - `Button`'s own dim was
+only left in place for the one site (`tours/[id]/page.tsx`'s "Add"
+button) that had no disabled-opacity styling at all before, which is a
+small new (and clearly harmless) visual improvement, not a regression.
+
+**3 more real button-shaped `--afa-terracotta` sites found during
+verification, NOT in the dispatch's list of 14, left untouched per
+scope:** `checkin/page.tsx`'s "📷 Start Camera Scan" button (14px/600,
+`14px` all-around padding - doesn't cleanly fit any bucket), `lineup/
+page.tsx`'s "Send to all" broadcast button (13px/600, 10px 18px
+padding, **also uses a raw `color: '#fff'` hex literal** - the same bug
+class as "Save override" but not fixed here since the button itself is
+out of scope), and `lineup/page.tsx`'s "Save Lineup" button (a
+genuinely different shape - background is conditional, terracotta only
+`if (dirty)` else a muted gray, not a constant-background site like the
+other 14). Flagging these three as a real, scoped follow-up candidate -
+not silently absorbed into this ticket, not silently dropped either.
+
+**Verify.**
+1. `check-design-tokens.js` against this branch's diff from
+   `origin/qa`: clean, 0 new offenses.
+2. `tsc --noEmit`: clean.
+3. Real `next build`: clean, all 9 touched routes present in the route
+   list (`/dashboard/organiser`, `/edit`, `/events/create`, `/events/
+   [id]/checkin`, `/events/[id]/edit`, `/payouts`, `/tours`, `/tours/
+   [id]`, `/tours/create`).
+4. `grep --afa-terracotta` in `dashboard/organiser/` post-change: 27
+   hits remain - matches the dispatch's own "~27 non-button" estimate
+   exactly, and includes the 3 newly-found extra button sites above
+   plus the previously-catalogued chart bars/selection pills/`DECLINED`
+   ternary/plain links from `GEN-2609-054`'s original audit.
+5. No visual verification possible (no browser tool this session) -
+   every site's property-by-property delta from its pre-migration
+   value is quantified above rather than screenshot-diffed; flagged as
+   unverified, not claimed done.
+
+Built on `feat/gen-2609-058-button-size-terracotta-migration`, branched
+from `qa` at `12d1280`.

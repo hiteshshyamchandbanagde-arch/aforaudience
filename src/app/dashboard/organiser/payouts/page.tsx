@@ -8,6 +8,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import Button from '@/components/ui/Button'
 
 interface PayoutStatus {
   linked: boolean
@@ -167,13 +168,16 @@ export default function OrganiserPayoutsPage() {
                     placeholder="acc_XXXXXXXXXXXXXX"
                     style={{ flex: 1, fontSize: '14px', fontFamily: 'monospace', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                   />
-                  <button
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    fullWidth={false}
                     onClick={linkAccount}
                     disabled={saving || !accountIdInput.trim()}
-                    style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', padding: '10px 22px', borderRadius: '8px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+                    style={{ opacity: saving ? 0.6 : 1 }}
                   >
                     {saving ? 'Linking…' : 'Link account'}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}

@@ -25,15 +25,28 @@ import Link from 'next/link'
 
 type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'form-submit'
 
+// GEN-2609-058 - a size scale orthogonal to variant: controls padding/
+// font-size/font-weight/border-radius only, never color/background.
+// `close`'s numeric size predates this and means something different
+// (the circle's pixel diameter) - kept as-is, the two meanings coexist
+// via the `size` prop's union type below rather than colliding, since
+// only `close` ever reads the numeric form and no other variant reads
+// the numeric form at all.
+type ButtonSizeToken = 'sm' | 'md' | 'lg'
+
 type BaseProps = {
   variant: ButtonVariant
   children: React.ReactNode
   fullWidth?: boolean
-  /** close variant only - the shared circle is 36px everywhere it floats
-   * over a sheet/modal (ContributionMoment, FeeSheet); the one inline
-   * use (a remove-chip inside a small pill) needs the same look at a
-   * smaller footprint rather than literally 36px breaking that layout. */
-  size?: number
+  /** For `close`: the shared circle's pixel diameter (36px everywhere it
+   * floats over a sheet/modal; a small inline use needs a smaller
+   * footprint instead of literally 36px breaking that layout). For every
+   * other variant: one of the 3 shared size tokens (`sm`/`md`/`lg`) -
+   * see `SIZE_CHROME` below. Leaving it unset on a non-`close` variant
+   * keeps that variant's own hardcoded padding/font-size/radius exactly
+   * as they were before this prop existed - no default size token is
+   * silently applied. */
+  size?: number | ButtonSizeToken
   style?: React.CSSProperties
   className?: string
 }
@@ -56,11 +69,40 @@ type ButtonProps = ButtonAsButton | ButtonAsLink
 
 const FONT_FAMILY = 'var(--font-sans)'
 
+// GEN-2609-058 - re-verified fresh against qa (not assumed) across the
+// 14 --afa-terracotta button-shaped call sites in dashboard/organiser/
+// this replaces: sm's 2 real sites were already identical on padding
+// (4px 10px) and radius (6px), only font-size/weight drifted (11/700 vs
+// 12/600) - picked 12/600 as canonical. md's 3 sites were already
+// identical on font-size (13px) and radius (8px); padding varied 8-9px/
+// 16-18px, rounded to 9px 17px per the approved decision; weight was
+// 600 on 2 of 3 (the 3rd, "Save override", was a real bug - see below).
+// lg's 9 sites were already identical on font-size (14px), weight (600)
+// and radius (8px); only padding varied (10-12px/22-26px), rounded to
+// 12px 24px. Every site's small delta from its own prior exact value is
+// a deliberate, documented consequence of consolidating onto one shared
+// scale (same tradeoff class as GEN-2609-055's Badge variants) - not an
+// oversight.
+const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: number; fontSize: number; fontWeight: number }> = {
+  sm: { padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600 },
+  md: { padding: '9px 17px', borderRadius: 8, fontSize: 13, fontWeight: 600 },
+  lg: { padding: '12px 24px', borderRadius: 8, fontSize: 14, fontWeight: 600 },
+}
+
 // Exported (not just used internally) so a caller that can't render a
 // literal <Button> - e.g. profile/page.tsx's avatar-upload control,
 // which has to be a <label> wrapping a hidden file input, not a
 // <button> - can still apply the exact same variant look directly.
-export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number): React.CSSProperties {
+export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken): React.CSSProperties {
+  const base = variantBaseStyle(variant, fullWidth, size)
+  // The size-token overlay applies to every variant uniformly (padding/
+  // font-size/font-weight/border-radius only) - deliberately after the
+  // variant's own base style so it wins, and deliberately never touches
+  // color/background/border-color, which stay whatever the variant says.
+  return typeof size === 'string' ? { ...base, ...SIZE_CHROME[size] } : base
+}
+
+function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken): React.CSSProperties {
   switch (variant) {
     case 'primary':
       return {
@@ -177,13 +219,17 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
       }
-    case 'close':
+    case 'close': {
+      // `close` is the one variant that reads `size` as a pixel diameter,
+      // not a size token - guard against the (currently unused) string
+      // form reaching here instead of silently rendering width:'sm'.
+      const diameter = typeof size === 'number' ? size : 36
       return {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: size,
-        height: size,
+        width: diameter,
+        height: diameter,
         borderRadius: '50%',
         flexShrink: 0,
         background: 'rgba(245,245,240,0.08)',
@@ -193,6 +239,7 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
       }
+    }
   }
 }
 

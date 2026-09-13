@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, use, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
+import Button from '@/components/ui/Button'
 
 type ScanResult = {
   ok: boolean
@@ -404,17 +405,16 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                     {c.checkedInAt ? (
                                       <span style={{ fontWeight: 600, color: 'var(--afa-sage)' }}>✓ In</span>
                                     ) : (
-                                      <button
+                                      <Button
+                                        variant="primary"
+                                        size="sm"
+                                        fullWidth={false}
                                         onClick={() => checkInCompanion(c.id)}
                                         disabled={checkingInCompanion === c.id}
-                                        style={{
-                                          fontSize: '11px', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)',
-                                          border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer',
-                                          opacity: checkingInCompanion === c.id ? 0.6 : 1,
-                                        }}
+                                        style={{ opacity: checkingInCompanion === c.id ? 0.6 : 1 }}
                                       >
                                         {checkingInCompanion === c.id ? 'Checking in…' : 'Check in'}
-                                      </button>
+                                      </Button>
                                     )}
                                   </div>
                                 ))}

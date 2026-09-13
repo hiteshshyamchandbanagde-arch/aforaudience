@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
+import Button, { variantStyle } from '@/components/ui/Button'
 
 const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
@@ -150,7 +151,7 @@ export default function OrganiserEditPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
                 )}
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', padding: '9px 16px', borderRadius: '8px', cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
+                <label style={{ ...variantStyle('primary', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} disabled={uploadingAvatar} style={{ display: 'none' }} />
                 </label>
@@ -168,13 +169,16 @@ export default function OrganiserEditPage() {
             </div>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth={false}
             onClick={save}
             disabled={saving}
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', border: 'none', borderRadius: '8px', padding: '12px 24px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{ opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Saving...' : 'Save Profile'}
-          </button>
+          </Button>
         </div>
       </main>
       </DashboardShell>

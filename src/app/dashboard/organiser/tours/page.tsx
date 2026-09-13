@@ -3,12 +3,12 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 interface TourItem {
   id: string
@@ -74,12 +74,9 @@ export default function OrganiserToursPage() {
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>
           </div>
-          <Link
-            href="/dashboard/organiser/tours/create"
-            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 22px', borderRadius: '8px', whiteSpace: 'nowrap' }}
-          >
+          <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create" style={{ whiteSpace: 'nowrap' }}>
             + Create Tour
-          </Link>
+          </Button>
         </div>
 
         {error && (
@@ -92,12 +89,9 @@ export default function OrganiserToursPage() {
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
               Create a Tour to group a series of stops under one shared page for your audience.
             </p>
-            <Link
-              href="/dashboard/organiser/tours/create"
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-terracotta)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
-            >
+            <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create">
               Create Tour
-            </Link>
+            </Button>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
