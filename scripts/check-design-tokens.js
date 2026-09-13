@@ -42,7 +42,14 @@ const RULES = [
     // "#241a10"), never bare in a comment, so requiring the match to sit
     // inside quotes removes the false positive without missing real hits.
     name: 'hex-color-literal',
-    test: (line) => /['"`][^'"`]*#[0-9a-fA-F]{3,8}\b[^'"`]*['"`]/.test(line),
+    //
+    // The opening and closing delimiter use a backreference (\1), not two
+    // independent ['"`] classes - found via GEN-2609-053's own dogfooding:
+    // a comment combining a backtick-quoted code term with a later
+    // apostrophe (a plain contraction like "repo's") let the un-anchored
+    // version treat the backtick as an opener and the apostrophe as its
+    // closer, false-flagging an unrelated hex value sitting in between.
+    test: (line) => /(['"`])[^'"`]*#[0-9a-fA-F]{3,8}\b[^'"`]*\1/.test(line),
   },
   { name: 'rgb-rgba-literal', test: (line) => /rgba?\([^)]+\)/.test(line) },
   {
