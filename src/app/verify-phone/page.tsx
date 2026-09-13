@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useLocale } from '@/lib/i18n/translate'
 import { useOtpVerification } from '@/lib/useOtpVerification'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 const inputStyle = {
   width: '100%',
@@ -97,7 +98,7 @@ function VerifyPhoneInner() {
               <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
-              <Link href={next} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
+              <Link href={next} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
                 {tr.verifyPhonePage.continueArrow}
               </Link>
             </div>
@@ -111,7 +112,7 @@ function VerifyPhoneInner() {
                 <ErrorBanner style={{ marginBottom: '18px', fontSize: '13px' }}>{error}</ErrorBanner>
               )}
               {devOtp && (
-                <div style={{ background: 'rgba(200,68,26,0.08)', border: '1px solid var(--afa-terracotta)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}
@@ -144,7 +145,7 @@ function VerifyPhoneInner() {
                   <button
                     onClick={sendCode}
                     disabled={submitting}
-                    style={{ width: '100%', background: 'transparent', color: 'var(--afa-terracotta)', padding: '10px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                    style={{ width: '100%', background: 'transparent', color: 'var(--afa-fill-solid)', padding: '10px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
                   >
                     {tr.loginPage.resendCodeButton}
                   </button>

@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import { fillSolidTint } from '@/lib/statusStyle'
 
 interface Inquiry {
   id: string
@@ -24,7 +25,7 @@ interface Inquiry {
 }
 
 const STATUS_META: Record<Inquiry['status'], { label: string; bg: string; color: string }> = {
-  NEW: { label: 'New', bg: 'rgba(200,68,26,0.12)', color: 'var(--afa-terracotta)' },
+  NEW: { label: 'New', bg: fillSolidTint(0.12), color: 'var(--afa-fill-solid)' },
   CONTACTED: { label: 'Contacted', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   CLOSED: { label: 'Closed', bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
 }
@@ -115,7 +116,7 @@ export default function CorporateInquiriesPage() {
                     </div>
 
                     <div style={{ fontSize: '14px', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: '10px' }}>
-                      <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-terracotta)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
+                      <div><strong>Contact:</strong> {inq.contactName} · <a href={`mailto:${inq.contactEmail}`} style={{ color: 'var(--afa-fill-solid)' }}>{inq.contactEmail}</a>{inq.contactPhone ? ` · ${inq.contactPhone}` : ''}</div>
                       {inq.eventType && <div><strong>Event type:</strong> {inq.eventType}</div>}
                       {inq.city && <div><strong>City:</strong> {inq.city}</div>}
                       {inq.preferredDate && <div><strong>Preferred date:</strong> {new Date(inq.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>}

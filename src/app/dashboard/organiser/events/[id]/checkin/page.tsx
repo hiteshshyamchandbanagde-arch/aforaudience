@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import Button from '@/components/ui/Button'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 type ScanResult = {
   ok: boolean
@@ -333,9 +334,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                       onClick={() => setListFilter(f)}
                       style={{
                         flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                        border: listFilter === f ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                        background: listFilter === f ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                        color: listFilter === f ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                        border: listFilter === f ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        background: listFilter === f ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                        color: listFilter === f ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {f === 'all' ? 'All' : f === 'checked_in' ? 'Checked In' : 'Pending'}

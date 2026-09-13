@@ -11,6 +11,7 @@ import PresetSelectWithOther from '@/components/PresetSelectWithOther'
 import BrandLoader from '@/components/BrandLoader'
 import SeatLayoutPreview, { PreviewSeat, colorForZone } from '@/components/SeatLayoutPreview'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE, FILL_SOLID_TINT } from '@/lib/statusStyle'
 import { EVENT_TERMS_CHECKLIST, SPECIAL_NOTES_MAX_LENGTH, REFUND_POLICY_LINK, AGE_LIMIT_PRESETS } from '@/lib/event-terms'
 
 interface SeatSection {
@@ -740,7 +741,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
-                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>view it here</Link>.
+                  booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
                 </p>
 
                 <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
@@ -862,8 +863,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         <span style={{ fontSize: '13px', fontWeight: 600, flex: 1 }}>{c.name}</span>
                         <span style={{
                           fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
-                          background: c.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : c.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
-                          color: c.status === 'ACCEPTED' ? 'var(--afa-sage)' : c.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                          background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
                           {c.status}
                         </span>
@@ -913,8 +914,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         </div>
                         <span style={{
                           fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
-                          background: p.status === 'ACCEPTED' ? 'rgba(74,103,65,0.15)' : p.status === 'DECLINED' ? 'rgba(200,68,26,0.1)' : 'rgba(201,151,58,0.15)',
-                          color: p.status === 'ACCEPTED' ? 'var(--afa-sage)' : p.status === 'DECLINED' ? 'var(--afa-terracotta)' : 'var(--afa-gold)',
+                          background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
+                          color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
                           {p.status}
                         </span>
@@ -960,7 +961,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -971,7 +972,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -982,7 +983,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-terracotta)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -1121,9 +1122,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     onClick={() => setDefaultCompensationType(opt.value)}
                     style={{
                       padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-terracotta)' : '1px solid rgba(245,245,240,0.15)',
-                      background: defaultCompensationType === opt.value ? 'rgba(200,68,26,0.08)' : 'var(--afa-surface-raised)',
-                      color: defaultCompensationType === opt.value ? 'var(--afa-terracotta)' : 'var(--afa-text-primary)',
+                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                      background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                      color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {opt.label}

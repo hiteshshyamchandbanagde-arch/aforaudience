@@ -23,9 +23,38 @@ export interface StatusToneStyle {
   color: string
 }
 
-export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted', StatusToneStyle> = {
+// GEN-2609-063 - `orange` added for the DECLINED-status ternary in
+// organiser/events/[id]/edit/page.tsx (both the lineup-consent and
+// panel-invite lists), previously a raw `--afa-terracotta`/
+// `rgba(200,68,26,0.1)` literal pair, not routed through this file at
+// all. Value carries forward the terracotta->fill-solid retarget
+// (same reasoning as the rest of the repo-wide sweep this ticket did) -
+// not a redesign of the ACCEPTED/DECLINED/PENDING color scheme itself,
+// which stays sage/orange/gold exactly as before.
+export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange', StatusToneStyle> = {
   gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
   sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
   muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
+  orange: { bg: 'rgba(255,90,54,0.1)', color: 'var(--afa-fill-solid)' },
+}
+
+// GEN-2609-063 - `--afa-fill-solid` has no CSS-level "-tint" companion
+// (unlike the legacy `--afa-terracotta-tint`, an opaque light color from
+// the pre-dark-theme palette that doesn't suit today's dark surfaces).
+// Every selected/active-state translucent overlay this ticket's repo-
+// wide sweep touched independently re-typed the same fill-solid RGB
+// triple (255,90,54) at its own alpha - centralized here (this file is
+// already the design-tokens check's exempt "shared tone source," same
+// reasoning as STATUS_TONE above) rather than leaving 6 files with a
+// brand-new hardcoded literal apiece.
+export const FILL_SOLID_TINT = 'rgba(255,90,54,0.08)'
+export const FILL_SOLID_BORDER_TINT = 'rgba(255,90,54,0.25)'
+
+// A handful of sites needed a one-off alpha (0.12, 0.15, ...) rather
+// than the two common ones above - a function call instead of another
+// named constant per alpha value, since the actual set of alphas in use
+// isn't fixed or meaningful on its own (unlike STATUS_TONE's palette).
+export function fillSolidTint(alpha: number): string {
+  return `rgba(255,90,54,${alpha})`
 }

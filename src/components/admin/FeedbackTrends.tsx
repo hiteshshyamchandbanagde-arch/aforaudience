@@ -33,7 +33,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 const CATEGORY_COLORS: Record<string, string> = {
   BUG: 'var(--afa-error)',
   FEATURE_IDEA: 'var(--afa-sage)',
-  QUESTION: 'var(--afa-terracotta)',
+  QUESTION: 'var(--afa-fill-solid)',
   GENERAL: 'var(--afa-taupe)',
   OTHER: 'var(--afa-taupe)',
 }
@@ -288,11 +288,11 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
           <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
             {/* baseline */}
             <line x1={padL} y1={padT + plotH} x2={W - 12} y2={padT + plotH} stroke="rgba(245,245,240,0.15)" strokeWidth={1} />
-            <path d={openedPath} fill="none" stroke="var(--afa-terracotta)" strokeWidth={2} />
+            <path d={openedPath} fill="none" stroke="var(--afa-fill-solid)" strokeWidth={2} />
             <path d={resolvedPath} fill="none" stroke="var(--afa-sage)" strokeWidth={2} />
             {series.map((w, i) => (
               <g key={i}>
-                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} fill="var(--afa-terracotta)" />
+                <circle cx={xFor(i)} cy={yFor(w.opened)} r={2.5} fill="var(--afa-fill-solid)" />
                 <circle cx={xFor(i)} cy={yFor(w.resolved)} r={2.5} fill="var(--afa-sage)" />
                 {(i === 0 || i === series.length - 1 || i === Math.floor(series.length / 2)) && (
                   <text x={xFor(i)} y={H - 4} fontSize={9} fill="var(--afa-taupe)" textAnchor="middle">
@@ -303,7 +303,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
             ))}
           </svg>
           <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '11px' }}>
-            <span style={{ color: 'var(--afa-terracotta)' }}>● Opened</span>
+            <span style={{ color: 'var(--afa-fill-solid)' }}>● Opened</span>
             <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
           </div>
         </div>
@@ -346,7 +346,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                   width: '100%',
                   maxWidth: '32px',
                   height: `${Math.max(4, (b.count / maxAgeCount) * 80)}px`,
-                  background: b.label === '14d+' ? 'var(--afa-error)' : 'var(--afa-terracotta)',
+                  background: b.label === '14d+' ? 'var(--afa-error)' : 'var(--afa-fill-solid)',
                   opacity: b.label === '14d+' ? 1 : 0.6 + 0.1 * AGE_BUCKETS.findIndex((ab) => ab.label === b.label),
                   borderRadius: '4px 4px 0 0',
                 }}

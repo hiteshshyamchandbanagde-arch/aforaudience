@@ -18,7 +18,7 @@ export default function BackLink({ href, label }: { href: string; label: string 
         gap: '4px',
         fontSize: '13px',
         fontWeight: 600,
-        color: 'var(--afa-terracotta)',
+        color: 'var(--afa-fill-solid)',
         textDecoration: 'none',
         marginBottom: '16px',
       }}

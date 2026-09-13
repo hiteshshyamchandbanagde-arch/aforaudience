@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
+import { fillSolidTint, FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface Application {
   id: string
@@ -341,7 +342,7 @@ export default function ArtistDashboard() {
               numbers (not a low-but-nonzero score) so it never contradicts actual
               stats once the artist has any real activity. */}
           {profile.performances.length === 0 && profile.followers.length === 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.15)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: `1px solid ${fillSolidTint(0.15)}` }}>
               <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
                 Today is just the beginning 🎤
               </p>
@@ -352,15 +353,15 @@ export default function ArtistDashboard() {
           )}
 
           {completionPercent < 100 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(200,68,26,0.2)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(255,90,54,0.2)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Profile {completionPercent}% complete</span>
-                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-terracotta)', textDecoration: 'none' }}>
+                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
                   Complete your profile →
                 </Link>
               </div>
               <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-terracotta)', borderRadius: '999px' }} />
+                <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-fill-solid)', borderRadius: '999px' }} />
               </div>
               <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '8px' }}>
                 A complete profile - bio, genre, style, and a social link - helps Organisers say yes faster.
@@ -379,7 +380,7 @@ export default function ArtistDashboard() {
                   <span key={g} style={{ fontSize: '12px', padding: '5px 12px', background: 'var(--afa-surface-raised)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>{g}</span>
                 ))}
                 {profile.styleTag.map((s) => (
-                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: 'rgba(200,68,26,0.08)', borderRadius: '999px', color: 'var(--afa-terracotta)' }}>{s}</span>
+                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: FILL_SOLID_TINT, borderRadius: '999px', color: 'var(--afa-fill-solid)' }}>{s}</span>
                 ))}
               </div>
             )}
@@ -535,7 +536,7 @@ export default function ArtistDashboard() {
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-terracotta)' }}>Slot #{p.slot} · {p.duration} min</span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>Slot #{p.slot} · {p.duration} min</span>
                       {canCancel(p) ? (
                         <button
                           onClick={() => cancelPerformance(p.id)}
@@ -563,7 +564,7 @@ export default function ArtistDashboard() {
             </h2>
             {profile.applications.length === 0 ? (
               <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
-                No applications yet. <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Browse events</Link> to apply.
+                No applications yet. <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Browse events</Link> to apply.
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -614,7 +615,7 @@ export default function ArtistDashboard() {
                               height: '22px',
                               borderRadius: '50%',
                               border: '3px solid rgba(245,245,240,0.15)',
-                              borderTopColor: 'var(--afa-terracotta)',
+                              borderTopColor: 'var(--afa-fill-solid)',
                               animation: 'afa-spin 0.7s linear infinite',
                             }}
                           />

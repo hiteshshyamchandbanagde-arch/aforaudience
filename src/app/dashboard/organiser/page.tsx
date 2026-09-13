@@ -134,7 +134,7 @@ export default function OrganiserDashboard() {
               {!orgStatus?.payoutAccountLinked ? (
                 orgStatus?.directPayoutsEnabled ? (
                   <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '6px' }}>
-                    <Link href="/dashboard/organiser/payouts" style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>Set up direct payouts →</Link>
+                    <Link href="/dashboard/organiser/payouts" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Set up direct payouts →</Link>
                   </p>
                 ) : null
               ) : orgStatus.payoutAccountStatus !== 'activated' ? (
@@ -190,7 +190,7 @@ export default function OrganiserDashboard() {
                       <span><strong>{event.totalSeats}</strong> seats</span>
                       <span><strong>{event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}</strong></span>
                       {pendingApplications > 0 && (
-                        <span style={{ color: 'var(--afa-terracotta)', fontWeight: 600 }}>{pendingApplications} pending application{pendingApplications > 1 ? 's' : ''}</span>
+                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>{pendingApplications} pending application{pendingApplications > 1 ? 's' : ''}</span>
                       )}
                     </div>
 

@@ -119,7 +119,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
-            <Link href="/dashboard/venue/sales" style={{ fontSize: '14px', color: 'var(--afa-terracotta)', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href="/dashboard/venue/sales" style={{ fontSize: '14px', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
               All venues →
             </Link>
           </div>

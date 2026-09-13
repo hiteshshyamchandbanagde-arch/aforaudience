@@ -12,7 +12,7 @@ export default function EnvBadge() {
   if (!label) return null
 
   const isQA = label.toLowerCase().includes("qa")
-  const bg = isQA ? "var(--afa-terracotta)" : "var(--afa-mist)"
+  const bg = isQA ? "var(--afa-fill-solid)" : "var(--afa-mist)"
   const fg = isQA ? "var(--afa-cream)" : "var(--afa-ink)"
 
   return (

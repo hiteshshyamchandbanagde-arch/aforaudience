@@ -117,7 +117,7 @@ function Ballot({
           </select>
         </div>
       ))}
-      {error && <div style={{ fontSize: '12px', color: 'var(--afa-terracotta)', marginBottom: '8px' }}>{error}</div>}
+      {error && <div style={{ fontSize: '12px', color: 'var(--afa-fill-solid)', marginBottom: '8px' }}>{error}</div>}
       <button
         onClick={handleSubmit}
         disabled={submitting}

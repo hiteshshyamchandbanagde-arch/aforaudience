@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { cityLabel } from '@/lib/country-codes'
 import { useLocale } from '@/lib/i18n/translate'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 interface LocationState {
   city: string | null
@@ -134,7 +135,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
                   key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? 'rgba(200,68,26,0.08)' : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? FILL_SOLID_TINT : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
                 >
                   {c.label}
                 </button>
