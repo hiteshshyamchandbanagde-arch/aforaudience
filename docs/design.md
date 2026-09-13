@@ -3258,3 +3258,56 @@ from `qa` at `8cecbe9`. Logging to the Feedback table as
 `BUILD_COMPLETE` per the dispatch - chat moves it to
 RESOLVED/DEPLOYED_QA after merge + Vercel verification, same split as
 recent tickets.
+
+## GEN-2609-056 - spinner-overlay extraction
+
+`-053`'s own Card-audit entry above already found the `isNavigating`
+spinner-overlay markup repeated byte-for-byte 3x across `VenueCard`
+(inline JSX in `VenuesGridClient.tsx`)/`EventCard`/`EventRow` - this
+ticket's premise was re-verified against that same claim rather than
+re-derived from scratch, since the exact wording ("3x ... byte-for-
+byte") is unusual to independently re-confirm word-for-word by
+coincidence.
+
+**Not actually byte-for-byte once diffed properly.** Three real
+differences found: ring size (`EventCard` 26px, `EventRow`/venue card
+24px), scrim darkness (`rgba(10,10,10,0.6)` on Event* vs
+`rgba(20,20,20,0.7)` on the venue card), and accent color
+(`--afa-amber` on Event* vs `--afa-fill-solid` on the venue card). New
+`src/components/SpinnerOverlay.tsx` takes all three as props rather
+than hardcoding one look, so each of the three call sites keeps its
+exact prior appearance - no visual change, same bar as `-053`'s Badge
+variant split.
+
+**A latent fragility found and closed for these three consumers only.**
+`EventCard`/`EventRow` used `animation: "afa-spin ..."` without ever
+defining `@keyframes afa-spin` anywhere in their own file or in
+`globals.css` - it only ever animated because some other component
+already mounted on the same page happened to inject the keyframe via
+its own inline `<style>` tag first (the venue card did this; so do 12+
+other files repo-wide: `artists/page.tsx`, `events/page.tsx`,
+`organisers/page.tsx`, `venue-owners/page.tsx`, `wall-of-fame/page.tsx`
+(3x), `dashboard/artist/page.tsx`, `organisers/[id]/page.tsx`,
+`OrganisersGridEmbed.tsx`, `VenueOwnersGridEmbed.tsx`). `SpinnerOverlay`
+now defines the keyframe itself, so `EventCard`/`EventRow` no longer
+depend on page-load order to animate at all. **The other 12+ duplicate
+keyframe injections are a real, wider version of the same pattern -
+flagged as a follow-up candidate, not touched here** (ticket scope was
+these 3 files specifically; fixing the rest would be scope creep per
+the dispatch's own instruction not to silently absorb it).
+
+**Click-guard audit within the two touched files (per the dispatch's
+explicit ask), clean:** every `onClick`/`role="link"` element in
+`VenuesGridClient.tsx` and `EventCard.tsx` already carries the
+`navigatingId`-driven dim/disable pattern - the only other `onClick`s
+in `VenuesGridClient.tsx` are the city-filter dropdown's own controls,
+not navigable tiles. Nothing new found to flag.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session, same standing
+gap) - reasoned from the preserved per-site props instead of screenshot
+diffing; flagged as unverified, not claimed done.
+
+Built on `feat/gen-2609-056-spinner-overlay-extraction`, branched from
+`qa` at `33cc922`.

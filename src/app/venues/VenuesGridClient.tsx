@@ -9,6 +9,7 @@ import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { useLocale } from "@/lib/i18n/translate"
 import { ArrowUpRightIcon, ChevronDownIcon } from "@/components/icons/VenueIcons"
 import SearchInputBox from "@/components/SearchInputBox"
+import SpinnerOverlay from "@/components/SpinnerOverlay"
 
 interface VenueItem {
   id: string
@@ -208,31 +209,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               transition: "opacity 0.15s ease",
             }}
           >
-            {isNavigatingThis && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: 2,
-                  background: "rgba(20,20,20,0.7)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    border: "3px solid rgba(245,245,240,0.15)",
-                    borderTopColor: "var(--afa-fill-solid)",
-                    animation: "afa-spin 0.7s linear infinite",
-                  }}
-                />
-                <style>{`@keyframes afa-spin { to { transform: rotate(360deg); } }`}</style>
-              </div>
-            )}
+            <SpinnerOverlay isNavigating={isNavigatingThis} size={24} accentColor="var(--afa-fill-solid)" scrimBackground="rgba(20,20,20,0.7)" />
 
             <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
               {photo ? (
