@@ -3258,3 +3258,73 @@ from `qa` at `8cecbe9`. Logging to the Feedback table as
 `BUILD_COMPLETE` per the dispatch - chat moves it to
 RESOLVED/DEPLOYED_QA after merge + Vercel verification, same split as
 recent tickets.
+
+## GEN-2609-055 - remaining status-pill migrations to Badge
+
+Scope named: admin feedback/bookings/diary, artist events/applications,
+organiser tours/lineup. **No standalone "artist applications" page
+exists** - `dashboard/artist/events/page.tsx` is the only artist-side
+file in scope; treated the dispatch's "events/applications" as
+referring to that one file's applications-related pills, not a second
+file.
+
+**Real mix found, same shape the dispatch anticipated - roughly half
+of the raw `borderRadius: '999px'` hits in these files aren't Badge
+candidates at all:**
+
+**Migrated (3, zero visual change):**
+- `dashboard/organiser/tours/page.tsx` - the tour status pill matched
+  `Badge`'s `status` variant chrome exactly (11px/700/uppercase/
+  0.05em/5px 10px/nowrap). Straight swap to `<Badge tone={statusStyle}>`.
+- `dashboard/organiser/events/[id]/lineup/page.tsx` - the compensation
+  pill matched `status-compact` exactly (11px/700/4px 10px/nowrap).
+  Straight swap to `<Badge variant="status-compact" tone={comp}>`.
+- `dashboard/admin/diary/page.tsx` - the diary-entry status pill
+  matched `status-compact` on every dimension except `fontWeight` (600
+  here vs. `Badge`'s 700) plus an extra `flexShrink: 0`. Used `Badge`'s
+  `style` override prop (same escape hatch `-043` used) to keep the
+  exact prior weight/shrink rather than silently bumping it to 700 -
+  no visual change, still de-duplicates the shared chrome.
+
+**Flagged, NOT migrated - genuine third shapes, forcing them into
+either Badge variant would be a visible change:**
+- `dashboard/admin/feedback/page.tsx`'s `CATEGORY_BADGE`/`SEVERITY_BADGE`
+  spans - 10px font (not 11px), 2px 8px padding (not 4-5px/10px),
+  0.03em letter-spacing (neither variant sets this). A third, smaller
+  pill chrome, undocumented until now.
+- `dashboard/admin/bookings/page.tsx`'s inline "FREE" tag - 11px font
+  but 2px 8px padding and `fontWeight: 500` (not 700), plus its tone is
+  a one-off literal `rgba(...)`/`--afa-text-secondary` pair, not drawn
+  from any status table - arguably not a "status" pill semantically
+  either, on top of the chrome mismatch.
+- `dashboard/artist/events/page.tsx`'s compensation pill and "Lineup
+  full - waitlist only" pill - 13px font, 5px 12px padding. A fourth
+  distinct pill size, larger than both existing `Badge` variants.
+
+**Skipped - these are interactive controls, not display badges, even
+though several reuse `borderRadius: '999px'` chrome:** `admin/bookings`'s
+tab-switcher buttons and "Retry" action button; `admin/diary`'s
+per-row status-change buttons (`disabled`/`cursor` logic, not pure
+display); `artist/events`'s city `<select>`; `organiser/lineup`'s
+Featured-vouch toggle button; `admin/feedback`'s "View full board" pill
+button. `Badge` is a presentational `<span>` with no click handling -
+mis-fitting any of these into it would either drop their interactivity
+or require bolting button semantics onto a component deliberately kept
+display-only.
+
+**Net: 3 real migrations, 3 new distinct pill shapes documented for the
+first time (not previously catalogued anywhere), 6 call sites correctly
+left as buttons/selects.** The 3 flagged shapes are a real follow-up
+candidate (a `status-badge-sm` variant, a `status-badge-lg` variant, and
+a decision on whether the "FREE"/count-tag pattern belongs in `Badge`
+at all) - not scheduled, not built this pass, per the dispatch's own
+"flag rather than mis-fit" instruction.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session) - the 3 migrations
+were checked property-by-property against `Badge`'s `CHROME` table
+instead of screenshot diffing; flagged as unverified, not claimed done.
+
+Built on `feat/gen-2609-055-badge-migration`, branched from `qa` at
+`33cc922`.
