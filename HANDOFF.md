@@ -279,10 +279,88 @@ Same pattern as last session: Hitesh pasted a fresh PAT directly into this chat 
 - `GEN-2609-059`'s hover-treatment direction — still needs Hitesh's confirmation, unrelated to this session's work.
 - Card (`VenueCard` vs `EventCard.tsx`) — still deliberately unmerged, documented, not re-opened.
 
-## Session-start checklist (this session's version)
+## Session-start checklist (superseded by the section below - kept for history)
 
 1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD is still `4c8393e` as of this session's end (neither `GEN-2609-067` branch has merged).
 2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
 3. Read this file, then `docs/design.md` for anything logged since.
 4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 5+ sessions running.
 5. Merge both `GEN-2609-067` branches (compare URLs above) — merge the item 1-7 branch first since item 8's doc content, while independent, documents the fuller "governed palette" picture the audit's items 1-7 are also about. Then take the remaining open items (Feedback-table logging, `-059` hover direction, Razorpay rotation) back to Hitesh.
+
+---
+
+# Session update (CC, 14 Sep) — GEN-2609-068, /tickets/ page rebuilt against the v6 Figma Make export; PR pushed, awaiting merge
+
+**Both `GEN-2609-067` branches confirmed merged at this session's start** (`#634` item 8, `#635` items 1-7) — `qa` HEAD synced fresh to `6a26557` before branching. The 2 real open decisions carried forward from that sweep (dashed button, PWA `theme_color` coupling) are both closed now that `-067` landed; drop them from any older open-items list.
+
+**Ships this session:** `GEN-2609-068` — full rebuild of `src/app/tickets/page.tsx` against the AFA Mobile App v6 Figma Make export's `Tickets.tsx`, used strictly as a visual/structural reference (never as code to copy in), per the standing Mobile Redesign rule that this export's output has repeatedly not matched rendered reality when trusted directly. One branch, not yet merged: `fix/gen-2609-067...` is done; this ticket's branch is `feat/gen-2609-068-tickets-page-v6-redesign`, branched from `qa` at `6a26557`. Compare URL: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/feat/gen-2609-068-tickets-page-v6-redesign?expand=1`
+
+Full technical detail (every changed file, the reconciliation with `-067` item 3, the real-QA-data verification findings) is in `docs/design.md`'s `GEN-2609-068` entry — this section covers what that entry doesn't: the WCAG contrast math (asked for explicitly, since it's a decision worth tracing back to) and the two things that need Hitesh's actual input.
+
+### WCAG contrast math for the two new tokens (`--afa-sage-bright`, `--afa-error-bright`)
+
+The dispatch's two known reference-design issues: the v6 mockup's status chips hardcoded `#7db873` (confirmed) and `#e05c55` (cancelled) as a workaround for `STATUS_TONE.sage`/`.error`'s real hues failing contrast against their own tinted pill backgrounds. Fixed at the token level, not per-chip.
+
+**Method**: standard WCAG relative-luminance formula (sRGB -> linear via the `c <= 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4` piecewise function, `L = 0.2126R + 0.7152G + 0.0722B`), contrast ratio `(L_light + 0.05) / (L_dark + 0.05)`. Backgrounds are the tone's real translucent `bg` composited over `--afa-surface-raised` (#1F1F1F, rgb(31,31,31)) — the actual surface every real consumer (dashboard status pills, this page's status chips) renders on.
+
+**Sage** — `STATUS_TONE.sage.bg` = `rgba(74,103,65,0.12)`. Composited over #1F1F1F: ≈rgb(36,40,35), luminance ≈0.0201. Minimum text luminance for 4.5:1: `L ≥ 4.5×(0.0201+0.05) − 0.05 ≈ 0.2655`. Chosen: `--afa-sage-bright: #7AA86E` → rgb(122,168,110), luminance ≈0.333 → **ratio ≈5.46:1** at the real 0.12 alpha. Re-checked at a hypothetical 0.20 alpha (this dispatch's own upper estimate for "the tinted backgrounds actually used"): background luminance ≈0.0249 → **ratio ≈5.11:1** — still comfortably over 4.5:1.
+
+**Error** — `STATUS_TONE.error.bg` = `rgba(179,38,30,0.10)`. Composited over #1F1F1F: ≈rgb(46,32,31), luminance ≈0.0172. Minimum text luminance for 4.5:1: ≈0.2522. Chosen: `--afa-error-bright: #E67870` → rgb(230,120,112), luminance ≈0.314 → **ratio ≈5.43:1** at the real 0.10 alpha; ≈5.10:1 at a hypothetical 0.20 alpha.
+
+**Cross-check, not just internal consistency**: the existing `--afa-red-alt` (#EF4444, rgb(239,68,68)) — already folded into `--afa-error` elsewhere per `GEN-2609-067` item 7 — measures luminance ≈0.229, giving only **≈4.16:1** against this exact error-tint background. It would **not** have passed AA here. This independently confirms red-alt was never designed for this text-on-tint role, consistent with `-067`'s own reasoning for retiring it.
+
+Both new tokens live in `globals.css` next to the dark-theme token block (not the legacy Phase-0 block `--afa-gold-bright` sits in, since these are freshly verified for the current dark theme) and are wired in as `STATUS_TONE.sage/.error`'s `color`, so every consumer gets the fix, not just this page.
+
+### Two things that need Hitesh's actual input, not just a build decision
+
+1. **Cancelled/refunded ticket cards are fully non-interactive** (ghosted at 55% opacity, no tap-through to the past event) — matches the v6 mockup exactly, but the dispatch explicitly asked to confirm this rather than silently copy it. There's a real argument a dead/past booking's card being tappable (to see the event page, who else attended) is more useful than fully inert. Kept matching the mockup for this pass since it's the simpler, lower-risk default and trivially reversible (the `isGhosted` flag already gates both the opacity and the interactivity in one place in the new `renderCard`). Needs a yes/no from Hitesh.
+2. **Feedback-table logging capability gap from `GEN-2609-067`, now resolved** — see below. Not something needing Hitesh's input any more, but worth him knowing it's unblocked.
+
+### Feedback-table gap closed
+
+The last two sessions flagged "no project_id or 'Feedback' table located" as an open capability gap for the "log each fixed item to the Feedback table" instruction. This session found it: **project `aforaudience-qa` (id `nqiyrypmjtogoocerxtu`), table `public.Feedback`, 551 rows** — a real, live, in-app end-user feedback/bug-report feature (`src/app/api/feedback/route.ts`, reviewed at `/dashboard/admin/feedback`), which a concurrent session had *also* independently started using as a lightweight dev-ticket log (category `BUG`/`FEATURE_IDEA`/etc., `status` walking the real build pipeline `NEW → ... → BUILD_COMPLETE → ... → RESOLVED`, human-readable `displayId` like `BUG-2609-037` from a real atomic per-prefix/month counter in `CodeCounter` via `src/lib/codeCounter.ts`). Found all 8 of `GEN-2609-067`'s items already logged there (`RESOLVED`, referencing PR #635/#634) — written by another session after reading this session's own earlier flag, the same "concurrent session closes a flagged gap" pattern this project has hit many times before. Logged this ticket's own 2 entries the same way, `displayId`s `BUG-2609-038`/`BUG-2609-039`, `status: BUILD_COMPLETE` (built + pushed, not yet merged) — replicated the app's real atomic-increment SQL rather than guessing a number, to avoid colliding with a real concurrent user bug report landing in the same table.
+
+**Important**: this table is genuinely dual-purpose — real end-user submissions AND this project's own dev-log convention share one table. Future sessions logging dev-ticket progress here should keep using `fromChatbot: false` and a real `category`/`status`/`displayId` exactly like the rows already there, not invent a separate convention.
+
+### Unrelated finding surfaced by the Supabase tooling itself (not new, already tracked)
+
+Every `list_tables`/schema query against `aforaudience-qa` this session carried a standing advisory: **22 tables have Row Level Security disabled**, fully exposed to the anon/authenticated Supabase client roles. This is the same item already on this file's open-items list ("RLS disabled on 22 QA-project tables — flagged, no policy pass done") — surfacing it again here only because the tool itself insists on it every time, not because it's new. Per the tool's own guidance, no remediation SQL was applied — enabling RLS without real policies would just break access outright. Still needs an actual policy-design pass, still nobody's call made.
+
+### Verification
+
+`tsc --noEmit` clean (confirms all 11 locale dictionary files stayed structurally in sync with the new `pageKicker`/`scanAtDoor`/etc. keys — `Dictionary = typeof en` makes a drift a compile error, not a silent gap), `check-design-tokens.js` clean, real `next build` succeeded, grep of every touched file for hex literals found none live. **No browser tool available this session** (same standing gap, many sessions running now) — real-data verification instead came from direct Supabase MCP queries against live QA booking rows (`atul.audience@aforaudience.qa`, 25 real bookings; `amit.audience@aforaudience.qa`, 0 bookings — confirmed as the real empty-state exercise path) rather than a screenshot. Notable real-data findings: every live booking's `ticketCode` is currently `null` (the new stub row's Ref cell shows an em-dash - a live, common case today, not a rare edge case, and not a bug introduced by this change); no live booking has multiple seat tiers or numbered seats yet, so that part of the stub-row logic is correct-by-schema but not exercised by real data; no live `PENDING` booking exists right now either.
+
+## Open items for next session (updated)
+
+**Resolved, remove from any older list:** `GEN-2609-067` (items 1-8, all merged, `qa` HEAD `6a26557`) — including its 2 carried-forward decisions (dashed button, PWA theme-color coupling). The Feedback-table capability gap is also resolved (see above).
+
+**New this session:**
+- `GEN-2609-068` branch needs review + merge: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/feat/gen-2609-068-tickets-page-v6-redesign?expand=1`
+- Decision needed: should cancelled/refunded ticket cards stay non-interactive (current, matches the v6 mockup), or should they tap through to the past event page? See "Two things that need Hitesh's actual input" above.
+- `docs/afa-design-tokens-reference.md` doesn't yet document `--afa-sage-bright`/`--afa-error-bright` or the new `StubRow`/`Button outline-neutral`/`Badge icon` additions — worth a small follow-up doc pass once `-068` merges, same spirit as `-067` item 8.
+- `SeatLayoutPreview.tsx`/`SeatPicker.tsx`'s seat-tier legend and `checkout/[bookingId]/page.tsx`'s booking-summary line are real `StubRow` reuse candidates, not migrated this pass (flagged in `docs/design.md`, not scheduled).
+
+**Still open, unchanged from before this session:**
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item, unresolved multiple sessions running.
+- `GEN-2609-005` — blocked purely on the above.
+- `GEN-2609-009`, `GEN-2609-016` — ready to dispatch, not yet sent.
+- `GEN-2609-022` — `BUILD_COMPLETE`, live click-through still not confirmed.
+- `GEN-2609-036` — scoped, not dispatched.
+- Residual card/sheet-context `--afa-error` gap (4 files, 4.17:1) — needs a decision beyond a text-color swap.
+- Icon system consolidation, `calendar`/`tag`/`map` naming collision, icon sizing/strokeWidth standardization — all documented, none scheduled.
+- Push-content localization foundation (`User.locale` column + server-side persistence decision) — nobody's call made yet.
+- e2e verification gap for `GEN-2609-042` — still genuinely inconclusive, not re-attempted.
+- DevTools reduced-motion Tab-key/emulation click-through — still no browser tool available, now 8 sessions running.
+- IA question (hamburger drawer duplicating tab-bar items) — still waiting on Hitesh's go-ahead to dispatch.
+- The stray `stash@{0}` — still unresolved, now spanning multiple sessions.
+- `GEN-2609-059`'s hover-treatment direction — still needs Hitesh's confirmation, unrelated to this session's work.
+- Card (`VenueCard` vs `EventCard.tsx`) — still deliberately unmerged, documented, not re-opened.
+- RLS disabled on 22 `aforaudience-qa` tables — re-surfaced by this session's own Supabase queries, not new; still needs a real policy-design pass, not a blanket enable.
+
+## Session-start checklist (this session's version)
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `6a26557` until `GEN-2609-068` is merged.
+2. If working from chat: ask Hitesh for a fresh GitHub PAT directly in-conversation. If working from CC: read `CC_HANDOFF.md`.
+3. Read this file, then `docs/design.md` for anything logged since.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item, now 6+ sessions running.
+5. Merge `GEN-2609-068` (compare URL above), then take the cancelled/refunded-tappability decision and the other still-open items above back to Hitesh.

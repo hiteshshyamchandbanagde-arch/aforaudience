@@ -875,3 +875,70 @@ and both compare URLs), then either resolve or explicitly wave off the
 Feedback-table logging gap, then take `GEN-2609-059`'s hover direction
 and the Razorpay/Maps key rotation back to Hitesh as the next real
 open decisions.
+
+## CC-side session note - 14 Sep (git/session state only)
+
+Both `GEN-2609-067` branches confirmed merged at session start (`#634`,
+`#635`) - `qa` synced fresh to `6a26557` before branching. Dispatched:
+`GEN-2609-068`, a full rebuild of `src/app/tickets/page.tsx` against
+the AFA Mobile App v6 Figma Make export's own `Tickets.tsx`, used as
+visual/structural reference only per the standing Mobile Redesign rule
+- never trust this export's code/data directly. One branch pushed, not
+yet merged: `feat/gen-2609-068-tickets-page-v6-redesign`, commit
+`7d55d00`, branched from `qa` at `6a26557`.
+
+**Resolved the standing "Feedback table" capability gap from the last
+2 sessions.** `mcp__claude_ai_Supabase__list_projects` surfaced
+`aforaudience-qa` (project id `nqiyrypmjtogoocerxtu`) directly - no
+project_id needed to be supplied externally, it was just never looked
+up via the MCP tool before. `list_tables` on it found `public.Feedback`
+(551 rows) on the first try. Found all 8 of `GEN-2609-067`'s items
+already logged there by a concurrent session (real PR/commit
+references, `status: RESOLVED`) - the same "concurrent session closes
+a flagged gap" pattern this project hits repeatedly. Logged this
+ticket's own 2 entries the same way (`BUG-2609-038`, `BUG-2609-039`,
+`status: BUILD_COMPLETE`) - read `src/lib/codeCounter.ts` first to
+replicate the app's own real atomic-increment SQL for `displayId`
+rather than inventing a number, since this table is genuinely
+dual-purpose (real end-user bug reports share it with this project's
+dev-log convention) and a collision would corrupt a real user's ticket
+number. Full detail, including the WCAG contrast math the dispatch
+asked to have traceable, is in `HANDOFF.md`'s own `GEN-2609-068`
+section - not re-duplicated here.
+
+**Every Supabase schema query this session carried a standing RLS
+advisory** (22 `aforaudience-qa` tables have Row Level Security
+disabled) - not new, already on `HANDOFF.md`'s open-items list, just
+re-surfaced by the tool itself every time. No remediation SQL applied,
+per the tool's own guidance (enabling RLS with no policies would break
+access outright) and this project's own "present the SQL, let Hitesh
+decide" convention for exactly this class of issue.
+
+**No browser tool available this session** (same standing gap, many
+sessions running now). Real-data verification instead came from direct
+`execute_sql` queries against live QA `Booking` rows for
+`atul.audience@aforaudience.qa` (25 real bookings) and
+`amit.audience@aforaudience.qa` (0 bookings, confirmed as the real
+empty-state path) - caught that every live booking's `ticketCode` is
+currently `null` (the new stub row's Ref cell handles this gracefully,
+not a bug) and that no multi-tier or numbered-seat booking exists yet
+to exercise those code paths live, both worth knowing before claiming
+this "tested against real data," not just visually reasoned.
+
+Verification: `tsc --noEmit` clean (confirms all 11 locale dictionary
+files - 9 new keys added to each, with real translations, not English
+duplicated - stayed structurally in sync with `Dictionary = typeof
+en`), `check-design-tokens.js` clean, real `next build` succeeded, a
+grep of every touched file for hex literals found none live.
+
+Working tree clean at end of session except the pre-existing untracked
+`Figma/` dir (never staged; this session's own `Figma/AFA Mobile App
+v6/` extraction lives there too, matching the v2/v3/v4 extraction
+precedent from prior sessions - never git-added). The unclaimed
+`stash@{0}` is still untouched, now spanning even more sessions.
+
+**Next session (CC or chat) should:** merge `GEN-2609-068` (compare
+URL in `HANDOFF.md`), get Hitesh's actual call on whether
+cancelled/refunded ticket cards should stay non-interactive or tap
+through to the past event, and take the still-open items (RLS policy
+pass, Razorpay/Maps rotation, `GEN-2609-059` hover direction) forward.
