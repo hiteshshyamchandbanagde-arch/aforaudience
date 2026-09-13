@@ -3328,3 +3328,81 @@ instead of screenshot diffing; flagged as unverified, not claimed done.
 
 Built on `feat/gen-2609-055-badge-migration`, branched from `qa` at
 `33cc922`.
+
+## GEN-2609-054 - wrong premise on the terracotta sweep, split per the dispatch's own instruction
+
+The dispatch's count ("`--afa-terracotta` appears 11 times across 9
+dashboard/organiser files") was re-verified fresh rather than trusted,
+per this project's standing re-verification convention. **It's wrong,
+substantially:** a scoped grep of `dashboard/organiser/` alone found
+**41 occurrences across 13 files** - before counting `dashboard/artist/`,
+`dashboard/venue/`, every public/auth page, and `src/components/`,
+which push the repo-wide total well past 90 occurrences across 40+
+files. Not a rounding difference - the real footprint is roughly 4x
+the stated one, and it isn't concentrated in "dashboard/organiser" the
+way the dispatch implies.
+
+**More importantly, it's a real mix, exactly the shape the dispatch
+told this session to watch for and split rather than force:**
+- **~15-18 are genuine solid-background CTA/submit buttons** - but
+  their padding varies call-site to call-site (8px 16px, 9px 18px,
+  10px 22px, 11px 22px, 12px 24px, 12px 26px...) rather than being one
+  consistent shape. `Button.tsx`'s existing `form-submit` variant is
+  specifically the full-width, 16px-padding, 8px-radius auth-form
+  look - forcing these dashboard-inline buttons into it would be a
+  real visual change (wrong padding, wrong width behavior), not a
+  safe reuse. A dashboard-specific CTA variant might be the right
+  answer, but sizing/padding needs a real decision, not a guess made
+  under this dispatch.
+- **The rest are not buttons at all:** two chart-bar heights
+  (`organiser/events/[id]/sales/page.tsx`, `organiser/sales/page.tsx`),
+  8 selection-pill border/text pairs on toggle-style option cards
+  (`events/create/page.tsx`, `events/[id]/edit/page.tsx`,
+  `events/[id]/checkin/page.tsx` - these are `border`/`color` on
+  already-interactive radio-style buttons, not backgrounds), a
+  DECLINED-status color ternary sitting alongside `--afa-sage`/
+  `--afa-gold` in `events/[id]/edit/page.tsx` (the same shape
+  `GEN-2609-051` already extracted into `statusStyle.ts` for two other
+  files - a candidate for that file, not `Button`), and roughly a
+  dozen plain link/text-accent-color usages with no button shape at
+  all.
+
+**What was buildable without a new decision, and built:** the
+dispatch's own aside - "also in scope: `forgot-password`/
+`reset-password` - not yet migrated to `form-submit`" - checked out
+independently of the terracotta framing. Both pages' real submit
+buttons don't use terracotta at all (their only `--afa-terracotta`
+usage is an unrelated error-banner background/border); both already
+use raw inline `background: var(--afa-fill-solid)` styling that is
+byte-identical in shape to the `form-submit` variant `GEN-2609-053`
+extracted from `login`/`register` (matches the variant's own code
+comment: "byte-identical across all 8 occurrences in those 4 files" -
+these are 2 of those same 4 files, just not yet switched over to the
+component). Migrated both to `<Button variant="form-submit">`,
+preserving `forgot-password`'s extra `marginTop: 20px` via the
+`style` override prop. `color` moves from the literal `'white'` to
+`form-submit`'s `--afa-cream` (per `-053`'s own already-verified
+"visually indistinguishable, resolves the hardcoded literal" finding -
+not re-derived, reused). One minor, intentional behavior addition
+inherited from the shared component: both buttons now dim to 0.7
+opacity while `disabled`, which neither did before - consistent with
+every other `form-submit` consumer, not a regression.
+
+**Not built, needs re-scoping before anyone builds it:** the wider
+terracotta sweep. Recommend splitting into (a) a real design decision
+on a dashboard-CTA button variant's exact padding/sizing before
+touching any of the ~15-18 button call sites, and (b) routing the
+`DECLINED`-status ternary into `statusStyle.ts` as its own small
+follow-up, unrelated to buttons. The chart-bar and selection-pill/link
+usages are cosmetic accent-color uses, not component-extraction
+candidates at all - no action needed there.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. No visual
+verification possible (no browser tool this session) - the two
+migrated buttons were checked property-by-property against
+`form-submit`'s `variantStyle` output instead of screenshot diffing;
+flagged as unverified, not claimed done.
+
+Built on `feat/gen-2609-054-form-submit-migration`, branched from `qa`
+at `33cc922`.
