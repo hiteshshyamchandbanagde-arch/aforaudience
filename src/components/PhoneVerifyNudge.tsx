@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 /**
  * "Verify your phone" nudge for logged-in users whose `isVerified` is
@@ -71,21 +71,15 @@ export default function PhoneVerifyNudge() {
       <span style={{ flex: 1, minWidth: 0 }}>
         Verify your phone number to book tickets or venues.
       </span>
-      <Link
+      <Button
+        variant="primary"
+        size="pill-sm"
+        fullWidth={false}
         href={`/verify-phone?next=${encodeURIComponent(pathname || '/')}`}
-        style={{
-          background: 'var(--afa-terracotta)',
-          color: 'white',
-          padding: '6px 14px',
-          borderRadius: 999,
-          textDecoration: 'none',
-          fontWeight: 600,
-          fontSize: 13,
-          whiteSpace: 'nowrap',
-        }}
+        style={{ whiteSpace: 'nowrap' }}
       >
         Verify now
-      </Link>
+      </Button>
     </div>
   );
 }

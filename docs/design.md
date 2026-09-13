@@ -4121,3 +4121,74 @@ Flagged as reasoned, not screenshotted.
 
 Built on `feat/gen-2609-065-registerform-error-color`, branched from
 `qa` at `3decea2`.
+
+## GEN-2609-066 - pill-shaped Button sizes, the 4-instance follow-up
+
+Re-verified all 4 flagged sites fresh before building, per standing
+convention.
+
+**Two real pill shapes, not one - confirmed by re-diffing, not
+assumed:** `DisplayNameNudge.tsx` and `PhoneVerifyNudge.tsx` are
+byte-identical (`padding: 6px 14px`, `borderRadius: 999`, `fontSize:
+13`, `fontWeight: 600`) - one shape, named `pill-sm`. `pwa/
+InstallPrompt.tsx`'s "Install" is genuinely different (`padding: 10px
+18px`, `fontSize: 14`) - its own `pill-md`, not forced into `pill-sm`.
+Both added to `Button.tsx`'s `SIZE_CHROME` additively - `sm`/`md`/`lg`
+and every existing consumer's appearance is unchanged (confirmed via
+`tsc`/build, not just reasoned).
+
+**The would-be 4th instance wasn't one at all - checked, not assumed,
+per the dispatch's explicit instruction.** `RegisterForm.tsx`'s
+username-suggestion chip looked pill-shaped at a glance (`borderRadius:
+999`) but its real chrome is a translucent-tint utility chip
+(`background: rgba(196,90,52,0.08)`, `border: 1px solid
+rgba(196,90,52,0.25)`, terracotta-colored *text*, no solid fill) - not
+a CTA button at all. This is the exact same architectural pattern as
+the selection-pills `GEN-2609-063` already centralized: `statusStyle.ts`
+already exports `FILL_SOLID_TINT` (`rgba(255,90,54,0.08)`) and
+`FILL_SOLID_BORDER_TINT` (`rgba(255,90,54,0.25)`) - both alphas match
+this chip's real values exactly. Fixed by importing those two constants
+instead of adding a 3rd `Button` size for a site that was never
+`Button`-shaped to begin with. This also resolves the chip's separate
+`rgba(196,90,52,...)` bug (a close-but-wrong RGB triple, distinct from
+`--afa-terracotta`'s real `(200,68,26)`) for free, in the same fix.
+
+**Fixed all 3 real `color: 'white'` bugs for free** via `variant="primary"`,
+same pattern as every prior ticket in this sweep.
+
+**A real, necessary `Button` API gap found and fixed, not worked
+around.** `DisplayNameNudge`'s link needs to both navigate *and* fire a
+dismiss side-effect on click-through - a completely standard `next/
+link` pattern - but `ButtonAsLink`'s type only ever declared `href`,
+with no `onClick` (its own comment said as much: "real navigation
+instead of an onClick handler"). Extended `ButtonAsLink` to spread
+`AnchorHTMLAttributes` (mirroring how `ButtonAsButton` already spreads
+`ButtonHTMLAttributes`) and fixed the render branch to actually pass
+those props through to `<Link>` - it was building `merged` style but
+never spreading `rest` onto the link, so `onClick` (and any other
+anchor prop) would have silently done nothing even after the type
+allowed it. `PhoneVerifyNudge`'s href-only link and every existing
+`href`-only consumer from `-058`/`-064` (`organiser/page.tsx`, `tours/
+page.tsx`) are unaffected - confirmed via a clean `tsc`/build, not
+assumed from the diff being "additive-looking."
+
+**Verify.** `tsc --noEmit` clean (including the real type-and-runtime
+gap above, not just a type-only fix). `check-design-tokens.js` against
+this branch's diff: clean. Real `next build`: clean, all touched routes
+present. Repo-wide grep after the change: zero remaining
+`rgba(196,90,52,...)` anywhere; the only `--afa-terracotta` left is
+comments and the two already-flagged, out-of-scope items below.
+
+**This closes the pill-button gap completely, but the wider terracotta/
+button-centralization sweep (`GEN-2609-052` through `-066`) still has 2
+known, already-flagged items standing - not a new gap, not
+re-discovered here, just still genuinely unresolved:**
+1. `artist/edit/page.tsx`'s dashed-outline "+ Add tour stop" button -
+   no `Button` variant supports a dashed border; needs a real shape
+   decision (flagged since `-064`).
+2. `layout.tsx`'s `themeColor` / `manifest.ts`'s `theme_color` - coupled
+   to a hardcoded PWA-manifest hex; swapping one side alone would break
+   a documented invariant (flagged since `-063`).
+
+Built on `feat/gen-2609-066-pill-button-sizes`, branched from `qa` at
+`0621ed1`.
