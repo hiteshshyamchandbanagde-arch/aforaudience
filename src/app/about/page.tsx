@@ -13,10 +13,16 @@ export const metadata: Metadata = {
 // introducing new fonts/colors. Consistency with the rest of the app matters
 // more than novelty on a slow-read editorial page.
 // ---------------------------------------------------------------------------
-const INK = "var(--afa-ink)"
-const PAPER = "var(--afa-cream)"
+// GEN-2609-067 - INK/PAPER/MIST retargeted from the legacy light-theme
+// palette (near-black ink text on cream paper) to the current dark-
+// theme tokens - this whole page was still rendering as a light
+// "paper" editorial page inside an otherwise all-dark app, a real
+// unmigrated leftover per docs/design.md's "final" dark editorial
+// theme direction, not a deliberate stylistic choice.
+const INK = "var(--afa-text-primary)"
+const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
-const MIST = "var(--afa-mist)"
+const MIST = "rgba(245,245,240,0.12)"
 const SERIF = "Georgia, 'Playfair Display', serif"
 const SANS = "system-ui, -apple-system, sans-serif"
 const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"
@@ -584,8 +590,8 @@ export default function AboutPage() {
                 fontFamily: SANS,
                 fontSize: "14px",
                 fontWeight: 600,
-                color: PAPER,
-                background: INK,
+                color: "var(--afa-on-fill-solid)",
+                background: EMBER,
                 padding: "14px 28px",
                 borderRadius: "6px",
                 textDecoration: "none",

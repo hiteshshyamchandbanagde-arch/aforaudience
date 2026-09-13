@@ -1496,7 +1496,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           padding: '7px 14px', borderRadius: '8px 0 0 8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                           border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)',
                           background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                          color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-text-primary)',
+                          color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                         }}
                       >
                         {levelLabel(lvl)}
@@ -1509,7 +1509,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
                           border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)', borderLeft: 'none',
                           background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                          color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-error)',
+                          color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-error)',
                         }}
                       >
                         ×
@@ -1622,7 +1622,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                         border: manualPlacement ? 'none' : '1px solid rgba(245,245,240,0.2)',
                         background: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                        color: manualPlacement ? 'var(--afa-white)' : 'var(--afa-text-primary)',
+                        color: manualPlacement ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
@@ -1802,7 +1802,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                             {wizardPreviewSeats.map((s, i) => {
                               const tf = tierFill(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel))))
                               return (
-                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-ink)' : 'var(--afa-white)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {s.row}{s.number}
                                 </div>
                               )
@@ -1839,8 +1839,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         style={{
                           padding: '7px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
                           border: markerMode === t ? 'none' : `1px solid ${MARKER_META[t].color}`,
-                          background: markerMode === t ? MARKER_META[t].color : 'var(--afa-white)',
-                          color: markerMode === t ? 'var(--afa-white)' : MARKER_META[t].color,
+                          background: markerMode === t ? MARKER_META[t].color : 'var(--afa-surface-raised)',
+                          color: markerMode === t ? 'var(--afa-cream)' : MARKER_META[t].color,
                         }}
                       >
                         {markerMode === t ? `✓ Placing ${MARKER_META[t].name}` : `+ ${MARKER_META[t].name}`}
@@ -1985,7 +1985,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     style={{
                       position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
                       width: '60%', padding: '8px 0', textAlign: 'center', borderRadius: '6px',
-                      background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', fontSize: '11px', fontWeight: 700,
+                      background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '11px', fontWeight: 700,
                       letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
                     }}
                   >
@@ -2024,9 +2024,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         // rule, plus dark label text so it stays legible.
                         boxShadow: tf.marker ? `inset -6px 6px 0 -3px ${tf.marker}` : undefined,
                         opacity: selectedId === s.clientId ? 1 : 0.85,
-                        outline: selectedId === s.clientId ? '2px solid var(--afa-ink)' : 'none',
+                        outline: selectedId === s.clientId ? '2px solid var(--afa-fill-solid)' : 'none',
                         outlineOffset: '2px',
-                        color: tf.labelDark ? 'var(--afa-ink)' : 'var(--afa-white)',
+                        color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)',
                         fontSize: '9px',
                         display: 'flex',
                         alignItems: 'center',
@@ -2061,9 +2061,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           borderRadius: '50%',
                           background: meta.color,
                           opacity: selectedMarkerId === m.clientId ? 1 : 0.9,
-                          outline: selectedMarkerId === m.clientId ? '2px solid var(--afa-ink)' : '2px solid var(--afa-white)',
+                          outline: selectedMarkerId === m.clientId ? '2px solid var(--afa-fill-solid)' : '2px solid var(--afa-cream)',
                           outlineOffset: '1px',
-                          color: 'var(--afa-white)',
+                          color: 'var(--afa-cream)',
                           fontSize: '11px',
                           fontWeight: 700,
                           display: 'flex',

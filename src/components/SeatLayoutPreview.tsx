@@ -33,11 +33,18 @@ export type PreviewSeat = {
 // out of the zone rotation everywhere these two duplicate palettes are
 // used, not just patched in the picker, so this can't recur in the
 // builder's own canvas either.
-export const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-ink)']
+// GEN-2609-067 - the 6th tier color was --afa-ink (near-black), a
+// legacy leftover from when this preview's own canvas (line ~81) was
+// still a light cream background - black-on-cream was high-contrast
+// and clearly visible. Now that the canvas is properly dark-themed
+// (matching the seat-map editor it's a preview of), a near-black tier
+// would barely be visible against it - swapped to --afa-cream, which
+// stays clearly distinct from the other 5 (mid-tone/saturated) colors.
+export const TIER_COLORS = ['var(--afa-sage)', 'var(--afa-blue-dark)', 'var(--afa-gold)', 'var(--afa-plum)', 'var(--afa-brown-dark)', 'var(--afa-cream)']
 
 export function colorForZone(zoneName: string, zoneOrder: string[]) {
   const idx = zoneOrder.indexOf(zoneName)
-  return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-ink)'
+  return TIER_COLORS[idx % TIER_COLORS.length] || 'var(--afa-cream)'
 }
 
 export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: PreviewSeat[]; zoneOrder: string[] }) {
@@ -67,9 +74,9 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 onClick={() => setActiveLevel(lvl)}
                 style={{
                   fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer',
-                  border: activeLevel === lvl ? 'none' : '1px solid rgba(14,12,10,0.2)',
-                  background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-white)',
-                  color: activeLevel === lvl ? 'var(--afa-white)' : 'var(--afa-text-primary)',
+                  border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                  background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
+                  color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                 }}
               >
                 {lvl || 'Main'}
@@ -78,8 +85,8 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           </div>
         )}
       </div>
-      <div style={{ border: '1px solid rgba(14,12,10,0.1)', borderRadius: '10px', background: 'var(--afa-cream, #f7f2ea)', padding: '16px', overflow: 'hidden' }}>
-        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-white)', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
+      <div style={{ border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
           STAGE
         </div>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>

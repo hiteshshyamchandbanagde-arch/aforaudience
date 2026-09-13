@@ -49,10 +49,12 @@ type Status =
   | { kind: "cancelled" }
 
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js"
-const INK = "var(--afa-ink)"
-const PAPER = "var(--afa-cream)"
+// GEN-2609-067 - retargeted from the legacy light-theme palette to the
+// current dark-theme tokens, same reasoning as about/page.tsx.
+const INK = "var(--afa-text-primary)"
+const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
-const MIST = "var(--afa-mist)"
+const MIST = "rgba(245,245,240,0.12)"
 const SAGE = "var(--afa-sage)"
 const SERIF = "Georgia, serif"
 const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"
@@ -243,7 +245,7 @@ export default function RazorpayTestPage() {
         <div
           style={{
             padding: "20px 24px",
-            background: "white",
+            background: "var(--afa-surface-raised)",
             border: `1px solid ${MIST}`,
             borderRadius: "10px",
             marginBottom: "32px",
@@ -288,8 +290,8 @@ export default function RazorpayTestPage() {
                 fontFamily: "system-ui, sans-serif",
                 fontSize: "14px",
                 fontWeight: 600,
-                color: PAPER,
-                background: INK,
+                color: "var(--afa-on-fill-solid)",
+                background: EMBER,
                 padding: "12px 24px",
                 borderRadius: "6px",
                 border: "none",
@@ -342,7 +344,7 @@ export default function RazorpayTestPage() {
                   borderRadius: "6px",
                   width: "200px",
                   color: INK,
-                  background: "white",
+                  background: "var(--afa-surface-raised)",
                 }}
               />
             </div>
@@ -359,7 +361,7 @@ export default function RazorpayTestPage() {
                 fontFamily: "system-ui, sans-serif",
                 fontSize: "16px",
                 fontWeight: 600,
-                color: "white",
+                color: "var(--afa-on-fill-solid)",
                 background: EMBER,
                 padding: "16px 32px",
                 borderRadius: "6px",
@@ -384,7 +386,7 @@ export default function RazorpayTestPage() {
           style={{
             marginTop: "48px",
             padding: "20px 24px",
-            background: "white",
+            background: "var(--afa-surface-raised)",
             border: `1px solid ${MIST}`,
             borderRadius: "10px",
             fontFamily: MONO,

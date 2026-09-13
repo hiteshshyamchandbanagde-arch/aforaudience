@@ -1,10 +1,12 @@
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 
-const INK = "var(--afa-ink)"
-const PAPER = "var(--afa-cream)"
+// GEN-2609-067 - retargeted from the legacy light-theme palette to the
+// current dark-theme tokens, same reasoning as about/page.tsx.
+const INK = "var(--afa-text-primary)"
+const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
-const MIST = "var(--afa-mist)"
+const MIST = "rgba(245,245,240,0.12)"
 const SERIF = "Georgia, 'Playfair Display', serif"
 const SANS = "system-ui, -apple-system, sans-serif"
 
@@ -33,11 +35,11 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
             marginBottom: "32px",
             padding: "16px 20px",
             borderRadius: "10px",
-            background: "var(--afa-cream-tint-2)",
-            border: "1px solid #E8C9A0",
+            background: "rgba(201,151,58,0.15)",
+            border: "1px solid var(--afa-amber)",
           }}
         >
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--afa-brown-gold)", marginBottom: "4px" }}>
+          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "4px" }}>
             Draft — pending legal review
           </p>
           <p style={{ fontSize: "13px", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
@@ -93,7 +95,7 @@ export function LI({ children }: { children: React.ReactNode }) {
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "var(--afa-cream-tint-2)", color: "var(--afa-brown-gold)", padding: "1px 6px", borderRadius: "4px", fontWeight: 600 }}>
+    <span style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "4px", fontWeight: 600 }}>
       {children}
     </span>
   )

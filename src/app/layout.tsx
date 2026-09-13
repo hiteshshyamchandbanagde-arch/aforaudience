@@ -116,7 +116,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Match the manifest's theme_color so the browser chrome (Android
   // address bar, iOS status bar in standalone) tints correctly.
-  themeColor: "var(--afa-terracotta)",
+  // GEN-2609-067 - retargeted from the legacy --afa-terracotta to
+  // --afa-fill-solid alongside manifest.ts's own hardcoded hex, closing
+  // the coupling gap flagged since GEN-2609-063 (previously: swapping
+  // one side alone would have broken this "must match" invariant).
+  themeColor: "var(--afa-fill-solid)",
 };
 
 export default function RootLayout({

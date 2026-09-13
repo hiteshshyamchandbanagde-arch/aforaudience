@@ -337,7 +337,7 @@ export default function RegisterForm() {
 
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
             {devOtp && (
-              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-amber)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-ink)" }}>
+              <div style={{ background: "rgba(201,151,58,0.15)", border: "1px solid var(--afa-amber)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}

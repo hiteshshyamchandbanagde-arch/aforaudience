@@ -54,9 +54,9 @@ export default function PhoneVerifyNudge() {
       role="status"
       aria-label="Verify your phone"
       style={{
-        background: 'var(--afa-error-bg)',
-        color: 'var(--afa-maroon)',
-        borderBottom: '1px solid var(--afa-error-border)',
+        background: 'rgba(179,38,30,0.1)',
+        color: 'var(--afa-error)',
+        borderBottom: '1px solid rgba(179,38,30,0.3)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,

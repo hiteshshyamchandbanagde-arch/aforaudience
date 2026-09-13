@@ -389,11 +389,11 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           const selectedBoost = Math.max(1, 1.5 / zoom)
           const bg =
             s.status === 'taken'
-              ? 'var(--afa-ink-a13)'
+              ? 'rgba(245,245,240,0.12)'
               : isSelected
               ? 'var(--afa-fill-solid)'
               : s.status === 'priceUnset'
-              ? 'var(--afa-ink-a8)'
+              ? 'rgba(245,245,240,0.08)'
               : colorForZone(s.tierLabel, zoneOrder)
           return (
             <div
@@ -438,7 +438,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 transform: isSelected ? `scale(${selectedBoost})` : undefined,
                 zIndex: isSelected ? 2 : undefined,
                 boxShadow: isSelected ? '0 0 0 2px var(--afa-text-primary)' : undefined,
-                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-ink-a40)' : 'var(--afa-text-primary)',
+                color: s.status === 'taken' || s.status === 'priceUnset' ? 'var(--afa-text-muted)' : 'var(--afa-text-primary)',
                 fontSize: isSelected ? '10px' : 'clamp(5px, 1.3cqw, 9px)',
                 fontWeight: isSelected ? 700 : 400,
                 display: 'flex',
@@ -456,7 +456,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
         <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-fill-solid)', marginRight: '4px' }} />Selected</span>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-ink-a13)', marginRight: '4px' }} />Taken</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'rgba(245,245,240,0.12)', marginRight: '4px' }} />Taken</span>
       </div>
     </div>
   )

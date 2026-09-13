@@ -25,10 +25,15 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: 'portrait',
     // BUG-2609-015: manifests are static JSON, not CSS-aware - CSS
     // variable strings here were silently ignored by the browser (both
-    // properties). Resolved hex values from the locked 4-color palette
-    // (src/app/globals.css: --afa-cream, --afa-terracotta).
+    // properties). Resolved hex values, not CSS var references
+    // (src/app/globals.css: --afa-cream, --afa-fill-solid).
+    // GEN-2609-067 - theme_color retargeted from the legacy
+    // --afa-terracotta's hex to --afa-fill-solid's, matching
+    // layout.tsx's viewport.themeColor (the two must stay in sync -
+    // this is the pairing that was flagged as a coupled invariant since
+    // GEN-2609-063, now resolved by updating both sides together).
     background_color: '#F7F3EE',
-    theme_color: '#C8441A',
+    theme_color: '#FF5A36',
     lang: 'en-IN',
     dir: 'ltr',
     categories: ['entertainment', 'events', 'music', 'social'],
