@@ -4048,3 +4048,76 @@ value is quantified above instead of screenshot-diffed.
 
 Built on `feat/gen-2609-064-remaining-terracotta-buttons`, branched
 from `qa` at `3decea2`.
+
+## GEN-2609-065 - RegisterForm.tsx's error-color bug, and a real recount
+
+**Re-verified fresh, and the prior "9 occurrences" count was off -
+11 real lines, not 9.** The dispatch's own tally ("8 error-state + 1
+button") missed two things a closer read found: there are **two**
+separate error banners (one on the OTP-verification screen, one on the
+main registration screen - the file renders different screens
+conditionally, so both exist in the same source with the same shape),
+and the QA-mode dev-otp notice is its own third category, not folded
+into either the error or button bucket.
+
+**9 sites were genuinely error-semantic, fixed to `--afa-error`** -
+matching `login.tsx`'s own already-established banner pattern exactly
+(`rgba(179,38,30,0.1)` background / `rgba(179,38,30,0.3)` border /
+`var(--afa-error)` text, not just a token-name swap) rather than
+inventing a new look:
+- The shared `inputStyle()` helper's `hasError` border (line 15) -
+  fixes every field that calls it, not just one.
+- Both real `{error}` banners (OTP-verification screen, main
+  registration screen).
+- The "username taken" message and its inline "use X instead" link
+  (nested in the same error context, kept visually consistent with its
+  parent message rather than treated as a separate button - it has no
+  background/border box, just underlined text, same treatment as
+  every other plain-text clickable accent this sweep migrated
+  elsewhere).
+- The username, email, and phone field-error paragraphs, plus the
+  phone field's own hand-rolled border ternary (a separate,
+  non-`inputStyle`-routed duplicate of the same `hasError` logic - the
+  phone field's bordered container is built differently from every
+  other field, so it never went through the shared helper).
+
+**The QA-mode dev-otp notice was a real, different bug - fixed
+differently, not just token-swapped.** Checked what was "genuinely
+broken" beyond the terracotta-vs-error question, per the dispatch's
+instruction: this notice's background is `--afa-amber-tint` (a warm
+cream/amber tone) but its border was `--afa-terracotta` (a
+reddish-orange) - two different hue families paired on one small
+notice, not an error at all (it's an informational "here's your dev
+OTP" message). Fixed by changing the border to `--afa-amber`, matching
+its own background's hue family - not routed to `--afa-error` at all,
+since this was never an error-semantic bug, just a mismatched color
+pairing.
+
+**The 9th real site is a button, correctly not touched here - and it
+has its own additional finding.** The username-suggestion chip
+(`<button>`, solid `rgba(196,90,52,...)` background/border) is
+unrelated to the error question, per the dispatch's own instruction to
+leave it for `GEN-2609-064`'s remit instead. Worth flagging precisely
+since `-064` already shipped without it: this chip is **also**
+pill-shaped (`borderRadius: 999`), matching the same "doesn't fit
+`sm`/`md`/`lg`'s 6/8/8 radius scheme" pattern `-064` flagged for
+`DisplayNameNudge`/`PhoneVerifyNudge`/`InstallPrompt` - a 4th instance
+of that recurring shape, not built here or in `-064`. Also notable: its
+background/border use `rgba(196,90,52,...)` - a close but genuinely
+*different* RGB triple from `--afa-terracotta`'s own `(200,68,26)`, a
+small extra inconsistency on top of the shape mismatch. Neither fixed
+here; flagging for whoever picks up the pill-shape follow-up.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff: clean (the `rgba(179,38,30,X)` literals correctly
+recognized as relocated - they already exist in `login.tsx`/`reset-
+password.tsx`/`verify-email.tsx` - not flagged as new). Real `next
+build`: clean, `/register` present. Visual reasoning (no browser tool
+this session): `--afa-error` resolves to `#B3261E`, the same value
+already proven legible against `--afa-surface-raised` in `login.tsx`'s
+identical banner shape and background - no new contrast risk, same
+color/background pairing already shipping elsewhere in this app.
+Flagged as reasoned, not screenshotted.
+
+Built on `feat/gen-2609-065-registerform-error-color`, branched from
+`qa` at `3decea2`.
