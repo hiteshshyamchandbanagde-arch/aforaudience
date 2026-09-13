@@ -218,9 +218,10 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
       // pill, 16px font, 1.5px border, built for a single high-emphasis
       // action on a --afa-fill-solid background, not a compact row of
       // ordinary actions on a card). Neutral translucent-cream border/
-      // text, same alpha family as this app's other resting-state
-      // borders (`rgba(245,245,240, a)`, see afa-design-tokens-
-      // reference.md's Borders section) rather than a new one-off value.
+      // text, using the shared --afa-border-resting token (added here -
+      // this exact alpha was already the de facto resting-border color
+      // app-wide but had no name until now) rather than a new one-off
+      // value.
       return {
         display: 'inline-flex',
         alignItems: 'center',
@@ -229,7 +230,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         color: 'var(--afa-text-secondary)',
-        border: '1px solid rgba(245,245,240,0.15)',
+        border: '1px solid var(--afa-border-resting)',
         // Own baseline chrome (not left to the `size` overlay alone) so
         // this renders sensibly even if a future caller omits `size` -
         // same defensive convention every other variant already follows.

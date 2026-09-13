@@ -157,6 +157,15 @@
   --afa-text-inverse: #F5F5F0;
 
   --afa-fill-solid: #FF5A36;
+
+  /* GEN-2609-068 - this exact border value (rgba(245,245,240,0.15))
+     was already the de facto resting-border color across the app -
+     .afa-search-box (this file) and several inline styles all
+     independently retyped it - but had no named token. Centralizing
+     it here so Button.tsx's new outline-neutral variant (and any
+     future consumer) can reference var() instead of adding another
+     copy of the literal. */
+  --afa-border-resting: rgba(245, 245, 240, 0.15);
   --afa-on-fill-solid: var(--afa-brown-black);
 
   /* GEN-2609-068 - lightened, AA-legible variants of --afa-sage/--afa-error
