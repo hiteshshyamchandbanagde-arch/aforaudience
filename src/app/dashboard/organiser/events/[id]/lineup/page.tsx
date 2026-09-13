@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 import {
   DndContext,
   closestCenter,
@@ -314,23 +315,16 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
                   style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
+                  fullWidth={false}
                   onClick={handleBroadcast}
                   disabled={broadcasting || !broadcastDraft.trim()}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: 'var(--afa-terracotta)',
-                    color: '#fff',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    cursor: broadcasting || !broadcastDraft.trim() ? 'default' : 'pointer',
-                    opacity: broadcasting || !broadcastDraft.trim() ? 0.6 : 1,
-                  }}
+                  style={{ opacity: broadcasting || !broadcastDraft.trim() ? 0.6 : 1 }}
                 >
                   Send to all
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -355,18 +349,20 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
           {lineup.length > 0 && (
             <div style={{ position: 'sticky', bottom: '24px', marginTop: '24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
-              <button
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth={false}
                 onClick={handleSave}
                 disabled={!dirty || saving}
                 style={{
-                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)',
-                  background: dirty ? 'var(--afa-terracotta)' : 'rgba(245,245,240,0.3)',
-                  border: 'none', padding: '12px 28px', borderRadius: '8px',
+                  background: dirty ? undefined : 'rgba(245,245,240,0.3)',
                   cursor: dirty && !saving ? 'pointer' : 'not-allowed',
+                  opacity: 1,
                 }}
               >
                 {saving ? 'Saving...' : 'Save Lineup'}
-              </button>
+              </Button>
             </div>
           )}
         </div>

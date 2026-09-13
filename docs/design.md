@@ -3634,3 +3634,61 @@ not silently absorbed into this ticket, not silently dropped either.
 
 Built on `feat/gen-2609-058-button-size-terracotta-migration`, branched
 from `qa` at `12d1280`.
+
+## GEN-2609-061 - the 3 remaining terracotta buttons
+
+Re-verified all 3 fresh against `qa` before building.
+
+**`checkin/page.tsx`'s "Start Camera Scan"** - `width: '100%'`,
+`padding: '14px'` (symmetric, all sides), radius 8, fontSize 14/600.
+Migrated to `<Button variant="primary" size="lg" fullWidth={true}>`.
+Since the button is full-width, `lg`'s horizontal padding component
+(24px) has no visible effect (text centers regardless); the real
+delta is vertical padding 14px -> 12px, a 2px-per-side reduction -
+same rounding-tolerance class as `GEN-2609-058`'s other `lg` sites.
+
+**`lineup/page.tsx`'s "Send to all"** - padding `10px 18px`, radius 8,
+fontSize 13/600, and the flagged separate bug: raw `color: '#fff'`.
+Migrated to `<Button variant="primary" size="md">` - confirmed the
+color bug resolves for free exactly like `GEN-2609-058`'s "Save
+override" did, since `primary`'s own `color: var(--afa-on-fill-solid)`
+replaces the hardcoded literal. Padding rounds `10/18` -> `9/17`
+(1px/side), same `md` bucket as before.
+
+**`lineup/page.tsx`'s "Save Lineup" - genuinely different shape,
+confirmed before building.** Checked `Button`'s existing `disabled`
+handling first, per the dispatch's instruction: it auto-applies
+`opacity: 0.7` whenever `disabled` is true - but this button's real
+behavior never touches opacity at all, only `background` (terracotta
+when `dirty`, a muted `rgba(245,245,240,0.3)` when not) and `cursor`
+(`not-allowed` vs `pointer`). Also found a real 3rd state hiding in the
+original: `disabled = !dirty || saving`, but `background` is gated on
+`dirty` alone - so a dirty-and-currently-saving button keeps its
+active (now fill-solid) color while still being genuinely disabled.
+Nothing in `Button` already models a background that's independent of
+its own disabled state, and adding a new prop for a single call site
+would be over-engineering one component for one caller. Resolved with
+the existing `style`-override escape hatch instead (same pattern as
+every prior ticket's one-off deviations): `<Button variant="primary"
+size="lg">` for the shared chrome, with `style={{ background: dirty ?
+undefined : 'rgba(245,245,240,0.3)', cursor: ..., opacity: 1 }}` -
+`opacity: 1` specifically neutralizes `Button`'s built-in disabled-dim
+so the original's "never dims via opacity" behavior survives exactly.
+Padding here was `12px 28px` - outside even the `10-12px/22-26px`
+range `GEN-2609-058`'s 9-site audit found (this button wasn't part of
+that original 14), rounds to `12/24`, a 4px horizontal reduction -
+the largest single delta of any site migrated so far, flagged rather
+than glossed over.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses (confirms the `#fff`
+removal registers as a real fix, not just a relocation). Real `next
+build`: clean, all touched routes present. `grep --afa-terracotta`
+on both files: `checkin/page.tsx` still shows its 2 selection-pill
+border/text pairs (explicitly `GEN-2609-063`'s scope, not this
+ticket's); `lineup/page.tsx` shows zero remaining hits. No visual
+verification possible (no browser tool this session) - every site's
+property delta is quantified above instead of screenshot-diffed.
+
+Built on `feat/gen-2609-061-remaining-terracotta-buttons`, branched
+from `qa` at `78934c8`.
