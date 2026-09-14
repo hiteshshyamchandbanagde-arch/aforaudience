@@ -237,7 +237,7 @@ export default function VenueBookingsPage() {
               Pending {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No pending booking requests.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No pending booking requests.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {pending.map((b) => (

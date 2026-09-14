@@ -230,7 +230,7 @@ export default function VenueOwnerSalesOverviewPage() {
 
           <Section title="By venue">
             {venues.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-muted)' }}>No venues yet.</p>
+              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
             ) : (
               <>
                 <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: '20px' }}>
@@ -309,7 +309,7 @@ export default function VenueOwnerSalesOverviewPage() {
               By organiser
             </p>
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
                 {organisers.map((o) => (

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/i18n/translate';
 import { subscribeAndSave } from '@/lib/push-subscribe';
 import Button from '@/components/ui/Button';
+import { BellIcon } from '@/components/icons/VenueIcons';
 
 /**
  * "Enable notifications" nudge. Any logged-in role can benefit (admin
@@ -96,9 +97,7 @@ export default function NotificationOptIn() {
         lineHeight: 1.4,
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>
-        🔔
-      </span>
+      <BellIcon style={{ width: 18, height: 18, flexShrink: 0, color: 'var(--afa-on-fill-solid)' }} />
       <span style={{ flex: 1, minWidth: 0 }}>
         {tr.notificationOptIn.message}
       </span>

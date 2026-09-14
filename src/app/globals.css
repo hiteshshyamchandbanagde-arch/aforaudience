@@ -503,4 +503,6 @@ html {
   .hover-lift-card:hover { transform: none; }
   .afa-push-mount { animation: none; }
   .afa-sheet-mount, .afa-backdrop-mount, .afa-seal-stamp-mount, .afa-seal-ring-mount { animation: none; }
+  .afa-seat-anim { animation: none; }
+  .afa-path-card:hover { transform: none; }
 }
