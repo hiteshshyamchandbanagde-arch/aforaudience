@@ -182,7 +182,7 @@ function FeedbackDetailOverlay({
           <button
             onClick={onClose}
             aria-label={tr.myFeedbackPage.closeLabel}
-            style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-black, #0E0C0A)' }}
+            style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
           >
             ✕
           </button>
@@ -208,7 +208,7 @@ function FeedbackDetailOverlay({
           {statusStyle.label}
         </span>
 
-        <p style={{ marginTop: '18px', fontSize: '16px', lineHeight: 1.5, color: 'var(--afa-black, #0E0C0A)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ marginTop: '18px', fontSize: '16px', lineHeight: 1.5, color: 'var(--afa-text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {item.message}
         </p>
 
@@ -237,7 +237,7 @@ function FeedbackDetailOverlay({
               borderRadius: '10px',
               border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
-              color: hasPrev ? 'var(--afa-black, #0E0C0A)' : 'rgba(245,245,240,0.3)',
+              color: hasPrev ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasPrev ? 'pointer' : 'default',
               fontWeight: 600,
             }}
@@ -253,7 +253,7 @@ function FeedbackDetailOverlay({
               borderRadius: '10px',
               border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
-              color: hasNext ? 'var(--afa-black, #0E0C0A)' : 'rgba(245,245,240,0.3)',
+              color: hasNext ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasNext ? 'pointer' : 'default',
               fontWeight: 600,
             }}
@@ -321,7 +321,7 @@ export default function MyFeedbackPage() {
     <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
       <SiteNav variant="page" />
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-black, #0E0C0A)' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-text-primary)' }}>
           {tr.myFeedbackPage.heading}
         </h1>
         <p style={{ color: 'rgba(245,245,240,0.6)', marginBottom: '28px' }}>
@@ -378,7 +378,7 @@ export default function MyFeedbackPage() {
                         {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>
-                      <p style={{ margin: '6px 0 0', fontSize: '15px', color: 'var(--afa-black, #0E0C0A)', wordBreak: 'break-word' }}>
+                      <p style={{ margin: '6px 0 0', fontSize: '15px', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
                         {item.title || item.message}
                       </p>
                       {item.latestNote && (
