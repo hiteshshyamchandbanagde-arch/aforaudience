@@ -114,6 +114,28 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { dateStyle: 'medium' })
 }
 
+// BUG-2609-045 (button consolidation, phase 1) - byte-identical
+// Approve/Reject pair, previously duplicated across all 4 pending-queue
+// sections (organiser approvals, venue-owner approvals, genre requests,
+// event notes). Extracted rather than folded into Button.tsx - no
+// existing variant matches this pair's color/border combination without
+// a visible change.
+function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
+  return (
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+      Approve
+    </button>
+  )
+}
+
+function RejectButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
+  return (
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+      Reject
+    </button>
+  )
+}
+
 function AdminFeedbackBoard() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -598,8 +620,8 @@ function AdminFeedbackBoard() {
                       {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <ApproveButton disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} />
+                      <RejectButton disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} />
                     </div>
                   </div>
                 </div>
@@ -617,8 +639,8 @@ function AdminFeedbackBoard() {
                       <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{v.user.email}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <ApproveButton disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} />
+                      <RejectButton disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} />
                     </div>
                   </div>
                 </div>
@@ -649,8 +671,8 @@ function AdminFeedbackBoard() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: '14px', fontWeight: 600 }}>{g.value}</div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <ApproveButton disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} />
+                      <RejectButton disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} />
                     </div>
                   </div>
                 </div>
@@ -683,8 +705,8 @@ function AdminFeedbackBoard() {
                       <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Approve</button>
-                      <button disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>Reject</button>
+                      <ApproveButton disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} />
+                      <RejectButton disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} />
                     </div>
                   </div>
                 </div>

@@ -56,6 +56,15 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
   return eventStart.getTime() <= Date.now()
 }
 
+// BUG-2609-045 (button consolidation, phase 1) - byte-identical 26x26
+// quantity-stepper button, previously duplicated across every ticket
+// tier row, the General Admission fallback, and the free-event row.
+function SeatStepperButton({ onClick, glyph }: { onClick: () => void; glyph: '−' | '+' }) {
+  return (
+    <button onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>{glyph}</button>
+  )
+}
+
 export default function SeatSelectionClientPage({ event }: { event: EventData | null }) {
   const { t: tr } = useLocale()
   const router = useRouter()
@@ -299,9 +308,9 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                           <div style={{ fontSize: "11px", color: "rgba(245,245,240,0.5)" }}>₹{t.price}</div>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <button onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
+                          <SeatStepperButton onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} glyph="−" />
                           <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats[t.sectionName] || 0}</span>
-                          <button onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
+                          <SeatStepperButton onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} glyph="+" />
                         </div>
                       </div>
                     ))
@@ -309,9 +318,9 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
                       <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.generalAdmission}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
+                        <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
                         <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
-                        <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
+                        <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
                       </div>
                     </div>
                   )}
@@ -322,9 +331,9 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsLabel}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <button onClick={() => updateSeat('General', -1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>−</button>
+                    <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
                     <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
-                    <button onClick={() => updateSeat('General', 1, event.totalSeats)} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>+</button>
+                    <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
                   </div>
                 </div>
               )}

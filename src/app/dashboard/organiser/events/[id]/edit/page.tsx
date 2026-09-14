@@ -129,6 +129,17 @@ function nowLocalTimeString() {
   return `${hh}:${mm}`
 }
 
+// BUG-2609-045 (button consolidation, phase 1) - byte-identical dismiss
+// button, previously duplicated in the Celebrity and Panelist invite
+// rows. Local extraction rather than Button.tsx - no existing variant
+// matches this opacity (0.5) + fontSize (16px) combination without a
+// visible change from `secondary` (0.4 opacity, 13px).
+function RemoveRowButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+  )
+}
+
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: session, status } = useSession()
@@ -868,7 +879,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         }}>
                           {c.status}
                         </span>
-                        <button type="button" onClick={() => removeCelebrity(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+                        <RemoveRowButton onClick={() => removeCelebrity(c.id)} />
                       </div>
                     ))}
                     <div style={{ position: 'relative' }}>
@@ -919,7 +930,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         }}>
                           {p.status}
                         </span>
-                        <button type="button" onClick={() => removePanelist(p.id)} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+                        <RemoveRowButton onClick={() => removePanelist(p.id)} />
                       </div>
                     ))}
                     <input

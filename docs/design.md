@@ -4827,3 +4827,62 @@ Logged to the Feedback table as `BUG-2609-044` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 43 to 44 (not guessed). Not
 yet merged - built on `fix/my-feedback-undefined-black-token`, branched
 from `qa` at `8b566fc`.
+
+## BUG-2609-045 - Button consolidation phase 1: 6 byte-identical duplicate groups, 21 instances, 4 files
+
+Dispatch: found via an exhaustive balanced-brace parser matching every
+`<button style={{...}}>` in `src/`, grouped by byte-identical style
+content per file - not a manual skim, and not the full ~254 raw
+`<button>` count app-wide (a naive regex misses these on the first
+pass, since arrow-function `onClick` handlers contain `>` and break a
+simple `[^>]*` match before reaching `style=`). 6 duplicate-style
+groups, 21 button instances, 4 files - the mechanically-provable cases,
+not stylistic similarity. Re-verified every group fresh against qa HEAD
+`e9f099e` before editing, confirming exact line numbers and
+byte-identical style objects in each case.
+
+Checked `Button.tsx`'s 7 existing variants (`primary`/`secondary`/
+`secondary-reveal`/`close`/`outline`/`outline-neutral`/`form-submit`)
+against all 6 groups before extracting anything new - none matched
+without a visible difference (e.g. `secondary`'s opacity 0.4/fontSize
+13px vs. the dismiss-button group's opacity 0.5/fontSize 16px), so per
+the dispatch's own "byte-identical after extraction, any visual
+difference is a bug" rule, local components were the correct choice
+over forcing a `Button.tsx` variant that would have shipped a real,
+if small, visual change.
+
+**Extracted:**
+- `dashboard/admin/feedback/page.tsx`: `ApproveButton`/`RejectButton`
+  (green-deep solid / error-outline), replacing 4 identical pairs
+  across organiser approvals, venue-owner approvals, genre requests,
+  and event notes.
+- `dashboard/organiser/events/[id]/edit/page.tsx`: `RemoveRowButton`,
+  replacing the 2 identical Celebrity/Panelist dismiss buttons.
+- `dashboard/venue/[id]/seat-map/page.tsx`: `RemoveGuidedRowButton`
+  (delete-row × icon, 3 sites: section removal, vertical-aisle removal,
+  gangway removal) and `AddDashedRowButton` (dashed-border "+ Add..."
+  CTA, 2 sites: "Add another section", "Add gangway") - confirmed the
+  visually-similar 3rd "+ Add vertical aisle" button has a different
+  fontSize/padding and correctly excluded it from the group, and
+  confirmed the seat-map's separate "+ Add level" button (different
+  opacity/`disabled` logic) is a genuinely distinct button, untouched.
+- `(public)/events/[id]/seats/SeatSelectionClientPage.tsx`:
+  `SeatStepperButton` (26×26 +/− stepper), replacing 6 identical
+  instances across ticket tiers, the General Admission fallback, and
+  the free-event row.
+
+**Verification:** repo-wide grep confirms each replaced style block
+now appears exactly once per file (the shared component's own
+definition) - zero leftover inline duplicates. `tsc --noEmit` clean,
+`check-design-tokens.js` clean, real `next build` succeeded.
+
+**Flagged, not built** (per the dispatch's own scope note): ~230
+remaining raw `<button>` instances weren't audited for whether they
+*should* use `Button.tsx` even without being literal duplicates - a
+real phase 2, but a judgment call per instance, not something the
+exhaustive script can find precisely.
+
+Logged to the Feedback table as `BUG-2609-045` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 44 to 45 (not guessed). Not
+yet merged - built on `refactor/button-consolidation-phase1`, branched
+from `qa` at `e9f099e`.
