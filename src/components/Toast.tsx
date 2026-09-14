@@ -96,6 +96,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           const accent = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
           const bg = t.kind === 'error' ? 'rgba(179,38,30,0.1)' : t.kind === 'info' ? 'rgba(201,151,58,0.12)' : 'rgba(74,103,65,0.12)'
           const text = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage)'
+          // BUG-2609-043: the badge glyph's color was a hardcoded 'white'
+          // literal - only actually legible against 2 of these 3 dynamic
+          // `accent` backgrounds (measured ~6.5:1 on error/green, but only
+          // ~2.6:1 on amber). --afa-on-fill-solid is the correct token for
+          // amber (its proven pairing app-wide, ~7.1:1) but drops error/
+          // green to ~2.9:1 - so this can't be a single static swap either.
+          // Same light-or-dark-per-fill pattern already used for seat-map
+          // marker glyphs (labelDark ? brown-black : --afa-cream).
+          const badgeText = t.kind === 'info' ? 'var(--afa-on-fill-solid)' : 'var(--afa-cream)'
           return (
             <div
               key={t.id}
@@ -125,7 +134,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   height: 22,
                   borderRadius: '50%',
                   background: accent,
-                  color: 'white',
+                  color: badgeText,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

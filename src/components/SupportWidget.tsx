@@ -491,6 +491,7 @@ export default function SupportWidget() {
             maxWidth: 'calc(100vw - 40px)',
             height: 460,
             background: 'var(--afa-surface-raised)',
+            color: 'var(--afa-text-primary)',
             borderRadius: 16,
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             display: 'flex',
