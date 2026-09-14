@@ -127,7 +127,7 @@ export default function OrganiserEditPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Edit Your Profile

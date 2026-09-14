@@ -32,7 +32,7 @@ export default function HelpIcon({ text }: { text: string }) {
           opacity: 0.7,
           fontSize: '10px',
           fontWeight: 700,
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'var(--font-sans)',
           cursor: 'pointer',
           padding: 0,
           lineHeight: 1,

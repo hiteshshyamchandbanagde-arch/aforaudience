@@ -56,8 +56,8 @@ const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
 const MIST = "rgba(245,245,240,0.12)"
 const SAGE = "var(--afa-sage)"
-const SERIF = "Georgia, serif"
-const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"
+const SERIF = "var(--font-display)"
+const MONO = "var(--font-mono)"
 
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -287,7 +287,7 @@ export default function RazorpayTestPage() {
             <button
               onClick={() => signIn(undefined, { callbackUrl: "/dev/razorpay-test" })}
               style={{
-                fontFamily: "system-ui, sans-serif",
+                fontFamily: "var(--font-sans)",
                 fontSize: "14px",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
@@ -305,7 +305,7 @@ export default function RazorpayTestPage() {
           <>
             <div
               style={{
-                fontFamily: "system-ui, sans-serif",
+                fontFamily: "var(--font-sans)",
                 fontSize: "13px",
                 color: INK,
                 opacity: 0.6,
@@ -358,7 +358,7 @@ export default function RazorpayTestPage() {
                 status.kind === "verifying"
               }
               style={{
-                fontFamily: "system-ui, sans-serif",
+                fontFamily: "var(--font-sans)",
                 fontSize: "16px",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
@@ -426,7 +426,7 @@ export default function RazorpayTestPage() {
           )}
         </div>
 
-        <div style={{ marginTop: "40px", fontFamily: "system-ui, sans-serif", fontSize: "13px", opacity: 0.55 }}>
+        <div style={{ marginTop: "40px", fontFamily: "var(--font-sans)", fontSize: "13px", opacity: 0.55 }}>
           <Link href="/" style={{ color: INK, textDecoration: "underline" }}>
             ← Back home
           </Link>

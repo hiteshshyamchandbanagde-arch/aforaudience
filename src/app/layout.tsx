@@ -221,7 +221,7 @@ export default function RootLayout({
                   #intro-wordmark { font-family: var(--font-display); font-size: clamp(36px, 9vw, 64px); font-weight: 700; color: var(--afa-text-primary); }
                   .intro-letter { opacity: 0; display: inline-block; }
                   #intro-cursor { display: inline-block; width: 3px; height: 0.85em; vertical-align: -0.1em; margin-left: 3px; background: var(--afa-surface-raised); opacity: 0; }
-                  #intro-tagline { font-family: Georgia, serif; font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
+                  #intro-tagline { font-family: var(--font-display); font-style: italic; font-size: clamp(13px, 2.2vw, 17px); color: var(--afa-amber); opacity: 0; margin-top: 14px; letter-spacing: 0.02em; }
                 </style>
                 <svg viewBox="0 0 64 64">
                   <rect x="18" y="42" width="14" height="8" fill="var(--afa-cream)" style="animation:intro-bar-in 260ms ease-out 0ms both"></rect>

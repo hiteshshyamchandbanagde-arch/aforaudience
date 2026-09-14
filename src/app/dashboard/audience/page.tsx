@@ -101,7 +101,7 @@ export default function AudienceActivityPage() {
     <>
       <SiteNav />
       <DashboardShell>
-        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '900px', padding: '48px 24px' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.audienceActivityPage.heading}

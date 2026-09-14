@@ -637,7 +637,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: 18, color: 'var(--afa-text-primary)' }}>My Roles</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--afa-text-primary)' }}>My Roles</span>
               <button
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close"

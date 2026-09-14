@@ -108,11 +108,11 @@ export default function MessageThreadPage() {
   const myId = (session?.user as any)?.id as string
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
         <div style={{ marginBottom: '12px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: 'var(--afa-text-primary)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--afa-text-primary)', margin: 0 }}>
             {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
@@ -124,7 +124,7 @@ export default function MessageThreadPage() {
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
           {thread.messages.length === 0 && (
-            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-sans)', fontSize: '14px' }}>
               {tr.messageThreadPage.emptyMessages}
             </p>
           )}
@@ -140,7 +140,7 @@ export default function MessageThreadPage() {
                   color: mine ? '#fff' : 'var(--afa-text-primary)',
                   borderRadius: '14px',
                   padding: '8px 12px',
-                  fontFamily: 'system-ui, sans-serif',
+                  fontFamily: 'var(--font-sans)',
                   fontSize: '14px',
                   wordBreak: 'break-word',
                 }}
@@ -172,7 +172,7 @@ export default function MessageThreadPage() {
                 padding: '10px 12px',
                 borderRadius: '20px',
                 border: '1px solid rgba(245,245,240,0.2)',
-                fontFamily: 'system-ui, sans-serif',
+                fontFamily: 'var(--font-sans)',
                 fontSize: '14px',
                 background: 'var(--afa-surface-raised)',
                 color: 'var(--afa-text-primary)',

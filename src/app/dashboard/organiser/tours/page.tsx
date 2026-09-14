@@ -107,7 +107,7 @@ export default function OrganiserToursPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                     <div>
-                      <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h3>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h3>
                       {tour.subject && (
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
                       )}

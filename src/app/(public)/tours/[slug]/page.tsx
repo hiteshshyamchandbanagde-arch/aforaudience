@@ -49,7 +49,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-fill-solid)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
           Tour · {tour.organiser.orgName}
         </p>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '34px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '34px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
           {tour.title}
         </h1>
         {tour.subject && (
@@ -71,7 +71,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
                 style={{ display: 'block', background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', border: '1px solid rgba(245,245,240,0.08)', textDecoration: 'none' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
-                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                   {stop.status === 'COMPLETED' && (
                     <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
                       Completed

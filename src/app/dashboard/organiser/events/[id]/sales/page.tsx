@@ -122,7 +122,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />

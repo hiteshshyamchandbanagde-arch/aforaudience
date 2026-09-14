@@ -102,7 +102,7 @@ export default function OrganiserPayoutsPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Direct Payouts
@@ -119,7 +119,7 @@ export default function OrganiserPayoutsPage() {
             {payout?.linked ? (
               <>
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
-                <p style={{ fontSize: '15px', fontFamily: 'monospace', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>{payout.accountId}</p>
+                <p style={{ fontSize: '15px', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>{payout.accountId}</p>
 
                 <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Status</p>
                 <p style={{ fontSize: '17px', fontWeight: 700, color: statusInfo?.color || 'var(--afa-text-primary)', marginBottom: '8px' }}>
@@ -166,7 +166,7 @@ export default function OrganiserPayoutsPage() {
                     value={accountIdInput}
                     onChange={(e) => setAccountIdInput(e.target.value)}
                     placeholder="acc_XXXXXXXXXXXXXX"
-                    style={{ flex: 1, fontSize: '14px', fontFamily: 'monospace', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                    style={{ flex: 1, fontSize: '14px', fontFamily: 'var(--font-mono)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                   />
                   <Button
                     variant="primary"

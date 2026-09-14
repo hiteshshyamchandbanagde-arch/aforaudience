@@ -488,7 +488,7 @@ function AdminFeedbackBoard() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>
               Admin access only
@@ -592,7 +592,7 @@ function AdminFeedbackBoard() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
           {/* Pending Approvals - merged in from the old separate
               /dashboard/admin page (session 39 unification, Feedback
@@ -607,7 +607,7 @@ function AdminFeedbackBoard() {
           </button>
           {approvalsOpen && (
             <div style={{ marginBottom: '28px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>
                 Organisers ({organisers.length})
               </h2>
               {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
@@ -627,7 +627,7 @@ function AdminFeedbackBoard() {
                 </div>
               ))}
 
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, marginTop: '20px', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, marginTop: '20px', marginBottom: '10px' }}>
                 Venue Owners ({venueOwners.length})
               </h2>
               {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
@@ -714,7 +714,7 @@ function AdminFeedbackBoard() {
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
             Feedback
           </h2>
           <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>

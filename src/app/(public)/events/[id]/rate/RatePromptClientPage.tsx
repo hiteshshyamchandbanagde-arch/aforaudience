@@ -112,7 +112,7 @@ export default function RatePromptClientPage({
 
   if (!event) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <p style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.ratePromptPage.eventNotFound}</p>
@@ -123,7 +123,7 @@ export default function RatePromptClientPage({
 
   if (!canReview) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+      <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
         <SiteNav />
         <div style={{ maxWidth: "500px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
@@ -139,7 +139,7 @@ export default function RatePromptClientPage({
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "48px 24px" }}>
         <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>{tr.ratePromptPage.howWasIt}</p>

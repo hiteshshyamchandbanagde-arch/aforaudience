@@ -74,14 +74,14 @@ export default function MessagesInboxPage() {
     <>
       <SiteNav />
       <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '760px', padding: '32px 24px' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
               {tr.messagesInboxPage.heading}
             </h1>
 
             {threads.length === 0 && (
-              <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'system-ui, sans-serif' }}>
+              <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-sans)' }}>
                 {tr.messagesInboxPage.emptyState}
               </p>
             )}
@@ -147,7 +147,7 @@ export default function MessagesInboxPage() {
                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-amber)' }} />
                         )}
                       </div>
-                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'system-ui, sans-serif', fontSize: '13px' }}>
+                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'var(--font-sans)', fontSize: '13px' }}>
                         {name}
                         {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
                       </div>

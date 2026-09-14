@@ -188,7 +188,7 @@ export default function BrowseEventsToApplyPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Browse Events
@@ -226,7 +226,7 @@ export default function BrowseEventsToApplyPage() {
                   <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(245,245,240,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>

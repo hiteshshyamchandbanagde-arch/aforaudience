@@ -54,7 +54,7 @@ export default function SavedPage() {
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--afa-amber)', marginBottom: 6 }}>
             {events.length} event{events.length === 1 ? '' : 's'} wishlisted

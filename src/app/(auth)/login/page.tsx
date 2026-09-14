@@ -151,7 +151,7 @@ function LoginForm() {
       </div>
 
       <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[rgba(245,245,240,0.08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
-        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "24px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "24px" }}>
           {tr.loginPage.signInHeading}
         </h2>
 

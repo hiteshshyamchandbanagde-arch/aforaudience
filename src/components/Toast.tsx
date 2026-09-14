@@ -82,7 +82,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           // content, outside that wrapper, so without setting it here
           // explicitly it silently falls back to the browser's default
           // serif font. That mismatch is what read as "flat/rough."
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'var(--font-sans)',
         }}
       >
         {toasts.map((t) => {

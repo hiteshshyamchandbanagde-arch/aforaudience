@@ -81,7 +81,7 @@ export default function OrganiserDashboard() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>You're not registered as an Organiser</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to become an Organiser from your profile to start creating events.</p>
@@ -98,7 +98,7 @@ export default function OrganiserDashboard() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>
@@ -118,7 +118,7 @@ export default function OrganiserDashboard() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
@@ -178,7 +178,7 @@ export default function OrganiserDashboard() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'No venue booked'}
                         </p>

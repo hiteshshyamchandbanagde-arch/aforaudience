@@ -195,7 +195,7 @@ export default function FeedbackDetailPanel({
                 {item.category}
               </span>
               {item.displayId && (
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', fontFamily: 'var(--font-mono)' }}>
                   {item.displayId}
                 </span>
               )}
@@ -254,7 +254,7 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-text-primary)' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-text-primary)' }}>
             {item.title || item.message.slice(0, 60)}
           </h2>
 

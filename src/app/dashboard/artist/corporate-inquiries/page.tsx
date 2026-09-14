@@ -88,7 +88,7 @@ export default function CorporateInquiriesPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Corporate Inquiries
@@ -109,7 +109,7 @@ export default function CorporateInquiriesPage() {
                   <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                       </div>
                       <span style={{ fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', background: meta.bg, color: meta.color }}>{meta.label}</span>
