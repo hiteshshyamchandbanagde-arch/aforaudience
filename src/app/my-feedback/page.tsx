@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import { useLocale } from '@/lib/i18n/translate'
 import type { Dictionary } from '@/lib/i18n/translate'
+import { STATUS_TONE, type StatusToneStyle } from '@/lib/statusStyle'
 
 type FeedbackCategory = 'BUG' | 'FEATURE_IDEA' | 'QUESTION' | 'GENERAL' | 'OTHER'
 type FeedbackStatus =
@@ -41,30 +42,45 @@ const CATEGORY_KEY: Record<FeedbackCategory, keyof Dictionary['myFeedbackPage']>
 // Complete", just "we're working on it". RESOLVED's label depends on
 // deployStage (computed below in statusStyleFor), since "fixed" reads
 // very differently depending on whether it's live yet.
-const STATUS_KEY: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { key: keyof Dictionary['myFeedbackPage']; bg: string; fg: string }> = {
-  NEW: { key: 'statusSubmitted', bg: 'rgba(245,245,240,0.08)', fg: '#0E0C0A' },
-  UNDER_REVIEW: { key: 'statusInReview', bg: '#FFF3E6', fg: '#C2410C' },
-  BUILD_QUEUE: { key: 'statusQueuedToBuild', bg: '#FFF3E6', fg: '#C2410C' },
-  IN_BUILD: { key: 'statusInProgress', bg: '#FFF3E6', fg: '#C2410C' },
-  BUILD_COMPLETE: { key: 'statusInProgress', bg: '#FFF3E6', fg: '#C2410C' },
-  IN_TEST: { key: 'statusBeingTested', bg: '#FFF3E6', fg: '#C2410C' },
-  REOPENED: { key: 'statusReopened', bg: '#FFF3E6', fg: '#C2410C' },
-  REJECTED: { key: 'statusNotPlanned', bg: 'rgba(245,245,240,0.08)', fg: 'rgba(245,245,240,0.6)' },
+// BUG-2609-046 - migrated off this file's own independent light-theme
+// hex map (bg #FFF3E6/fg #C2410C for the in-progress group, #E8F5E9/
+// #2E7D32 for resolved - Material-Design-ish colors matching no real
+// token, plus a genuinely broken near-black NEW fg) onto the shared
+// STATUS_TONE tones (src/lib/statusStyle.ts), per that file's own
+// documented pattern of each page building its own status->tone map
+// from the 5 shared tones rather than a universal table.
+//
+// REJECTED deliberately does NOT take STATUS_TONE.muted wholesale:
+// this page's own design already dims REJECTED (0.6-alpha text) below
+// NEW's full-strength text as a real, intentional "closed/de-emphasized"
+// vs. "active/current" distinction - if REJECTED took muted's full-
+// opacity color like NEW does, both would render as visually identical
+// badges, silently erasing that distinction. Kept the original dimmed
+// value here rather than flattening it just because a fix was nearby.
+const STATUS_KEY: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { key: keyof Dictionary['myFeedbackPage'] } & StatusToneStyle> = {
+  NEW: { key: 'statusSubmitted', ...STATUS_TONE.muted },
+  UNDER_REVIEW: { key: 'statusInReview', ...STATUS_TONE.orange },
+  BUILD_QUEUE: { key: 'statusQueuedToBuild', ...STATUS_TONE.orange },
+  IN_BUILD: { key: 'statusInProgress', ...STATUS_TONE.orange },
+  BUILD_COMPLETE: { key: 'statusInProgress', ...STATUS_TONE.orange },
+  IN_TEST: { key: 'statusBeingTested', ...STATUS_TONE.orange },
+  REOPENED: { key: 'statusReopened', ...STATUS_TONE.orange },
+  REJECTED: { key: 'statusNotPlanned', bg: STATUS_TONE.muted.bg, color: 'rgba(245,245,240,0.6)' },
 }
 
-function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string; bg: string; fg: string } {
+function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string } & StatusToneStyle {
   if (item.status !== 'RESOLVED') {
     const s = STATUS_KEY[item.status]
-    return { label: tr.myFeedbackPage[s.key], bg: s.bg, fg: s.fg }
+    return { label: tr.myFeedbackPage[s.key], bg: s.bg, color: s.color }
   }
   if (item.deployStage === 'IN_PRODUCT' || item.deployStage === 'NOTIFIED_USER' || item.deployStage === 'CLOSED') {
-    return { label: tr.myFeedbackPage.statusFixedLive, bg: '#E8F5E9', fg: '#2E7D32' }
+    return { label: tr.myFeedbackPage.statusFixedLive, ...STATUS_TONE.sage }
   }
   // RESOLVED with no deployStage (or DEPLOYED_QA) - fixed, but not yet
   // shipped to the live app. Under the current prod freeze this is
   // where everything sits, so it's worth being explicit rather than
   // just saying "Resolved" and letting someone assume it's live.
-  return { label: tr.myFeedbackPage.statusFixedTesting, bg: '#E8F5E9', fg: '#2E7D32' }
+  return { label: tr.myFeedbackPage.statusFixedTesting, ...STATUS_TONE.sage }
 }
 
 function formatDate(iso: string): string {
@@ -202,7 +218,7 @@ function FeedbackDetailOverlay({
             padding: '4px 10px',
             borderRadius: '999px',
             background: statusStyle.bg,
-            color: statusStyle.fg,
+            color: statusStyle.color,
           }}
         >
           {statusStyle.label}
@@ -395,7 +411,7 @@ export default function MyFeedbackPage() {
                         padding: '4px 10px',
                         borderRadius: '999px',
                         background: statusStyle.bg,
-                        color: statusStyle.fg,
+                        color: statusStyle.color,
                         whiteSpace: 'nowrap',
                       }}
                     >

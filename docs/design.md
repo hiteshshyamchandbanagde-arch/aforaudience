@@ -4641,6 +4641,17 @@ than claimed. Side finding: `--afa-orange-tint`/`--afa-tan`/
 future ticket, not removed here (out of scope for a pure migration
 pass).
 
+> **Correction (BUG-2609-046, 14 Sep):** the "`--afa-orange-tint` unused
+> outside its own definition" claim above turned out inaccurate -
+> `my-feedback/page.tsx`'s independent `STATUS_KEY` map used that
+> token's real hex value directly (`#FFF3E6`), not via the CSS variable,
+> so a grep for the token *name* never caught it. Migrated off that
+> hardcoded hex in `BUG-2609-046` below - re-checked afterward and
+> `--afa-orange-tint`/`#FFF3E6` is now genuinely dead repo-wide (its
+> `globals.css` definition is the only hit). `--afa-orange-dark`
+> (`#C2410C`) is NOT dead, unlike its tint companion - still live via
+> `FeedbackDetailPanel.tsx`'s `HIGH` severity color.
+
 Logged to the Feedback table as `BUG-2609-041` (`RESOLVED`,
 `deployStage: DEPLOYED_QA`) - the real `CodeCounter`-backed next
 sequence value, not a guessed number (`currentSeq` was at 40;
@@ -4886,3 +4897,69 @@ Logged to the Feedback table as `BUG-2609-045` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 44 to 45 (not guessed). Not
 yet merged - built on `refactor/button-consolidation-phase1`, branched
 from `qa` at `e9f099e`.
+
+## BUG-2609-046 - `my-feedback/page.tsx`: independent status-color map migrated onto shared `STATUS_TONE`
+
+Dispatch: this page maintained its own complete, independent
+status-color map (`STATUS_KEY`) instead of drawing from the shared
+`src/lib/statusStyle.ts` - the exact "no deviation" violation the
+centralization rule targets - plus a live bug: `NEW`'s `fg` was
+`#0E0C0A`, near-black-on-dark, nearly invisible. Re-verified fresh
+against qa HEAD `e283f13` before editing: confirmed the broken `NEW`
+color, confirmed the 6-status `UNDER_REVIEW`..`REOPENED` group
+hardcoded `#FFF3E6`/`#C2410C` (real hex values of
+`--afa-orange-tint`/`--afa-orange-dark`, not arbitrary), and confirmed
+the `RESOLVED`+live case hardcoded `#E8F5E9`/`#2E7D32` (a
+Material-Design green pair matching no token at all).
+
+**Fix:** migrated the whole map onto `STATUS_TONE`. Renamed the local
+`fg` field to `color` throughout (2 render call sites) to match
+`StatusToneStyle`'s real `{bg, color}` shape and the app-wide
+convention already used by `tickets/page.tsx` and
+`dashboard/organiser/page.tsx` - the dispatch's own suggested code
+snippet spread `StatusToneStyle` onto a `fg`-keyed type, which doesn't
+type-check; fixed by renaming rather than manually remapping
+`color`->`fg` at each site.
+
+**Two judgment calls made, not shipped mechanically:**
+1. `REJECTED` vs. `NEW` - `NEW` takes the full `STATUS_TONE.muted`
+   (`bg`+`color`), genuinely fixing the bug (full-opacity legible text
+   replacing the broken near-black). `REJECTED` deliberately kept its
+   *own* existing dimmed color (`rgba(245,245,240,0.6)`) rather than
+   also taking `muted`'s full-opacity color - this page's original
+   design intentionally dims `REJECTED` below `NEW` as a real "closed/
+   de-emphasized" vs. "active" distinction; taking `muted` wholesale
+   would have silently flattened both into visually identical badges.
+   Documented in-code, not shipped as a silent side effect.
+2. `UNDER_REVIEW`..`REOPENED` (6 statuses) -> `STATUS_TONE.orange`:
+   computed real WCAG contrast before treating this as safe rather than
+   assuming. Original light-theme pairing (`#C2410C` on `#FFF3E6`)
+   measured 4.74:1; `STATUS_TONE.orange`'s real pairing
+   (`--afa-fill-solid` on its 10%-alpha tint, composited over
+   `--afa-surface-page`) measures 5.31:1 - an improvement, not a
+   regression, and consistent with every other "stray light-theme box
+   on a dark page" fix this session has made. Migrated as specced.
+
+`RESOLVED`+live/testing -> `STATUS_TONE.sage` as specced, no real
+judgment call - the original pair matched no token at all.
+
+**Correction applied, not just noted:** `docs/design.md`'s
+`BUG-2609-041` entry claimed `--afa-orange-tint` was "unused outside
+its own definition" - inaccurate, since this file used the token's hex
+value directly rather than its name, so a token-name grep never caught
+it. A correction note is now inline at that entry. Re-checked after
+this fix: `--afa-orange-tint`/`#FFF3E6` is now genuinely dead
+repo-wide (only its own `globals.css` definition remains).
+`--afa-orange-dark` (`#C2410C`) is **not** dead, unlike its tint
+companion - still live via `FeedbackDetailPanel.tsx`'s `HIGH` severity
+color.
+
+**Verification:** `tsc --noEmit` clean, `check-design-tokens.js`
+clean, real `next build` succeeded. Not verified visually - no browser
+tool this session; both judgment calls above are reasoned from real
+computed contrast math and code-level intent, not eyeballed.
+
+Logged to the Feedback table as `BUG-2609-046` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 45 to 46 (not guessed). Not
+yet merged - built on `refactor/my-feedback-status-tone-migration`,
+branched from `qa` at `e283f13`.
