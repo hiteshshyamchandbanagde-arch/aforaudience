@@ -1528,7 +1528,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        {seatingMode === 'NUMBERED' && effectivePath === 'choose' && (
+        {seatingMode === 'NUMBERED' && effectivePath === 'choose' && !isMobile && (
           <div className="afa-glow-orange" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', maxWidth: '780px', padding: '20px', margin: '0 -20px', borderRadius: '12px' }}>
             <button
               onClick={startWizard}
@@ -1570,13 +1570,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        {seatingMode === 'NUMBERED' && effectivePath === 'canvas' && (
+        {seatingMode === 'NUMBERED' && (effectivePath === 'canvas' || isMobile) && (
           <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px', fontStyle: 'italic' }}>
-                <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
-                  ← Back to setup options
-                </button>
+                {!isMobile && (
+                  <button onClick={backToChoice} style={{ display: 'block', fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '8px', textDecoration: 'underline' }}>
+                    ← Back to setup options
+                  </button>
+                )}
                 Orientation: this canvas is drawn as if you're standing on stage facing the audience — "Left" and "Right" match the performer's perspective, not the audience's.
               </div>
 

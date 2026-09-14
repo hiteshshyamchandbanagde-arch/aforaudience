@@ -4596,3 +4596,63 @@ with real concurrent submissions, the exact trap `GEN-2609-068`'s own
 write-up flagged). Not yet merged to `qa` - built on
 `bugfix/gen-2609-026-027-028-audit-tail`, branched from `qa` at
 `be2263a`.
+
+## BUG-2609-042 - Seat-map builder "mobile light-view": premise was stale, real gap was narrower
+
+Dispatch claimed, as "current state, confirmed in code": the Guided
+Setup wizard on `dashboard/venue/[id]/seat-map/page.tsx` has no
+`isMobile` gate at all and stays fully interactive on phones,
+producing the cramped wrapped-input mess shown in its screenshots.
+Re-verifying fresh against qa HEAD `c36a6c8` before writing anything -
+per standing convention, and doubly warranted here since the dispatch's
+own claim turned out wrong - found this premise did not hold.
+
+`git blame` shows the entire Guided Setup wizard (row/seat/price
+inputs, section add/remove, Generate/Update Layout, the manual-
+placement toggle) has been wrapped in an `isMobile` ternary since
+2026-07-31 (`GEN-2608-082`, touched again 2026-08-23): on mobile it
+already renders a compact "Viewing only on this screen" note instead of
+the wizard, **unconditionally** - not gated to an empty canvas, already
+satisfying the dispatch's own fix items 1 and the core of item 2. The
+read-only canvas (pan/zoom/tap-to-inspect, no drag) and the
+Selected-seat summary panel were already fully mobile-aware too (fix
+item 3, which the dispatch itself said needed no changes). Item 4 (the
+Live Preview nested-scroll box) was already moot for the same reason
+the dispatch predicted - it lives inside the now-desktop-only branch.
+
+**The one real, confirmed-still-open gap:** the pre-canvas "Guided
+Setup vs. Draw It Myself" choice screen (`effectivePath === 'choose'`)
+had zero `isMobile` gating - two fully clickable cards, no warning,
+landing a mobile visitor on the "Viewing only" note only *after*
+tapping one. The note itself also lived inside the canvas branch rather
+than showing regardless of which sub-state (`choose` or `canvas`) a
+mobile visitor landed in.
+
+**Fix**, 2 render-condition changes, no new UI invented: (1) added
+`&& !isMobile` to the choose-screen's condition - nothing to view yet
+means nothing to choose between either, and editing is blocked
+regardless of which card gets tapped. (2) changed the canvas-branch
+condition from `effectivePath === 'canvas'` to
+`(effectivePath === 'canvas' || isMobile)`, so a mobile visitor is
+routed straight to the already-correct read-only view regardless of
+`builderPath` state - the existing "Viewing only" note and the existing
+empty-canvas message ("No seats placed yet - switch to a tablet or
+desktop") become reliably the first thing a mobile NUMBERED-seating
+visitor sees, without adding a second, duplicate banner. Also hid the
+now-inapplicable "Back to setup options" link on mobile - it targeted a
+screen that no longer renders there, so it would have silently done
+nothing if tapped.
+
+**Verification:** `tsc --noEmit` clean, `check-design-tokens.js` clean,
+real `next build` succeeded. The dispatch's own requested DevTools
+375px/414px responsive-mode check was **not done** - no browser tool
+this session - reasoned from the flex/wrap CSS and the pre-existing
+(and presumably already visually verified, back when `GEN-2608-082`
+shipped) mobile canvas/summary-panel behavior instead. Flagged as a
+real verification gap, not claimed as done.
+
+Logged to the Feedback table as `BUG-2609-042` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 41 to 42 (not guessed).
+Title and message both lead with the corrected premise so this doesn't
+read as a bigger rebuild than it was. Not yet merged - built on
+`fix/seat-map-mobile-light-view`, branched from `qa` at `c36a6c8`.
