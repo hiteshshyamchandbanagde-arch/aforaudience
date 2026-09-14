@@ -178,7 +178,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
               </div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: org.bio ? "var(--afa-text-secondary)" : "var(--afa-text-muted)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}
             </p>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>

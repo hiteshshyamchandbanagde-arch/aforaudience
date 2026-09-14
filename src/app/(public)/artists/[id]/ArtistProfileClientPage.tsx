@@ -10,6 +10,7 @@ import Photo from "@/components/Photo"
 import ArtistNoPhoto from "@/components/ArtistNoPhoto"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
 import { CheckSealIcon, RepeatIcon } from "@/components/icons/ArtistIcons"
+import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
 import type { SceneStatusTier } from "@/lib/scene-status"
 
 interface Performance {
@@ -517,11 +518,16 @@ export default function ArtistProfilePage({
                     width: "34px", height: "34px", borderRadius: "50%",
                     border: "1.5px solid rgba(245,245,240,0.4)",
                     background: notifyEnabled ? "rgba(255,90,54,0.3)" : "transparent",
-                    fontSize: "15px", cursor: followBusy ? "default" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: followBusy ? "default" : "pointer",
                     opacity: followBusy ? 0.6 : 1,
                   }}
                 >
-                  {notifyEnabled ? "🔔" : "🔕"}
+                  {notifyEnabled ? (
+                    <BellIcon style={{ width: "15px", height: "15px", color: "var(--afa-amber)" }} />
+                  ) : (
+                    <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
+                  )}
                 </button>
               )}
               <span style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)" }}>

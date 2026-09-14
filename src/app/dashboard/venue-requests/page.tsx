@@ -238,7 +238,7 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && !canRespond && (
-                    <p style={{ fontSize: '13px', color: 'var(--afa-text-muted)', fontStyle: 'italic', margin: 0 }}>
+                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', fontStyle: 'italic', margin: 0 }}>
                       Waiting on the other side to respond.
                     </p>
                   )}

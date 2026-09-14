@@ -4519,3 +4519,80 @@ colliding with a real, concurrently-submitted user bug report.
 
 Built on `feat/gen-2609-068-tickets-page-v6-redesign`, branched from
 `qa` at `6a26557`.
+
+## BUG-2609-026 / -027 / -028 — audit tail (Step 6 sub-specs 1/2/4), and a corrected premise
+
+Dispatch closed out the last 3 open items from the Step 6 UI/UX audit
+(motion, accessibility, icon-system). Re-verified every premise fresh
+against qa HEAD `ee9e47c` before editing anything, per standing
+convention, rather than trusting the dispatch's own line numbers/claims
+unchecked - one of those re-checks changed scope, and another
+overturned a stated premise entirely.
+
+**BUG-2609-026 (reduced-motion gaps) - scope reduced from 3 to 2.**
+The original audit listed `.afa-seat-anim`, `.afa-path-card:hover`, and
+`ContributionMoment.tsx`'s own `cm-modal-mount` as uncovered. Re-reading
+`ContributionMoment.tsx` found its `cm-modal-in` animation already has
+its own local `@media (prefers-reduced-motion: reduce)` block, and
+every other class it uses (`afa-seal-ring-mount`/`afa-seal-stamp-mount`/
+`afa-sheet-mount`/`afa-backdrop-mount`) is already in `globals.css`'s
+consolidated reduced-motion block - already fully resolved, same
+already-fixed-during-merge pattern as `-016`/`-029`. Dropped from this
+ticket's scope. The 2 real gaps (`.afa-seat-anim`, `.afa-path-card:hover`
+- confirmed real call site in `src/app/dashboard/venue/create/page.tsx`
+before touching the CSS) were added to the existing consolidated block
+rather than a new one, per that block's own comment. Left the
+`:not(.afa-path-card-active):hover` border-color transition alone -
+color, not motion, and not paired with a `transition: all` that would
+need scoping.
+
+**BUG-2609-027 (`--afa-text-muted` misused on body copy) - fixed as
+specced.** All 5 sites re-grepped fresh, line numbers confirmed, all
+real 13-14px body/empty-state copy rather than the mono-uppercase
+micro-labels sharing these same files. `var(--afa-text-muted)` ->
+`var(--afa-text-secondary)` at `OrganisersGridEmbed.tsx:181` (bio
+placeholder - simplified the ternary since both branches now resolve to
+the same token rather than leaving a same/same conditional),
+`dashboard/venue-requests/page.tsx:241`, `dashboard/venue/sales/page.tsx:233`
+and `:312`, `dashboard/venue/bookings/page.tsx:240`. Left every
+mono-label/caption `--afa-text-muted` use in these same files untouched.
+
+**BUG-2609-028 (bare 🔔 emoji) - stated premise was wrong, and a 3rd
+site turned up.** The dispatch said no bell icon existed in the
+registry after checking all 6 icon files. Re-checking `VenueIcons.tsx`
+found this false: `BellIcon`/`BellOffIcon` already exist there (built
+for `VenueFollowButton.tsx`'s follow-notify toggle), in the exact
+`IconProps`/`viewBox="0 0 24 24"`/`stroke="currentColor"`/svg-level
+`aria-hidden` pattern needed. Cross-domain reuse of `VenueIcons.tsx` is
+already this codebase's convention (`OrganiserFollowButton.tsx`,
+`EventDetailClientPage.tsx`, `profile/page.tsx` all import from it
+despite not being venue-specific) - reused the existing icon rather
+than duplicating a new one. Fixed 3 bare-emoji sites, not the 2 named:
+`NotificationOptIn.tsx` (banner bell -> `BellIcon`,
+`var(--afa-on-fill-solid)` to match the banner's existing text color),
+`WelcomeSequence.tsx` Screen 3 heading (-> `BellIcon` at 32px,
+`var(--afa-text-primary)`, centered via the replacement wrapper div
+since the emoji's centering had come from the parent's `textAlign:
+center`), and `ArtistProfileClientPage.tsx`'s follow-notify toggle
+(🔔/🔕, same pattern already fixed in `VenueFollowButton.tsx`/
+`OrganiserFollowButton.tsx` but missed in this file - found via a
+repo-wide grep for the emoji after the first 2 fixes, not in the
+original dispatch, fixed in the same pass rather than left dangling).
+
+**Verification:** `tsc --noEmit` clean, `check-design-tokens.js` clean,
+real `next build` succeeded (0 errors, all routes compiled). No browser
+tool available this session - the `WelcomeSequence.tsx`/
+`ArtistProfileClientPage.tsx` icon swaps and the `NotificationOptIn.tsx`
+banner contrast are unverified visually, same standing gap as prior
+sessions; worth a real look before/alongside merge.
+
+Logged to the Feedback table: the original audit had already
+pre-registered these 3 as `NEW` rows (`BUG-2609-026`/`027`/`028`) with
+`displayId`s from the real `CodeCounter`-backed sequence - updated in
+place to `BUILD_COMPLETE` with the fix detail above appended, rather
+than inserting new rows (which would have hand-guessed a displayId
+against `src/lib/codeCounter.ts`'s atomic sequence and risked colliding
+with real concurrent submissions, the exact trap `GEN-2609-068`'s own
+write-up flagged). Not yet merged to `qa` - built on
+`bugfix/gen-2609-026-027-028-audit-tail`, branched from `qa` at
+`be2263a`.

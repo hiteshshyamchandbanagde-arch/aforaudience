@@ -8,6 +8,7 @@ import { useLocale } from '@/lib/i18n/translate';
 import { useOtpVerification } from '@/lib/useOtpVerification';
 import { subscribeAndSave } from '@/lib/push-subscribe';
 import { isOnboardingSequenceDue } from '@/lib/onboarding';
+import { BellIcon } from '@/components/icons/VenueIcons';
 
 /**
  * GEN-2609-042 - one-time, full-screen welcome sequence shown after
@@ -247,9 +248,9 @@ export default function WelcomeSequence() {
 
         {step === 3 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 16 }}>
-              🔔
-            </h1>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <BellIcon style={{ width: 32, height: 32, color: 'var(--afa-text-primary)' }} />
+            </div>
             <p style={{ fontSize: 15, color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
               {tr.notificationOptIn.message}
             </p>
