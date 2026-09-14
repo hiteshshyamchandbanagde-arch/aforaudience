@@ -4785,3 +4785,45 @@ Logged to the Feedback table as `BUG-2609-043` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 42 to 43 (not guessed). Not
 yet merged - built on `fix/foreground-background-token-root-cause`,
 branched from `qa` at `3aef2de`.
+
+## BUG-2609-044 - `my-feedback/page.tsx`: `--afa-black` is undefined everywhere, 6 sites
+
+Dispatch: an exhaustive repo-wide grep of every `var(--afa-X,
+fallback)` pattern, cross-checked against `globals.css`'s real
+definitions, found `--afa-black` as the only undefined token in the
+entire app - all 6 occurrences confined to `src/app/my-feedback/
+page.tsx`, all identically `'var(--afa-black, #0E0C0A)'` (lines 185,
+211, 240, 256, 324, 381). Re-verified fresh against qa HEAD `8b566fc`
+before editing: confirmed `--afa-black` has zero definitions anywhere
+in `globals.css`, and confirmed all 6 sites at the exact stated lines.
+
+**Fix:** all 6 replaced with `var(--afa-text-primary)` - the correct
+token for primary readable text, already used correctly right
+alongside these exact sites via this file's own `rgba(245,245,240,
+0.5/0.6/0.65/0.75)` secondary-text values, confirming the page already
+knew the right visual language and had just referenced a token that
+was never defined for the primary-text case specifically. Every one of
+these had been silently resolving to the hardcoded `#0E0C0A` CSS
+fallback - near-black, invisible against this page's dark background -
+on every single render, since the "real" token side of the `var()`
+call never existed to win.
+
+**Repo-wide re-verification, not just this file:** re-ran the same
+exhaustive `var(--afa-X, fallback)` grep across all of `src/` after the
+fix, per the dispatch's own reasoning - this file was found by an
+exhaustive method, not a targeted one, so only the same method is real
+insurance against a second undefined-token instance existing elsewhere
+that a targeted search would miss. Found 3 remaining fallback-guarded
+tokens repo-wide: `--afa-surface-raised` (`EventCard.tsx`),
+`--afa-sage` (`MessageButton.tsx`, `dashboard/messages/[id]/page.tsx`),
+`--afa-error` (seat-map's `MARKER_META`). Cross-checked all 3 against
+`globals.css`: all three genuinely defined. Zero undefined `--afa-*`
+tokens remain anywhere in `src/` after this fix.
+
+**Verification:** `tsc --noEmit` clean, `check-design-tokens.js`
+clean, real `next build` succeeded.
+
+Logged to the Feedback table as `BUG-2609-044` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 43 to 44 (not guessed). Not
+yet merged - built on `fix/my-feedback-undefined-black-token`, branched
+from `qa` at `8b566fc`.
