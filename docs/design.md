@@ -4710,3 +4710,78 @@ branch had gone stale against `qa` by the time it was ready (`-041`
 merged first, same session), so this section was reconciled via a real
 local `git merge`, not API guesswork - only this changelog conflicted,
 the code diff itself had no overlap with `-041`'s file.
+
+## BUG-2609-043 - `--background`/`--foreground` never resolved to the dark theme: the real root cause
+
+Dispatch: fix the actual mechanism behind `SupportWidget.tsx`'s
+inheritance bug (`-041`), not just that one symptom. Re-verified fresh
+against qa HEAD `3aef2de` before touching anything.
+
+**Confirmed:** `globals.css` has a real `body { @apply bg-background
+text-foreground; }` (not vestigial). `--background`/`--foreground` are
+defined twice - `:root` at shadcn scaffold defaults
+(`oklch(1 0 0)`/`oklch(0.145 0 0)` - white/near-black), `.dark` at the
+correct dark values - and grepping `layout.tsx` plus every component
+under `src/` found zero mechanism that ever applies the `dark` class to
+`<html>`/`<body>` (no `next-themes`, no `classList.add('dark')`,
+nothing). So `:root`'s shadcn defaults were the real, live fallback
+every unstyled element inherited - the opposite of this app's actual
+identity. Almost invisible everywhere because nearly every page root
+already sets its own explicit `background`+`color` (e.g. `<main
+style={{background:'var(--afa-surface-page)',
+color:'var(--afa-text-primary)'}}>`), masking it - it only ever
+surfaced in fixed/floating overlays that forget to set their own
+`color`, which is exactly why `AuthPromptSheet`/`ContributionMoment`/
+`CorporateInquiryModal`/`FeeSheet`/`FeedbackDetailPanel`/
+`InstallPrompt`/`MobileEventFilterSheet`/`WelcomeSequence` all already
+set an explicit root `color` defensively, and `SupportWidget.tsx`
+didn't. Repo-wide grep for other `var(--background)`/`var(--foreground)`/
+`bg-background`/`text-foreground` consumers found only `globals.css`'s
+own `@theme inline` mapping and the `body` rule itself - nothing else
+depends on the current (broken) fallback on purpose, safe to repoint.
+
+**Fix 1** (`globals.css` `:root`, scoped narrowly - only these 2
+properties): `--background` -> `var(--afa-surface-page)`, `--foreground`
+-> `var(--afa-text-primary)`. `--card`/`--popover`/`--primary`/`--muted`/
+etc. and the entire `.dark` block left untouched, as instructed - not
+audited, not proven broken.
+
+**Fix 2** (`SupportWidget.tsx`): added `color: 'var(--afa-text-primary)'`
+to the `.afa-support-chat-panel` root style object. One line fixes
+every label in the file that was inheriting the broken fallback (What's
+this about? / Message / Screenshot (optional) / every bug-report and
+feature-request sub-label / the "Thanks — got it." success heading) -
+an inheritance bug, so an inheritance-level fix, not per-label patches.
+
+**Fix 3** (`Toast.tsx`) - **the dispatch's literal instruction did not
+survive fresh verification, caught before shipping.** The badge
+circle's `background` is a dynamic `accent` (error-red / amber /
+green-mid, depending on toast kind), not always amber. Computed real
+WCAG contrast for the dispatch's proposed `'white'` ->
+`var(--afa-on-fill-solid)` swap against all 3 kinds:
+
+| Kind | white (current) | on-fill-solid (dispatch's ask) |
+|---|---|---|
+| error | 6.54:1 (pass) | 2.87:1 (**fail**) |
+| amber/info | 2.63:1 (**fail**) | 7.13:1 (pass) |
+| green-mid/success | 6.39:1 (pass) | 2.94:1 (**fail**) |
+
+A single static swap fixes the one real failure (amber/info) but
+regresses the other two from a comfortable AA pass into a failure - not
+shippable as specced. Fixed instead with a per-kind `badgeText`:
+`var(--afa-on-fill-solid)` for amber/info (its proven pairing app-wide),
+`var(--afa-cream)` for error/success (5.92:1 / 5.78:1) - the same
+light-or-dark-per-fill pattern already established for seat-map marker
+glyphs (`labelDark ? brown-black : --afa-cream`), not a new convention.
+This is the dispatch's own "check contrast, don't assume" standard
+applied to its own Fix 3.
+
+**Verification:** `tsc --noEmit` clean, `check-design-tokens.js` clean,
+real `next build` succeeded. Not verified visually - no browser tool
+this session; the panel-label fix and the toast-badge contrast math are
+unconfirmed on a real render, flagged rather than claimed.
+
+Logged to the Feedback table as `BUG-2609-043` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 42 to 43 (not guessed). Not
+yet merged - built on `fix/foreground-background-token-root-cause`,
+branched from `qa` at `3aef2de`.

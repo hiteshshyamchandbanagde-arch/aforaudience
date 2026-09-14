@@ -194,8 +194,14 @@
   --afa-sage-bright: #7AA86E;
   --afa-error-bright: #E67870;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
+     (below) is never applied to <html>/<body> anywhere in this app, so
+     these shadcn-scaffold defaults were the actual fallback every
+     unstyled element inherited: near-black text on white, the opposite
+     of this app's real identity. Single source of truth now instead of
+     a second, wrong set of hardcoded values. */
+  --background: var(--afa-surface-page);
+  --foreground: var(--afa-text-primary);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
