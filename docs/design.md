@@ -4597,6 +4597,56 @@ write-up flagged). Not yet merged to `qa` - built on
 `bugfix/gen-2609-026-027-028-audit-tail`, branched from `qa` at
 `be2263a`.
 
+## BUG-2609-041 - `SupportWidget.tsx` full dark-theme migration
+
+Dispatch: this component was never touched by any prior centralization
+sweep because those all grepped for named legacy tokens
+(`--afa-terracotta`/`--afa-white`) - `SupportWidget.tsx` uses a
+different, still-technically-defined set of Phase-0 light tokens
+(`--afa-gray-warm`, `--afa-orange-tint`, `--afa-tan`) plus raw hex
+(`#E5DCCF`, `#F0D9BF`) and a hardcoded `'white'`, so it never matched.
+Re-verified every occurrence fresh against qa HEAD `c36a6c8` before
+editing - all confirmed at the dispatch's stated counts (11×
+`#E5DCCF`, 1× `#F0D9BF`, ~4× `--afa-gray-warm`, 1×
+`--afa-orange-tint`, 1× `--afa-tan`, 1× `'white'`).
+
+**Fix:** border/background swaps to `--afa-border-resting`,
+`--afa-text-secondary`, `--afa-on-fill-solid`, and a
+`rgba(201,151,58,...)` amber-tint recipe matching `-067`'s auth-page
+banners. Added a shared local `inputStyle` object (border/radius/
+padding/color) used by every textarea/input/select in the file -
+**one deliberate deviation from the dispatch's literal snippet**: kept
+`background: var(--afa-surface-page)` rather than
+`dashboard/venue/[id]/edit/page.tsx`'s `--afa-surface-raised`, because
+this panel itself is `--afa-surface-raised` - inputs need the darker
+"well" token to read as recessed against it, not the lighter pairing
+that file's own page-vs-card hierarchy calls for. The category
+`<select>` got the `appearance: none` + inline chevron-SVG treatment
+already established in `profile/page.tsx`'s display-currency select,
+rather than a new bespoke dropdown component. The screenshot
+`<input type="file">` was replaced with the `<label>` +
+`variantStyle('primary', false, 'md')` + hidden-input pattern already
+shipped in `profile/page.tsx` and `dashboard/artist/edit/page.tsx`. The
+bare `✓` success glyph was replaced with the existing `CheckIcon` from
+`EventIcons.tsx`, same pattern as `BUG-2609-028`'s bell-emoji fix.
+
+**Verification:** repo-wide grep confirms zero remaining legacy hex/
+tokens in this file. `tsc --noEmit` clean, `check-design-tokens.js`
+clean, real `next build` succeeded. Not verified visually - no browser
+tool this session, same standing gap as prior sessions; the banner
+contrast and the two icon-swap sites are unconfirmed, flagged rather
+than claimed. Side finding: `--afa-orange-tint`/`--afa-tan`/
+`--afa-gray-warm` are now completely unused outside their own
+`globals.css` definitions app-wide - dead-token cleanup fodder for a
+future ticket, not removed here (out of scope for a pure migration
+pass).
+
+Logged to the Feedback table as `BUG-2609-041` (`RESOLVED`,
+`deployStage: DEPLOYED_QA`) - the real `CodeCounter`-backed next
+sequence value, not a guessed number (`currentSeq` was at 40;
+incremented atomically to 41). Merged to `qa` at `8618a61` (chat,
+PR #639), CI green on the actual PR run, 0 runtime errors post-deploy.
+
 ## BUG-2609-042 - Seat-map builder "mobile light-view": premise was stale, real gap was narrower
 
 Dispatch claimed, as "current state, confirmed in code": the Guided
@@ -4655,4 +4705,8 @@ Logged to the Feedback table as `BUG-2609-042` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 41 to 42 (not guessed).
 Title and message both lead with the corrected premise so this doesn't
 read as a bigger rebuild than it was. Not yet merged - built on
-`fix/seat-map-mobile-light-view`, branched from `qa` at `c36a6c8`.
+`fix/seat-map-mobile-light-view`, branched from `qa` at `c36a6c8`; this
+branch had gone stale against `qa` by the time it was ready (`-041`
+merged first, same session), so this section was reconciled via a real
+local `git merge`, not API guesswork - only this changelog conflicted,
+the code diff itself had no overlap with `-041`'s file.
