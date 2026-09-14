@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Button from '@/components/ui/Button';
+import Button, { variantStyle } from '@/components/ui/Button';
+import { CheckIcon } from '@/components/icons/EventIcons';
 
 /**
  * Floating support widget: chat first, feedback-form fallback.
@@ -109,6 +110,22 @@ const MOBILE_TAB_BAR_HEIGHT = 'calc(64px + env(safe-area-inset-bottom))';
 const CHAT_BUTTON_MOBILE_BOTTOM = `calc(${MOBILE_TAB_BAR_HEIGHT} + 8px)`;
 const CHAT_PANEL_MOBILE_BOTTOM = `calc(${CHAT_BUTTON_MOBILE_BOTTOM} + 56px + 12px)`; // clears the 56px button + the same 12px gap it always opened with
 const CHAT_PANEL_MOBILE_MAX_HEIGHT = `calc(100vh - ${CHAT_PANEL_MOBILE_BOTTOM} - 52px)`; // same 52px top clearance the old bottom:88/maxHeight pairing reserved
+
+// Shared shape for every text input/textarea/select in this widget (same
+// spirit as dashboard/venue/[id]/edit/page.tsx's own local `inputStyle`).
+// background stays --afa-surface-page rather than that file's
+// --afa-surface-raised: this panel itself is --afa-surface-raised, so
+// inputs need the darker "well" token to read as recessed against it,
+// not the page's own lighter-hierarchy pairing.
+const inputStyle = {
+  width: '100%',
+  padding: '10px 12px',
+  borderRadius: '6px',
+  border: '1px solid var(--afa-border-resting)',
+  background: 'var(--afa-surface-page)',
+  fontSize: '14px',
+  color: 'var(--afa-text-primary)',
+} as const;
 
 export default function SupportWidget() {
   const pathname = usePathname();
@@ -482,7 +499,7 @@ export default function SupportWidget() {
             fontFamily: 'inherit',
           }}
         >
-          <div style={{ display: 'flex', borderBottom: '1px solid #E5DCCF' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--afa-border-resting)' }}>
             <button
               onClick={() => setPanel('chat')}
               style={{
@@ -525,7 +542,7 @@ export default function SupportWidget() {
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     Chat is temporarily unavailable.
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--afa-gray-warm)', marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: 'var(--afa-text-secondary)', marginBottom: 16 }}>
                     Please use the feedback form instead — the team reads these personally.
                   </div>
                   <button
@@ -548,7 +565,7 @@ export default function SupportWidget() {
                 <>
                   <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
                     {chatMessages.length === 0 && (
-                      <div style={{ color: 'var(--afa-gray-warm)', fontSize: 13, padding: 8 }}>
+                      <div style={{ color: 'var(--afa-text-secondary)', fontSize: 13, padding: 8 }}>
                         Ask anything about booking, becoming an Artist/Organiser, fees, or
                         how AforAudience works.
                       </div>
@@ -563,8 +580,8 @@ export default function SupportWidget() {
                             borderRadius: 12,
                             fontSize: 14,
                             lineHeight: 1.4,
-                            background: m.role === 'user' ? 'var(--afa-amber)' : 'var(--afa-tan)',
-                            color: m.role === 'user' ? 'white' : 'var(--afa-text-primary)',
+                            background: m.role === 'user' ? 'var(--afa-amber)' : 'var(--afa-surface-page)',
+                            color: m.role === 'user' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                             float: m.role === 'user' ? 'right' : 'left',
                             clear: 'both',
                           }}
@@ -594,15 +611,15 @@ export default function SupportWidget() {
                       </div>
                     ))}
                     {chatLoading && (
-                      <div style={{ color: 'var(--afa-gray-warm)', fontSize: 13, padding: 8 }}>
+                      <div style={{ color: 'var(--afa-text-secondary)', fontSize: 13, padding: 8 }}>
                         Thinking…
                       </div>
                     )}
                     {capReached && (
                       <div
                         style={{
-                          background: 'var(--afa-orange-tint)',
-                          border: '1px solid #F0D9BF',
+                          background: 'rgba(201,151,58,0.15)',
+                          border: '1px solid rgba(201,151,58,0.3)',
                           borderRadius: 8,
                           padding: 10,
                           fontSize: 13,
@@ -630,7 +647,7 @@ export default function SupportWidget() {
                     )}
                     <div ref={chatEndRef} />
                   </div>
-                  <div style={{ display: 'flex', borderTop: '1px solid #E5DCCF', padding: 8 }}>
+                  <div style={{ display: 'flex', borderTop: '1px solid var(--afa-border-resting)', padding: 8 }}>
                     <input
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
@@ -640,15 +657,12 @@ export default function SupportWidget() {
                       disabled={capReached}
                       placeholder={capReached ? 'Question limit reached' : 'Type your question…'}
                       style={{
+                        ...inputStyle,
                         flex: 1,
-                        border: '1px solid #E5DCCF',
                         borderRadius: 999,
                         padding: '8px 14px',
-                        fontSize: 14,
                         outline: 'none',
                         opacity: capReached ? 0.5 : 1,
-                        background: 'var(--afa-surface-page)',
-                        color: 'var(--afa-text-primary)',
                       }}
                     />
                     <Button
@@ -670,9 +684,9 @@ export default function SupportWidget() {
             <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
               {fbSubmitted ? (
                 <div style={{ textAlign: 'center', padding: '40px 12px' }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
+                  <CheckIcon style={{ width: 32, height: 32, marginBottom: 12, color: 'var(--afa-text-primary)' }} />
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>Thanks — got it.</div>
-                  <div style={{ fontSize: 13, color: 'var(--afa-gray-warm)' }}>
+                  <div style={{ fontSize: 13, color: 'var(--afa-text-secondary)' }}>
                     The team reviews these personally.
                   </div>
                 </div>
@@ -685,14 +699,19 @@ export default function SupportWidget() {
                     value={fbCategory}
                     onChange={(e) => setFbCategory(e.target.value)}
                     style={{
-                      width: '100%',
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #E5DCCF',
-                      fontSize: 14,
+                      ...inputStyle,
                       marginBottom: 12,
-                      background: 'var(--afa-surface-page)',
-                      color: 'var(--afa-text-primary)',
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      // Chevron stroke inlined as rgba(245,245,240,0.65) - the
+                      // same value as --afa-text-secondary - since a data-URI
+                      // can't reference a CSS custom property. Same technique
+                      // as profile/page.tsx's display-currency select.
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      paddingRight: '32px',
                     }}
                   >
                     {FEEDBACK_CATEGORIES.map((c) => (
@@ -711,17 +730,7 @@ export default function SupportWidget() {
                         onChange={(e) => setBugAction(e.target.value)}
                         rows={2}
                         placeholder="e.g. Entered my full name on the Sign Up page"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
                         What did you expect? <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
@@ -731,17 +740,7 @@ export default function SupportWidget() {
                         onChange={(e) => setBugExpected(e.target.value)}
                         rows={2}
                         placeholder="e.g. A username to be suggested automatically"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
                         What happened instead?
@@ -751,17 +750,7 @@ export default function SupportWidget() {
                         onChange={(e) => setBugActual(e.target.value)}
                         rows={2}
                         placeholder="e.g. The field stayed blank, had to type it myself"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                     </>
                   ) : isFeatureCategory ? (
@@ -774,17 +763,7 @@ export default function SupportWidget() {
                         onChange={(e) => setFeatureProblem(e.target.value)}
                         rows={2}
                         placeholder="e.g. I can never remember which events I already reported feedback on"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
                         What would you like to see?
@@ -794,17 +773,7 @@ export default function SupportWidget() {
                         onChange={(e) => setFeatureIdea(e.target.value)}
                         rows={3}
                         placeholder="e.g. A page showing my own past feedback and its status"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                     </>
                   ) : (
@@ -817,17 +786,7 @@ export default function SupportWidget() {
                         onChange={(e) => setFbMessage(e.target.value)}
                         rows={5}
                         placeholder="Tell us what's up…"
-                        style={{
-                          width: '100%',
-                          padding: '8px 10px',
-                          borderRadius: 8,
-                          border: '1px solid #E5DCCF',
-                          fontSize: 14,
-                          resize: 'vertical',
-                          marginBottom: 12,
-                          background: 'var(--afa-surface-page)',
-                          color: 'var(--afa-text-primary)',
-                        }}
+                        style={{ ...inputStyle, resize: 'vertical', marginBottom: 12 }}
                       />
                     </>
                   )}
@@ -844,7 +803,7 @@ export default function SupportWidget() {
                           maxWidth: '100%',
                           maxHeight: 120,
                           borderRadius: 8,
-                          border: '1px solid #E5DCCF',
+                          border: '1px solid var(--afa-border-resting)',
                           display: 'block',
                           marginBottom: 6,
                         }}
@@ -866,13 +825,16 @@ export default function SupportWidget() {
                     </div>
                   ) : (
                     <div style={{ marginBottom: 12 }}>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAttachmentSelect}
-                        style={{ fontSize: 13 }}
-                      />
+                      <label style={{ ...variantStyle('primary', false, 'md'), cursor: 'pointer' }}>
+                        Attach screenshot
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAttachmentSelect}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
                     </div>
                   )}
                   {fbAttachmentError && (
