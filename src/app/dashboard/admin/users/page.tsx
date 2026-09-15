@@ -121,7 +121,7 @@ export default function AdminUsersPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           {/* lg:hidden - now redundant on desktop once DashboardShell's sidebar is there; still the only way back on mobile */}
           <div className="lg:hidden">

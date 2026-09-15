@@ -66,8 +66,8 @@ export default function AuthBrandPanel() {
 
         <div>
           <p
-            className="font-serif font-light text-[var(--afa-text-primary)] leading-[1.15]"
-            style={{ fontSize: "2.5rem" }}
+            className="font-light text-[var(--afa-text-primary)] leading-[1.15]"
+            style={{ fontSize: "2.5rem", fontFamily: "var(--font-display)" }}
           >
             Every show.<br />Every story.
           </p>

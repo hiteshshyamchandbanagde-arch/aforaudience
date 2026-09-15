@@ -29,7 +29,7 @@ export default function EnvBadge() {
         background: bg,
         borderRadius: "999px",
         verticalAlign: "middle",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "var(--font-sans)",
       }}
     >
       {label}

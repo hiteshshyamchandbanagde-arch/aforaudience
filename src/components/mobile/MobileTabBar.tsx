@@ -507,7 +507,7 @@ export default function MobileTabBar() {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(245,245,240,0.08)' }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: 18, color: 'var(--afa-text-primary)' }}>More</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--afa-text-primary)' }}>More</span>
               <button
                 onClick={() => setMoreOpen(false)}
                 aria-label="Close"

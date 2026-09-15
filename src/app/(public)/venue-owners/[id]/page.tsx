@@ -47,7 +47,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
   const displayName = owner.user.displayName || owner.user.name
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
 
       <div style={{ background: "var(--afa-surface-raised)", padding: "48px 24px", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>

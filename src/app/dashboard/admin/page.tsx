@@ -145,7 +145,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         {icon}
       </div>
       <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
         <div style={{ fontSize: '11.5px', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>

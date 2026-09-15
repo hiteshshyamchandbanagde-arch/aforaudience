@@ -108,7 +108,7 @@ export default function OrganiserSalesOverviewPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>

@@ -193,7 +193,7 @@ export default function EditArtistProfilePage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Edit Your Profile
@@ -251,7 +251,7 @@ export default function EditArtistProfilePage() {
           {/* Artist Background - a richer, entirely optional storytelling
               section beyond the short bio above. Nothing here is required. */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               Your Background
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>

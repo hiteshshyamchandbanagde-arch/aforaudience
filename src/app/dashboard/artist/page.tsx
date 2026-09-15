@@ -275,7 +275,7 @@ export default function ArtistDashboard() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
@@ -393,7 +393,7 @@ export default function ArtistDashboard() {
               see an empty ₹0/₹0/₹0 block. */}
           {(totalCompensation > 0 || totalSpend > 0) && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Recorded Earnings
               </h2>
               <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>
@@ -421,7 +421,7 @@ export default function ArtistDashboard() {
           {/* Reviews */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '14px' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 Reviews
               </h2>
               {avgRating !== null && (
@@ -491,7 +491,7 @@ export default function ArtistDashboard() {
 
           {/* Followers */}
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
               Followers
             </h2>
             {profile.followers.length === 0 ? (
@@ -523,7 +523,7 @@ export default function ArtistDashboard() {
 
           {/* Upcoming performances */}
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
               Upcoming Performances
             </h2>
             {upcoming.length === 0 ? (
@@ -562,7 +562,7 @@ export default function ArtistDashboard() {
 
           {/* Applications */}
           <div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
               My Applications
             </h2>
             {profile.applications.length === 0 ? (

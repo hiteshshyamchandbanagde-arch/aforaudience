@@ -236,7 +236,7 @@ export default function AdminBookingsPage() {
                         <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>
                           {displayName} — {b.user.email}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'ui-monospace, monospace' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>
                           {b.id}
                         </div>
                       </div>
@@ -274,7 +274,7 @@ export default function AdminBookingsPage() {
                           borderRadius: '8px',
                           fontSize: '13px',
                           color: 'var(--afa-error)',
-                          fontFamily: 'ui-monospace, monospace',
+                          fontFamily: 'var(--font-mono)',
                           whiteSpace: 'pre-wrap',
                           wordBreak: 'break-word',
                         }}

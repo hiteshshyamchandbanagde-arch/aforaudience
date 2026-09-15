@@ -655,7 +655,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
@@ -668,7 +668,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
           <form onSubmit={(e) => e.preventDefault()}>
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                 Event Details
               </h2>
               <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
@@ -1032,7 +1032,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </section>
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
                 Seats & Ticket Price
               </h2>
 
@@ -1115,7 +1115,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </section>
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Artist Payment Terms
               </h2>
               <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
@@ -1151,7 +1151,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </section>
 
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Venue
               </h2>
               <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>

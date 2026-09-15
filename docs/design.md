@@ -4963,3 +4963,88 @@ Logged to the Feedback table as `BUG-2609-046` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 45 to 46 (not guessed). Not
 yet merged - built on `refactor/my-feedback-status-tone-migration`,
 branched from `qa` at `e283f13`.
+
+## BUG-2609-047 - repo-wide font-family centralization
+
+Dispatch: the app already loads real branded fonts via
+`next/font/google` (`layout.tsx`) - Young Serif/`--font-display`,
+Schibsted Grotesk/`--font-ui`, Instrument Sans/`--font-sans`,
+JetBrains Mono/`--font-mono`, applied on `<body>`. Every hardcoded
+`fontFamily` site below was silently discarding the real branded font
+for a generic system fallback - not a "no token" gap, an active
+deviation from tokens that already exist. Re-verified fresh against
+qa HEAD `c9c4f80` before editing (dispatch cited `e9f099e`; qa had
+advanced 3 merges since, none touching these patterns).
+
+Fresh counts differed slightly from the dispatch's own (64/31 vs. their
+60/28 for Georgia; 57/42 vs. 56/42 for system-ui) - investigated every
+discrepancy rather than assuming drift: 2 were comments (`layout.tsx`,
+`poster-fonts.ts`, correctly left untouched), the rest were genuine
+sites the dispatch's own exhaustive check had already caught.
+
+**Fix 1** (`Georgia, serif` -> `var(--font-display)`): all sites across
+the dispatch's 28 files, plus `layout.tsx`'s intro-splash
+`#intro-tagline` CSS text - missed by a JSX-prop grep since it's raw
+CSS inside a `dangerouslySetInnerHTML` string, not a style prop, but
+real browser-rendered CSS where `var()` resolves fine. Note:
+`#intro-tagline` uses `font-style: italic`, and Young Serif ships no
+italic via `next/font/google` (a documented, already-accepted tradeoff
+for 4 other components from the original font migration) - this is a
+5th, previously-unlisted site hitting the same known fake-oblique
+limitation, not a new regression class.
+
+**Fix 2** (`system-ui, sans-serif` -> `var(--font-sans)`): all sites
+across ~42 files, plus 6 bare `fontFamily: 'system-ui'` sites (missing
+the `, sans-serif` suffix) in `checkout/[bookingId]/page.tsx` (5) and
+`dashboard/admin/settings/page.tsx` (1) that evaded the exact-string
+grep.
+
+**Fix 3** (mono fallbacks -> `var(--font-mono)`): bare `'monospace'`
+(4 files) and `'ui-monospace, monospace'` (1 file,
+`dashboard/admin/bookings/page.tsx`) as specced. `src/lib/email.ts`'s
+`SF Mono` left untouched, as instructed (email HTML, can't use CSS
+variables).
+
+**Found and fixed beyond the dispatch's stated file list** - same
+category, same principle, each verified live before touching:
+- `about/page.tsx`'s `SERIF`/`SANS`/`MONO` consts - compound stacks
+  (e.g. `"Georgia, 'Playfair Display', serif"`) that didn't match any
+  named pattern exactly, despite the file's own comment stating the
+  intent was to reuse real branded tokens - a genuine oversight, not a
+  deliberate stylistic choice for this page.
+- `LegalDocLayout.tsx`'s matching `SERIF`/`SANS` pair (same sibling
+  design as `about/page.tsx`, same `GEN-2609-067` lineage).
+- `EnvBadge.tsx`'s `"system-ui, -apple-system, sans-serif"`.
+- `dev/razorpay-test/page.tsx`'s `SERIF`/`MONO` consts (a dev-only test
+  page, included for consistency since the usage is real and active).
+- `AuthBrandPanel.tsx`'s Tailwind `font-serif` utility class - the one
+  architecturally different case (a class, not a literal string).
+  Fixed by extending the file's own existing
+  `style={{fontFamily:'var(--font-display)'}}` pattern, already used
+  one line above for the wordmark, rather than touching Tailwind's
+  global `@theme` config - a bigger, unrequested architecture decision.
+
+Ran multiple broadening re-grep passes after the initial sweep
+specifically to catch these near-miss variants, per the dispatch's own
+instruction that this needed repo-wide re-verification, not just a
+check of the named files. Final comprehensive grep (fontFamily prop
+literals, `font-family` CSS text, `const FONT`/`SERIF`/`SANS`/`MONO`
+assignments, Tailwind `font-serif`/`font-mono` classes) confirms zero
+hardcoded generic-family fallbacks remain anywhere in `src/` outside
+the explicitly-excluded poster-rendering pipeline (`api/posters/**`,
+`ticket-pdf.ts`, `poster-fonts.ts`'s `Poster Serif`) and `email.ts`.
+
+**Total: 61 files changed.** Verified: `tsc --noEmit` clean,
+`check-design-tokens.js` clean, real `next build` succeeded.
+
+**Flagging per the dispatch's own instruction:** this is a real visual
+change - actual typeface swaps to Young Serif/Instrument Sans/
+JetBrains Mono on 116+ headings/labels/badges across the app. No
+browser tool this session - needs a real visual look before merge, not
+just a token-compliance check. Not claiming visual verification here,
+flagging the gap explicitly.
+
+Logged to the Feedback table as `BUG-2609-047` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 46 to 47 (not guessed). Not
+yet merged - built on `refactor/font-family-centralization`, branched
+from `qa` at `c9c4f80`.

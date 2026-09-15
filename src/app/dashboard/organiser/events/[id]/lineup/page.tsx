@@ -287,7 +287,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 

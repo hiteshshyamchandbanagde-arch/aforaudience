@@ -88,7 +88,7 @@ export default function BrowseSearchDropdown<T>({
                 style={{
                   display: "block", width: "100%", textAlign: "left", padding: "10px 20px",
                   border: "none", background: "transparent", cursor: "pointer", fontSize: "14px",
-                  color: "var(--afa-text-primary)", fontFamily: "system-ui, sans-serif",
+                  color: "var(--afa-text-primary)", fontFamily: "var(--font-sans)",
                 }}
               >
                 {renderRow(item)}

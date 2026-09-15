@@ -12,7 +12,7 @@ type ComingSoonProps = {
 export default function ComingSoon({ title, description }: ComingSoonProps) {
   const { t: tr } = useLocale()
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-raised)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
       <div
         style={{
@@ -25,10 +25,10 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           padding: "48px 24px",
         }}
       >
-        <div style={{ fontFamily: "monospace", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
           {tr.comingSoon.badge}
         </div>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
           {title}
         </h1>
         <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>

@@ -47,7 +47,7 @@ export default function VenueOwnersPage() {
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
 
       <div style={{ background: "var(--afa-surface-inverse)", padding: "56px 48px" }}>

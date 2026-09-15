@@ -157,7 +157,7 @@ const kpiCard: React.CSSProperties = {
 }
 
 const kpiValue: React.CSSProperties = {
-  fontFamily: 'Georgia, serif',
+  fontFamily: 'var(--font-display)',
   fontSize: '24px',
   fontWeight: 700,
   color: 'var(--afa-text-primary)',

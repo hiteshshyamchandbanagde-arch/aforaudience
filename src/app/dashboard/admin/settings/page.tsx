@@ -495,7 +495,7 @@ export default function AdminSettingsPage() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'system-ui' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: 560, margin: '0 auto' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
               Admins only
@@ -521,7 +521,7 @@ export default function AdminSettingsPage() {
         style={{
           minHeight: '100vh',
           background: 'var(--afa-surface-raised)',
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'var(--font-sans)',
           color: 'var(--afa-text-primary)',
         }}
       >
@@ -553,7 +553,7 @@ export default function AdminSettingsPage() {
             padding: 24,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Audience booking fee
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
@@ -638,7 +638,7 @@ export default function AdminSettingsPage() {
             marginTop: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Support chat message cap
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
@@ -709,7 +709,7 @@ export default function AdminSettingsPage() {
             marginBottom: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Scene Status thresholds
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
@@ -806,7 +806,7 @@ export default function AdminSettingsPage() {
             marginBottom: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Hype Score lookback window
           </h2>
           <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -855,7 +855,7 @@ export default function AdminSettingsPage() {
             marginBottom: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Event-creation forward window
           </h2>
           <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -905,7 +905,7 @@ export default function AdminSettingsPage() {
             marginBottom: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Direct payouts (Razorpay Route)
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
@@ -985,7 +985,7 @@ export default function AdminSettingsPage() {
             marginBottom: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Audience Choice default weights
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
@@ -1038,7 +1038,7 @@ export default function AdminSettingsPage() {
             marginTop: 20,
           }}
         >
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
             Display currency rates
           </h2>
           <p style={{ fontSize: 13, color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>

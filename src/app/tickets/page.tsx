@@ -379,7 +379,7 @@ export default function MyTicketsPage() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <style>{`
           .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
           @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }

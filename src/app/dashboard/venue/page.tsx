@@ -149,7 +149,7 @@ export default function VenueDashboard() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
@@ -166,7 +166,7 @@ export default function VenueDashboard() {
       <>
         <SiteNav />
         <DashboardShell>
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>

@@ -591,7 +591,7 @@ function ProfileContent() {
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div
           className="afa-profile-page-container"
           style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(32px, 5vw, 56px) clamp(20px, 5vw, 56px)' }}
@@ -686,7 +686,7 @@ function ProfileContent() {
                   </h1>
                   <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: 'var(--afa-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
                   {user?.code && (
-                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--afa-text-muted)', fontFamily: 'monospace' }}>
+                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)' }}>
                       {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
                     </p>
                   )}
@@ -757,7 +757,7 @@ function ProfileContent() {
             </h1>
             <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
             {user?.code && (
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'monospace' }}>
+              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                 {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
               </p>
             )}
@@ -830,7 +830,7 @@ function ProfileContent() {
               tickets, emails, and greetings. Falls back to username if
               blank, so existing users see no change until they set one. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.displayNameHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -865,7 +865,7 @@ function ProfileContent() {
               account's name/photo already surface publicly, e.g.
               ratings and feedback on events. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.aboutYouHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -903,7 +903,7 @@ function ProfileContent() {
               stays INR always - this only changes how amounts are shown
               to this user (event prices, checkout totals). */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.displayCurrencyHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -948,7 +948,7 @@ function ProfileContent() {
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.becomeArtistBtn}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -971,7 +971,7 @@ function ProfileContent() {
 
           {/* Organiser upgrade */}
           <div id="apply-organiser" style={cardStyle(highlightedCard === 'organiser')}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.becomeOrganiserHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -998,7 +998,7 @@ function ProfileContent() {
 
           {/* Venue Owner upgrade */}
           <div id="apply-venue" style={cardStyle(highlightedCard === 'venue')}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.profilePage.listVenueHeading}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
@@ -1036,7 +1036,7 @@ function ProfileContent() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               <div>
-                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
                   {tr.profilePage.myFeedbackHeading}
                 </h2>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>

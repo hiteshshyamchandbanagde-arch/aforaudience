@@ -172,7 +172,7 @@ export default function WallOfFamePage() {
   const stripLeadingEmoji = (s: string) => s.replace(/^\p{Extended_Pictographic}\s*/u, "")
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav active="wall-of-fame" />
 
       {/* HERO */}

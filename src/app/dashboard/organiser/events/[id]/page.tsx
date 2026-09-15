@@ -255,7 +255,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
     <>
       <SiteNav />
       <DashboardShell>
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
           <BackLink href="/dashboard/organiser" label="Back to Events" />
 
@@ -293,7 +293,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               // anyway, showing a broken image and a Share button that
               // would always fail. Found via live device test 29 Jul.
               <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-                <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
                   Share Poster
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>

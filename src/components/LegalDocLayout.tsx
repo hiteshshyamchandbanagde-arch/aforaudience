@@ -7,8 +7,8 @@ const INK = "var(--afa-text-primary)"
 const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
 const MIST = "rgba(245,245,240,0.12)"
-const SERIF = "Georgia, 'Playfair Display', serif"
-const SANS = "system-ui, -apple-system, sans-serif"
+const SERIF = "var(--font-display)"
+const SANS = "var(--font-sans)"
 
 type LegalDocLayoutProps = {
   title: string

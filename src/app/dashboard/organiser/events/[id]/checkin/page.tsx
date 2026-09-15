@@ -240,7 +240,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         </div>
       )}
 
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'system-ui, sans-serif' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px 64px' }}>
           <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 

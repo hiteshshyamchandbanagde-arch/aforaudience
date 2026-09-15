@@ -23,9 +23,14 @@ const INK = "var(--afa-text-primary)"
 const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
 const MIST = "rgba(245,245,240,0.12)"
-const SERIF = "Georgia, 'Playfair Display', serif"
-const SANS = "system-ui, -apple-system, sans-serif"
-const MONO = "ui-monospace, 'SF Mono', Menlo, monospace"
+// BUG-2609-047 - this comment above already said the intent was to
+// reuse the site's real brand vocabulary, not hardcode - but these 3
+// consts did exactly that, missed by the dispatch's exact-string-match
+// grep since none of these stacks matched "Georgia, serif"/"system-ui,
+// sans-serif" literally. Fixed to match the stated intent.
+const SERIF = "var(--font-display)"
+const SANS = "var(--font-sans)"
+const MONO = "var(--font-mono)"
 
 // Small ornament used between beats of the founder note — used sparingly.
 function Ornament() {
