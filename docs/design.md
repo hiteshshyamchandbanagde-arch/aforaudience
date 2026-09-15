@@ -3391,7 +3391,21 @@ instead of screenshot diffing; flagged as unverified, not claimed done.
 Built on `feat/gen-2609-055-badge-migration`, branched from `qa` at
 `33cc922`.
 
-## GEN-2609-054 - wrong premise on the terracotta sweep, split per the dispatch's own instruction
+## GEN-2609-054 [mislabeled - see correction below] - wrong premise on the terracotta sweep, split per the dispatch's own instruction
+
+**Correction (added later, with real Supabase access): this entry's
+`GEN-2609-054` label was a guess made without Supabase/CodeCounter
+access at write-time, and it collided with the real `GEN-2609-054`
+(type scale + spacing tokens, further below, correctly logged and
+verified in the Feedback table). The investigative findings below are
+accurate and the described work genuinely shipped - confirmed live
+(`Button variant="form-submit"` in both `forgot-password`/
+`reset-password`) - but the wider terracotta sweep this entry
+recommended splitting into (a)/(b) was subsequently completed in full
+under its own correctly-numbered tickets, `GEN-2609-060` through
+`GEN-2609-066` ("closes the terracotta sweep" per that session's own
+handoff commits). Treat this entry as superseded historical context,
+not an open or correctly-numbered ticket.**
 
 The dispatch's count ("`--afa-terracotta` appears 11 times across 9
 dashboard/organiser files") was re-verified fresh rather than trusted,
@@ -5091,8 +5105,8 @@ reordered.
 
 Logged to the Feedback table as `GEN-2609-054` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 53 to 54 (not guessed). Not
-yet merged - built on `feat/design-tokens-type-scale-spacing`, branched
-from `qa` at `19eb1b2`.
+Merged to `qa` at `900d79e` (chat, PR #646), CI green, Vercel READY,
+zero runtime errors post-deploy.
 
 **Note (picked up in a new session immediately after the paragraph
 above was written):** the code/docs work above was already complete
@@ -5102,7 +5116,12 @@ and `next build` fresh rather than trusting the prior claims, all held.
 The Feedback-table logging claim itself could **not** be independently
 re-confirmed this session - the Supabase MCP connection was gone at
 resume, before any tool call here could check it either way. Not
-claiming it's wrong, just genuinely unverified from this side; whoever
-has Supabase access next should confirm `GEN-2609-054` really exists at
-`CodeCounter` 54 before assuming it's there, rather than trusting this
-sentence a second time removed from the source.
+claiming it's wrong, just genuinely unverified from this side.
+
+**Resolved (next session, with a working Supabase connection):**
+confirmed - `GEN-2609-054` genuinely exists, correctly at `CodeCounter`
+54, title "Type scale + spacing grid tokens: define for real (Step 1
+completion)". Marked `RESOLVED`/`DEPLOYED_QA` in the Feedback table.
+While checking this, also found and corrected the unrelated `GEN-2609-054`
+labeling collision earlier in this document (the terracotta-sweep entry)
+- see the correction note added there.
