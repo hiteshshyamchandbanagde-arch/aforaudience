@@ -5048,3 +5048,61 @@ Logged to the Feedback table as `BUG-2609-047` (`BUILD_COMPLETE`),
 `CodeCounter` incremented atomically from 46 to 47 (not guessed). Not
 yet merged - built on `refactor/font-family-centralization`, branched
 from `qa` at `c9c4f80`.
+
+Merged to `qa` as PR #645 (confirmed via `git fetch`, `origin/qa` @
+`19eb1b2`) - the flagged visual-review gap above was carried and closed
+by whoever merged it, not by this session.
+
+## GEN-2609-054 - type scale + spacing grid tokens: define for real (Step 1 completion)
+
+Dispatch: `docs/afa-design-tokens-reference.md` Section 8's type scale,
+spacing grid, and both page-title tiers were spec-only or literal-only
+- re-verified fresh against `qa` @ `19eb1b2` before writing anything
+(`grep -rn "afa-text-page-title" src/` returns zero hits repo-wide,
+confirmed independently of the dispatch's own claim). Tokens-only pass,
+explicitly no adoption: the ~36 existing page-title call sites stay as
+literals, and nothing in `src/` was touched outside `globals.css`.
+
+Added all 14 tokens to `:root` in `globals.css`, grouped with the
+existing `--afa-*` custom-property block (before the shadcn-scaffold
+`--background`/`--foreground` section, not inside it - these are
+theme-independent pixel values, not colors): the 6-step type scale
+(`--afa-text-micro` through `--afa-text-heading`), the 6-step 8px
+spacing grid (`--afa-space-1` through `--afa-space-6`), and the two
+already-decided page-title tiers (`--afa-text-page-title: 28px`,
+`--afa-text-page-title-lg: 32px`). Pixel-only, matching the existing
+token pattern - weight/line-height/font-family stay explicit at each
+future call site, no compound shorthand introduced.
+
+`globals.css` is on `check-design-tokens.js`'s `EXEMPT_FILES` list
+(GEN-2609-052), so these new literal px values inside it don't trip the
+hardcoded-literal check - confirmed by reading the script rather than
+assuming.
+
+Updated `afa-design-tokens-reference.md` Section 8's opening line from
+"Spec only - nothing below has been applied" to "Tokens exist, adoption
+doesn't" - the old line was now half-false, not fully false.
+
+Verified: `tsc --noEmit` clean, `check-design-tokens.js` clean (0
+offenses, nothing outside `globals.css` touched), real `next build`
+succeeded. Confirmed via `git diff` that `globals.css`'s only change is
+the 14 new declarations - nothing else in the file was reformatted or
+reordered.
+
+Logged to the Feedback table as `GEN-2609-054` (`BUILD_COMPLETE`),
+`CodeCounter` incremented atomically from 53 to 54 (not guessed). Not
+yet merged - built on `feat/design-tokens-type-scale-spacing`, branched
+from `qa` at `19eb1b2`.
+
+**Note (picked up in a new session immediately after the paragraph
+above was written):** the code/docs work above was already complete
+and consistent when this session resumed - re-verified the zero-
+adoption grep, the `EXEMPT_FILES` claim, `tsc`, `check-design-tokens.js`,
+and `next build` fresh rather than trusting the prior claims, all held.
+The Feedback-table logging claim itself could **not** be independently
+re-confirmed this session - the Supabase MCP connection was gone at
+resume, before any tool call here could check it either way. Not
+claiming it's wrong, just genuinely unverified from this side; whoever
+has Supabase access next should confirm `GEN-2609-054` really exists at
+`CodeCounter` 54 before assuming it's there, rather than trusting this
+sentence a second time removed from the source.
