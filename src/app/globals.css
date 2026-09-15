@@ -194,6 +194,32 @@
   --afa-sage-bright: #7AA86E;
   --afa-error-bright: #E67870;
 
+  /* Type scale & spacing grid (Step 1 completion, 15 Sep 2026) - derived
+     from grepping every shipped font-size/spacing value in src/, not
+     picked first and fitted after. See docs/afa-design-tokens-reference.md
+     Section 8 for the full derivation. Tokens only, zero adoption yet -
+     weight/line-height/font-family stay explicit at each call site, same
+     as the existing --afa-space and type-scale pattern. */
+  --afa-text-micro: 11px;
+  --afa-text-small: 12px;
+  --afa-text-ui: 13px;
+  --afa-text-body: 14px;
+  --afa-text-title: 16px;
+  --afa-text-heading: 24px;
+
+  --afa-space-1: 4px;
+  --afa-space-2: 8px;
+  --afa-space-3: 12px;
+  --afa-space-4: 16px;
+  --afa-space-5: 20px;
+  --afa-space-6: 24px;
+
+  /* Page-title tiers (Section 8.4/8.5) - decided and already applied
+     consistently as literals at ~36 call sites (GEN-2609-032/033/035);
+     this just names that existing decision, doesn't retrofit it. */
+  --afa-text-page-title: 28px;
+  --afa-text-page-title-lg: 32px;
+
   /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
      (below) is never applied to <html>/<body> anywhere in this app, so
      these shadcn-scaffold defaults were the actual fallback every

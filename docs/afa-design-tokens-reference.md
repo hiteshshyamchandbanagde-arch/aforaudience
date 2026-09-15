@@ -182,7 +182,7 @@ Real, shipped dashboards already exist under `src/app/dashboard/` — this is **
 
 ## 8. Type Scale & Spacing Grid (proposed, 12 Sep 2026 — UI/UX audit Section 06 / 12 Step 1)
 
-**Spec only — nothing below has been applied to any component yet.** Derived from grepping every shipped `font-size`/`fontSize` and `padding`/`margin`/`gap` value in `src/`, not assumed. Source: `docs/afa-uiux-design-audit.md`, qa @ `4456f3b`.
+**Tokens exist, adoption doesn't (as of 15 Sep, Step 1 completion).** All 14 tokens below — the 6-step type scale, the 6-step spacing grid, and both page-title tiers — are now real CSS custom properties in `src/app/globals.css`. Nothing in the app consumes them yet: the ~36 existing page-title call sites are still literals, and no component has been retrofitted to the base scale/grid either. Derived from grepping every shipped `font-size`/`fontSize` and `padding`/`margin`/`gap` value in `src/`, not assumed. Source: `docs/afa-uiux-design-audit.md`, qa @ `4456f3b`.
 
 ### 8.1 Type scale
 
