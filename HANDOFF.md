@@ -1,3 +1,57 @@
+# Session Handoff — 14-15 Sept 2026 (CC — audit tail, root-cause token fixes, button consolidation, font-family centralization)
+
+## qa HEAD: `c9c4f80` — `BUG-2609-041` through `-046` all merged and verified (`RESOLVED`/`DEPLOYED_QA`, independently re-queried, not assumed). `BUG-2609-047` is pushed, **not merged** — see below, this is the one thing that needs doing first. Supersedes, does not delete, the 14 Sept section below — its still-open items are folded forward unchanged except where resolved here.
+
+## Session narrative — seven dispatches, one continuous CC thread
+
+All seven were dispatched to CC directly this session (no chat involvement noted in this thread), each its own branch, each re-verified fresh against live `qa` before editing per standing convention — several premises turned out stale or wrong and were corrected rather than built as specced. Full per-ticket technical detail lives in `docs/design.md` (`BUG-2609-041` through `-047` entries) — this section is the narrative summary, not a duplicate.
+
+**`BUG-2609-026`/`-027`/`-028`** (audit tail, PR #638) — closed the last 3 items from the Step 6 UI/UX audit. `-026` (reduced-motion gaps) dropped from 3 sites to 2 on re-check: `ContributionMoment.tsx` turned out already fully covered by its own local block plus the consolidated one, not actually broken. `-027` (`--afa-text-muted` misused on real body copy) fixed exactly as specced, 5 sites. `-028` (bare bell emoji) — dispatch's premise was wrong: `BellIcon`/`BellOffIcon` already existed in `VenueIcons.tsx` (reused rather than duplicated), and a 3rd bare-emoji site turned up during re-grep (`ArtistProfileClientPage.tsx`'s follow-notify toggle) and got fixed in the same pass.
+
+**`BUG-2609-041`** (PR #639) — `SupportWidget.tsx` was never touched by any prior centralization sweep because it used unnamed Phase-0 light tokens/raw hex instead of the named legacy tokens those sweeps grepped for. Full dark-theme migration: shared `inputStyle`, the `appearance:none`+chevron select pattern from `profile/page.tsx`, the label+`variantStyle`+hidden-input file-upload pattern, `CheckIcon` replacing a bare `✓`. One deliberate deviation from the dispatch's literal snippet: kept input backgrounds at `--afa-surface-page` (not the dispatch's `--afa-surface-raised`) since this panel is itself `--afa-surface-raised` — using the same token would have erased the input/panel contrast.
+
+**`BUG-2609-042`** (PR #640) — dispatch claimed the seat-map builder's Guided Setup wizard had no mobile gate and rendered fully interactive on phones. **Wrong**, caught via `git blame`: it's been `isMobile`-gated with a read-only note since `GEN-2608-082` (31 Jul). The one real gap was the pre-canvas "Guided Setup vs. Draw It Myself" choice screen having zero mobile gating — fixed with a 2-condition change routing mobile visitors straight to the existing read-only view, rather than rebuilding something already done.
+
+**`BUG-2609-043`** (PR #641) — the actual root cause behind `-041`'s bug: `globals.css`'s `body{@apply bg-background text-foreground}` is real, but `.dark` (holding correct dark values) is never applied to `<html>`/`<body>` anywhere in the app — `:root`'s shadcn-scaffold light-mode defaults were the live fallback every unstyled element inherited, invisible almost everywhere because page roots set their own explicit color. Repointed `:root`'s `--background`/`--foreground` to the real tokens (scoped narrowly, `.dark` and other properties untouched); added the missing root `color` to `SupportWidget`'s panel. **Caught the dispatch's own Fix 3 before shipping it**: swapping `Toast.tsx`'s badge `'white'` to `--afa-on-fill-solid` would have fixed the amber case (2.63→7.13:1) but broken error and success (6.54→2.87:1, 6.39→2.94:1) since the badge's background is dynamic per toast kind. Shipped a per-kind color instead.
+
+**`BUG-2609-044`** (PR #642) — `my-feedback/page.tsx`'s `--afa-black` was undefined everywhere in the app, so 6 sites silently resolved to a hardcoded near-black fallback. Fixed to `--afa-text-primary`; re-ran the same exhaustive undefined-token grep repo-wide afterward (found 3 remaining fallback-guarded tokens, all genuinely defined — zero undefined tokens remain).
+
+**`BUG-2609-045`** (PR #643) — button consolidation phase 1: an exhaustive balanced-brace parser (not a naive regex, which misses these past an arrow-function's own `>`) found 6 byte-identical duplicate-style button groups, 21 instances, 4 files. Extracted local shared components (`ApproveButton`/`RejectButton`, `RemoveRowButton`, `RemoveGuidedRowButton`/`AddDashedRowButton`, `SeatStepperButton`) rather than forcing them into `Button.tsx` — none of its 7 variants matched any group without a visible difference. ~230 remaining raw `<button>` instances flagged as phase 2 (a judgment call per instance, not mechanically provable), not built.
+
+**`BUG-2609-046`** (PR #644) — `my-feedback/page.tsx` kept its own independent status-color map instead of drawing from `src/lib/statusStyle.ts`, plus a live bug (`NEW`'s badge text was near-invisible). Migrated onto `STATUS_TONE`, with 2 real judgment calls made rather than shipped mechanically: `REJECTED` kept its own dimmed text color rather than also taking `STATUS_TONE.muted`'s full opacity (would have made it visually identical to the now-fixed `NEW`, erasing an intentional distinction); the 6-status orange group's migration was verified via real computed contrast before treating it as safe (4.74:1 → 5.31:1, an improvement). Also caught a type mismatch in the dispatch's own suggested snippet.
+
+**`BUG-2609-047`** (branch `refactor/font-family-centralization`, **pushed, not yet merged**) — repo-wide font-family centralization: `Georgia, serif`/`system-ui, sans-serif`/bare `monospace` → `var(--font-display/sans/mono)` across 61 files. Fresh counts differed slightly from the dispatch's own; investigated every discrepancy rather than assuming drift (2 were comments, correctly left alone). Found and fixed several sites beyond the dispatch's stated file list using the same principle — compound font stacks in `about/page.tsx`/`LegalDocLayout.tsx`/`EnvBadge.tsx`/`dev/razorpay-test/page.tsx` that evaded exact-string matching, plus one Tailwind `font-serif` utility class in `AuthBrandPanel.tsx` (fixed by extending that file's own existing inline-style pattern, not touching Tailwind's global theme config). **This is a real, visible typeface change on 116+ headings/labels/badges — flagged explicitly in the PR, needs actual eyes on the rendered app before merging, not just a green build.**
+
+## The one thing next session should do first
+
+**Merge `BUG-2609-047`** (compare link in `CC_HANDOFF.md`), but only after a real visual pass — this changes actual rendered typefaces across most of the app. If nobody has looked at it yet, that's the session's first job, not merging on faith that a clean `next build` means it looks right.
+
+## No browser tool this session, again
+
+Every visual claim across all seven tickets was reasoned from token values, computed contrast math (2 real contrast computations done from scratch this session — the Toast.tsx badge and the STATUS_TONE.orange migration — not eyeballed), or existing on-page precedent, and flagged as unverified rather than claimed done. This is now many sessions running with the same gap. If a browser tool ever becomes available, `BUG-2609-047`'s visual review is the single highest-value thing to point it at.
+
+## Open items carried forward (unchanged from 14 Sept section below except where resolved above)
+
+**Resolved this session, remove from any older list:** `BUG-2609-026` through `-046`.
+
+**Still open:**
+- **`BUG-2609-047` needs merge + real visual review** (new, see above) — the highest-priority item.
+- Real product decision, still not made: cancelled/refunded ticket cards — stay non-interactive or tap through to the past event? (`GEN-2609-068`, unchanged since 14 Sept)
+- 🔴 Razorpay + Google Maps/Places QA key rotation — still the single oldest item on the whole board, now many sessions running.
+- 22 QA-project tables with RLS disabled — flagged repeatedly, no policy pass done.
+- The unclaimed `stash@{0}` — still untouched, spanning many sessions now (see `CC_HANDOFF.md`).
+- Everything else in the 14 Sept section below that isn't explicitly marked resolved above.
+
+## Session-start checklist
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `c9c4f80` until `BUG-2609-047` merges.
+2. Read this file, then `docs/design.md` for the full per-ticket technical detail on everything above.
+3. **Get real eyes on `BUG-2609-047`'s branch before merging it** — a live preview deploy or a local `next dev` look at a few of the 61 touched pages, not just trusting the clean build.
+4. Check Razorpay/Google Maps billing dashboards — still the oldest open item.
+5. Decide on `stash@{0}` — it's been carried forward unresolved for a very long time now.
+
+---
+
 # Session Handoff — 14 Sept 2026 (GEN-2609-067/068/069 — UI centralization audit, tickets-page v6 rebuild, live-bug fix)
 
 ## qa HEAD: `ee9e47c` — GEN-2609-067 (both PRs), -068, and -069 all merged and verified. Supersedes, does not delete, the 13 Sept handoff below — its still-open items are folded forward unchanged except where resolved here.

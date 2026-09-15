@@ -1,3 +1,26 @@
+# CC Local/Session Handoff — 14-15 Sep 2026 (git/session state only — see HANDOFF.md for the 7-ticket feature narrative)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `c9c4f80` (`BUG-2609-046`'s squash-merge, PR #644). Synced fresh (`checkout qa && fetch origin && reset --hard origin/qa`) at multiple points this session, confirmed via `git log`, never assumed.
+- Seven branches this session, six merged and remote-deleted (confirmed via `git ls-remote --heads origin <branch>` returning empty for each, not just trusted from the handoff text): `bugfix/gen-2609-026-027-028-audit-tail` (#638), `fix/support-widget-dark-theme` (#639), `fix/seat-map-mobile-light-view` (#640), `fix/foreground-background-token-root-cause` (#641), `fix/my-feedback-undefined-black-token` (#642), `refactor/button-consolidation-phase1` (#643), `refactor/my-feedback-status-tone-migration` (#644).
+- **One branch still open, not merged:** `refactor/font-family-centralization` (commit `c05be2e`, `BUG-2609-047`), confirmed still present on `origin` via `git ls-remote`. Compare link:
+  `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...refactor/font-family-centralization?expand=1`
+  This one touches 62 files (61 source + `docs/design.md`) and changes real rendered typefaces on 116+ elements — flagged in its own PR description as needing a genuine visual look before merge, not just a clean CI run. Don't merge this one on autopilot the way the other six went through.
+- All Feedback rows for `BUG-2609-041` through `-046` independently re-queried via `execute_sql` this session and confirmed `RESOLVED`/`DEPLOYED_QA` (not assumed from merge alone) — some external process or the PR merge itself appears to update these automatically now, worth noting since past sessions had to update them by hand. `BUG-2609-047` correctly still shows `BUILD_COMPLETE`/`null` deployStage, matching its unmerged state.
+- `CodeCounter` (`prefix='BUG', yearMonth='2609'`) incremented atomically for every new entry this session, never guessed: 40→41 (`-041`), 41→42 (`-042`), 42→43 (`-043`), 43→44 (`-044`), 44→45 (`-045`), 45→46 (`-046`), 46→47 (`-047`). Ends this session at `47`.
+- `which gh` / `$GITHUB_TOKEN`: still absent, re-confirmed this session. No PR/merge workflow was needed from this side this session anyway — every branch's compare link was handed off and (for six of seven) already merged by the time the next dispatch landed, same standing push-branch pattern as always.
+- The unclaimed `stash@{0}` (`"WIP on qa: bb8613e Merge pull request #50..."`) is still present, confirmed via `git stash list`, still untouched — now spanning a very large number of sessions. Genuinely worth a direct yes/no from Hitesh rather than continuing to carry it forward silently; it is trivial in content (a 2-line `.gitignore` change against a `qa` commit from long before this file existed) but nobody has claimed or dropped it.
+- Working tree clean at end of session except the pre-existing untracked `Figma/` dir (never staged, confirmed via `git status --short` before every commit this session).
+
+## Next session should
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `c9c4f80` until `BUG-2609-047` merges, then whatever its squash-merge SHA is.
+2. **Get a real visual look at `BUG-2609-047`'s branch before merging** — see `HANDOFF.md`'s top section for why this one specifically shouldn't go through on a clean-build assumption alone.
+3. Decide on `stash@{0}` — drop or pop, it's Hitesh's call, not something to keep silently flagging.
+
+---
+
 # CC Local/Session Handoff — 14 Sep 2026, later same day (sync + independent verification, git state only)
 
 ## Git state as of this handoff
