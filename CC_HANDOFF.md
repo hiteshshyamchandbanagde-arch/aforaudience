@@ -1,3 +1,21 @@
+# CC Local/Session Handoff — 15 Sep 2026 (git/session state only — see HANDOFF.md for the feature narrative)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `2edbcaf` (a direct docs-only commit correcting a `GEN-2609-054` numbering collision — see `HANDOFF.md`). Confirmed via fresh `git fetch`/`reset --hard`, not assumed.
+- Two merges this session (chat-side, PAT-based, not `gh`): `refactor/font-family-centralization` (`BUG-2609-047`, PR #645, squash sha `19eb1b2`) and `feat/design-tokens-type-scale-spacing` (`GEN-2609-054`, PR #646, squash sha `900d79e`). Both branches confirmed remote-deleted post-merge.
+- **PAT expired mid-session** — `401 Bad credentials` on the PR #645 merge PUT specifically (not on an earlier check in the same session). First time this has happened mid-session rather than between sessions — don't assume a working token stays working for a long session; a mid-session `401` means re-request, not retry.
+- `CodeCounter`: `GEN` prefix now at `54` (confirmed, was the source of this session's numbering-collision investigation). `BUG` prefix unchanged at `47` this round.
+- **Read `docs/afa-uiux-design-audit.md` at session start from now on**, alongside `HANDOFF.md`/`docs/design.md`. It's a real, 217-line, 12-Sep strategic sequencing document with an explicit build order (Section 12) that neither chat nor CC had been reading — several sessions' component-extraction work (this session's button consolidation included) happened out of sequence relative to its Step 1 as a result. Not being unwound, just: check it before assuming the next logical piece of work is unblocked.
+- The unclaimed `stash@{0}` on the local machine — still present, still untouched, still nobody's claimed or dropped it. Same standing ask: get a direct yes/no from Hitesh rather than continuing to silently carry it forward.
+- Working tree should be clean except the pre-existing untracked `Figma/` dir.
+
+## Next session should
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `2edbcaf`.
+2. Read `docs/afa-uiux-design-audit.md` before picking up new component-extraction work — Step 1 is now genuinely complete (14 real tokens in `globals.css`, zero adoption), so button-consolidation phase 2 (~230 raw `<button>` instances, judgment-heavy) is correctly sequenced to resume next, per `HANDOFF.md`'s top section.
+3. Decide on `stash@{0}` — still Hitesh's call.
+
 # CC Local/Session Handoff — 14-15 Sep 2026 (git/session state only — see HANDOFF.md for the 7-ticket feature narrative)
 
 ## Git state as of this handoff

@@ -1,3 +1,44 @@
+# Session Handoff — 15 Sept 2026 (chat — BUG-2609-047 merged, Step 1 of the 12-step audit completed, a real numbering collision found and fixed)
+
+## qa HEAD: `2edbcaf` — `BUG-2609-047` and `GEN-2609-054` both merged and verified. Supersedes, does not delete, the 14-15 Sept section below — its still-open items are folded forward unchanged except where resolved here.
+
+## The one thing this session did that's new: found and read `docs/afa-uiux-design-audit.md`
+
+This file exists — a comprehensive 12-Sep strategic UI/UX audit, 217 lines, with an explicit **6-step build sequence in its own Section 12**: Step 1 (type-scale + 8px grid spec) must ship *before* Step 4 (extract the component library from the worst legacy-token offenders), and Step 5 (bring in Figma Make) comes *after* Steps 1–4, not before. Neither chat nor CC had been reading this file — every session's work, including `BUG-2609-045`'s button consolidation and `-058`/`-066`'s earlier Button extractions, has been happening as the "simultaneous push" this document explicitly warns against. **Read this file at session start from now on, alongside `HANDOFF.md`/`docs/design.md`** — it's load-bearing for sequencing, not optional background reading.
+
+Checked whether Step 1 was actually done (Hitesh's own instinct, correctly half-right): `docs/afa-design-tokens-reference.md` §8 has the full derived spec (real type scale + spacing grid, both page-title tiers) — but it says itself "spec only, nothing applied," and independent grep confirmed zero `--afa-text-*`/`--afa-space-*` tokens existed anywhere in `globals.css`. The two page-title tiers (`GEN-2609-032`/`-033`/`-035`) had real, verified, shipped work behind them — but as **repeated correct literal values at ~36 call sites, never actually promoted to a named token**. Real, if subtle, distinction: consistently-applied hardcoded values aren't the same as a single source of truth.
+
+## `BUG-2609-047` (font-family centralization) — merged
+
+Visually reviewed this time, not just build-checked — the one exception to this session's "no browser tool" pattern. Gave Hitesh a prioritized page list (homepage intro-splash, `/about`, `/login`+`/forgot-password`'s `AuthBrandPanel`, a legal page, `/dev/razorpay-test`, one page per dashboard role, `/checkout/[bookingId]`) via a live Vercel preview URL for the PR branch rather than merging on faith. Approved, merged (PR #645, sha `19eb1b2`), Vercel `READY`, zero runtime errors, `RESOLVED`/`DEPLOYED_QA`.
+
+**Mid-merge, the GitHub PAT expired** (`401 Bad credentials` on the merge PUT, not on the first check earlier this session) — this is the first time a PAT has died *mid-session* rather than between sessions; don't assume a token that worked an hour ago still works for a long session. Hitesh supplied a fresh one, stored at the usual path, merge retried and succeeded.
+
+## `GEN-2609-054` (type-scale + spacing tokens — Step 1 completion) — merged, with a real collision found and fixed
+
+Per Hitesh's decision ("finish Step 1 first"), dispatched defining the 14 already-derived tokens for real in `globals.css`, zero component adoption. **CC had already started this independently** — resumed to find in-progress, uncommitted work on a matching branch (`GEN-2609-054` per its own commit), plus an unrelated stray `public/sw.js` `CACHE_VERSION` bump that CC correctly found and reverted before pushing (not part of this ticket). Re-verified everything fresh rather than trusting the leftover state: zero-adoption grep, `EXEMPT_FILES` status, `tsc`, `check-design-tokens.js`, `next build` all held. Diff-verified independently before merging (PR #646, sha `900d79e`) — all 14 tokens exact values, nothing else in `globals.css` touched. Vercel `READY`, zero runtime errors, `RESOLVED`/`DEPLOYED_QA`.
+
+**Found while closing this out: a real `GEN-2609-054` numbering collision in `docs/design.md`.** An older entry (a terracotta-button-sweep investigation, written in a session without Supabase access) had self-guessed `GEN-2609-054` for its own work — colliding with this ticket's real, correctly-`CodeCounter`-issued `GEN-2609-054`. Investigated rather than assumed: the terracotta entry's own described work (migrating `forgot-password`/`reset-password` to `Button variant="form-submit"`) genuinely shipped (confirmed live in both files), and the wider terracotta sweep it recommended splitting off was properly finished and correctly renumbered as `GEN-2609-060` through `-066` in a later session (`git log` confirms "closes the terracotta sweep" commits under those numbers). Corrected via a direct docs-only commit to `qa` (`2edbcaf`) — added a correction note to the mislabeled historical entry rather than rewriting it, and closed out the type-scale entry's own stale "Supabase was disconnected, couldn't verify" caveat now that it's confirmed.
+
+## Where this leaves the 12-step audit
+
+- **Step 1: done for real now.** 14 tokens exist as genuine CSS custom properties. Zero adoption anywhere — that's deliberate, not a gap.
+- **Step 4 (component library extraction): partially underway**, out of sequence relative to Step 1 until just now — `BUG-2609-045`'s button consolidation phase 1 (6 duplicate groups, 21 instances, 4 files) and the older `GEN-2609-058`/`-060`–`-066`/`-053`/`-060` Button/Badge extraction work all predate Step 1's completion. Not being unwound — just noting the sequence was violated in practice before this session caught it.
+- **Button phase 2** (the ~230 non-duplicate raw `<button>` instances, judgment-heavy, not mechanically provable) was about to start this session when the Step 1 discovery interrupted it. **This is the next thing to pick up** — now correctly sequenced behind a completed Step 1.
+- **Step 5 (Figma Make)** stays explicitly held per Hitesh's own standing instruction this session ("ignore Figma for now, I'll tell you explicitly") — which the audit doc's own sequence agrees with anyway.
+
+## Carried forward, unchanged from before
+
+- `GEN-2609-015` (seat picker legend/squished seats) — still unverified visually.
+- `BUG-2609-029` (i18n half only on `PhoneVerifyNudge.tsx`) — still open.
+- Icon-naming collision (`calendar`/`tag`/`map`) from the centralization audit — still undispatched.
+- Reduced-motion DevTools click-through verification — still no browser tool, now spanning many sessions.
+- Razorpay/Maps API key rotation — oldest standing item, Hitesh action required.
+- 22 Supabase tables with RLS disabled — still open, never actioned.
+- Font-size *scale adoption* (as opposed to definition, now done) — a real, separate, larger retrofit across ~36+ files, not started.
+
+## No browser tool, again — except `BUG-2609-047`, which got a real one this time (see above)
+
 # Session Handoff — 14-15 Sept 2026 (CC — audit tail, root-cause token fixes, button consolidation, font-family centralization)
 
 ## qa HEAD: `c9c4f80` — `BUG-2609-041` through `-046` all merged and verified (`RESOLVED`/`DEPLOYED_QA`, independently re-queried, not assumed). `BUG-2609-047` is pushed, **not merged** — see below, this is the one thing that needs doing first. Supersedes, does not delete, the 14 Sept section below — its still-open items are folded forward unchanged except where resolved here.
