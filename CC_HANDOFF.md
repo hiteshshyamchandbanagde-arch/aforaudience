@@ -1,3 +1,20 @@
+# CC Local/Session Handoff — 16 Sep 2026 (confirmation only — no new work this session)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `a3a9d01` — chat's own numbering-collision handoff commit (one past the `2edbcaf` the prior CC_HANDOFF.md entry cites, same self-referential lag every handoff in this file has had: written just before its own commit lands). Confirmed via fresh `fetch`/`reset --hard`, not assumed.
+- **No code work done this session** — picked up, read `HANDOFF.md`'s and this file's latest entries in full, and verified rather than re-derived: `BUG-2609-047` and `GEN-2609-054` are both confirmed merged (`#645`/`#646`), the local `feat/design-tokens-type-scale-spacing` branch's diff against `qa` came back empty (content fully landed), so it was force-deleted locally — nothing lost, `origin` had already deleted its copy.
+- The unclaimed `stash@{0}` — still present (`git stash list` re-checked this session), still untouched. Now spanning a very large number of sessions with no resolution either way.
+- Working tree clean except the pre-existing untracked `Figma/` dir.
+
+## Next session should
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `a3a9d01`.
+2. Read `docs/afa-uiux-design-audit.md` (Section 12's build sequence) before starting new component-extraction work, per the 15 Sep entry below — Step 1 is genuinely done, so **button-consolidation phase 2** (the ~230 non-duplicate raw `<button>` instances flagged in `BUG-2609-045`, judgment-heavy, not mechanically provable) is the correctly-sequenced next piece, per `HANDOFF.md`'s top section.
+3. Decide on `stash@{0}` — still Hitesh's call, not getting any fresher by being carried forward again.
+
+---
+
 # CC Local/Session Handoff — 15 Sep 2026 (git/session state only — see HANDOFF.md for the feature narrative)
 
 ## Git state as of this handoff
