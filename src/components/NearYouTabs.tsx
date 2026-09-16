@@ -125,13 +125,13 @@ export default function NearYouTabs() {
       <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <button
           onClick={() => setTab('events')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-fill-solid)' : '2px solid transparent' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabEvents}
         </button>
         <button
           onClick={() => setTab('artists')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-fill-solid)' : '2px solid transparent' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 6px', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabArtists}
         </button>

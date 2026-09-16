@@ -1,5 +1,7 @@
 'use client'
 
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+
 const RANGES: { value: string; label: string }[] = [
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
@@ -22,8 +24,8 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
             borderRadius: '6px',
             border: 'none',
             cursor: 'pointer',
-            color: value === r.value ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-            background: value === r.value ? 'var(--afa-fill-solid)' : 'transparent',
+            color: value === r.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
+            background: value === r.value ? FILL_SOLID_TINT : 'transparent',
           }}
         >
           {r.label}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 // Replaces the old free-text "comma separated" Facilities input, which
 // directly produced garbage public-facing data (Feedback 3213952d, session
@@ -93,9 +94,9 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
                 fontWeight: 600,
                 padding: '7px 14px',
                 borderRadius: '999px',
-                border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
-                background: selected ? 'var(--afa-fill-solid)' : 'transparent',
-                color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                border: selected ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                background: selected ? FILL_SOLID_TINT : 'transparent',
+                color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                 cursor: 'pointer',
               }}
             >

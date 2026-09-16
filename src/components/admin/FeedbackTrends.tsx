@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 // Admin Dashboard v1 trend charts (design.md §9.1).
 //
@@ -274,9 +275,9 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                     fontWeight: 600,
                     padding: '4px 9px',
                     borderRadius: '999px',
-                    border: granularity === g ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                    background: granularity === g ? 'var(--afa-fill-solid)' : 'transparent',
-                    color: granularity === g ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                    border: granularity === g ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                    background: granularity === g ? FILL_SOLID_TINT : 'transparent',
+                    color: granularity === g ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: 'pointer',
                   }}
                 >
