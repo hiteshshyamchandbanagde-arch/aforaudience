@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 // Replaces the old free-text "comma separated" Facilities input, which
 // directly produced garbage public-facing data (Feedback 3213952d, session
@@ -85,23 +85,17 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         {PRESET_FACILITIES.map((facility) => {
           const selected = presetSelected.includes(facility)
           return (
-            <button
+            <Button
               key={facility}
+              variant="toggle-pill"
+              size="pill-sm"
+              fullWidth={false}
               type="button"
+              selected={selected}
               onClick={() => togglePreset(facility)}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                padding: '7px 14px',
-                borderRadius: '999px',
-                border: selected ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                background: selected ? FILL_SOLID_TINT : 'transparent',
-                color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                cursor: 'pointer',
-              }}
             >
               {facility}
-            </button>
+            </Button>
           )
         })}
       </div>

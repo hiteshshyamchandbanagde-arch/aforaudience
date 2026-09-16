@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 // Admin Dashboard v1 trend charts (design.md §9.1).
 //
@@ -267,22 +267,16 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
             </div>
             <div style={{ display: 'flex', gap: '4px' }}>
               {(['weekly', 'daily'] as const).map((g) => (
-                <button
+                <Button
                   key={g}
+                  variant="toggle-pill"
+                  size="pill-sm"
+                  fullWidth={false}
+                  selected={granularity === g}
                   onClick={() => setGranularity(g)}
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    padding: '4px 9px',
-                    borderRadius: '999px',
-                    border: granularity === g ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                    background: granularity === g ? FILL_SOLID_TINT : 'transparent',
-                    color: granularity === g ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                    cursor: 'pointer',
-                  }}
                 >
                   {g === 'weekly' ? 'Weekly' : 'Daily'}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

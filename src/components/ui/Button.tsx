@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 
 // Shared Button - Step 4 of the UI/UX audit sequence
 // (docs/afa-uiux-design-audit.md, Section 06/12 Step 4): extracted from
@@ -23,7 +24,7 @@ import Link from 'next/link'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit'
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -54,6 +55,16 @@ type BaseProps = {
    * as they were before this prop existed - no default size token is
    * silently applied. */
   size?: number | ButtonSizeToken
+  /** `toggle-pill` only - whether this pill is the currently-selected
+   * option in its group. Ignored by every other variant (each of those
+   * is a single-state CTA role, not a two-state selector) - see
+   * `toggle-pill`'s own case in `variantBaseStyle` below. */
+  selected?: boolean
+  /** Optional leading icon, rendered before `children` - same additive,
+   * optional-and-harmless convention as `Badge.tsx`/`MessageButton.tsx`
+   * (GEN-2609-068): sized/positioned by the caller, laid out here via a
+   * `gap` that only takes effect once `icon` is actually passed. */
+  icon?: React.ReactNode
   style?: React.CSSProperties
   className?: string
 }
@@ -117,8 +128,8 @@ const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: numb
 // literal <Button> - e.g. profile/page.tsx's avatar-upload control,
 // which has to be a <label> wrapping a hidden file input, not a
 // <button> - can still apply the exact same variant look directly.
-export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken): React.CSSProperties {
-  const base = variantBaseStyle(variant, fullWidth, size)
+export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken, selected = false): React.CSSProperties {
+  const base = variantBaseStyle(variant, fullWidth, size, selected)
   // The size-token overlay applies to every variant uniformly (padding/
   // font-size/font-weight/border-radius only) - deliberately after the
   // variant's own base style so it wins, and deliberately never touches
@@ -126,7 +137,7 @@ export function variantStyle(variant: ButtonVariant, fullWidth: boolean, size: n
   return typeof size === 'string' ? { ...base, ...SIZE_CHROME[size] } : base
 }
 
-function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken): React.CSSProperties {
+function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: number | ButtonSizeToken, selected: boolean): React.CSSProperties {
   switch (variant) {
     case 'primary':
       return {
@@ -276,6 +287,51 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
       }
+    case 'toggle-pill':
+      // GEN-2609-069 - the segmented/filter/toggle shape found dominating
+      // BUG-2609-048's 239-raw-button inventory: a group of discrete,
+      // individually-bordered pills (not one container with dividers),
+      // each independently selectable. Design confirmed before build,
+      // spec locked - not re-derived here.
+      //
+      // Reuses `pill-sm`/`pill-md` from SIZE_CHROME for shape (999px
+      // radius, padding, font-size/weight) - this variant only defines
+      // color/border, same division of responsibility `size` already
+      // has with every other variant. Font-size check against the Step-1
+      // type scale (docs/afa-design-tokens-reference.md Section 8): no
+      // divergence to flag - `pill-sm`'s 13px is exactly
+      // `--afa-text-ui`, `pill-md`'s 14px is exactly `--afa-text-body`.
+      //
+      // Selected state deliberately uses FILL_SOLID_BORDER_TINT (a
+      // translucent border), NOT the solid `2px solid var(--afa-fill-
+      // solid)` border GEN-2609-063/-066/BUG-2609-048's 26 already-
+      // shipped box-shaped selector sites use - a real, locked
+      // difference from that convention for this specific pill shape,
+      // not an inconsistency to reconcile. Both states keep the same
+      // 1px border width - only color/background move - since the
+      // spec calls for discrete individually-bordered pills, not a
+      // width change on selection.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        width: fullWidth ? '100%' : undefined,
+        background: selected ? FILL_SOLID_TINT : 'transparent',
+        border: `1px solid ${selected ? FILL_SOLID_BORDER_TINT : 'var(--afa-border-resting)'}`,
+        color: selected ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
+        // Own baseline chrome (same defensive convention as
+        // `outline-neutral`) so this renders sensibly even if a future
+        // caller omits `size` - callers should always pass `pill-sm`/
+        // `pill-md` per the spec, this is only the fallback.
+        padding: '6px 14px',
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
     case 'close': {
       // `close` is the one variant that reads `size` as a pixel diameter,
       // not a size token - guard against the (currently unused) string
@@ -301,26 +357,32 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
 }
 
 export default function Button(props: ButtonProps) {
-  const { variant, children, fullWidth = true, size = 36, style, className } = props
+  const { variant, children, fullWidth = true, size = 36, selected = false, icon, style, className } = props
   const merged: React.CSSProperties = {
-    ...variantStyle(variant, fullWidth, size),
+    ...variantStyle(variant, fullWidth, size, selected),
     ...('disabled' in props && props.disabled ? { opacity: 0.7, cursor: 'default' } : null),
     ...style,
   }
+  const content = (
+    <>
+      {icon}
+      {children}
+    </>
+  )
 
   if ('href' in props && props.href) {
-    const { variant: _v, children: _c, fullWidth: _fw, size: _s, style: _st, className: _cl, href, ...anchorRest } = props as ButtonAsLink
+    const { variant: _v, children: _c, fullWidth: _fw, size: _s, selected: _sel, icon: _ic, style: _st, className: _cl, href, ...anchorRest } = props as ButtonAsLink
     return (
       <Link href={href} style={merged} className={className} {...anchorRest}>
-        {children}
+        {content}
       </Link>
     )
   }
 
-  const { variant: _variant, children: _children, fullWidth: _fullWidth, size: _size, style: _style, className: _className, ...rest } = props as ButtonAsButton
+  const { variant: _variant, children: _children, fullWidth: _fullWidth, size: _size, selected: _selected, icon: _icon, style: _style, className: _className, ...rest } = props as ButtonAsButton
   return (
     <button {...rest} style={merged} className={className}>
-      {children}
+      {content}
     </button>
   )
 }
