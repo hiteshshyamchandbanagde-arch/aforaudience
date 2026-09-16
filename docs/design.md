@@ -5125,3 +5125,128 @@ completion)". Marked `RESOLVED`/`DEPLOYED_QA` in the Feedback table.
 While checking this, also found and corrected the unrelated `GEN-2609-054`
 labeling collision earlier in this document (the terracotta-sweep entry)
 - see the correction note added there.
+
+## BUG-2609-048 - Button consolidation phase 2, batch 1: `--afa-fill-solid` masquerading as a toggle/filter selected-state color, 21 sites
+
+Dispatch: pick up `BUG-2609-045`'s own flagged phase-2 scope - the
+~230 raw `<button>` instances left unaudited after phase 1's 6
+mechanically-provable duplicate groups. Explicit rules from the
+dispatch: shared tokens are the single source of truth (call sites
+conform, not the reverse), any legacy-token hit gets migrated as part
+of extraction (not deferred), `--afa-fill-solid` is reserved for
+booking/payment/commit actions only and any other use is itself a bug
+to fix, and a real shape mismatch gets flagged/proposed rather than
+forced into an existing `Button` variant.
+
+**Built an exhaustive inventory before touching anything - not a
+manual skim.** A balanced-brace/paren/string scanner (the same class
+of tool `BUG-2609-045`'s own dispatch used, since a naive regex breaks
+on arrow-function `onClick` handlers) found **239 raw `<button>`
+elements across 75 files** - in line with the ~230 the dispatch
+estimated, re-verified fresh rather than trusted. Clustered every
+one's `(padding, borderRadius, fontSize, fontWeight)` shape repo-wide
+to find real cross-file duplication, not just per-file.
+
+**Two findings from the inventory, not one:**
+
+1. **Zero legacy-token hits anywhere in the 239.** The terracotta/
+   `--afa-ink`/`--afa-white` sweep (`GEN-2609-058` through `-067`)
+   genuinely finished the job - re-confirmed rather than assumed.
+2. **A real, repeated `--afa-fill-solid` reservation violation, not
+   found by `BUG-2609-045`'s duplicate-only search.** 21 raw buttons
+   across 8 files used the solid, full-opacity `--afa-fill-solid`
+   fill as a generic "this option is currently selected" indicator on
+   toggle/filter/segmented-option controls - none of them a booking,
+   payment, or commit action. Concentrated in
+   `dashboard/venue/[id]/seat-map/page.tsx`'s builder-mode selectors
+   (11 sites: seating-mode, active-level pair, guided-setup toggle,
+   manual-placement toggle, wizard-shape, multi-zone, row-alignment),
+   plus `FeedbackDetailPanel.tsx` (status/deploy-stage/severity filter
+   chips, 3), `FeedbackTrends.tsx` (granularity toggle, 1),
+   `FacilitiesPicker.tsx` (venue-amenity multi-select chip, 1),
+   `RangePicker.tsx` (date-range filter, 1), `SeatLayoutPreview.tsx`
+   and `SeatPicker.tsx` (level-switcher tabs, 1 each), and
+   `NearYouTabs.tsx` (home-page tab underline, 2).
+
+**Fixed by completing an already-shipped pattern's adoption, not
+inventing a new one.** `GEN-2609-063`/`-066` already established and
+shipped the correct look for exactly this "selected filter option"
+semantic at 5 other call sites (`events/create` x2, `events/[id]/
+checkin`, `events/[id]/edit`, `venue/[id]/edit`'s rate-type picker):
+`border: '2px solid var(--afa-fill-solid)'` / `background:
+FILL_SOLID_TINT` / `color: 'var(--afa-fill-solid)'` on the selected
+state - a translucent tint, not a solid fill, so it reads as an
+accented chip rather than a second CTA-weight button competing with
+the real one. The 21 sites found here were a real adoption gap
+against that already-reviewed convention, not a new design decision -
+migrated all 21 onto it verbatim (`FILL_SOLID_TINT` imported from
+`@/lib/statusStyle` in the 7 files that didn't already have it).
+`NearYouTabs.tsx`'s pair is structurally different (a `borderBottom`
+tab-underline, no fill box at all) - fixed to `var(--afa-amber)`
+instead, this repo's own documented "quiet accent, never CTA" token,
+already used for the same active/hover-indicator role elsewhere
+(`hover-lift-card`'s title-color transition).
+
+**One incidental, in-scope fix found while migrating the paired
+level-select/delete buttons in `seat-map/page.tsx`:** the delete "x"
+button's text color previously flipped from `--afa-error` (red) to
+`--afa-on-fill-solid` (near-black) whenever that level was active -
+a real, small, pre-existing inconsistency (a delete affordance
+shouldn't stop looking like one). Now stays `--afa-error` in both
+states; background/border still track the paired select button's
+selected state so the joined pill reads as one connected control.
+
+**Flagged, not fixed - reviewed and left alone deliberately:**
+- `OrganiserFollowButton.tsx`/`VenueFollowButton.tsx` (3 sites) - the
+  already-documented `BUG-2608-076` Follow-button pattern
+  (`docs/afa-design-tokens-reference.md` Section 4). Follow is
+  explicitly treated as a CTA-weight engagement action in this app,
+  not a mismatch to fix.
+- `ArtistProfileClientPage.tsx`'s prev/next-artist carousel arrows (2
+  sites) - a genuinely borderline case. These reuse the page's own
+  already-established `.afa-cta-solid` class (also used on this same
+  page for its real Follow/View-Event/Login CTAs), and "browsing to
+  another artist" sits closer to a page-level navigation accent than
+  a filter chip. Reviewed and left as-is rather than silently decided
+  either way, per the dispatch's own "flag rather than force"
+  instruction - a call for whoever picks up the next batch.
+
+**The real shape behind most of the 239-button inventory: a
+recurring, currently undocumented "segmented/toggle option" role that
+`Button.tsx` doesn't model at all.** Every variant `Button.tsx`
+currently has (`primary`/`secondary`/`secondary-reveal`/`close`/
+`outline`/`outline-neutral`/`form-submit`) is a single-state CTA role
+- none represent a two-state selected/unselected control. The 21
+sites fixed here are drawn from a much larger population of the same
+underlying shape (`seat-map/page.tsx` alone still has its own
+internally-consistent toggle buttons beyond the 11 touched here, and
+the repo-wide style-signature clustering surfaced dozens more
+candidates across dashboard/admin/organiser/venue forms). Not forced
+into `Button.tsx` this pass - the component would need a real new
+concept (a `selected` boolean crossed with its own chrome), not a
+size/variant addition like `-058`'s or `-066`'s. Flagged as the
+strongest, highest-volume candidate for the next `Button`-consolidation
+batch, alongside the remaining non-toggle raw-button population this
+inventory didn't yet triage.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against
+this branch's diff from `origin/qa`: clean, 0 offenses (every literal
+touched - `FILL_SOLID_TINT`'s `rgba(255,90,54,0.08)`, the pre-existing
+hex colors on the two untouched `NearYouTabs.tsx` lines - already
+exists byte-identical in the base tree, correctly recognized as
+relocated/unchanged rather than new). Real `next build`: clean, all 8
+touched files' routes present in the route list
+(`/dashboard/venue/[id]/seat-map`, `/dashboard/admin/feedback`,
+`/events/[id]/seats`, `/dashboard/organiser/events/[id]/edit`, `/`).
+No visual verification possible (no browser tool this session) - the
+selected-state substitution was checked property-by-property against
+the 5 already-shipped `FILL_SOLID_TINT` reference sites instead of
+screenshot diffing; flagged as reasoned, not screenshotted.
+
+Built on `refactor/button-consolidation-phase2-fillsolid-toggle-fix`,
+branched from `qa` at `372ee08`. `CodeCounter` read (not yet
+incremented - the write was withheld by this session's own permission
+guard as a shared-resource modification; flagging for the user/next
+session to complete rather than working around it) shows `BUG/2609`
+at `currentSeq: 47`, so this is provisionally `BUG-2609-048` pending
+that increment.
