@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, type TouchEvent } from 'react'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 // Admin Dashboard v1 detail panel (design.md §9.1).
 //
@@ -312,9 +313,9 @@ export default function FeedbackDetailPanel({
                     fontWeight: 600,
                     padding: '6px 12px',
                     borderRadius: '999px',
-                    border: item.status === s ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                    background: item.status === s ? 'var(--afa-fill-solid)' : 'transparent',
-                    color: item.status === s ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                    border: item.status === s ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                    background: item.status === s ? FILL_SOLID_TINT : 'transparent',
+                    color: item.status === s ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.6 : 1,
                   }}
@@ -370,9 +371,9 @@ export default function FeedbackDetailPanel({
                   onClick={() => onSetDeployStage(null)}
                   style={{
                     fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
-                    border: !item.deployStage ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                    background: !item.deployStage ? 'var(--afa-fill-solid)' : 'transparent',
-                    color: !item.deployStage ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                    border: !item.deployStage ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                    background: !item.deployStage ? FILL_SOLID_TINT : 'transparent',
+                    color: !item.deployStage ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
                   }}
                 >
@@ -409,9 +410,9 @@ export default function FeedbackDetailPanel({
                   fontWeight: 600,
                   padding: '6px 12px',
                   borderRadius: '999px',
-                  border: !item.severity ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                  background: !item.severity ? 'var(--afa-fill-solid)' : 'transparent',
-                  color: !item.severity ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                  border: !item.severity ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                  background: !item.severity ? FILL_SOLID_TINT : 'transparent',
+                  color: !item.severity ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                   cursor: busy ? 'default' : 'pointer',
                   opacity: busy ? 0.6 : 1,
                 }}

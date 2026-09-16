@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 // Read-only visual preview of a NUMBERED venue's saved seat layout, shown
 // on the event-creation/edit pricing screen. Confirmed still missing
@@ -74,9 +75,9 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 onClick={() => setActiveLevel(lvl)}
                 style={{
                   fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer',
-                  border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                  background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                  color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                  border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                  background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                  color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                 }}
               >
                 {lvl || 'Main'}

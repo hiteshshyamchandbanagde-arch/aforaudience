@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import { normalizeWhitespace, normalizeForCompare } from '@/lib/text'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 import { IconSection, IconSeatGlyph, IconAisleV, IconAisleH, IconLevel, IconLockGlyph } from '@/components/dashboard/VenuePortalUI'
 
 // §9.4 twenty-fourth amendment - Venue Owner seat-map builder.
@@ -1438,9 +1439,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={() => setSeatingMode('GENERAL_ADMISSION')}
               style={{
                 padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                border: seatingMode === 'GENERAL_ADMISSION' ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                background: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                border: seatingMode === 'GENERAL_ADMISSION' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                background: seatingMode === 'GENERAL_ADMISSION' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                color: seatingMode === 'GENERAL_ADMISSION' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
               }}
             >
               General Admission
@@ -1449,9 +1450,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={() => setSeatingMode('NUMBERED')}
               style={{
                 padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                border: seatingMode === 'NUMBERED' ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                background: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                color: seatingMode === 'NUMBERED' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                border: seatingMode === 'NUMBERED' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                background: seatingMode === 'NUMBERED' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                color: seatingMode === 'NUMBERED' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
               }}
             >
               Numbered Seating
@@ -1515,9 +1516,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         onClick={() => setActiveLevel(lvl)}
                         style={{
                           padding: '7px 14px', borderRadius: '8px 0 0 8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                          border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)',
-                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                          color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                          border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                          background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                          color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                         }}
                       >
                         {levelLabel(lvl)}
@@ -1528,9 +1529,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         aria-label={`Remove ${levelLabel(lvl)}`}
                         style={{
                           padding: '7px 8px', borderRadius: '0 8px 8px 0', fontSize: '13px', cursor: 'pointer',
-                          border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.15)', borderLeft: 'none',
-                          background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                          color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-error)',
+                          border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)', borderLeft: 'none',
+                          background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                          color: 'var(--afa-error)',
                         }}
                       >
                         ×
@@ -1621,7 +1622,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
                       onClick={() => setGuidedPanelOpen((v) => !v)}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: guidedPanelOpen ? 'none' : '1px solid rgba(255,90,54,0.4)', background: guidedPanelOpen ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: guidedPanelOpen ? 'var(--afa-on-fill-solid)' : 'var(--afa-fill-solid)' }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', border: guidedPanelOpen ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(255,90,54,0.4)', background: guidedPanelOpen ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: 'var(--afa-fill-solid)' }}
                     >
                       <IconSection size={14} /> {guidedPanelOpen ? 'Collapse Guided Setup' : 'Guided Setup'}
                     </button>
@@ -1643,9 +1644,9 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
                       style={{
                         padding: '9px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: manualPlacement ? 'none' : '1px solid rgba(245,245,240,0.2)',
-                        background: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                        color: manualPlacement ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                        border: manualPlacement ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)',
+                        background: manualPlacement ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                        color: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {manualPlacement ? '✓ Manual placement ON' : 'Manual placement OFF'}
@@ -1682,10 +1683,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           What's your seating shape?
                         </label>
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <button onClick={() => setWizardShape('rows')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape !== 'other' ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <button onClick={() => setWizardShape('rows')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape !== 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardShape !== 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Straight rows facing the stage
                           </button>
-                          <button onClick={() => setWizardShape('other')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape === 'other' ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <button onClick={() => setWizardShape('other')} style={{ padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardShape === 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardShape === 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Curved rows, round tables, or a U-shape
                           </button>
                         </div>
@@ -1706,10 +1707,10 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           <IconSection size={13} style={{ opacity: 0.6 }} /> Sections
                         </label>
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                          <button onClick={() => setMultiZone(false)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <button onClick={() => setMultiZone(false)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === false ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             One section for everything
                           </button>
-                          <button onClick={() => setMultiZone(true)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? 'none' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <button onClick={() => setMultiZone(true)} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: wizardMultiZone === true ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Multiple sections
                           </button>
                         </div>
@@ -1769,7 +1770,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </label>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           {(['left', 'center', 'right'] as const).map((opt) => (
-                            <button key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? 'none' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            <button key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                               {opt}
                             </button>
                           ))}

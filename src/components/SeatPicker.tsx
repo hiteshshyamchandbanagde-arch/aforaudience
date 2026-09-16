@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
+import { FILL_SOLID_TINT } from '@/lib/statusStyle'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
 // x/y layout the Venue Owner builder saved, read-only except for click-
@@ -320,9 +321,9 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
               onClick={() => setActiveLevel(lvl)}
               style={{
                 fontSize: '12px', fontWeight: 600, padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
-                border: activeLevel === lvl ? 'none' : '1px solid rgba(245,245,240,0.2)',
-                background: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-surface-raised)',
-                color: activeLevel === lvl ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
+                border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)',
+                background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
+                color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
               }}
             >
               {lvl || 'Main'}
