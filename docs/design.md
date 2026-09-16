@@ -5250,3 +5250,120 @@ guard as a shared-resource modification; flagging for the user/next
 session to complete rather than working around it) shows `BUG/2609`
 at `currentSeq: 47`, so this is provisionally `BUG-2609-048` pending
 that increment.
+
+## GEN-2609-069 - `Button` `toggle-pill` variant + 5-site retrofit
+
+Dispatch: `BUG-2609-048`'s own finding - most of the 239-instance raw-
+button inventory is one repeated segmented/filter/toggle shape that
+`Button.tsx`'s 7 existing variants (all single-state CTA roles) don't
+model. Design confirmed and locked before this dispatch - not
+re-derived here.
+
+**Numbering note, flagged rather than guessed.** `CodeCounter`'s
+`GEN/2609` row reads `currentSeq: 54`, but `design.md` itself already
+uses `GEN-2609-055` through `-068` as real, already-shipped ticket
+labels (re-confirmed via `grep` against this file, not assumed) - the
+same drift the `GEN-2609-054` labeling-collision note earlier in this
+document already flagged once. Incrementing `CodeCounter` to 55 here
+would collide with the entry this document already calls
+`GEN-2609-055`. Used `GEN-2609-069` instead - one past this
+document's own real highest `GEN-2609` number - since that's the
+namespace actually load-bearing in this codebase (Button.tsx's own
+code comments cite `GEN-2609-066`/`-068` by number). Not attempting to
+reconcile the wider `CodeCounter`-vs-`design.md` drift here - out of
+this ticket's scope, flagged again for whoever eventually does.
+
+**Built `toggle-pill` on `Button.tsx`, spec-locked, not reinterpreted:**
+- Reuses `pill-sm`/`pill-md` from the existing `SIZE_CHROME` table for
+  shape (999px radius, padding, font-size/weight) - this variant only
+  defines color/border, the same division of labor `size` already has
+  with every other variant. Checked the two sizes' hardcoded font-sizes
+  against the Step-1 type scale (`docs/afa-design-tokens-reference.md`
+  Section 8) per the dispatch's own instruction to flag any divergence
+  rather than silently pick one: none found - `pill-sm`'s `13px` is
+  exactly `--afa-text-ui`, `pill-md`'s `14px` is exactly
+  `--afa-text-body`.
+- Selected state: `FILL_SOLID_TINT` background / `FILL_SOLID_BORDER_TINT`
+  border / `var(--afa-fill-solid)` text, imported from
+  `src/lib/statusStyle.ts` rather than retyped. Deliberately a
+  translucent border, not the solid `2px solid var(--afa-fill-solid)`
+  border `GEN-2609-063`/`-066`/`BUG-2609-048`'s 26 already-shipped
+  box-shaped selector sites use - a real, locked difference for this
+  pill shape specifically, called out in the code comment so it isn't
+  mistaken for an inconsistency to fix later.
+- Unselected state: transparent / `var(--afa-border-resting)` /
+  `var(--afa-text-secondary)` - the same pairing `outline-neutral`
+  already ships and already reasoned as legible.
+- New `selected`/`icon` props added to `Button`'s `BaseProps` and
+  threaded through `variantStyle`/`variantBaseStyle` (both gained a
+  4th parameter with a default, so every existing internal/exported
+  call site - including `variantStyle`'s external consumers like
+  `profile/page.tsx`'s avatar-upload label - keeps compiling
+  unchanged). `icon` reuses `Badge.tsx`/`MessageButton.tsx`'s existing
+  optional-leading-`ReactNode` convention (GEN-2609-068) rather than
+  inventing a second one; rendered before `children` in both the
+  `<button>` and `<Link>` render branches.
+
+**Retrofitted 5 sites - the pill-shaped (radius 999) subset of
+`BUG-2609-048`'s 21 already-tinted fixes, per that dispatch's own
+"exclude the 21 unless their pill/icon structure also needs to
+change" instruction.** All 5 needed to change (border width 2px->1px,
+custom padding/font-size -> the canonical `pill-sm` token) to match
+the now-real shared component, so retrofitting was in scope, not
+excluded: `FeedbackDetailPanel.tsx` (status filter, deploy-stage
+"Unset", severity "Unset" - 3 sites), `FeedbackTrends.tsx`
+(granularity toggle), `FacilitiesPicker.tsx` (venue-amenity chip). Pure
+structural consolidation onto shared code - same color family both
+before and after, no visual color change, only the border-width/
+padding rounding already established as acceptable tolerance
+throughout this ticket chain.
+
+**The other 11 `BUG-2609-048` sites (seat-map's 11, the box-shaped
+6-8px-radius selectors in `events/create`/`checkin`/`venue/edit`) were
+correctly NOT retrofitted** - they're a genuinely different shape
+(boxy, not pill), out of `toggle-pill`'s spec entirely. Confirmed by
+checking each site's own `borderRadius` before deciding, not assumed
+from the file list.
+
+**Confirmed via repo-wide grep that no other close-but-different
+toggle pattern was missed, per the dispatch's explicit instruction -
+found two real things, neither retrofitted:**
+1. **A second, real "amber accent" selected-chip family, deliberately
+   not touched.** `dashboard/admin/bookings/page.tsx`'s tab switcher
+   (line 146), `profile/page.tsx`'s role-switcher (line 794),
+   `GenrePicker.tsx` (line 64), and `MobileEventFilterSheet.tsx` (line
+   24) all use a structurally similar selected/unselected pill or chip
+   pattern, but built on `--afa-amber` (solid fill on 2 of the 4, tint
+   on the other 2) rather than `--afa-fill-solid`-derived colors.
+   Forcing these onto `toggle-pill`'s locked fill-solid-tint spec would
+   be a real, undiscussed color-family change, not a shape
+   consolidation - flagged for a follow-up decision (unify onto
+   `toggle-pill`, or formally recognize amber as a second legitimate
+   selected-state token), not silently made either way here.
+2. **A missed instance of `BUG-2609-048`'s own bug class, not a pill.**
+   `(public)/events/page.tsx`'s `.afa-events-mode-tab.active::after`
+   (a CSS-class-driven tab underline, not an inline `style={{}}`
+   object - why the previous ticket's ternary-in-inline-style scan
+   missed it) reuses `--afa-fill-solid` for its active-tab indicator,
+   the exact same misuse `NearYouTabs.tsx` had. Not a pill shape, so
+   out of this ticket's scope; flagged precisely (file/line/selector)
+   rather than fixed here, to keep this diff matched to its stated
+   scope - a one-line follow-up for whoever picks it up.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. Real `next build`:
+clean, all touched routes present (`/dashboard/admin/feedback`,
+`/events` and friends unaffected since that page wasn't touched). No
+`/dev` or Storybook-style isolated preview page exists in this repo to
+render the 4 new states (selected/unselected x pill-sm/pill-md)
+against, and no browser tool this session - verified by reasoning
+against already-proven token pairings instead: the selected state's
+background/text combination is byte-identical to the 26 already-
+shipped `FILL_SOLID_TINT`/`var(--afa-fill-solid)` sites (just a
+translucent border where those use a solid one); the unselected state
+is byte-identical to `outline-neutral`'s already-shipped pairing.
+Flagged as reasoned, not screenshotted, per this ticket chain's
+standing convention.
+
+Built on `feat/gen-2609-069-toggle-pill-button-variant`, branched from
+`qa` at `45710a9` (post `BUG-2609-048` merge, PR #647).

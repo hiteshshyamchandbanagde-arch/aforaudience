@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, type TouchEvent } from 'react'
-import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 // Admin Dashboard v1 detail panel (design.md §9.1).
 //
@@ -297,8 +297,12 @@ export default function FeedbackDetailPanel({
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Status</div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {STATUSES.map((s) => (
-                <button
+                <Button
                   key={s}
+                  variant="toggle-pill"
+                  size="pill-sm"
+                  fullWidth={false}
+                  selected={item.status === s}
                   disabled={busy}
                   onClick={() => {
                     if (NOTE_REQUIRED_STATUSES.includes(s) && s !== item.status) {
@@ -308,20 +312,9 @@ export default function FeedbackDetailPanel({
                       onSetStatus(s)
                     }
                   }}
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    border: item.status === s ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                    background: item.status === s ? FILL_SOLID_TINT : 'transparent',
-                    color: item.status === s ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                    cursor: busy ? 'default' : 'pointer',
-                    opacity: busy ? 0.6 : 1,
-                  }}
                 >
                   {labelize(s)}
-                </button>
+                </Button>
               ))}
             </div>
             {pendingNoteStatus && (
@@ -366,19 +359,16 @@ export default function FeedbackDetailPanel({
                 Deploy Stage
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <button
+                <Button
+                  variant="toggle-pill"
+                  size="pill-sm"
+                  fullWidth={false}
+                  selected={!item.deployStage}
                   disabled={busy}
                   onClick={() => onSetDeployStage(null)}
-                  style={{
-                    fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
-                    border: !item.deployStage ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                    background: !item.deployStage ? FILL_SOLID_TINT : 'transparent',
-                    color: !item.deployStage ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                    cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
-                  }}
                 >
                   Unset
-                </button>
+                </Button>
                 {DEPLOY_STAGES.map((ds) => (
                   <button
                     key={ds}
@@ -402,23 +392,16 @@ export default function FeedbackDetailPanel({
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Severity</div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <button
+              <Button
+                variant="toggle-pill"
+                size="pill-sm"
+                fullWidth={false}
+                selected={!item.severity}
                 disabled={busy}
                 onClick={() => onSetSeverity(null)}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  padding: '6px 12px',
-                  borderRadius: '999px',
-                  border: !item.severity ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
-                  background: !item.severity ? FILL_SOLID_TINT : 'transparent',
-                  color: !item.severity ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
-                  cursor: busy ? 'default' : 'pointer',
-                  opacity: busy ? 0.6 : 1,
-                }}
               >
                 Unset
-              </button>
+              </Button>
               {SEVERITIES.map((sev) => (
                 <button
                   key={sev}
