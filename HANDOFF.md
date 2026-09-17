@@ -1,3 +1,26 @@
+# Session Handoff — 17 Sept 2026 (CC — button consolidation phase 2 batch 1 + toggle-pill Button variant)
+
+## qa HEAD: `5bc7cf9` — `BUG-2609-048` (PR #647) and `GEN-2609-069` (PR #648) both merged, `RESOLVED`/`DEPLOYED_QA`, independently re-verified (qa HEAD, Vercel `READY`, zero runtime errors via Vercel MCP), not assumed. Supersedes, does not delete, the 15 Sept section below — its still-open items are folded forward unchanged except where resolved here.
+
+## `BUG-2609-048` — button consolidation phase 2, batch 1: `--afa-fill-solid` reservation violations
+
+Picked up the exact item the 15 Sept handoff flagged as next (line 27 below, now resolved). Built a fresh, exhaustive raw-`<button>` inventory (balanced-brace scanner, same class of tool `BUG-2609-045` used) rather than trusting the prior "~230" estimate: **239 across 75 files**, in line. Two real findings: zero legacy-token hits anywhere (the terracotta sweep really is done), and **21 raw toggle/filter/segmented-option buttons across 8 files misusing `--afa-fill-solid`** (reserved for booking/payment/commit) as a generic "selected" indicator — 11 of them in the seat-map builder alone. Fixed by completing an already-shipped pattern's adoption (`GEN-2609-063`/`-066`'s `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT`), not inventing a new one. Flagged, not touched: the Follow-button pattern (already-sanctioned CTA convention) and `ArtistProfileClientPage.tsx`'s prev/next-artist nav arrows (a genuine borderline case). Full detail: `docs/design.md`'s `BUG-2609-048` entry.
+
+## `GEN-2609-069` — `Button` `toggle-pill` variant + 5-site retrofit
+
+Direct follow-up dispatch: `BUG-2609-048`'s own finding was that most of the 239-button inventory is one repeated pill-shaped toggle shape `Button.tsx`'s 7 variants don't model. Design was locked before the dispatch (mockup reviewed). Built `variant="toggle-pill"` reusing the existing `pill-sm`/`pill-md` size tokens for shape, `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT` for selected state (deliberately a translucent border, not `-048`'s solid one — a locked, intentional difference, not an inconsistency). Added `selected`/`icon` props to `Button`, reusing `Badge.tsx`'s existing icon convention. Retrofitted the 5 sites that were both pill-shaped and already on the right color family from `-048`. Confirmed via repo-wide grep (including CSS-class-driven `.active` toggles, which a first pass missed) that no other pill-shaped toggle group exists — found and flagged two real things instead of forcing them in: a second "amber accent" selected-chip family at 4 sites (`admin/bookings` tab switcher, `profile`'s role-switcher, `GenrePicker.tsx`, `MobileEventFilterSheet.tsx`) using a different hue than the new variant's locked spec, and one more instance of `-048`'s own bug class on `(public)/events/page.tsx`'s `.afa-events-mode-tab.active::after` (CSS-class-driven, not a pill, out of this ticket's scope). Full detail: `docs/design.md`'s `GEN-2609-069` entry.
+
+## Open item this session couldn't resolve: `CodeCounter`/`design.md` numbering drift
+
+`CodeCounter`'s `GEN/2609` row reads `currentSeq: 54`, but `design.md` already uses `055` through `069` for real, already-shipped work (re-confirmed via grep, not assumed) — the same drift the 15 Sept section's `GEN-2609-054` collision note already flagged once, now confirmed wider than just that one entry. `GEN-2609-069` was assigned by reading `design.md`'s own real max + 1, not from the stale counter. **Not fixed here** — realigning `CodeCounter.GEN/2609` to 69 is a real, consequential write to shared state (not a simple "+1"), and this session's permission guard treats `CodeCounter` writes as sensitive (blocked once, then allowed on a retry — inconsistent, don't assume either behavior). Asked Hitesh whether to correct it; no answer yet as of this handoff. Whoever picks this up next: get an explicit yes before writing to `CodeCounter`, and note that `BUG/2609`'s counter (`48`) is currently in sync with `design.md`, only the `GEN` row has drifted.
+
+## Where this leaves button consolidation
+
+- **Phase 2, batch 1: done** (`BUG-2609-048`). **`toggle-pill` variant: done** (`GEN-2609-069`), 5 sites retrofitted.
+- **Flagged, real, not yet dispatched:** the amber-accent selected-chip family (4 sites) and the `events/page.tsx` fill-solid tab-underline bug (1 site, 1-line fix) — see `GEN-2609-069`'s entry above for exact locations.
+- **The other 11 `BUG-2609-048` sites** (seat-map's boxy 6-8px-radius selectors) are a genuinely different, non-pill shape — correctly out of `toggle-pill`'s scope, not a leftover.
+- **The bulk of the 239-button inventory** (everything outside the toggle/segmented shape) still hasn't been triaged - a real phase 3, per-instance judgment call, not started.
+
 # Session Handoff — 15 Sept 2026 (chat — BUG-2609-047 merged, Step 1 of the 12-step audit completed, a real numbering collision found and fixed)
 
 ## qa HEAD: `2edbcaf` — `BUG-2609-047` and `GEN-2609-054` both merged and verified. Supersedes, does not delete, the 14-15 Sept section below — its still-open items are folded forward unchanged except where resolved here.
