@@ -351,7 +351,7 @@ function EventsPageContent() {
         .afa-events-mode-tab { font-family: var(--font-ui); font-size: 18px; background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
         .afa-events-mode-tab:hover { color: rgba(245,245,240,0.7); }
         .afa-events-mode-tab.active { color: var(--afa-cream); }
-        .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-fill-solid); }
+        .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-amber); }
         .afa-events-price-filter { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: rgba(245,245,240,0.4); padding: 0; transition: color 0.2s ease; }
         .afa-events-price-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-price-filter.active { color: var(--afa-amber); }
