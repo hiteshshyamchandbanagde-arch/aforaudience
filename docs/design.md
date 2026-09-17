@@ -5367,3 +5367,53 @@ standing convention.
 
 Built on `feat/gen-2609-069-toggle-pill-button-variant`, branched from
 `qa` at `45710a9` (post `BUG-2609-048` merge, PR #647).
+
+## BUG-2609-049 - `events/page.tsx` tab-underline: the 22nd `--afa-fill-solid` misuse, CSS-class-driven
+
+Dispatch: `GEN-2609-069`'s own follow-up grep (confirming no toggle
+pattern was missed before shipping `toggle-pill`) found a 22nd
+instance of `BUG-2609-048`'s exact bug class -
+`(public)/events/page.tsx`'s `.afa-events-mode-tab.active::after`
+reuses `--afa-fill-solid` (reserved for booking/payment/commit) for a
+plain active-tab underline. Missed by both prior passes because it's
+CSS-class-driven (a `<style jsx>` rule), not inline-styled or
+`className`-ternary-driven the way every other site those two tickets
+found was.
+
+**Re-grepped repo-wide for `::after`/`::before` rules referencing
+`--afa-fill-solid` before fixing anything, per the dispatch's explicit
+"confirm this is really the last instance" instruction - not assumed.**
+Only 2 files in all of `src/` use `::after`/`::before` at all:
+`(public)/events/page.tsx` (the bug) and `(public)/artists/page.tsx`
+(`.afa-genre-filter::after`, a hover-reveal underline that already
+correctly uses `--afa-amber`, confirmed by reading it, not just
+counting the file). Genuinely the last instance, not a guess.
+
+**Checked for an established "active tab underline" convention before
+picking a fix, per the dispatch's explicit instruction, rather than
+inventing one:** `ArtistProfileClientPage.tsx`'s own tab switcher
+(`borderBottom: 2px solid var(--afa-amber)` when active) and
+`NearYouTabs.tsx` (fixed to the same pattern in `BUG-2609-048`) both
+already establish `2px solid var(--afa-amber)` as this app's real
+active-tab-underline look. Even `events/page.tsx`'s own two sibling
+`.active` rules on the very same lines
+(`.afa-events-type-filter.active`, `.afa-events-price-filter.active`)
+already use `--afa-amber` - only this one underline was the outlier.
+Matched the existing convention: `background: var(--afa-fill-solid)`
+-> `background: var(--afa-amber)`, one line.
+
+**Correctly not routed through `Button`'s new `toggle-pill` variant**
+(per the dispatch's own explicit instruction) - this is a `::after`
+pseudo-element underline under a text label, not a button and not a
+pill. Right shape call, not a missed consolidation opportunity.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. Real `next build`:
+clean, `/events` present (static). No visual verification possible (no
+browser tool this session) - reasoned from the token swap being
+byte-identical to two already-shipped, already-reasoned instances
+(`ArtistProfileClientPage.tsx`, `NearYouTabs.tsx`) rather than
+screenshotted.
+
+Built on `fix/bug-2609-049-events-tab-underline-fillsolid`, branched
+from `qa` at `dbc3c28` (post `GEN-2609-069` merge, PR #648).
