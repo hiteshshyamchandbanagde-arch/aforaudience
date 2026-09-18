@@ -5548,3 +5548,52 @@ for the explicit cross-reference note.
 
 Built on `ee9e47c`, merged to `qa` via PR #637 on 14 Sep 2026 - no new
 branch for this entry, documentation/numbering only.
+
+## GEN-2609-072 - UI/UX Centralization Audit (18 Sep) - findings only, no fixes yet
+
+Full-repo audit against 69 substantive page files plus shared
+components (`SiteNav`, `DashboardShell`, `Toast`, `EventCard`, `Photo`,
+`Button`), verified by direct grep against `qa`, not taken on prior
+audit summaries alone.
+
+1. **Typography scale (`--afa-text-*`, `--afa-space-*`) - zero adoption,
+   repo-wide.** Defined in `globals.css`, referenced as a live style in
+   zero files, including `Button.tsx` itself (hand-types 12/13/14/16 as
+   bare numbers).
+2. **Color palette not actually locked at the source.** `globals.css`
+   defines 84 `--afa-*` color tokens against the documented "locked 4";
+   17 are fully orphaned (defined, unused anywhere).
+3. **`--afa-cream` (non-locked token) live in `Toast.tsx` line 107** -
+   a shared, app-wide component, not just a page-level miss.
+4. **11 public content pages never migrated:** Artist detail/list,
+   Event detail/list/seat-select, Wall of Fame, Organisers directory,
+   Venue-owners list/detail, Venue grid/detail. Inline `style={{}}`
+   throughout, 6-17 hand-typed font sizes per page, `--afa-cream` in 9
+   of 11, one stray `--afa-terracotta` (Venue grid), two literal hex
+   colors (Event detail).
+5. **Static/marketing pages, same pattern:** homepage, about,
+   for-artists, `dev/razorpay-test`.
+6. **Auth pages, lighter but not clean:** login (5 raw buttons vs. 3
+   `Button` uses), forgot-password, reset-password.
+7. **Seat-map builder - worst outlier in the codebase.**
+   `dashboard/venue/[id]/seat-map/page.tsx`: 2302 lines, 192 inline
+   style blocks, 29 raw `<button>`, zero `Button` component uses, 5
+   live `--afa-cream` references.
+8. **Checkout and Tickets - mixed adoption despite being the most
+   business-critical flow.** Checkout (8 hardcoded sizes / 4 `Button`
+   uses), tickets (5 hardcoded sizes / 4 `Button` uses).
+9. **Raw-button residue inside Admin** despite Admin being clean on
+   color tokens: artists (5), bookings (2), diary (2), feedback (7),
+   settings (8), users (3) - all 0 `Button` component uses. Admin's
+   button consistency was never actually verified before, only its
+   colors were.
+10. **`DashboardShell.tsx` and `SiteNav.tsx` - the shared layer most
+    pages depend on isn't clean either.** Both hand-type 4-5 distinct
+    font sizes; `SiteNav.tsx` has 7 raw buttons, 0 `Button` uses. This
+    is why dashboard pages *look* clean on font-size - the hardcoding
+    was pushed into the shared layer underneath them, not eliminated.
+
+**No decisions made on scope/sequencing yet - awaiting Hitesh's call on
+what to fix first.** Logged as `GEN-2609-072`, `Feedback` row status
+`NEW` (audit only, nothing built) - `CodeCounter.GEN/2609` advanced
+`71` -> `72` (conditioned on it still reading `71` at write time).

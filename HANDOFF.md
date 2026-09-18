@@ -24,9 +24,13 @@ Same class of gap as the 14-ticket backfill above: Step 6 design specs (Motion G
 
 Hitesh's call, `GEN-2609-070`: collapse onto `toggle-pill`'s orange convention, don't keep as a second legitimate one. Built and pushed on `feat/gen-2609-070-amber-chip-family-collapse`, PR open — see that branch's own `design.md` entry for the per-site breakdown (3 sites through `Button variant="toggle-pill"`, 1 site — `MobileEventFilterSheet.tsx` — token-swap only, shape genuinely differs).
 
+## `GEN-2609-072` — new UI/UX Centralization Audit logged, no fixes built, decision pending
+
+Hitesh relayed a full-repo audit (69 page files + shared components — `SiteNav`/`DashboardShell`/`Toast`/`EventCard`/`Photo`/`Button`), verified by direct grep against `qa`. 10 findings, full detail in `design.md`'s `GEN-2609-072` entry — headline items: the type-scale/spacing tokens have **zero** live adoption anywhere including `Button.tsx` itself; 17 of 84 `--afa-*` color tokens are fully orphaned; `--afa-cream` (non-locked) leaks into `Toast.tsx`, a shared component, not just pages; 11 public content pages + static/marketing pages never migrated; the seat-map builder is the worst outlier in the repo (192 inline style blocks, 0 `Button` uses); checkout/tickets (the most business-critical flow) have mixed adoption; Admin has real raw-button residue despite clean colors; and `DashboardShell.tsx`/`SiteNav.tsx` — the shared layer — aren't clean either, which is *why* pages built on them look cleaner than they are. `CodeCounter.GEN/2609` advanced `71` → `72` (guarded on the read value, same pattern as every move this session). `Feedback` row logged `NEW` — audit only, nothing built. **No scope/sequencing decision made — this is next session's/Hitesh's call**, not something to start fixing unprompted.
+
 ## Next session starts by
 
-Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed. `GEN-2609` numbering is fully reconciled (`001`-`071`, gapless) — no backfill/collision decisions outstanding.
+Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed, then getting Hitesh's call on `GEN-2609-072`'s scope/sequencing before touching any of its 10 findings. `GEN-2609` numbering is otherwise fully reconciled (`001`-`072`, gapless) — no backfill/collision decisions outstanding.
 
 ## Standing open items, unchanged
 
