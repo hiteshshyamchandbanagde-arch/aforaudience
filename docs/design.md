@@ -5417,3 +5417,69 @@ screenshotted.
 
 Built on `fix/bug-2609-049-events-tab-underline-fillsolid`, branched
 from `qa` at `dbc3c28` (post `GEN-2609-069` merge, PR #648).
+
+## GEN-2609-070 [provisional numbering - see note] - collapse the amber-accent selected-chip family onto `toggle-pill`
+
+Dispatch: `GEN-2609-069` flagged 4 sites using `--afa-amber` as a
+selected-chip indicator - a second color language alongside
+`toggle-pill`'s new `FILL_SOLID_TINT` convention - as a real design
+call, not a mechanical fix. Put to Hitesh directly; decided: collapse
+onto `toggle-pill`, not keep as a second legitimate convention. A
+real, visible color change on these 4 screens, chosen knowingly.
+
+**Numbering note.** Assigned `GEN-2609-070` provisionally - the real
+next number depends on the separate 14-ticket `Feedback` backfill
+(`052`-`053`/`055`-`068`) Hitesh also approved this session, which
+moves `CodeCounter.GEN/2609` to `69`. Both the backfill and this
+ticket's real `Feedback` row are blocked on Supabase MCP reconnecting
+(disconnected mid-session, confirmed via the harness's own
+disconnection notice, not assumed). Do not treat `070` as confirmed
+until the backfill lands and the counter is independently re-checked.
+
+**Two sites routed through `Button variant="toggle-pill"` directly -
+checked each site's actual shape against the variant's chrome first,
+not assumed to fit:**
+- `dashboard/admin/bookings/page.tsx`'s tab switcher (`tabButton`
+  helper, 4 call sites: errored/pending/delivered/all) - `7px 14px`
+  padding, `13px` sans font, already within the same rounding
+  tolerance `-058`/`-069` established for `pill-sm`. Straight swap.
+- `profile/page.tsx`'s role-switcher pills (`.map()` over held roles)
+  - same shape match. **Preserved one real behavioral nuance instead
+    of silently dropping it**: this site only dims the *non-active*
+    pills while a role-switch is in flight, keeping the active one at
+    full opacity - `Button`'s own `disabled`-opacity default (`0.7` on
+    every disabled instance, active or not) would have changed that.
+    Passed `disabled` for the actual click-blocking behavior but
+    overrode `style.opacity` to keep the original per-pill logic - a
+    real, deliberate preservation, not an oversight.
+- `components/GenrePicker.tsx`'s genre chips - its own existing `size`
+  prop (`'default' | 'lg'`) already mapped cleanly onto `pill-sm`/
+  `pill-md` respectively; swapped the prop's internal representation
+  from a raw padding string to the size-token name rather than adding
+  a second parallel sizing concept.
+
+**One site deliberately NOT routed through `Button` - a token-only
+fix instead, to avoid a second, unrequested change:**
+`components/MobileEventFilterSheet.tsx`'s local `Pill` wrapper uses
+`font-mono` at `12px` with `8px 14px` padding - checked against
+`toggle-pill`'s chrome (`font-sans`/`13px`/`6px 14px` for `pill-sm`)
+and it's a genuinely different shape, not a rounding-tolerance match.
+Forcing it through `Button` would have silently changed this
+component's typography (mono numerals/labels - matches this sheet's
+other mono eyebrow text) on top of the approved color change, which
+wasn't asked for. Swapped only the 3-token trio in place (`--afa-amber`
+-> `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT`/`var(--afa-fill-solid)`),
+kept the component's own shape untouched.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. Real `next build`:
+clean, `/dashboard/admin/bookings` and `/profile` present in the route
+list (`GenrePicker.tsx`/`MobileEventFilterSheet.tsx` aren't routes
+themselves - covered by `tsc` plus the pages that render them building
+clean). No visual verification possible (no browser tool this
+session) - reasoned from the color trio being byte-identical to
+`toggle-pill`'s own already-reasoned selected-state pairing.
+
+Built on `feat/gen-2609-070-amber-chip-family-collapse`, branched from
+`qa` at `38c1e43` (post `BUG-2609-049` + both chat-side handoff
+commits).
