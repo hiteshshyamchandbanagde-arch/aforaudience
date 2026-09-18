@@ -1,3 +1,20 @@
+# CC Local/Session Handoff — 17 Sept 2026 (chat-side git ops, git-state only)
+
+## Git state as of this handoff
+
+- `origin/qa` HEAD: `6ba4bb2` — merges this session, in order: `45710a9` (`BUG-2609-048`, #647), `5bc7cf9` (`GEN-2609-069`, #648), `6ba4bb2` (`BUG-2609-049`, #649). All independently re-verified: qa HEAD after each merge, Vercel `READY`, zero runtime errors, `Feedback` flipped `RESOLVED`/`DEPLOYED_QA` only after merge+deploy confirmed (not before — one entry was briefly marked resolved prematurely and corrected, see `HANDOFF.md`).
+- **PAT expired mid-session again** — same gotcha as last time, hit while writing this very handoff. Fresh one obtained and confirmed working before this file was written. Re-fetch a fresh PAT at session start regardless of whether the last one "should" still be valid.
+- `stash@{0}` — still present, still untouched, still nothing from Hitesh.
+
+## Next session should
+
+1. `git checkout qa && git fetch origin && git reset --hard origin/qa` — HEAD should be `6ba4bb2`.
+2. Read `docs/afa-uiux-design-audit.md` first, per standing instruction — still load-bearing, unchanged.
+3. **Do NOT touch `CodeCounter.GEN/2609` or write new `GEN`-prefixed `Feedback` rows** until Hitesh has picked an option for the 14-ticket backfill gap (`052`-`053`, `055`-`068` real in `design.md`, absent from `Feedback`) — see `HANDOFF.md` for the three options. `BUG/2609` counter (`49`) is fine, keep incrementing normally.
+4. The amber-accent selected-chip family (4 sites, see `HANDOFF.md`) needs Hitesh's design call before any dispatch — don't fold it into other component-extraction work.
+
+---
+
 # CC Local/Session Handoff — 16 Sep 2026 (confirmation only — no new work this session)
 
 ## Git state as of this handoff
