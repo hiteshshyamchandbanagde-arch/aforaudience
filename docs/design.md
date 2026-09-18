@@ -2874,6 +2874,16 @@ closes Step 6 (5/5) and the original six-step UI/UX audit sequence in
 full, once the migration lands. Pending merge confirmation before this
 entry is finalized, per the standing rule.
 
+**`Feedback`-table backfill note, added 18 Sept.** `GEN-2609-038`
+through `-042` above were real and merged (PRs #611-#615) but had zero
+`Feedback` rows until this backfill - same gap class as the
+`GEN-2609-055`-`068` backfill elsewhere in this doc, found while
+checking for other unreconciled numbers during that work. All 5 logged
+`RESOLVED`/`DEPLOYED_QA`. This entry's own "once the migration lands"
+caveat is resolved: `onboardedAt`/`intendedRole` confirmed present in
+`aforaudience-qa`'s live schema, not just `schema.prisma`, so `-042` is
+logged fully `RESOLVED`, not pending.
+
 ## GEN-2609-043 + GEN-2609-047: targeted contrast fix + Enable button restyle - built
 
 Two small, independent fixes off the accessibility/notifications specs'

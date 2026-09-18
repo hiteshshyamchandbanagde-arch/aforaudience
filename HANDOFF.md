@@ -14,9 +14,11 @@ While re-checking the DB for the backfill above, found `ee9e47c` (PR #637, "conf
 
 **If you find PR #637 or commit `ee9e47c` referenced anywhere by "GEN-2609-069" (old PR title, an old branch name, a stale bookmark) — that's this ticket. The real, current number is `GEN-2609-071`.** `design.md` has a full entry under that number cross-referencing `ee9e47c`/PR #637 directly.
 
-## New gap found while checking for other collisions, NOT fixed — needs the same kind of decision as the backfill above
+## `GEN-2609-038` through `-042` — RESOLVED, also backfilled this session (approved same-day, after this handoff was first drafted)
 
-`GEN-2609-038` through `-042` (Step 6 design specs: Motion Guidelines #611, Accessibility Guidelines #612, Icon System Guidelines #613, Notifications Guidelines #614, Onboarding Guidelines #615) are real, shipped, and fully documented in `design.md` (under Step-6-sub-spec headings that don't put the ticket number in the title, which is why the number search didn't catch them until a slower pass) — but **zero of the 5 have a `Feedback` table row.** Not touched this session — same class of gap as the 14-ticket backfill above, but a separate decision (different date range, different content shape — specs, not code fixes). No other same-number-reused-for-different-work collisions found in a spot-check of `001` through `054`; `019`'s and `032`'s multi-commit spans are the same ticket's own phases, not collisions.
+Same class of gap as the 14-ticket backfill above: Step 6 design specs (Motion Guidelines #611, Accessibility Guidelines #612, Icon System Guidelines #613, Notifications Guidelines #614, Onboarding Guidelines #615) were real, shipped, and fully documented in `design.md` (under Step-6-sub-spec headings that don't put the ticket number in the title, which is why the number search didn't catch them until a slower pass), but had zero `Feedback` rows. Hitesh approved the same treatment; row samples shown before writing per the standing bulk-write rule, then all 5 inserted (`RESOLVED`/`DEPLOYED_QA`). `-042`'s migration (`onboardedAt`/`intendedRole` on `User`) was independently confirmed actually applied in the live `aforaudience-qa` schema, not just staged in `schema.prisma`, before marking it `RESOLVED` rather than the "pending approval" state `design.md`'s own write-up described. **No `CodeCounter` move needed or made** — `038`-`042` were already-assigned, already-referenced numbers; only the missing `Feedback` rows were added.
+
+**The `GEN-2609` `Feedback` table is now fully gapless, `001` through `071`** — confirmed by direct query, every number present exactly once. No other same-number-reused-for-different-work collisions found in a spot-check of `001` through `054`; `019`'s and `032`'s multi-commit spans are the same ticket's own phases, not collisions.
 
 ## Amber-accent selected-chip family — RESOLVED, was "still undecided" below
 
@@ -24,7 +26,7 @@ Hitesh's call, `GEN-2609-070`: collapse onto `toggle-pill`'s orange convention, 
 
 ## Next session starts by
 
-Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed, then deciding the `GEN-2609-038`–`042` `Feedback`-backfill question above before any more `GEN`-prefixed logging.
+Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed. `GEN-2609` numbering is fully reconciled (`001`-`071`, gapless) — no backfill/collision decisions outstanding.
 
 ## Standing open items, unchanged
 
