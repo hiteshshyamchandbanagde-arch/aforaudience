@@ -1,3 +1,34 @@
+# Session Handoff — 17 Sept 2026 (chat — BUG-2609-049 + counter-gap investigation)
+
+## qa HEAD: `6ba4bb2` — `BUG-2609-049` (PR #649) merged, `RESOLVED`/`DEPLOYED_QA`, independently re-verified (qa HEAD, Vercel `READY`, zero runtime errors). Also independently re-confirmed `BUG-2609-048`/`GEN-2609-069`'s prior merge state (`5bc7cf9`) before this session's own work — no drift found, CC's confirmation-only pass and this session's checks agree. Supersedes, does not delete, the section below.
+
+## `BUG-2609-049` — events/page.tsx tab-underline fillsolid fix
+
+The second flagged-not-fixed item from `GEN-2609-069`'s entry below. Dispatched, built, and merged this session: `.afa-events-mode-tab.active::after` used `--afa-fill-solid` (reserved) for a plain tab underline — fixed to `--afa-amber`, matching `ArtistProfileClientPage.tsx`/`NearYouTabs.tsx`'s existing convention. Pre-fix grep confirmed, not assumed: only 2 files in `src/` use `::after`/`::before` at all, and the other (`artists/page.tsx`) was already correct. This really is the last instance of `-048`'s bug class.
+
+## `CodeCounter`/`GEN` drift — bigger than the section below states, still unresolved
+
+The `GEN-2609-069` entry below frames this as a stale counter (`54` vs `design.md`'s real max `69`). Investigation this session found it's worse: **`052`, `053`, and `055` through `068` — 14 real, shipped, PR-referenced tickets documented in full in `design.md` — have ZERO corresponding rows in the `Feedback` table.** Confirmed by direct query, not inferred: `Feedback` has rows for `043`–`054` and now `069`, nothing between. This is a genuine multi-session gap in the standing "~30min logging cadence" rule, not a simple off-by-N. Three options put to Hitesh, **still no answer as of this handoff**:
+(a) backfill all 14 `Feedback` rows from `design.md`'s existing write-ups, then set counter to `69`
+(b) move counter to `69` only, note the gap once in `design.md`, don't backfill
+(c) backfill only `-063`/`-066`/`-067`/`-068` (the ones referenced/built on this session), leave the rest as noted drift
+
+**Do not touch `CodeCounter.GEN/2609` or insert new `GEN`-prefixed `Feedback` rows until this is decided.** `BUG/2609` counter is unaffected and fine — currently `49`, stays in sync, keep incrementing normally.
+
+## Amber-accent selected-chip family — still undecided, unchanged from below
+
+4 sites (`admin/bookings` tab switcher, profile role-switcher, `GenrePicker.tsx`, `MobileEventFilterSheet.tsx`) use a second, different "selected" color language than the orange-tint convention `BUG-2609-048`/`GEN-2609-069` just established. Real design call — is this a legitimate second convention, or should it collapse onto the orange-tint pattern — not a mechanical fix. No dispatch should be written for these 4 sites until Hitesh weighs in.
+
+## Next session starts by
+
+Reading `docs/afa-uiux-design-audit.md` (unchanged, still load-bearing) — then resolving the `GEN` counter/backfill decision above before any further `GEN`-prefixed logging — then the amber-accent decision before touching any of those 4 sites.
+
+## Standing open items, unchanged
+
+`stash@{0}` (still nothing from Hitesh, spanning a very long number of sessions now), Razorpay/Maps key rotation (oldest item on the board), 22 RLS-disabled tables, `GEN-2609-015` (seat picker)/`BUG-2609-029` (i18n half)/icon-naming collision/reduced-motion DevTools verification — all still open, all still unverified visually.
+
+---
+
 # Session Handoff — 17 Sept 2026 (CC — button consolidation phase 2 batch 1 + toggle-pill Button variant)
 
 ## qa HEAD: `5bc7cf9` — `BUG-2609-048` (PR #647) and `GEN-2609-069` (PR #648) both merged, `RESOLVED`/`DEPLOYED_QA`, independently re-verified (qa HEAD, Vercel `READY`, zero runtime errors via Vercel MCP), not assumed. Supersedes, does not delete, the 15 Sept section below — its still-open items are folded forward unchanged except where resolved here.
