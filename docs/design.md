@@ -5418,7 +5418,7 @@ screenshotted.
 Built on `fix/bug-2609-049-events-tab-underline-fillsolid`, branched
 from `qa` at `dbc3c28` (post `GEN-2609-069` merge, PR #648).
 
-## GEN-2609-070 [provisional numbering - see note] - collapse the amber-accent selected-chip family onto `toggle-pill`
+## GEN-2609-070 - collapse the amber-accent selected-chip family onto `toggle-pill`
 
 Dispatch: `GEN-2609-069` flagged 4 sites using `--afa-amber` as a
 selected-chip indicator - a second color language alongside
@@ -5427,14 +5427,26 @@ call, not a mechanical fix. Put to Hitesh directly; decided: collapse
 onto `toggle-pill`, not keep as a second legitimate convention. A
 real, visible color change on these 4 screens, chosen knowingly.
 
-**Numbering note.** Assigned `GEN-2609-070` provisionally - the real
-next number depends on the separate 14-ticket `Feedback` backfill
-(`052`-`053`/`055`-`068`) Hitesh also approved this session, which
-moves `CodeCounter.GEN/2609` to `69`. Both the backfill and this
-ticket's real `Feedback` row are blocked on Supabase MCP reconnecting
-(disconnected mid-session, confirmed via the harness's own
-disconnection notice, not assumed). Do not treat `070` as confirmed
-until the backfill lands and the counter is independently re-checked.
+**Numbering note, now confirmed.** Supabase reconnected. The 14-ticket
+`Feedback` backfill (`GEN-2609-055` through `-068` - re-checked against
+the DB directly, not the `052`-`053` range this entry originally
+guessed: those two already had real `Feedback` rows from their own
+sessions, nothing to backfill there) is now logged, and
+`CodeCounter.GEN/2609` moved from `54` to `69`. This ticket's own
+`Feedback` row is logged as `GEN-2609-070`, status `IN_TEST` (branch
+pushed, PR open, not yet merged) - `070` is real, not provisional.
+
+**A second, separate `GEN-2609-069` collision found while re-checking
+the DB, flagged not fixed.** Commit `ee9e47c` ("fix confirmed-state
+action row wrapping in 2-up desktop grid", PR #637, merged 14 Sep)
+also self-labeled `GEN-2609-069` - a different ticket from the
+toggle-pill-variant `GEN-2609-069` that's actually logged in the
+`Feedback` table today. It predates the real one by two days and has
+no `design.md` entry and no `Feedback` row of its own. Real, shipped
+work (the fix itself reads as correct), just never reconciled the way
+the `GEN-2609-054` collision was - left for Hitesh/whoever picks up
+numbering cleanup next, since guessing a number for it here would just
+add a third collision on top of two.
 
 **Two sites routed through `Button variant="toggle-pill"` directly -
 checked each site's actual shape against the variant's chrome first,
