@@ -5437,16 +5437,18 @@ sessions, nothing to backfill there) is now logged, and
 pushed, PR open, not yet merged) - `070` is real, not provisional.
 
 **A second, separate `GEN-2609-069` collision found while re-checking
-the DB, flagged not fixed.** Commit `ee9e47c` ("fix confirmed-state
-action row wrapping in 2-up desktop grid", PR #637, merged 14 Sep)
-also self-labeled `GEN-2609-069` - a different ticket from the
-toggle-pill-variant `GEN-2609-069` that's actually logged in the
-`Feedback` table today. It predates the real one by two days and has
-no `design.md` entry and no `Feedback` row of its own. Real, shipped
-work (the fix itself reads as correct), just never reconciled the way
-the `GEN-2609-054` collision was - left for Hitesh/whoever picks up
-numbering cleanup next, since guessing a number for it here would just
-add a third collision on top of two.
+the DB - resolved by Hitesh's own call, see `GEN-2609-071` below.**
+Commit `ee9e47c` ("fix confirmed-state action row wrapping in 2-up
+desktop grid", PR #637, merged 14 Sep) also self-labeled `GEN-2609-069`
+- a different ticket from the toggle-pill-variant `GEN-2609-069` that's
+actually logged in the `Feedback` table today. It predates the real
+one by two days and had no `design.md` entry and no `Feedback` row of
+its own. Real, shipped work (the fix itself reads as correct), just
+never reconciled the way the `GEN-2609-054` collision was. Decision:
+the existing `GEN-2609-069` `Feedback` entry stays put (already
+backfilled and real, don't touch it); `ee9e47c`/PR #637 is renumbered
+to `GEN-2609-071` instead, since it was never logged anywhere and has
+no existing references to break.
 
 **Two sites routed through `Button variant="toggle-pill"` directly -
 checked each site's actual shape against the variant's chrome first,
@@ -5495,3 +5497,44 @@ session) - reasoned from the color trio being byte-identical to
 Built on `feat/gen-2609-070-amber-chip-family-collapse`, branched from
 `qa` at `38c1e43` (post `BUG-2609-049` + both chat-side handoff
 commits).
+
+## GEN-2609-071 - confirmed-state action row wrapping in 2-up desktop grid (renumbered from a `GEN-2609-069` self-label)
+
+**Not new work - a numbering correction for already-shipped code.**
+Commit `ee9e47c` (PR #637, merged 14 Sep) fixed a real layout bug and
+self-labeled itself `GEN-2609-069` in both its commit message and PR
+title, but that number collides with the toggle-pill-variant ticket
+that legitimately holds `GEN-2609-069` in the `Feedback` table (logged
+two days later, 16-17 Sep). Neither had a `design.md` entry or
+`Feedback` row at the time; found during the `GEN-2609-070` numbering
+re-check. Hitesh's call: the existing `GEN-2609-069` `Feedback` entry
+stays as-is; this commit's work is renumbered to `GEN-2609-071` since
+it had no existing references anywhere to break.
+
+**The original fix (unchanged, just documented and numbered now).**
+The 3-button confirmed-state action row (Download PDF / Message
+Organiser / Cancel) added in `GEN-2609-068` used `flex: '1 1 auto'` on
+each button, so each button's flex-basis defaulted to its own content
+width - in the narrower 2-up desktop grid (vs. the mobile-first v6
+reference design `-068` was built against) all 3 overflowed their
+available width and wrapped onto their own full-width lines instead of
+sharing the row, visible on live qa at the time
+(`qa.aforaudience.com/tickets/`). Fixed with flex-basis `0`
+(`flex: '1 1 0'` + `minWidth: 0`) on all 3 so they split the row
+evenly and wrap their own label text only if truly constrained.
+Also routed `MessageButton`'s border override through the
+`--afa-border-resting` token added in `GEN-2609-068`'s own CI fixup,
+replacing a second copy of the same literal that had been sitting
+unnoticed in the same block.
+
+**Logged after the fact.** `Feedback` row inserted as `GEN-2609-071`
+(`RESOLVED`/`DEPLOYED_QA`, matching PR #637's already-shipped state).
+`CodeCounter.GEN/2609` advanced `69` -> `71` (`070` already consumed
+the intervening number).
+
+**Anyone searching old PR titles/commit messages for "GEN-2609-069"
+should land here, not on the toggle-pill ticket** - see `HANDOFF.md`
+for the explicit cross-reference note.
+
+Built on `ee9e47c`, merged to `qa` via PR #637 on 14 Sep 2026 - no new
+branch for this entry, documentation/numbering only.

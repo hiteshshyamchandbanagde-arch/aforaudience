@@ -1,3 +1,37 @@
+# Session Handoff — 18 Sept 2026 (chat — Supabase reconnected: GEN backfill, counter fix, GEN-2609-070/-071)
+
+## qa HEAD unchanged this session — this was a docs/DB reconciliation session, no app code merged. Feature branch `feat/gen-2609-070-amber-chip-family-collapse` (PR open, not yet merged) gained one more commit (`bb30c58`, docs-only). Supersedes, does not delete, the 17 Sept section below — its still-open items are folded forward, resolved where noted.
+
+## `CodeCounter`/`GEN` drift — RESOLVED, and the 17 Sept section's own count was wrong
+
+Supabase reconnected mid-session, unblocking the backfill the 17 Sept section below put to Hitesh as options (a)/(b)/(c). Hitesh chose (a). Before writing anything, re-verified the 17 Sept section's claim directly against the DB rather than trusting it: **`GEN-2609-052`/`-053` already had real `Feedback` rows** (matches `design.md`'s own write-ups, matches memory from 13 Sept) — that section's "052, 053, and 055 through 068" framing was itself stale/wrong. The real gap was exactly **`GEN-2609-055` through `-068` (14 tickets, confirmed by direct query)**. Backfilled all 14 from `design.md`'s existing write-ups, each cross-checked against its own merge commit in `git log` before writing (all 14 confirmed merged to `qa`, all logged `RESOLVED`/`DEPLOYED_QA`). `CodeCounter.GEN/2609` moved `54` → `69` (conditioned on it still reading `54` at write time — it did).
+
+`GEN-2609-070` (amber-chip family collapse, this branch's own ticket) was logged provisionally pending this exact backfill — now confirmed real, not provisional. `Feedback` row logged as `GEN-2609-070`, status `IN_TEST` (PR open, not merged yet).
+
+## `GEN-2609-069` — a second, separate collision found and resolved
+
+While re-checking the DB for the backfill above, found `ee9e47c` (PR #637, "confirmed-state action row wrapping", merged 14 Sept) also self-labeled `GEN-2609-069` in its own commit message/PR title — a completely different ticket from the toggle-pill-variant `GEN-2609-069` that's actually in the `Feedback` table (logged two days later, 16-17 Sept). Flagged to Hitesh rather than guessed at. **Decision: the existing `GEN-2609-069` `Feedback` entry stays untouched; `ee9e47c`/PR #637 is renumbered to `GEN-2609-071`** (it had no `design.md` entry and no `Feedback` row of its own, so nothing else references the old number). `Feedback` row logged as `GEN-2609-071`, `RESOLVED`/`DEPLOYED_QA` (already shipped). `CodeCounter.GEN/2609` moved `69` → `71` (conditioned on it still reading `69`).
+
+**If you find PR #637 or commit `ee9e47c` referenced anywhere by "GEN-2609-069" (old PR title, an old branch name, a stale bookmark) — that's this ticket. The real, current number is `GEN-2609-071`.** `design.md` has a full entry under that number cross-referencing `ee9e47c`/PR #637 directly.
+
+## New gap found while checking for other collisions, NOT fixed — needs the same kind of decision as the backfill above
+
+`GEN-2609-038` through `-042` (Step 6 design specs: Motion Guidelines #611, Accessibility Guidelines #612, Icon System Guidelines #613, Notifications Guidelines #614, Onboarding Guidelines #615) are real, shipped, and fully documented in `design.md` (under Step-6-sub-spec headings that don't put the ticket number in the title, which is why the number search didn't catch them until a slower pass) — but **zero of the 5 have a `Feedback` table row.** Not touched this session — same class of gap as the 14-ticket backfill above, but a separate decision (different date range, different content shape — specs, not code fixes). No other same-number-reused-for-different-work collisions found in a spot-check of `001` through `054`; `019`'s and `032`'s multi-commit spans are the same ticket's own phases, not collisions.
+
+## Amber-accent selected-chip family — RESOLVED, was "still undecided" below
+
+Hitesh's call, `GEN-2609-070`: collapse onto `toggle-pill`'s orange convention, don't keep as a second legitimate one. Built and pushed on `feat/gen-2609-070-amber-chip-family-collapse`, PR open — see that branch's own `design.md` entry for the per-site breakdown (3 sites through `Button variant="toggle-pill"`, 1 site — `MobileEventFilterSheet.tsx` — token-swap only, shape genuinely differs).
+
+## Next session starts by
+
+Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed, then deciding the `GEN-2609-038`–`042` `Feedback`-backfill question above before any more `GEN`-prefixed logging.
+
+## Standing open items, unchanged
+
+`stash@{0}` (still nothing from Hitesh, spanning a very long number of sessions now), Razorpay/Maps key rotation (oldest item on the board), 22 RLS-disabled tables, `GEN-2609-015` (seat picker)/`BUG-2609-029` (i18n half)/icon-naming collision/reduced-motion DevTools verification — all still open, all still unverified visually. `artist/edit/page.tsx`'s dashed-outline button and the nudge-banner pill shapes (flagged across `GEN-2609-064`/`-066`) also still open.
+
+---
+
 # Session Handoff — 17 Sept 2026 (chat — BUG-2609-049 + counter-gap investigation)
 
 ## qa HEAD: `6ba4bb2` — `BUG-2609-049` (PR #649) merged, `RESOLVED`/`DEPLOYED_QA`, independently re-verified (qa HEAD, Vercel `READY`, zero runtime errors). Also independently re-confirmed `BUG-2609-048`/`GEN-2609-069`'s prior merge state (`5bc7cf9`) before this session's own work — no drift found, CC's confirmation-only pass and this session's checks agree. Supersedes, does not delete, the section below.
