@@ -791,25 +791,27 @@ function ProfileContent() {
                   .map((r) => {
                     const active = activeRole === r.value
                     return (
-                      <button
+                      <Button
                         key={r.kind}
+                        variant="toggle-pill"
+                        size="pill-sm"
+                        fullWidth={false}
                         type="button"
+                        selected={active}
                         onClick={() => { if (!active) switchRole(r.kind) }}
                         disabled={switching !== null}
+                        // Deliberately not Button's own disabled-opacity default
+                        // (0.7 on every disabled pill, including the active one)
+                        // - preserves this site's own nuance: only the non-active
+                        // pills dim while a switch is in flight, the active one
+                        // stays fully visible.
                         style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          padding: '7px 14px',
-                          borderRadius: '999px',
-                          border: active ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
-                          background: active ? 'var(--afa-amber)' : 'transparent',
-                          color: active ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
                           cursor: switching !== null ? 'default' : 'pointer',
                           opacity: switching !== null && !active ? 0.6 : 1,
                         }}
                       >
                         {switching === r.kind ? tr.profilePage.switchingEllipsis : r.label}
-                      </button>
+                      </Button>
                     )
                   })}
               </div>

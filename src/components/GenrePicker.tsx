@@ -2,6 +2,7 @@
 
 import { PRESET_GENRES } from '@/lib/genres'
 import { useLocale } from '@/lib/i18n/translate'
+import Button from '@/components/ui/Button'
 
 // Same fix pattern as FacilitiesPicker (Feedback 3213952d, session 36) and
 // Dress Code/Vibe (session 36) - replaces free-text "comma separated"
@@ -33,7 +34,7 @@ interface Props {
 
 export default function GenrePicker({ value, onChange, size = 'default' }: Props) {
   const { t: tr } = useLocale()
-  const pillPadding = size === 'lg' ? '9px 18px' : '7px 14px'
+  const pillSize = size === 'lg' ? 'pill-md' : 'pill-sm'
   const presetSelected = value.filter((v) => PRESET_GENRES.includes(v))
   // Anything in `value` that isn't one of the presets is "Other" content -
   // this correctly round-trips existing artists who already have free-text
@@ -61,23 +62,17 @@ export default function GenrePicker({ value, onChange, size = 'default' }: Props
         {PRESET_GENRES.map((genre) => {
           const selected = presetSelected.includes(genre)
           return (
-            <button
+            <Button
               key={genre}
+              variant="toggle-pill"
+              size={pillSize}
+              fullWidth={false}
               type="button"
+              selected={selected}
               onClick={() => togglePreset(genre)}
-              style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                padding: pillPadding,
-                borderRadius: '999px',
-                border: selected ? '1px solid var(--afa-text-primary)' : '1px solid rgba(245,245,240,0.15)',
-                background: selected ? 'var(--afa-amber)' : 'transparent',
-                color: selected ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-                cursor: 'pointer',
-              }}
             >
               {genre}
-            </button>
+            </Button>
           )
         })}
       </div>
