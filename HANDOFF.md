@@ -1,3 +1,92 @@
+# Session Handoff — 19 Sept 2026, closeout (chat — GEN-2609 backfill, numbering collisions, UI/UX centralization audit + fixes)
+
+Template: `docs/HANDOFF_TEMPLATE.md`.
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 18-19 Sept 2026 (chat) | GEN-2609 backfill, numbering collisions, UI/UX centralization audit + fixes | Complete | Audit (`GEN-2609-072`) → 4-ticket fix chain, PRs #650-653, all merged (API-verified). Ticket span 070-074: `069`→`071` renumber (2nd collision on 069, found mid-backfill) absorbs 071; `072` is the audit log itself, no code. | `feat/gen-2609-070-amber-chip-family-collapse`, `feat/gen-2609-073-artist-pages-migration`, `feat/gen-2609-073-phase2-remaining-pages`, `feat/gen-2609-074-text-on-image-token` |
+| 17 Sept 2026 (chat) | `BUG-2609-049` fix + counter-gap investigation | Partial | PR #649 merged. Found 14-ticket `Feedback` backfill gap, left decision open (resolved this session). | `fix/bug-2609-049-events-tab-underline-fillsolid` |
+| 17 Sept 2026 (CC) | Button consolidation phase 2 batch 1 + `toggle-pill` variant | Complete | PR #647 (`BUG-2609-048`) + PR #648 (`GEN-2609-069`) merged. Found amber-accent 2nd-convention question + `CodeCounter` drift, both left open (resolved this session). | PR #647, `feat/gen-2609-069-toggle-pill-button-variant` (PR #648) |
+| 15 Sept 2026 (chat) | `BUG-2609-047` merge + Step 1 (type-scale/spacing tokens) | Complete | PR #645 + PR #646 merged. Found + fixed a real `GEN-2609-054` numbering collision. PAT expired mid-session (first time mid- not between-session). | PR #645, PR #646 |
+| 14-15 Sept 2026 (CC) | Audit tail, token fixes, button consolidation, font-family centralization | Partial | `BUG-2609-041`-`046` merged; `047` pushed, not yet merged at handoff. Found the 12-step audit doc had gone unread — real sequencing violation. | PR #645 (merged next session) |
+
+(Oldest row from the prior table dropped to hold at 5.)
+
+## 2. Activity in progress
+
+None. All session tickets (070-074) merged, `RESOLVED`/`DEPLOYED_QA` in `Feedback`.
+
+## 3. Open PRs awaiting action
+
+None. Verified via GitHub API (`GET /pulls?state=open`), not assumed: repo has exactly **1** open PR total (`#450`, CI-config-only, targets `main`, unrelated, dated 14 Aug - predates this ticket chain). `#650`/`#651`/`#652`/`#653` individually confirmed `merged: true` via API.
+
+## 4. Decisions sitting with Hitesh
+
+None open. Resolved this session (recorded as outcomes, not carried forward as open):
+
+| Question | Options | Status | Resolution |
+|---|---|---|---|
+| `GEN-2609-069` 2nd collision (`ee9e47c`/PR #637 also self-labeled `069`) | keep existing `069`, renumber the other / renumber existing `069` | resolved | Existing `069` (`Feedback`-logged) stays; `ee9e47c`/PR #637 → `GEN-2609-071` (no prior refs to break). |
+| Amber-accent selected-chip family (4 sites) vs `toggle-pill` orange convention | keep as 2nd legitimate convention / collapse onto `toggle-pill` | resolved | Collapse (`GEN-2609-070`). 3 sites via `Button variant="toggle-pill"`; `MobileEventFilterSheet.tsx` token-swap only (shape differs). |
+| `events/page.tsx` view-toggle active color (flagged `--afa-cream` bg, no locked-4 fit) | flag only / pick a token | resolved | `--afa-surface-raised` bg + `--afa-text-primary` text (the paired `--afa-surface-inverse` text would've been 1.20:1 contrast - real bug caught applying this). |
+| Merge order, `070` vs `073` | either order | resolved | `070` first (PR #650), then `073` rebased onto updated `qa`, docs conflicts reconciled by keeping both sides. |
+| `rgba(255,255,255,0.5)` hero-subtitle color (3 confirmed sites after scope correction from 6) | collapse onto `--afa-text-secondary` / lock as new token | resolved | Locked as new token - different role (photo-hero text vs flat-surface text), not a duplicate. |
+| New token's name | `--afa-text-secondary-cold` / `--afa-text-on-image` / other | resolved | `--afa-text-on-image` - named for role, not value. |
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **74**. `BUG/2609`: **49**. Live-queried this task, immediately before writing this section (not carried from memory).
+- Guard pattern: `SELECT` the real row immediately before any write; condition every `UPDATE ... currentSeq` on the value just read; never advance from a cached/remembered number.
+
+## 6. Known GEN-numbering collisions/gaps ledger
+
+Confirmed present in `docs/HANDOFF_TEMPLATE.md` (source of truth for this ledger): `054` ✅, `069→071` ✅. No new collisions this session.
+
+## 7. Docs-conflict watchlist
+
+None open. Checked via GitHub API, not assumed: the repo's only open PR (`#450`) is CI-config-only and doesn't touch `docs/`.
+
+## 8. Verification standard checklist
+
+✅ `tsc --noEmit` / ✅ `check-design-tokens.js` / ✅ `next build` - all clean, all 4 merges this session (`070`, `073`×2, `074`), every `next build` run foreground and checked via `$PIPESTATUS` (never a backgrounded result - see the `GEN-2609-073` false-positive incident this session found and fixed).
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.**
+
+## 10. UI/UX Design System Debt Ledger
+
+| Metric | Value | Method | As of |
+|---|---|---|---|
+| `--afa-*` token definitions in `globals.css` | **82** | `grep -oE -- '--afa-[a-z0-9-]+:' globals.css \| sort -u \| wc -l`, freshly measured this task | `GEN-2609-074` |
+| Orphaned tokens (defined, zero usage) | 17 | **Not re-measured this task** - carried forward from `GEN-2609-072`'s original audit, unchanged this session | `GEN-2609-072` (18 Sep) |
+| Public content pages migrated (Sep 18 audit's 11) | **11 of 11** | Direct count: Artist×2, Event×3, Venue×2 (`073` Phase 1) + Wall of Fame, Organisers, Venue-owners×2 (`073` Phase 2) | `GEN-2609-073` |
+| Raw `<button>` elements, repo-wide | **~229** (73 files) | `grep -roE '<button' src --include="*.tsx" \| wc -l` this task - a simple grep, NOT `BUG-2609-048`'s balanced-brace scanner (which found 239/75 on 17 Sept); the two methods aren't directly comparable, both included for context | this task |
+| `Button`-component imports, repo-wide | 44 files | `grep -rl` for the import statement, this task - a file count, not an instance count, so not a strict ratio partner to the row above | this task |
+| Raw-button → `Button` conversions, Sep 18 audit's 11 pages | **2 of 37** | `073`'s own count within its 7 migrated pages (Phase 2's 4 pages had 0 raw buttons) | `GEN-2609-073` |
+
+**Flag: the repo-wide raw-button count (~229/239) is still-open work outside this session's actually-fixed scope (2/37, page-scoped) - future scope, NOT resolved.** No ticket assigned.
+
+**Discrepancy noted, not chased down:** the audit's own original count was "84" `--afa-*` tokens; this task's fresh count is 82. Difference unexplained (not caused by this session, which only added 1 token, `--afa-text-on-image`) - possibly a counting-method difference in the original audit. Flagging rather than silently reconciling.
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Verified before writing this section, per instruction not to assume: the file's Section 1 table lists **4** `--afa-text-*` role tokens (`primary`/`secondary`/`muted`/`on-image`), not 5. **Real gap found, pre-existing, not caused by this session:** `--afa-text-inverse` is defined in `globals.css` and has 3 real consumers (`src/app/page.tsx`, `for-artists/page.tsx`, `FourRooms.tsx`) but was never added to this reference doc's table - a documentation gap that predates `GEN-2609-074` (this session only added `--afa-text-on-image`'s own row correctly). Flagging rather than writing the "5 tokens" claim as given, since it doesn't hold. Any PR introducing a new `--afa-*` token must still update this file's Section 1 table in the same PR - unrelated to the `text-inverse` gap, which needs its own small fix (not scoped to a ticket here).
+
+## 12. Immediate next action
+
+**No hard blocker. Suggested, unticketed:** scope the Sep 18 audit's remaining shared-layer items into real tickets - `Toast.tsx`/`DashboardShell.tsx`/`SiteNav.tsx` (audit item #10), the seat-map builder's 29 raw buttons (item #7), and Admin's raw-button residue (item #9) - none started, no `GEN`/`BUG` numbers assigned yet.
+
+## 13. Chat vs. CC ownership note
+
+**Standing model, decided (not an open question, not a one-off exception to re-flag each time):** **chat** owns all PR-open/merge and git-write operations (pushing branches, opening PRs, merging), gated on a session-scoped GitHub PAT Hitesh provides that session; **CC** owns all coding — branching, editing, committing, verifying locally, and pushing its own feature branches. Neither lane crosses into the other's job. This is exactly the split observed across the `GEN-2609-070` through `-074` sessions once the PAT was provided (before that, chat had read-only access — clone-and-read but no write, confirmed directly rather than assumed); that pattern is the standing model going forward, not something to log as a deviation each time it recurs. Per-item in sections 2/3, note which lane each open item belongs to.
+
+**Forward-looking note, not yet acted on:** chat's half of this depends on Hitesh manually re-pasting a short-lived PAT each session — real friction, and a bare token in a chat transcript even briefly is worth removing on its own. Hitesh is considering moving chat's git-write auth to a proper GitHub connector (already configured for this project, not yet given repo-scoped write permissions) instead. If/when that changes, update this section again - the ownership split itself won't change, only *how* chat authenticates to exercise its half of it.
+
+---
+
 # Session Handoff — 19 Sept 2026, GEN-2609-074 built (chat — new --afa-text-on-image token, Hitesh's decision applied)
 
 ## qa HEAD: `fa6a8c2` (PR #652, `GEN-2609-073` Phase 2, merged) - confirmed via `git fetch` before branching. New branch `feat/gen-2609-074-text-on-image-token`. Supersedes, does not delete, the sections below.
