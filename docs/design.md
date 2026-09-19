@@ -5778,3 +5778,69 @@ appended after `GEN-2609-070`'s/`-071`'s/`-072`'s, neither dropped.
 
 Built on `feat/gen-2609-073-artist-pages-migration`, branched from
 `qa` at `38c1e43`.
+
+## GEN-2609-073 Phase 2 - Wall of Fame, Organisers directory, Venue-owners list/detail (closes out the full ticket scope)
+
+Dispatch: the last 4 of the 11 pages the 18 Sep audit (`GEN-2609-072`)
+flagged, same treatment as Phase 1 - already-decided values only, no
+new design decision.
+
+**Colors - only 1 `--afa-cream` usage found across all 4 files**,
+in `wall-of-fame/page.tsx`'s own local `GridTexture` component (a
+`background-image: linear-gradient(...)` line color at 4% opacity,
+not a text color) -> `--afa-text-primary`, same reasoning as every
+Phase 1 instance. No `--afa-terracotta`, no hex literals, in any of
+the 4 files.
+
+**One color pattern flagged, not touched - a real, recurring one.**
+3 of the 4 pages (Wall of Fame, Organisers, Venue-owners list - not
+Venue-owners detail, which is already clean) use a raw
+`rgba(255,255,255,0.5)` for their hero subtitle text, not any locked
+token. `--afa-text-secondary` is defined as `rgba(245,245,240,0.65)` -
+close in hue but a genuinely different alpha (0.5 vs 0.65) and a
+colder white (`255,255,255` vs `245,245,240`), so swapping in the
+token would be a real, if subtle, brightness/hue change, not a
+no-op - exactly the kind of thing this ticket's own standard says to
+flag rather than guess. Checked how widespread this literal actually
+is before flagging: also appears in `dashboard/artist/page.tsx`,
+`NotificationOptIn.tsx`, and the homepage (`src/app/page.tsx`) - a
+real, recurring pattern across the app, not a one-off typo, but
+normalizing it everywhere is out of this ticket's page-scoped remit.
+Needs Hitesh's call, same standard as Phase 1's view-toggle color.
+
+**Typography** - exact scale matches
+(11/12/13/14/16/24/32px) replaced with their token across all 4
+files. Non-matching values (18/20/22/36px, `clamp()` responsive
+headlines) left as literals, flagged not rounded.
+
+**Buttons - zero raw `<button>` elements found across all 4 files.**
+Every card/row uses a `role="link"` div with the same click-guard
+pattern as Phase 1's Artist/Venue list pages, or a plain `next/link`
+`Link` - genuinely nothing to migrate or flag here, unlike Phase 1's
+pages which had 37 raw buttons between them.
+
+**Shared-component sweep, per the standing convention.** Confirmed
+`VenueNoPhoto.tsx` (a real shared component, used beyond these 4
+pages - Venue grid/detail among others) carries the identical
+`--afa-cream` grid-texture pattern `wall-of-fame/page.tsx`'s own local
+`GridTexture` duplicates, right down to the same code comment
+("`GridTexture` ... same recipe as `VenueNoPhoto.tsx`"). Consistent
+with Phase 1's decision not to touch `ArtistNoPhoto.tsx`/
+`VenueNoPhoto.tsx` - `GEN-2609-072` finding #10's territory, a
+separate, larger shared-layer undertaking, not silently absorbed here.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against
+`origin/qa`: clean, 0 offenses. Real `next build`: clean, confirmed
+via a foreground run's `$PIPESTATUS`, all 4 routes present
+(`/wall-of-fame`, `/organisers`, `/venue-owners`, `/venue-owners/
+[id]`). No visual verification possible (no browser tool needed this
+pass - every swap is byte-identical to Phase 1's already-verified
+`--afa-cream`->`--afa-text-primary` mapping).
+
+**This closes the full `GEN-2609-073` scope from the 18 Sep audit -
+all 11 originally-flagged pages now migrated across Phase 1 (7 pages)
+and Phase 2 (4 pages).** No further phases planned unless something
+new surfaces.
+
+Built on `feat/gen-2609-073-phase2-remaining-pages`, branched from
+`qa` at `4fa6717` (post `GEN-2609-070`/Phase 1 merge, PR #650/#651).

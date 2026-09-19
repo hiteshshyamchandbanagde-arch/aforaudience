@@ -55,7 +55,7 @@ export default function VenueOwnersPage() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.venueOwnersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.venueOwnersPage.heroEmphasis}</em>{tr.venueOwnersPage.heroSuffix}
           </div>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+          <p style={{ fontSize: "var(--afa-text-title)", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {loading ? tr.venueOwnersPage.loading : tr.venueOwnersPage.countHosting.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
@@ -73,7 +73,7 @@ export default function VenueOwnersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.venueOwnersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -89,10 +89,10 @@ export default function VenueOwnersPage() {
           <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetTitle : tr.venueOwnersPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {owners.length === 0 ? tr.venueOwnersPage.emptyNoneYetSub : tr.venueOwnersPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -143,10 +143,10 @@ export default function VenueOwnersPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>
                       {owner.bio || tr.venueOwnersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-text-secondary)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>
                       {owner._count.venues} {owner._count.venues === 1 ? tr.venueOwnersPage.venueSingular : tr.venueOwnersPage.venuePlural}
                     </div>
                   </div>
