@@ -51,19 +51,19 @@ interface VenueOption {
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid rgba(245,245,240,0.15)',
+  padding: 'var(--afa-space-10px) var(--afa-space-3)',
+  borderRadius: 'var(--afa-radius-sm)',
+  border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   color: 'var(--afa-text-primary)',
 }
 
 const labelStyle = {
   display: 'block',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
-  marginBottom: '6px',
+  marginBottom: 'var(--afa-space-6px)',
   color: 'var(--afa-text-primary)',
 }
 
@@ -545,39 +545,39 @@ export default function CreateEventPage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Create an Event
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Set up your event details, book a venue, and publish when ready.
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
                 AforAudience is for live performances - music, comedy, theatre, spoken word, and similar. Movie screenings and film events aren&apos;t supported on the platform.
               </p>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Title *</label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="e.g., Friday Night Open Mic" style={inputStyle} required />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Description *</label>
                 <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Tell your audience what to expect" rows={3} style={{ ...inputStyle, resize: 'vertical' as const }} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
                   <label style={labelStyle}>Event Type *</label>
                   <select name="type" value={formData.type} onChange={handleChange} style={inputStyle}>
@@ -590,14 +590,14 @@ export default function CreateEventPage() {
                   <label style={labelStyle}>Date *</label>
                   <input type="date" name="date" value={formData.date} onChange={handleChange} min={todayLocalDateString()} max={maxDateString ?? undefined} style={inputStyle} required />
                   {windowMonths && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '4px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
                       Up to {windowMonths} months out. For a later date, contact us via the feedback widget.
                     </p>
                   )}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
                   <label style={labelStyle}>Start Time *</label>
                   <input
@@ -616,7 +616,7 @@ export default function CreateEventPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)' }}>
                 <div>
                   <label style={labelStyle}>Dress Code</label>
                   <PresetSelectWithOther
@@ -639,7 +639,7 @@ export default function CreateEventPage() {
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-18px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
@@ -648,14 +648,14 @@ export default function CreateEventPage() {
                   so an organiser can't accidentally write something that
                   conflicts with AFA's own refund/cancellation policy
                   (linked below, platform-wide, not editable here). */}
-              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
                 <label style={labelStyle}>Event terms</label>
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
                   booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
                 </p>
 
-                <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
+                <div style={{ marginBottom: 'var(--afa-space-4)', maxWidth: '260px' }}>
                   <label style={labelStyle}>Age limit</label>
                   <PresetSelectWithOther
                     value={ageLimit}
@@ -666,9 +666,9 @@ export default function CreateEventPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-2) var(--afa-space-4)' }}>
                   {EVENT_TERMS_CHECKLIST.map((term) => (
-                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                       <input
                         type="checkbox"
                         checked={termsChecklist.includes(term.key)}
@@ -684,9 +684,9 @@ export default function CreateEventPage() {
                   ))}
                 </div>
 
-                <div style={{ marginTop: '18px' }}>
+                <div style={{ marginTop: 'var(--afa-space-18px)' }}>
                   <label style={labelStyle}>Special notes (optional)</label>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '6px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-6px)' }}>
                     Anything specific to this event that isn't covered above. Reviewed by AFA before it's shown
                     publicly — you'll see the status on your event dashboard.
                   </p>
@@ -698,25 +698,25 @@ export default function CreateEventPage() {
                     placeholder="e.g., This show includes strobe lighting and haze effects."
                     style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
                   />
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: '4px', textAlign: 'right' }}>
+                  <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: 'var(--afa-space-1)', textAlign: 'right' }}>
                     {specialNotes.length}/{SPECIAL_NOTES_MAX_LENGTH}
                   </p>
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
                 This is a competition show (panelists, prizes, celebrity guest)
               </label>
 
               {isCompetitionShow && (
-                <div style={{ marginTop: '16px', padding: '20px', background: 'var(--afa-surface-raised)', borderRadius: '10px' }}>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
                     Panelists and a celebrity guest are invited by their AFA account (not typed freely) once
                     the event is saved, from Edit Event — they'll need to accept before appearing publicly.
                   </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)' }}>
                     <div>
                       <label style={labelStyle}>1st Prize</label>
                       <input style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
@@ -735,11 +735,11 @@ export default function CreateEventPage() {
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Book a Venue
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
                 Optional — you can add this later. Booking requests are sent as pending until the venue owner responds.
               </p>
 
@@ -757,7 +757,7 @@ export default function CreateEventPage() {
                 <div>
                   {selectedVenue?.rateType === 'FLEXIBLE' || !selectedVenue?.rateType ? (
                     <>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
                         {selectedVenue?.rateType === 'FLEXIBLE'
                           ? "This venue uses flexible, negotiated pricing — no fixed rate published. Propose an amount below; the venue owner can confirm or come back with a different number."
                           : "This venue hasn't set a rental rate yet — propose an amount to offer."}
@@ -767,12 +767,12 @@ export default function CreateEventPage() {
                     </>
                   ) : (
                     <>
-                      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
-                        <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '2px' }}>
+                      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) var(--afa-space-14px)', marginBottom: 'var(--afa-space-10px)' }}>
+                        <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2px)' }}>
                           {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
                           {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                         </div>
-                        <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                        <div style={{ fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                           {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
                         </div>
                       </div>
@@ -785,23 +785,23 @@ export default function CreateEventPage() {
             </section>
 
             {/* Seats & pricing */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
 
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '18px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-18px)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                   <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                   <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
                 </label>
               </div>
 
               {usingTierPricing ? (
                 <div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-14px)' }}>
                     Sections and seat counts come from {selectedVenue?.name}'s seat map — you only set the price per section for this event.
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
@@ -810,20 +810,20 @@ export default function CreateEventPage() {
                   {venueLevels.map((lvl) => (
                     <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? '10px' : 0 }}>
                       {venueLevels.length > 1 && (
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '10px', marginBottom: '4px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-1)' }}>
                           {lvl || 'Main'}
                         </div>
                       )}
                       {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
-                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
                               {selectedVenue?.seatingMode === 'NUMBERED' && (
                                 <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
                               )}
                               {s.name}
                             </div>
-                            <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{s.seats} seats</div>
+                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{s.seats} seats</div>
                           </div>
                           {!isFree ? (
                             <input
@@ -835,19 +835,19 @@ export default function CreateEventPage() {
                               style={{ ...inputStyle, width: '120px' }}
                             />
                           ) : (
-                            <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Free</span>
+                            <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Free</span>
                           )}
                         </div>
                       ))}
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '14px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-14px)' }}>
                     Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
                   </p>
                 </div>
               ) : (
                 <>
-                  <div style={{ marginBottom: '18px' }}>
+                  <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                     <label style={labelStyle}>Total Seats *</label>
                     <input type="number" name="totalSeats" value={formData.totalSeats} onChange={handleChange} min="1" placeholder="e.g., 50" style={inputStyle} required />
                   </div>
@@ -862,12 +862,12 @@ export default function CreateEventPage() {
             </section>
 
             {/* Lineup & approvals */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '18px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-18px)' }}>
                 Lineup &amp; Approvals
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
                   <label style={labelStyle}>Max Performers <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                   <input type="number" value={maxPerformers} onChange={handleMaxPerformersChange} min="1" max={MAX_PERFORMERS} maxLength={3} placeholder="e.g., 6" style={inputStyle} />
@@ -875,24 +875,24 @@ export default function CreateEventPage() {
                 <div>
                   <label style={labelStyle}>Max Seats Per Booking</label>
                   <input type="number" value={maxSeatsPerBooking} onChange={handleMaxSeatsPerBookingChange} min="1" max="10" maxLength={2} style={inputStyle} />
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '4px' }}>1–10, applies across all sections combined per booking.</p>
+                  <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>1–10, applies across all sections combined per booking.</p>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" maxLength={2} placeholder="0" style={{ ...inputStyle, maxWidth: '120px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '4px' }}>
+                <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
                   Each artist in the lineup must have this many audience members confirm they're coming to support them - included in the artist&apos;s spot fee, no extra charge. Set to 0 if not required.
                 </p>
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Artist Payment Terms</label>
-                <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '8px' }}>
+                <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-2)' }}>
                   Shown to Artists before they apply, so it's clear upfront - you can still negotiate a different amount with a specific artist when approving their application.
                 </p>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
                   {([
                     { value: 'FREE', label: 'Free / Exposure' },
                     { value: 'PAID', label: 'Paid' },
@@ -903,8 +903,8 @@ export default function CreateEventPage() {
                       type="button"
                       onClick={() => setDefaultCompensationType(opt.value)}
                       style={{
-                        padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                        border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
@@ -923,15 +923,15 @@ export default function CreateEventPage() {
 
               <div>
                 <label style={labelStyle}>Artist Application Approval</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                   {(['MANUAL', 'AUTO'] as const).map((mode) => (
                     <button
                       key={mode}
                       type="button"
                       onClick={() => setApplicationApprovalMode(mode)}
                       style={{
-                        flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                        border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                        border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: applicationApprovalMode === mode ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: applicationApprovalMode === mode ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
@@ -941,7 +941,7 @@ export default function CreateEventPage() {
                   ))}
                 </div>
                 {applicationApprovalMode === 'AUTO' && (
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '6px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>
                     Applications auto-accept as free/exposure slots up to your Max Performers cap. You can still edit compensation per performer afterward.
                   </p>
                 )}
@@ -950,12 +950,12 @@ export default function CreateEventPage() {
 
             {/* Actions */}
             {venueId && (
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '12px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-3)' }}>
                 Since you've attached a venue, this event goes to <strong>Pending</strong> when published, not live yet -
                 it'll go public automatically once the venue owner confirms your booking request.
               </p>
             )}
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center' }}>
               <Button
                 variant="primary"
                 size="lg"
@@ -971,11 +971,11 @@ export default function CreateEventPage() {
                 type="button"
                 disabled={saving}
                 onClick={() => submit(false)}
-                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 Save as Draft
               </button>
-              <Link href="/dashboard/organiser" style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none', marginLeft: '4px' }}>
+              <Link href="/dashboard/organiser" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none', marginLeft: 'var(--afa-space-1)' }}>
                 Cancel
               </Link>
             </div>
