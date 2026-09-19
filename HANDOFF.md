@@ -1,6 +1,18 @@
-# Session Handoff — 19 Sept 2026, closeout (chat — GEN-2609-073 fully merged, new GEN-2609-074 finding logged)
+# Session Handoff — 19 Sept 2026, GEN-2609-074 built (chat — new --afa-text-on-image token, Hitesh's decision applied)
 
-## qa HEAD: `fa6a8c2` (PR #652, `GEN-2609-073` Phase 2, merged) - confirmed via `git fetch`, not assumed. Phase 1 (PR #651, `4fa6717`) and Phase 2 (PR #652, `fa6a8c2`) are **both merged**. Supersedes, does not delete, the sections below.
+## qa HEAD: `fa6a8c2` (PR #652, `GEN-2609-073` Phase 2, merged) - confirmed via `git fetch` before branching. New branch `feat/gen-2609-074-text-on-image-token`. Supersedes, does not delete, the sections below.
+
+## `GEN-2609-074` - decided and built: `--afa-text-on-image` locked as its own token
+
+Hitesh's call: don't collapse the `rgba(255,255,255,0.5)` hero-subtitle color onto `--afa-text-secondary` - it's a genuinely different role (text over a *photograph*, not a flat surface), and more photo-hero pages are expected as this app leans further into imagery. Added `--afa-text-on-image: rgba(255, 255, 255, 0.5)` to `globals.css`, migrated the 3 confirmed sites (`wall-of-fame/page.tsx:184`, `organisers/page.tsx:61`, `venue-owners/page.tsx:58`) off the hand-typed literal, documented in `docs/afa-design-tokens-reference.md`'s Section 1 token table. The 3 false-lead files from this finding's own earlier scope correction stayed untouched, re-confirmed via grep after the change.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean (the new literal lives only in `globals.css`, which is exempt). Real `next build`: clean, confirmed via a foreground run's `$PIPESTATUS`, all 3 touched routes present.
+
+`Feedback` row moved `NEW` -> `IN_TEST` (PR open, not merged). `docs/design.md`'s `GEN-2609-074` entry updated with the decision and build.
+
+## Next session starts by
+
+Merging `feat/gen-2609-074-text-on-image-token`'s PR once reviewed, then updating the `Feedback` row to `RESOLVED`/`DEPLOYED_QA` - same two-step pattern as `GEN-2609-073`.
 
 ## `GEN-2609-073` - fully closed, both phases merged
 

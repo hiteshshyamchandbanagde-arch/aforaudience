@@ -5907,3 +5907,38 @@ sites (not 6/7 - see the scope correction above).
 Logged as `GEN-2609-074`, `Feedback` row status `NEW` (finding only,
 nothing built) - `CodeCounter.GEN/2609` advanced `73` -> `74`
 (conditioned on it still reading `73` at write time).
+
+**Decision (Hitesh) and build.** Option 2 above: lock the value as its
+own token, don't collapse onto `--afa-text-secondary`. Reasoning: this
+pattern is hero-subtitle text sitting on top of a *photograph* (Wall of
+Fame/Organisers/Venue-owners' hero bands), a genuinely different job
+from `--afa-text-secondary`'s flat-surface role - a cooler, purer white
+reads more legibly across a photo's unpredictable luminance than
+`--afa-text-secondary`'s warm cream tint, and the lower alpha (`0.5` vs
+`0.65`) was likely already tuned for exactly that. Named for the role,
+not the value (`--afa-text-on-image`, not e.g. `-secondary-cold`),
+since more photo-hero pages are expected as this app leans further
+into imagery, not fewer.
+
+Added `--afa-text-on-image: rgba(255, 255, 255, 0.5)` to `globals.css`
+(exempt from `check-design-tokens.js`, same as every other token
+definition there) and switched all 3 confirmed real sites
+(`wall-of-fame/page.tsx:184`, `organisers/page.tsx:61`,
+`venue-owners/page.tsx:58`) from the hand-typed literal to
+`var(--afa-text-on-image)` - zero visual change, same value, just
+named now. The 3 false-lead files from this entry's own scope
+correction above are untouched, confirmed by re-grepping the exact
+literal after this change: the only remaining match repo-wide is the
+token's own definition in `globals.css`. Documented in
+`docs/afa-design-tokens-reference.md`'s Section 1 token table
+alongside `--afa-text-secondary`/`--afa-text-muted` (the dispatch
+named this file "design-system.md" - no file by that name exists in
+this repo; used the real, single design-tokens reference doc instead).
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against
+`origin/qa`: clean, 0 offenses. Real `next build`: clean, confirmed
+via a foreground run's `$PIPESTATUS`, all 3 touched routes present.
+`Feedback` row moved `NEW` -> `RESOLVED`/`DEPLOYED_QA` once merged.
+
+Built on `feat/gen-2609-074-text-on-image-token`, branched from `qa`
+at `fa6a8c2` (post `GEN-2609-073` Phase 2 merge, PR #652).
