@@ -5941,4 +5941,39 @@ via a foreground run's `$PIPESTATUS`, all 3 touched routes present.
 `Feedback` row moved `NEW` -> `RESOLVED`/`DEPLOYED_QA` once merged.
 
 Built on `feat/gen-2609-074-text-on-image-token`, branched from `qa`
-at `fa6a8c2` (post `GEN-2609-073` Phase 2 merge, PR #652).
+at `fa6a8c2` (post `GEN-2609-073` Phase 2 merge, PR #652). Merged as
+PR #653, `997d5c8` - `Feedback` row confirmed `RESOLVED`/`DEPLOYED_QA`.
+
+## `docs/HANDOFF_TEMPLATE.md` added - standing structure for future session handoffs
+
+New file, docs-only, not a `GEN`-numbered ticket (a process/tooling
+artifact, not a code or design-token change). Gives every future
+session's `HANDOFF.md` entry the same 13-section shape instead of each
+session inventing its own: a 5-session summary table, in-progress
+activity, open-PRs-awaiting-action (explicitly flagging a pushed
+branch with no PR opened yet, a real silent-stall failure mode this
+project has hit), a running Hitesh-decisions queue (removed only once
+*resolved*, not once merged), `CodeCounter` state plus its guard-
+pattern reminder, a permanent append-only GEN-collision ledger (seeded
+with the two real collisions already found - `054`, `069`->`071` - so
+neither is ever rediscovered from scratch), a docs-conflict watchlist
+for currently-open branches touching `design.md`/`HANDOFF.md`, a
+literal per-build verification checklist (including the foreground-
+build-vs-`$PIPESTATUS` lesson from `GEN-2609-073`'s false-positive
+incident), a fixed production-freeze reminder, a running UI/UX Design
+System Debt Ledger (so the next full-repo audit is a diff against a
+known baseline, not a from-scratch re-scan like `GEN-2609-072`'s own
+first pass had to be), a canonical locked-tokens source-of-truth
+pointer (confirms `docs/afa-design-tokens-reference.md` is the real
+file - `design-system.md`, named in an earlier dispatch, does not
+exist in this repo), a single-sentence immediate-next-action slot, and
+a chat-vs-CC ownership note flagging that this session's own PR-push/
+merge actions (`GEN-2609-070` through `-074`) were a documented
+exception to the normal split, not a new unstated precedent.
+
+Forward-looking only, per the dispatch's own instruction - the
+current `HANDOFF.md` is NOT retroactively reformatted into this shape.
+Future sessions copy the template's structure into `HANDOFF.md`'s new
+top entry each time; the template file itself stays a skeleton, not a
+changelog, except for section 6's permanent ledger, which accumulates
+in both places.
