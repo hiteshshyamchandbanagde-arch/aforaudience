@@ -6911,3 +6911,48 @@ All 3 already had every in-scope literal token-retrofitted by the passes above.
 **Colour, batch-wide:** 16 manual `--afa-*`-token matches found across the 3 files (2 + 3 + 11) - `--afa-text-muted` (0.4-alpha cream, the largest single bucket at 9 sites, all in file 3) and `--afa-border-resting` (0.15-alpha cream border) were the two real recurring matches; `--afa-text-secondary` (0.65-alpha) matched once. One real **role-mismatch trap** found and deliberately NOT matched (file 2's `rgba(245,245,240,0.4)` used as a *border* color, byte-identical to `--afa-text-muted`'s value but the wrong semantic role) - flagged in that file's own entry, not silently applied. `rgba(245,245,240,0.08)` (`STATUS_TONE.muted.bg`, not a `--afa-*` token) recurred heavily across all 3 files, consistent with `081`'s own colour report - still not tokenized, per that ticket's own finding.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-082-1-artist-dashboard`, `-2-artist-profile`, `-3-event-detail`) - chat opens/merges each independently. All 3 touch the same 2 files at their tail (`docs/design.md`, `scripts/design-token-baseline.json`) - same expected 3-way conflict `GEN-2609-079`'s own batch already established a precedent for resolving: keep every branch's own `docs/design.md` section (file order, or actual merge order), and run `node scripts/design-token-ratchet.js --update-baseline` fresh on the fully-merged `qa` once all 3 land rather than hand-merging the JSON.
+
+## GEN-2609-083 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **82** at branch start - `082` was batch 2) - bulk token migration batch 3, file 1 of 3: `seat-map/page.tsx`
+
+Same method and contract as batch 2, per the dispatch's own instruction ("same method as 082, this prompt only states what differs"). Branched independently from `qa` (post-`082` merge), not stacked. **This is a second pass on a file `GEN-2609-079` already migrated once** - what's left here is exactly what batch 1 couldn't match before `081`'s scale extension existed.
+
+### Geometry exclusion, re-confirmed at the same 3 sites `GEN-2609-079` documented, not re-derived from scratch
+
+Grepped `wizardPreviewSeats.map`/`seats.map(`/`markers.map(` first - same 3 line ranges as `079`'s own entry (`1824-1831`, `2009-2056`, `2062-2095`), unchanged since that ticket, confirming the file's structure hasn't shifted. 2 of the 3 ranges have zero values that would match the scale anyway (radius `5px`, font-size `9px` - both off-scale, so exclusion is moot there). **The 3rd range has a real, live trap**: the safety-marker glyph's `fontSize: '11px'` (L2082) is an EXACT match for `--afa-text-micro` - the automated script migrated it on the first pass (it has no way to know about geometry exclusion), caught by re-checking the dry-run diff against the known exclusion-range line numbers before applying, not assumed safe. Manually reverted, with a `// GEN-2609-083` comment citing `079`'s own original reasoning ("the marker glyph's own fixed size, not a type-scale choice") so this doesn't need re-discovering a 3rd time in a future pass.
+
+### A 2nd real bug in the migration script, found and fixed before applying - `borderRadius`'s bare `0` in a mixed-corner shorthand
+
+The reverse-lookup script (extended from batch 2, not rewritten) included `'0px': '--afa-radius-sharp'` in its `RADIUS_MAP`, copied verbatim from the dispatch's own documented reverse-lookup table. This file has 2 real mixed-corner shorthands from the joined level-tab UI (`borderRadius: 'var(--afa-radius-md) 0 0 var(--afa-radius-md)'` and its mirror) - the bare `0` on each represents "sharp on this one joined edge," a structural necessity of the tab shape, not a considered choice to use the sharp-radius token. **This is the exact bug `GEN-2609-079`'s own file-1 entry already found and fixed once** ("Removed 0 from the reverse map entirely rather than filtering it ad hoc per call site") - re-introduced here because this session's script was rebuilt from the `082` dispatch's own documented map, which (for completeness of documentation, not as an instruction to re-add it) still listed `0px→--afa-radius-sharp`. Re-derived the same fix independently: `0px` excluded from `RADIUS_MAP`. **Real, not just theoretical** - confirmed via `isAllowlistedLength()` that a bare `0` was never counted as ratchet debt in the first place (0 is allowlisted for every numeric rule), so migrating it would have added a new admin-editable dependency for a literal zero ratchet-count benefit. **Retroactively checked all 3 already-merged `GEN-2609-082` files for the same exposure** - `git grep -c radius-sharp` against each returns 0; none had a mixed-corner shorthand with a bare `0`, so no follow-up fix needed there.
+
+### Coverage - spacing/radius match the dispatch exactly; font-size is 1 lower, by design, not a discrepancy
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 79 | 18 | **61** | 61 / 79 |
+| font-size | 9 | 4 | **5** | 6 / 9 |
+| radius | 14 | 3 | **11** | 11 / 14 |
+| rgba | 37 | 37 | 0 (none matched) | n/a |
+| raw-button | 23 | 23 | 0 (already fully retrofitted by `079`) | n/a |
+| hex | 1 | 1 | 0 (the deliberate `var()` fallback, `079`'s own finding, still correctly untouched) | n/a |
+
+**Font-size migrated 5, not the dispatch's predicted 6 - deliberately, not a measurement error.** The dispatch's own count was taken from "the checker's own `extract`," which has no concept of the geometry exclusion above - it correctly counted 6 exact-match font-size literals repo-wide-style, but 1 of those 6 is the safety-marker glyph's `11px`, which this entry's own geometry section explains should stay literal. Flagged explicitly per the dispatch's own instruction ("say so in the entry if your numbers differ materially") rather than silently reconciling the table to match.
+
+**163 → 86 literals (47% reduction).** Smaller than batch 2's per-file reductions (this file already went through a migration pass in `079`), but real: every one of these 77 literals is genuinely new coverage `081`'s scale extension unlocked, not re-migration of anything `079` already handled. `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -5, `spacing-literal` -61, `radius-literal` -11, everything else ±0.
+
+### Colour - zero matches, checked not assumed
+
+Tallied every distinct `rgba()` value in the file (14 distinct values, 37 total occurrences) against the 3 known exact-match tokens (`--afa-border-resting` 0.15, `--afa-text-muted` 0.4, `--afa-text-secondary` 0.65) - **none match**. The file's own translucent-cream palette clusters at different alphas entirely (`0.2`×10, `0.08`×5, `0.3`×4, `0.04`/`0.03`×3 each, `0.1`×2, plus 6 lower-frequency singles) - a real, different design vocabulary from the 3 files in batch 2, not an oversight. Left entirely untouched.
+
+### Stays a literal - all on the dispatch's named list, negatives correctly excluded
+
+font-size: `17px`×1, `9px`×2 (plus the 1 geometry-excluded `11px`). spacing: `9px`×4, `7px`×9 (repo-wide: `9px` **34**, `7px` **23**, both re-measured this session, both well below 50), `22px`×2, `-20px`×2, `-6px`×1 (negative margins - per the dispatch's own new instruction, never a token candidate; a token would need `calc(-1 * var(...))`, a design decision not a swap). radius: `5px`×2 (the geometry-excluded rendering-loop marker shape, already documented above and in `079`), `3px`×1.
+
+### Raw `<button>` - all 23 already fully token-retrofitted, 0 newly migrated to a `Button` variant
+
+Re-confirmed rather than re-audited from scratch: `079`'s own entry already reviewed all 23 against every `Button.tsx` variant (9 segmented-toggle family kept raw per `076`'s own locked design call, 2 shared local components, 12 one-offs) and found none match - unchanged since, same buttons, same shapes. Spot-checked the multi-line style blocks (11 of the 23 span multiple lines, which this session's single-line-regex migration script can't see into) individually - every one already carries only off-scale/out-of-scope literals (`9px`/`22px`/`7px` padding-halves, `50%`/`36px`/`32px` width-height-radius circle shapes) alongside its already-tokenized half; nothing left un-retrofitted.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1281→1276, `spacing-literal` 2985→2924, `radius-literal` 500→489, `rgb-rgba-literal`/`hex-color-literal`/`raw-button` all ±0 (this branch's own `qa` starting point, independent of files 2/3's branches). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff - branch not yet merged/deployed. **Specific flag for this file**: the joined level-tab shape (the mixed-corner `borderRadius` fix above) and the safety-marker glyph (the geometry-exclusion fix above) are both real, deliberate non-migrations worth a specific visual check alongside the general "does the seat-map canvas render identically" pass every prior seat-map ticket has flagged.
