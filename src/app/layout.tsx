@@ -5,6 +5,8 @@ import {
   Noto_Sans_Kannada, Noto_Sans_Malayalam, Noto_Sans_Gujarati, Noto_Sans_Bengali,
 } from "next/font/google";
 import "./globals.css";
+import { getDesignTokensSafe } from "@/lib/design-tokens.server";
+import { buildDesignTokenCss } from "@/lib/design-tokens";
 import Providers from "@/components/Providers";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import NudgeStack from "@/components/NudgeStack";
@@ -56,6 +58,23 @@ const youngSerif = Young_Serif({ subsets: ["latin"], weight: ["400"], style: ["n
 const schibstedGrotesk = Schibsted_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], variable: "--font-ui", display: "swap" });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans", display: "swap" });
 const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-mono", display: "swap" });
+
+// GEN-2609-075 - stable, role-independent aliases for the same 4
+// families above, used only as the admin design-token panel's font
+// allowlist (src/lib/design-tokens.ts's FONT_ALLOWLIST). Each of these
+// re-requests the identical weight/subset config as its role sibling
+// above, so Next self-hosts it under the same static font file it
+// already generated for that sibling - no second network fetch, just
+// one extra @font-face declaration under its own CSS variable name.
+// The indirection is the point: --font-display etc. are themselves
+// admin-overridable (a role can be reassigned to a different physical
+// font), so anything that names a PHYSICAL font unambiguously - e.g.
+// "render this role as Schibsted Grotesk, whatever --font-ui currently
+// points at" - needs a name that never itself gets reassigned.
+const youngSerifPhys = Young_Serif({ subsets: ["latin"], weight: ["400"], style: ["normal"], variable: "--font-phys-young-serif", display: "swap" });
+const schibstedGroteskPhys = Schibsted_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], variable: "--font-phys-schibsted-grotesk", display: "swap" });
+const instrumentSansPhys = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-phys-instrument-sans", display: "swap" });
+const jetBrainsMonoPhys = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-phys-jetbrains-mono", display: "swap" });
 
 // Phase 2c multi-script fix (FEAT-2608-051): --font-sans (Manrope) only
 // covers Latin, so headings/body silently fell back to a generic system
@@ -123,14 +142,26 @@ export const viewport: Viewport = {
   themeColor: "var(--afa-fill-solid)",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // GEN-2609-075 - cached (tag "design-tokens"), never throws: an empty
+  // array here means either the DB has no rows yet or the read failed,
+  // and buildDesignTokenCss('') for an empty array renders no <style>
+  // at all - globals.css's own :root defaults apply untouched, so a
+  // down DB degrades to "site looks like before this ticket shipped",
+  // never a broken/unstyled page.
+  const designTokens = await getDesignTokensSafe();
+  const designTokenCss = buildDesignTokenCss(designTokens);
+
   return (
     <html lang="en">
       <head>
+        {designTokenCss && (
+          <style id="afa-design-tokens-runtime" dangerouslySetInnerHTML={{ __html: designTokenCss }} />
+        )}
         {/*
           Theme Phase 1/2's pre-paint accent-theme-restoration script was
           removed (GEN-2608-048, 15 Aug) alongside the picker itself. Any
@@ -174,7 +205,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${youngSerif.variable} ${schibstedGrotesk.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
+      <body className={`${youngSerif.variable} ${schibstedGrotesk.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${youngSerifPhys.variable} ${schibstedGroteskPhys.variable} ${instrumentSansPhys.variable} ${jetBrainsMonoPhys.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.

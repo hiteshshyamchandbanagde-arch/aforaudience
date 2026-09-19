@@ -116,12 +116,23 @@ const FONT_FAMILY = 'var(--font-sans)'
 // GEN-2609-063 already centralized via `statusStyle.ts`'s
 // `FILL_SOLID_TINT`/`fillSolidTint()` - not a `Button`-shaped CTA, so
 // it's fixed there instead of getting a 3rd pill size here.
-const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: number; fontSize: number; fontWeight: number }> = {
-  sm: { padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600 },
-  md: { padding: '9px 17px', borderRadius: 8, fontSize: 13, fontWeight: 600 },
-  lg: { padding: '12px 24px', borderRadius: 8, fontSize: 14, fontWeight: 600 },
-  'pill-sm': { padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600 },
-  'pill-md': { padding: '10px 18px', borderRadius: 999, fontSize: 14, fontWeight: 600 },
+// GEN-2609-075 - sm/md/lg's padding/radius/font-size now read from the
+// admin-controlled --afa-btn-padding-*/--afa-radius-*/--afa-text-*
+// tokens (src/app/globals.css) instead of hardcoded numbers, so an
+// admin edit in /dashboard/admin/design-system has a real, visible
+// effect on this component - the whole point of this ticket's "live
+// preview using the real Button component" requirement. `pill-sm`/
+// `pill-md` deliberately keep their own literal padding/font-size
+// (never audited/derived against the type scale the way sm/md/lg's
+// 12/13/14px happen to line up 1:1 with --afa-text-small/-ui/-body) -
+// only their radius moves to the shared --afa-radius-pill token, same
+// as every other 999px pill shape in this file.
+const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: string; fontSize: string; fontWeight: number }> = {
+  sm: { padding: 'var(--afa-btn-padding-sm)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-small)', fontWeight: 600 },
+  md: { padding: 'var(--afa-btn-padding-md)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 },
+  lg: { padding: 'var(--afa-btn-padding-lg)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-body)', fontWeight: 600 },
+  'pill-sm': { padding: '6px 14px', borderRadius: 'var(--afa-radius-pill)', fontSize: '13px', fontWeight: 600 },
+  'pill-md': { padding: '10px 18px', borderRadius: 'var(--afa-radius-pill)', fontSize: '14px', fontWeight: 600 },
 }
 
 // Exported (not just used internally) so a caller that can't render a
@@ -150,7 +161,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         color: 'var(--afa-on-fill-solid)',
         padding: 16,
         border: 'none',
-        borderRadius: 999,
+        borderRadius: 'var(--afa-radius-pill)',
         fontSize: 16,
         fontWeight: 700,
         fontFamily: FONT_FAMILY,
@@ -214,7 +225,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         color: 'var(--afa-on-fill-solid)',
         padding: 16,
         border: '1.5px solid var(--afa-on-fill-solid)',
-        borderRadius: 999,
+        borderRadius: 'var(--afa-radius-pill)',
         fontSize: 16,
         fontWeight: 700,
         fontFamily: FONT_FAMILY,
@@ -247,7 +258,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         // same defensive convention every other variant already follows.
         // A `size` token (this ticket always passes `sm`) overrides these.
         padding: '4px 10px',
-        borderRadius: 6,
+        borderRadius: 'var(--afa-radius-sm)',
         fontSize: 12,
         fontWeight: 600,
         fontFamily: FONT_FAMILY,
@@ -281,7 +292,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         color: 'var(--afa-cream)',
         padding: 16,
         border: 'none',
-        borderRadius: 8,
+        borderRadius: 'var(--afa-radius-md)',
         fontSize: 15,
         fontWeight: 600,
         fontFamily: FONT_FAMILY,
@@ -325,7 +336,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         // caller omits `size` - callers should always pass `pill-sm`/
         // `pill-md` per the spec, this is only the fallback.
         padding: '6px 14px',
-        borderRadius: 999,
+        borderRadius: 'var(--afa-radius-pill)',
         fontSize: 13,
         fontWeight: 600,
         fontFamily: FONT_FAMILY,

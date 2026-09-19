@@ -1861,3 +1861,42 @@ model AdminDiaryEntry {
   updatedAt DateTime    @updatedAt
 }
 
+// GEN-2609-075 - Admin-controlled design tokens, runtime layer (MVP).
+// One row per CSS custom property the admin panel can edit
+// (--afa-*/--font-* names, used verbatim as the key). `value` is the
+// raw CSS value string injected into the root layout's runtime
+// <style> tag - validated server-side per `type` before being
+// persisted, since it lands unescaped in HTML served to every visitor
+// (see src/lib/design-tokens.ts's isValidTokenValue). `group` drives
+// the admin UI's section layout (color/font/size/radius/spacing/
+// button); `type` drives both validation and which input control the
+// UI renders. `locked` tokens (the core brand 5 - surface-page,
+// surface-raised, amber, fill-solid, on-fill-solid) still edit through
+// this same table, just gated behind a confirm dialog client-side and
+// a matching server-side check - "locked" here means "protected from
+// casual change," not "read-only," and is unrelated to
+// check-design-tokens.js's separate locked-palette CI rule (which
+// keeps blocking raw literals in application code regardless of what
+// this table holds).
+model DesignToken {
+  key       String   @id
+  value     String
+  group     String
+  type      String
+  locked    Boolean  @default(false)
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+}
+
+// A full snapshot of every DesignToken row, written on every save,
+// reset-to-defaults, and revert - so "revert to a previous version"
+// has something concrete to restore and the admin page can show real
+// history, not just the current state.
+model DesignTokenVersion {
+  id        String   @id @default(cuid())
+  snapshot  Json
+  createdBy String?
+  createdAt DateTime @default(now())
+  note      String?
+}
+

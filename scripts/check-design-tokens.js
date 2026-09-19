@@ -150,9 +150,18 @@ function isKnownLiteralInBase(literal) {
 // Exact-path exemptions - the actual token source and the tone
 // source-of-truth extracted in GEN-2609-051 legitimately hold literal
 // values; everything else should draw from them instead of re-typing.
+//
+// GEN-2609-075 - src/lib/design-tokens.ts's DEFAULT_TOKEN_VALUES is a
+// second, DB-backed token source-of-truth (mirrors globals.css's
+// values 1:1, deliberately - see that file's own header comment for
+// why "reset to defaults" needs its own copy rather than re-reading
+// globals.css at runtime). Same exemption rationale as globals.css
+// itself: this is where these literals are SUPPOSED to live, not a new
+// gap in the checker.
 const EXEMPT_FILES = new Set([
   'src/app/globals.css',
   'src/lib/statusStyle.ts',
+  'src/lib/design-tokens.ts',
 ])
 
 function isExemptFile(file) {
