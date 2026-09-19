@@ -11,6 +11,7 @@ import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { contrastRatio, isValidTokenValue, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, type CoverageStatus } from '@/lib/design-token-coverage'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -80,10 +81,14 @@ const GROUP_ORDER: TokenGroup[] = ['color', 'font', 'size', 'radius', 'spacing',
 // individual fields get their own disabled/noted treatment too (see
 // TokenField below) rather than the group badge alone standing in for
 // per-token truth.
+// Reuses statusStyle.ts's own governed STATUS_TONE palette instead of
+// inventing new rgba tints - it's exempt from check-design-tokens.js's
+// literal-check for exactly this reason (see that file's own header
+// comment: "this is where new tone literals are supposed to live").
 const COVERAGE_META: Record<CoverageStatus, { label: string; color: string; bg: string }> = {
-  'site-wide': { label: 'Site-wide', color: 'var(--afa-sage-bright)', bg: 'rgba(122,168,110,0.14)' },
-  'button-only': { label: 'Button only', color: 'var(--afa-amber)', bg: 'rgba(201,151,58,0.15)' },
-  unused: { label: 'Not yet applied', color: 'var(--afa-error-bright)', bg: 'rgba(230,120,112,0.14)' },
+  'site-wide': { label: 'Site-wide', ...STATUS_TONE.sage },
+  'button-only': { label: 'Button only', ...STATUS_TONE.gold },
+  unused: { label: 'Not yet applied', ...STATUS_TONE.error },
 }
 
 function tokenCoverage(key: string): CoverageStatus {
@@ -512,7 +517,7 @@ export default function AdminDesignSystemPage() {
                   </div>
                   <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>{GROUP_META[group].blurb}</p>
                   {groupDisabled && (
-                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 13, fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: 'rgba(230,120,112,0.1)', border: '1px solid rgba(230,120,112,0.25)' }}>
+                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 13, fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
                       Not consumed anywhere in the app right now (checked via a real grep of every var(--…) usage, not assumed). Editing these has no visible effect until a future ticket adopts them — disabled here so that isn't a trap.
                     </p>
                   )}
