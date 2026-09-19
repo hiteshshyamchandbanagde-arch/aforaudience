@@ -1,6 +1,8 @@
-# Session Handoff — 19 Sept 2026, later same day (chat — GEN-2609-073 closeout: color decision applied, real bug caught via visual verification, merge still blocked)
+# Session Handoff — 19 Sept 2026, later same day (chat — GEN-2609-073 closeout: color decision applied, real bug caught via visual verification, merge order at time of writing)
 
-## qa HEAD unchanged - `feat/gen-2609-070-amber-chip-family-collapse` still has not merged as of this update (re-checked via `git merge-base --is-ancestor` against `origin/qa`, not assumed). Supersedes, does not delete, the section immediately below (same-day, earlier).
+**UPDATE, same day, after this section was written:** `feat/gen-2609-070-amber-chip-family-collapse` merged (PR #650, `fc0421f`) shortly after this section's "still blocked" framing below was written. This branch was rebased onto the updated `qa` and re-verified clean - see the top of this file for that outcome. The "still NOT merged"/"still waiting" statements in this section describe the state *at the time*, not the current state - left as-is rather than rewritten, per this doc's own history-preserving convention.
+
+## qa HEAD unchanged (at the time) - `feat/gen-2609-070-amber-chip-family-collapse` still has not merged as of this update (re-checked via `git merge-base --is-ancestor` against `origin/qa`, not assumed). Supersedes, does not delete, the section immediately below (same-day, earlier).
 
 ## `GEN-2609-073`'s flagged color, resolved
 
