@@ -1,6 +1,18 @@
-# Session Handoff — 19 Sept 2026, Phase 2 (chat — GEN-2609-073 Phase 2: Wall of Fame/Organisers/Venue-owners, closes the full ticket)
+# Session Handoff — 19 Sept 2026, closeout (chat — GEN-2609-073 fully merged, new GEN-2609-074 finding logged)
 
-## qa HEAD: `4fa6717` (PR #651, `GEN-2609-073` Phase 1, merged) - confirmed via `git fetch` before branching, not assumed. New branch `feat/gen-2609-073-phase2-remaining-pages`, synced fresh from `origin/qa` per the standing rule. Supersedes, does not delete, the sections below.
+## qa HEAD: `fa6a8c2` (PR #652, `GEN-2609-073` Phase 2, merged) - confirmed via `git fetch`, not assumed. Phase 1 (PR #651, `4fa6717`) and Phase 2 (PR #652, `fa6a8c2`) are **both merged**. Supersedes, does not delete, the sections below.
+
+## `GEN-2609-073` - fully closed, both phases merged
+
+`Feedback` row moved `IN_TEST` -> `RESOLVED`/`DEPLOYED_QA`. **The full 11-page public-content migration scope from the 18 Sep audit (`GEN-2609-072`) is now closed**: Artist detail/list, Event detail/list/seat-select, Venue grid/detail (Phase 1, PR #651), plus Wall of Fame, Organisers directory, Venue-owners list/detail (Phase 2, PR #652). `docs/design.md`'s two `GEN-2609-073` entries both annotated MERGED with their real PR/commit refs.
+
+## `GEN-2609-074` - new tracked finding, NOT part of `GEN-2609-073`'s closed scope
+
+The `rgba(255,255,255,0.5)` hero-subtitle color Phase 2 flagged. **Scope corrected before logging, narrower than Phase 2's own writeup first suggested:** re-grepping the *exact* literal (not just any `rgba(255,255,255,X)`) found it genuinely live in only 3 sites - `wall-of-fame/page.tsx:184`, `organisers/page.tsx:61`, `venue-owners/page.tsx:58` (all three the identical hero-subtitle text). The 3 other files named in Phase 2's writeup (`src/app/page.tsx`, `dashboard/artist/page.tsx`, `NotificationOptIn.tsx`) turned out to use `rgba(255,255,255,X)`-family literals at *different* alphas and *different* CSS roles (a border, a background, a border - not this text-color pattern) - not the same finding, not bundled in. Needs Hitesh's call: collapse onto `--afa-text-secondary` (a real, visible brightness/warmth change - different alpha and a colder white than the token) or lock the current value as its own new token. Logged as `GEN-2609-074`, `Feedback` row `NEW`, `CodeCounter.GEN/2609` advanced `73` -> `74` (guarded on the read value). Not built - a value decision, not this session's call to make.
+
+## Next session starts by
+
+Taking the `GEN-2609-074` color decision to Hitesh. No `GEN-2609-073` follow-up work outstanding - that ticket is done.
 
 ## `GEN-2609-073` Phase 2 - the last 4 of the audit's 11 pages, same treatment as Phase 1
 

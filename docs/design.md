@@ -5598,7 +5598,13 @@ what to fix first.** Logged as `GEN-2609-072`, `Feedback` row status
 `NEW` (audit only, nothing built) - `CodeCounter.GEN/2609` advanced
 `71` -> `72` (conditioned on it still reading `71` at write time).
 
-## GEN-2609-073 - Public content pages token/typography/Button migration, Phase 1 (Artist + Event + Venue pages)
+## GEN-2609-073 - Public content pages token/typography/Button migration, Phase 1 (Artist + Event + Venue pages) - MERGED
+
+**Merged to `qa` as PR #651 (`4fa6717`).** Phase 2 (Wall of Fame,
+Organisers directory, Venue-owners list/detail) followed and also
+merged (PR #652, `fa6a8c2`) - see that entry further below. Together
+they close the full 11-page scope the 18 Sep audit (`GEN-2609-072`)
+flagged. `Feedback` row updated to `RESOLVED`/`DEPLOYED_QA`.
 
 Dispatch: apply already-decided design-system values (the locked-4
 surface/text/amber/fill-solid palette, the `--afa-text-*` type scale,
@@ -5779,7 +5785,17 @@ appended after `GEN-2609-070`'s/`-071`'s/`-072`'s, neither dropped.
 Built on `feat/gen-2609-073-artist-pages-migration`, branched from
 `qa` at `38c1e43`.
 
-## GEN-2609-073 Phase 2 - Wall of Fame, Organisers directory, Venue-owners list/detail (closes out the full ticket scope)
+## GEN-2609-073 Phase 2 - Wall of Fame, Organisers directory, Venue-owners list/detail (closes out the full ticket scope) - MERGED
+
+**Merged to `qa` as PR #652 (`fa6a8c2`).** Together with Phase 1
+(`4fa6717`, above), this closes the full 11-page scope from the 18
+Sep audit (`GEN-2609-072`) - every originally-flagged public content
+page now runs on the locked design-system values. `Feedback` row
+updated `RESOLVED`/`DEPLOYED_QA`. The one real open item this phase
+surfaced (the `rgba(255,255,255,0.5)` hero-subtitle color) is
+deliberately NOT part of this closed scope - tracked separately as
+`GEN-2609-074` below, since it needs its own decision and its own
+fix pass across multiple files, not a re-open of this ticket.
 
 Dispatch: the last 4 of the 11 pages the 18 Sep audit (`GEN-2609-072`)
 flagged, same treatment as Phase 1 - already-decided values only, no
@@ -5844,3 +5860,50 @@ new surfaces.
 
 Built on `feat/gen-2609-073-phase2-remaining-pages`, branched from
 `qa` at `4fa6717` (post `GEN-2609-070`/Phase 1 merge, PR #650/#651).
+
+## GEN-2609-074 - untokenized `rgba(255,255,255,0.5)` hero-subtitle color, open finding (not built)
+
+Logged as its own tracked finding, deliberately kept out of
+`GEN-2609-073`'s now-closed scope, since it needs a real decision
+before any fix - same discipline as every other "flag, don't guess"
+item this audit chain has produced.
+
+**Scope, corrected on re-verification before logging - narrower than
+first described.** `GEN-2609-073` Phase 2's own writeup named 6 sites
+sharing this pattern; re-grepping for the *exact* literal
+(`rgba(255,255,255,0.5)`, not just any `rgba(255,255,255,X)`) found it
+genuinely live in only **3**: `wall-of-fame/page.tsx:184`,
+`organisers/page.tsx:61`, `venue-owners/page.tsx:58` - all three the
+identical hero-subtitle `<p>` text color, all three visually and
+structurally the same site (same component shape, same role). The
+other 3 files named earlier (`src/app/page.tsx`, `dashboard/artist/
+page.tsx`, `NotificationOptIn.tsx`) do use `rgba(255,255,255,X)`-family
+literals, but **different alphas and different CSS roles** - a
+footer's `border-top` at `0.08` (`src/app/page.tsx:254`, whose own
+text color is actually a *different* base, `rgba(247,243,238,0.3)`,
+not white at all), a `background` at `0.7` (`dashboard/artist/
+page.tsx:609`), and a `border-bottom` at `0.1`
+(`NotificationOptIn.tsx:91`). None of these three share the specific
+"untokenized `--afa-text-secondary`-adjacent white text" problem the
+3 real sites have - bundling all 6 into "the same finding" would have
+been wrong scope-inflation, caught before it got tracked as such.
+
+**The real question, for the 3 confirmed sites.** `--afa-text-secondary`
+is defined as `rgba(245,245,240,0.65)` - close in hue to
+`rgba(255,255,255,0.5)` but not identical: a genuinely colder white
+(`255` vs `245,245,240`) at a genuinely different alpha (`0.5` vs
+`0.65`). Two real options, needs Hitesh's call, not a guess:
+1. Collapse onto `--afa-text-secondary` as-is - a real, visible
+   brightness/warmth change on all 3 hero subtitles (secondary text
+   would get both warmer and less opaque).
+2. Lock `rgba(255,255,255,0.5)` itself as its own new token (e.g. an
+   `--afa-text-secondary-cold` or similar) if the current look is the
+   intended one and just needs a name, not a value change.
+
+Not built either way - a value decision, not a mechanical token swap.
+Once decided: a small, contained fix across exactly the 3 confirmed
+sites (not 6/7 - see the scope correction above).
+
+Logged as `GEN-2609-074`, `Feedback` row status `NEW` (finding only,
+nothing built) - `CodeCounter.GEN/2609` advanced `73` -> `74`
+(conditioned on it still reading `73` at write time).
