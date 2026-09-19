@@ -290,7 +290,7 @@ export default function AdminBookingsPage() {
                           disabled={retryingId === b.id}
                           style={{
                             padding: '8px 16px',
-                            borderRadius: '999px',
+                            borderRadius: 'var(--afa-radius-pill)',
                             border: 'none',
                             background: 'var(--afa-fill-solid)',
                             color: 'var(--afa-on-fill-solid)',

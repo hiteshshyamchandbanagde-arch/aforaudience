@@ -6,6 +6,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 // /dashboard/admin/diary — Admin Diary
 //
@@ -145,24 +146,9 @@ export default function AdminDiaryPage() {
         rows={3}
         style={{ ...inputStyle, marginBottom: '14px', fontFamily: 'inherit', resize: 'vertical' }}
       />
-      <button
-        onClick={handleCreate}
-        disabled={saving || !newTitle.trim()}
-        style={{
-          width: '100%',
-          background: 'var(--afa-fill-solid)',
-          color: 'var(--afa-on-fill-solid)',
-          border: 'none',
-          borderRadius: '10px',
-          padding: '11px 22px',
-          fontSize: '14px',
-          fontWeight: 600,
-          cursor: saving || !newTitle.trim() ? 'default' : 'pointer',
-          opacity: saving || !newTitle.trim() ? 0.5 : 1,
-        }}
-      >
+      <Button variant="solid" size="lg" fullWidth onClick={handleCreate} disabled={saving || !newTitle.trim()}>
         {saving ? 'Saving...' : 'Add entry'}
-      </button>
+      </Button>
     </div>
   )
 
@@ -213,7 +199,7 @@ export default function AdminDiaryPage() {
                         fontSize: '11px',
                         fontWeight: 600,
                         padding: '5px 12px',
-                        borderRadius: '999px',
+                        borderRadius: 'var(--afa-radius-pill)',
                         border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid rgba(245,245,240,0.12)',
                         background: s === entry.status ? STATUS_META[s].bg : 'var(--afa-surface-raised)',
                         color: s === entry.status ? STATUS_META[s].color : 'var(--afa-text-secondary)',

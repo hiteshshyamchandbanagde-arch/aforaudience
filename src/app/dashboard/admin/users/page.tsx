@@ -8,6 +8,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import SearchInputBox from '@/components/SearchInputBox'
+import Button from '@/components/ui/Button'
 
 interface UserRow {
   id: string
@@ -194,7 +195,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--afa-green-deep)', background: 'transparent', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}
+                        style={{ padding: '8px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-green-deep)', background: 'transparent', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}
                       >
                         Unsuspend
                       </button>
@@ -206,13 +207,9 @@ export default function AdminUsersPage() {
                           placeholder="Reason..."
                           style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                         />
-                        <button
-                          onClick={() => handleSuspend(u.id)}
-                          disabled={actioningId === u.id}
-                          style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
-                        >
+                        <Button variant="solid" size="md" fullWidth={false} onClick={() => handleSuspend(u.id)} disabled={actioningId === u.id}>
                           Suspend
-                        </button>
+                        </Button>
                       </div>
                     )
                   )}
