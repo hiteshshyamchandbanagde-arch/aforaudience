@@ -21,6 +21,8 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-text-primary:    #F5F5F0;
 --afa-text-secondary:  rgba(245, 245, 240, 0.65);
 --afa-text-muted:      rgba(245, 245, 240, 0.4);
+
+--afa-text-on-image:   rgba(255, 255, 255, 0.5);  /* GEN-2609-074 — hero-subtitle text over a PHOTOGRAPH, not a flat surface; a cooler/purer white than --afa-text-secondary's warm cream tint, tuned for legibility across a photo's unpredictable luminance rather than reused for token-count tidiness */
 ```
 
 **Borders**: there is no single `--afa-border` token. In practice, borders are hand-authored `rgba(245,245,240, α)` (translucent cream-on-dark) at low opacity for resting state, with `--afa-amber` (or `rgba(201,151,58, α)`) on hover/focus:

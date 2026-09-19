@@ -181,7 +181,7 @@ export default function WallOfFamePage() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.wallOfFamePage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.wallOfFamePage.heroEmphasis}</em>
           </div>
-          <p style={{ fontSize: "var(--afa-text-title)", color: "rgba(255,255,255,0.5)" }}>
+          <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)" }}>
             {loading ? tr.wallOfFamePage.loading : data ? tr.wallOfFamePage.subtitleTemplate.replace("{month}", data.month) : ""}
           </p>
         </div>

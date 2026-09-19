@@ -58,7 +58,7 @@ export default function OrganisersPage() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.organisersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.organisersPage.heroEmphasis}</em>{tr.organisersPage.heroSuffix}
           </div>
-          <p style={{ fontSize: "var(--afa-text-title)", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+          <p style={{ fontSize: "var(--afa-text-title)", color: "var(--afa-text-on-image)", marginBottom: "32px" }}>
             {loading ? tr.organisersPage.loading : tr.organisersPage.countTemplate.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
