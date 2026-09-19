@@ -61,7 +61,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
 // tier row, the General Admission fallback, and the free-event row.
 function SeatStepperButton({ onClick, glyph }: { onClick: () => void; glyph: '−' | '+' }) {
   return (
-    <button onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-cream)", cursor: "pointer" }}>{glyph}</button>
+    <button onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-text-primary)", cursor: "pointer" }}>{glyph}</button>
   )
 }
 
@@ -248,14 +248,14 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
     <>
       <SiteNav backHref={`/events/${event.id}`} backLabel={tr.checkoutPage.backToEventLabel} />
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", maxWidth: "560px", margin: "0 auto", padding: "32px 20px 64px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)" }}>
-        <div style={{ marginBottom: "8px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
+        <div style={{ marginBottom: "8px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
           {tr.eventDetailPage.selectTicketsCta}
         </div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "4px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
           {event.title}
         </h1>
         {event.venue && (
-          <p style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)", marginBottom: "24px" }}>
+          <p style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", marginBottom: "24px" }}>
             {event.venue.name}, {event.venue.city}
           </p>
         )}
@@ -263,23 +263,23 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
         <div style={{ borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
           {contributionMoment ? null : isPast ? (
             <div>
-              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
-              <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
+              <p style={{ marginTop: "8px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
             </div>
           ) : reservedMessage ? (
             <div>
-              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsReserved}</div>
-              <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)", lineHeight: 1.6 }}>{reservedMessage}</p>
+              <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsReserved}</div>
+              <p style={{ marginTop: "8px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)", lineHeight: 1.6 }}>{reservedMessage}</p>
             </div>
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
-                <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-cream)" }}>
+                <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
                   {event.isFree ? tr.eventDetailPage.freeEntry : event.ticketTiers.length > 0 ? tr.eventDetailPage.chooseSection : event.ticketPrice ? `₹${event.ticketPrice} / ${tr.eventDetailPage.seatSingular}` : tr.eventDetailPage.priceTBD}
                 </span>
                 <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
               </div>
-              <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.4)", marginBottom: "16px" }}>
+              <div style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.4)", marginBottom: "16px" }}>
                 {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
               </div>
 
@@ -304,22 +304,22 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                     event.ticketTiers.map((t) => (
                       <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
                         <div>
-                          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{t.sectionName}</div>
-                          <div style={{ fontSize: "11px", color: "rgba(245,245,240,0.5)" }}>₹{t.price}</div>
+                          <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
+                          <div style={{ fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.5)" }}>₹{t.price}</div>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <SeatStepperButton onClick={() => updateSeat(t.sectionName, -1, t.totalSeats)} glyph="−" />
-                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats[t.sectionName] || 0}</span>
+                          <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats[t.sectionName] || 0}</span>
                           <SeatStepperButton onClick={() => updateSeat(t.sectionName, 1, t.totalSeats)} glyph="+" />
                         </div>
                       </div>
                     ))
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.generalAdmission}</div>
+                      <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.generalAdmission}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
-                        <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
+                        <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
                         <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
                       </div>
                     </div>
@@ -329,10 +329,10 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
 
               {event.isFree && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", marginBottom: "8px" }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.seatsLabel}</div>
+                  <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.seatsLabel}</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <SeatStepperButton onClick={() => updateSeat('General', -1, event.totalSeats)} glyph="−" />
-                    <span style={{ minWidth: "14px", textAlign: "center", fontSize: "13px", color: "var(--afa-cream)" }}>{selectedSeats['General'] || 0}</span>
+                    <span style={{ minWidth: "14px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>{selectedSeats['General'] || 0}</span>
                     <SeatStepperButton onClick={() => updateSeat('General', 1, event.totalSeats)} glyph="+" />
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
               {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
                   {event.ticketTiers.map((t) => (
-                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "11px", color: "var(--afa-cream)", background: "rgba(245,245,240,0.08)", padding: "4px 10px", borderRadius: "999px" }}>
+                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "rgba(245,245,240,0.08)", padding: "4px 10px", borderRadius: "999px" }}>
                       <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "6px" }} />
                       {t.sectionName} · ₹{t.price}
                     </span>
@@ -357,22 +357,22 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
               )}
 
               {bookingError && (
-                <div style={{ fontSize: "12px", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
+                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
               )}
 
               {totalAmount > 0 ? (
                 <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                    <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                    <span style={{ fontSize: "14px", color: "var(--afa-cream)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
+                    <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                    <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "12px" }}>
                     <div>
-                      <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
+                      <div style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{tr.eventDetailPage.bookingFeeLabel}</div>
                       <div style={{ fontSize: "10px", color: "rgba(245,245,240,0.4)", maxWidth: "160px" }}>{tr.eventDetailPage.bookingFeeHint}</div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-                      <span style={{ fontSize: "14px", color: "var(--afa-cream)" }}>₹</span>
+                      <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹</span>
                       <Input
                         variant="compact"
                         type="number"
@@ -391,14 +391,14 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                     </div>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--afa-cream)" }}>{tr.eventDetailPage.totalLabel}</span>
-                    <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-cream)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
+                    <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
+                    <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               ) : (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
-                  <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
-                  <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-cream)" }}>{tr.eventDetailPage.freeAmount}</span>
+                  <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
+                  <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
                 </div>
               )}
 
@@ -407,7 +407,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 {reserving ? tr.eventDetailPage.reserving : status === "loading" ? tr.eventDetailPage.loadingButton : event.isFree ? tr.eventDetailPage.confirmFreeBooking : tr.eventDetailPage.continueToCheckout}
               </Button>
 
-              <div style={{ marginTop: "12px", fontSize: "12px", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
+              <div style={{ marginTop: "12px", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
                 {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
               </div>
             </>
