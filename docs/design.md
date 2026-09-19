@@ -6753,3 +6753,49 @@ Zero page files touched. `check-design-tokens.js`'s diff-only rules are complete
 ### Next dispatch after this merges
 
 Migration batch 2, next three largest files by literal count (this session's own fresh `design-token-ratchet.js` top-10, re-confirmed at session start): `dashboard/artist/page.tsx` (177), `ArtistProfileClientPage.tsx` (175), `EventDetailClientPage.tsx` (174) - each its own PR, same "exact match only, no rounding" discipline, now with 14 more real token slots to match against.
+
+## GEN-2609-082 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **80** at branch start - `081` is the scale-extension ticket) - bulk token migration batch 2, file 2 of 3: `ArtistProfileClientPage.tsx`
+
+Same dispatch, same method as file 1 (`dashboard/artist/page.tsx`, its own entry above/elsewhere in this doc depending on merge order) - branched independently from `qa` (post-`081` merge), not stacked on file 1's branch, per the dispatch's own "each PR stands alone."
+
+**No canvas/SVG, no Tailwind arbitrary-value classes** - checked first, same as file 1. 100% inline `style={{}}`.
+
+### Coverage - matches the dispatch's own predicted numbers exactly
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 94 | 6 | **88** | 88 / 94 |
+| font-size | 14 | 3 | **11** | 11 / 14 |
+| radius | 18 | 2 | **16** | 16 / 18 |
+| rgba | 43 | 40 | 3 (manual) | n/a |
+| raw-button | 6 | 6 | 0 (retrofit only) | n/a |
+
+**175 → 57 literals (67% reduction).** `scripts/design-token-baseline.json` deltas confirm independently: `rgb-rgba-literal` -3, `font-size-literal` -11, `spacing-literal` -88, `radius-literal` -16, `raw-button` ±0.
+
+### Colour - 3 manual matches, one real role-mismatch trap found and correctly NOT migrated
+
+Reviewed all ~40 `rgba()` sites individually (role + exact value, per the dispatch's own rule) rather than pattern-matching on value alone:
+
+- **Migrated (3):** `border: "1px solid rgba(245,245,240,0.15)"` (L540, the `Badge`-shaped social-tag pill) → `var(--afa-border-resting)`; 2x `color: "rgba(245,245,240,0.4)"` (L591 "upcoming shows" count label, L783 corporate-inquiry helper text) → `var(--afa-text-muted)` - both are the same RGB+alpha `--afa-text-muted` already carries (`rgba(245, 245, 240, 0.4)`, whitespace aside), used as an actual text color.
+- **A real trap, found and correctly left alone:** `border: "1.5px solid rgba(245,245,240,0.4)"` appears twice (L504 Follow-button outline, L520 notify-toggle circle border) - **byte-identical in value** to `--afa-text-muted`, but used as a **border** color, not text. The dispatch's own rule is explicit ("used for the same role") precisely to catch this: `--afa-text-muted` is a text-role token: reusing it for an unrelated border would be a coincidental value match, not a real semantic one, and would make an admin's "make muted text lighter" edit silently also move a border color with no visual-role connection. Left as a raw literal on both sites - flagged here, not silently matched.
+- **Not migrated (37 rgba remaining), the recurring buckets:** `rgba(245,245,240,0.08)` x2 (L540 background, L791 background) and `rgba(245,245,240,0.1)`/`0.13` (borders, ~10 sites) - none of these are `--afa-*` tokens (the `0.08` value is `STATUS_TONE.muted.bg`, same finding as file 1 and `GEN-2609-081`'s own colour report; `0.1`/`0.13` don't match `--afa-border-resting`'s `0.15` at all). A wide spread of one-off alphas (`0.5`/`0.55`/`0.6`/`0.65`/`0.75`/`0.85` on `color:`, `0.2`/`0.25`/`0.3` on `border:`/`background:`) - none byte-identical to any real token, left untouched rather than approximated.
+
+### Stays a literal - this file's own off-scale values, all on the dispatch's named list or below the bar
+
+font-size: `22px`x2, `26px`x1 (a stat-number span, not named on the dispatch's list but a single low-frequency site - not chased). spacing: `40px`x4 (padding shorthand outer values), `-2px`x1 (a tab-underline overlap hack, negative - never a token candidate, same reasoning `GEN-2609-079`'s own seat-map entry gave for its own negative-margin literals). radius: `4px`x1 (a small genre-tag pill), `99px`x1 (background/border cluster - almost certainly a typo for `999px` in the original source, but not this migration's job to fix a pre-existing bug, only to swap exact literals for tokens - flagged here rather than silently "corrected").
+
+### Raw `<button>` - 6 sites, 0 migrated to a `Button` variant, all already token-retrofitted
+
+- **Prev/next artist nav arrows (L383, L406):** 34×34px circular icon buttons (`width`/`height` untouched, out of this migration's scope regardless), pill radius. No icon-only circular-nav variant exists in `Button.tsx`.
+- **Follow (L498):** Superficially resembles `docs/afa-design-tokens-reference.md` Section 4's documented Follow-button convention, but differs on 3 real dimensions when compared directly, not assumed: `fontWeight: 700` (not the convention's `600`), `padding: var(--afa-space-2) var(--afa-space-5)` (8px 20px, not `10px 20px`), `borderRadius: var(--afa-radius-sm)` (6px, not the convention's sharp/no-radius). Not an exact match; not migrated, not force-fit.
+- **Notify toggle (L513):** 34×34px circle, unique shape (contains the role-mismatch border trap above). No match.
+- **About/Shows tab switcher (L625):** underline-tab chrome, no `Button.tsx` variant covers this shape.
+- **Corporate inquiry CTA (L836):** full-width outline button, `borderRadius: var(--afa-radius-md)` (8px) and an untokenized border color - closest in spirit to `outline-neutral` but that variant uses `radius-sm` (6px), not `md`; not an exact match.
+
+All 6 already had every spacing/font-size/radius/color literal in scope token-retrofitted by the passes above.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `rgb-rgba-literal` 967→964, `font-size-literal` 1351→1340, `spacing-literal` 3244→3156, `radius-literal` 535→519 (all measured against this branch's own `qa` starting point, independent of file 1's branch - the 2 branches' baseline deltas are not additive until both merge and the baseline is regenerated post-merge, same convention `GEN-2609-079`'s own 3-file batch used). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff - branch not yet merged/deployed. Same standing caveat as every file in this batch.
