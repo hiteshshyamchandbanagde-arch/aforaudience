@@ -39,6 +39,27 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-btn-padding-lg:  12px 24px;
 ```
 
+**GEN-2609-081 — scale extension (new tokens, admin-controlled, no migration).** `GEN-2609-079`'s bulk migration found these 14 values recurring 50+ times repo-wide (precise, reconciled count — see `docs/design.md`'s `GEN-2609-081` entry for the full per-value table) with no existing scale step to match exactly. Explicit px-suffixed names, not step indices/role names — see that same entry for why. Zero adoption yet (no page file was migrated to reference them in this ticket) — same "tokens only" posture Section 8's own original scale had before `GEN-2609-077`'s homepage phase:
+
+```css
+--afa-space-2px:   2px;
+--afa-space-6px:   6px;
+--afa-space-10px:  10px;
+--afa-space-14px:  14px;
+--afa-space-18px:  18px;
+--afa-space-28px:  28px;
+--afa-space-32px:  32px;
+--afa-space-48px:  48px;
+
+--afa-text-10px:   10px;
+--afa-text-15px:   15px;
+--afa-text-18px:   18px;
+--afa-text-20px:   20px;
+
+--afa-radius-10px: 10px;
+--afa-radius-12px: 12px;
+```
+
 **Admin-controlled runtime layer (GEN-2609-075, 19 Sep).** Every token in this section, plus `--font-display`/`--font-ui`/`--font-sans`/`--font-mono`, is now also a row in the `DesignToken` table (`aforaudience-qa`) and editable at `/dashboard/admin/design-system` — an admin change is cached (tag `"design-tokens"`) and takes effect on the next page load, no deploy, falling back to the static values in this file/`globals.css` if the DB is empty or unreachable. `globals.css` stays the authoritative *default* (and the only thing that matters for a fresh environment before the table is seeded); the DB is a runtime override layer on top of it, not a replacement. 5 tokens (`--afa-surface-page`, `--afa-surface-raised`, `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid`) are "locked" in the admin UI — still editable, gated behind a confirm dialog — unrelated to this section's own CI-enforced locked-palette rule below, which keeps blocking raw literals in application *code* regardless of what the DB holds. Full reasoning in `docs/design.md`'s `GEN-2609-075` entry.
 
 **Do not confuse this 5 with the 5 `--afa-text-*` tokens two paragraphs up (`primary`/`secondary`/`muted`/`inverse`/`on-image`) — GEN-2609-076 found the two genuinely conflated once already.** Zero overlap between the two sets; they answer different questions (which named color a piece of text should use, vs. which tokens are core-identity-defining enough to need a confirm click before an admin changes them). Locking the text-role tokens behind a confirm dialog wouldn't make sense — they're ordinary content-color choices, not brand-identity primitives — so `GEN-2609-076` recommended keeping the surface/amber/fill-solid set as-is rather than reconciling toward this section's `--afa-text-*` table.
@@ -201,6 +222,8 @@ Real, shipped dashboards already exist under `src/app/dashboard/` — this is **
 **Implication for new dashboard work**: match the *existing dashboard* convention (rounded `12px` cards, `999px` pills, flat borders, `--afa-surface-raised` fill) rather than the public-site sharp-corner rule — they are two deliberately different, already-coexisting systems in this codebase, not one the other should be reconciled toward.
 
 ## 8. Type Scale & Spacing Grid (proposed, 12 Sep 2026 — UI/UX audit Section 06 / 12 Step 1)
+
+**Scale extended 19 Sep (`GEN-2609-081`).** The 6-step type scale / 6-step spacing grid / 4-step radius scale below are the *original* scale — 14 more px-suffixed tokens (`--afa-space-2px`/`6px`/`10px`/`14px`/`18px`/`28px`/`32px`/`48px`, `--afa-text-10px`/`15px`/`18px`/`20px`, `--afa-radius-10px`/`12px`) were added in Section 1 above to cover the highest-frequency off-scale values `GEN-2609-079`'s migration actually found in shipped code (50+ repo-wide occurrences each) — see `docs/design.md`'s `GEN-2609-081` entry for the full measurement.
 
 **Tokens exist, adoption doesn't (as of 15 Sep, Step 1 completion).** All 14 tokens below — the 6-step type scale, the 6-step spacing grid, and both page-title tiers — are now real CSS custom properties in `src/app/globals.css`. Nothing in the app consumes them yet: the ~36 existing page-title call sites are still literals, and no component has been retrofitted to the base scale/grid either. Derived from grepping every shipped `font-size`/`fontSize` and `padding`/`margin`/`gap` value in `src/`, not assumed. Source: `docs/afa-uiux-design-audit.md`, qa @ `4456f3b`.
 
