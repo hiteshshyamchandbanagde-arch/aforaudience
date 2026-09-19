@@ -31,12 +31,12 @@ export default function Hero() {
 
       <div style={{ position: "relative", zIndex: 2, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100svh", padding: "128px 24px 72px" }}>
         <div style={{ maxWidth: "760px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-6)" }}>
             <span style={{ position: "relative", display: "flex", width: "8px", height: "8px" }}>
               <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "var(--afa-fill-solid)", opacity: 0.75, animation: reduced ? "none" : "heroPing 1.8s cubic-bezier(0,0,0.2,1) infinite" }} />
               <span style={{ position: "relative", width: "8px", height: "8px", borderRadius: "50%", background: "var(--afa-fill-solid)" }} />
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
               {tr.homePage.heroIssueTag}
             </span>
           </div>
@@ -50,14 +50,14 @@ export default function Hero() {
             {tr.homePage.heroSubtitle}
           </p>
 
-          <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
-            <Link href="/events" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px 28px", borderRadius: "999px", fontFamily: "var(--font-sans)", fontSize: "16px", fontWeight: 700, textDecoration: "none" }}>
+          <div style={{ marginTop: "34px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
+            <Link href="/events" style={{ display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "14px 28px", borderRadius: "999px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 700, textDecoration: "none" }}>
               {tr.homePage.ctaFindTonightsShow}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
-            <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", color: "var(--afa-text-primary)", padding: "14px 28px", borderRadius: "999px", border: "1.5px solid rgba(245,245,240,0.25)", fontFamily: "var(--font-sans)", fontSize: "16px", fontWeight: 500, textDecoration: "none" }}>
+            <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", color: "var(--afa-text-primary)", padding: "14px 28px", borderRadius: "999px", border: "1.5px solid rgba(245,245,240,0.25)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", fontWeight: 500, textDecoration: "none" }}>
               {tr.homePage.ctaImArtist}
             </Link>
           </div>

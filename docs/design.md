@@ -6288,3 +6288,73 @@ Per Hitesh's explicit instruction, no new variants for single-site or too-diverg
 - **Version history readability.** Previously showed only a note string + timestamp + "Revert to this" - an admin had no way to tell WHAT a version actually changed or who made it without reverting first. Now shows, per version: which token key(s) changed vs. the immediately-prior version (diffed client-side from the snapshot JSON already being fetched), each as `key: old → new`, and the admin's own display name/email (looked up via the existing `updatedBy` user id already stored on the affected `DesignToken` rows - reused, not a new join).
 - **Sidebar link.** `/dashboard/admin/design-system` had no entry point from `DashboardShell`'s admin nav - reachable only by typing the URL. Added alongside the other admin-role nav items.
 - **Near-invisible `outline` button in the live preview, found and fixed.** `outline`'s text/border color is `--afa-on-fill-solid` (near-black, `#1A1000`) - by design, meant to read against a `--afa-fill-solid` (orange) background it sits on top of (see `Button.tsx`'s own `GEN-2609-047` comment). The preview panel rendered it directly on `--afa-surface-page` (near-black, `#141414`) instead - near-black text on a near-black page, functionally invisible. Fixed by giving just that one preview cell its own `--afa-fill-solid`-colored wrapper, matching how `outline` is actually used in production (e.g. `NotificationOptIn.tsx`'s banner) rather than previewing it out of context.
+
+## GEN-2609-077 - Type-scale + spacing coverage, phase 1 (homepage) - audit + build
+
+### Audit method
+
+Grepped every `fontSize:`/`font-size:`/`text-[Npx]` and `padding`/`margin`/`gap` (and their `-Top`/`-Left`/etc. longhand + Tailwind `p-[Npx]`/`gap-[Npx]` arbitrary-value forms) literal in `src/app/**/*.tsx` and `src/components/**/*.tsx`, per page group, via a small throwaway script (not committed - one-off, same spirit as prior audits in this doc). Classified each literal as "clean" if its bare numeric value exactly equals one of the 8 type-scale steps (11/12/13/14/16/24/28/32) or 6 spacing-grid steps (4/8/12/16/20/24), "off-scale" otherwise. `em`/`rem`/`%`/`vw`-relative font sizes and `clamp()` expressions are excluded entirely (different unit system / the still-open display-scale gap from Section 8.1 - not this scale's job to absorb, unchanged from that prior finding). Spacing shorthand with multiple values (e.g. `'10px 20px'`) is excluded from the single-value counts below, not silently rounded.
+
+**No measured traffic data exists to rank against.** Checked first, not assumed: Vercel Web Analytics returns `web_analytics_not_enabled` for this project, and there's no in-app pageview/analytics table in the `aforaudience-qa` schema (`Review`/`ReviewReply` were the only `%view%`-matching tables). Traffic ranking below is a reasoned proxy from the app's own structure (homepage as the universal entry point, events as the core transactional/ticketing flow, artists/venues as secondary discovery, Wall of Fame as a single curated page) - flagged explicitly as a proxy, not measured, rather than presented as real numbers.
+
+### Per-group counts
+
+| Group | Files | Font-size: total / clean / off-scale | Spacing: total / clean / off-scale | Traffic (proxy) |
+|---|---|---|---|---|
+| Homepage | `page.tsx` + `HomeHeader`/`Hero`/`FourRooms`/`PlatformGrowthStrip`/`Ledger` | 46 / **34 (74%)** / 12 | 44 / 30 (68%) / 14 | Highest - universal entry point |
+| Events | `events/page.tsx` + detail/rate/seats client pages | 42 / 16 (38%) / 26 | 141 / 97 (69%) / 44 | High - core ticketing flow |
+| Artists | `artists/page.tsx` + `ArtistProfileClientPage.tsx` | 18 / 0 (0%) / 18 | 79 / 52 (66%) / 27 | Medium - secondary discovery |
+| Venues | `venues/page.tsx` + grid/hero/toggle/detail/follow | 9 / 0 (0%) / 9 | 46 / 30 (65%) / 16 | Medium - secondary discovery |
+| Wall of Fame | `wall-of-fame/page.tsx` | 5 / 0 (0%) / 5 | 16 / 11 (69%) / 5 | Lower - single curated page |
+| Rest (90 files) | everything else in `src/app`/`src/components` | 1173 / 926 (79%) / 247 | 1335 / 739 (55%) / 596 | Mixed - dashboards, admin, auth, checkout, shared layer |
+
+Artists/Venues/Wall of Fame showing **0%** font-size clean is real, not a bug in the method - re-verified by spot-checking several off-scale values by hand (`10/15/18/20/22/26px`, genuinely none of them are 11/12/13/14/16/24/28/32). These 3 groups already went through `GEN-2609-073`'s color/typography-family/Button migration, which explicitly only touched "exact scale matches" for font-size and left the rest as literals (per that entry's own words) - what's left here is precisely the residue that pass correctly declined to round.
+
+The `spacingClean` percentages being consistently ~65-69% across groups (not near 0 the way font-size is for 3 of them) reflects that the spacing grid was *never touched* by any prior migration (`GEN-2609-072`'s original finding: "zero adoption anywhere including `Button.tsx` itself" - still true before this ticket) - these are naturally-occurring round numbers from developers already gravitating toward an implicit 4px rhythm, not leftover residue from a partial migration.
+
+### Phase proposal
+
+1. **Phase 1 (this ticket): Homepage.** Wins on both axes - highest proxy-traffic AND the best clean-match ratio for font-size (74%, well above every other group) and a strong spacing ratio (68%). Smallest, highest-confidence phase to prove the pattern.
+2. **Phase 2 (proposed, not built): Events.** Largest remaining literal volume (183 combined) on the platform's core transactional flow - highest-value next target despite the lower font-size clean ratio (38%, more off-scale decisions to make).
+3. **Phase 3 (proposed, not built): Artists + Venues, paired.** Same profile (0% font clean, ~65% spacing clean, medium proxy-traffic) - the residue left after `GEN-2609-073`'s color pass, now needs its own explicit per-value decisions rather than mechanical swaps.
+4. **Phase 4 (proposed, not built): Wall of Fame + the broader "rest."** Wall of Fame alone is tiny (10 combined literals) and could ride along with whichever phase is convenient; "the rest" (90 files, ~2,500 combined literals) is by far the largest remaining scope - dashboards, admin, auth, checkout, the shared layer (`SiteNav`/`DashboardShell`/`EventCard`/etc., cross-cutting every group above) - and will very likely need its own further sub-phasing once reached, not a single pass.
+
+### Phase 1 build (homepage)
+
+Migrated every font-size/spacing literal whose bare value exactly matched a token step to `var(--afa-text-*)`/`var(--afa-space-*)`, across `src/app/page.tsx`, `HomeHeader.tsx`, `Hero.tsx`, `FourRooms.tsx`, `PlatformGrowthStrip.tsx`, `Ledger.tsx`. Off-scale values (`9/10/15/17/18/22/26/56px` font-size; `10/26/28/32/34/36/48px` spacing) left untouched, not rounded - see the decision list below for the ones worth a real call rather than silence.
+
+**Off-scale decision list (not guessed, not silently changed).** Every literal below stayed a raw literal - none were rounded onto a nearby step. "Nearest step" is shown for context only, not applied:
+
+| File | Value | Context | Nearest step |
+|---|---|---|---|
+| `page.tsx` | `fontSize: 10px` | small type badge | 11px (`--afa-text-micro`) |
+| `page.tsx` | `marginBottom: 10px` | hero title spacing | 8 or 12px |
+| `page.tsx` | `padding: 5px 9px` | pill badge (2-value shorthand) | not directly mappable |
+| `page.tsx` | `padding: 24px 36px 56px` / `0 36px 56px` | section padding (3-value shorthand) | not directly mappable |
+| `page.tsx` | `gap: 48px`, `marginBottom: 48px` | footer column grid | no step above 24px exists |
+| `page.tsx` | `gap: 10px` (footer link list) | footer nav column | 8 or 12px |
+| `page.tsx` | `paddingTop: 32px` | footer divider | no step above 24px exists |
+| `HomeHeader.tsx` | `fontSize: 22px` | wordmark | 24px |
+| `HomeHeader.tsx` | `fontSize: 10px` | tagline | 11px |
+| `HomeHeader.tsx` | `gap: 28px` (desktop nav) | nav item spacing | 24px |
+| `HomeHeader.tsx` | `gap: 10px` | account-row spacing | 8 or 12px |
+| `Hero.tsx` | `marginTop: 26px`, `fontSize: 18px` | hero subtitle | 24/20px, 16px |
+| `Hero.tsx` | `marginTop: 34px` | CTA row spacing | no step near 34 |
+| `FourRooms.tsx` | `fontSize: 56px` | decorative background numeral | out of scale by design (display-adjacent) |
+| `FourRooms.tsx` | `fontSize: 17px` ×2 | room copy | 16px |
+| `FourRooms.tsx` | `fontSize: 15px` | numbered-step label | 14 or 16px |
+| `FourRooms.tsx` | `marginTop: 36px` | CTA link spacing | no step near 36 |
+| `PlatformGrowthStrip.tsx` | `gap: 36px` (stats row), `28px`/`32px` (responsive) | entire file - 0 clean matches | 24px is the closest, but a visible shrink |
+| `PlatformGrowthStrip.tsx` | `fontSize: 26px` (stat number), `9px` (stat label) | growth-strip stats | 24/28px; 11px |
+| `Ledger.tsx` | `gap: 32px` ×2, `padding: 36px` | ledger card/grid | 24px is the closest, but a visible shrink |
+| `Ledger.tsx` | `fontSize: 22px` | headline | 24px |
+
+**Real finding, not assumed: `Ledger.tsx` is shared beyond the homepage.** Its own header comment says it's reused on the Artist landing page (`for-artists/page.tsx`, `GEN-2608-072`, "honest money" section) - not one of this ticket's 5 named groups. Migrating its clean matches (done above) is a genuine bonus, not scope creep: the component's tokens now also apply wherever else it's mounted, for free. Flagged here rather than silently claimed as "homepage-only."
+
+### Admin coverage labels updated
+
+`src/lib/design-token-coverage.ts` regenerated via the same `git grep -l --fixed-strings -- "var(KEY)" -- src` method `GEN-2609-076` established, now that homepage's migrated literals are real `var()` consumers. Real result, not assumed: **all 8 `--afa-text-*` and all 6 `--afa-space-*` tokens** now show at least one non-`Button.tsx` consumer - the "Size" and "Spacing" groups both flip from `unused` (fully disabled in the admin UI) to `site-wide`, and every field in both groups becomes editable.
+
+**New: a real "applies to" label, not a static string.** Added `PAGE_GROUP_OF_FILE` + `appliesTo()` to `design-token-coverage.ts` - maps each token's real `consumerFiles` (the same array the coverage badge itself reads) to this ticket's 5 named page-group labels (`Homepage`/`Events`/`Artists`/`Venues`/`Wall of Fame`) plus `Button`, collapsing anything else to `elsewhere` rather than guessing a name for the ~90-file unphased "rest" bucket. The admin page renders this live per group ("Applies to: Homepage, Events, Artists, Venues, Wall of Fame, Button.") - derived from the same grep data, not a hand-typed claim that could drift as later phases land. Size/Spacing's static blurb text ("adopted by 11 pages...") was deliberately trimmed to just "Type scale."/"8px-based spacing grid." now that the dynamic line carries the real coverage claim.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean (checked AFTER committing - `GEN-2609-076` found this checker only sees committed refs, not the working tree; verifying pre-commit would be a no-op). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`.

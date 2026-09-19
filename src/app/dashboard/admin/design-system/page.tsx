@@ -10,7 +10,7 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { contrastRatio, isValidTokenValue, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
-import { TOKEN_COVERAGE, type CoverageStatus } from '@/lib/design-token-coverage'
+import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 
 // /dashboard/admin/design-system — GEN-2609-075
@@ -66,7 +66,7 @@ function diffSnapshots(newer: Record<string, string>, older: Record<string, stri
 const GROUP_META: Record<TokenGroup, { label: string; blurb: string }> = {
   color: { label: 'Color', blurb: 'Every --afa-* color token in globals.css.' },
   font: { label: 'Font', blurb: 'Which pre-loaded font plays each typographic role.' },
-  size: { label: 'Size', blurb: 'Type scale — adopted by 11 public content pages (GEN-2609-073).' },
+  size: { label: 'Size', blurb: 'Type scale.' },
   radius: { label: 'Radius', blurb: 'Corner radius scale, consumed by the Button component.' },
   spacing: { label: 'Spacing', blurb: '8px-based spacing grid.' },
   button: { label: 'Button', blurb: 'Button padding scale (sm/md/lg), consumed by the Button component.' },
@@ -512,13 +512,23 @@ export default function AdminDesignSystemPage() {
               if (groupTokens.length === 0) return null
               const coverage = groupCoverage(groupTokens)
               const groupDisabled = coverage === 'unused'
+              // GEN-2609-077 - "applies to: <groups>" derived live from
+              // the same consumerFiles the coverage badge itself uses
+              // (src/lib/design-token-coverage.ts), not a hand-maintained
+              // string that could drift out of date as later phases land.
+              const groupAppliesTo = groupDisabled
+                ? []
+                : appliesTo(groupTokens.flatMap((t) => TOKEN_COVERAGE[t.key]?.consumerFiles ?? []))
               return (
                 <div key={group} style={{ ...panelStyle, marginBottom: 24, opacity: groupDisabled ? 0.6 : 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                     <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>{GROUP_META[group].label}</h2>
                     <CoverageBadge status={coverage} />
                   </div>
-                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>{GROUP_META[group].blurb}</p>
+                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+                    {GROUP_META[group].blurb}
+                    {groupAppliesTo.length > 0 && <> Applies to: {groupAppliesTo.join(', ')}.</>}
+                  </p>
                   {groupDisabled && (
                     <p style={{ color: 'var(--afa-error-bright)', fontSize: 13, fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
                       Not consumed anywhere in the app right now (checked via a real grep of every var(--…) usage, not assumed). Editing these has no visible effect until a future ticket adopts them — disabled here so that isn't a trap.

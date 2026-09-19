@@ -95,15 +95,15 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
       )}
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
       <div style={{ position: "absolute", left: size === "strip" ? "28px" : "20px", right: "20px", bottom: "20px" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "8px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
           {typeLabel} · {event.venue ? event.venue.city : tr.eventsPage.venueTBD}
         </div>
         <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: titleSize, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--afa-text-primary)", marginBottom: "10px" }}>
           {event.title}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
           <LineupChips lineup={event.lineup} size={24} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(245,245,240,0.75)" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.75)" }}>
             {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"}
           </span>
         </div>
@@ -157,24 +157,24 @@ export default function Home() {
           disconnected transition until it's folded into a later pass. */}
       {bentoEvents.length > 0 && (
         <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "24px 36px 56px" }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "var(--afa-space-5)" }}>
             <div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "8px" }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
                 {tr.homePage.happeningSoonEyebrow}
               </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "28px", color: "var(--afa-text-primary)" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--afa-text-page-title)", color: "var(--afa-text-primary)" }}>
                 {tr.homePage.happeningSoonTitle}
               </h2>
             </div>
-            <Link href="/events" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--afa-amber)", textDecoration: "none" }}>
+            <Link href="/events" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--afa-amber)", textDecoration: "none" }}>
               {tr.homePage.happeningSoonAll}
             </Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: bentoEvents.length > 1 ? "3fr 2fr" : "1fr", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: bentoEvents.length > 1 ? "3fr 2fr" : "1fr", gap: "var(--afa-space-3)" }}>
             <BentoTile event={bentoEvents[0]} size="large" />
             {bentoEvents.length > 1 && (
-              <div style={{ display: "grid", gap: "12px" }}>
+              <div style={{ display: "grid", gap: "var(--afa-space-3)" }}>
                 {bentoEvents[1] && <BentoTile event={bentoEvents[1]} size="medium" />}
                 {bentoEvents[2] && <BentoTile event={bentoEvents[2]} size="medium" />}
               </div>
@@ -205,10 +205,10 @@ export default function Home() {
         <div style={{ maxWidth: "1360px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "48px", marginBottom: "48px" }}>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "12px" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "var(--afa-space-3)" }}>
                 <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               </div>
-              <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
                 {tr.homePage.footerTagline}
               </p>
             </div>
@@ -242,16 +242,16 @@ export default function Home() {
               },
             ].map((col) => (
               <div key={col.title}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "20px" }}>{col.title}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-body)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-5)" }}>{col.title}</div>
                 <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                   {col.links.map((link) => (
-                    <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
+                    <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             <span>{tr.homePage.footerCopyright}</span>
             <span>{tr.homePage.footerMadeWith}</span>
           </div>
