@@ -231,8 +231,8 @@ export default function ArtistDashboard() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
-  if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>Profile not found</div></DashboardShell></>)
+  if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>Profile not found</div></DashboardShell></>)
 
   const upcoming = profile.performances
     .filter((p) => !p.cancelledAt && new Date(p.event.date) >= new Date(new Date().toDateString()))
@@ -276,16 +276,16 @@ export default function ArtistDashboard() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--afa-space-32px)', flexWrap: 'wrap', gap: 'var(--afa-space-4)' }}>
             <div>
               {/* BUG-2609-018: was profile.name (the API's raw username
                   field) - this heading is the public-profile preview, same
                   fallback chain as the rest of the app. */}
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 {profile.displayName || profile.name || profile.email}
               </h1>
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                 {profile.followers.length} follower{profile.followers.length === 1 ? '' : 's'}
               </p>
             </div>
@@ -298,36 +298,36 @@ export default function ArtistDashboard() {
               Tour (not per stop). Placed right after the header, same
               can't-miss-it priority as the corporate-inquiry inbox link. */}
           {tourInvites.length > 0 && (
-            <div style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-28px)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-14px)' }}>
               {tourInvites.map((inv) => (
-                <div key={inv.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-gold)', borderRadius: '12px', padding: '20px 24px' }}>
-                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-gold)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                <div key={inv.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-gold)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-gold)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 'var(--afa-space-2)' }}>
                     Tour invite
                   </p>
-                  <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>{inv.tour.title}</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '10px' }}>
+                  <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>{inv.tour.title}</h3>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>
                     {inv.tour.organiser.orgName} wants to feature you on this Tour
                     {inv.tour.stops.length > 0 && ` — ${inv.tour.stops.length} stop${inv.tour.stops.length > 1 ? 's' : ''}`}.
                   </p>
                   {inv.tour.stops.length > 0 && (
-                    <ul style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: '14px', paddingLeft: '18px' }}>
+                    <ul style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8, marginBottom: 'var(--afa-space-14px)', paddingLeft: 'var(--afa-space-18px)' }}>
                       {inv.tour.stops.map((s) => (
                         <li key={s.id}>{s.title} — {new Date(s.date).toLocaleDateString()}{s.venue ? `, ${s.venue.city}` : ''}</li>
                       ))}
                     </ul>
                   )}
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
                     <button
                       onClick={() => respondToTourInvite(inv.id, true)}
                       disabled={respondingTour === inv.id}
-                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
                     >
                       Accept
                     </button>
                     <button
                       onClick={() => respondToTourInvite(inv.id, false)}
                       disabled={respondingTour === inv.id}
-                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
                     >
                       Decline
                     </button>
@@ -343,45 +343,45 @@ export default function ArtistDashboard() {
               numbers (not a low-but-nonzero score) so it never contradicts actual
               stats once the artist has any real activity. */}
           {profile.performances.length === 0 && profile.followers.length === 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: `1px solid ${fillSolidTint(0.15)}` }}>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: `1px solid ${fillSolidTint(0.15)}` }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
                 Today is just the beginning 🎤
               </p>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.65, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, lineHeight: 1.5 }}>
                 Every hype score and follower count starts at zero. Complete your profile and apply to your first event to start building yours — this platform is here to grow with you.
               </p>
             </div>
           )}
 
           {completionPercent < 100 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', border: '1px solid rgba(255,90,54,0.2)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Profile {completionPercent}% complete</span>
-                <Link href="/dashboard/artist/edit" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: '1px solid rgba(255,90,54,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-10px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+                <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Profile {completionPercent}% complete</span>
+                <Link href="/dashboard/artist/edit" style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
                   Complete your profile →
                 </Link>
               </div>
-              <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-fill-solid)', borderRadius: '999px' }} />
+              <div style={{ height: '6px', borderRadius: 'var(--afa-radius-pill)', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-pill)' }} />
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '8px' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-2)' }}>
                 A complete profile - bio, genre, style, and a social link - helps Organisers say yes faster.
               </p>
             </div>
           )}
 
           {/* Profile summary */}
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
-            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: profile.bio ? 0.8 : 0.4, marginBottom: '16px', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-6)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: profile.bio ? 0.8 : 0.4, marginBottom: 'var(--afa-space-4)', lineHeight: 1.6, fontStyle: profile.bio ? 'normal' : 'italic' }}>
               {profile.bio || 'No bio yet — add one from Edit Profile.'}
             </p>
             {(profile.genre.length > 0 || profile.styleTag.length > 0) && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                 {profile.genre.map((g) => (
-                  <span key={g} style={{ fontSize: '12px', padding: '5px 12px', background: 'var(--afa-surface-raised)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>{g}</span>
+                  <span key={g} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>{g}</span>
                 ))}
                 {profile.styleTag.map((s) => (
-                  <span key={s} style={{ fontSize: '12px', padding: '5px 12px', background: FILL_SOLID_TINT, borderRadius: '999px', color: 'var(--afa-fill-solid)' }}>{s}</span>
+                  <span key={s} style={{ fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-3)', background: FILL_SOLID_TINT, borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-fill-solid)' }}>{s}</span>
                 ))}
               </div>
             )}
@@ -392,24 +392,24 @@ export default function ArtistDashboard() {
               to show, so a brand-new artist with zero performances doesn't
               see an empty ₹0/₹0/₹0 block. */}
           {(totalCompensation > 0 || totalSpend > 0) && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-6)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Recorded Earnings
               </h2>
-              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-18px)' }}>
                 Compensation and spend agreed with Organisers - not processed or confirmed by the platform. Tips will show separately once available.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-4)' }}>
                 <div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Recorded Compensation</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Compensation</p>
                   <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Recorded Spend</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Spend</p>
                   <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Net</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Net</p>
                   <p style={{ fontSize: '22px', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error)' }}>
                     {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
                   </p>
@@ -419,53 +419,53 @@ export default function ArtistDashboard() {
           )}
 
           {/* Reviews */}
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '14px' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-14px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 Reviews
               </h2>
               {avgRating !== null && (
-                <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+                <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                   {'⭐'.repeat(Math.round(avgRating))} {avgRating.toFixed(1)} · {allReviews.length} review{allReviews.length === 1 ? '' : 's'}
                 </span>
               )}
             </div>
             {allReviews.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
                 No reviews yet. Audiences can rate you after checking in at a show.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {allReviews.map((r) => {
                   const reply = r.reply || localReplies[r.id]
                   return (
-                    <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                        <span style={{ fontSize: '14px' }}>{'⭐'.repeat(r.rating)}</span>
-                        <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
+                    <div key={r.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+                        <span style={{ fontSize: 'var(--afa-text-body)' }}>{'⭐'.repeat(r.rating)}</span>
+                        <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{r.eventTitle}</span>
                       </div>
                       {r.comment && (
-                        <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5, marginBottom: '6px' }}>{r.comment}</p>
+                        <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5, marginBottom: 'var(--afa-space-6px)' }}>{r.comment}</p>
                       )}
-                      <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: reply ? '10px' : 0 }}>
                         {r.user.displayName || r.user.name} · {new Date(r.createdAt).toLocaleDateString()}
                       </p>
 
                       {reply ? (
-                        <div style={{ marginTop: '4px', paddingTop: '10px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
-                          <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.85, lineHeight: 1.5 }}>
+                        <div style={{ marginTop: 'var(--afa-space-1)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
+                          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.85, lineHeight: 1.5 }}>
                             <strong>Your reply:</strong> {reply.text}
                           </p>
                         </div>
                       ) : (
-                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(245,245,240,0.06)', display: 'flex', gap: '8px' }}>
+                        <div style={{ marginTop: 'var(--afa-space-10px)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid rgba(245,245,240,0.06)', display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <input
                             type="text"
                             placeholder="Write a reply..."
                             value={replyDrafts[r.id] || ''}
                             onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
                             maxLength={500}
-                            style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                            style={{ flex: 1, padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                           />
                           <Button
                             variant="primary"
@@ -474,7 +474,7 @@ export default function ArtistDashboard() {
                             onClick={() => submitReply(r.id)}
                             disabled={replySubmitting === r.id || !(replyDrafts[r.id] || '').trim()}
                             style={{
-                              padding: '8px 16px',
+                              padding: 'var(--afa-space-2) var(--afa-space-4)',
                               opacity: replySubmitting === r.id || !(replyDrafts[r.id] || '').trim() ? 0.6 : 1,
                             }}
                           >
@@ -490,28 +490,28 @@ export default function ArtistDashboard() {
           </div>
 
           {/* Followers */}
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Followers
             </h2>
             {profile.followers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
                 No followers yet. They&apos;ll show up here as people find your profile.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2)' }}>
                 {profile.followers.map((f) => {
                   const label = f.user.displayName || f.user.name
                   return (
-                    <div key={f.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '12px 16px', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div key={f.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-3) var(--afa-space-4)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
                       <div style={{
                         width: '32px', height: '32px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 700, flexShrink: 0,
                       }}>
                         {label.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontSize: '14px', color: 'var(--afa-text-primary)', fontWeight: 500 }}>{label}</span>
-                      <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.4, marginLeft: 'auto' }}>
+                      <span style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', fontWeight: 500 }}>{label}</span>
+                      <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginLeft: 'auto' }}>
                         since {new Date(f.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -522,34 +522,34 @@ export default function ArtistDashboard() {
           </div>
 
           {/* Upcoming performances */}
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Upcoming Performances
             </h2>
             {upcoming.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No upcoming performances yet. Apply to events to get booked.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No upcoming performances yet. Apply to events to get booked.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {upcoming.map((p) => (
-                  <div key={p.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px 20px', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div key={p.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                     <div>
-                      <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+                      <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                         {new Date(p.event.date).toLocaleDateString()} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>Slot #{p.slot} · {p.duration} min</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>Slot #{p.slot} · {p.duration} min</span>
                       {canCancel(p) ? (
                         <button
                           onClick={() => cancelPerformance(p.id)}
                           disabled={cancelling === p.id}
-                          style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: '6px', padding: '6px 12px', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
+                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-3)', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
                         >
                           {cancelling === p.id ? 'Cancelling...' : 'Cancel'}
                         </button>
                       ) : (
-                        <span style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
+                        <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
                           Too close to cancel
                         </span>
                       )}
@@ -562,15 +562,15 @@ export default function ArtistDashboard() {
 
           {/* Applications */}
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               My Applications
             </h2>
             {profile.applications.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
                 No applications yet. <Link href="/dashboard/artist/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>Browse events</Link> to apply.
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                 {profile.applications.map((app) => {
                   const appStyle = APPLICATION_STYLE[app.status] || APPLICATION_STYLE.PENDING
                   const isNavigatingThis = navigatingEventId === app.event.id
@@ -591,8 +591,8 @@ export default function ArtistDashboard() {
                       style={{
                         position: 'relative',
                         background: 'var(--afa-surface-raised)',
-                        borderRadius: '10px',
-                        padding: '16px 20px',
+                        borderRadius: 'var(--afa-radius-10px)',
+                        padding: 'var(--afa-space-4) var(--afa-space-5)',
                         border: '1px solid rgba(245,245,240,0.08)',
                         cursor: navigatingEventId ? 'default' : 'pointer',
                         opacity: navigatingEventId && !isNavigatingThis ? 0.5 : 1,
@@ -605,7 +605,7 @@ export default function ArtistDashboard() {
                             position: 'absolute',
                             inset: 0,
                             zIndex: 2,
-                            borderRadius: '10px',
+                            borderRadius: 'var(--afa-radius-10px)',
                             background: 'rgba(255,255,255,0.7)',
                             display: 'flex',
                             alignItems: 'center',
@@ -617,20 +617,20 @@ export default function ArtistDashboard() {
                               width: '22px',
                               height: '22px',
                               borderRadius: '50%',
-                              border: '3px solid rgba(245,245,240,0.15)',
+                              border: '3px solid var(--afa-border-resting)',
                               borderTopColor: 'var(--afa-fill-solid)',
                               animation: 'afa-spin 0.7s linear infinite',
                             }}
                           />
                         </div>
                       )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                        <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
-                        <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: appStyle.bg, color: appStyle.color }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
+                        <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
                           {app.status.toLowerCase()}
                         </span>
                       </div>
-                      <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                         {new Date(app.event.date).toLocaleDateString()} · {app.event.venue ? `${app.event.venue.name}, ${app.event.venue.city}` : 'Venue TBD'} · by {app.event.organiser.orgName}
                       </p>
                     </div>

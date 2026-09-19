@@ -1,3 +1,99 @@
+# Session Handoff — 19 Sept 2026, even later still yet again (CC — GEN-2609-082 provisional: bulk token migration batch 2, 3 files)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - the dispatch stated `GEN/2609` `CodeCounter` reads **80** live (`081` is the scale-extension ticket, already logged separately). Would be **082** if chat confirms no collision. Not written to `CodeCounter` this session.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-082` (provisional) - bulk token migration batch 2: 3 highest-count files, 1 PR each, now against `081`'s extended scale | Complete, unmerged | 526 → 146 combined literals (72% reduction) - well above batch 1's ~57% ceiling. All 3 precise per-file measurements matched the dispatch's own predicted numbers exactly. A real bug in the migration script (CSS-comment quoting inside a `<style>{}` block) caught in dry-run review before any file was touched - see §4. | `feat/gen-2609-082-1-artist-dashboard`, `-2-artist-profile`, `-3-event-detail` |
+| 19 Sept 2026 (CC) | `GEN-2609-081` (provisional) - extend spacing/font-size/radius scales with 14 frequent off-scale values | Complete; **merged as PR #664** (confirmed via `git fetch` this session) | Precise measurement fully reconciled the dispatch's rough table. | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-080` (provisional) - fix `raw-button` rule: count-based over the whole diff, not per-line | Complete; **merged as PR #663** (confirmed via `git fetch` this session) | | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files, 1 PR each | Complete; all 3 merged (`#660`/`#661`/`#662`, confirmed via `git fetch` this session - `080`'s fix unblocked the 2 that were failing CI last handoff) | 791 → 337 combined literals (57% reduction). | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete; merged as PR #659 | No migration, zero visual change. | (merged) |
+
+(Oldest row, "19 Sept 2026 (CC) — Verification closeout: 075/076/077...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-082` (provisional) - all 3 branches pushed, no PRs opened yet:
+  - `feat/gen-2609-082-1-artist-dashboard` (`dashboard/artist/page.tsx`, 177→26 literals)
+  - `feat/gen-2609-082-2-artist-profile` (`ArtistProfileClientPage.tsx`, 175→57 literals)
+  - `feat/gen-2609-082-3-event-detail` (`EventDetailClientPage.tsx`, 174→63 literals)
+  - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as `081`'s own handoff entry):
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-082-1-artist-dashboard`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-082-2-artist-profile`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-082-3-event-detail`
+
+## 3. Open PRs awaiting action
+
+**Could not re-verify live PR/CI status via GitHub API this session (same standing gap - no `gh` CLI, GitHub MCP connector not attempted this session).** Confirmed via `git fetch` (real, not assumed) that `081` (#664), `080` (#663), and all 3 of `079`'s branches (#660/#661/#662) are merged into `origin/qa` - `qa` HEAD is `3307d42` at this session's start.
+
+| Branch | PR # | Merge-ready? |
+|---|---|---|
+| `feat/gen-2609-082-1-artist-dashboard` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet. |
+| `feat/gen-2609-082-2-artist-profile` | **`NOT YET OPENED`** (this session) | Same. |
+| `feat/gen-2609-082-3-event-detail` | **`NOT YET OPENED`** (this session) | Same. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | Unrelated, out of scope every session since 14 Aug. |
+
+## 4. Decisions / findings this session
+
+**All 3 files' precise measurements matched the dispatch's own predicted coverage numbers exactly** - built a reverse-lookup migration script (scratch, reused/extended across all 3 files, not re-written per file), reusing `check-design-tokens.js`'s own `extractPropValues`/`extractLengthTokensFromValue` for detection, with a custom position-aware replacement layer. Every dry-run diff reviewed by hand before applying, none applied blind.
+
+**A real bug in the migration script itself, caught before it shipped - not after.** File 3 (`EventDetailClientPage.tsx`) has a raw `<style>{\`...\`}</style>` CSS-template-literal block the other 2 files don't. The script's bare-numeric replacement unconditionally wrapped its output in JS string quotes (`'var(--afa-space-32px)'`) - correct for a React inline-style object, but wrong inside that block, where a bare value like `gap: 32px;` is plain CSS text: the quoted replacement would have produced `gap: 'var(--afa-space-32px)';`, literal quote characters inside a stylesheet rule - invalid CSS, likely silently dropped by the browser's parser rather than erroring, which is exactly why this needed catching by eye in the dry-run review rather than trusted to fail loudly later. Fixed by tracking `<style>{` / `` `}</style>` `` block boundaries and emitting an unquoted `var(...)` inside them. **Retroactively checked files 1/2 (already committed and pushed) for the same exposure, not assumed safe**: file 1 has no `<style>` tag at all; file 2 has one, but it contains zero spacing/font-size/radius properties (only `grid-template-columns`/`filter`) - neither was ever exposed to the bug, confirmed via `git grep` against each pushed branch, no follow-up fix needed on either.
+
+**Colour matching found a real role-mismatch trap, correctly left unmatched.** File 2: `rgba(245,245,240,0.4)` used as a `border:` color is byte-identical to `--afa-text-muted`'s value, but that token is semantically a *text*-role token - matching it here would conflate two unrelated design decisions (an admin lightening muted text would also silently move an unrelated border color). Left raw, flagged in that file's own `docs/design.md` entry rather than force-matched by value alone.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **80** per the dispatch. Not written to this session.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions found or introduced this session. `054` ✅, `069→071` ✅, per the permanent ledger, unchanged. Standing risk noted every session: confirm `082` is actually free at logging time - not independently checkable this session (no `CodeCounter` access).
+
+## 7. Docs-conflict watchlist
+
+- All 3 of `feat/gen-2609-082-*` touch the same 2 files at their tail: `docs/design.md` (each appends its own file-N-of-3 section after `081`'s own entry, the current tail as of this session's branch point) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object, branched from the same starting values). **Real, expected 3-way conflict on merge** - same shape as `GEN-2609-079`'s own batch-1 precedent: keep every branch's own `docs/design.md` section (order by actual merge order), and run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 3 land, rather than hand-merging the JSON 3 ways.
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, per file, each branched from `origin/qa` `3307d42`:
+
+- ✅ `tsc --noEmit` - clean, exit 0, all 3 files.
+- ✅ `node scripts/check-design-tokens.test.js` - 40/40 passing, unchanged, all 3 runs (no rule logic touched - pure migration).
+- ✅ `check-design-tokens.js` against `origin/qa` - clean, 0 offenses, all 3 (checked after committing each, per `076`'s own working-tree-vs-committed-ref finding).
+- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 3 branches, refused-to-raise guard confirmed intact each time (no category rose). Deltas matched hand-predicted numbers exactly in all 3 cases.
+- ✅ `next build` - clean, foreground, confirmed via `$PIPESTATUS`, all 3 files. File 3's build is the actual proof the `<style>`-block fix works, not just the dry-run diff review.
+- ✅ `public/sw.js`'s `CACHE_VERSION` - unchanged by any of the 3 builds; nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff, any of the 3 files - no Preview deployment exists yet (no PRs opened). File 3 carries an extra flag: its `<style>` block's 4 migrated CSS rules (`.afa-event-hero-grid`/`.afa-event-lineup-row`/`.afa-event-prize-grid`/`.afa-book-btn`) are exactly where the script bug would have shown up visually if the fix were wrong - worth a specific check on the event-detail hero/lineup/prize-grid/book-button layout, not just a general glance, once a Preview exists.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** Unaffected this session (pure `src/`/`docs/`/`scripts/` changes, no database writes).
+
+## 10. UI/UX Design System Debt Ledger
+
+`081`'s scale extension directly paid off: batch 2's combined reduction (72%) is well above batch 1's ~57% ceiling, with all 3 files' real numbers matching the dispatch's own pre-measured predictions exactly (259/280 spacing, 70/79 font-size, 35/50 radius combined). 16 colour literals matched to existing `--afa-*` tokens by hand across the batch (2 in file 1, 3 in file 2, 11 in file 3 - dominated by `--afa-text-muted`/`--afa-border-resting`; full per-value breakdown in `docs/design.md`'s per-file entries). `radius-literal`'s repo-wide `3px` near-miss (46, still below 50) is now the closest unconverted near-miss value, concentrated in file 3.
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration-only, no new token added).
+
+## 12. Immediate next action
+
+**Chat: confirm `GEN-2609-082` is free against `CodeCounter`, open and merge all 3 PRs** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` 3-way conflict per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the merged result. After that, the next natural migration batch-3 candidates are the ratchet's own next top-3 (not yet re-measured post-batch-2 merge - re-run the ratchet fresh before drafting that dispatch, don't reuse this session's pre-merge top-10).
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model.** This session: CC built, verified (including a real bug found and fixed in its own migration tooling before it could ship), and pushed all 3 `feat/gen-2609-082-*` branches. Chat's half (confirm the ticket number, open the 3 PRs, merge) is next. CC never merges.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, later still yet again (CC — GEN-2609-081 provisional: extend the central spacing/font-size/radius scales with the frequent off-scale values)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - the dispatch stated `GEN/2609` `CodeCounter` reads **80** live, confirmed by chat before dispatching this prompt. Would be **081** if chat confirms no collision at logging time. Not written to `CodeCounter` this session (per the dispatch's own explicit instruction).
