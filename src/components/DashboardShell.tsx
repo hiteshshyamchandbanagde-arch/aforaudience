@@ -191,6 +191,12 @@ const ADMIN_SECTION: RoleSectionDef = {
     { label: 'Diary', icon: 'calendar', href: '/dashboard/admin/diary' },
     { label: 'Feedback', icon: 'message', href: '/dashboard/admin/feedback', badgeKey: 'adminFeedbackPending' },
     { label: 'Settings', icon: 'settings', href: '/dashboard/admin/settings' },
+    // GEN-2609-076 - had no sidebar entry point at all since GEN-2609-075
+    // shipped it; only reachable by typing the URL directly. No dedicated
+    // palette/swatch icon exists in this file's Icon component - reusing
+    // 'grid' (closest fit to "a grid of tokens") rather than adding a new
+    // icon case for one nav item.
+    { label: 'Design System', icon: 'grid', href: '/dashboard/admin/design-system' },
   ],
 }
 
@@ -540,6 +546,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     '/dashboard/admin/diary',
     '/dashboard/admin/feedback',
     '/dashboard/admin/settings',
+    '/dashboard/admin/design-system',
   ]
   const normalizedPathname = pathname && pathname !== '/' ? pathname.replace(/\/$/, '') : pathname
   const hideMobileBarForUnifiedTabBar = !!normalizedPathname && MOBILE_TAB_BAR_ROUTES.includes(normalizedPathname)

@@ -24,7 +24,7 @@ import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill'
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -260,6 +260,62 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         padding: '4px 10px',
         borderRadius: 'var(--afa-radius-sm)',
         fontSize: 12,
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'solid':
+      // GEN-2609-076 - consolidates the "compact-save" shape found at
+      // 16 real sites during the Button-coverage audit (settings x8,
+      // artists, users, diary, design-system x2, seat-map x2) - same
+      // --afa-fill-solid/--afa-on-fill-solid coloring as `primary`, but
+      // `primary` bakes in a fixed 999px pill + uniform 16px sizing
+      // none of these 16 sites actually use (they're all rounded-rects
+      // at varying sizes). Sized via the EXISTING sm/md/lg SIZE_CHROME
+      // scale rather than a new one - spec locked with Hitesh before
+      // build, full per-site delta table in docs/design.md's
+      // GEN-2609-076 entry (every site normalizes to fontWeight 600,
+      // several had 700 - the one deliberate, documented drift here).
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        width: fullWidth ? '100%' : undefined,
+        background: 'var(--afa-fill-solid)',
+        color: 'var(--afa-on-fill-solid)',
+        border: 'none',
+        // md-shaped fallback if a caller omits `size` - same defensive
+        // convention as outline-neutral/toggle-pill above.
+        padding: '9px 17px',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 13,
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'outline-error':
+      // GEN-2609-076 - consolidates the destructive-outline shape found
+      // at 4 real sites (seat-map's Reset Layout/Remove image/Delete
+      // seat/Delete marker) - error-red text/border on a raised-surface
+      // fill, sized via the same sm/md/lg scale as `solid`. Admin
+      // feedback's Approve/Reject buttons are a DIFFERENT color family
+      // (green fill, translucent-red outline) and deliberately not
+      // folded in here - see docs/design.md's GEN-2609-076 entry.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        width: fullWidth ? '100%' : undefined,
+        background: 'var(--afa-surface-raised)',
+        color: 'var(--afa-error)',
+        border: '1px solid var(--afa-error)',
+        padding: '9px 17px',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 13,
         fontWeight: 600,
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',

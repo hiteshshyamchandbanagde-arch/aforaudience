@@ -52,21 +52,27 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   }
 
   const now = new Date()
-  await prisma.$transaction([
-    ...applicable.map(([key, value]) =>
-      prisma.designToken.update({
-        where: { key },
-        data: { value, updatedBy: admin.id, updatedAt: now },
+  await prisma.$transaction(
+    [
+      ...applicable.map(([key, value]) =>
+        prisma.designToken.update({
+          where: { key },
+          data: { value, updatedBy: admin.id, updatedAt: now },
+        }),
+      ),
+      prisma.designTokenVersion.create({
+        data: {
+          snapshot,
+          createdBy: admin.id,
+          note: `Reverted to version ${version.id} (${version.note ?? 'no note'})`,
+        },
       }),
-    ),
-    prisma.designTokenVersion.create({
-      data: {
-        snapshot,
-        createdBy: admin.id,
-        note: `Reverted to version ${version.id} (${version.note ?? 'no note'})`,
-      },
-    }),
-  ])
+    ],
+    // GEN-2609-076 - a revert can touch up to all 93 tokens too (a
+    // snapshot can be a full set), same round-trip-timeout risk and
+    // fix as reset/route.ts.
+    { timeout: 20000, maxWait: 5000 },
+  )
 
   revalidateDesignTokens()
 

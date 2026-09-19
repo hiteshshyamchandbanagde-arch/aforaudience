@@ -6216,3 +6216,75 @@ connect). Either do the admin-login round-trip check yourself (change
 the primary button color, confirm it shows on the next load, revert,
 confirm it's restored) before merging, or say so and a throwaway QA
 admin test account can be scripted for it instead.
+
+## GEN-2609-076 - Button coverage + admin honesty - `solid`/`outline-error` variant specs, locked before build
+
+Full audit (Explore subagent, `Toast.tsx`/`DashboardShell.tsx`/`SiteNav.tsx` read directly) found **zero** raw `<button>` across the shared layer, Admin (32 buttons/6 files), and the seat-map builder (29 declarations/15 distinct shapes) that byte-match an existing `Button.tsx` variant. Two real, repeated families emerged big enough to justify new variants (this codebase's own bar: `toggle-pill`/`form-submit` were each added only after finding 3+ real, near-identical sites) - Hitesh approved both before any migration code was written, per this codebase's standing "design locked before build" convention for new variants.
+
+### `solid` - consolidates the "compact-save" family (16 real sites)
+
+Same `--afa-fill-solid`/`--afa-on-fill-solid` coloring as `primary`, but `primary` bakes in a fixed 999px pill + uniform 16px sizing that none of these 16 sites actually use - they're all rounded-rects at various sizes. Sized via the *existing* `sm`/`md`/`lg` `SIZE_CHROME` scale (no new size tokens) rather than inventing a parallel one:
+
+```js
+case 'solid':
+  return {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    width: fullWidth ? '100%' : undefined,
+    background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)',
+    border: 'none',
+    padding: '9px 17px', borderRadius: 'var(--afa-radius-md)', fontSize: 13, fontWeight: 600, // md-shaped fallback if size is omitted
+    fontFamily: FONT_FAMILY, cursor: 'pointer', textDecoration: 'none',
+  }
+```
+
+`SIZE_CHROME` overlay (already exists, unchanged) applies on top when a `size` token is passed: `sm` 4px 10px / `--afa-radius-sm` (6px) / 12px / 600, `md` 9px 17px / `--afa-radius-md` (8px) / 13px / 600, `lg` 12px 24px / `--afa-radius-md` (8px) / 14px / 600.
+
+**Per-site delta table (padding/radius/font-weight that visibly changes - every site normalizes to `fontWeight: 600`, several had 700):**
+
+| Site | Original | Target | Visible delta |
+|---|---|---|---|
+| `settings` booking-fee/chat-cap/scene-status/direct-payouts/vote-weight (5 sites) | `10px 20px` / r8 / f14 / w700 | `lg` | padding `10×20→12×24`, weight `700→600` |
+| `settings` roster-lookback/event-window (2 sites) | `9px 16px` / r8 / f13 / w700 | `md` | padding `9×16→9×17` (1px), weight `700→600` |
+| `settings` currency-rate (1 site) | `8px 16px` / r6 / f13 / w700 | `sm` | radius kept exact (6), padding `8×16→4×10`, font `13→12`, weight `700→600` |
+| `artists` Grant Headliner (1 site) | `7px 14px` / r8 / f12 / w700 | `md` | radius kept exact (8), padding `7×14→9×17`, font `12→13`, weight `700→600` |
+| `users` Suspend (1 site) | `8px 14px` / r8 / f13 / w700 | `md` | padding `8×14→9×17` (near-exact), weight `700→600` |
+| `diary` Add entry (1 site, full-width) | `11px 22px` / r10 / f14 / w600 | `lg` + `fullWidth` | padding `11×22→12×24`, radius `10→8` |
+| `design-system` "Save N changes" + `ConfirmDialog` confirm (2 sites) | `9px 17px` / **square corners (no radius)** / f13 / w700 | `md` | radius `0→8` (new rounding), weight `700→600` |
+| `seat-map` "Generate / Update Layout" (1 site) | `10px 24px` / r8 / f13 / w700 | `lg` | padding-left `10→12`, font `13→14`, weight `700→600` |
+| `seat-map` "Save Seat Map" (1 site) | `11px 28px` / r8 / f14 / w700 | `lg` | padding-right `28→24`, weight `700→600` |
+
+**Not migrated - stays raw, token-retrofitted only:** `bookings` "Retry" (`8px 16px` / **999px pill**, not the rounded-rect family at all - closer to `primary`'s shape but much smaller; a single-site outlier, not forced into either variant).
+
+### `outline-error` - consolidates the destructive-outline family (4 sites)
+
+```js
+case 'outline-error':
+  return {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    width: fullWidth ? '100%' : undefined,
+    background: 'var(--afa-surface-raised)', color: 'var(--afa-error)',
+    border: '1px solid var(--afa-error)',
+    padding: '9px 17px', borderRadius: 'var(--afa-radius-md)', fontSize: 13, fontWeight: 600,
+    fontFamily: FONT_FAMILY, cursor: 'pointer', textDecoration: 'none',
+  }
+```
+
+| Site | Original | Target | Visible delta |
+|---|---|---|---|
+| `seat-map` Reset Layout | `9px 16px` / r8 / f13 / w600 | `md` | padding `9×16→9×17` (1px, near-exact) |
+| `seat-map` Remove image | `7px 12px` / r8 / f12 / w600 | `sm` | font kept exact (12), radius `8→6`, padding `7×12→4×10` |
+| `seat-map` Delete seat / Delete marker (2 sites, full-width sidebar) | `8px 0` (vertical only) / r6 / f13 / w600 | `sm` + `fullWidth` | radius kept exact (6), font `13→12`, **new horizontal padding** `0→10px` (these had none - a real, visible inset added) |
+
+**Not migrated:** Admin `feedback` page's `ApproveButton`/`RejectButton` (green-deep fill and translucent-red-outline respectively - a third color family neither new variant covers, and the file's own code comment already documents this as deliberate). Token-retrofitted only (their hardcoded `borderRadius: '6px'` → `var(--afa-radius-sm)`).
+
+### Everything else - one-offs, token-retrofitted, not migrated to a variant
+
+Per Hitesh's explicit instruction, no new variants for single-site or too-divergent shapes: icon-only circular toggles (lang picker, search, help "?"), dropdown/menu rows, table sort headers, disclosure toggles, the seat-map's own dominant 9-declaration segmented-toggle family (reuses `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT` but a different geometry than `toggle-pill`), dashed "+ Add" row buttons, status-color data-driven pills (diary, seat-map markers). Every one of these that had a hardcoded radius literal matching an existing `--afa-radius-*` value (`0`/`6`/`8`/`999`) gets that literal swapped for the token, so the QA acceptance test's "these follow an admin radius change" holds even for buttons that never became `<Button>` instances. Full per-file list in this ticket's PR descriptions (3 PRs - Button variants + shared layer, Admin, seat-map).
+
+### Other GEN-2609-076 fixes to the design-system admin page itself
+
+- **Reset-to-defaults transaction timeout risk, found and fixed.** `POST /api/admin/design-tokens/reset` writes all 93 tokens + 1 version row as 94 sequential statements inside one `prisma.$transaction([...])` array. Prisma's default transaction `timeout` is 5000ms (`prisma.ts`'s own adapter config confirms no override); 94 round-trips to a remote Supabase instance, over a pool capped at `max: 1` connection (itself a prior fix for a real connection-exhaustion incident, see `prisma.ts`'s own comment), plausibly exceeds that under real network latency - a reset that silently fails with a generic "Reset failed." toast and no indication why. Fixed by passing an explicit `{ timeout: 20000, maxWait: 5000 }` to the transaction (reset only - PATCH's transaction is bounded by however many tokens one save touches, typically far fewer than 93, but given the same headroom defensively).
+- **Coverage-derived section honesty** (this ticket's own item 1): group-level badges (site-wide / Button only / not yet applied) + per-token "unused" disabling, both driven by `src/lib/design-token-coverage.ts` (a committed, grep-derived snapshot, re-run manually when adoption changes - no git binary in a deployed serverless function to compute this live).
+- **Version history readability.** Previously showed only a note string + timestamp + "Revert to this" - an admin had no way to tell WHAT a version actually changed or who made it without reverting first. Now shows, per version: which token key(s) changed vs. the immediately-prior version (diffed client-side from the snapshot JSON already being fetched), each as `key: old → new`, and the admin's own display name/email (looked up via the existing `updatedBy` user id already stored on the affected `DesignToken` rows - reused, not a new join).
+- **Sidebar link.** `/dashboard/admin/design-system` had no entry point from `DashboardShell`'s admin nav - reachable only by typing the URL. Added alongside the other admin-role nav items.
+- **Near-invisible `outline` button in the live preview, found and fixed.** `outline`'s text/border color is `--afa-on-fill-solid` (near-black, `#1A1000`) - by design, meant to read against a `--afa-fill-solid` (orange) background it sits on top of (see `Button.tsx`'s own `GEN-2609-047` comment). The preview panel rendered it directly on `--afa-surface-page` (near-black, `#141414`) instead - near-black text on a near-black page, functionally invisible. Fixed by giving just that one preview cell its own `--afa-fill-solid`-colored wrapper, matching how `outline` is actually used in production (e.g. `NotificationOptIn.tsx`'s banner) rather than previewing it out of context.
