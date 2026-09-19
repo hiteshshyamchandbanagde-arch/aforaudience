@@ -86,7 +86,7 @@ interface EventData {
 // "Venue facilities") instead of the old bigger serif <h2>/<h3> mix.
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
+    <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "var(--afa-amber)" }}>
       {children}
     </span>
   )
@@ -98,7 +98,7 @@ function MetaTile({ icon: Icon, label, value }: { icon: (p: { style?: React.CSSP
       <Icon style={{ width: "20px", height: "20px", marginTop: "2px", flexShrink: 0, color: "var(--afa-amber)" }} />
       <div>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>{label}</div>
-        <div style={{ marginTop: "4px", fontSize: "14px", color: "rgba(245,245,240,0.85)" }}>{value}</div>
+        <div style={{ marginTop: "4px", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)" }}>{value}</div>
       </div>
     </div>
   )
@@ -116,7 +116,7 @@ function HypeStat({ value }: { value: number }) {
       <div style={{ width: "64px", height: "4px", borderRadius: "2px", overflow: "hidden", background: "rgba(245,245,240,0.1)" }}>
         <div style={{ height: "100%", borderRadius: "2px", background: "var(--afa-amber)", width: `${pct}%` }} />
       </div>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>{value.toFixed(1)}</span>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{value.toFixed(1)}</span>
     </div>
   )
 }
@@ -308,12 +308,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
           <div>
             <EventTypeBadge type={event.type} typeLabel={typeLabel} size={16} />
-            <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.05, color: "var(--afa-cream)" }}>
+            <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.05, color: "var(--afa-text-primary)" }}>
               {event.title}
             </h1>
             <p style={{ marginTop: "16px", maxWidth: "560px", fontSize: "15px", lineHeight: 1.7, color: "rgba(245,245,240,0.65)" }}>{event.description}</p>
             {event.organiser && (
-              <p style={{ marginTop: "12px", fontSize: "13px", color: "rgba(245,245,240,0.5)" }}>
+              <p style={{ marginTop: "12px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.5)" }}>
                 {tr.eventDetailPage.organisedBy}{" "}
                 <Link href={`/organisers/${event.organiser.id}`} style={{ color: "var(--afa-amber)", fontWeight: 600, textDecoration: "none" }}>
                   {event.organiser.orgName}
@@ -322,7 +322,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             )}
 
             {/* when / where */}
-            <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px", fontSize: "14px", color: "rgba(245,245,240,0.8)" }}>
+            <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.8)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <CalendarIcon style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />
                 <span>{new Date(event.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
@@ -335,7 +335,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                   <PinIcon style={{ width: "18px", height: "18px", marginTop: "2px", flexShrink: 0, color: "var(--afa-amber)" }} />
                   <span>
-                    <span style={{ color: "var(--afa-cream)" }}>{event.venue.name}</span>
+                    <span style={{ color: "var(--afa-text-primary)" }}>{event.venue.name}</span>
                     <br />
                     <span style={{ color: "rgba(245,245,240,0.55)" }}>{event.venue.address}, {event.venue.city}</span>
                   </span>
@@ -352,18 +352,18 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ marginTop: "28px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
               {isPast ? (
                 <div>
-                  <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-cream)" }}>{tr.eventDetailPage.eventEnded}</div>
-                  <p style={{ marginTop: "8px", fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
+                  <p style={{ marginTop: "8px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
                 </div>
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
-                    <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-cream)" }}>
+                    <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
                       {priceLabel}
                     </span>
                     <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
                   </div>
-                  <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.4)", marginBottom: "16px" }}>
+                  <div style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.4)", marginBottom: "16px" }}>
                     {tr.eventDetailPage.seatsAvailableSummary.replace("{available}", String(event.availableSeats)).replace("{total}", String(event.totalSeats)).replace("{max}", String(event.maxSeatsPerBooking))}
                   </div>
 
@@ -371,7 +371,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     {tr.eventDetailPage.selectTicketsCta}
                   </Link>
 
-                  <div style={{ marginTop: "12px", fontSize: "12px", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
+                  <div style={{ marginTop: "12px", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.4)", textAlign: "center" }}>
                     {event.isFree ? tr.eventDetailPage.freeEntryFooter : tr.eventDetailPage.securePaymentFooter}
                   </div>
                 </>
@@ -404,7 +404,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 {event.termsChecklist && event.termsChecklist.length > 0 && (
                   <ul style={{ margin: 0, padding: "16px 0 0", listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
                     {EVENT_TERMS_CHECKLIST.filter((t) => event.termsChecklist!.includes(t.key)).map((t) => (
-                      <li key={t.key} style={{ fontSize: "14px", color: "rgba(245,245,240,0.8)", display: "flex", gap: "8px" }}>
+                      <li key={t.key} style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.8)", display: "flex", gap: "8px" }}>
                         <span style={{ color: "var(--afa-amber)" }}>·</span>
                         {tr.eventTermsChecklist[t.key as keyof typeof tr.eventTermsChecklist] || t.label}
                       </li>
@@ -414,12 +414,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
                   <div style={{ marginTop: "16px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "14px 16px" }}>
                     <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)", marginBottom: "6px" }}>{tr.eventDetailPage.specialNoteLabel}</div>
-                    <div style={{ fontSize: "14px", color: "rgba(245,245,240,0.85)", lineHeight: 1.6 }}>{event.specialNotes}</div>
+                    <div style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)", lineHeight: 1.6 }}>{event.specialNotes}</div>
                   </div>
                 )}
               </div>
             ) : null}
-            <p style={{ fontSize: "13px", color: "rgba(245,245,240,0.45)", marginTop: "16px" }}>
+            <p style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.45)", marginTop: "16px" }}>
               {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[0]}
               <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: "var(--afa-amber)", fontWeight: 600 }}>{tr.eventDetailPage.refundPolicyLinkLabel}</Link>
               {tr.eventDetailPage.refundPolicyLinkText.split("{link}")[1]}
@@ -431,14 +431,14 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         <section style={{ marginTop: "64px" }}>
           <SectionEyebrow>{tr.eventDetailPage.lineupHeading}</SectionEyebrow>
           {event.lineup.length === 0 ? (
-            <p style={{ marginTop: "16px", fontSize: "14px", color: "rgba(245,245,240,0.5)" }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
+            <p style={{ marginTop: "16px", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.5)" }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
           ) : (
             <div style={{ marginTop: "16px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
               {event.lineup.map((p) => {
                 const performerName = p.artist.user.displayName || p.artist.user.name
                 return (
                   <div key={p.id} className="afa-event-lineup-row" style={{ flexWrap: "wrap" }}>
-                    <div style={{ position: "relative", width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "#241a10" }}>
+                    <div style={{ position: "relative", width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)" }}>
                       {p.artist.user.avatar ? (
                         <img src={p.artist.user.avatar} alt={performerName} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.25) brightness(0.9)" }} />
                       ) : (
@@ -448,32 +448,32 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       )}
                     </div>
                     <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                      <div style={{ fontSize: "15px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{performerName}</div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(245,245,240,0.4)", marginTop: "2px" }}>
+                      <div style={{ fontSize: "15px", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{performerName}</div>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(245,245,240,0.4)", marginTop: "2px" }}>
                         {p.artist.genre.length > 0 ? p.artist.genre.join(", ") : tr.eventDetailPage.slotDuration.replace("{n}", String(p.slot)).replace("{duration}", String(p.duration))}
                       </div>
 
                       {event.plusOnesRequired > 0 && plusOneStatus[p.id] && (
                         <div style={{ marginTop: "8px" }}>
                           {plusOneStatus[p.id].alreadyConfirmed ? (
-                            <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--afa-amber)" }}>
+                            <span style={{ fontSize: "var(--afa-text-small)", fontWeight: 600, color: "var(--afa-amber)" }}>
                               {tr.eventDetailPage.plusOneConfirmedAs.replace("{name}", performerName.split(" ")[0])}
                             </span>
                           ) : plusOneStatus[p.id].fulfilled ? (
-                            <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.5)" }}>
+                            <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.5)" }}>
                               {tr.eventDetailPage.plusOneFullySupported.replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                             </span>
                           ) : (
                             <button
                               onClick={() => confirmPlusOne(p.id)}
                               disabled={plusOneBusy === p.id}
-                              style={{ fontSize: "12px", fontWeight: 600, padding: "5px 12px", borderRadius: "3px", border: "1.5px solid var(--afa-amber)", background: "transparent", color: "var(--afa-amber)", cursor: plusOneBusy === p.id ? "default" : "pointer", opacity: plusOneBusy === p.id ? 0.6 : 1 }}
+                              style={{ fontSize: "var(--afa-text-small)", fontWeight: 600, padding: "5px 12px", borderRadius: "3px", border: "1.5px solid var(--afa-amber)", background: "transparent", color: "var(--afa-amber)", cursor: plusOneBusy === p.id ? "default" : "pointer", opacity: plusOneBusy === p.id ? 0.6 : 1 }}
                             >
                               {plusOneBusy === p.id ? tr.eventDetailPage.plusOneConfirming : tr.eventDetailPage.plusOneIllBeThere.replace("{name}", performerName.split(" ")[0]).replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                             </button>
                           )}
                           {plusOneError && (
-                            <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--afa-error)" }}>{plusOneError}</div>
+                            <div style={{ marginTop: "6px", fontSize: "var(--afa-text-micro)", color: "var(--afa-error)" }}>{plusOneError}</div>
                           )}
                         </div>
                       )}
@@ -482,19 +482,19 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       {(p.reviews.length > 0 || submittedReviews[p.id]) && (
                         <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "6px" }}>
                           {submittedReviews[p.id] && !p.reviews.find((r) => r.id === submittedReviews[p.id].id) && (
-                            <div style={{ fontSize: "13px", color: "rgba(245,245,240,0.75)" }}>
+                            <div style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.75)" }}>
                               {submittedReviews[p.id].rating}/5 <span style={{ opacity: 0.6 }}>— {tr.eventDetailPage.reviewYouSuffix}</span>
                               {submittedReviews[p.id].comment && <span style={{ opacity: 0.7 }}> · {submittedReviews[p.id].comment}</span>}
                             </div>
                           )}
                           {p.reviews.slice(0, 3).map((r) => (
                             <div key={r.id}>
-                              <div style={{ fontSize: "13px", color: "rgba(245,245,240,0.75)" }}>
+                              <div style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.75)" }}>
                                 {r.rating}/5 <span style={{ opacity: 0.6 }}>— {r.user.displayName || r.user.name}</span>
                                 {r.comment && <span style={{ opacity: 0.7 }}> · {r.comment}</span>}
                               </div>
                               {r.reply && (
-                                <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.6)", marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(201,151,58,0.3)" }}>
+                                <div style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)", marginTop: "3px", marginLeft: "16px", paddingLeft: "10px", borderLeft: "2px solid rgba(201,151,58,0.3)" }}>
                                   <strong>{r.reply.author.displayName || r.reply.author.name}</strong> {tr.eventDetailPage.repliedLabel} {r.reply.text}
                                 </div>
                               )}
@@ -522,7 +522,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               <button
                                 onClick={() => submitReview(p.id)}
                                 disabled={reviewSubmitting === p.id}
-                                style={{ marginLeft: "8px", fontSize: "12px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", borderRadius: "3px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                style={{ marginLeft: "8px", fontSize: "var(--afa-text-small)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", borderRadius: "3px", padding: "4px 12px", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
                               >
                                 {reviewSubmitting === p.id ? tr.eventDetailPage.ratingSubmitting : tr.eventDetailPage.ratePrompt}
                               </button>
@@ -534,10 +534,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               placeholder={tr.eventDetailPage.commentPlaceholder}
                               value={reviewDrafts[p.id]?.comment || ""}
                               onChange={(e) => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: prev[p.id]?.rating || 0, comment: e.target.value } }))}
-                              style={{ width: "100%", padding: "6px 10px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", color: "var(--afa-cream)", fontSize: "13px", boxSizing: "border-box" }}
+                              style={{ width: "100%", padding: "6px 10px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", boxSizing: "border-box" }}
                             />
                           )}
-                          {reviewError && <p style={{ fontSize: "12px", color: "var(--afa-error)", marginTop: "6px" }}>{reviewError}</p>}
+                          {reviewError && <p style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error)", marginTop: "6px" }}>{reviewError}</p>}
                         </div>
                       )}
                     </div>
@@ -576,9 +576,9 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   <div key={p.rank} style={{ display: "flex", flexDirection: "column", gap: "12px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <TrophyIcon style={{ width: "20px", height: "20px", color: p.top ? "var(--afa-amber)" : "rgba(245,245,240,0.4)" }} />
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.5)" }}>{p.rank}</span>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.5)" }}>{p.rank}</span>
                     </div>
-                    <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(245,245,240,0.85)", margin: 0 }}>{p.value}</p>
+                    <p style={{ fontSize: "var(--afa-text-body)", lineHeight: 1.6, color: "rgba(245,245,240,0.85)", margin: 0 }}>{p.value}</p>
                   </div>
                 ))}
               </div>
@@ -588,7 +588,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 {event.celebrities.map((c) => (
                   <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "14px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "14px 16px" }}>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "#241a10", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {c.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={c.photoUrl} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.25) brightness(0.9)" }} />
@@ -598,7 +598,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     </div>
                     <div>
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>{tr.eventDetailPage.celebrityAttending}</div>
-                      <div style={{ fontSize: "15px", color: "var(--afa-cream)", marginTop: "2px" }}>{c.name}</div>
+                      <div style={{ fontSize: "15px", color: "var(--afa-text-primary)", marginTop: "2px" }}>{c.name}</div>
                     </div>
                   </div>
                 ))}
@@ -611,7 +611,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                   {event.panelists.map((p) => (
                     <div key={p.id} style={{ display: "flex", gap: "12px", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "14px" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "3px", overflow: "hidden", flexShrink: 0, background: "#241a10", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ width: "40px", height: "40px", borderRadius: "3px", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {p.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={p.photoUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.25) brightness(0.9)" }} />
@@ -620,8 +620,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         )}
                       </div>
                       <div>
-                        <div style={{ fontSize: "14px", color: "var(--afa-cream)" }}>{p.name}</div>
-                        {p.bio && <div style={{ fontSize: "12px", color: "rgba(245,245,240,0.55)", marginTop: "2px" }}>{p.bio}</div>}
+                        <div style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>{p.name}</div>
+                        {p.bio && <div style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.55)", marginTop: "2px" }}>{p.bio}</div>}
                       </div>
                     </div>
                   ))}
@@ -643,7 +643,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
               {event.venue.facilities.map((f) => (
                 <div key={f} style={{ display: "flex", alignItems: "center", gap: "12px", borderTop: "1px solid rgba(245,245,240,0.1)", padding: "16px 0" }}>
                   <FacilityIcon label={f} style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />
-                  <span style={{ fontSize: "14px", color: "rgba(245,245,240,0.85)" }}>{f}</span>
+                  <span style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)" }}>{f}</span>
                 </div>
               ))}
             </div>
@@ -677,7 +677,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>
               {typeLabel}
             </div>
-            <div style={{ fontFamily: "var(--font-ui)", fontSize: "17px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "17px", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {priceLabel}
             </div>
           </div>

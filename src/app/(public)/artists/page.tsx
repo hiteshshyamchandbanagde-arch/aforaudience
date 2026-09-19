@@ -2,6 +2,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import Button from "@/components/ui/Button"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import SearchInputBox from "@/components/SearchInputBox"
 import Photo from "@/components/Photo"
@@ -218,17 +219,17 @@ export default function ArtistsPage() {
       {/* HERO */}
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px 0" }}>
         <div className="afa-artists-hero-grid">
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             {loading ? tr.artistsPage.loadingArtists : tr.artistsPage.eyebrowDirectory.replace("{n}", String(filtered.length))}
           </span>
-          <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 8vw, 96px)", lineHeight: 0.9, color: "var(--afa-cream)" }}>
+          <h1 style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(48px, 8vw, 96px)", lineHeight: 0.9, color: "var(--afa-text-primary)" }}>
             {tr.artistsPage.heroPrefix}
             <span style={{ color: "var(--afa-amber)" }}>{tr.artistsPage.heroEmphasis}</span>
             {tr.artistsPage.heroSuffix}
           </h1>
           <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.65)" }}>
             {tr.artistsPage.heroSubtitle}{" "}
-            <span style={{ color: "var(--afa-cream)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
+            <span style={{ color: "var(--afa-text-primary)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
           </p>
         </div>
 
@@ -261,7 +262,7 @@ export default function ArtistsPage() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
             {error}
           </div>
         )}
@@ -276,8 +277,8 @@ export default function ArtistsPage() {
               style={{
                 fontFamily: "var(--font-ui)",
                 fontStyle: "italic",
-                fontSize: "16px",
-                color: selectedGenre === g ? "var(--afa-cream)" : "rgba(245,245,240,0.4)",
+                fontSize: "var(--afa-text-title)",
+                color: selectedGenre === g ? "var(--afa-text-primary)" : "rgba(245,245,240,0.4)",
               }}
             >
               {g === "All" ? tr.artistsPage.filterAll : g}
@@ -299,29 +300,32 @@ export default function ArtistsPage() {
               )}
               <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <SparkIcon style={{ width: "16px", height: "16px", color: "var(--afa-fill-solid)" }} />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-cream)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
                   {tr.artistsPage.topArtistNow}
                 </span>
               </div>
             </div>
             <div className="afa-featured-artist-content" style={{ padding: "28px 32px", display: "flex", flexDirection: "column", justifyContent: "center", gap: "16px" }}>
               <div>
-                <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-cream)", marginBottom: "6px" }}>
+                <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
                   {risingStar.user.displayName || risingStar.user.name}
                 </div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(245,245,240,0.6)" }}>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)" }}>
                   {risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}
                 </div>
               </div>
-              <button
+              <Button
+                variant="primary"
+                size="pill-md"
+                fullWidth={false}
                 onClick={() => goToArtist(risingStar.id)}
                 disabled={!!navigatingId}
                 className="afa-cta-solid"
-                style={{ display: "inline-flex", alignItems: "center", gap: "8px", width: "fit-content", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "999px", fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-sans)", border: "none", cursor: navigatingId ? "default" : "pointer", opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
+                style={{ opacity: navigatingId && navigatingId !== risingStar.id ? 0.5 : 1 }}
               >
                 {navigatingId === risingStar.id ? tr.artistsPage.loadingEllipsis : tr.artistsPage.viewProfile}
                 <ArrowIcon style={{ width: "14px", height: "14px" }} />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -332,10 +336,10 @@ export default function ArtistsPage() {
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
             <SearchIcon style={{ width: "32px", height: "32px", color: "var(--afa-amber)", marginBottom: "16px" }} />
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetTitle : tr.artistsPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {artists.length === 0 ? tr.artistsPage.emptyNoneYetSub : tr.artistsPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -444,7 +448,7 @@ export default function ArtistsPage() {
 
                   {/* WALL-LABEL - mono/amber/diamond caption device,
                       genre + shows count. */}
-                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "10px 18px 0", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", display: "flex", alignItems: "center", gap: "8px" }}>
                     <span>{artist.genre.length > 0 ? artist.genre.slice(0, 2).join(" / ") : tr.artistsPage.genreNotSet}</span>
                     <span>◆</span>
                     <span>{artist._count.performances} {artist._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}</span>
@@ -454,7 +458,7 @@ export default function ArtistsPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "11px", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
                   </div>

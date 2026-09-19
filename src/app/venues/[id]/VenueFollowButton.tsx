@@ -103,7 +103,7 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
           border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
           background: following ? "transparent" : "var(--afa-fill-solid)",
           color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
-          fontSize: "13px",
+          fontSize: "var(--afa-text-ui)",
           fontWeight: 600,
           cursor: busy ? "default" : "pointer",
           opacity: busy ? 0.6 : 1,
@@ -168,7 +168,7 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
           border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
           background: following ? "transparent" : "var(--afa-fill-solid)",
           color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
-          fontSize: "14px",
+          fontSize: "var(--afa-text-body)",
           fontWeight: 600,
           cursor: busy ? "default" : "pointer",
           opacity: busy ? 0.6 : 1,
@@ -177,7 +177,7 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
         {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
         {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}
       </button>
-      <p style={{ marginTop: "10px", textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+      <p style={{ marginTop: "10px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
         {tr.venueDetailPage.followCaption}
       </p>
     </div>

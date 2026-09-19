@@ -5597,3 +5597,184 @@ audit summaries alone.
 what to fix first.** Logged as `GEN-2609-072`, `Feedback` row status
 `NEW` (audit only, nothing built) - `CodeCounter.GEN/2609` advanced
 `71` -> `72` (conditioned on it still reading `71` at write time).
+
+## GEN-2609-073 - Public content pages token/typography/Button migration, Phase 1 (Artist + Event + Venue pages)
+
+Dispatch: apply already-decided design-system values (the locked-4
+surface/text/amber/fill-solid palette, the `--afa-text-*` type scale,
+`Button.tsx`'s variants) to the 7 highest-traffic pages the 18 Sep
+UI/UX Centralization Audit (`GEN-2609-072`) flagged as never migrated:
+Artist detail, Artist list, Event detail, Event list, Event
+seat-select, Venue grid, Venue detail. Not a new design decision - no
+Figma round needed, same category of work as the Admin token sweep
+(`GEN-2609-020`). Wall of Fame, Organisers directory, and
+Venue-owners list/detail deliberately deferred to a Phase 2 once this
+pattern is proven, per the dispatch's own default (splitting over one
+11-page pass).
+
+Shipped as 3 commits on one branch/PR, sequenced smallest-to-largest
+per the dispatch's own suggestion (Artist pair -> Event trio -> Venue
+pair) rather than 3 separate PRs - matches this codebase's existing
+convention for multi-file tickets (e.g. `GEN-2609-063`'s 6 logical
+commits in one PR).
+
+**Colors - 60+ `--afa-cream` text-color usages migrated to
+`--afa-text-primary` across all 7 pages' files**, one mapping applied
+uniformly: `--afa-cream` (`#F7F3EE`) and `--afa-text-primary`
+(`#F5F5F0`) are visually indistinguishable text-on-dark tones -
+`Button.tsx`'s own `form-submit` variant already documents this exact
+equivalence. Every instance checked was a `color:` role, never a
+`background:`, before the blanket swap - not assumed.
+
+**One color flagged, then resolved once Hitesh made the call.**
+`events/page.tsx`'s `.afa-events-view-btn.active` rule originally set a
+light cream *background* (not text) with dark `--afa-surface-inverse`
+text - none of the locked-4 tokens covered "light neutral background,
+dark text" (surface-page/raised/inverse are all dark; amber is a
+golden-tan accent, a real color change from cream's near-white tone,
+not a safe silent swap), so this shipped as a flagged literal rather
+than a guess.
+
+Hitesh's decision: `background` moves to `--afa-surface-raised` - a
+normal "selected chip on a raised panel" look, not an inversion.
+Applying just that swap alone would have shipped a real, new bug
+though: the rule's own paired `color: var(--afa-surface-inverse)`
+computes to **1.20:1** contrast against `--afa-surface-raised` (both
+near-black, computed via the real WCAG relative-luminance formula, not
+eyeballed) - the active icon would have been essentially invisible.
+Moved `color` to `--afa-text-primary` in the same fix (15.07:1 against
+`--afa-surface-raised`) - not asked for verbatim, but a mechanical
+consequence of the background change that would have been irresponsible
+to ship silently broken. This also happens to match `:hover`'s already-
+migrated icon color on the line above, so active/hover no longer
+disagree on icon color.
+
+**A real bug this session's own explanatory comment introduced, caught
+only because Hitesh asked for real visual verification.** The
+resolution comment above originally wrote `` `color` `` (backtick-
+quoted) inside this `<style>{\`...\`}</style>` template literal -
+backticks aren't escaped in template-literal text, so that prematurely
+closed the literal and broke the build (Turbopack: `Expected '</',
+got 'ident'`). Worse, this session's own prior backgrounded `next
+build` run had reported a clean exit (`0`) against the broken commit -
+a false pass, cause unclear (possibly a stale Turbopack cache reusing
+an unaffected artifact for this route). Only caught because this
+session went on to actually start the dev server and drive it with
+Playwright per Hitesh's explicit "verify it visually" ask, rather than
+stopping at the (wrong) build result. Fixed in a follow-up commit;
+re-verified for real afterward: `tsc` clean, `next build` clean
+(confirmed via the shell's own `$PIPESTATUS` on a foreground run, not
+a backgrounded one, with the full route list visible), `check-design-
+tokens.js` clean. Visually confirmed via computed styles (`background:
+rgb(31,31,31)` / `color: rgb(245,245,240)` - exactly `--afa-surface-
+raised` / `--afa-text-primary`) and screenshots of both the grid-active
+and list-active states, both clearly legible.
+
+**Hex-color count corrected on re-verification, per this codebase's
+standing convention of re-checking a dispatch's own numbers before
+acting on them.** The audit's "two literal hex colors (Event detail)"
+turned out to be one distinct value, `#241a10`, at 3 call sites (all
+circular avatar-placeholder backgrounds - lineup/celebrity/panelist
+fallback), not two separate colors. Migrated to
+`--afa-surface-inverse`, matching the identical role's existing token
+usage at `OrganisersGridEmbed.tsx:172` - a real precedent, not a
+guess.
+
+**Terracotta finding corrected, nothing to migrate.** The audit's "one
+stray `--afa-terracotta` (Venue grid)" doesn't hold on a fresh grep -
+neither the CSS var nor its raw RGB triple (`200,68,26`, the pattern
+`GEN-2609-063` taught this codebase to also check) appear live
+anywhere in `src/app/venues/`. Both venue files carry a comment
+documenting an *earlier* migration off `--afa-terracotta`
+(`GEN-2608-074`, 19 Aug) - the audit's grep almost certainly matched
+that historical comment text, not a real live usage.
+
+**Typography - hand-typed `fontSize` values that exactly match the
+locked scale** (11/12/13/14/16/24/28/32px, both inline styles and
+CSS-in-JS `<style>` blocks) **replaced with their token**
+(`--afa-text-micro/small/ui/body/title/heading/page-title/
+page-title-lg`) across all 10 touched files. Values that don't
+cleanly match a scale step were left as literals, not rounded -
+recurring non-matches across the 7 pages: `clamp()` responsive
+headlines (7 instances), `em`-relative sizes on 2 badge glyphs, and
+flat 10/15/17/18/20/22/26px values (several dozen instances, mostly
+18px on emoji-icon-sized spans and secondary body copy). Full
+per-file breakdown in this ticket's 3 commit messages.
+
+**Buttons - 2 of 37 raw `<button>` elements across the 7 pages
+migrated, 35 flagged as genuine shape mismatches rather than forced:**
+- `artists/page.tsx`'s rising-star "View Profile" CTA ->
+  `variant="primary" size="pill-md" fullWidth={false}` (padding/
+  font-weight round by 2-6px/1px/100-weight, within this codebase's
+  established tolerance from the terracotta-sweep tickets); the
+  original's `navigatingId`-based opacity dimming preserved via a
+  `style` override since `Button`'s own disabled-dim would have
+  incorrectly dimmed the button while *its own* navigation is in
+  flight, not just a sibling card's - same "preserve the real
+  behavioral nuance" discipline as `GEN-2609-070`'s profile
+  role-switcher fix.
+- `ArtistProfileClientPage.tsx`'s "Invite to Lineup" ->
+  `variant="form-submit"` (padding 12->16, fontSize 13->15 -
+  documented deltas, same rounding class as `GEN-2609-058`'s
+  canonicalization).
+
+**Not migrated, by recurring shape family:**
+- Underline/flat-text tab switchers with no visible chip/pill
+  container (Artist About/History, Events mode/upcoming-past/type/
+  price filters, Venues/Owners toggle, Artist's own genre-filter row -
+  the last one's own code comment explicitly says "editorial underline
+  row, not pill-chip buttons"). No `Button` variant renders a
+  containerless text-underline role.
+- Circular icon toggles with a shape or radius `Button` doesn't model
+  (prev/next artist nav pair, Notify-bell toggles on both Artist and
+  Venue detail, Events' 32px square grid/list view icons, a star-rating
+  control, a 20x20 quantity stepper).
+- 3px-border-radius controls on Event detail (a +1 RSVP button, a
+  review-submit button) - doesn't match any `size` token's radius
+  (6/8/8).
+- Explicitly sharp-cornered-by-design controls: Venue detail's Follow/
+  sidebar-CTA buttons, per `VenueFollowButton.tsx`'s own comment
+  ("export's Follow buttons are sharp-edged") - no `Button` variant
+  renders a non-rounded corner, so routing these through would be a
+  real, unrequested shape change.
+- Dropdown trigger/listbox options (Venue grid's city filter) - not a
+  CTA/chip role `Button` was built for.
+- Venue detail's "Get Directions" is an `<a>` styled as a button, not a
+  raw `<button>` element - outside this ticket's literal scope, noted
+  for completeness rather than silently skipped.
+
+**Shared-component sweep, per the dispatch's explicit ask.**
+`ArtistNoPhoto.tsx`/`VenueNoPhoto.tsx` (both still `--afa-cream`
+consumers) are used beyond these 7 pages - also `wall-of-fame/
+page.tsx` and `layout.tsx` - confirmed via grep before deciding not to
+touch them: real shared-layer components, the same class of item
+`GEN-2609-072`'s finding #10 already flagged as its own, larger,
+separate undertaking, not silently absorbed into this page-scoped
+ticket.
+
+**`--afa-cream` re-verified repo-wide after the migration, per the
+dispatch's explicit ask.** 18 files still reference the token
+(`globals.css`'s own definition plus 17 real consumers - `Button.tsx`'s
+`form-submit` variant, several still-unmigrated pages/components).
+None orphaned; the token itself is untouched in `globals.css`, only
+these 7 pages' own usages moved.
+
+**Verify.** `tsc --noEmit` clean after each of the 3 commits.
+`check-design-tokens.js` against this branch's diff from `origin/qa`:
+clean, 0 offenses. Real `next build`: clean. No visual verification
+possible (no browser tool this session) - every color swap is
+byte-identical or precedent-matched as documented above, and every
+typography swap is an exact-value token substitution; flagged as
+reasoned, not screenshotted.
+
+**Merge-order note, resolved.** This branch was synced from `origin/qa`
+before `GEN-2609-070`/`-071`/`-072`'s own branch (`feat/gen-2609-070-
+amber-chip-family-collapse`) had merged, so this entry and that
+branch's own `docs/design.md`/`HANDOFF.md` additions were flagged as a
+predicted conflict. `GEN-2609-070` merged first (PR #650, `fc0421f`);
+this branch was then rebased onto the updated `qa` and the predicted
+conflict resolved exactly as planned - both entries kept, this one
+appended after `GEN-2609-070`'s/`-071`'s/`-072`'s, neither dropped.
+
+Built on `feat/gen-2609-073-artist-pages-migration`, branched from
+`qa` at `38c1e43`.

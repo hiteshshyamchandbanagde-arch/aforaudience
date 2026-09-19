@@ -20,7 +20,7 @@ export default function VenuesHero({ count }: { count: number }) {
   const { t: tr } = useLocale()
   return (
     <header style={{ borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "40px", marginBottom: "40px" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
         {tr.venuesPage.eyebrowDirectory.replace("{count}", String(count))}
       </span>
       <h1 style={{ marginTop: "20px", fontFamily: "var(--font-display)", fontSize: "clamp(44px, 7vw, 80px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
