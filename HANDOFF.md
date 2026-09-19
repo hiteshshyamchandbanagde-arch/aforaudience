@@ -1,3 +1,27 @@
+# Session Handoff — 19 Sept 2026, Phase 2 (chat — GEN-2609-073 Phase 2: Wall of Fame/Organisers/Venue-owners, closes the full ticket)
+
+## qa HEAD: `4fa6717` (PR #651, `GEN-2609-073` Phase 1, merged) - confirmed via `git fetch` before branching, not assumed. New branch `feat/gen-2609-073-phase2-remaining-pages`, synced fresh from `origin/qa` per the standing rule. Supersedes, does not delete, the sections below.
+
+## `GEN-2609-073` Phase 2 - the last 4 of the audit's 11 pages, same treatment as Phase 1
+
+Wall of Fame, Organisers directory, Venue-owners list, Venue-owners detail. Full reasoning in `docs/design.md`'s own `GEN-2609-073` Phase 2 entry; headline points here:
+
+- **Only 1 `--afa-cream` usage across all 4 files** - `wall-of-fame/page.tsx`'s local `GridTexture` component (a decorative gradient-line color, not text) -> `--afa-text-primary`. No terracotta, no hex literals anywhere in this batch.
+- **One color pattern flagged, not guessed - and it's a real, recurring one.** 3 of the 4 pages use a raw `rgba(255,255,255,0.5)` hero-subtitle color that doesn't match `--afa-text-secondary`'s actual value (`rgba(245,245,240,0.65)` - different alpha *and* a colder white). Also found the identical literal in `dashboard/artist/page.tsx`, `NotificationOptIn.tsx`, and the homepage - real and recurring, but normalizing it repo-wide is out of this ticket's page-scoped remit. Needs Hitesh's call.
+- **Typography:** exact scale matches only (11/12/13/14/16/24/32px); non-matches (18/20/22/36px, `clamp()`) left alone and flagged.
+- **Buttons: zero raw `<button>` elements in any of the 4 files** - every card/row is a `role="link"` div or a plain `Link`. Nothing to migrate or flag, unlike Phase 1's 37-button haul.
+- Shared-component sweep confirmed `VenueNoPhoto.tsx` carries the identical `--afa-cream` grid-texture pattern `wall-of-fame/page.tsx`'s own copy duplicates (same code comment cross-references it) - left untouched, consistent with Phase 1's call on `ArtistNoPhoto.tsx`/`VenueNoPhoto.tsx` being separate shared-layer work.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. Real `next build`: clean, checked via a **foreground** run's `$PIPESTATUS` (not backgrounded - see the Phase 1 session's own false-positive lesson above/below), all 4 routes present.
+
+**This closes the full `GEN-2609-073` scope from the 18 Sep audit - all 11 originally-flagged pages migrated (7 in Phase 1, 4 here).** No further phases planned unless something new surfaces.
+
+## Next session starts by
+
+Merging `feat/gen-2609-073-phase2-remaining-pages`'s PR once reviewed. Two open decisions carried forward for Hitesh: (1) the `rgba(255,255,255,0.5)` hero-subtitle color question above (Wall of Fame/Organisers/Venue-owners, plus the 3 out-of-scope files it also appears in), and (2) whatever comes next now that the full `GEN-2609-073` migration scope is closed - no automatic Phase 3.
+
+---
+
 # Session Handoff — 19 Sept 2026, later same day (chat — GEN-2609-073 closeout: color decision applied, real bug caught via visual verification, merge order at time of writing)
 
 **UPDATE, same day, after this section was written:** `feat/gen-2609-070-amber-chip-family-collapse` merged (PR #650, `fc0421f`) shortly after this section's "still blocked" framing below was written. This branch was rebased onto the updated `qa` and re-verified clean - see the top of this file for that outcome. The "still NOT merged"/"still waiting" statements in this section describe the state *at the time*, not the current state - left as-is rather than rewritten, per this doc's own history-preserving convention.
