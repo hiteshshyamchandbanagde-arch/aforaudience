@@ -9,7 +9,7 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/26
 | Session / date | Goal | Status | Remarks | Branches |
 |---|---|---|---|---|
 | 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files from `078`'s ratchet report, 1 PR each | Complete, unmerged | 791 → 337 combined literals across the 3 files (57% reduction). All 3 branches independent (each branched fresh from `origin/qa`), each with its own `docs/design.md` entry + baseline update. 1 real accessibility bug found and deliberately left unfixed (see §4). Batch-wide recurring-value proposal table appended for Hitesh. | `feat/gen-2609-079-batch1-seatmap`, `feat/gen-2609-079-batch1-admin-settings`, `feat/gen-2609-079-batch1-organiser-event-edit` |
-| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete, unmerged (still, as of this session's start) | No migration, zero visual change. Full precise measurement reconciled against the dispatch's own rough numbers. | `feat/gen-2609-078-design-token-guard-coverage` |
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete; **merged as PR #659** (confirmed via API this session - merge commit `273b4c4`, this session's own `qa` starting point) | No migration, zero visual change. Full precise measurement reconciled against the dispatch's own rough numbers. | `feat/gen-2609-078-design-token-guard-coverage` (merged, deleted) |
 | 19 Sept 2026 (CC) | Verification closeout: `GEN-2609-075`/`076`/`077` confirmed merged, `Feedback` backfilled, live re-verify | Complete | qa HEAD `d0a2c69` at the time. | none (docs-only, direct to qa) |
 | 19 Sept 2026 (CC+chat) | `GEN-2609-075` admin design tokens, `076` Button coverage, `077` type-scale/spacing phase 1 (homepage) | Complete (build+merge); acceptance partial | PRs #654-658, all merged. | 5 branches, all deleted post-merge |
 | 18-19 Sept 2026 (chat) | `GEN-2609` backfill, numbering collisions, UI/UX centralization audit + fixes | Complete | Audit (`GEN-2609-072`) → 4-ticket fix chain, PRs #650-653, all merged. | 4 branches |
@@ -22,7 +22,7 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/26
   - `feat/gen-2609-079-batch1-seatmap` (file 1/3, `seat-map/page.tsx`, 376→163 literals)
   - `feat/gen-2609-079-batch1-admin-settings` (file 2/3, `admin/settings/page.tsx`, 208→82 literals)
   - `feat/gen-2609-079-batch1-organiser-event-edit` (file 3/3, `organiser/events/[id]/edit/page.tsx`, 207→92 literals)
-- `GEN-2609-078` (provisional) - `feat/gen-2609-078-design-token-guard-coverage` - **confirmed still NOT merged**: `git fetch` + `origin/qa` HEAD re-checked at the very end of this session, still `273b4c4` (this session's own starting commit) - unchanged the whole session. Still needs chat to confirm the ticket number and open/merge its PR before any `GEN-2609-079` branch can land (see §7 - the `079` branches all assume `078`'s baseline file already exists in `qa`).
+- `GEN-2609-078` - **correction, pushed in a follow-up commit after this entry first went out with a wrong claim.** The first version of this section said `078` was still unmerged, reasoning from "`origin/qa` HEAD hasn't moved since this session's own `git fetch`" - true, but the wrong inference. That `git fetch`, at this session's own start, already picked up `078`'s merge (PR #659, chat merged it between sessions, before this session began) - `qa` "not moving during this session" and "`078` being unmerged" are different claims, and only the first is true. Verified properly via GitHub API on the re-check: **PR #659 `merged: true`, merge commit `273b4c4`** - exactly this session's own starting `qa` HEAD. `078` is done, nothing pending on it.
 
 ## 3. Open PRs awaiting action
 
@@ -75,7 +75,7 @@ No new collisions this session. `docs/HANDOFF_TEMPLATE.md`'s permanent ledger un
 ## 7. Docs-conflict watchlist
 
 - All 3 of this session's own branches (`feat/gen-2609-079-batch1-*`) touch `docs/design.md` (each appends its own section) and `scripts/design-token-baseline.json` (each lowers it independently) - **see §3 above for the merge-order/reconciliation instructions**, not repeated here.
-- `feat/gen-2609-078-design-token-guard-coverage` - **confirmed still open/unmerged** (see §2). It also touches `HANDOFF.md`/`docs/design.md`, and it's the branch that CREATES `scripts/design-token-baseline.json` in the first place - a real ordering dependency: **`078` must merge before any `079` branch**, since all 3 `079` branches were built assuming that file already exists in `qa` and already reflects `078`'s starting values. Merging a `079` branch before `078` would be merging a diff against a baseline file `qa` doesn't have yet.
+- `078` is **already merged** (see the correction in §2 - no ordering dependency exists, `scripts/design-token-baseline.json` already lives in `qa` and all 3 `079` branches were correctly branched from `qa` after it was there). No action needed on `078` itself.
 
 ## 8. Verification standard checklist
 
@@ -117,7 +117,7 @@ Central-control status vs. the north star: unchanged in kind from `078`'s own su
 
 ## 12. Immediate next action
 
-**Chat: open and merge the 3 `GEN-2609-079` PRs** (seat-map first per file-numbering, but no hard ordering requirement between the 3 - they don't touch each other's files), resolving the `docs/design.md`/`design-token-baseline.json` conflicts per §3's instructions, gated first on confirming `078` itself is already merged (§7). **Admin settings PR additionally needs Hitesh's own live click-through** before merging - flag this explicitly, don't merge on local verification alone for that one file.
+**Chat: open and merge the 3 `GEN-2609-079` PRs** (seat-map first per file-numbering, but no hard ordering requirement between the 3 - they don't touch each other's files; `078` is already merged, no gating needed there), resolving the `docs/design.md`/`design-token-baseline.json` conflicts per §3's instructions. **Admin settings PR additionally needs Hitesh's own live click-through** before merging - flag this explicitly, don't merge on local verification alone for that one file.
 
 **Next CC dispatch after this merges** (per the original dispatch's own instruction, not re-decided here): raw `<input>`/`<select>`/`<textarea>` guard rule (5th CI category) plus shared `Input` component adoption (`Input.tsx` exists, confirmed still just 1 import repo-wide as of `078`'s own audit - not re-verified this session), then the next batch of files from the ratchet's own top-10 report (`dashboard/artist/page.tsx` 177, `ArtistProfileClientPage.tsx` 175, `EventDetailClientPage.tsx` 174 were next in line as of `078`'s snapshot - re-run the ratchet fresh before trusting these numbers, they'll have shifted once `079` merges).
 
