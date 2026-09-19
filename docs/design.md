@@ -2874,6 +2874,16 @@ closes Step 6 (5/5) and the original six-step UI/UX audit sequence in
 full, once the migration lands. Pending merge confirmation before this
 entry is finalized, per the standing rule.
 
+**`Feedback`-table backfill note, added 18 Sept.** `GEN-2609-038`
+through `-042` above were real and merged (PRs #611-#615) but had zero
+`Feedback` rows until this backfill - same gap class as the
+`GEN-2609-055`-`068` backfill elsewhere in this doc, found while
+checking for other unreconciled numbers during that work. All 5 logged
+`RESOLVED`/`DEPLOYED_QA`. This entry's own "once the migration lands"
+caveat is resolved: `onboardedAt`/`intendedRole` confirmed present in
+`aforaudience-qa`'s live schema, not just `schema.prisma`, so `-042` is
+logged fully `RESOLVED`, not pending.
+
 ## GEN-2609-043 + GEN-2609-047: targeted contrast fix + Enable button restyle - built
 
 Two small, independent fixes off the accessibility/notifications specs'
@@ -5417,3 +5427,173 @@ screenshotted.
 
 Built on `fix/bug-2609-049-events-tab-underline-fillsolid`, branched
 from `qa` at `dbc3c28` (post `GEN-2609-069` merge, PR #648).
+
+## GEN-2609-070 - collapse the amber-accent selected-chip family onto `toggle-pill`
+
+Dispatch: `GEN-2609-069` flagged 4 sites using `--afa-amber` as a
+selected-chip indicator - a second color language alongside
+`toggle-pill`'s new `FILL_SOLID_TINT` convention - as a real design
+call, not a mechanical fix. Put to Hitesh directly; decided: collapse
+onto `toggle-pill`, not keep as a second legitimate convention. A
+real, visible color change on these 4 screens, chosen knowingly.
+
+**Numbering note, now confirmed.** Supabase reconnected. The 14-ticket
+`Feedback` backfill (`GEN-2609-055` through `-068` - re-checked against
+the DB directly, not the `052`-`053` range this entry originally
+guessed: those two already had real `Feedback` rows from their own
+sessions, nothing to backfill there) is now logged, and
+`CodeCounter.GEN/2609` moved from `54` to `69`. This ticket's own
+`Feedback` row is logged as `GEN-2609-070`, status `IN_TEST` (branch
+pushed, PR open, not yet merged) - `070` is real, not provisional.
+
+**A second, separate `GEN-2609-069` collision found while re-checking
+the DB - resolved by Hitesh's own call, see `GEN-2609-071` below.**
+Commit `ee9e47c` ("fix confirmed-state action row wrapping in 2-up
+desktop grid", PR #637, merged 14 Sep) also self-labeled `GEN-2609-069`
+- a different ticket from the toggle-pill-variant `GEN-2609-069` that's
+actually logged in the `Feedback` table today. It predates the real
+one by two days and had no `design.md` entry and no `Feedback` row of
+its own. Real, shipped work (the fix itself reads as correct), just
+never reconciled the way the `GEN-2609-054` collision was. Decision:
+the existing `GEN-2609-069` `Feedback` entry stays put (already
+backfilled and real, don't touch it); `ee9e47c`/PR #637 is renumbered
+to `GEN-2609-071` instead, since it was never logged anywhere and has
+no existing references to break.
+
+**Two sites routed through `Button variant="toggle-pill"` directly -
+checked each site's actual shape against the variant's chrome first,
+not assumed to fit:**
+- `dashboard/admin/bookings/page.tsx`'s tab switcher (`tabButton`
+  helper, 4 call sites: errored/pending/delivered/all) - `7px 14px`
+  padding, `13px` sans font, already within the same rounding
+  tolerance `-058`/`-069` established for `pill-sm`. Straight swap.
+- `profile/page.tsx`'s role-switcher pills (`.map()` over held roles)
+  - same shape match. **Preserved one real behavioral nuance instead
+    of silently dropping it**: this site only dims the *non-active*
+    pills while a role-switch is in flight, keeping the active one at
+    full opacity - `Button`'s own `disabled`-opacity default (`0.7` on
+    every disabled instance, active or not) would have changed that.
+    Passed `disabled` for the actual click-blocking behavior but
+    overrode `style.opacity` to keep the original per-pill logic - a
+    real, deliberate preservation, not an oversight.
+- `components/GenrePicker.tsx`'s genre chips - its own existing `size`
+  prop (`'default' | 'lg'`) already mapped cleanly onto `pill-sm`/
+  `pill-md` respectively; swapped the prop's internal representation
+  from a raw padding string to the size-token name rather than adding
+  a second parallel sizing concept.
+
+**One site deliberately NOT routed through `Button` - a token-only
+fix instead, to avoid a second, unrequested change:**
+`components/MobileEventFilterSheet.tsx`'s local `Pill` wrapper uses
+`font-mono` at `12px` with `8px 14px` padding - checked against
+`toggle-pill`'s chrome (`font-sans`/`13px`/`6px 14px` for `pill-sm`)
+and it's a genuinely different shape, not a rounding-tolerance match.
+Forcing it through `Button` would have silently changed this
+component's typography (mono numerals/labels - matches this sheet's
+other mono eyebrow text) on top of the approved color change, which
+wasn't asked for. Swapped only the 3-token trio in place (`--afa-amber`
+-> `FILL_SOLID_TINT`/`FILL_SOLID_BORDER_TINT`/`var(--afa-fill-solid)`),
+kept the component's own shape untouched.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against this
+branch's diff from `origin/qa`: clean, 0 offenses. Real `next build`:
+clean, `/dashboard/admin/bookings` and `/profile` present in the route
+list (`GenrePicker.tsx`/`MobileEventFilterSheet.tsx` aren't routes
+themselves - covered by `tsc` plus the pages that render them building
+clean). No visual verification possible (no browser tool this
+session) - reasoned from the color trio being byte-identical to
+`toggle-pill`'s own already-reasoned selected-state pairing.
+
+Built on `feat/gen-2609-070-amber-chip-family-collapse`, branched from
+`qa` at `38c1e43` (post `BUG-2609-049` + both chat-side handoff
+commits).
+
+## GEN-2609-071 - confirmed-state action row wrapping in 2-up desktop grid (renumbered from a `GEN-2609-069` self-label)
+
+**Not new work - a numbering correction for already-shipped code.**
+Commit `ee9e47c` (PR #637, merged 14 Sep) fixed a real layout bug and
+self-labeled itself `GEN-2609-069` in both its commit message and PR
+title, but that number collides with the toggle-pill-variant ticket
+that legitimately holds `GEN-2609-069` in the `Feedback` table (logged
+two days later, 16-17 Sep). Neither had a `design.md` entry or
+`Feedback` row at the time; found during the `GEN-2609-070` numbering
+re-check. Hitesh's call: the existing `GEN-2609-069` `Feedback` entry
+stays as-is; this commit's work is renumbered to `GEN-2609-071` since
+it had no existing references anywhere to break.
+
+**The original fix (unchanged, just documented and numbered now).**
+The 3-button confirmed-state action row (Download PDF / Message
+Organiser / Cancel) added in `GEN-2609-068` used `flex: '1 1 auto'` on
+each button, so each button's flex-basis defaulted to its own content
+width - in the narrower 2-up desktop grid (vs. the mobile-first v6
+reference design `-068` was built against) all 3 overflowed their
+available width and wrapped onto their own full-width lines instead of
+sharing the row, visible on live qa at the time
+(`qa.aforaudience.com/tickets/`). Fixed with flex-basis `0`
+(`flex: '1 1 0'` + `minWidth: 0`) on all 3 so they split the row
+evenly and wrap their own label text only if truly constrained.
+Also routed `MessageButton`'s border override through the
+`--afa-border-resting` token added in `GEN-2609-068`'s own CI fixup,
+replacing a second copy of the same literal that had been sitting
+unnoticed in the same block.
+
+**Logged after the fact.** `Feedback` row inserted as `GEN-2609-071`
+(`RESOLVED`/`DEPLOYED_QA`, matching PR #637's already-shipped state).
+`CodeCounter.GEN/2609` advanced `69` -> `71` (`070` already consumed
+the intervening number).
+
+**Anyone searching old PR titles/commit messages for "GEN-2609-069"
+should land here, not on the toggle-pill ticket** - see `HANDOFF.md`
+for the explicit cross-reference note.
+
+Built on `ee9e47c`, merged to `qa` via PR #637 on 14 Sep 2026 - no new
+branch for this entry, documentation/numbering only.
+
+## GEN-2609-072 - UI/UX Centralization Audit (18 Sep) - findings only, no fixes yet
+
+Full-repo audit against 69 substantive page files plus shared
+components (`SiteNav`, `DashboardShell`, `Toast`, `EventCard`, `Photo`,
+`Button`), verified by direct grep against `qa`, not taken on prior
+audit summaries alone.
+
+1. **Typography scale (`--afa-text-*`, `--afa-space-*`) - zero adoption,
+   repo-wide.** Defined in `globals.css`, referenced as a live style in
+   zero files, including `Button.tsx` itself (hand-types 12/13/14/16 as
+   bare numbers).
+2. **Color palette not actually locked at the source.** `globals.css`
+   defines 84 `--afa-*` color tokens against the documented "locked 4";
+   17 are fully orphaned (defined, unused anywhere).
+3. **`--afa-cream` (non-locked token) live in `Toast.tsx` line 107** -
+   a shared, app-wide component, not just a page-level miss.
+4. **11 public content pages never migrated:** Artist detail/list,
+   Event detail/list/seat-select, Wall of Fame, Organisers directory,
+   Venue-owners list/detail, Venue grid/detail. Inline `style={{}}`
+   throughout, 6-17 hand-typed font sizes per page, `--afa-cream` in 9
+   of 11, one stray `--afa-terracotta` (Venue grid), two literal hex
+   colors (Event detail).
+5. **Static/marketing pages, same pattern:** homepage, about,
+   for-artists, `dev/razorpay-test`.
+6. **Auth pages, lighter but not clean:** login (5 raw buttons vs. 3
+   `Button` uses), forgot-password, reset-password.
+7. **Seat-map builder - worst outlier in the codebase.**
+   `dashboard/venue/[id]/seat-map/page.tsx`: 2302 lines, 192 inline
+   style blocks, 29 raw `<button>`, zero `Button` component uses, 5
+   live `--afa-cream` references.
+8. **Checkout and Tickets - mixed adoption despite being the most
+   business-critical flow.** Checkout (8 hardcoded sizes / 4 `Button`
+   uses), tickets (5 hardcoded sizes / 4 `Button` uses).
+9. **Raw-button residue inside Admin** despite Admin being clean on
+   color tokens: artists (5), bookings (2), diary (2), feedback (7),
+   settings (8), users (3) - all 0 `Button` component uses. Admin's
+   button consistency was never actually verified before, only its
+   colors were.
+10. **`DashboardShell.tsx` and `SiteNav.tsx` - the shared layer most
+    pages depend on isn't clean either.** Both hand-type 4-5 distinct
+    font sizes; `SiteNav.tsx` has 7 raw buttons, 0 `Button` uses. This
+    is why dashboard pages *look* clean on font-size - the hardcoding
+    was pushed into the shared layer underneath them, not eliminated.
+
+**No decisions made on scope/sequencing yet - awaiting Hitesh's call on
+what to fix first.** Logged as `GEN-2609-072`, `Feedback` row status
+`NEW` (audit only, nothing built) - `CodeCounter.GEN/2609` advanced
+`71` -> `72` (conditioned on it still reading `71` at write time).

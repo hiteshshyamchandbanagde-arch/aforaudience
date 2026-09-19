@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from 'react'
 import SiteNav from '@/components/SiteNav'
 import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 // /dashboard/admin/bookings
 //
@@ -143,22 +144,9 @@ export default function AdminBookingsPage() {
   const tabButton = (id: Tab, label: string, count: number) => {
     const active = id === tab
     return (
-      <button
-        key={id}
-        onClick={() => setTab(id)}
-        style={{
-          padding: '7px 14px',
-          borderRadius: '999px',
-          border: active ? '1px solid transparent' : '1px solid rgba(245,245,240,0.14)',
-          background: active ? 'rgba(201,151,58,0.15)' : 'transparent',
-          color: active ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
-          fontSize: '13px',
-          fontWeight: 600,
-          cursor: 'pointer',
-        }}
-      >
+      <Button key={id} variant="toggle-pill" size="pill-sm" fullWidth={false} selected={active} onClick={() => setTab(id)}>
         {label} <span style={{ opacity: 0.7, marginLeft: '4px' }}>({count})</span>
-      </button>
+      </Button>
     )
   }
 

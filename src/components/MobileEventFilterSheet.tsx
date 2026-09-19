@@ -3,6 +3,7 @@ import { TYPE_META } from "@/components/EventCard"
 import { EventTypeIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
+import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only bottom sheet for
 // /events' filters (type/city/price/sort), replacing the desktop inline
@@ -29,9 +30,9 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
         alignItems: "center",
         gap: "6px",
         borderRadius: "999px",
-        border: active ? "1px solid var(--afa-amber)" : "1px solid rgba(245,245,240,0.15)",
-        background: active ? "rgba(201,151,58,0.15)" : "var(--afa-surface-raised)",
-        color: active ? "var(--afa-amber)" : "rgba(245,245,240,0.7)",
+        border: active ? `1px solid ${FILL_SOLID_BORDER_TINT}` : "1px solid rgba(245,245,240,0.15)",
+        background: active ? FILL_SOLID_TINT : "var(--afa-surface-raised)",
+        color: active ? "var(--afa-fill-solid)" : "rgba(245,245,240,0.7)",
         padding: "8px 14px",
         fontFamily: "var(--font-mono)",
         fontSize: "12px",
