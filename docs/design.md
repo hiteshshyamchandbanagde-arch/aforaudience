@@ -6753,3 +6753,70 @@ Zero page files touched. `check-design-tokens.js`'s diff-only rules are complete
 ### Next dispatch after this merges
 
 Migration batch 2, next three largest files by literal count (this session's own fresh `design-token-ratchet.js` top-10, re-confirmed at session start): `dashboard/artist/page.tsx` (177), `ArtistProfileClientPage.tsx` (175), `EventDetailClientPage.tsx` (174) - each its own PR, same "exact match only, no rounding" discipline, now with 14 more real token slots to match against.
+
+## GEN-2609-082 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **80** at branch start - `081` is the scale-extension ticket) - bulk token migration batch 2, file 3 of 3: `EventDetailClientPage.tsx`
+
+Same dispatch, same method as files 1/2 - branched independently from `qa` (post-`081` merge), not stacked. **No canvas/SVG** (checked first). **This file has 1 Tailwind-adjacent surface the other 2 didn't**: a real `<style>{\`...\`}</style>` raw-CSS template-literal block (`.afa-event-hero-grid`/`.afa-event-lineup-row`/`.afa-book-btn`/etc., lines 273-297) - not Tailwind arbitrary-value classes (there are none), but still a second, different value-shape from the JS `style={{}}` objects everywhere else in the file.
+
+### A real bug in this ticket's own migration script, caught before applying (not after)
+
+The reverse-lookup script (same one used for files 1/2, extended for this file) originally wrapped every bare-numeric replacement in JS string quotes (`'var(--afa-space-32px)'`) - correct for a React inline-style object (`padding: 32` → `padding: 'var(--afa-space-32px)'`), but **wrong** inside the raw `<style>{}` CSS block, where a bare value like `gap: 32px;` is plain CSS text, not a JS property. Quoting it would have produced `gap: 'var(--afa-space-32px)';` - literal quote characters inside a stylesheet rule, which is invalid CSS and would have silently broken that rule (not necessarily a hard build failure - CSS parsers tend to drop/ignore malformed declarations rather than error, which is exactly why this needed to be caught by eye, not assumed safe because `next build` might still pass). **Caught in the dry-run review, before any file was touched** - the script now tracks whether the current line sits inside a `<style>{\`...\`}</style>` block (via a `<style...>{` / `` `}</style>` ` `` boundary match) and emits an unquoted `var(...)` there instead. Re-ran the dry-run after the fix and confirmed only those 5 style-block lines changed, byte-identical elsewhere.
+
+**Retroactively checked files 1 and 2 for the same exposure, not assumed safe.** `dashboard/artist/page.tsx` has no `<style>` tag at all - never exposed. `ArtistProfileClientPage.tsx` does have one (`.afa-cta-solid`/`.artist-hero-grid`/etc.), but it contains zero `padding`/`margin`/`gap`/`fontSize`/`borderRadius` declarations (only `grid-template-columns`/`filter`/`transition`) - the buggy code path was never exercised there, confirmed by grep, not assumed. Both already-pushed branches are unaffected; no follow-up fix needed on either.
+
+### Coverage - matches the dispatch's own predicted numbers exactly, including the one *zero*
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 98 | 11 | **87** | 87 / 98 |
+| font-size | 15 | 2 | **13** | 13 / 15 |
+| radius | 13 | 13 | **0** | 0 / 13 |
+| rgba | 45 | 34 | 11 (manual) | n/a |
+| raw-button | 3 | 3 | 0 (retrofit only) | n/a |
+
+**174 → 63 literals (64% reduction).** The dispatch's own table predicted radius at exactly `0 / 13` for this file - worth calling out explicitly, since a "0 migrated" row is easy to misread as an error rather than a correct prediction: every one of the 13 radius literals here is off-scale (`3px` × 11 - see below - plus `2px` × 2), none of them equal `6`/`8`/`10`/`12`/`999`. `scripts/design-token-baseline.json` deltas confirm independently: `rgb-rgba-literal` -11, `font-size-literal` -13, `spacing-literal` -87, `radius-literal` ±0, `raw-button` ±0.
+
+### Colour - 11 manual matches, the largest colour haul of the batch
+
+Same "exact value + same role" review as files 1/2, done systematically this time (grepped every exact `color: "rgba(245,245,240,0.4)"` / `0.65)"` substring across the file first, rather than eyeballing each `rgba(` hit individually, then hand-checked the one outlier that wasn't a plain string):
+
+- **9× `color: "rgba(245,245,240,0.4)"` → `var(--afa-text-muted)`** (byte-identical value, `--afa-text-muted` is `rgba(245, 245, 240, 0.4)`) - 8 direct, plus 1 inside a ternary (`color: p.top ? "var(--afa-amber)" : "rgba(245,245,240,0.4)"`, the leaderboard trophy icon) - included since the property itself is unambiguously `color:`, only its two possible values are conditional.
+- **1× `color: "rgba(245,245,240,0.65)"` → `var(--afa-text-secondary)`** (byte-identical, event description copy).
+- **1× `border: "1px solid rgba(245,245,240,0.15)"` → `var(--afa-border-resting)`** (the review-comment `<input>`'s border).
+- **Retroactively swept files 1/2 for the same 2 exact `color:` patterns, confirmed clean** - neither had a missed occurrence (`git grep` against each already-pushed branch, 0 hits beyond what those entries already migrated).
+- **Not migrated (34 rgba remaining):** the dominant bucket is `rgba(245,245,240,0.1)`/`0.08` on `border:`/`background:` (~15 sites, not `--afa-border-resting`'s `0.15`), plus a wide one-off spread on `color:` (`0.5`/`0.55`/`0.6`/`0.75`/`0.8`/`0.85`) and 2 non-cream literals (`rgba(201,151,58,0.3)` amber border-left, `rgba(10,10,10,0.94)` the sticky-CTA-bar overlay) - none byte-identical to any real token.
+
+### Stays a literal - includes the batch's one real recurring cluster
+
+font-size: `22px`×1, `17px`×1. spacing: `40px`×4, `64px`×4, `132px`×1 (the `GEN-2609-011` sticky-CTA-bar padding-bottom reservation, already documented by name in this file's own code comment - a deliberate one-off, not a candidate), `5px`×1, `3px`×1 (a `marginTop`, not the radius cluster below). **radius `3px`×11** - the dispatch's own named "only real cluster" in this batch, confirmed: every bordered content card in this file (`event-ended` panel, `special-notes` box, lineup terms box, prize-grid cards, celebrity/panelist cards) shares the exact same `border-radius: 3px`, plus the 2 CTA button radii (`.afa-book-btn`, `.afa-event-hero-poster`) in the `<style>` block. Below the 50-occurrence repo-wide bar (`3px` radius: **46** repo-wide, re-confirmed this session, unchanged from `081`'s own count) - not added as a token here, flagged for whoever eventually revisits the near-miss list.
+
+### Raw `<button>` - 3 sites, 0 migrated to a `Button` variant, all already token-retrofitted
+
+- **"I'll be there" plus-one confirm (L467):** amber outline (`border: 1.5px solid var(--afa-amber)`, `color: var(--afa-amber)`) - `Button.tsx` has no amber-outline variant (`outline-error`/`outline-neutral` are error/neutral-colored specifically); not a match.
+- **Star-rating buttons (L513, ×5 rendered):** 20×20px circular icon buttons (`width`/`height` untouched, out of scope), no circular-rating variant exists.
+- **Submit rating (L522):** fill-solid background, but `borderRadius: 3px` (not `radius-md`'s 8px) and `padding: var(--afa-space-1) var(--afa-space-3)` (4px 12px, not `solid`'s `9px 17px`) - 2 real dimension mismatches, not migrated.
+
+All 3 already had every in-scope literal token-retrofitted by the passes above.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `rgb-rgba-literal` 967→956, `font-size-literal` 1351→1338, `spacing-literal` 3244→3157, `radius-literal` unchanged at 535 (this branch's own `qa` starting point, independent of files 1/2's branches - not additive until all 3 merge and the baseline is regenerated post-merge). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS` - **the actual proof the `<style>` block fix works**, not just the dry-run diff review (a malformed CSS rule wouldn't necessarily fail this build the way a JS syntax error would, so the visual argument really does rest on the rule reading correctly, which was reviewed by eye against the fixed dry-run output before applying). `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff - branch not yet merged/deployed. Same standing caveat as every file in this batch. **Additional flag specific to this file:** the `<style>{\`...\`}</style>` block's migrated rules (`.afa-event-hero-grid`, `.afa-event-lineup-row`, `.afa-event-prize-grid`, `.afa-book-btn`) are exactly the ones the script-bug risk touched - worth a specific visual check on the event-detail hero layout, lineup rows, prize grid, and the sticky book button, not just a general page glance, when a Preview exists.
+
+## Batch 2 summary (`GEN-2609-082`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `dashboard/artist/page.tsx` | 177 | 26 | 85% | 84/88 | 46/50 | 19/19 | 2 |
+| `ArtistProfileClientPage.tsx` | 175 | 57 | 67% | 88/94 | 11/14 | 16/18 | 3 |
+| `EventDetailClientPage.tsx` | 174 | 63 | 64% | 87/98 | 13/15 | 0/13 | 11 |
+| **Batch total** | **526** | **146** | **72%** | **259/280** | **70/79** | **35/50** | **16** |
+
+**Matches the dispatch's own predicted batch totals exactly** (259/280 spacing, 70/79 font-size, 35/50 radius) - every one of this session's precise per-file measurements reconciled with the dispatch's numbers without needing to override any of them. Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (projected, not yet run - each branch's own delta above was measured independently against its own `qa` starting point, not stacked): `rgb-rgba-literal` -25 combined (967→~942), `font-size-literal` -70 (1351→~1281), `spacing-literal` -259 (3244→~2985), `radius-literal` -35 (535→~500) - matching the dispatch's own projected movement.
+
+**Repo-wide counts for the dispatch's named near-miss values (re-measured this session, unchanged from `GEN-2609-081`'s own count - none of batch 2's 3 files individually cleared 50 on any of these):** font-size `22px` **26**, font-size `40px` **1** (spacing `40px` **35**, separately), spacing `64px` **20**, radius `3px` **46** - closest to the bar, concentrated in `EventDetailClientPage.tsx` (11 of its own 46) but still short repo-wide. None added as tokens this batch, per the dispatch's own explicit instruction.
+
+**Colour, batch-wide:** 16 manual `--afa-*`-token matches found across the 3 files (2 + 3 + 11) - `--afa-text-muted` (0.4-alpha cream, the largest single bucket at 9 sites, all in file 3) and `--afa-border-resting` (0.15-alpha cream border) were the two real recurring matches; `--afa-text-secondary` (0.65-alpha) matched once. One real **role-mismatch trap** found and deliberately NOT matched (file 2's `rgba(245,245,240,0.4)` used as a *border* color, byte-identical to `--afa-text-muted`'s value but the wrong semantic role) - flagged in that file's own entry, not silently applied. `rgba(245,245,240,0.08)` (`STATUS_TONE.muted.bg`, not a `--afa-*` token) recurred heavily across all 3 files, consistent with `081`'s own colour report - still not tokenized, per that ticket's own finding.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-082-1-artist-dashboard`, `-2-artist-profile`, `-3-event-detail`) - chat opens/merges each independently. All 3 touch the same 2 files at their tail (`docs/design.md`, `scripts/design-token-baseline.json`) - same expected 3-way conflict `GEN-2609-079`'s own batch already established a precedent for resolving: keep every branch's own `docs/design.md` section (file order, or actual merge order), and run `node scripts/design-token-ratchet.js --update-baseline` fresh on the fully-merged `qa` once all 3 land rather than hand-merging the JSON.
