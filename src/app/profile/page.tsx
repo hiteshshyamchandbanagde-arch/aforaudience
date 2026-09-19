@@ -108,8 +108,8 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
 // scrollIntoView happened to land them.
 const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
-  borderRadius: '12px',
-  padding: '28px 28px 24px',
+  borderRadius: 'var(--afa-radius-12px)',
+  padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
   border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.07)',
   boxShadow: active ? '0 0 0 4px rgba(201,151,58,0.12)' : 'none',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
@@ -121,10 +121,10 @@ const cardStyle = (active?: boolean) => ({
 // before, just the background + a subtle amber focus ring.
 const fieldStyle: React.CSSProperties = {
   width: '100%',
-  padding: '11px 14px',
-  borderRadius: '8px',
+  padding: '11px var(--afa-space-14px)',
+  borderRadius: 'var(--afa-radius-md)',
   border: '1px solid rgba(245,245,240,0.1)',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   boxSizing: 'border-box',
   background: 'var(--afa-surface-page)',
   color: 'var(--afa-text-primary)',
@@ -567,11 +567,11 @@ function ProfileContent() {
   ) => {
     if (!roleStatus?.hasProfile) return null
     if (!roleStatus.isApproved) {
-      return <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-gold)' }}>{tr.profilePage.pendingApproval}</div>
+      return <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-gold)' }}>{tr.profilePage.pendingApproval}</div>
     }
     if (roleStatus.isActive) {
       return (
-        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
+        <Link href={DASHBOARD_PATH[kind]} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage)', textDecoration: 'none' }}>
           {tr.profilePage.visitDashboardTemplate.replace('{label}', label)}
         </Link>
       )
@@ -580,7 +580,7 @@ function ProfileContent() {
       <button
         onClick={() => switchRole(kind)}
         disabled={switching === kind}
-        style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-amber)', background: 'transparent', border: '1.5px solid var(--afa-amber)', borderRadius: '8px', padding: '9px 18px', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
+        style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', background: 'transparent', border: '1.5px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '9px var(--afa-space-18px)', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
         {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
       </button>
@@ -603,10 +603,10 @@ function ProfileContent() {
               HomeHeader, SiteNav, ArtistProfileClientPage, organisers/venues
               pages) rather than the Figma export's 860px. */}
           <style>{`
-            .afa-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
-            .afa-profile-col { display: flex; flex-direction: column; gap: 20px; }
+            .afa-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--afa-space-32px); align-items: start; }
+            .afa-profile-col { display: flex; flex-direction: column; gap: var(--afa-space-5); }
             @media (max-width: 900px) {
-              .afa-profile-grid { grid-template-columns: 1fr; gap: 20px; }
+              .afa-profile-grid { grid-template-columns: 1fr; gap: var(--afa-space-5); }
             }
             .afa-profile-page-container input:focus,
             .afa-profile-page-container textarea:focus,
@@ -630,8 +630,8 @@ function ProfileContent() {
               trailing chevron), plus a badge pill matching
               DashboardShell.tsx's SidebarLink badge treatment exactly
               rather than inventing a new one. */}
-          <div className="lg:hidden" style={{ marginBottom: '18px' }}>
-            <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+          <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-18px)' }}>
+            <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
               {tr.profilePage.quickLinksLabel}
             </p>
             <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
@@ -643,16 +643,16 @@ function ProfileContent() {
                   key={row.href}
                   href={row.href}
                   style={{
-                    display: 'flex', alignItems: 'center', width: '100%', gap: '12px', padding: '14px 16px',
+                    display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
                     textDecoration: 'none',
                     borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
                     color: 'var(--afa-text-primary)',
                   }}
                 >
                   <span style={{ display: 'flex', flexShrink: 0, color: 'var(--afa-text-secondary)' }}>{row.icon}</span>
-                  <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: 600 }}>{row.title}</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{row.title}</span>
                   {!!row.badge && row.badge > 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3, flexShrink: 0 }}>
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: 'var(--afa-space-2px) 7px', lineHeight: 1.3, flexShrink: 0 }}>
                       {row.badge}
                     </span>
                   )}
@@ -670,13 +670,13 @@ function ProfileContent() {
               apply logic - every row below scrolls to and reuses the exact
               same cards/handlers the desktop column already has. */}
           {isAudience && (
-            <div className="lg:hidden" style={{ marginBottom: '28px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(245,245,240,0.1)' }} />
                 ) : (
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid rgba(201,151,58,0.3)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700 }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid rgba(201,151,58,0.3)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700 }}>
                     {(initialDisplayName || user?.name || '?').trim().slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -684,9 +684,9 @@ function ProfileContent() {
                   <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
                   </h1>
-                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: 'var(--afa-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                  <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: '12.5px', color: 'var(--afa-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
                   {user?.code && (
-                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    <p style={{ margin: 'var(--afa-space-2px) 0 0', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)' }}>
                       {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
                     </p>
                   )}
@@ -721,8 +721,8 @@ function ProfileContent() {
                   ],
                 },
               ].map((group) => (
-                <div key={group.label} style={{ marginTop: '18px' }}>
-                  <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                <div key={group.label} style={{ marginTop: 'var(--afa-space-18px)' }}>
+                  <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                     {group.label}
                   </p>
                   <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
@@ -731,7 +731,7 @@ function ProfileContent() {
                         key={row.title}
                         onClick={row.onClick}
                         style={{
-                          display: 'flex', alignItems: 'center', width: '100%', gap: '12px', padding: '14px 16px',
+                          display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
                           background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
                           borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
                           color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-primary)',
@@ -739,7 +739,7 @@ function ProfileContent() {
                       >
                         <span style={{ display: 'flex', flexShrink: 0, color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-secondary)' }}>{row.icon}</span>
                         <span style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ display: 'block', fontSize: '14px', fontWeight: 600 }}>{row.title}</span>
+                          <span style={{ display: 'block', fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{row.title}</span>
                           {row.hint && <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--afa-text-muted)', marginTop: '1px' }}>{row.hint}</span>}
                         </span>
                         {!row.danger && <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />}
@@ -752,12 +752,12 @@ function ProfileContent() {
           )}
 
           <div className={isAudience ? 'hidden lg:block' : undefined} style={{ marginBottom: '40px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
               {nameLoaded ? (initialDisplayName || user?.name || tr.profilePage.fallbackTitle) : '\u00A0'}
             </h1>
-            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{user?.email}</p>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{user?.email}</p>
             {user?.code && (
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-mono)' }}>
                 {tr.profilePage.loginCodeLabel}<span style={{ fontWeight: 700, letterSpacing: '0.03em' }}>{user.code}</span>
               </p>
             )}
@@ -775,11 +775,11 @@ function ProfileContent() {
               so switching the active role here is the only piece that
               was missing - that file needs no changes of its own. */}
           {[held.ORGANISER, held.ARTIST, held.VENUE_OWNER].filter(Boolean).length >= 2 && (
-            <div style={{ marginBottom: '28px' }}>
-              <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+            <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                 Active role
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                 {(
                   [
                     { kind: 'artist', held: held.ARTIST, value: 'ARTIST', label: tr.roles.ARTIST },
@@ -819,10 +819,10 @@ function ProfileContent() {
           )}
 
           {message && (
-            <SuccessBanner style={{ marginBottom: '24px' }}>{message}</SuccessBanner>
+            <SuccessBanner style={{ marginBottom: 'var(--afa-space-6)' }}>{message}</SuccessBanner>
           )}
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           <div className="afa-profile-grid">
@@ -832,10 +832,10 @@ function ProfileContent() {
               tickets, emails, and greetings. Falls back to username if
               blank, so existing users see no change until they set one. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.displayNameHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.displayNameDescPrefix}<strong>{user?.name}</strong>{tr.profilePage.displayNameDescSuffix}
             </p>
             <input
@@ -847,7 +847,7 @@ function ProfileContent() {
               maxLength={120}
               style={{
                 ...fieldStyle,
-                marginBottom: '18px',
+                marginBottom: 'var(--afa-space-18px)',
                 opacity: nameLoaded ? 1 : 0.5,
                 cursor: nameLoaded ? 'text' : 'default',
               }}
@@ -867,13 +867,13 @@ function ProfileContent() {
               account's name/photo already surface publicly, e.g.
               ratings and feedback on events. */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.aboutYouHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.aboutYouDesc}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-14px)' }}>
               {avatar && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
@@ -889,7 +889,7 @@ function ProfileContent() {
               rows={3}
               maxLength={500}
               placeholder={tr.profilePage.bioPlaceholder}
-              style={{ ...fieldStyle, marginBottom: '18px', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
+              style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)', resize: 'vertical', fontFamily: 'inherit', minHeight: '100px', lineHeight: 1.6 }}
             />
             <Button
               variant="primary"
@@ -905,10 +905,10 @@ function ProfileContent() {
               stays INR always - this only changes how amounts are shown
               to this user (event prices, checkout totals). */}
           <div style={cardStyle()}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.displayCurrencyHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.displayCurrencyDesc}
             </p>
             <select
@@ -916,7 +916,7 @@ function ProfileContent() {
               onChange={(e) => setDisplayCurrency(e.target.value)}
               style={{
                 ...fieldStyle,
-                marginBottom: '18px',
+                marginBottom: 'var(--afa-space-18px)',
                 cursor: 'pointer',
                 appearance: 'none',
                 // Chevron stroke inlined as rgba(245,245,240,0.65) - the same
@@ -950,10 +950,10 @@ function ProfileContent() {
 
           {/* Artist upgrade - no approval needed, unlike Organiser/Venue Owner below */}
           <div id="apply-artist" style={cardStyle(highlightedCard === 'artist')}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.becomeArtistBtn}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.artistUpgradeDesc}
             </p>
 
@@ -961,7 +961,7 @@ function ProfileContent() {
               renderRoleStatus(artistStatus, 'artist', tr.profilePage.roleLabelArtist)
             ) : (
               <>
-                <div style={{ marginBottom: '12px' }}>
+                <div style={{ marginBottom: 'var(--afa-space-3)' }}>
                   <GenrePicker value={genre} onChange={setGenre} size="lg" />
                 </div>
                 <Button variant="primary" fullWidth={false} onClick={applyArtist} disabled={applying === 'artist'}>
@@ -973,10 +973,10 @@ function ProfileContent() {
 
           {/* Organiser upgrade */}
           <div id="apply-organiser" style={cardStyle(highlightedCard === 'organiser')}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.becomeOrganiserHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.becomeOrganiserDesc}
             </p>
 
@@ -989,7 +989,7 @@ function ProfileContent() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder={tr.profilePage.orgNamePlaceholder}
-                  style={{ ...fieldStyle, marginBottom: '18px' }}
+                  style={{ ...fieldStyle, marginBottom: 'var(--afa-space-18px)' }}
                 />
                 <Button variant="primary" fullWidth={false} onClick={applyOrganiser} disabled={applying === 'organiser'}>
                   {applying === 'organiser' ? tr.profilePage.submittingEllipsis : tr.profilePage.applyBtn}
@@ -1000,10 +1000,10 @@ function ProfileContent() {
 
           {/* Venue Owner upgrade */}
           <div id="apply-venue" style={cardStyle(highlightedCard === 'venue')}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
               {tr.profilePage.listVenueHeading}
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
               {tr.profilePage.listVenueDesc}
             </p>
 
@@ -1031,17 +1031,17 @@ function ProfileContent() {
             style={{
               display: 'block',
               ...cardStyle(),
-              marginTop: '32px',
+              marginTop: 'var(--afa-space-32px)',
               textDecoration: 'none',
               color: 'inherit',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
               <div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
                   {tr.profilePage.myFeedbackHeading}
                 </h2>
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: 0 }}>
                   {feedbackSummary === null
                     ? tr.profilePage.feedbackSummaryDefault
                     : feedbackSummary.total === 0
@@ -1057,12 +1057,12 @@ function ProfileContent() {
                 <span
                   style={{
                     flexShrink: 0,
-                    fontSize: '13px',
+                    fontSize: 'var(--afa-text-ui)',
                     fontWeight: 700,
                     color: 'var(--afa-on-fill-solid)',
                     background: 'var(--afa-amber)',
-                    borderRadius: '999px',
-                    padding: '4px 12px',
+                    borderRadius: 'var(--afa-radius-pill)',
+                    padding: 'var(--afa-space-1) var(--afa-space-3)',
                   }}
                 >
                   {feedbackSummary.open}
