@@ -69,20 +69,20 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
       </div>
 
       <div className="four-rooms-copy" style={{ background: "var(--afa-surface-inverse)", padding: "56px 28px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.24em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-4)" }}>
           {personaLabel}
         </div>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 500, lineHeight: 1, letterSpacing: "-0.01em", color: "var(--afa-text-inverse)", margin: 0 }}>
           {room.name}
         </h3>
-        <p style={{ marginTop: "20px", maxWidth: "440px", fontFamily: "var(--font-sans)", fontSize: "17px", lineHeight: 1.65, color: "var(--afa-text-inverse)", opacity: 0.75 }}>
+        <p style={{ marginTop: "var(--afa-space-5)", maxWidth: "440px", fontFamily: "var(--font-sans)", fontSize: "17px", lineHeight: 1.65, color: "var(--afa-text-inverse)", opacity: 0.75 }}>
           {room.promise}
         </p>
 
-        <ol style={{ listStyle: "none", margin: "32px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+        <ol style={{ listStyle: "none", margin: "32px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
           {room.steps.map((step, i) => (
-            <li key={step} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--afa-amber)" }}>
+            <li key={step} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-4)" }}>
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-amber)" }}>
                 {i + 1}
               </span>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: "15px", color: "rgba(245,245,240,0.85)" }}>{step}</span>
@@ -92,7 +92,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
 
         <Link
           href={room.href}
-          style={{ marginTop: "36px", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "999px", fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 700, textDecoration: "none" }}
+          style={{ marginTop: "36px", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "999px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", fontWeight: 700, textDecoration: "none" }}
         >
           {room.cta}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -168,7 +168,7 @@ export default function FourRooms() {
   return (
     <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
       <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px 36px 40px" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "24px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
           {tr.homePage.fourRoomsEyebrow}
         </div>
         <div className="four-rooms-intro">
