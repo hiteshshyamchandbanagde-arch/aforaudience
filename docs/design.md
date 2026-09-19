@@ -5626,14 +5626,28 @@ uniformly: `--afa-cream` (`#F7F3EE`) and `--afa-text-primary`
 equivalence. Every instance checked was a `color:` role, never a
 `background:`, before the blanket swap - not assumed.
 
-**One color deliberately NOT migrated, flagged instead.**
-`events/page.tsx`'s `.afa-events-view-btn.active` rule sets a light
-cream *background* (not text) with dark `--afa-surface-inverse` text -
-none of the locked-4 tokens covers "light neutral background, dark
-text" (surface-page/raised/inverse are all dark; amber is a golden-tan
-accent, a real color change from cream's near-white tone, not a safe
-silent swap). Needs Hitesh's call on the right token, or whether this
-earns a new one.
+**One color flagged, then resolved once Hitesh made the call.**
+`events/page.tsx`'s `.afa-events-view-btn.active` rule originally set a
+light cream *background* (not text) with dark `--afa-surface-inverse`
+text - none of the locked-4 tokens covered "light neutral background,
+dark text" (surface-page/raised/inverse are all dark; amber is a
+golden-tan accent, a real color change from cream's near-white tone,
+not a safe silent swap), so this shipped as a flagged literal rather
+than a guess.
+
+Hitesh's decision: `background` moves to `--afa-surface-raised` - a
+normal "selected chip on a raised panel" look, not an inversion.
+Applying just that swap alone would have shipped a real, new bug
+though: the rule's own paired `color: var(--afa-surface-inverse)`
+computes to **1.20:1** contrast against `--afa-surface-raised` (both
+near-black, computed via the real WCAG relative-luminance formula, not
+eyeballed) - the active icon would have been essentially invisible.
+Moved `color` to `--afa-text-primary` in the same fix (15.07:1 against
+`--afa-surface-raised`) - not asked for verbatim, but a mechanical
+consequence of the background change that would have been irresponsible
+to ship silently broken. This also happens to match `:hover`'s already-
+migrated icon color on the line above, so active/hover no longer
+disagree on icon color.
 
 **Hex-color count corrected on re-verification, per this codebase's
 standing convention of re-checking a dispatch's own numbers before

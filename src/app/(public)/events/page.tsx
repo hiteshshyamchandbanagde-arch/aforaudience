@@ -358,15 +358,20 @@ function EventsPageContent() {
         .afa-events-select { padding: 8px 12px; border-radius: 3px; border: 1px solid rgba(245,245,240,0.15); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
         .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 2px; border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
-        /* FLAGGED, not migrated (GEN-2609-073): active state uses a light
-           cream background with dark inverse text - none of the locked-4
-           surface/text/amber/fill-solid tokens covers "light background,
-           dark text" (surface-page/raised/inverse are all dark; amber is a
-           golden-tan accent, not a neutral light background). Kept the
-           literal so this doesn't silently gain a real color change or an
-           incorrect token pairing - needs Hitesh's call on the right token
-           (or whether this earns a new one) before it moves. */
-        .afa-events-view-btn.active { background: var(--afa-cream); color: var(--afa-surface-inverse); }
+        /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
+           --afa-surface-raised, a normal "selected chip on a raised panel"
+           look instead of the light-cream inversion. The paired `color`
+           also had to move off --afa-surface-inverse - that pairing
+           computes to 1.20:1 contrast against --afa-surface-raised
+           (both near-black, computed via the real WCAG relative-
+           luminance formula, not eyeballed), which would have rendered
+           the active icon essentially invisible. --afa-text-primary
+           against --afa-surface-raised computes to 15.07:1 - the same
+           icon color
+           already used on :hover above, so active/hover are now
+           consistent instead of the icon changing color twice on the way
+           to selected. */
+        .afa-events-view-btn.active { background: var(--afa-surface-raised); color: var(--afa-text-primary); }
         .afa-discover-carousel-track { scrollbar-width: none; -ms-overflow-style: none; }
         .afa-discover-carousel-track::-webkit-scrollbar { display: none; }
       `}</style>
