@@ -156,6 +156,18 @@
   --afa-text-muted: rgba(245, 245, 240, 0.4);
   --afa-text-inverse: #F5F5F0;
 
+  /* GEN-2609-074 - a real, separate role from --afa-text-secondary,
+     not a duplicate to merge away: hero-subtitle text sitting directly
+     on top of a photograph (Wall of Fame/Organisers/Venue-owners' hero
+     bands), not a flat surface color. Hitesh's call: a cool, pure
+     white reads legibly across a photo's unpredictable luminance in a
+     way --afa-text-secondary's warm cream tint (tuned for flat
+     surfaces) doesn't guarantee, and the lower alpha (0.5 vs
+     --text-secondary's 0.65) was likely already tuned for that same
+     reason. Named for the role, not the value, since more photo-hero
+     pages are expected as this app leans further into imagery. */
+  --afa-text-on-image: rgba(255, 255, 255, 0.5);
+
   --afa-fill-solid: #FF5A36;
 
   /* GEN-2609-068 - this exact border value (rgba(245,245,240,0.15))
