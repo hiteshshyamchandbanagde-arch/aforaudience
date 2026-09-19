@@ -6911,3 +6911,63 @@ All 3 already had every in-scope literal token-retrofitted by the passes above.
 **Colour, batch-wide:** 16 manual `--afa-*`-token matches found across the 3 files (2 + 3 + 11) - `--afa-text-muted` (0.4-alpha cream, the largest single bucket at 9 sites, all in file 3) and `--afa-border-resting` (0.15-alpha cream border) were the two real recurring matches; `--afa-text-secondary` (0.65-alpha) matched once. One real **role-mismatch trap** found and deliberately NOT matched (file 2's `rgba(245,245,240,0.4)` used as a *border* color, byte-identical to `--afa-text-muted`'s value but the wrong semantic role) - flagged in that file's own entry, not silently applied. `rgba(245,245,240,0.08)` (`STATUS_TONE.muted.bg`, not a `--afa-*` token) recurred heavily across all 3 files, consistent with `081`'s own colour report - still not tokenized, per that ticket's own finding.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-082-1-artist-dashboard`, `-2-artist-profile`, `-3-event-detail`) - chat opens/merges each independently. All 3 touch the same 2 files at their tail (`docs/design.md`, `scripts/design-token-baseline.json`) - same expected 3-way conflict `GEN-2609-079`'s own batch already established a precedent for resolving: keep every branch's own `docs/design.md` section (file order, or actual merge order), and run `node scripts/design-token-ratchet.js --update-baseline` fresh on the fully-merged `qa` once all 3 land rather than hand-merging the JSON.
+
+## GEN-2609-083 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **82** at branch start - `082` was batch 2) - bulk token migration batch 3, file 3 of 3: `organiser/events/create/page.tsx`
+
+Same method as files 1/2 - branched independently from `qa` (post-`082` merge), not stacked. **No canvas/SVG, no Tailwind arbitrary-value classes, no `<style>` block** - checked first. First-pass migration (never touched by `079`).
+
+### `hardcoded-font-family`'s 1 hit - the same rule-gap `GEN-2609-079` already documented, not a new bug
+
+`fontFamily: 'inherit'` (L699, a `<textarea>`) - a legitimate CSS keyword (deliberately inherit the ancestor's font, correct for a `<textarea>` which otherwise defaults to monospace), not hardcoded debt. Confirmed via the checker's own `extract()` before assuming - this is byte-identical to the `GEN-2609-079` organiser-event-edit finding (that rule doesn't special-case global CSS keywords). Left as-is, per that same reasoning: fixing an existing, previously-verified rule deserves its own dispatch, not a drive-by patch bundled into a migration ticket.
+
+### A real bug in THIS session's own manual colour-migration step, caught and fixed before committing - not a script bug this time, a `sed` mistake
+
+3 sites had `border: '1px solid rgba(245,245,240,0.15)'` - an exact match to `--afa-border-resting`. The first `sed` pass correctly matched and intended to swap only the `rgba(...)` portion, but the replacement pattern accidentally captured and dropped the `1px solid ` prefix entirely, producing `border: 'var(--afa-border-resting)'` - **a genuine visual regression**: a bare custom-property reference with no explicit `border-style` renders as if `border-style: none` (the default), so this would have silently removed the border, not just recolored it. **Caught immediately by re-reading the 3 edited lines right after the `sed` command, before moving on to anything else** - not assumed correct because the string "looked like" a successful token swap. Fixed with a corrected `sed` pass that restores `1px solid ` before the token; re-verified via `git diff` against `origin/qa`, isolating every `border:`-containing line in the diff to confirm nothing else was touched. Flagged here as a real lesson, distinct from every prior file's script-level bugs (`082`'s CSS-comment `*/`, `082`'s style-block quoting, `083` file 1's `0px` radius map) - this one was a manual `sed` substitution mistake, the same class of error a careless find-and-replace can produce regardless of tooling, and the fix is the same discipline every prior bug in this migration needed: re-read the actual diff, don't trust that a replacement did what it was supposed to.
+
+### Coverage - matches the dispatch's own predicted numbers exactly, and the batch's highest reduction
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 85 | 2 | **83** | 83 / 85 |
+| font-size | 38 | 0 | **38** | 38 / 38 |
+| radius | 11 | 1 | **10** | 10 / 11 |
+| rgba | 10 | 7 | 3 (manual, see bug note above) | n/a |
+| raw-button | 3 | 3 | 0 (retrofit only) | n/a |
+
+**148 → 14 literals (91% reduction)** - the highest of any file across all 3 migration batches (`079`/`082`/`083`). Font-size hit 100% coverage again (2nd file in this batch alone). `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -38, `spacing-literal` -83, `radius-literal` -10, `rgb-rgba-literal` -3, `raw-button` ±0.
+
+### Colour - 3 manual matches (the fixed ones above), the rest checked and left alone
+
+Beyond the 3 `border-resting` matches: `rgba(245,245,240,0.08)`×5 (`STATUS_TONE.muted.bg`, not a `--afa-*` token, same standing finding), `rgba(245,245,240,0.2)`×1 and `rgba(245,245,240,0.06)`×1 (neither hits an exact token alpha). Zero further migrations.
+
+### Stays a literal
+
+spacing: `3px`×1 (a lone `marginTop`), `26px`×1 (the "Save as Draft" button's own padding second-half, see below). radius: `2px`×1 (a small colored-dot legend swatch, `width`/`height: 9px` alongside it - not touched, out of scope).
+
+### Raw `<button>` - 3 sites, 0 migrated to a `Button` variant
+
+- **Compensation-type toggle (L901) and approval-mode toggle (L928):** both real members of the segmented-toggle family `GEN-2609-076` already found repo-wide and deliberately chose NOT to migrate to `toggle-pill` (a locked design call, re-confirmed not re-litigated here) - same FILL_SOLID_TINT/border-color ternary shape documented in every prior seat-map-family entry.
+- **"Save as Draft" (L970):** transparent/neutral-border outline, `padding: var(--afa-space-3) 26px`, `radius: md` - **the exact same one-off `GEN-2609-079`'s organiser-event-edit entry already documented by name** ("off-scale border alpha and padding, doesn't match outline/outline-neutral") - this is a different file with the same button shape, confirming it's a real repeated pattern, not chased into a new variant here (per this migration's own "no new tokens/variants" scope).
+
+All 3 already had every in-scope literal token-retrofitted.
+
+## Batch 3 summary (`GEN-2609-083`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `seat-map/page.tsx` (2nd pass) | 163 | 86 | 47% | 61/79 | 5/9 (dispatch said 6/9, deliberate geometry exclusion) | 11/14 | 0 |
+| `organiser/events/[id]/page.tsx` | 153 | 32 | 79% | 65/67 | 38/38 | 18/18 | 0 |
+| `organiser/events/create/page.tsx` | 148 | 14 | 91% | 83/85 | 38/38 | 10/11 | 3 |
+| **Batch total** | **464** | **132** | **72%** | **209/231** | **81/85** | **39/43** | **3** |
+
+**Matches the dispatch's own predicted batch totals almost exactly** (209/231 spacing ✓ exact, 39/43 radius ✓ exact, 81/85 font-size vs. dispatch's 82/85 - the 1-off is file 1's deliberate geometry exclusion, explained in that file's own entry, not a measurement error). Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (each branch's own delta above was measured independently against its own `qa` starting point, not stacked, so this is a projection, not yet run): `rgb-rgba-literal` -3 (951→~948), `font-size-literal` -81 (1281→~1200, 1 shy of the dispatch's own -82 projection for the exact reason above), `spacing-literal` -209 (2985→~2776), `radius-literal` -39 (500→~461).
+
+**2 real bugs found and fixed this session, both before committing, neither a repeat of a prior batch's bug:**
+1. File 1's migration script re-introduced a bug `GEN-2609-079` had already fixed once (bare `0` in a mixed-corner `borderRadius` shorthand) - re-derived independently, `RADIUS_MAP`'s `0px` entry removed.
+2. File 3's manual `sed` colour substitution dropped a `1px solid ` prefix, which would have silently removed a border rather than just recoloring it - caught by re-reading the diff immediately after the `sed` command, before moving on.
+
+Both are reminders that this migration's *contract* ("zero visual change") is only as good as what actually gets verified, not what a script or command was *intended* to do - every file in this batch's own diff was read line-by-line before applying, and both bugs were caught that way, not by any of the automated checks (`tsc`/self-tests/`next build` would not have caught either one).
+
+**Repo-wide near-miss counts, re-measured this session (unchanged from `081`'s own baseline count, none of batch 3's files individually cleared 50):** spacing `7px` **23**, spacing `9px` **34**, radius `3px` **46** (still the closest to the bar) - none added as tokens, per the dispatch's own instruction.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-083-1-seat-map`, `-2-organiser-event-detail`, `-3-organiser-event-create`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch, same resolution (keep every section, re-run `--update-baseline` fresh post-merge).
