@@ -6482,6 +6482,150 @@ All 6 raw `<button>` sites already token-retrofitted for color/size/spacing/radi
 
 **rgba (13 left, 3 of which are the flagged bug above, deliberately untouched):** `rgba(245,245,240,0.08)`x5 (3rd file confirming this recurs - seat-map 5, settings 8, this file 5 = **18 combined**, the strongest color-alpha proposal candidate), `rgba(14,12,10,0.15)`x2 (an ink-tint dropdown shadow/border, not seen in files 1-2, single-file so far), `rgba(245,245,240,0.1)`/`0.06`/`0.2` x1 each.
 
+## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 1 of 3: `seat-map/page.tsx`
+
+Dispatch: migrate exact-scale-match literals in the 3 highest-count files from `078`'s own ratchet report to existing tokens/components, one PR per file, no rounding, no new tokens/variants invented. This entry covers file 1.
+
+### Method
+
+Built a reverse lookup (token value -> token name) straight from `globals.css`'s own `--afa-*` definitions (color hex/rgba, the 8 type-scale steps, the 6 spacing-grid steps, the 4 radius steps), then a one-off Node script (not committed, same throwaway-script convention `077`'s own audit used) that rewrites only **exact** matches: a hex/rgba literal byte-identical to a token's real value, or a bare/px length whose numeric value exactly equals a scale step. Off-scale values are never touched, never rounded - the script only ever *removes* an exact literal in favor of `var(...)`, it never *changes* one.
+
+**Two real bugs the dry-run caught before anything was applied (verified against a printed diff first, not trusted blind):**
+- A hex value living inside an *existing* `var(--afa-error, #b3261e)` fallback (`MARKER_META.FIRE_EXTINGUISHER`) got matched by the naive "any hex anywhere in the string" pass and rewritten into `var(--afa-error, var(--afa-error))` - a self-referential, meaningless fallback. Fixed by masking anything already inside a `var(...)` call before scanning for replaceable hex/rgba, so an existing deliberate CSS fallback is never touched.
+- The script's reverse map initially included `--afa-radius-sharp: 0px`, so a bare `0` in a mixed-corner `borderRadius` shorthand (`'var(--afa-radius-md) 0 0 var(--afa-radius-md)'`) got rewritten to `var(--afa-radius-sharp)`. Wrong per the dispatch's own words - "Intentional literals (hairlines, 0, %, ...) are allowlisted already" means `0` should stay a literal, not become a new dependency on an admin-editable token for what's really "no radius on this one corner." Removed `0` from the reverse map entirely rather than filtering it ad hoc per call site.
+
+**Geometry exclusion, precisely bounded, not guessed.** This page has no canvas/SVG at all (checked - `grep getContext|<canvas|<svg` returns nothing); seats/markers render as absolutely-positioned `<div>`s. 3 literal line-ranges are the actual per-seat/per-marker rendering loops (`wizardPreviewSeats.map` L1824-1831, the main canvas `seats.map` L2009-2056, `markers.map` L2062-2095) - excluded from the script entirely, listed below rather than migrated. Everything else (toolbar, sidebar panels, dialogs, the fixed "Stage" overlay badge) is chrome and went through the migration.
+
+### Drawing-geometry literals - listed, not tokenized, per the dispatch's own instruction
+
+| Location | Literal | Why it's geometry, not chrome |
+|---|---|---|
+| Wizard-preview + main-canvas seat markers (2 sites) | `borderRadius: '5px'` | Per-seat visual marker shape, computed alongside dynamic `left`/`top: s.x/s.y` - not a chrome radius, and 5px doesn't match any token anyway (sm=6/md=8) |
+| Same 2 sites | `fontSize: '9px'` | Seat-label text size on the tiny 22px marker itself, sized to the marker not the type scale |
+| Safety-marker circle (1 site) | `width/height: '22px'`, `borderRadius: '50%'` | Fixed marker-glyph circle size/shape |
+| Safety-marker glyph label | `fontSize: '11px'` | Coincidentally equals `--afa-text-micro` (11px) - deliberately left literal anyway: this is the marker glyph's own fixed size, not a type-scale choice, and tying it to an admin-editable token would be a coincidental, not designed, relationship |
+
+### Off-scale decision table (chrome only - geometry already excluded above)
+
+**Font-size** (6 off-scale literals, all single/low-frequency, no proposal-worthy recurrence): `15px`×1 (Advanced-spacing label edge case), `18px`×2, `17px`×1, `10px`×1 (Stage overlay badge), `20px`×1 (terminology-panel close ×). Left literal.
+
+**Radius** (14 off-scale): `12px`×6, `10px`×5, `3px`×1. `12px`/`10px` both recur 5+ times *within this file alone* - carried into the batch-wide proposal list below (§ at the end of file 3's entry).
+
+**Spacing** (79 off-scale, by numeric value - `6`/`6px` merged as the same value in different literal forms): `10px`×24, `6`×16 (14 as `'6px'` + 2 as bare `6`), `14px`×12, `7px`×9, `18px`×4, `9px`×4, `32px`×2, `22px`×2, `2px`×2, `28px`×1. Also 2 negative values (`-20px`×2, `-6px`×1) - a different semantic (bleed-margin pull on `.afa-glow-orange` panels, not a spacing gap) and correctly never matched by the script (no negative token exists, nor should one). `10px`/`6`/`14px`/`7px` all clear the 5+ threshold *within this one file* - carried into the batch-wide proposal list.
+
+### Colour: one real centralization beyond plain `--afa-*` token substitution
+
+7 sites hardcoded the `rgba(255,90,54,X)` triple (the `--afa-fill-solid` RGB values at a one-off alpha) instead of using `fillSolidTint(alpha)` - an existing, already-exported helper in `src/lib/statusStyle.ts` built for exactly this ("a handful of sites needed a one-off alpha... a function call instead of another named constant per alpha value"). Not a `--afa-*` token match (the dispatch's literal rule is "Colours -> locked `--afa-*` tokens"), but squarely an "existing central... component" per this ticket's own framing - migrated all 7 (`SECTION_TIER_FILLS`'s 2 static entries + 1 dynamic `${opacity}` call in `tierFill()`, plus 4 `border`/`background` sites requiring a plain-string-to-template-literal conversion to embed the function call). Zero visual change - `fillSolidTint(0.48)` returns the byte-identical `'rgba(255,90,54,0.48)'` string the literal was. `rgba(245,245,240,${opacity})` (the cream-family analog, 1 dynamic site) has no equivalent parameterized helper and wasn't invented here - left as-is, flagged as a possible future `statusStyle.ts` addition, not built without being asked.
+
+### Raw `<button>` - 23 sites, 0 migrated to a `Button` variant, all already token-retrofitted
+
+Reviewed every one individually against `Button.tsx`'s 9 real variants (`solid`/`outline-error`/`toggle-pill`/`primary`/`secondary`/`secondary-reveal`/`outline`/`outline-neutral`/`form-submit`/`close`) - none is a close enough shape match to migrate without inventing a new variant, which is explicitly out of this ticket's scope (same "no new tokens, no rounding" discipline extended to variants: a migration-only ticket doesn't get to unilaterally invent new shared-component shapes either).
+
+- **2 sites are shared local components already** (`RemoveGuidedRowButton`, `AddDashedRowButton`, each reused 3-4x elsewhere in the file) - no dashed-border or bare-× variant exists in `Button.tsx`, so these stay their own local abstraction, now token-retrofit.
+- **9 sites are the already-documented segmented-toggle family** (`GEN-2609-076`'s own words: "the seat-map's own dominant 9-declaration segmented-toggle family... a different geometry than `toggle-pill`") - `076` explicitly chose not to migrate these to `toggle-pill` (real, locked design call, not an oversight this ticket should second-guess). Confirmed the count still holds at 9 (seating-mode toggle x2, level-tab x1, guided-setup-open x1, manual-placement x1, wizard-shape x2, multi-zone x2 - the row-alignment 3-way toggle and safety-marker-type buttons use per-item dynamic colors, a related but distinct pattern, counted separately below).
+- **12 remaining one-offs**: the freeze/unfreeze CTA (2-state color-and-copy swap, doesn't fit any single-role variant), the joined level-tab "remove ×" (compound half-radius shape attached to its sibling button), "Add level" x2 (same dashed shape as `AddDashedRowButton` but needs a `disabled` prop that component doesn't expose - a real, documented reason it wasn't extracted, not a duplication bug), the 2 "choice card" buttons (icon+title+description content blocks, not simple CTAs), the "Back to setup options" text link (underlined, doesn't match `secondary`'s fixed no-underline/opacity-0.4 shape), the "?" help-circle button (32px transparent-bordered circle, doesn't match `close`'s 36px filled-circle shape), the row-alignment 3-way toggle, the 3 safety-marker-type buttons (dynamic per-marker-type color, not `--afa-fill-solid`), and the terminology-panel's own close `×` (20px, no circle).
+
+Every one of these already had its color/font-size/spacing/radius literals token-retrofitted by the mechanical pass above - satisfies "these follow an admin token/radius change" even though the elements themselves stay raw `<button>`, same precedent `GEN-2609-076` already established for its own un-migrated seat-map sites.
+
+## GEN-2609-080 (provisional - chat confirms/assigns the real number against `CodeCounter`; read **79** live, not the dispatch's stated 78 - chat evidently advanced the counter to log `GEN-2609-079` between writing this dispatch and this session starting, which also confirms `079` as `079` batch-1's real number) - fix `raw-button`: count-based over the whole diff, not per-line
+
+### The bug, and why `078` shipped it
+
+`078`'s `raw-button` rule flagged every diff line where an ADDED line contained `<button`, full stop - it never asked whether the actual number of raw buttons had gone up. A token-retrofit edit to an *existing* raw button (`padding: '8px'` -> `padding: 'var(--afa-space-2)'` on a line that also happens to contain `<button`) is exactly 1 removed line + 1 added line in a unified diff - the count of raw buttons on that line is unchanged, but the old rule only ever looked at the added side, so it flagged it as if it were new.
+
+This is precisely the class of bug `078`'s own design.md entry documents itself having solved for the *other* categories via `GEN-2609-057`'s relocated-literal exemption (a value that already exists in the base tree is treated as moved, not new) - `raw-button` was deliberately given `skipRelocatedCheck: true` instead, reasoning that the string `"<button>"` is a fixed constant, not a value that meaningfully "relocates" the way a color does. That reasoning is still correct for what it was solving (the exemption really would have silently defeated the rule for every genuinely new button, since `"<button>"` trivially already exists 200+ times). But it left the real problem - "how do I tell a retrofit from new debt" - completely unaddressed, because relocated-literal matching was never the right tool for it in the first place. `raw-button` needed its own, different mechanism from day one; `078` shipped without one.
+
+### Reproduced independently before touching any code
+
+Chat's dispatch named PR #660 (seat-map) failing at 6 lines and PR #662 (organiser-event-edit) at 1. Re-ran the *unmodified* `078` checker against both PRs' real diffs before writing any fix, not trusted on the dispatch's word:
+
+- **PR #662: 1 offense, exactly as stated** (`organiser/events/[id]/edit/page.tsx:139`).
+- **PR #660: 11 offenses, not 6** (`495`, `505`, `1507`, `1542`, `1601`, `1684`, `1687`, `1708`, `1711`, `1749`, `1771`). The dispatch's own 6-line list is a real subset of this (all 6 of its named lines are among the 11), so the root-cause diagnosis is unaffected - but the count itself was checked directly rather than copied, and it's higher than stated. Every one of the 11 is confirmed a retrofit-only edit to an already-existing raw button from `GEN-2609-079`'s own migration work, none a genuinely new button.
+
+### Fix
+
+`raw-button` is now the one rule in `RULES` excluded from `findOffenses()`'s generic per-line loop (`PER_LINE_RULES = RULES.filter(r => r.name !== 'raw-button')`). Instead, while walking the same diff, it separately accumulates:
+
+- `rawButtonAdded`: every added line matching `<button` (excluding `Button.tsx` and `// token-ok:`-annotated lines), pushed in diff order as `{file, line, content}`.
+- `rawButtonRemoved`: a plain count of every removed line matching `<button` (same 2 exclusions).
+
+After the walk: `surplus = rawButtonAdded.length - rawButtonRemoved`. If `surplus <= 0`, nothing is flagged - the count didn't go up, regardless of how many individual lines changed. If `surplus > 0`, the **last** `surplus` entries of `rawButtonAdded` (in diff order) are reported as offenses.
+
+**Why "last N," not "first N" or "all of them":** with count alone, there's no way to know *which specific* added line is the genuinely new one versus a retrofit - a 2-added-1-removed diff (surplus 1) could be "1 new button + 1 retrofit" in either order, and the diff itself doesn't disambiguate. Reporting the last N is a deterministic, reproducible choice (not random, not the old "flag everything" behavior), not a claim that the *specific* reported line is provably the new one - a human reviewing the CI failure still needs to look at the actual diff to confirm which button is new, same as before, just now gated on a real count instead of firing on every retrofit.
+
+**Why counting is diff-wide, not per-file - deliberate, not an oversight.** A raw button genuinely moved between files (an extract-component refactor: -1 in the source file, +1 in the destination) nets to 0 across the whole diff and correctly passes. Counted per-file instead, the destination file's own +1 would wrongly flag as new debt even though the repo-wide total didn't change. This mirrors exactly how the whole-repo ratchet (`design-token-ratchet.js`) already thinks about the total - it's the real backstop on the aggregate count regardless of how literals shuffle between files, and this diff-level fix is now consistent with that philosophy instead of fighting it.
+
+**`token-ok` and `Button.tsx` behavior, unchanged in effect, re-verified explicitly.** A token-ok-annotated new raw button is excluded from the added count entirely (never enters `rawButtonAdded`) and is still reported in `tokenOkUses`, exactly as before. `Button.tsx` itself stays exempt on both the added and removed sides via the existing `rawButtonRule.isExemptFile` check, applied once per `+++` file header (`rawButtonFileExempt`) rather than per-rule-per-line as the other rules still do - functionally identical outcome, just computed once per file instead of redundantly per matching line.
+
+**Every other rule is untouched.** `hex-color-literal`/`rgb-rgba-literal`/`hardcoded-font-family`/`font-size-literal`/`spacing-literal`/`radius-literal` all still go through the original per-line `shouldFlag()` + `GEN-2609-057` relocated-literal path, exactly as `078` shipped them - per the dispatch's own explicit instruction not to switch them to this scheme. They don't have `raw-button`'s problem: a genuinely relocated color/size literal already has a real mechanism (does the exact value exist elsewhere in the base tree), which correctly treats a retrofit's *replacement* value (a fresh `var(--afa-*)` reference) as neither "new debt" nor "relocated" in the first place - `var()` calls were never literals these rules would flag to begin with, so retrofitting a color/size doesn't produce the false-positive `raw-button` was producing.
+
+### Fixture self-tests (6 new, all in `scripts/check-design-tokens.test.js`)
+
+1. Retrofit-only diff (1 removed, 1 added, same button) - passes.
+2. One genuinely new raw button (0 removed, 1 added) - fails, exactly 1 offense.
+3. 2 added + 1 removed (surplus 1) - fails, exactly 1 offense, and it's confirmed to be the *last* added entry (asserted on content, not just count).
+4. A button moved between 2 files (-1 source, +1 destination) - passes, diff-wide net 0.
+5. A token-ok-annotated new button - passes (0 offenses), and still shows up in `tokenOkUses` with its reason.
+6. `Button.tsx` itself - an added `<button>` there never counts, even with zero removed lines to offset it.
+
+All 6 existing `raw-button` fixtures (positive/negative, the `isExemptFile` check, the `shouldFlag()` contrast test against `spacing-literal`) still pass unmodified - `rule.test()`/`rule.extract()` on a single line are unaffected by this change; only `findOffenses()`'s diff-wide aggregation changed. **40/40 fixtures passing** (34 from `078` + 6 new).
+
+### Replay against the 2 real failing PRs - the actual proof, not just fixtures
+
+Per the dispatch's own instruction: scratch-merged this fix branch into a throwaway local copy of each PR branch (never touching or rebasing the real `feat/gen-2609-079-batch1-*` branches themselves - deleted immediately after each check), then ran the exact CI command.
+
+**Before the fix** (unmodified `078` checker, `BASE_REF=origin/qa HEAD_REF=origin/feat/gen-2609-079-batch1-seatmap`):
+```
+design-token check: found 11 new hardcoded design-token literal(s):
+  [11 lines, listed above]
+EXIT=1
+```
+
+**After the fix** (this branch merged in, same PR content, same command):
+```
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+```
+
+**Before the fix** (`organiser-event-edit`):
+```
+design-token check: found 1 new hardcoded design-token literal(s):
+  src/app/dashboard/organiser/events/[id]/edit/page.tsx:139  [raw-button]
+EXIT=1
+```
+
+**After the fix**:
+```
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+```
+
+**Also re-checked `admin/settings` (PR #661, already merged by the time this session ran) for a regression** - passes both before and after, as expected (it has zero raw-`<button>` lines in its diff at all, so it was never affected by the bug and isn't affected by the fix either).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (this branch's own changes live entirely in `scripts/`, no `src/` literal changes). `node scripts/design-token-ratchet.js`: unaffected, all 7 categories exactly at baseline (`raw-button`'s live/static single-line `test()`/`extract()` behavior is unchanged - only the diff-based aggregation in `findOffenses()` changed, and the ratchet doesn't call `findOffenses()` at all). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 2 of 3: `admin/settings/page.tsx`
+
+Same dispatch, same method as file 1 (`seat-map/page.tsx`, its own entry above/elsewhere in this doc depending on merge order - branched independently from `qa`, not stacked on file 1's branch, per the dispatch's "each PR stands alone"). Exact-match-only reverse-lookup script, dry-run reviewed in full before applying, no rounding, no new tokens/variants.
+
+**No geometry exclusion needed.** Checked first, not assumed: `grep getContext|<canvas|<svg` on this file returns nothing - it's a plain settings form (currency rates, vote weights, booking-fee/chat-cap/scene-status/direct-payouts toggles), no canvas/SVG drawing surface anywhere. Every literal in this file is real chrome.
+
+**Zero raw `<button>`, zero hex, zero hardcoded font-family in this file already** - confirmed live via the rule engine before starting, not assumed from the ratchet's aggregate report (which only gives whole-repo totals, not a per-file rule breakdown). This file's 208 literals were 100% rgba/font-size/spacing/radius.
+
+**83 lines changed, reviewed in full before applying** (not spot-checked) - every single diff hunk is an unambiguous exact-value swap (e.g. `padding: 24` -> `padding: 'var(--afa-space-6)'`, `borderRadius: 6` -> `borderRadius: 'var(--afa-radius-sm)'`, `border: '1px solid rgba(245,245,240,0.15)'` -> `border: '1px solid var(--afa-border-resting)'`). No template-literal conversions or helper-function calls needed this file (unlike `seat-map`'s `fillSolidTint` work) - every color/size/spacing/radius literal here was either a plain quoted CSS value or a bare React inline-style number, both handled by the same script path.
+
+### Off-scale decision table
+
+**rgba (9 left, 22 -> 9):** `rgba(245,245,240,0.08)` x8, `rgba(245,245,240,0.06)` x1 - neither matches a named `--afa-*` token (border-resting=0.15, muted=0.4, secondary=0.65). `0.08` recurs 8x in this file alone - carried into the batch-wide proposal list (also seen in `seat-map`, so this is a real cross-file recurring value, not a one-file coincidence).
+
+**font-size (21 left, 58 -> 21):** `20`x8 (all `h2` section headers - same literal, same role, every section of this settings page), `15`x12 (all form-input `fontSize: 15` - another same-role recurring literal), `18`x1. `20` and `15` both clear the 5+ threshold heavily - carried into the batch-wide proposal list.
+
+**spacing (44 left, 107 -> 44):** `6` (bare, unitless) x21 - overwhelmingly `marginBottom: 6` under every section `<h2>`, spot-checked 5 occurrences directly, all identical role. `10px`x13 (recurs both here and in `seat-map` - the strongest cross-file candidate). `10`(bare)x2, `14`x2, `28`x1, `32`x1, `48px`x1, `32px`x1, `64px`x1, `14px`x1. `6` and `10px` both carried into the batch-wide proposal list (`6` especially - 21 sites in one file, all the same semantic role, is about as clean a "should be a token" case as this migration will find).
+
+**radius (8 left, 21 -> 8):** `12` (bare) x8 - every "highlighted/active" panel's own corner radius, consistently 12 across all 8 sites. Recurs in `seat-map` too (12px x6 there). Strong cross-file proposal candidate.
+
 ### Per-category ratchet, before -> after (whole repo, this file's migration only)
 
 | Category | Before | After | Delta |
@@ -6516,3 +6660,31 @@ Per the dispatch's own rule ("if the same off-scale value appears at 5+ sites ac
 | Font-size `20px`/`15px` | 20/13 (settings only, both heavy: 8 and 12) | font-size | 1 file, but very high per-file density (every `h2` / every form-input respectively) |
 
 **Not turned into tokens** - this is Hitesh's product decision per the dispatch's own instruction, not something to unilaterally add to `globals.css`/the admin-controlled token set. If approved, the natural next step is a `--afa-space-*`/`--afa-radius-*` addition (an off-by-one step between two existing scale steps, e.g. a `10px` between `space-2`=8 and `space-3`=12) plus a corresponding `DesignToken` DB row and reference-doc update, same shape as `GEN-2609-075`'s own radius/button-padding additions.
+
+| `hex-color-literal` | 87 | 83 | -4 |
+| `rgb-rgba-literal` | 997 | 983 | -14 |
+| `hardcoded-font-family` | 10 | 10 | ±0 |
+| `font-size-literal` | 1530 | 1429 | -101 |
+| `spacing-literal` | 3450 | 3365 | -85 |
+| `radius-literal` | 570 | 561 | -9 |
+| `raw-button` | 211 | 211 | ±0 |
+
+This file alone: 376 -> 163 literals (57% reduction) - 1 hex (the deliberate `var()` fallback, correctly untouched), 37 rgba (30 genuinely off-scale + 7 already centralized via `fillSolidTint` before this count, so those don't show here at all), 0 font-family, 9 font-size (all off-scale, documented above), 79 spacing (all off-scale, documented above), 14 radius (all off-scale, documented above), 23 raw-button (all reviewed, 0 migrated, reasons documented above). Committed baseline updated via `--update-baseline` (refused-to-raise guard confirmed still intact from `078` - no category needed forcing).
+
+**Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing (unchanged - no rule logic touched). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (migration only removes literals, never adds one). `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**Not verified this session:** a real QA-preview visual diff (before/after screenshots of the same screen) - this branch hasn't been merged/deployed yet, so there's no preview URL to screenshot against. Flagged for whoever reviews/merges the PR: confirm the seat-map builder renders identically pre/post on a real preview before merging, since "exact match, zero visual change" is this migration's entire safety argument and deserves an independent visual check, not just the mechanical guarantee.
+
+| `hex-color-literal` | 87 | 87 | ±0 (file had none) |
+| `rgb-rgba-literal` | 997 | 984 | -13 |
+| `hardcoded-font-family` | 10 | 10 | ±0 |
+| `font-size-literal` | 1530 | 1493 | -37 |
+| `spacing-literal` | 3450 | 3387 | -63 |
+| `radius-literal` | 570 | 557 | -13 |
+| `raw-button` | 211 | 211 | ±0 (file had none) |
+
+This file alone: 208 -> 82 literals (61% reduction).
+
+**Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**Not verified this session:** a real QA-preview click-through. Flagged explicitly per the dispatch's own instruction: **no test credential exists for Admin** (Hitesh's own Google OAuth account, no scriptable QA admin login documented anywhere in this repo, confirmed by every prior ticket that touched an Admin page - e.g. `GEN-2609-035`'s verify section). This PR needs Hitesh's own live click-through on the settings page before merging, not a delegated/scripted check - flagged in the handoff as a hard requirement, not a nice-to-have.
