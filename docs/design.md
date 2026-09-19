@@ -7053,3 +7053,49 @@ Both are reminders that this migration's *contract* ("zero visual change") is on
 **Repo-wide near-miss counts, re-measured this session (unchanged from `081`'s own baseline count, none of batch 3's files individually cleared 50):** spacing `7px` **23**, spacing `9px` **34**, radius `3px` **46** (still the closest to the bar) - none added as tokens, per the dispatch's own instruction.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-083-1-seat-map`, `-2-organiser-event-detail`, `-3-organiser-event-create`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch, same resolution (keep every section, re-run `--update-baseline` fresh post-merge).
+
+## GEN-2609-084 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **83** at branch start - `083` was batch 3) - bulk token migration batch 4, file 1 of 3: `admin/feedback/page.tsx`
+
+Same method as batch 3, per the dispatch's own instruction. Branched independently from `qa` (post-`083` merge), not stacked. **No canvas/SVG, no Tailwind arbitrary-value classes, no `<style>` block.**
+
+### A new automated safety net, built and validated before touching any file this batch
+
+Per the dispatch's own explicit new requirement, built `verify-equivalence.js` (scratch, not committed): for every REPLACED line pair in the real `git diff` (paired within each hunk, not naive line-index alignment - a pure-insertion comment block, like `083` file 1's geometry-exclusion comment, would otherwise cascade-misalign every later line), resolves every `var(--afa-*)`/`var(--font-*)` reference to its live value straight from `globals.css`, strips quote characters and whitespace entirely, normalizes bare numbers to their `Npx` form, and requires the two resolved strings to be identical.
+
+**Validated against 3 known cases before trusting it on real work:** (1) re-ran it against `083`'s own already-merged `organiser/events/create/page.tsx` migration - 71 paired lines, 0 mismatches, confirms it doesn't false-positive on a real clean migration; (2) re-ran it against `083`'s seat-map migration (which has a genuine 5-line comment insertion for the geometry exclusion) - correctly skipped the insertion and reported 0 mismatches, not a cascade of false positives; (3) **deliberately re-injected `083`'s own already-fixed `sed` bug** (dropping `1px solid ` from a border value) into a scratch copy of the file and confirmed the script catches it as a real mismatch, then restored the file and re-confirmed clean. Two real bugs were found and fixed in the checker script itself during this validation (a CRLF line-ending mismatch that inflated the "changed" count to nearly the whole file, and a comma-spacing difference between `globals.css`'s own spaced `rgba(245, 245, 240, 0.15)` formatting and a hand-written unspaced literal, which the initial whitespace-collapse normalization didn't fully absorb) - fixed by stripping all whitespace rather than collapsing it, and normalizing quote characters by removing them entirely rather than unifying them.
+
+Ran on this file (and will run on every file this batch) as the last step before staging: **0 mismatches**, confirmed via a real run against `origin/qa`, not just the dry-run diff review this migration's earlier tickets relied on alone.
+
+### Coverage - matches the dispatch's own predicted numbers exactly
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 70 | 7 | **63** | 63 / 70 |
+| font-size | 38 | 0 | **38** | 38 / 38 |
+| radius | 7 | 0 | **7** | 7 / 7 |
+| rgba | 14 | 13 | 1 (manual) | n/a |
+| raw-button | 7 | 7 | 0 (retrofit only) | n/a |
+
+Font-size and radius both hit **100%** coverage. **136 → 27 literals (80% reduction).** `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -38, `spacing-literal` -63, `radius-literal` -7, `rgb-rgba-literal` -1, `raw-button` ±0.
+
+### Colour - 1 manual match, 3 hex "matches" that turned out to be PR-reference comments, not real hex
+
+A naive `#[0-9a-fA-F]{3,8}` sweep of the file found 3 hits (`#224`, `#322` ×2) - all inside `// ... (PR #224)`-style comments, the exact false-positive class `GEN-2609-052`/`053` already found and fixed for in the real checker (requiring the match sit inside a quoted string). Confirmed via the checker's own `extract()`, not the naive grep: **0 real hex literals**, matching the dispatch's own table. `rgba(245,245,240,0.15)` (L510, `inputStyle`'s own `border:`) is byte-identical to `--afa-border-resting` and the same role - migrated. Everything else (`rgba(245,245,240,0.08)`×5 = `STATUS_TONE.muted.bg`, `rgba(201,151,58,0.15)`×3 = `STATUS_TONE.gold.bg`, `rgba(245,245,240,0.13)`×2, `rgba(22,101,52,0.15)`×1, `rgba(179,38,30,0.4)`/`0.15)`×1 each) doesn't hit an exact `--afa-*` token - left alone.
+
+### Stays a literal
+
+spacing: `7px`×3, `5px`×3, `80px`×1 (a lone empty-state top padding, single site). Nothing left in font-size or radius.
+
+### Raw `<button>` - 7 sites, 0 migrated to a `Button` variant
+
+- **Approve (L125, green-deep fill) / Reject (L133, error outline at `0.4` alpha, not `--afa-error-border`'s token value):** neither matches an existing variant's exact colour/padding pairing.
+- **4 disclosure toggles (L602/657/687/724, "▾ Section" collapse/expand chevrons):** transparent, no border, `padding: 0` - a plain text-button shape no `Button.tsx` variant covers.
+- **"Clear status focus" chip (L761):** `background: var(--afa-surface-raised)`, `border: 1px solid rgba(245,245,240,0.13)` (not `border-resting`'s `0.15`), pill radius - close in shape to nothing exact.
+
+All 7 already had every in-scope literal token-retrofitted.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. **`verify-equivalence.js` against `origin/qa`: 75 paired lines, 0 mismatches** (the new per-dispatch safety net, see above). `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1200→1162, `spacing-literal` 2776→2713, `radius-literal` 461→454, `rgb-rgba-literal` 948→947, `raw-button` ±0. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview click-through. Flagged explicitly per this migration's own standing limitation - **no scriptable Admin QA credential exists anywhere in this repo** (Hitesh's real Google OAuth account is the only way in, confirmed by every prior Admin-page ticket). Specific elements worth a targeted look once Hitesh can click through: the 4 pending-request panels (organisers/venue-owners/genre-requests/event-notes) for spacing rhythm, the approve/reject button pair's colour, and the trends-toggle disclosure chevron's alignment.
