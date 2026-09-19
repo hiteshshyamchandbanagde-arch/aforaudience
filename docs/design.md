@@ -6452,6 +6452,36 @@ Added 2 steps to the existing `pull_request` workflow: the self-test suite, and 
 
 Bulk migration, largest-literal-count files first (the ratchet's own top-10 report above), not page-by-page - `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), and `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets.
 
+## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 3 of 3: `organiser/events/[id]/edit/page.tsx`
+
+Same dispatch, same method, branched independently from `qa` (not stacked on files 1/2). No canvas/SVG (checked first) - a plain event-edit form, all literals are chrome.
+
+### A real accessibility bug found, deliberately NOT fixed here
+
+3 `rgba()` literals (`specialNotesStatus` badge, L806-809) are **byte-identical** to `STATUS_TONE.sage.bg`/`.error.bg`/`.gold.bg` (`src/lib/statusStyle.ts`) - a real, page-specific status (`APPROVED`/`REJECTED`/pending special-notes review) that duplicates the shared tone table's `bg` values instead of importing them, exactly the kind of case `GEN-2609-051`'s own scoping rule anticipates ("each page owns its own status->tone mapping... what's shared is the tone"). But the duplicate is only half-faithful: this page's `color` uses the **base** hue tokens (`var(--afa-sage)`, `var(--afa-error)`) instead of the `-bright` variants (`var(--afa-sage-bright)`, `var(--afa-error-bright)`) `STATUS_TONE` itself was updated to use in `GEN-2609-068` specifically because the base hues fail WCAG AA against these translucent backgrounds. This page predates or never got that fix - its badge has had a real, live contrast problem since `068` shipped, silently, because it was never actually importing `STATUS_TONE` in the first place.
+
+**Not fixed in this ticket.** Importing `STATUS_TONE` here and spreading `...STATUS_TONE.sage` etc. would swap the `color` value too - a genuine, visible text-color change, which breaks this migration's own "exact match, zero visual change" contract. Flagged here and in the handoff as a real bug needing its own ticket (likely `BUG-2609-XXX`, contrast fix scoped to this one page) - the 3 `rgba()` literals themselves are left completely untouched (not in the reverse-lookup map at all, since `STATUS_TONE` isn't a `--afa-*` CSS token and matching only half a value pair would be worse than matching neither).
+
+### Other off-scale / left-alone findings
+
+- **`fontFamily: 'inherit'`** (L833, a `<textarea>`) - flagged by the existing `hardcoded-font-family` rule, but this is a legitimate CSS keyword (deliberately inherit the ancestor's font, the correct choice for a `<textarea>` which otherwise defaults to monospace), not a hardcoded font name. A second, different pre-existing gap in the original `GEN-2609-052` rule (alongside `078`'s own raw-CSS-text finding) - the rule doesn't special-case global CSS keywords (`inherit`/`initial`/`unset`/`revert`). Nothing to migrate this *to* - `inherit` is already the right answer. Left as-is, rule gap noted, not touched (same reasoning as `078`'s `email.ts` finding - fixing an existing, previously-verified rule deserves its own dispatch).
+- **2 more segmented-toggle-family instances** (L1130 compensation-type selector, matching the exact `FILL_SOLID_TINT`/border/color ternary shape already documented in `seat-map`'s own entry above) - confirms this pattern is genuinely repo-wide, not seat-map-specific. Left raw, consistent with `076`'s standing decision not to force this shape into `toggle-pill`.
+- **1 near-miss for `outline-neutral`** (L1020, "Use platform default") - same general shape (transparent bg, border-resting outline) but differs on radius (`md` vs `outline-neutral`'s `sm`), padding, font-size, and color token - not an exact match, left raw per "no rounding" extended to variant-matching too.
+- **2 dropdown-row buttons** (celebrity/panelist search results, L896/L953) - full-width list-row buttons, not CTA-shaped, no `Button.tsx` variant covers this shape.
+- **2 more one-offs**: a bare "✕" remove icon (L139, transparent/no-bg - doesn't match `close`'s filled-circle shape) and "Save as Draft" (L1203, off-scale border alpha and padding, doesn't match `outline`/`outline-neutral`).
+
+All 6 raw `<button>` sites already token-retrofitted for color/size/spacing/radius regardless of staying raw - 0 migrated to a `Button` variant, same discipline as file 1.
+
+### Off-scale decision table (recurring values, batch-wide candidates confirmed a 3rd time here)
+
+**spacing (58 left):** `10px`x17, `18px`x14, `6px`x8, `14px`x6, `28px`x4, `32px`x3, `3px`x3, `48px`x1, `26px`x1, `2px`x1. `10px` recurs in all 3 files now (seat-map 24, settings 13, this file 17 = **54 combined**) - the single strongest cross-file proposal candidate in the whole batch. `18px` is new/heavy here (14x) - worth tracking even though it didn't recur as strongly in files 1-2.
+
+**radius (6 left):** `12px`x4, `10px`x1, `2px`x1. `12px` now confirmed in all 3 files (seat-map 6, settings 8, this file 4 = **18 combined**).
+
+**font-size (8 left):** `20px`x4, `15px`x1, `10px`x2, `18px`x1 - low-frequency here, folds into the same cross-file buckets files 1-2 already established.
+
+**rgba (13 left, 3 of which are the flagged bug above, deliberately untouched):** `rgba(245,245,240,0.08)`x5 (3rd file confirming this recurs - seat-map 5, settings 8, this file 5 = **18 combined**, the strongest color-alpha proposal candidate), `rgba(14,12,10,0.15)`x2 (an ink-tint dropdown shadow/border, not seen in files 1-2, single-file so far), `rgba(245,245,240,0.1)`/`0.06`/`0.2` x1 each.
+
 ## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 1 of 3: `seat-map/page.tsx`
 
 Dispatch: migrate exact-scale-match literals in the 3 highest-count files from `078`'s own ratchet report to existing tokens/components, one PR per file, no rounding, no new tokens/variants invented. This entry covers file 1.
@@ -6600,6 +6630,37 @@ Same dispatch, same method as file 1 (`seat-map/page.tsx`, its own entry above/e
 
 | Category | Before | After | Delta |
 |---|---|---|---|
+| `hex-color-literal` | 87 | 87 | ±0 (file had none) |
+| `rgb-rgba-literal` | 997 | 994 | -3 (kept the 3 `STATUS_TONE`-matching values deliberately untouched - see the bug finding above) |
+| `hardcoded-font-family` | 10 | 10 | ±0 (the 1 hit is `inherit`, correctly left alone) |
+| `font-size-literal` | 1530 | 1489 | -41 |
+| `spacing-literal` | 3450 | 3392 | -58 |
+| `radius-literal` | 570 | 557 | -13 |
+| `raw-button` | 211 | 211 | ±0 (0 of 6 migrated - see above) |
+
+This file alone: 207 -> 92 literals (56% reduction).
+
+**Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**Not verified this session:** a real QA-preview visual diff - branch not yet merged/deployed. Flagged for the reviewer, same as files 1-2.
+
+## Batch-wide recurring-value proposals (all 3 files, `GEN-2609-079`) - for Hitesh, not built
+
+Per the dispatch's own rule ("if the same off-scale value appears at 5+ sites across the batch, do NOT add a scale token yourself... list it as a proposal"). Combined counts across all 3 files' migrations:
+
+| Value | Combined count | Category | Where it recurs |
+|---|---|---|---|
+| Spacing `10px` | 54 (seat-map 24, settings 13, organiser-edit 17) | spacing | All 3 files - strongest candidate in the batch |
+| Colour `rgba(245,245,240,0.08)` | 18 (seat-map 5, settings 8, organiser-edit 5) | rgba | All 3 files - strongest colour candidate |
+| Spacing `6`/`6px` (bare and px forms merged) | 37 (seat-map 16, settings 21) | spacing | 2 of 3 files, settings alone has 21 identical-role sites (`marginBottom: 6` under every section heading) |
+| Radius `12px` | 18 (seat-map 6, settings 8, organiser-edit 4) | radius | All 3 files |
+| Spacing `14px` | 20 (seat-map 12, organiser-edit 6, + 2 settings) | spacing | 3 files, lighter |
+| Spacing `7px` | 9 (seat-map only) | spacing | 1 file so far, tracked in case a future batch confirms it elsewhere |
+| Spacing `18px` | 18 (seat-map 4, organiser-edit 14) | spacing | 2 files |
+| Font-size `20px`/`15px` | 20/13 (settings only, both heavy: 8 and 12) | font-size | 1 file, but very high per-file density (every `h2` / every form-input respectively) |
+
+**Not turned into tokens** - this is Hitesh's product decision per the dispatch's own instruction, not something to unilaterally add to `globals.css`/the admin-controlled token set. If approved, the natural next step is a `--afa-space-*`/`--afa-radius-*` addition (an off-by-one step between two existing scale steps, e.g. a `10px` between `space-2`=8 and `space-3`=12) plus a corresponding `DesignToken` DB row and reference-doc update, same shape as `GEN-2609-075`'s own radius/button-padding additions.
+
 | `hex-color-literal` | 87 | 83 | -4 |
 | `rgb-rgba-literal` | 997 | 983 | -14 |
 | `hardcoded-font-family` | 10 | 10 | ±0 |

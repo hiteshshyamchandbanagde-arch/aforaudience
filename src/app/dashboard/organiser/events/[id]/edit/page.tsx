@@ -84,17 +84,17 @@ interface EventDetail {
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 12px',
-  borderRadius: '6px',
-  border: '1px solid rgba(245,245,240,0.15)',
+  padding: '10px var(--afa-space-3)',
+  borderRadius: 'var(--afa-radius-sm)',
+  border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   color: 'var(--afa-text-primary)',
 }
 
 const labelStyle = {
   display: 'block',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
   marginBottom: '6px',
   color: 'var(--afa-text-primary)',
@@ -136,7 +136,7 @@ function nowLocalTimeString() {
 // visible change from `secondary` (0.4 opacity, 13px).
 function RemoveRowButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: '16px' }} aria-label="Remove">✕</button>
+    <button type="button" onClick={onClick} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: 'var(--afa-text-title)' }} aria-label="Remove">✕</button>
   )
 }
 
@@ -656,10 +656,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     <>
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px var(--afa-space-6)' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '16px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-2)' }}>
             Edit Event
           </h1>
           <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
@@ -667,11 +667,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
                 AforAudience is for live performances - music, comedy, theatre, spoken word, and similar. Movie screenings and film events aren&apos;t supported on the platform.
               </p>
 
@@ -742,20 +742,20 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '18px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: '18px', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={surpriseAct} onChange={(e) => setSurpriseAct(e.target.checked)} />
                 This event includes a surprise act
               </label>
 
               {/* FEAT-2608-045 */}
-              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
                 <label style={labelStyle}>Event terms</label>
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '10px' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
                   booking platform-wide — <Link href={REFUND_POLICY_LINK} target="_blank" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>view it here</Link>.
                 </p>
 
-                <div style={{ marginBottom: '16px', maxWidth: '260px' }}>
+                <div style={{ marginBottom: 'var(--afa-space-4)', maxWidth: '260px' }}>
                   <label style={labelStyle}>Age limit</label>
                   <PresetSelectWithOther
                     value={ageLimit}
@@ -766,9 +766,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-2) var(--afa-space-4)' }}>
                   {EVENT_TERMS_CHECKLIST.map((term) => (
-                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+                    <label key={term.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                       <input
                         type="checkbox"
                         checked={termsChecklist.includes(term.key)}
@@ -786,7 +786,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 <div style={{ marginTop: '18px' }}>
                   <label style={labelStyle}>Special notes (optional)</label>
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '6px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '6px' }}>
                     Anything specific to this event that isn't covered above. Reviewed by AFA before it's shown
                     publicly.
                   </p>
@@ -797,11 +797,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
-                        fontSize: '12px',
+                        fontSize: 'var(--afa-text-small)',
                         fontWeight: 700,
-                        padding: '4px 10px',
-                        borderRadius: '999px',
-                        marginBottom: '8px',
+                        padding: 'var(--afa-space-1) 10px',
+                        borderRadius: 'var(--afa-radius-pill)',
+                        marginBottom: 'var(--afa-space-2)',
                         ...(specialNotesStatus === 'APPROVED'
                           ? { background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' }
                           : specialNotesStatus === 'REJECTED'
@@ -813,12 +813,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   )}
                   {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
-                    <p style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '8px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: 'var(--afa-space-2)' }}>
                       Reason: {specialNotesRejectionReason}
                     </p>
                   )}
                   {specialNotesStatus === 'APPROVED' && specialNotes !== specialNotesOriginal && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-brown-gold)', marginBottom: '8px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-brown-gold)', marginBottom: 'var(--afa-space-2)' }}>
                       Editing this will send it back for review — it won't be visible on your event page until
                       re-approved.
                     </p>
@@ -832,20 +832,20 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     placeholder="e.g., This show includes strobe lighting and haze effects."
                     style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
                   />
-                  <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: '4px', textAlign: 'right' }}>
+                  <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4, marginTop: 'var(--afa-space-1)', textAlign: 'right' }}>
                     {specialNotes.length}/{SPECIAL_NOTES_MAX_LENGTH}
                   </p>
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginTop: '14px', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                 <input type="checkbox" checked={isCompetitionShow} onChange={(e) => setIsCompetitionShow(e.target.checked)} />
                 This is a competition show (panelists, prizes, celebrity guest)
               </label>
 
               {isCompetitionShow && (
-                <div style={{ marginTop: '16px', padding: '20px', background: 'var(--afa-surface-raised)', borderRadius: '10px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-4)' }}>
                     <div>
                       <label style={labelStyle}>1st Prize</label>
                       <input style={inputStyle} value={competitionPrizeFirst} onChange={(e) => setCompetitionPrizeFirst(e.target.value)} placeholder="e.g. ₹10,000 + trophy" />
@@ -860,20 +860,20 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '24px' }}>
+                  <div style={{ marginBottom: 'var(--afa-space-6)' }}>
                     <label style={labelStyle}>Celebrity Attending</label>
-                    <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
                       Invited by AFA account — they'll only appear publicly once they accept.
                     </p>
                     {(event?.celebrities || []).map((c) => (
-                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-surface-raised)', borderRadius: '8px' }}>
+                      <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) 10px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
                         {c.photoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={c.photoUrl} alt={c.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
                         )}
-                        <span style={{ fontSize: '13px', fontWeight: 600, flex: 1 }}>{c.name}</span>
+                        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, flex: 1 }}>{c.name}</span>
                         <span style={{
-                          fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
+                          fontSize: '10px', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase',
                           background: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (c.status === 'ACCEPTED' ? STATUS_TONE.sage : c.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
@@ -891,14 +891,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         disabled={celebrityInviting}
                       />
                       {celebritySearchResults.length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {celebritySearchResults.map((u) => (
                             <button
                               key={u.id}
                               type="button"
                               onClick={() => inviteCelebrity(u.id)}
                               disabled={celebrityInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px var(--afa-space-3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 'var(--afa-text-ui)' }}
                             >
                               {u.displayName || u.name}
                             </button>
@@ -910,21 +910,21 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                   <div>
                     <label style={labelStyle}>Panelists</label>
-                    <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
                       Same as Celebrity — invited by account, only shown publicly once accepted.
                     </p>
                     {(event?.panelists || []).map((p) => (
-                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '8px 10px', background: 'var(--afa-surface-raised)', borderRadius: '8px' }}>
+                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 'var(--afa-space-2)', padding: 'var(--afa-space-2) 10px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)' }}>
                         {p.photoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.photoUrl} alt={p.name} style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+                          <img src={p.photoUrl} alt={p.name} style={{ width: '32px', height: '32px', borderRadius: 'var(--afa-radius-sm)', objectFit: 'cover' }} />
                         )}
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '13px', fontWeight: 600 }}>{p.name}</div>
-                          {p.bio && <div style={{ fontSize: '11px', opacity: 0.6 }}>{p.bio}</div>}
+                          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{p.name}</div>
+                          {p.bio && <div style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6 }}>{p.bio}</div>}
                         </div>
                         <span style={{
-                          fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', textTransform: 'uppercase',
+                          fontSize: '10px', fontWeight: 700, padding: '3px var(--afa-space-2)', borderRadius: 'var(--afa-radius-pill)', textTransform: 'uppercase',
                           background: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).bg,
                           color: (p.status === 'ACCEPTED' ? STATUS_TONE.sage : p.status === 'DECLINED' ? STATUS_TONE.orange : STATUS_TONE.gold).color,
                         }}>
@@ -934,7 +934,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       </div>
                     ))}
                     <input
-                      style={{ ...inputStyle, marginBottom: '8px' }}
+                      style={{ ...inputStyle, marginBottom: 'var(--afa-space-2)' }}
                       value={panelistBioDraft}
                       onChange={(e) => setPanelistBioDraft(e.target.value)}
                       placeholder="Bio for next invite (optional)"
@@ -948,14 +948,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         disabled={panelistInviting}
                       />
                       {panelistSearchResults.length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {panelistSearchResults.map((u) => (
                             <button
                               key={u.id}
                               type="button"
                               onClick={() => invitePanelist(u.id)}
                               disabled={panelistInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px var(--afa-space-3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 'var(--afa-text-ui)' }}
                             >
                               {u.displayName || u.name}
                             </button>
@@ -965,14 +965,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   </div>
 
-                  <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(245,245,240,0.1)' }}>
+                  <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.1)' }}>
                     <label style={labelStyle}>Audience Choice vote weighting</label>
-                    <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: '10px' }}>
                       How much each voter category counts toward the Audience Choice result. Leave blank to follow the platform default (currently 80/10/10). Must sum to 100, Audience at least 50.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>AUDIENCE</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>AUDIENCE</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -983,7 +983,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>PANELIST</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>PANELIST</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -994,7 +994,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: '4px' }}>CELEBRITY</label>
+                        <label style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', display: 'block', marginBottom: 'var(--afa-space-1)' }}>CELEBRITY</label>
                         <input
                           type="number"
                           style={inputStyle}
@@ -1005,7 +1005,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         />
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                       <Button
                         variant="primary"
                         size="md"
@@ -1021,7 +1021,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         type="button"
                         onClick={() => saveVoteWeights(true)}
                         disabled={voteWeightSaving}
-                        style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.6, background: 'transparent', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '8px', padding: '8px 16px', cursor: voteWeightSaving ? 'default' : 'pointer' }}
+                        style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.6, background: 'transparent', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-2) var(--afa-space-4)', cursor: voteWeightSaving ? 'default' : 'pointer' }}
                       >
                         Use platform default
                       </button>
@@ -1031,14 +1031,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '20px' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
 
               {usingTierPricing ? (
                 <div style={{ marginBottom: '18px' }}>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
                     Sections and seat counts come from {selectedVenue?.name}'s seat map - you only set the price per section for this event.
                   </p>
                   {selectedVenue?.seatingMode === 'NUMBERED' && selectedVenue.seats && (
@@ -1047,20 +1047,20 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   {venueLevels.map((lvl) => (
                     <div key={lvl || '__single__'} style={{ marginBottom: venueLevels.length > 1 ? '10px' : 0 }}>
                       {venueLevels.length > 1 && (
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '10px', marginBottom: '4px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '10px', marginBottom: 'var(--afa-space-1)' }}>
                           {lvl || 'Main'}
                         </div>
                       )}
                       {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
-                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               {selectedVenue?.seatingMode === 'NUMBERED' && (
                                 <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
                               )}
                               {s.name}
                             </div>
-                            <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{s.seats} seats</div>
+                            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{s.seats} seats</div>
                           </div>
                           {!isFree ? (
                             <input
@@ -1072,13 +1072,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                               style={{ ...inputStyle, width: '120px' }}
                             />
                           ) : (
-                            <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Free</span>
+                            <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Free</span>
                           )}
                         </div>
                       ))}
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '14px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '14px' }}>
                     Total capacity: {venueSections.reduce((sum, s) => sum + (Number(s.seats) || 0), 0)} seats across {venueSections.length} section{venueSections.length === 1 ? '' : 's'}
                   </p>
                 </div>
@@ -1092,16 +1092,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ marginBottom: '18px' }}>
                 <label style={labelStyle}>Require a &quot;+1&quot; per artist <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span></label>
                 <input type="number" value={plusOnesRequired} onChange={handlePlusOnesRequiredChange} min="0" max="20" style={{ ...inputStyle, maxWidth: '120px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '4px' }}>
+                <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-1)' }}>
                   Each artist in the lineup must have this many audience members confirm support - included in their spot fee. Set to 0 if not required.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-5)', marginBottom: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                   <input type="radio" checked={isFree} onChange={() => setIsFree(true)} /> Free entry
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--afa-text-primary)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>
                   <input type="radio" checked={!isFree} onChange={() => setIsFree(false)} /> Paid entry
                 </label>
               </div>
@@ -1114,14 +1114,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Artist Payment Terms
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
                 Shown to Artists before they apply. You can still negotiate a different amount with a specific artist when approving their application.
               </p>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: '10px' }}>
                 {([
                   { value: 'FREE', label: 'Free / Exposure' },
                   { value: 'PAID', label: 'Paid' },
@@ -1132,8 +1132,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     type="button"
                     onClick={() => setDefaultCompensationType(opt.value)}
                     style={{
-                      padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                      padding: 'var(--afa-space-2) 14px', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                      border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                       background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                       color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
@@ -1150,11 +1150,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
                 Venue
               </h2>
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
                 Changing the venue sends a new booking request.
               </p>
 
@@ -1171,8 +1171,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               {venueId && (
                 <div>
                   {venueId !== originalVenueId && (selectedVenue?.rateType === 'HOURLY' || selectedVenue?.rateType === 'DAILY') && (
-                    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '2px' }}>
+                    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 14px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '2px' }}>
                         {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
                         {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                       </div>
@@ -1187,7 +1187,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="primary"
                 size="lg"
@@ -1204,12 +1204,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '12px 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </button>
               )}
-              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
+              <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel
               </Link>
             </div>
