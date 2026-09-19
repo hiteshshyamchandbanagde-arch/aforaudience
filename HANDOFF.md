@@ -1,3 +1,29 @@
+# Session Handoff — 19 Sept 2026, later same day (chat — GEN-2609-073 closeout: color decision applied, real bug caught via visual verification, merge still blocked)
+
+## qa HEAD unchanged - `feat/gen-2609-070-amber-chip-family-collapse` still has not merged as of this update (re-checked via `git merge-base --is-ancestor` against `origin/qa`, not assumed). Supersedes, does not delete, the section immediately below (same-day, earlier).
+
+## `GEN-2609-073`'s flagged color, resolved
+
+Hitesh's call: `events/page.tsx`'s `.afa-events-view-btn.active` background moves to `--afa-surface-raised`. Applying only that (leaving the paired `color: var(--afa-surface-inverse)` as-is) would have shipped a real bug - computed to 1.20:1 contrast against the new background (real WCAG luminance math), an effectively invisible active icon. Moved `color` to `--afa-text-primary` in the same fix (15.07:1) - a necessary consequence of the background change, not scope creep, and documented as such rather than silently bundled in.
+
+## A real bug caught only because visual verification actually happened this time
+
+The first version of the fix's own explanatory code comment wrote `` `color` `` (backtick-quoted) inside `events/page.tsx`'s `<style>{\`...\`}</style>` template literal - backticks aren't escaped there, so it prematurely closed the literal and broke the build. **This session's own prior backgrounded `next build` run reported a clean exit (0) against that broken commit - a false pass**, cause unclear (a stale Turbopack cache is the leading guess, not confirmed). Only surfaced because this session went on to actually start the dev server and drive it with Playwright (no `chromium-cli` available; fell back to a direct script per the `/run` skill's own guidance) instead of stopping at the earlier "clean" build result. Fixed in a follow-up commit, re-verified for real: `tsc` clean, `next build` clean (confirmed via `$PIPESTATUS` on a **foreground**, not backgrounded, run - worth doing whenever a backgrounded build result feeds a real decision), `check-design-tokens.js` clean. Visually confirmed: computed styles `background: rgb(31,31,31)` / `color: rgb(245,245,240)` (exactly the intended tokens) and screenshots of both grid-active and list-active states, both clearly legible. Unrelated pre-existing console noise observed and left alone (a hydration-mismatch warning from the intro-splash script, and duplicate-`Pune`-key React warnings likely from duplicate city rows in seed data) - neither caused by this change, neither this ticket's scope.
+
+**Takeaway worth keeping:** a backgrounded shell command's reported exit code is not automatically trustworthy for a build - re-check with a foreground run and `$PIPESTATUS` before treating a background result as the real verdict on anything that gates a merge decision.
+
+Both fixes pushed to `feat/gen-2609-073-artist-pages-migration` (commits `bcbd27e`, `aba52a2`). `docs/design.md`'s `GEN-2609-073` entry updated with both.
+
+## Merge order - still waiting on step 1
+
+`feat/gen-2609-070-amber-chip-family-collapse` has **not** merged to `origin/qa` yet (re-confirmed this update). The rebase-`073`-onto-updated-`qa` step Hitesh asked for is blocked until that lands - not something to force early. Once it merges: rebase `feat/gen-2609-073-artist-pages-migration` onto the new `qa`, resolve the `docs/design.md`/`HANDOFF.md` conflict by keeping *both* sessions' entries (append, don't overwrite either), then re-run `tsc`/`check-design-tokens.js`/`next build` before treating it as merge-ready.
+
+## Phase 2 - still not started, per Hitesh's explicit hold
+
+Wall of Fame, Organisers directory, Venue-owners list/detail. Hold until `073` is fully merged and clean - do not start early even if idle.
+
+---
+
 # Session Handoff — 19 Sept 2026 (chat — GEN-2609-073, Phase 1 public-pages token/typography/Button migration)
 
 ## qa HEAD unchanged this session - PR open, not yet merged. Branch `feat/gen-2609-073-artist-pages-migration`, synced fresh from `origin/qa` (`38c1e43`) before branching, per the standing rule. Supersedes, does not delete, the 18 Sept section below - its still-open items (the `CodeCounter`/`GEN` drift investigation, the amber-accent decision) were resolved in a *separate* branch (`feat/gen-2609-070-amber-chip-family-collapse`), merged first per the merge-order note below.

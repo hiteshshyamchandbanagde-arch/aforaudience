@@ -5649,6 +5649,27 @@ to ship silently broken. This also happens to match `:hover`'s already-
 migrated icon color on the line above, so active/hover no longer
 disagree on icon color.
 
+**A real bug this session's own explanatory comment introduced, caught
+only because Hitesh asked for real visual verification.** The
+resolution comment above originally wrote `` `color` `` (backtick-
+quoted) inside this `<style>{\`...\`}</style>` template literal -
+backticks aren't escaped in template-literal text, so that prematurely
+closed the literal and broke the build (Turbopack: `Expected '</',
+got 'ident'`). Worse, this session's own prior backgrounded `next
+build` run had reported a clean exit (`0`) against the broken commit -
+a false pass, cause unclear (possibly a stale Turbopack cache reusing
+an unaffected artifact for this route). Only caught because this
+session went on to actually start the dev server and drive it with
+Playwright per Hitesh's explicit "verify it visually" ask, rather than
+stopping at the (wrong) build result. Fixed in a follow-up commit;
+re-verified for real afterward: `tsc` clean, `next build` clean
+(confirmed via the shell's own `$PIPESTATUS` on a foreground run, not
+a backgrounded one, with the full route list visible), `check-design-
+tokens.js` clean. Visually confirmed via computed styles (`background:
+rgb(31,31,31)` / `color: rgb(245,245,240)` - exactly `--afa-surface-
+raised` / `--afa-text-primary`) and screenshots of both the grid-active
+and list-active states, both clearly legible.
+
 **Hex-color count corrected on re-verification, per this codebase's
 standing convention of re-checking a dispatch's own numbers before
 acting on them.** The audit's "two literal hex colors (Event detail)"
