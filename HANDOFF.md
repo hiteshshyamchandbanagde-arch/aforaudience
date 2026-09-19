@@ -1,3 +1,118 @@
+# Session Handoff — 19 Sept 2026, later (CC — GEN-2609-078 provisional: token guard covers every category + whole-repo ratchet)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **77** immediately before this branch started (live-queried, not cached); this ticket would be **078** if chat confirms no collision at logging time. Not self-assigned to `Feedback`, not written to `CodeCounter`, per the dispatch's explicit instruction.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Restated 19 Sep: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules (font-size/spacing/radius/raw-button), allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete, unmerged | No migration, zero visual change, per dispatch. Full precise measurement reconciled against the dispatch's own rough numbers (see §4). Pushed, awaiting chat's ticket-number confirmation + PR open/merge. | `feat/gen-2609-078-design-token-guard-coverage` |
+| 19 Sept 2026 (CC) | Verification closeout: `GEN-2609-075`/`076`/`077` confirmed merged, `Feedback` backfilled, live re-verify | Complete | qa HEAD `d0a2c69`. Corrected a stale "zero type-scale adoption" assumption; caught+reverted a `public/sw.js` build artifact (later found to be intentional `stamp-sw-version.js` infra, not stray debt - corrected in this session, see §8). | none (docs-only, direct to qa) |
+| 19 Sept 2026 (CC+chat) | `GEN-2609-075` admin design tokens, `076` Button coverage, `077` type-scale/spacing phase 1 (homepage) | Complete (build+merge); acceptance partial | PRs #654-658, all merged. Chat merged via a Hitesh-supplied PAT. | 5 branches, all deleted post-merge |
+| 18-19 Sept 2026 (chat) | `GEN-2609` backfill, numbering collisions, UI/UX centralization audit + fixes | Complete | Audit (`GEN-2609-072`) → 4-ticket fix chain, PRs #650-653, all merged. | 4 branches |
+| 17 Sept 2026 (chat) | `BUG-2609-049` fix + counter-gap investigation | Partial | PR #649 merged. Found 14-ticket `Feedback` backfill gap (resolved 18-19 Sept). | `fix/bug-2609-049-events-tab-underline-fillsolid` |
+
+(Oldest row, "17 Sept 2026 (CC) — Button consolidation phase 2 batch 1...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-078` (provisional) - `feat/gen-2609-078-design-token-guard-coverage` - **pushed, no PR opened yet**. Blocked on: (a) chat confirming the real ticket number against `CodeCounter` (read 77 at branch start; this ticket claims 078 if still uncontested), (b) chat opening + merging the PR (session PAT, this session had none - no `gh` CLI, no PAT, GitHub MCP connector never connected this session).
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `feat/gen-2609-078-design-token-guard-coverage` | **`NOT YET OPENED`** | n/a (not yet run in CI) | Locally verified clean (see §8) - ready for chat to open once the ticket number is confirmed |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | `success` | n/a - unrelated, pre-existing, targets `main`, out of scope every session since 14 Aug |
+
+Re-verified via GitHub API this session (not carried from the prior session's check): still exactly 1 open PR repo-wide before this branch's own PR is opened.
+
+## 4. Decisions sitting with Hitesh / chat
+
+| Question | Options | Status | Resolution |
+|---|---|---|---|
+| Real `GEN-2609` number for this ticket | `078` (if `CodeCounter` still reads 77 at logging time) / something else if another session claimed a number in between | **open, chat's job** | `CodeCounter.GEN/2609` read **77** at this branch's start (live-queried) - not written to, per the dispatch's explicit instruction not to self-assign. |
+| Who merges when CC lacks GitHub credentials | (a) chat merges via a Hitesh-supplied session PAT | (b) Hitesh gives CC its own PAT at session start | **open, carried forward unchanged** | — |
+
+**Resolved this session (the ticket's own build decisions - not sitting with anyone, decided and built):**
+
+- **Allowlist:** `0` (any unit) + hairline `1px`/`0.5px` are explicit value-based checks; any `%` value is excluded by construction (none of the 3 new numeric rules include `%` in their allowed-unit list, so `border-radius: 50%/100%` never reaches the extractor - documented as a no-op defensive branch rather than a separate special case).
+- **Third-party brand SVG fills (e.g. Google's 4-color logo) - refused to guess.** No hardcoded brand-hex allowlist built (guessing which hex values count as "brand," with no way to verify the list stays complete, is exactly the kind of assumption the dispatch said to flag instead of make). Routed through the general `// token-ok: <reason>` escape hatch instead - a real per-site decision made visibly, not a silent regex carve-out.
+- **Raw `<input>`/`<select>`/`<textarea>` as a 5th CI rule - refused to build, per the dispatch's own explicit scope** (measurement only). Real adjacent finding surfaced instead: `src/components/ui/Input.tsx` exists but has exactly **1** import repo-wide (226 raw form-control elements across 58 files, effectively un-adopted); no shared `Select`/`Textarea` exists at all. Worth its own future ticket.
+- **`spacing-literal`/`radius-literal` scoped to px-only, `font-size-literal` to px+rem** - taken literally from the dispatch's own per-rule wording ("non-zero px `padding/margin/gap*`", "numeric `borderRadius`", "numeric/px/rem `fontSize`"), not silently widened to match each other.
+- **`raw-button` needed its own `skipRelocatedCheck` flag** - `GEN-2609-057`'s relocated-literal exemption (built for *value* uniqueness, e.g. a specific hex code) would have silently defeated `raw-button` entirely: the "literal" it extracts is always the fixed string `"<button>"`, which trivially already exists at 200+ other sites, so every new raw button would have been treated as "already known" and never flagged. Not guessed at - caught by reasoning through the existing mechanism's actual semantics before wiring the new rule into it, then verified with a dedicated contrast test (`raw-button` bypasses the check; `spacing-literal` correctly still honors it).
+- **`public/sw.js`'s `CACHE_VERSION` diff is NOT stray debt** - correction to the prior session's own handoff entry (which called it a "stray build artifact, same class GEN-2609-054 hit"). It's `scripts/stamp-sw-version.js`, a real `prebuild` npm hook (added session 36, 26 Jul, to fix a real stale-cache incident). Still reverted before finishing this session (same mechanical step, `git checkout -- public/sw.js`) - it's real per-build-machine infra output, not something to commit, just not "debt" the way the wording implied.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **77** (unchanged - this session read it, did not write to it, per the dispatch's explicit instruction). `BUG/2609`: not re-queried this session (no `BUG` work).
+- Guard pattern unchanged: `SELECT` immediately before any write; never advance from a cached number. This session made zero writes.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collision **confirmed** this session, but flagging a real risk for chat to check at logging time: this branch was built assuming `078` is free (based on a `77` read at branch start) - if another session claimed `078` in the interim, chat must resolve it the same way `054`/`069→071` were resolved (check `design.md`/`Feedback` for what's actually there, don't just overwrite). `docs/HANDOFF_TEMPLATE.md`'s permanent ledger re-read this session, unchanged: `054` ✅, `069→071` ✅.
+
+## 7. Docs-conflict watchlist
+
+- `feat/gen-2609-078-design-token-guard-coverage` - touches `docs/design.md` (new `GEN-2609-078` entry, appended at the file's end) and `HANDOFF.md` (this entry). No other branch is currently open against either file (per §3, the only other open PR - `#450` - is CI-config-only and untouched by this check).
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, on the feature branch (`feat/gen-2609-078-design-token-guard-coverage`, branched from `qa` `d0a2c69`):
+
+- ✅ `tsc --noEmit` - clean, exit 0.
+- ✅ `node scripts/check-design-tokens.test.js` - **34/34 fixtures passing** (new this ticket - see `docs/design.md`'s `GEN-2609-078` entry for the full list).
+- ✅ `check-design-tokens.js` (`BASE_REF=origin/qa HEAD_REF=HEAD`) - clean, 0 offenses (this branch's own changes live entirely in `scripts/`/`.github/`, outside `src/`, so nothing of its own to flag).
+- ✅ `node scripts/design-token-ratchet.js` - clean, all 7 categories at/below the baseline this session generated.
+- ✅ `next build` - clean, exit 0 via `$PIPESTATUS`, all routes present.
+
+**Regression check against real history, not synthetic strings** (same convention `GEN-2609-057` established): re-ran `BASE_REF=e110ebe^ HEAD_REF=e110ebe node scripts/check-design-tokens.js` against the patched checker - reproduces the exact same 11 hits on the 3 original rules (5 hex + 6 rgba, byte-identical to `GEN-2609-057`'s own verified count) **plus 1 new genuine hit** from the new `font-size-literal` rule (`email.ts:101`'s `font-size: 30px`, previously invisible to the checker). Confirms zero regression + real incremental coverage.
+
+**Ratchet's fail/refuse behavior verified live**, not just reasoned about: staged a scratch file (`git add`, never committed) adding one new hex literal - confirmed (a) `design-token-ratchet.js` correctly fails (exit 1, `hex-color-literal: 88 > 87`), (b) `--update-baseline` in that same state also refuses (exit 1, names the category and the would-be jump) rather than silently raising the baseline. Scratch file then unstaged and deleted, ratchet re-confirmed clean.
+
+**Side effect caught, and a prior session's framing corrected:** `npm run build`'s `prebuild` hook bumps `public/sw.js`'s `CACHE_VERSION` - this is `scripts/stamp-sw-version.js`, real infra (see §4), not the "stray build artifact" a prior handoff entry called it. Reverted anyway (`git checkout -- public/sw.js`) since it's still per-machine build output that shouldn't be committed from this session - just corrected the record on *why*.
+
+**`git add -A` near-miss, caught before committing anything:** the pre-existing untracked `Figma/` directory (Hitesh's own local drop - not part of this or any prior session, per the standing "ignore Figma" instruction) got swept into the index by an overly broad `git add -A` mid-session. Caught via `git status` immediately after, `git reset` before anything was committed - nothing from `Figma/` ever touched a commit. Staged explicitly by path for the rest of the session.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** Unaffected by this ticket (tooling-only, no schema/data change).
+
+## 10. UI/UX Design System Debt Ledger
+
+Not a migration ticket - no category's *real* count changed. What changed is **measurement infrastructure**: 3 new literal categories (font-size/spacing/radius) plus raw-`<button>` are now precisely, repeatably countable and CI-enforced (ratchet), not just informally grepped per-audit the way `GEN-2609-077`'s own phase-1 count was. Precise baseline this session (method: the new rules themselves, `git ls-files -- src` full-tree scan, excluding the same `EXEMPT_FILES`/`.test.tsx?` this checker already excluded):
+
+| Category | Baseline (this session) | Files |
+|---|---|---|
+| `hex-color-literal` | 87 | 21 |
+| `rgb-rgba-literal` | 997 | 130 |
+| `hardcoded-font-family` | 10 | 10 |
+| `font-size-literal` | 1530 | 134 |
+| `spacing-literal` | 3450 | 137 |
+| `radius-literal` | 570 | 117 |
+| `raw-button` | 211 | 72 |
+
+Full reconciliation against the dispatch's own rough numbers (why each delta is real, not error) is in `docs/design.md`'s `GEN-2609-078` entry - headline: the hex gap (295 rough vs. 87 precise) is fully explained by the dispatch's rough grep including the already-documented PR-reference-comment false-positive class (`GEN-2609-052`/`053`).
+
+**Top 10 files by combined literal count** (the ratchet's own report - this is the real "where to migrate first" signal, not a guess): `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), `organiser/events/[id]/edit/page.tsx` (207), `dashboard/artist/page.tsx` (177), `ArtistProfileClientPage.tsx` (175), `EventDetailClientPage.tsx` (174), `organiser/events/[id]/page.tsx` (153), `organiser/events/create/page.tsx` (148), `admin/feedback/page.tsx` (136), `RegisterForm.tsx` (126).
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Unaffected by this ticket - no new token, no migration.
+
+## 12. Immediate next action
+
+**Bulk migration, largest-literal-count files first** (the ratchet's own top-10 report, §10 above), per the dispatch's own instruction - not page-by-page the way `GEN-2609-077` phased by page-group. `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets. Blocked first on chat opening/merging this ticket's own PR.
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model** (see prior handoff entries for the full statement) - chat owns PR-open/merge via a session PAT; CC owns branching/coding/local-verify/push. This session: CC built, verified, and pushed `feat/gen-2609-078-design-token-guard-coverage`; chat's half (confirm the ticket number, open the PR, merge) is next.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, verification closeout (CC — GEN-2609-075/076/077 confirmed merged, `Feedback` backfilled, live re-verify)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **`HANDOFF.md` had not been updated since `GEN-2609-074`** (see the "18-19 Sept 2026, closeout" entry below) — the 075/076/077 build+merge work below happened in the gap and was never logged here; this entry is that missing write-up plus this session's own independent re-verification, not assumed from the dispatch that requested it.

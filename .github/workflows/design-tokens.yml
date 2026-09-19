@@ -6,6 +6,16 @@ name: Design Token Check
 # (scripts/check-design-tokens.js) - pre-existing literals elsewhere in
 # src/ are known debt and are NOT touched or failed on here.
 #
+# GEN-2609-078 - added 2 more steps: the rule engine's own fixture-based
+# self-tests (so a change to the regex/allowlist logic itself is caught,
+# not just discovered via a future false-positive/negative), and the
+# whole-repo ratchet (scripts/design-token-ratchet.js) - unlike the
+# diff-only check above, this fails if ANY category's total literal
+# count across the whole repo is higher than the committed baseline
+# (scripts/design-token-baseline.json), which is what actually proves
+# migration is converging rather than just "this one PR didn't make it
+# worse."
+#
 # This is the first pull_request-triggered workflow in this repo (the
 # existing e2e*.yml files are push-to-qa/nightly/manual only) - added
 # specifically so this check runs at merge time, before a PR lands on
@@ -27,8 +37,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Check for new hardcoded design-token literals
+      - name: Rule-engine self-tests
+        run: node scripts/check-design-tokens.test.js
+
+      - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}
           HEAD_REF: HEAD
         run: node scripts/check-design-tokens.js
+
+      - name: Whole-repo design-token ratchet
+        run: node scripts/design-token-ratchet.js

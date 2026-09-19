@@ -6358,3 +6358,96 @@ Migrated every font-size/spacing literal whose bare value exactly matched a toke
 **New: a real "applies to" label, not a static string.** Added `PAGE_GROUP_OF_FILE` + `appliesTo()` to `design-token-coverage.ts` - maps each token's real `consumerFiles` (the same array the coverage badge itself reads) to this ticket's 5 named page-group labels (`Homepage`/`Events`/`Artists`/`Venues`/`Wall of Fame`) plus `Button`, collapsing anything else to `elsewhere` rather than guessing a name for the ~90-file unphased "rest" bucket. The admin page renders this live per group ("Applies to: Homepage, Events, Artists, Venues, Wall of Fame, Button.") - derived from the same grep data, not a hand-typed claim that could drift as later phases land. Size/Spacing's static blurb text ("adopted by 11 pages...") was deliberately trimmed to just "Type scale."/"8px-based spacing grid." now that the dynamic line carries the real coverage claim.
 
 **Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean (checked AFTER committing - `GEN-2609-076` found this checker only sees committed refs, not the working tree; verifying pre-commit would be a no-op). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`.
+
+## GEN-2609-078 (provisional - chat confirms/assigns the real number against `CodeCounter` before logging `Feedback`) - token guard: cover every category + whole-repo ratchet
+
+Dispatch's framing: `check-design-tokens.js` (`GEN-2609-052`/`057`) only ever covered 3 of the categories the north star cares about (hex/rgba/font-family), was diff-only with no whole-repo signal, and nothing stopped a brand-new font-size/spacing/radius/raw-`<button>` literal from landing. Migration can't provably converge while new hardcoding can still be added anywhere. This ticket adds the missing 4 rules, a value-based allowlist, a `// token-ok:` escape hatch, and a whole-repo ratchet with a committed baseline - explicitly **no migration of any existing literal**, no visual change.
+
+### Precise measurement, reconciled against the dispatch's own rough numbers
+
+The dispatch's reference table was an admitted "rough grep" and explicitly asked for a real reconciliation, not blind trust. Built the 4 new rules first, then measured with them directly (same engine that also powers the ratchet - one source of truth, not a separate throwaway script):
+
+| Category | Dispatch's rough count | This ticket's precise count | Reconciliation |
+|---|---|---|---|
+| hex | 295 (30 files) | **87** (21 files) | The gap is fully explained, not just noted: a bare `#[0-9a-fA-F]{3,8}` grep (re-ran it to confirm) returns 298, of which **87 sit inside a PR-reference comment** (`// ... (#261)`, `PR #212`) - the exact false-positive class `GEN-2609-052`/`053` already found and fixed for by requiring the match sit inside a quoted string. This rule's precise count also reproduces `GEN-2609-057`'s own historically-verified regression check byte-for-byte (5 hex hits on commit `e110ebe`, unchanged) - confirmed live this session, not assumed from that entry's text. |
+| rgba() | 1012 (134 files) | 997 (130 files) | Close; not chased further - both land in the same real-debt ballpark, the 1.5% delta isn't worth a forensic pass. |
+| fontSize | 1514 (135 files) | 1530 (134 files) | Close; this rule's count is defined by construction as authoritative (it's the rule that also gates the ratchet), so no further reconciliation needed. |
+| spacing (non-zero px) | 2795 (139 files) | **3450** (137 files) | Higher by design: a multi-value CSS shorthand (`padding: "24px 36px 56px"`) is counted per-literal-token (3), not per-match (1) - real per-value debt, not an inflated number. Spot-checked 15 live hits by hand against their full source lines to confirm no double-counting or mis-parse (see verify section). |
+| borderRadius | 642 (125 files) | **570** (117 files) | Lower by design: this rule is deliberately **px-only**, per the dispatch's own literal wording ("numeric `borderRadius`, Tailwind `rounded-[Npx]`") - `borderRadius: '50%'`/`'100%'` (circle/pill shapes, genuinely common in this codebase - `Button.tsx`'s own `close` variant, `VenueCard`'s avatar, etc.) never reach the extractor at all since `%` isn't in the allowed-unit list, rather than needing a separate allowlist entry. |
+| raw `<button>` | 216 (73 files) | 211 (72 files) | Close; this rule's own `Button.tsx` file exemption (a bare grep wouldn't apply) accounts for the small gap. |
+| raw `<input>`/`<select>`/`<textarea>` | 228 (60 files) | 226 (58 files) | Measurement only, per the dispatch's own scope - **not built into a CI rule this ticket** (see "refused to guess" below). A real, matching shared component (`src/components/ui/Input.tsx`) already exists but has exactly **1** import repo-wide - built once, adopted nowhere, real debt on its own. No shared `Select`/`Textarea` component exists at all. |
+
+### Build
+
+4 new rules added to `check-design-tokens.js`'s existing `RULES` array (`scripts/check-design-tokens.js`), sharing the same diff-only + `GEN-2609-057` relocated-literal architecture as the original 3:
+
+- **`font-size-literal`** - numeric/px/rem `fontSize` (camelCase JS or kebab-case raw CSS text), Tailwind `text-[Npx]`/`text-[Nrem]` (rem included at the Tailwind layer for consistency with the property-level spec, which the dispatch's own Tailwind example didn't show but the prose explicitly listed - a deliberate small extension, flagged here rather than silently assumed).
+- **`spacing-literal`** - non-zero **px only** `padding`/`margin`/`gap` (+ directional longhands: `Top`/`Right`/`Bottom`/`Left`/`Inline`/`Block`/`...Start`/`...End`), Tailwind `p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|gap-x|gap-y-[Npx]`. Handles multi-value CSS shorthand correctly - a value like `"var(--afa-space-2) 10px"` only flags the genuinely-hardcoded `10px` half, the already-tokenized part is skipped.
+- **`radius-literal`** - numeric **px only** `borderRadius` (+ 4 corner longhands), Tailwind `rounded[-side]-[Npx]`.
+- **`raw-button`** - `<button` anywhere in `src/**/*.tsx`, exempting `src/components/ui/Button.tsx` itself (the one file where the literal tag is the implementation, not debt).
+
+**A real design bug caught before it shipped, not after.** `GEN-2609-057`'s relocated-literal exemption (skip a literal if the exact string already exists elsewhere in `BASE_REF`'s tree) makes sense for a *value* like a hex code or an rgba() tuple - matching an existing one really does mean "not new debt." It does **not** make sense for `raw-button`: the "literal" extracted is always the same fixed string (`"<button>"`), which trivially already exists at 211+ other sites today - naively reusing the exemption would have silently defeated the whole rule, flagging zero new raw buttons ever, forever. Fixed with a `skipRelocatedCheck` flag, `raw-button`-only: every new `<button` on an added line always flags, regardless of how many others exist elsewhere. Covered by a dedicated self-test contrasting `raw-button` (ignores the relocated check) against `spacing-literal` (correctly honors it) side by side.
+
+### Allowlist
+
+Per the dispatch's own proposal, resolved as:
+
+- **`0`** (any unit) and **any `%` value** - the latter isn't a separate allowlist branch at all; none of the 3 new numeric rules include `%` in their allowed-units list, so `border-radius: 50%`/`100%` never reach the extractor in the first place. Documented as a no-op defensive branch in `isAllowlistedLength()` so the intent reads directly off that one function rather than being implicit in three different regexes.
+- **Hairline `1px`/`0.5px`** - allowed uniformly across all 3 numeric rules. Honestly noted: none of the 3 rules actually scan a `border`/`borderWidth` property at all (only padding/margin/gap and border-radius), so a hairline *border* literal was never going to be flagged by this ticket's rules regardless - this allowlist entry is kept anyway because the dispatch was explicit about it and it's a cheap, harmless, forward-compatible no-op (covers the edge case of a genuinely hairline `padding`/`borderRadius` value, and pre-empts the question if a border-width rule is ever added later).
+- **Third-party brand SVG fills (e.g. Google's 4-color logo)** - **refused to guess.** Hardcoding a specific allowlist of "these hex values are brand-exempt" means guessing which colors count, with no way to verify the list is complete or ever will be. Used the general `// token-ok: <reason>` escape hatch instead (see below) - a real per-site decision, made visibly, not a silent regex carve-out.
+- **Raw `<input>`/`<select>`/`<textarea>` as their own CI-blocked category** - **refused to build**, per the dispatch's own explicit scope (measurement only, not one of the 4 rules to add). Flagged as a real, adjacent finding instead: `Input.tsx` exists and is adopted almost nowhere (1 import), no `Select`/`Textarea` exists at all - worth its own future ticket, not silently rolled into this one.
+
+**`// token-ok: <reason>` escape hatch.** A trailing comment on the same line as a flagged literal suppresses every rule on that line. Deliberately simple (a literal substring match, not scoped to "real code comment vs. inside a string") - matches how this codebase's own PR-reference convention is written, and over-engineering the parser for an honor-system mechanism used by a small team isn't worth it. Both `check-design-tokens.js` and `design-token-ratchet.js` print every `token-ok` use in their output on every run (pass or fail) - a bypass can never go quietly unnoticed the way a silent allowlist entry could. Verified via a synthetic diff in the self-tests: a `// token-ok:`-annotated line is suppressed and reported separately; an un-annotated literal on the very next line of the same diff is still flagged.
+
+### Whole-repo ratchet (`scripts/design-token-ratchet.js` + `scripts/design-token-baseline.json`)
+
+Counts every rule's live matches across the whole checked `src/` tree (via `git ls-files -- src`, so it only sees tracked/committed content - correct for CI's post-checkout state, consistent with the diff-only check's own git-based approach) and fails if any category is **above** the committed baseline. Shares `RULES`/`isCheckedFile`/`isExemptFile`/`tokenOkReason` directly from `check-design-tokens.js` (exported this session) rather than re-implementing them, so the diff-only check and the whole-repo count can never quietly drift out of sync.
+
+`--update-baseline` writes the current counts as the new baseline - but **refuses to write if any category would rise**, printing exactly which categories and by how much, rather than silently accepting a regression as the new normal. This was a deliberate design decision, not assumed: verified live by staging a scratch file with one new hex literal, confirming (a) the plain ratchet run correctly fails (exit 1, `hex-color-literal: 88 > 87`), and (b) `--update-baseline` in that state also refuses (exit 1) rather than quietly raising the baseline to 88 - then removed the scratch file and re-confirmed a clean run.
+
+Also prints a "top 10 files by literal count" report every run (all 7 categories combined) - the actual signal for the dispatch's own stated next step ("bulk migration, largest-literal-count files first"):
+
+| Rank | File | Combined literal count |
+|---|---|---|
+| 1 | `src/app/dashboard/venue/[id]/seat-map/page.tsx` | 376 |
+| 2 | `src/app/dashboard/admin/settings/page.tsx` | 208 |
+| 3 | `src/app/dashboard/organiser/events/[id]/edit/page.tsx` | 207 |
+| 4 | `src/app/dashboard/artist/page.tsx` | 177 |
+| 5 | `src/app/(public)/artists/[id]/ArtistProfileClientPage.tsx` | 175 |
+| 6 | `src/app/(public)/events/[id]/EventDetailClientPage.tsx` | 174 |
+| 7 | `src/app/dashboard/organiser/events/[id]/page.tsx` | 153 |
+| 8 | `src/app/dashboard/organiser/events/create/page.tsx` | 148 |
+| 9 | `src/app/dashboard/admin/feedback/page.tsx` | 136 |
+| 10 | `src/app/(auth)/register/RegisterForm.tsx` | 126 |
+
+**Committed baseline** (`scripts/design-token-baseline.json`, generated this session via `--update-baseline` against qa `d0a2c69` + this branch's new rule code - no existing literal touched):
+
+| Category | Baseline |
+|---|---|
+| `hex-color-literal` | 87 |
+| `rgb-rgba-literal` | 997 |
+| `hardcoded-font-family` | 10 |
+| `font-size-literal` | 1530 |
+| `spacing-literal` | 3450 |
+| `radius-literal` | 570 |
+| `raw-button` | 211 |
+
+### A real, pre-existing gap found in `hardcoded-font-family` (not fixed - out of this ticket's scope)
+
+While re-running `GEN-2609-057`'s own historical regression check (`e110ebe^...e110ebe`) to confirm no regression in the 3 original rules, `src/lib/email.ts:101`'s `font-family: Georgia, 'Times New Roman', serif;` (raw CSS text inside an HTML-email template string) did **not** get flagged by `hardcoded-font-family`, even though it's a genuine hardcoded font-family. Root cause: that rule's regex requires the *entire* value to be one quoted string (`fontFamily: 'Georgia, serif'` - the shape every other real hit in this codebase takes); here only the `'Times New Roman'` sub-value happens to be quoted, with `Georgia,` sitting unquoted before it, so the regex's `['"]` boundary right after the colon never matches at that position. Pre-existing behavior of the original `GEN-2609-052` rule, not introduced by this ticket, and not one of the 4 rules in this ticket's build scope - flagged here rather than silently patched on the side, since touching an existing, previously-verified rule's regex deserves its own dispatch and its own verification pass, not a drive-by fix bundled into an unrelated ticket.
+
+### Fixture-based self-tests (`scripts/check-design-tokens.test.js`)
+
+No test framework configured anywhere in this repo (checked `package.json` before writing - `test:e2e` is Playwright, a different layer). Plain Node + built-in `assert`, matching this project's own established "small script, no new dependency" convention for this checker (see `check-design-tokens.js`'s own header and `GEN-2609-057`'s design.md entry on why no ESLint plugin was ever added). **34 fixtures, all passing**: one positive + one negative per rule (7 rules), Tailwind-form-specific cases for the 3 new numeric rules, the allowlist (0/hairline/percent, plus a mixed-shorthand case proving only the non-zero part of a value gets flagged), the `raw-button` file exemption, the `raw-button` vs. `spacing-literal` `skipRelocatedCheck` contrast case, and the `// token-ok:` escape hatch (including a full synthetic-diff run through `findOffenses()` itself, not just the underlying regex). Wired into `.github/workflows/design-tokens.yml` as its own step, ahead of the diff-only check, so a change to the rule engine that breaks a fixture fails CI immediately.
+
+### CI (`.github/workflows/design-tokens.yml`)
+
+Added 2 steps to the existing `pull_request` workflow: the self-test suite, and the whole-repo ratchet (after the existing diff-only check). All 3 steps run on every PR into `qa`/`main`.
+
+**Verify.** `tsc --noEmit` clean. `scripts/check-design-tokens.test.js`: 34/34 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (this branch's own new code lives entirely in `scripts/`/`.github/`, outside `src/`, so the diff-only check has nothing of its own to flag). `scripts/design-token-ratchet.js`: passes clean against the baseline this same session generated. `GEN-2609-057`'s own historical regression check (`e110ebe^...e110ebe`) re-run against the patched file: reproduces the exact same 11 hits on the 3 original rules (5 hex + 6 rgba, byte-identical to that entry's own verified count) plus 1 new genuine hit from the new `font-size-literal` rule (`email.ts:101`'s `font-size: 30px`) - confirms zero regression on the existing rules and real incremental coverage from the new one. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build-time stamp (`scripts/stamp-sw-version.js`, a real `prebuild` hook, not stray debt - see this ticket's handoff entry) reverted before finishing.
+
+**No existing literal migrated - by design, per the dispatch's explicit constraint.** Zero visual change. `docs/design-token-coverage.ts`/admin panel/`globals.css` all untouched.
+
+### Next dispatch after this merges
+
+Bulk migration, largest-literal-count files first (the ratchet's own top-10 report above), not page-by-page - `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), and `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets.
