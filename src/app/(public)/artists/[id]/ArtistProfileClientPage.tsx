@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
+import Button from "@/components/ui/Button"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import CorporateInquiryModal from "@/components/CorporateInquiryModal"
 import Photo from "@/components/Photo"
@@ -390,7 +391,7 @@ export default function ArtistProfilePage({
               borderRadius: "999px",
               width: "34px",
               height: "34px",
-              fontSize: "16px",
+              fontSize: "var(--afa-text-title)",
               fontWeight: 700,
               cursor: prevArtistId ? "pointer" : "default",
               opacity: prevArtistId ? 1 : 0.35,
@@ -399,7 +400,7 @@ export default function ArtistProfilePage({
           >
             ‹
           </button>
-          <span style={{ fontSize: "12px", color: "rgba(245,245,240,0.5)" }}>
+          <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.5)" }}>
             Artist {navIndex + 1} of {navOrder.length}
           </span>
           <button
@@ -413,7 +414,7 @@ export default function ArtistProfilePage({
               borderRadius: "999px",
               width: "34px",
               height: "34px",
-              fontSize: "16px",
+              fontSize: "var(--afa-text-title)",
               fontWeight: 700,
               cursor: nextArtistId ? "pointer" : "default",
               opacity: nextArtistId ? 1 : 0.35,
@@ -441,10 +442,10 @@ export default function ArtistProfilePage({
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: "32px" }}>
             <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
               {artist.genre.map((g) => (
-                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "11px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
+                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "var(--afa-text-micro)", fontWeight: 600, padding: "4px 12px", borderRadius: "4px" }}>{g.toUpperCase()}</span>
               ))}
             </div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "var(--afa-cream)", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "var(--afa-text-primary)", lineHeight: 1.05, marginBottom: "12px", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               {displayName}
               {isVerified && (
                 <span
@@ -489,7 +490,7 @@ export default function ArtistProfilePage({
               )}
             </h1>
             {artist.tagline && (
-              <p style={{ fontSize: "16px", color: "rgba(245,245,240,0.75)", fontStyle: "italic", marginBottom: "16px", maxWidth: "500px" }}>
+              <p style={{ fontSize: "var(--afa-text-title)", color: "rgba(245,245,240,0.75)", fontStyle: "italic", marginBottom: "16px", maxWidth: "500px" }}>
                 &quot;{artist.tagline}&quot;
               </p>
             )}
@@ -499,10 +500,10 @@ export default function ArtistProfilePage({
                 disabled={followBusy}
                 className={!following ? "afa-cta-solid" : undefined}
                 style={{
-                  fontSize: "13px", fontWeight: 700, padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
+                  fontSize: "var(--afa-text-ui)", fontWeight: 700, padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
                   border: following ? "1.5px solid rgba(245,245,240,0.4)" : "none",
                   background: following ? "transparent" : "var(--afa-fill-solid)",
-                  color: following ? "var(--afa-cream)" : "var(--afa-on-fill-solid)",
+                  color: following ? "var(--afa-text-primary)" : "var(--afa-on-fill-solid)",
                   opacity: followBusy ? 0.6 : 1,
                 }}
               >
@@ -530,13 +531,13 @@ export default function ArtistProfilePage({
                   )}
                 </button>
               )}
-              <span style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)" }}>
+              <span style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)" }}>
                 {followerCount} {followerCount === 1 ? "follower" : "followers"}
               </span>
             </div>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               {artist.styleTag.map((tag) => (
-                <span key={tag} style={{ background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "12px", padding: "4px 12px", borderRadius: "99px", border: "1px solid rgba(245,245,240,0.15)" }}>{tag}</span>
+                <span key={tag} style={{ background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "4px 12px", borderRadius: "99px", border: "1px solid rgba(245,245,240,0.15)" }}>{tag}</span>
               ))}
             </div>
           </div>
@@ -549,7 +550,7 @@ export default function ArtistProfilePage({
           footer/header labels below). */}
       <div className="artist-vouched-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 48px 0", display: "grid", gap: "40px" }}>
         <div>
-          <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,245,240,0.55)", marginBottom: "16px" }}>
+          <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,245,240,0.55)", marginBottom: "16px" }}>
             Vouched for by
           </h2>
           <div style={{ border: "1px solid rgba(201,151,58,0.25)", borderRadius: "12px", background: "var(--afa-surface-page)", overflow: "hidden" }}>
@@ -557,10 +558,10 @@ export default function ArtistProfilePage({
               <CheckSealIcon style={{ width: "28px", height: "28px", color: "var(--afa-amber)", flexShrink: 0, marginTop: "2px" }} />
               <div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
-                  <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "32px", color: "var(--afa-cream)" }}>{artist.verifiedAttendees}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(245,245,240,0.55)" }}>verified attendees</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-page-title-lg)", color: "var(--afa-text-primary)" }}>{artist.verifiedAttendees}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(245,245,240,0.55)" }}>verified attendees</span>
                 </div>
-                <p style={{ marginTop: "6px", fontSize: "13px", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
+                <p style={{ marginTop: "6px", fontSize: "var(--afa-text-ui)", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
                   Audience accounts who checked in at a show {displayName.split(" ")[0]} performed at.
                 </p>
               </div>
@@ -569,28 +570,28 @@ export default function ArtistProfilePage({
               <RepeatIcon style={{ width: "28px", height: "28px", color: "var(--afa-amber)", flexShrink: 0, marginTop: "2px" }} />
               <div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
-                  <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "32px", color: "var(--afa-cream)" }}>{artist.repeatAttendees}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(245,245,240,0.55)" }}>came back for more</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-page-title-lg)", color: "var(--afa-text-primary)" }}>{artist.repeatAttendees}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(245,245,240,0.55)" }}>came back for more</span>
                 </div>
-                <p style={{ marginTop: "6px", fontSize: "13px", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
+                <p style={{ marginTop: "6px", fontSize: "var(--afa-text-ui)", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
                   Repeat attendees who&rsquo;ve booked {displayName.split(" ")[0]} more than once.
                 </p>
               </div>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(245,245,240,0.1)", marginTop: "12px", paddingTop: "12px" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(245,245,240,0.5)" }}>Total performances</span>
-            <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "20px", color: "var(--afa-cream)" }}>{artist._count.performances}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(245,245,240,0.5)" }}>Total performances</span>
+            <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "20px", color: "var(--afa-text-primary)" }}>{artist._count.performances}</span>
           </div>
         </div>
 
         <div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "16px" }}>
-            <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,245,240,0.55)" }}>Upcoming shows</h2>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "rgba(245,245,240,0.4)" }}>{upcomingShows.length} {upcomingShows.length === 1 ? "date" : "dates"}</span>
+            <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,245,240,0.55)" }}>Upcoming shows</h2>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.4)" }}>{upcomingShows.length} {upcomingShows.length === 1 ? "date" : "dates"}</span>
           </div>
           {upcomingShows.length === 0 ? (
-            <p style={{ fontSize: "14px", color: "rgba(245,245,240,0.5)" }}>No upcoming shows booked yet.</p>
+            <p style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.5)" }}>No upcoming shows booked yet.</p>
           ) : (
             <div>
               {upcomingShows.map((p) => {
@@ -598,14 +599,14 @@ export default function ArtistProfilePage({
                 return (
                   <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "16px", padding: "16px 0", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
                     <div style={{ textAlign: "center", width: "48px" }}>
-                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "26px", lineHeight: 1, color: "var(--afa-cream)" }}>{eventDate.getDate()}</div>
+                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "26px", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "18px", color: "var(--afa-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.title}</div>
-                      <div style={{ fontSize: "13px", color: "rgba(245,245,240,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
+                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "18px", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.title}</div>
+                      <div style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
                     </div>
-                    <Link href={`/events/${p.event.id}`} className="afa-cta-solid" style={{ background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "8px 18px", borderRadius: "6px", fontSize: "12px", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
+                    <Link href={`/events/${p.event.id}`} className="afa-cta-solid" style={{ background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "8px 18px", borderRadius: "6px", fontSize: "var(--afa-text-small)", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
                       Book
                     </Link>
                   </div>
@@ -624,7 +625,7 @@ export default function ArtistProfilePage({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "14px", fontWeight: 600, color: activeTab === tab ? "var(--afa-amber)" : "var(--afa-text-primary)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-amber)" : "transparent"}`, marginBottom: "-2px" }}
+                style={{ padding: "12px 24px", border: "none", background: "transparent", fontSize: "var(--afa-text-body)", fontWeight: 600, color: activeTab === tab ? "var(--afa-amber)" : "var(--afa-text-primary)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-amber)" : "transparent"}`, marginBottom: "-2px" }}
               >
                 {TAB_LABEL[tab]}
               </button>
@@ -649,7 +650,7 @@ export default function ArtistProfilePage({
                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>
                     {section.label}
                   </h3>
-                  <p style={{ fontSize: "14px", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: 0.75, whiteSpace: "pre-wrap" }}>
+                  <p style={{ fontSize: "var(--afa-text-body)", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: 0.75, whiteSpace: "pre-wrap" }}>
                     {section.value}
                   </p>
                 </div>
@@ -673,15 +674,15 @@ export default function ArtistProfilePage({
                       >
                         <span style={{ fontSize: "18px" }}>🎟️</span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>
+                          <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>
                             {stop.title}{stop.venue && ` — ${stop.venue.city}`}
                           </div>
-                          <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
+                          <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55 }}>
                             {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                             {stop.tour && ` · Part of ${stop.tour.title}`}
                           </div>
                         </div>
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--afa-sage)", whiteSpace: "nowrap" }}>Book on AFA →</span>
+                        <span style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-sage)", whiteSpace: "nowrap" }}>Book on AFA →</span>
                       </Link>
                     ))}
                   </div>
@@ -702,15 +703,15 @@ export default function ArtistProfilePage({
                       <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "12px", background: "var(--afa-surface-raised)", borderRadius: "10px", padding: "12px 16px", border: "1px solid rgba(245,245,240,0.1)" }}>
                         <span style={{ fontSize: "18px" }}>📍</span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
+                          <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
                           {stop.date && (
-                            <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55 }}>
+                            <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55 }}>
                               {new Date(stop.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                             </div>
                           )}
                         </div>
                         {stop.link && (
-                          <a href={stop.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "13px", color: "var(--afa-fill-solid)", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
+                          <a href={stop.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-fill-solid)", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
                             Details →
                           </a>
                         )}
@@ -725,7 +726,7 @@ export default function ArtistProfilePage({
                   <h3 style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>Reels</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {artist.videoReel.map((url) => (
-                      <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "13px", color: "var(--afa-fill-solid)", wordBreak: "break-all" }}>{url}</a>
+                      <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-fill-solid)", wordBreak: "break-all" }}>{url}</a>
                     ))}
                   </div>
                 </>
@@ -737,7 +738,7 @@ export default function ArtistProfilePage({
             <div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "20px" }}>Past Shows</h2>
               {pastShows.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>No past shows yet.</p>
+                <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>No past shows yet.</p>
               ) : (
                 <div style={{ position: "relative", paddingLeft: "24px" }}>
                   <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "rgba(245,245,240,0.1)" }} />
@@ -745,8 +746,8 @@ export default function ArtistProfilePage({
                     <div key={p.id} style={{ position: "relative", marginBottom: "20px" }}>
                       <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-amber)" : "rgba(245,245,240,0.2)" }} />
                       <div style={{ background: "var(--afa-surface-raised)", borderRadius: "10px", padding: "14px 16px", border: "1px solid rgba(245,245,240,0.1)" }}>
-                        <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--afa-text-primary)", marginBottom: "4px" }}>{p.event.title}</div>
-                        <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
+                        <div style={{ fontWeight: 600, fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", marginBottom: "4px" }}>{p.event.title}</div>
+                        <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
                     </div>
                   ))}
@@ -760,26 +761,26 @@ export default function ArtistProfilePage({
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {socialEntries.length > 0 && (
             <div style={{ background: "var(--afa-surface-raised)", borderRadius: "12px", padding: "20px", border: "1px solid rgba(245,245,240,0.1)" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>Connect</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}>
                   <span style={{ fontSize: "18px" }}>{SOCIAL_ICON[platform] || "🔗"}</span>
-                  <span style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
+                  <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
                 </a>
               ))}
             </div>
           )}
 
           <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "12px", padding: "20px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--afa-cream)", marginBottom: "8px" }}>🎤 Book for your event</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>🎤 Book for your event</div>
 
             {sessionStatus === "authenticated" && userRole === "ORGANISER" ? (
               <>
-                <p style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6, marginBottom: "14px" }}>
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6, marginBottom: "14px" }}>
                   Invite {displayName} directly into one of your published events.
                 </p>
                 {invitableEvents.length === 0 ? (
-                  <p style={{ fontSize: "12px", color: "rgba(245,245,240,0.4)", lineHeight: 1.5 }}>
+                  <p style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.4)", lineHeight: 1.5 }}>
                     No eligible published events right now - {displayName} may already be in the lineup for all of yours, or none are published yet.
                   </p>
                 ) : (
@@ -787,7 +788,7 @@ export default function ArtistProfilePage({
                     <select
                       value={selectedInviteEventId}
                       onChange={(e) => { setSelectedInviteEventId(e.target.value); setInviteResult(null) }}
-                      style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.2)", background: "rgba(245,245,240,0.08)", color: "var(--afa-cream)", fontSize: "13px", marginBottom: "10px" }}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.2)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", marginBottom: "10px" }}
                     >
                       <option value="" style={{ color: "black" }}>Select an event...</option>
                       {invitableEvents.map((e) => (
@@ -796,30 +797,30 @@ export default function ArtistProfilePage({
                         </option>
                       ))}
                     </select>
-                    <button
+                    <Button
+                      variant="form-submit"
                       onClick={sendInvite}
                       disabled={!selectedInviteEventId || inviting}
                       className="afa-cta-solid"
-                      style={{ display: "block", width: "100%", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", border: "none", cursor: !selectedInviteEventId || inviting ? "default" : "pointer", opacity: !selectedInviteEventId || inviting ? 0.6 : 1 }}
                     >
                       {inviting ? "Sending..." : "Invite to Lineup"}
-                    </button>
+                    </Button>
                   </>
                 )}
                 {inviteResult && (
-                  <p style={{ fontSize: "12px", marginTop: "10px", color: inviteResult.ok ? "var(--afa-sage)" : "var(--afa-fill-solid)" }}>
+                  <p style={{ fontSize: "var(--afa-text-small)", marginTop: "10px", color: inviteResult.ok ? "var(--afa-sage)" : "var(--afa-fill-solid)" }}>
                     {inviteResult.message}
                   </p>
                 )}
               </>
             ) : sessionStatus === "authenticated" ? (
-              <p style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>
+              <p style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>
                 Organisers can invite {displayName} directly into their published events.
               </p>
             ) : (
               <>
-                <p style={{ fontSize: "13px", color: "rgba(245,245,240,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {displayName} directly into your event's lineup.</p>
-                <Link href="/login" className="afa-cta-solid" style={{ display: "block", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
+                <p style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6, marginBottom: "16px" }}>Are you an organiser? Log in to invite {displayName} directly into your event's lineup.</p>
+                <Link href="/login" className="afa-cta-solid" style={{ display: "block", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px", borderRadius: "8px", fontSize: "var(--afa-text-ui)", fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
                   Log In
                 </Link>
               </>
@@ -830,11 +831,11 @@ export default function ArtistProfilePage({
               Login required as of 11 Aug (Hitesh's rule) - same gate as
               Follow. */}
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "12px", padding: "20px", border: "1px solid rgba(245,245,240,0.1)" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
-            <p style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry.</p>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>🏢 Corporate or Private Event?</div>
+            <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "16px" }}>Send {displayName} a direct booking inquiry.</p>
             <button
               onClick={openCorporateInquiry}
-              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-text-primary)", border: "1.5px solid rgba(245,245,240,0.2)", padding: "12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
+              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-text-primary)", border: "1.5px solid rgba(245,245,240,0.2)", padding: "12px", borderRadius: "8px", fontSize: "var(--afa-text-ui)", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
             >
               Send Inquiry
             </button>
