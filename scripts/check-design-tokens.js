@@ -23,6 +23,20 @@
 // ratchet.js, sharing these same rule definitions so the two checks
 // can never drift out of sync with each other.
 //
+// GEN-2609-080 - the `raw-button` rule as shipped in GEN-2609-078 was
+// per-line: it flagged every added line containing `<button`, with no
+// way to tell "this line is new debt" from "this line is a token
+// retrofit of an existing raw button" (a `padding: '8px'` ->
+// `padding: 'var(--afa-space-2)'` edit is 1 removed + 1 added line -
+// the button count didn't change, but the old rule flagged it anyway).
+// This punished the exact migration work the north star asks for and
+// broke on real PRs (GEN-2609-079's seat-map and organiser-event-edit
+// batches). `raw-button` is now the one rule handled outside the
+// generic per-line loop in findOffenses() - it counts `<button` across
+// the WHOLE diff (added vs. removed, excluding Button.tsx and
+// `token-ok` lines) and flags only the surplus. See that function's
+// own comments for the full mechanism.
+//
 // Deliberately diff-only: pre-existing literals elsewhere in src/ (e.g.
 // the hand-authored rgba() borders documented in
 // docs/afa-design-tokens-reference.md Section 1) are real, known debt
@@ -265,15 +279,35 @@ const RULES = [
   ),
   // GEN-2609-078 - raw <button>, allowed only inside Button.tsx itself
   // (the one file where the literal tag is the actual implementation,
-  // not debt). Deliberately `skipRelocatedCheck: true`: the "extracted
-  // literal" here is always the same fixed string ("<button>"), and
-  // that string already exists in BASE_REF's tree at 216+ other sites
-  // today - the GEN-2609-057 relocated-literal exemption (built for
-  // value-uniqueness checks like a specific hex/rgba) would treat every
-  // new raw <button> as "already known" and never flag it, silently
-  // defeating the rule. A raw <button> tag isn't a value that can
-  // "relocate" the way a color can; every new site is new regardless of
-  // how many others already exist, so this rule always flags.
+  // not debt).
+  //
+  // GEN-2609-080 - `skipRelocatedCheck: true` is kept (raw <button> was
+  // never a "relocatable value" the GEN-2609-057 exemption's exact-
+  // string matching could meaningfully apply to - the string "<button>"
+  // trivially already exists at 200+ other sites regardless of whether
+  // a given line is new debt), but it no longer decides this rule's
+  // real behavior. `findOffenses()` below now excludes `raw-button`
+  // from the generic per-line loop entirely and instead counts `<button`
+  // on added vs. removed lines across the WHOLE diff, flagging only the
+  // surplus - see that block's own comment for why. `skipRelocatedCheck`
+  // stays `true` here purely as a defensive/documentary marker (if this
+  // rule were ever fed through the generic per-line path again by
+  // mistake, it should still flag-always rather than silently adopt the
+  // relocated-literal exemption, which was never correct for it).
+  //
+  // Why the count had to change from "every added line" to "diff-wide
+  // surplus": a token-retrofit edit to an EXISTING raw button (e.g.
+  // `padding: '8px'` -> `padding: 'var(--afa-space-2)'` on a line that
+  // also contains `<button`) is one removed line + one added line in
+  // the diff - the raw-button COUNT didn't change, but the old rule
+  // flagged it anyway, since it only ever asked "does this added line
+  // contain `<button`," never "did the number of raw buttons actually
+  // go up." Reproduced live against 2 real PRs before this fix: PR #660
+  // (seat-map) failed at 6 sites, PR #662 (organiser event edit) failed
+  // at 1 - all 7 were retrofit-only edits to already-existing buttons,
+  // not new debt. This was a design flaw in GEN-2609-078 itself, not in
+  // those PRs, and it directly punished the exact migration work the
+  // north star asks for.
   {
     name: 'raw-button',
     test: (line) => /<button\b/.test(line),
@@ -407,18 +441,39 @@ function getDiff() {
   }
 }
 
+// GEN-2609-080 - the one rule in RULES handled outside the generic
+// per-line loop in findOffenses() below (see that rule's own comment
+// for why: a retrofit edit to an existing raw button is 1 removed + 1
+// added line, and the old per-line "does this added line match" check
+// couldn't tell that apart from a genuinely new one).
+const RAW_BUTTON_RULE = RULES.find((r) => r.name === 'raw-button')
+const PER_LINE_RULES = RULES.filter((r) => r.name !== 'raw-button')
+
 function findOffenses(diffText) {
   const offenses = []
   const tokenOkUses = []
   let currentFile = null
   let checkCurrentFile = false
+  let rawButtonFileExempt = false
   let newLineNo = 0
+
+  // GEN-2609-080 - accumulated across the WHOLE diff (every file the PR
+  // touches), not per-file: a raw button genuinely moved from one file
+  // to another (an extract-component refactor) is -1 in the source file
+  // and +1 in the destination - diff-wide, that nets to 0 and correctly
+  // passes; counted per-file instead, the destination file's own +1
+  // would wrongly flag as new debt. The whole-repo ratchet
+  // (design-token-ratchet.js) is the actual backstop on the total count
+  // regardless of how literals shuffle between files.
+  const rawButtonAdded = [] // { file, line, content }, in diff order
+  let rawButtonRemoved = 0
 
   for (const rawLine of diffText.split('\n')) {
     if (rawLine.startsWith('+++ ')) {
       const p = rawLine.slice(4).trim()
       currentFile = p === '/dev/null' ? null : p.replace(/^b\//, '')
       checkCurrentFile = !!currentFile && isCheckedFile(currentFile) && !isExemptFile(currentFile)
+      rawButtonFileExempt = !!currentFile && RAW_BUTTON_RULE.isExemptFile && RAW_BUTTON_RULE.isExemptFile(currentFile)
       continue
     }
     if (rawLine.startsWith('@@')) {
@@ -433,11 +488,13 @@ function findOffenses(diffText) {
       const content = rawLine.slice(1)
       const reason = tokenOkReason(content)
       if (reason) {
+        // token-ok suppresses every rule on this line, raw-button
+        // included - it never enters the added count below.
         tokenOkUses.push({ file: currentFile, line: newLineNo, reason, content: content.trim() })
         newLineNo++
         continue
       }
-      for (const rule of RULES) {
+      for (const rule of PER_LINE_RULES) {
         if (rule.isExemptFile && rule.isExemptFile(currentFile)) continue
         if (!rule.test(content)) continue
         const literals = rule.extract ? rule.extract(content) : []
@@ -445,9 +502,31 @@ function findOffenses(diffText) {
           offenses.push({ file: currentFile, line: newLineNo, rule: rule.name, content: content.trim() })
         }
       }
+      if (!rawButtonFileExempt && RAW_BUTTON_RULE.test(content)) {
+        rawButtonAdded.push({ file: currentFile, line: newLineNo, content: content.trim() })
+      }
       newLineNo++
     } else if (rawLine.startsWith('-')) {
       // removed line - doesn't occupy a line number in the new file
+      const content = rawLine.slice(1)
+      if (!rawButtonFileExempt && RAW_BUTTON_RULE.test(content)) {
+        rawButtonRemoved++
+      }
+    }
+  }
+
+  // GEN-2609-080 - flag only the surplus: if this diff removed as many
+  // (or more) raw <button>s than it added, the count didn't go up and
+  // nothing is flagged, no matter how many individual lines changed.
+  // The specific lines reported are the LAST `surplus` added entries in
+  // diff order - with count alone there's no way to know which of the
+  // added lines is "the genuinely new one" vs. "a retrofit," so this
+  // picks a deterministic, arbitrary-but-consistent subset rather than
+  // either flagging all of them (the old, wrong behavior) or guessing.
+  const surplus = rawButtonAdded.length - rawButtonRemoved
+  if (surplus > 0) {
+    for (const entry of rawButtonAdded.slice(-surplus)) {
+      offenses.push({ file: entry.file, line: entry.line, rule: 'raw-button', content: entry.content })
     }
   }
 
