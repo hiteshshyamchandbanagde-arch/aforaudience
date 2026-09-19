@@ -10,6 +10,8 @@ import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
 import { contrastRatio, isValidTokenValue, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { TOKEN_COVERAGE, type CoverageStatus } from '@/lib/design-token-coverage'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -41,19 +43,78 @@ type DesignTokenVersion = {
   id: string
   snapshot: Record<string, string>
   createdBy: string | null
+  creatorLabel: string | null
   createdAt: string
   note: string | null
+}
+
+// GEN-2609-076 - versions come back newest-first; diffing each one
+// against the NEXT one in that same order (i.e. the version immediately
+// before it in time) shows what THAT SAVE actually changed, without a
+// second API round trip - the snapshots are already in hand.
+function diffSnapshots(newer: Record<string, string>, older: Record<string, string> | undefined): { key: string; from: string; to: string }[] {
+  if (!older) return []
+  const changes: { key: string; from: string; to: string }[] = []
+  for (const key of Object.keys(newer)) {
+    if (older[key] !== undefined && older[key] !== newer[key]) {
+      changes.push({ key, from: older[key], to: newer[key] })
+    }
+  }
+  return changes
 }
 
 const GROUP_META: Record<TokenGroup, { label: string; blurb: string }> = {
   color: { label: 'Color', blurb: 'Every --afa-* color token in globals.css.' },
   font: { label: 'Font', blurb: 'Which pre-loaded font plays each typographic role.' },
-  size: { label: 'Size', blurb: 'Type scale — text sizes used across the app.' },
+  size: { label: 'Size', blurb: 'Type scale — adopted by 11 public content pages (GEN-2609-073).' },
   radius: { label: 'Radius', blurb: 'Corner radius scale, consumed by the Button component.' },
   spacing: { label: 'Spacing', blurb: '8px-based spacing grid.' },
   button: { label: 'Button', blurb: 'Button padding scale (sm/md/lg), consumed by the Button component.' },
 }
 const GROUP_ORDER: TokenGroup[] = ['color', 'font', 'size', 'radius', 'spacing', 'button']
+
+// GEN-2609-076 - "coverage" here means real, grepped consumer files
+// (TOKEN_COVERAGE, src/lib/design-token-coverage.ts), not a guess. A
+// group's own badge is the honest headline (does editing ANYTHING in
+// this group ever do anything, and where), but real groups are mixed -
+// "color" is mostly site-wide with 24 orphaned tokens mixed in, so
+// individual fields get their own disabled/noted treatment too (see
+// TokenField below) rather than the group badge alone standing in for
+// per-token truth.
+// Reuses statusStyle.ts's own governed STATUS_TONE palette instead of
+// inventing new rgba tints - it's exempt from check-design-tokens.js's
+// literal-check for exactly this reason (see that file's own header
+// comment: "this is where new tone literals are supposed to live").
+const COVERAGE_META: Record<CoverageStatus, { label: string; color: string; bg: string }> = {
+  'site-wide': { label: 'Site-wide', ...STATUS_TONE.sage },
+  'button-only': { label: 'Button only', ...STATUS_TONE.gold },
+  unused: { label: 'Not yet applied', ...STATUS_TONE.error },
+}
+
+function tokenCoverage(key: string): CoverageStatus {
+  return TOKEN_COVERAGE[key]?.status ?? 'unused'
+}
+
+// A group's headline status: "site-wide" if ANY token in it reaches
+// beyond Button.tsx (even if others in the same group are dead),
+// "button-only" if every live token in it tops out at Button.tsx,
+// "unused" only when EVERY token in the group has zero consumers -
+// exactly the case the ticket says to hide or disable-with-note.
+function groupCoverage(tokens: DesignToken[]): CoverageStatus {
+  const statuses = tokens.map((t) => tokenCoverage(t.key))
+  if (statuses.every((s) => s === 'unused')) return 'unused'
+  if (statuses.some((s) => s === 'site-wide')) return 'site-wide'
+  return 'button-only'
+}
+
+function CoverageBadge({ status }: { status: CoverageStatus }) {
+  const meta = COVERAGE_META[status]
+  return (
+    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 999, color: meta.color, background: meta.bg }}>
+      {meta.label}
+    </span>
+  )
+}
 
 const FONT_ROLE_LABEL: Record<string, string> = {
   '--font-display': 'Display (headlines)',
@@ -333,18 +394,49 @@ export default function AdminDesignSystemPage() {
                 {versions.length === 0 ? (
                   <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13 }}>No versions yet.</p>
                 ) : (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {versions.map((v) => (
-                      <li key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
-                        <div>
-                          <div style={{ color: 'var(--afa-text-primary)', fontSize: 13, fontWeight: 600 }}>{v.note || 'Update'}</div>
-                          <div style={{ color: 'var(--afa-text-muted)', fontSize: 12 }}>{new Date(v.createdAt).toLocaleString()}</div>
-                        </div>
-                        <button onClick={() => handleRevert(v.id)} disabled={saving} style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 12 }}>
-                          Revert to this
-                        </button>
-                      </li>
-                    ))}
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {versions.map((v, i) => {
+                      // versions is newest-first, so index i+1 is the
+                      // version immediately BEFORE this one in time -
+                      // diffing against it shows what THIS save changed.
+                      const changedByThisSave = diffSnapshots(v.snapshot, versions[i + 1]?.snapshot)
+                      // What reverting TO this version would actually
+                      // change, compared to the CURRENTLY LIVE token
+                      // values (not this list's snapshots) - the real
+                      // answer to "what does this button do right now."
+                      const currentValues = Object.fromEntries((tokens ?? []).map((t) => [t.key, t.value]))
+                      const wouldRestore = diffSnapshots(v.snapshot, currentValues).length
+                      return (
+                        <li key={v.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                            <div>
+                              <div style={{ color: 'var(--afa-text-primary)', fontSize: 13, fontWeight: 600 }}>{v.note || 'Update'}</div>
+                              <div style={{ color: 'var(--afa-text-muted)', fontSize: 12 }}>
+                                {new Date(v.createdAt).toLocaleString()}
+                                {v.creatorLabel && <> · by {v.creatorLabel}</>}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleRevert(v.id)}
+                              disabled={saving || wouldRestore === 0}
+                              title={wouldRestore === 0 ? 'Already matches the current live values' : `Would change ${wouldRestore} token(s) back to this version's values`}
+                              style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 12, flexShrink: 0, opacity: wouldRestore === 0 ? 0.5 : 1 }}
+                            >
+                              {wouldRestore === 0 ? 'Already current' : `Revert (${wouldRestore})`}
+                            </button>
+                          </div>
+                          {changedByThisSave.length > 0 && (
+                            <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              {changedByThisSave.map((c) => (
+                                <li key={c.key} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--afa-text-muted)' }}>
+                                  {c.key}: <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{c.from}</span> → <span style={{ color: 'var(--afa-text-secondary)' }}>{c.to}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
               </div>
@@ -357,9 +449,22 @@ export default function AdminDesignSystemPage() {
               </p>
               <div style={{ ...previewStyle, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: 20, background: 'var(--afa-surface-page)' }}>
                 <Button variant="primary" fullWidth={false} size={36}>Primary</Button>
-                <Button variant="outline" fullWidth={false} size={36}>Outline</Button>
+                {/* GEN-2609-076 - `outline`'s text/border color is
+                    --afa-on-fill-solid (near-black by design), meant to
+                    read against a --afa-fill-solid background it sits
+                    on top of (see Button.tsx's own GEN-2609-047
+                    comment) - rendering it directly on this panel's
+                    --afa-surface-page (near-black too) made it
+                    functionally invisible. Its own small fill-solid
+                    wrapper previews it in the context it's actually
+                    used in, e.g. NotificationOptIn.tsx's banner. */}
+                <div style={{ ...previewStyle, background: 'var(--afa-fill-solid)', padding: '10px 14px' }}>
+                  <Button variant="outline" fullWidth={false} size={36}>Outline</Button>
+                </div>
                 <Button variant="form-submit" fullWidth={false} size={36}>Form submit</Button>
                 <Button variant="outline-neutral" fullWidth={false} size="sm">Outline neutral</Button>
+                <Button variant="solid" fullWidth={false} size="md">Solid</Button>
+                <Button variant="outline-error" fullWidth={false} size="md">Outline error</Button>
                 <Button variant="toggle-pill" fullWidth={false} size="pill-sm">Toggle pill</Button>
                 <Button variant="toggle-pill" fullWidth={false} size="pill-sm" selected>Toggle pill (selected)</Button>
                 <Button variant="secondary" fullWidth={false} size={36}>Secondary</Button>
@@ -402,13 +507,30 @@ export default function AdminDesignSystemPage() {
             {GROUP_ORDER.map((group) => {
               const groupTokens = tokensByGroup.get(group) ?? []
               if (groupTokens.length === 0) return null
+              const coverage = groupCoverage(groupTokens)
+              const groupDisabled = coverage === 'unused'
               return (
-                <div key={group} style={{ ...panelStyle, marginBottom: 24 }}>
-                  <h2 style={sectionTitleStyle}>{GROUP_META[group].label}</h2>
+                <div key={group} style={{ ...panelStyle, marginBottom: 24, opacity: groupDisabled ? 0.6 : 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                    <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>{GROUP_META[group].label}</h2>
+                    <CoverageBadge status={coverage} />
+                  </div>
                   <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>{GROUP_META[group].blurb}</p>
+                  {groupDisabled && (
+                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 13, fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
+                      Not consumed anywhere in the app right now (checked via a real grep of every var(--…) usage, not assumed). Editing these has no visible effect until a future ticket adopts them — disabled here so that isn't a trap.
+                    </p>
+                  )}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
                     {groupTokens.map((token) => (
-                      <TokenField key={token.key} token={token} value={pending.get(token.key) ?? token.value} onChange={(v) => setValue(token.key, v)} />
+                      <TokenField
+                        key={token.key}
+                        token={token}
+                        value={pending.get(token.key) ?? token.value}
+                        onChange={(v) => setValue(token.key, v)}
+                        disabled={groupDisabled || tokenCoverage(token.key) === 'unused'}
+                        coverage={tokenCoverage(token.key)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -440,17 +562,39 @@ export default function AdminDesignSystemPage() {
   )
 }
 
-function TokenField({ token, value, onChange }: { token: DesignToken; value: string; onChange: (v: string) => void }) {
+function TokenField({
+  token,
+  value,
+  onChange,
+  disabled,
+  coverage,
+}: {
+  token: DesignToken
+  value: string
+  onChange: (v: string) => void
+  disabled: boolean
+  coverage: CoverageStatus
+}) {
   const invalid = !isValidTokenValue(token.type, value)
   const isSimpleHex = /^#[0-9a-fA-F]{6}$/.test(value)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, opacity: disabled ? 0.55 : 1 }}>
+      <label style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         {token.key}
         {token.locked && (
           <span title="Locked — editable only with confirmation" style={{ color: 'var(--afa-amber)' }}>
             🔒
+          </span>
+        )}
+        {coverage === 'unused' && (
+          <span title="No consumers found anywhere in src/ — editing this has no visible effect" style={{ color: 'var(--afa-error-bright)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            unused
+          </span>
+        )}
+        {coverage === 'button-only' && (
+          <span title="Only Button.tsx reads this token" style={{ color: 'var(--afa-amber)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Button only
           </span>
         )}
       </label>
@@ -458,21 +602,22 @@ function TokenField({ token, value, onChange }: { token: DesignToken; value: str
       {token.type === 'color' && (
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           {isSimpleHex ? (
-            <input type="color" value={value} onChange={(e) => onChange(e.target.value)} style={{ width: 32, height: 32, padding: 0, border: 'none', background: 'none', cursor: 'pointer' }} />
+            <input type="color" value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} style={{ width: 32, height: 32, padding: 0, border: 'none', background: 'none', cursor: disabled ? 'not-allowed' : 'pointer' }} />
           ) : (
             <div style={{ width: 32, height: 32, flexShrink: 0, background: value, border: '1px solid var(--afa-border-resting)' }} />
           )}
           <input
             type="text"
             value={value}
+            disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
-            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)' }}
+            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
           />
         </div>
       )}
 
       {token.type === 'font-family' && (
-        <select value={value} onChange={(e) => onChange(e.target.value)} style={inputStyle}>
+        <select value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, cursor: disabled ? 'not-allowed' : 'pointer' }}>
           {FONT_ALLOWLIST.map((f) => (
             <option key={f.value} value={f.value}>
               {f.label}
@@ -486,8 +631,9 @@ function TokenField({ token, value, onChange }: { token: DesignToken; value: str
           <input
             type="number"
             value={parseFloat(value) || 0}
+            disabled={disabled}
             onChange={(e) => onChange(`${e.target.value}px`)}
-            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)' }}
+            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
           />
           <span style={{ color: 'var(--afa-text-muted)', fontSize: 12 }}>px</span>
         </div>
@@ -497,9 +643,10 @@ function TokenField({ token, value, onChange }: { token: DesignToken; value: str
         <input
           type="text"
           value={value}
+          disabled={disabled}
           placeholder="e.g. 9px 17px"
           onChange={(e) => onChange(e.target.value)}
-          style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', fontFamily: 'var(--font-mono)' }}
+          style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', fontFamily: 'var(--font-mono)', cursor: disabled ? 'not-allowed' : 'text' }}
         />
       )}
 

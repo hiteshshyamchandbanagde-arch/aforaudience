@@ -449,7 +449,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       <button
                         key={l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                       >
                         {l.nativeLabel}
                       </button>
@@ -501,7 +501,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   ))}
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "10px 22px", borderRadius: "6px" }}
+                    style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "10px 22px", borderRadius: "var(--afa-radius-sm)" }}
                   >
                     {t.nav.signOut}
                   </button>
@@ -547,7 +547,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   aria-label="Account menu"
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}
                 >
                   {user ? (
                     <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700 }}>

@@ -27,21 +27,32 @@ export async function POST() {
   }
 
   const now = new Date()
-  await prisma.$transaction([
-    ...Object.entries(DEFAULT_TOKEN_VALUES).map(([key, value]) =>
-      prisma.designToken.update({
-        where: { key },
-        data: { value, updatedBy: admin.id, updatedAt: now },
+  await prisma.$transaction(
+    [
+      ...Object.entries(DEFAULT_TOKEN_VALUES).map(([key, value]) =>
+        prisma.designToken.update({
+          where: { key },
+          data: { value, updatedBy: admin.id, updatedAt: now },
+        }),
+      ),
+      prisma.designTokenVersion.create({
+        data: {
+          snapshot: DEFAULT_TOKEN_VALUES,
+          createdBy: admin.id,
+          note: 'Reset to defaults',
+        },
       }),
-    ),
-    prisma.designTokenVersion.create({
-      data: {
-        snapshot: DEFAULT_TOKEN_VALUES,
-        createdBy: admin.id,
-        note: 'Reset to defaults',
-      },
-    }),
-  ])
+    ],
+    // GEN-2609-076 - this always writes all 93 tokens + 1 version row
+    // as 94 sequential round-trips over one connection (prisma.ts caps
+    // the pool at max:1). Prisma's default $transaction timeout is
+    // 5000ms - over real network latency to Supabase that's plausibly
+    // not enough, and the failure mode is a silent, unexplained "Reset
+    // failed" with no indication why. Not a hypothetical: found by
+    // re-reading this route specifically because Reset was reported
+    // broken. Generous headroom, not tuned to a measured number.
+    { timeout: 20000, maxWait: 5000 },
+  )
 
   revalidateDesignTokens()
 

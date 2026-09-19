@@ -34,7 +34,23 @@ export async function GET() {
     prisma.designTokenVersion.findMany({ orderBy: { createdAt: 'desc' }, take: 20 }),
   ])
 
-  return NextResponse.json({ tokens, versions })
+  // GEN-2609-076 - version history previously showed only a note string
+  // and timestamp; an admin had no way to tell WHO made a change without
+  // cross-referencing elsewhere. `createdBy` is a bare user id - resolve
+  // it to something readable here (one extra query, bounded by however
+  // many distinct admins appear in the last 20 versions) rather than
+  // pushing that join onto the client.
+  const creatorIds = [...new Set(versions.map((v) => v.createdBy).filter((id): id is string => !!id))]
+  const creators = creatorIds.length
+    ? await prisma.user.findMany({ where: { id: { in: creatorIds } }, select: { id: true, displayName: true, name: true, email: true } })
+    : []
+  const creatorLabelById = new Map(creators.map((c) => [c.id, c.displayName || c.name || c.email]))
+  const versionsWithCreator = versions.map((v) => ({
+    ...v,
+    creatorLabel: v.createdBy ? creatorLabelById.get(v.createdBy) ?? v.createdBy : null,
+  }))
+
+  return NextResponse.json({ tokens, versions: versionsWithCreator })
 }
 
 type PatchBody = {
@@ -91,21 +107,28 @@ export async function PATCH(req: Request) {
   }
 
   const now = new Date()
-  await prisma.$transaction([
-    ...body.changes.map((c) =>
-      prisma.designToken.update({
-        where: { key: c.key },
-        data: { value: c.value, updatedBy: admin.id, updatedAt: now },
+  await prisma.$transaction(
+    [
+      ...body.changes.map((c) =>
+        prisma.designToken.update({
+          where: { key: c.key },
+          data: { value: c.value, updatedBy: admin.id, updatedAt: now },
+        }),
+      ),
+      prisma.designTokenVersion.create({
+        data: {
+          snapshot: await snapshotAfter(body.changes),
+          createdBy: admin.id,
+          note: body.note ?? `Updated ${body.changes.length} token(s)`,
+        },
       }),
-    ),
-    prisma.designTokenVersion.create({
-      data: {
-        snapshot: await snapshotAfter(body.changes),
-        createdBy: admin.id,
-        note: body.note ?? `Updated ${body.changes.length} token(s)`,
-      },
-    }),
-  ])
+    ],
+    // GEN-2609-076 - up to 100 changes allowed per save (the limit
+    // checked above); same round-trip-timeout risk the reset endpoint
+    // had, same fix, defensively applied here too even though a save
+    // rarely approaches that ceiling in practice.
+    { timeout: 20000, maxWait: 5000 },
+  )
 
   revalidateDesignTokens()
 
