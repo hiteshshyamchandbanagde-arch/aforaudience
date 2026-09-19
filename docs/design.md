@@ -6688,3 +6688,66 @@ This file alone: 208 -> 82 literals (61% reduction).
 **Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
 
 **Not verified this session:** a real QA-preview click-through. Flagged explicitly per the dispatch's own instruction: **no test credential exists for Admin** (Hitesh's own Google OAuth account, no scriptable QA admin login documented anywhere in this repo, confirmed by every prior ticket that touched an Admin page - e.g. `GEN-2609-035`'s verify section). This PR needs Hitesh's own live click-through on the settings page before merging, not a delegated/scripted check - flagged in the handoff as a hard requirement, not a nice-to-have.
+
+## GEN-2609-081 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **80** before this session started) - extend the central scales with the frequent off-scale values
+
+Dispatch: `GEN-2609-079`'s batch-1 migration hit a ~57% per-file ceiling because most of what's left is genuinely OFF-SCALE - no existing `--afa-space-*`/`--afa-text-*`/`--afa-radius-*` step matches these values exactly, and rounding them would be a real, visible change this migration's own "exact match only" contract forbids. Rule (Hitesh, approved by dispatching this prompt): a value gets a token if it has **50+ non-tokenized occurrences repo-wide**. This ticket adds those tokens - no page migration, zero visual change, admin-editable from the moment it merges.
+
+### Reconciled measurement, not copied from the dispatch's own rough numbers
+
+Built a fresh Node script (scratch, not committed - same throwaway-script convention every prior audit in this doc uses) that reuses `check-design-tokens.js`'s own exported `extractPropValues`/`extractLengthTokensFromValue`/`isAllowlistedLength` (the exact same extraction the ratchet's live counts are built from, not a separate hand-written regex), tallying by normalized value (`6` bare and `6px` merged, per this doc's own established convention - see `GEN-2609-079` file 1's off-scale decision table) across every `git ls-files -- src` checked/non-exempt file. Ran against `qa` `a6ec083` (this session's own branch point) before any edit:
+
+| Value | Dispatch's rough count | This session's precise count | Existing scale it sits between |
+|---|---|---|---|
+| Spacing `10px` | 353 | **347** | `space-2`=8 / `space-3`=12 |
+| Spacing `6px` | 254 | **254** | `space-1`=4 / `space-2`=8 |
+| Spacing `14px` | 214 | **213** | `space-3`=12 / `space-4`=16 |
+| Spacing `32px` | 120 | **117** | `space-6`=24 / (above top) |
+| Spacing `18px` | 116 | **115** | `space-4`=16 / `space-5`=20 |
+| Spacing `28px` | 91 | **90** | `space-6`=24 / (above top) |
+| Spacing `48px` | 71 | **70** | (well above top) |
+| Spacing `2px` | 65 | **65** | (below `space-1`=4) |
+| Font-size `15px` | 71 | **72** | `text-body`=14 / `text-title`=16 |
+| Font-size `10px` | 58 | **66** | (below `text-micro`=11) |
+| Font-size `18px` | 57 | **56** | `text-title`=16 / `text-heading`=24 |
+| Font-size `20px` | 50 | **51** | `text-title`=16 / `text-heading`=24 |
+| Radius `12px` | 102 | **99** | `radius-md`=8 / `radius-pill`=999 |
+| Radius `10px` | 60 | **60** | `radius-sm`=6 / `radius-md`=8 |
+
+Every one of the 14 clears the bar on the real count, the lowest being font-size `20px` at 51. Re-ran the same script against the 4 explicitly-declined values to confirm they're correctly excluded, not just taken on the dispatch's word: font-size `22px` (dispatch 29, precise **26**), font-size `17px` (dispatch 25, precise **25**), radius `3px` (dispatch 43, precise **46**), radius `16px` (dispatch 16, precise **20**) - all 4 stay below 50 on the precise count too. **No value flips status either direction** - the dispatch's own rough-grep table turned out fully reconcilable, nothing new crossed the bar and nothing listed fell below it. No other value anywhere in the 3 categories (checked the full sorted list, not just these 18) clears 50 outside this set.
+
+### Naming decision
+
+The existing spacing scale is `--afa-space-1..6` = a **step index** into a 4px-uniform grid (`space-N` = `4N`px) - none of the 8 new values (2/6/10/14/18/28/32/48) lands on a free index without either colliding with an existing one's number (`space-2` already means 8px) or breaking the "N×4" pattern for a value that isn't actually on that grid (48 would be "space-12", implying a grid step that was never real). The size/radius scales are **semantic role names** (`text-micro`/`radius-sm`) with no natural non-arbitrary name for a raw in-between pixel value.
+
+Chosen scheme, applied uniformly across all 3 scales: **explicit px-suffixed names** - `--afa-space-10px`, `--afa-text-18px`, `--afa-radius-12px`. The unit is part of the name, which is the point: it reads unambiguously as "this many pixels," distinguishing it at a glance from the pre-existing index/role-named tokens (`--afa-space-2` is step-2, 8px; `--afa-space-2px` is literally 2px) rather than risking the two schemes being silently conflated. **No existing token was renamed or re-valued** - `--afa-space-1..6`/`--afa-text-micro..heading`/`--afa-radius-sharp/sm/md/pill` are byte-identical to before this ticket.
+
+### Build
+
+Same shape as `GEN-2609-075`'s own token-addition pattern, reused rather than reinvented:
+- `src/app/globals.css` - 14 new `--afa-*` custom properties added to `:root` (own comment block, full naming rationale inline), values byte-identical to the literals they name.
+- `src/lib/design-tokens.ts` - `DEFAULT_TOKEN_VALUES` gets the same 14 entries (the DB "reset to defaults" source of truth, mirrored 1:1 per that file's own header comment).
+- `src/lib/design-token-coverage.ts` - 14 new `TOKEN_COVERAGE` rows, all `{ status: "unused", consumerCount: 0, consumerFiles: [] }` - real, not a placeholder: `git grep` for every new key confirms zero consumers anywhere in `src/` (this ticket touches no page file, per its own explicit constraint). Correctly renders disabled in the admin UI until a future migration batch adopts one, same honest-coverage behavior every other never-yet-adopted token already gets.
+- `prisma/migrations/20260919140000_add_design_token_scale_extension/migration.sql` - applied directly via `Supabase:apply_migration` against `aforaudience-qa` (`nqiyrypmjtogoocerxtu`) only, verified against `list_projects` before running (production-freeze rule). 14 `INSERT`s, none locked, values re-queried post-apply and confirmed byte-identical to `globals.css`. `DesignToken` now holds 107 rows (93 + 14).
+- **`/dashboard/admin/design-system` needed zero code changes.** The page already renders every token in a group generically (`GROUP_ORDER`/`tokensByGroup`/`TokenField`, `GEN-2609-075`) - the 14 new rows show up as real, editable fields under Spacing/Size/Radius automatically once the DB read returns them, each individually disabled with an "unused" badge (via `tokenCoverage()`) until something consumes it, exactly like every other never-yet-adopted token already behaves. Confirmed by reading the page's own render logic, not assumed.
+- **Reverse-lookup / next-batch note.** No reverse-lookup script is committed anywhere in this repo - every prior migration batch (`GEN-2609-079`'s 3 files) built one fresh each time, straight from `globals.css`'s own `--afa-*` definitions (that method is documented in this doc's own `GEN-2609-079` file-1 entry). Because these 14 tokens are now real entries in `globals.css`, the next batch's freshly-built reverse-lookup script picks them up automatically with no separate script to update - the extension IS the documentation update. This table (and the naming section above) is the durable record for whoever writes that next script.
+
+### Colour: `rgba(245,245,240,0.08)` - reported, not tokenized (per the dispatch's explicit instruction)
+
+18 occurrences across the 3 batch-1 files (5 seat-map + 8 settings + 5 organiser-event-edit, all already documented in this doc's own `GEN-2609-079` entries); **173 repo-wide**, confirmed via `git grep -c`. **Real finding: this value is not a near-miss, it's an EXACT, byte-identical match** - `src/lib/statusStyle.ts:46`'s `STATUS_TONE.muted.bg` is `'rgba(245,245,240,0.08)'`, the "completed / neutral end-state" tone (Section 5.1 of `docs/afa-design-tokens-reference.md`). It is not a `--afa-*` CSS custom property and not a border/divider token - it's the governed status-tone table's own background value, reused so often outside an actual status-badge context that it reads like a generic translucent-panel fill.
+
+The nearest real **border/divider** token is `--afa-border-resting: rgba(245, 245, 240, 0.15)` (`GEN-2609-068`) - same RGB triple, alpha **0.15 vs 0.08, roughly double** (not close, not equal). No border/divider token matches `0.08` exactly or closely; the exact match lives in `statusStyle.ts`, a different governed table entirely. Per the dispatch's own instruction, not adding a token for this - flagged here as a real, reportable finding (many of these 173 sites are plausibly meant to be "this panel is in its neutral/muted state," i.e. genuinely `STATUS_TONE.muted.bg`-shaped, not border-shaped - a real future audit question, not decided here).
+
+### Not migrated - by design, per this ticket's own explicit constraint
+
+Zero page files touched. `check-design-tokens.js`'s diff-only rules are completely unaffected (this branch's only `src/` change is 14 new lines in `globals.css`, which is an `EXEMPT_FILES` entry, plus 2 files that only ever define/list tokens, touching no flagged property). `design-token-ratchet.js`'s live counts are unaffected for the same reason - these are new custom-property *definitions*, not new *literal usages* of `fontSize`/`padding`/`borderRadius`/etc., so none of the 7 rule categories' counts move.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged - no rule logic touched). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories exactly unchanged from the session-start counts (hex 83, rgba 967, font-family 10, font-size 1351, spacing 3244, radius 535, raw-button 211) - confirms this ticket adds zero new literal debt, as expected for a tokens-only change. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing. **Live-verified against the real QA database, not just locally**: `execute_sql` against `aforaudience-qa` post-migration confirms all 14 rows exist with the exact expected `group`/`type`/`value`/`locked=false`.
+
+**Design System page - live QA-preview check, not just code-reading.** [Filled in once the branch has a real Preview deployment - see this ticket's own handoff entry for what's actually been confirmed vs. still pending: whether all 14 new fields render under the right group with the right default, and whether editing one (then resetting it) reaches a real consuming page once one exists.]
+
+### Next dispatch after this merges
+
+Migration batch 2, next three largest files by literal count (this session's own fresh `design-token-ratchet.js` top-10, re-confirmed at session start): `dashboard/artist/page.tsx` (177), `ArtistProfileClientPage.tsx` (175), `EventDetailClientPage.tsx` (174) - each its own PR, same "exact match only, no rounding" discipline, now with 14 more real token slots to match against.

@@ -249,6 +249,42 @@
   --afa-btn-padding-md: 9px 17px;
   --afa-btn-padding-lg: 12px 24px;
 
+  /* GEN-2609-081 - scale extension: the 8/4/2 highest-frequency
+     off-scale spacing/font-size/radius values from GEN-2609-079's own
+     batch-1 migration (repo-wide precise count >= 50 non-tokenized
+     occurrences each - see docs/design.md's GEN-2609-081 entry for the
+     full reconciled count per value and the naming-scheme reasoning).
+     Same "tokens only, zero adoption yet" posture as the original
+     scale (GEN-2609-077's own comment above) - this ticket adds no
+     migration, so every value here is admin-editable but not yet
+     consumed anywhere in src/ (confirmed via design-token-coverage.ts).
+     Naming: the original space-1..6/text-*/radius-* names are either a
+     step INDEX (space-N) or a semantic role (text-micro, radius-sm) -
+     neither scheme has a natural, non-colliding slot for an
+     in-between raw value, and the dispatch's own instruction was not
+     to rename or re-value any existing token. Explicit px-suffixed
+     names read unambiguously as "this many pixels" (the unit is part
+     of the name), which is the deliberate signal that distinguishes
+     e.g. --afa-space-2px (2px, this ticket) from the pre-existing
+     --afa-space-2 (8px, GEN-2609-077's step-2) at a glance - same
+     scheme applied to all 3 scales for consistency. */
+  --afa-space-2px: 2px;
+  --afa-space-6px: 6px;
+  --afa-space-10px: 10px;
+  --afa-space-14px: 14px;
+  --afa-space-18px: 18px;
+  --afa-space-28px: 28px;
+  --afa-space-32px: 32px;
+  --afa-space-48px: 48px;
+
+  --afa-text-10px: 10px;
+  --afa-text-15px: 15px;
+  --afa-text-18px: 18px;
+  --afa-text-20px: 20px;
+
+  --afa-radius-10px: 10px;
+  --afa-radius-12px: 12px;
+
   /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
      (below) is never applied to <html>/<body> anywhere in this app, so
      these shadcn-scaffold defaults were the actual fallback every
