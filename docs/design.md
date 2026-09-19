@@ -6452,6 +6452,85 @@ Added 2 steps to the existing `pull_request` workflow: the self-test suite, and 
 
 Bulk migration, largest-literal-count files first (the ratchet's own top-10 report above), not page-by-page - `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), and `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets.
 
+## GEN-2609-080 (provisional - chat confirms/assigns the real number against `CodeCounter`; read **79** live, not the dispatch's stated 78 - chat evidently advanced the counter to log `GEN-2609-079` between writing this dispatch and this session starting, which also confirms `079` as `079` batch-1's real number) - fix `raw-button`: count-based over the whole diff, not per-line
+
+### The bug, and why `078` shipped it
+
+`078`'s `raw-button` rule flagged every diff line where an ADDED line contained `<button`, full stop - it never asked whether the actual number of raw buttons had gone up. A token-retrofit edit to an *existing* raw button (`padding: '8px'` -> `padding: 'var(--afa-space-2)'` on a line that also happens to contain `<button`) is exactly 1 removed line + 1 added line in a unified diff - the count of raw buttons on that line is unchanged, but the old rule only ever looked at the added side, so it flagged it as if it were new.
+
+This is precisely the class of bug `078`'s own design.md entry documents itself having solved for the *other* categories via `GEN-2609-057`'s relocated-literal exemption (a value that already exists in the base tree is treated as moved, not new) - `raw-button` was deliberately given `skipRelocatedCheck: true` instead, reasoning that the string `"<button>"` is a fixed constant, not a value that meaningfully "relocates" the way a color does. That reasoning is still correct for what it was solving (the exemption really would have silently defeated the rule for every genuinely new button, since `"<button>"` trivially already exists 200+ times). But it left the real problem - "how do I tell a retrofit from new debt" - completely unaddressed, because relocated-literal matching was never the right tool for it in the first place. `raw-button` needed its own, different mechanism from day one; `078` shipped without one.
+
+### Reproduced independently before touching any code
+
+Chat's dispatch named PR #660 (seat-map) failing at 6 lines and PR #662 (organiser-event-edit) at 1. Re-ran the *unmodified* `078` checker against both PRs' real diffs before writing any fix, not trusted on the dispatch's word:
+
+- **PR #662: 1 offense, exactly as stated** (`organiser/events/[id]/edit/page.tsx:139`).
+- **PR #660: 11 offenses, not 6** (`495`, `505`, `1507`, `1542`, `1601`, `1684`, `1687`, `1708`, `1711`, `1749`, `1771`). The dispatch's own 6-line list is a real subset of this (all 6 of its named lines are among the 11), so the root-cause diagnosis is unaffected - but the count itself was checked directly rather than copied, and it's higher than stated. Every one of the 11 is confirmed a retrofit-only edit to an already-existing raw button from `GEN-2609-079`'s own migration work, none a genuinely new button.
+
+### Fix
+
+`raw-button` is now the one rule in `RULES` excluded from `findOffenses()`'s generic per-line loop (`PER_LINE_RULES = RULES.filter(r => r.name !== 'raw-button')`). Instead, while walking the same diff, it separately accumulates:
+
+- `rawButtonAdded`: every added line matching `<button` (excluding `Button.tsx` and `// token-ok:`-annotated lines), pushed in diff order as `{file, line, content}`.
+- `rawButtonRemoved`: a plain count of every removed line matching `<button` (same 2 exclusions).
+
+After the walk: `surplus = rawButtonAdded.length - rawButtonRemoved`. If `surplus <= 0`, nothing is flagged - the count didn't go up, regardless of how many individual lines changed. If `surplus > 0`, the **last** `surplus` entries of `rawButtonAdded` (in diff order) are reported as offenses.
+
+**Why "last N," not "first N" or "all of them":** with count alone, there's no way to know *which specific* added line is the genuinely new one versus a retrofit - a 2-added-1-removed diff (surplus 1) could be "1 new button + 1 retrofit" in either order, and the diff itself doesn't disambiguate. Reporting the last N is a deterministic, reproducible choice (not random, not the old "flag everything" behavior), not a claim that the *specific* reported line is provably the new one - a human reviewing the CI failure still needs to look at the actual diff to confirm which button is new, same as before, just now gated on a real count instead of firing on every retrofit.
+
+**Why counting is diff-wide, not per-file - deliberate, not an oversight.** A raw button genuinely moved between files (an extract-component refactor: -1 in the source file, +1 in the destination) nets to 0 across the whole diff and correctly passes. Counted per-file instead, the destination file's own +1 would wrongly flag as new debt even though the repo-wide total didn't change. This mirrors exactly how the whole-repo ratchet (`design-token-ratchet.js`) already thinks about the total - it's the real backstop on the aggregate count regardless of how literals shuffle between files, and this diff-level fix is now consistent with that philosophy instead of fighting it.
+
+**`token-ok` and `Button.tsx` behavior, unchanged in effect, re-verified explicitly.** A token-ok-annotated new raw button is excluded from the added count entirely (never enters `rawButtonAdded`) and is still reported in `tokenOkUses`, exactly as before. `Button.tsx` itself stays exempt on both the added and removed sides via the existing `rawButtonRule.isExemptFile` check, applied once per `+++` file header (`rawButtonFileExempt`) rather than per-rule-per-line as the other rules still do - functionally identical outcome, just computed once per file instead of redundantly per matching line.
+
+**Every other rule is untouched.** `hex-color-literal`/`rgb-rgba-literal`/`hardcoded-font-family`/`font-size-literal`/`spacing-literal`/`radius-literal` all still go through the original per-line `shouldFlag()` + `GEN-2609-057` relocated-literal path, exactly as `078` shipped them - per the dispatch's own explicit instruction not to switch them to this scheme. They don't have `raw-button`'s problem: a genuinely relocated color/size literal already has a real mechanism (does the exact value exist elsewhere in the base tree), which correctly treats a retrofit's *replacement* value (a fresh `var(--afa-*)` reference) as neither "new debt" nor "relocated" in the first place - `var()` calls were never literals these rules would flag to begin with, so retrofitting a color/size doesn't produce the false-positive `raw-button` was producing.
+
+### Fixture self-tests (6 new, all in `scripts/check-design-tokens.test.js`)
+
+1. Retrofit-only diff (1 removed, 1 added, same button) - passes.
+2. One genuinely new raw button (0 removed, 1 added) - fails, exactly 1 offense.
+3. 2 added + 1 removed (surplus 1) - fails, exactly 1 offense, and it's confirmed to be the *last* added entry (asserted on content, not just count).
+4. A button moved between 2 files (-1 source, +1 destination) - passes, diff-wide net 0.
+5. A token-ok-annotated new button - passes (0 offenses), and still shows up in `tokenOkUses` with its reason.
+6. `Button.tsx` itself - an added `<button>` there never counts, even with zero removed lines to offset it.
+
+All 6 existing `raw-button` fixtures (positive/negative, the `isExemptFile` check, the `shouldFlag()` contrast test against `spacing-literal`) still pass unmodified - `rule.test()`/`rule.extract()` on a single line are unaffected by this change; only `findOffenses()`'s diff-wide aggregation changed. **40/40 fixtures passing** (34 from `078` + 6 new).
+
+### Replay against the 2 real failing PRs - the actual proof, not just fixtures
+
+Per the dispatch's own instruction: scratch-merged this fix branch into a throwaway local copy of each PR branch (never touching or rebasing the real `feat/gen-2609-079-batch1-*` branches themselves - deleted immediately after each check), then ran the exact CI command.
+
+**Before the fix** (unmodified `078` checker, `BASE_REF=origin/qa HEAD_REF=origin/feat/gen-2609-079-batch1-seatmap`):
+```
+design-token check: found 11 new hardcoded design-token literal(s):
+  [11 lines, listed above]
+EXIT=1
+```
+
+**After the fix** (this branch merged in, same PR content, same command):
+```
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+```
+
+**Before the fix** (`organiser-event-edit`):
+```
+design-token check: found 1 new hardcoded design-token literal(s):
+  src/app/dashboard/organiser/events/[id]/edit/page.tsx:139  [raw-button]
+EXIT=1
+```
+
+**After the fix**:
+```
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+```
+
+**Also re-checked `admin/settings` (PR #661, already merged by the time this session ran) for a regression** - passes both before and after, as expected (it has zero raw-`<button>` lines in its diff at all, so it was never affected by the bug and isn't affected by the fix either).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (this branch's own changes live entirely in `scripts/`, no `src/` literal changes). `node scripts/design-token-ratchet.js`: unaffected, all 7 categories exactly at baseline (`raw-button`'s live/static single-line `test()`/`extract()` behavior is unchanged - only the diff-based aggregation in `findOffenses()` changed, and the ratchet doesn't call `findOffenses()` at all). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
 ## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 2 of 3: `admin/settings/page.tsx`
 
 Same dispatch, same method as file 1 (`seat-map/page.tsx`, its own entry above/elsewhere in this doc depending on merge order - branched independently from `qa`, not stacked on file 1's branch, per the dispatch's "each PR stands alone"). Exact-match-only reverse-lookup script, dry-run reviewed in full before applying, no rounding, no new tokens/variants.

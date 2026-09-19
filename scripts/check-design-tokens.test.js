@@ -235,5 +235,91 @@ t('findOffenses: exempt files (globals.css-equivalent path) are skipped entirely
   assert.equal(offenses.length, 0, 'the exempt token-definition file should never be scanned')
 })
 
+// ---------------------------------------------------------------------
+// GEN-2609-080 - raw-button is count-based over the WHOLE diff, not
+// per-line like every other rule (see check-design-tokens.js's own
+// header comment and the rule's own comment for why: a token retrofit
+// of an EXISTING raw button is 1 removed + 1 added line, and per-line
+// matching alone can't tell that apart from a genuinely new button).
+// ---------------------------------------------------------------------
+t('raw-button (count-based): a retrofit-only diff (1 removed, 1 added, same button) passes', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -10,1 +10,1 @@',
+    "-      <button style={{ padding: '8px' }}>Save</button>",
+    "+      <button style={{ padding: 'var(--afa-space-2)' }}>Save</button>",
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'the button count did not change, so nothing should flag')
+})
+t('raw-button (count-based): one genuinely new raw button (0 removed, 1 added) fails', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -0,0 +1,1 @@',
+    '+      <button onClick={onSave}>New</button>',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'raw-button')
+})
+t('raw-button (count-based): 2 added + 1 removed nets a surplus of 1, reports only the last added line', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -5,1 +5,2 @@',
+    '-      <button>Old</button>',
+    '+      <button>First</button>',
+    '+      <button>Second</button>',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1, 'surplus = 2 added - 1 removed = 1')
+  assert.ok(offenses[0].content.includes('Second'), 'the reported line should be the last of the added entries, in diff order')
+})
+t('raw-button (count-based): a button moved between files (-1 in one, +1 in another) nets to 0 and passes', () => {
+  const diff = [
+    'diff --git a/src/app/source.tsx b/src/app/source.tsx',
+    '--- a/src/app/source.tsx',
+    '+++ b/src/app/source.tsx',
+    '@@ -5,1 +5,0 @@',
+    '-      <button onClick={onSave}>Save</button>',
+    'diff --git a/src/app/dest.tsx b/src/app/dest.tsx',
+    '--- a/src/app/dest.tsx',
+    '+++ b/src/app/dest.tsx',
+    '@@ -0,0 +1,1 @@',
+    '+      <button onClick={onSave}>Save</button>',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'diff-wide net is 0 even though it is +1 in the destination file alone')
+})
+t('raw-button (count-based): a token-ok-annotated new button is suppressed, not counted as added, and still reported', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -0,0 +1,1 @@',
+    '+      <button onClick={onSave}>New</button> // token-ok: one-off, see PR description',
+  ].join('\n')
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(offenses.length, 0)
+  assert.equal(tokenOkUses.length, 1)
+  assert.equal(tokenOkUses[0].reason, 'one-off, see PR description')
+})
+t('raw-button (count-based): Button.tsx stays exempt (an added <button> there never counts, even alone)', () => {
+  const diff = [
+    'diff --git a/src/components/ui/Button.tsx b/src/components/ui/Button.tsx',
+    '--- a/src/components/ui/Button.tsx',
+    '+++ b/src/components/ui/Button.tsx',
+    '@@ -0,0 +1,1 @@',
+    '+    <button {...rest} style={merged}>{content}</button>',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0)
+})
+
 console.log(`\n${passed} passed, ${failed} failed.`)
 if (failed > 0) process.exit(1)

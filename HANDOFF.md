@@ -1,3 +1,111 @@
+# Session Handoff — 19 Sept 2026, later still again (CC — GEN-2609-080 provisional: fix `raw-button` to be count-based, unblocking the 079 batch)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **79** live (not the dispatch's stated 78 - chat evidently logged `GEN-2609-079` between writing this dispatch and this session starting, confirming `079` as that ticket's real number). This ticket would be **080** if chat confirms no collision. Not written to `CodeCounter`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-080` (provisional) - fix `raw-button` rule: count-based over the whole diff, not per-line | Complete, unmerged | Reproduced the bug independently before fixing (found 11 real offenses on the seat-map PR, not the dispatch's stated 6 - see §4). Replayed the fix against both failing PRs via scratch merges, both now pass. | `feat/gen-2609-080-raw-button-count-based` |
+| 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files, 1 PR each | Complete; **`admin/settings` merged as PR #661**; seat-map (#660) and organiser-event-edit (#662) still open, **blocked by the exact bug this session fixes** | 791 → 337 combined literals (57% reduction). | `feat/gen-2609-079-batch1-seatmap`, `feat/gen-2609-079-batch1-admin-settings` (merged, deleted), `feat/gen-2609-079-batch1-organiser-event-edit` |
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete; **merged as PR #659** | No migration, zero visual change. | `feat/gen-2609-078-design-token-guard-coverage` (merged, deleted) |
+| 19 Sept 2026 (CC) | Verification closeout: `GEN-2609-075`/`076`/`077` confirmed merged, `Feedback` backfilled, live re-verify | Complete | qa HEAD `d0a2c69` at the time. | none (docs-only, direct to qa) |
+| 19 Sept 2026 (CC+chat) | `GEN-2609-075` admin design tokens, `076` Button coverage, `077` type-scale/spacing phase 1 (homepage) | Complete; PRs #654-658 all merged. | | 5 branches, all deleted post-merge |
+
+(Oldest row, "18-19 Sept 2026 (chat) — GEN-2609 backfill...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-080` (provisional) - `feat/gen-2609-080-raw-button-count-based`, pushed, no PR opened yet.
+- `GEN-2609-079` batch 1 - 2 of 3 PRs still open (`#660` seat-map, `#662` organiser-event-edit), both blocked exclusively by the bug this ticket fixes. Once `080` merges, both should pass CI on their existing content with no further changes needed to either PR branch (confirmed this session via scratch-merge replay, not assumed).
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `feat/gen-2609-080-raw-button-count-based` | **`NOT YET OPENED`** | n/a | Locally verified clean; the actual proof is the scratch-merge replay against both blocked PRs (see §4/§8) - both pass with this fix applied. |
+| `feat/gen-2609-079-batch1-seatmap` | `#660` | currently failing (`raw-button`, 11 false positives - see §4) | Will pass once `080` merges to `qa` and its CI re-runs against the updated checker. No changes needed to this PR itself. |
+| `feat/gen-2609-079-batch1-organiser-event-edit` | `#662` | currently failing (`raw-button`, 1 false positive) | Same - will pass once `080` merges, no changes to this PR. |
+| `feat/gen-2609-079-batch1-admin-settings` | `#661` | merged | Done - confirmed via GitHub API this session. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | `success` | n/a - unrelated, out of scope every session since 14 Aug. |
+
+Re-verified via GitHub API this session: 3 open PRs total before this session's own `080` PR is opened (`#660`, `#662`, `#450`).
+
+## 4. Decisions / findings this session
+
+**Not a decision sitting with anyone - a factual correction, verified before trusting the dispatch's own numbers.** The dispatch stated PR #660 (seat-map) fails at 6 lines. Re-ran the *unmodified* `078` checker against the real PR diff before writing any fix - it actually fails at **11** lines (`495`, `505`, `1507`, `1542`, `1601`, `1684`, `1687`, `1708`, `1711`, `1749`, `1771`). The dispatch's 6 named lines are a real subset of these 11 (nothing contradicts the root-cause diagnosis), but the count itself needed checking, not copying - `git blame`/`grep` habits from this whole ticket chain paid off again here. PR #662 (organiser-event-edit) matched the dispatch exactly: 1 offense, line 139.
+
+**Root cause, stated precisely:** the `078` `raw-button` rule only ever asked "does this added line contain `<button`" - it never compared against removed lines, so a token-retrofit edit to an *existing* raw button (1 removed + 1 added line, same button) looked identical to a genuinely new one. `078`'s own `skipRelocatedCheck: true` design choice (bypassing the `GEN-2609-057` relocated-literal exemption for this rule) was independently correct for what IT was solving, but left this real gap completely unaddressed - relocated-literal matching (checking if a *value* already exists elsewhere) was never the right tool for "did the count of buttons go up," which needed its own mechanism from the start.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **79**, confirmed live (the dispatch's own stated "78" was already stale by the time this session started - chat had logged `079` in between). Not written to this session.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions. `054` ✅, `069→071` ✅ per `docs/HANDOFF_TEMPLATE.md`'s permanent ledger, re-read this session, unchanged. Same standing risk noted every session: confirm `080` is actually free at logging time.
+
+## 7. Docs-conflict watchlist
+
+- `feat/gen-2609-080-raw-button-count-based` touches `docs/design.md` (new entry, appended after `078`'s own "Next dispatch" paragraph - same anchor point the 3 `079` branches also append after) and will conflict with whichever of `#660`/`#662` merges first, for the same reason those 2 already conflict with each other on `docs/design.md`. **Merge order suggestion, not a hard requirement:** merge `080` before `#660`/`#662` - it's a pure tooling fix with no `src/` changes, so it can't conflict with either PR's own file-level changes, only with their shared `docs/design.md` tail (resolve the same way as always: keep every branch's own section, in whatever order they're actually merged).
+- `scripts/design-token-baseline.json`: this branch does **not** touch it (raw-button's live single-line behavior is unchanged, only the diff-aggregation logic changed) - confirmed via a fresh `design-token-ratchet.js` run this session, all 7 categories exactly at the existing baseline, no update needed or made.
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, on `feat/gen-2609-080-raw-button-count-based` (branched from `origin/qa` `a55cbc5`):
+
+- ✅ `tsc --noEmit` - clean, exit 0.
+- ✅ `node scripts/check-design-tokens.test.js` - **40/40 passing** (34 from `078`, unmodified and unaffected, + 6 new fixtures for the count-based behavior: retrofit-only passes, one genuinely-new button fails, a 2-added-1-removed surplus-of-1 correctly reports only the last added line, a cross-file move nets to 0 and passes, `token-ok` still suppresses and is still reported, `Button.tsx` stays exempt).
+- ✅ `check-design-tokens.js` against `origin/qa` - clean, 0 offenses (this branch's changes are `scripts/`-only, no `src/` literal changes of its own).
+- ✅ `node scripts/design-token-ratchet.js` - unaffected, all 7 categories exactly at the existing baseline (no update needed - `raw-button`'s single-line `test()`/`extract()` didn't change, only `findOffenses()`'s diff aggregation did, and the ratchet never calls `findOffenses()`).
+- ✅ `next build` - clean, exit 0 via `$PIPESTATUS`.
+- ✅ `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**The actual proof - scratch-merge replay against both real failing PRs, per the dispatch's own instruction.** For each of `origin/feat/gen-2609-079-batch1-seatmap` and `origin/feat/gen-2609-079-batch1-organiser-event-edit`: created a throwaway local branch from the PR's own remote tip, ran the *unmodified* checker first to confirm the real failure (11 offenses / 1 offense, matching §4's numbers), then merged this fix branch in and re-ran the exact same command:
+
+```
+# seat-map, before:
+design-token check: found 11 new hardcoded design-token literal(s): ...
+EXIT=1
+# seat-map, after (this fix merged in):
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+
+# organiser-event-edit, before:
+design-token check: found 1 new hardcoded design-token literal(s): ...
+EXIT=1
+# organiser-event-edit, after:
+design-token check: no new hardcoded design-token literals (origin/qa...HEAD).
+EXIT=0
+```
+
+Also replayed against `admin/settings` (`#661`, already merged) as a regression check - passes both before and after, as expected (zero raw-`<button>` lines in its diff, never affected by the bug). All 3 scratch branches deleted immediately after their check ran - the 3 real `feat/gen-2609-079-batch1-*` branches were never touched or rebased, per the dispatch's explicit constraint.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** Unaffected (tooling-only).
+
+## 10. UI/UX Design System Debt Ledger
+
+Not a migration ticket - no literal count changed, confirmed via the unchanged ratchet baseline (§7/§8). What changed is the CI mechanism's own correctness: `raw-button` no longer double-counts every retrofit edit as new debt, which directly unblocks `079`'s own 2 remaining PRs (11 + 1 = 12 false-positive offenses cleared, 0 real debt involved in either).
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Unaffected.
+
+## 12. Immediate next action
+
+**Chat: open and merge `GEN-2609-080`'s PR**, then re-run CI (or just re-push/re-trigger) on `#660` and `#662` - both should pass with zero further changes, per this session's own scratch-merge replay proof. Suggested merge order: `080` before either of `#660`/`#662` (see §7 - it can't conflict with their `src/` changes, only their shared `docs/design.md` tail, and merging the fix first means their own CI re-runs already see it).
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model.** This session: CC built, verified (including the scratch-merge replay proof), and pushed `feat/gen-2609-080-raw-button-count-based`. Chat's half (confirm the ticket number, open the PR, merge, then get `#660`/`#662` re-checked) is next. CC never merges.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, later still (CC — GEN-2609-079 provisional: bulk token migration batch 1, 3 files, 3 PRs)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **78** immediately before branching (live-queried each time, not cached), confirmed unchanged at 78 again at the end of this session. Would be **079** if chat confirms no collision. Not self-assigned to `Feedback`, not written to `CodeCounter`.
