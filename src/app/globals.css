@@ -232,6 +232,23 @@
   --afa-text-page-title: 28px;
   --afa-text-page-title-lg: 32px;
 
+  /* GEN-2609-075 - radius + button-padding scale, promoted out of
+     Button.tsx's SIZE_CHROME (where these were plain hardcoded numbers,
+     never a CSS custom property) so the admin design-token panel has a
+     real, live-effect "radius"/"button" group to control. These are the
+     static fallback the app renders when the DesignToken DB table is
+     empty or unreachable - see src/lib/design-tokens.ts's
+     DEFAULT_TOKEN_VALUES, which mirrors these exact values as the "reset
+     to defaults" target. */
+  --afa-radius-sharp: 0px;
+  --afa-radius-sm: 6px;
+  --afa-radius-md: 8px;
+  --afa-radius-pill: 999px;
+
+  --afa-btn-padding-sm: 4px 10px;
+  --afa-btn-padding-md: 9px 17px;
+  --afa-btn-padding-lg: 12px 24px;
+
   /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
      (below) is never applied to <html>/<body> anywhere in this app, so
      these shadcn-scaffold defaults were the actual fallback every
