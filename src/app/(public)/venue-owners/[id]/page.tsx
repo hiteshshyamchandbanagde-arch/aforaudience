@@ -37,8 +37,8 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
         <SiteNav />
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
-          <Link href="/venue-owners" style={{ color: "var(--afa-amber)", fontSize: "14px", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>{tr.venueOwnerDetailPage.notFoundHeading}</div>
+          <Link href="/venue-owners" style={{ color: "var(--afa-amber)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}>{tr.venueOwnerDetailPage.backToOwners}</Link>
         </div>
       </main>
     )
@@ -61,8 +61,8 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
             )}
           </div>
           <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>{displayName}</div>
-            <div style={{ fontSize: "14px", color: "var(--afa-text-secondary)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title-lg)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "6px" }}>{displayName}</div>
+            <div style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)" }}>
               {owner.venues.length} {owner.venues.length === 1 ? tr.venueOwnerDetailPage.venueSingular : tr.venueOwnerDetailPage.venuePlural}
             </div>
           </div>
@@ -71,14 +71,14 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.1)" }}>
-          <p style={{ fontSize: "14px", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
             {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
         </div>
 
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
         {owner.venues.length === 0 ? (
-          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" }}>
             {owner.venues.map((v) => (
@@ -95,7 +95,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
                 </div>
                 <div style={{ padding: "14px 16px" }}>
                   <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
-                  <div style={{ fontSize: "12px", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
+                  <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
                 </div>
               </Link>
             ))}

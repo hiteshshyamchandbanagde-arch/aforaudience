@@ -58,7 +58,7 @@ export default function OrganisersPage() {
           <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 900, color: "var(--afa-text-primary)", marginBottom: "8px", lineHeight: 1.1 }}>
             {tr.organisersPage.heroPrefix}<em style={{ color: "var(--afa-amber)", fontStyle: "italic" }}>{tr.organisersPage.heroEmphasis}</em>{tr.organisersPage.heroSuffix}
           </div>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+          <p style={{ fontSize: "var(--afa-text-title)", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
             {loading ? tr.organisersPage.loading : tr.organisersPage.countTemplate.replace("{n}", String(filtered.length))}
           </p>
           <BrowseSearchDropdown
@@ -76,7 +76,7 @@ export default function OrganisersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.organisersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "16px", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -92,10 +92,10 @@ export default function OrganisersPage() {
           <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersPage.loading}</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               {organisers.length === 0 ? tr.organisersPage.emptyNoneYetTitle : tr.organisersPage.emptyNoneFoundTitle}
             </div>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {organisers.length === 0 ? tr.organisersPage.emptyNoneYetSub : tr.organisersPage.emptyNoneFoundSub}
             </p>
           </div>
@@ -145,10 +145,10 @@ export default function OrganisersPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{org.orgName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
-                    <p style={{ fontSize: "13px", color: "var(--afa-text-secondary)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
+                    <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>
                       {org.bio || tr.organisersPage.noBioYet}
                     </p>
-                    <div style={{ fontSize: "12px", color: "var(--afa-text-secondary)", opacity: 0.5 }}>
+                    <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>
                       {org._count.events} {org._count.events === 1 ? tr.organisersPage.eventSingular : tr.organisersPage.eventPlural}
                     </div>
                   </div>
