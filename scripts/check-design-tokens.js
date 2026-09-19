@@ -7,6 +7,22 @@
 // the point is to fail the PR that introduces it, not discover it
 // later during another audit pass.
 //
+// GEN-2609-078 - the north star is "no hard coding at any page," and
+// the 3 original rules only covered color + font-family. Nothing
+// stopped a NEW font-size/spacing/radius/raw-<button> literal from
+// landing, and nothing tracked the whole-repo total, so migration
+// could never provably converge. Adds 4 more diff-only rules
+// (font-size-literal, spacing-literal, radius-literal, raw-button), a
+// small value-based allowlist (0, hairline 1px/0.5px, and any %
+// value - the last one falls out of the unit scoping below rather
+// than needing its own check), and a per-line `// token-ok: <reason>`
+// escape hatch for genuinely-exempt cases (documented, not silently
+// widened rules) - printed in CI output whenever used, so it stays
+// visible rather than becoming a silent bypass. The whole-repo ratchet
+// that actually tracks the total lives in scripts/design-token-
+// ratchet.js, sharing these same rule definitions so the two checks
+// can never drift out of sync with each other.
+//
 // Deliberately diff-only: pre-existing literals elsewhere in src/ (e.g.
 // the hand-authored rgba() borders documented in
 // docs/afa-design-tokens-reference.md Section 1) are real, known debt
@@ -29,6 +45,123 @@ const { execSync, execFileSync } = require('child_process')
 
 const BASE_REF = process.env.BASE_REF || 'origin/qa'
 const HEAD_REF = process.env.HEAD_REF || 'HEAD'
+
+// ---------------------------------------------------------------------
+// GEN-2609-078 - shared helpers for the 4 new numeric-literal rules
+// (font-size/spacing/radius all follow the same "property: value"
+// shape, only the property names + allowed CSS units differ per the
+// dispatch's own per-rule spec). Tightened regex, not an AST parse -
+// same "small Node script" convention this file's own header comment
+// and GEN-2609-057's design.md entry already established as this
+// project's deliberate choice over adding an ESLint plugin.
+// ---------------------------------------------------------------------
+
+// Matches `propName: value` where value is either a bare/unit-suffixed
+// number (React inline-style shorthand, e.g. `fontSize: 14` or
+// `padding: '10px'`) or a quoted string (which may itself be a
+// multi-value CSS shorthand like "24px 36px 56px", or an already-
+// tokenized `var(--afa-*)` call). propName may be camelCase (JS style
+// object key) or kebab-case (raw CSS text inside a template literal,
+// e.g. the `<style>{`...`}</style>` pattern this codebase uses in a
+// couple of places). Captures the raw (unquoted) value text in group 2
+// (numeric) or group 3 (quoted).
+const CSS_PROP_VALUE_RE = /([a-zA-Z-]+)\s*:\s*(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?)(?=[,;}\s]|$)|['"`]([^'"`]*)['"`])/g
+
+function extractPropValues(line, propNameSet) {
+  const found = []
+  CSS_PROP_VALUE_RE.lastIndex = 0
+  let m
+  while ((m = CSS_PROP_VALUE_RE.exec(line))) {
+    const norm = m[1].replace(/-/g, '').toLowerCase()
+    if (!propNameSet.has(norm)) continue
+    found.push(m[3] !== undefined ? m[3] : m[2])
+  }
+  return found
+}
+
+// A raw value can be a single token ("14px") or CSS shorthand
+// ("24px 36px 56px", "10px 20px") - split on whitespace and keep only
+// the parts that are themselves a pure length literal in one of
+// `allowedUnits` (bare numbers are treated as px, matching both React
+// inline-style and plain CSS's own unitless-means-px convention for
+// these properties). A part starting with `var(` is an already-
+// tokenized reference, never a literal - skipped outright, so a mixed
+// shorthand like "var(--afa-space-2) 10px" only flags the genuinely
+// hardcoded "10px" half.
+function extractLengthTokensFromValue(raw, allowedUnits) {
+  return raw
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((part) => {
+      if (/^var\(/.test(part)) return false
+      const m = /^(-?\d+(?:\.\d+)?)(px|rem|em|%)?$/.exec(part)
+      if (!m) return false
+      const unit = m[2] || 'px'
+      return allowedUnits.includes(unit)
+    })
+}
+
+// Allowlist, per the dispatch: 0 (any unit), and hairline 1px/0.5px.
+// Percent values (50%, 100%) never reach this function at all - none
+// of the 3 numeric rules below include "%" in their allowed-units list
+// (percentage isn't part of the px/rem token scale these rules exist
+// to enforce), so they're excluded by the unit scoping itself rather
+// than needing a separate check here. Kept as a defensive no-op branch
+// anyway so the intent reads directly off this function rather than
+// being implicit in three different callers' regexes.
+function isAllowlistedLength(token) {
+  const m = /^(-?\d+(?:\.\d+)?)(px|rem|em|%)?$/.exec(token)
+  if (!m) return false
+  const value = Math.abs(parseFloat(m[1]))
+  const unit = m[2] || 'px'
+  if (unit === '%') return true
+  if (value === 0) return true
+  if (unit === 'px' && (value === 1 || value === 0.5)) return true
+  return false
+}
+
+function makeLiteralRule(name, propNameSet, allowedUnits, twRegexSource, opts = {}) {
+  const twRe = twRegexSource ? new RegExp(twRegexSource, 'g') : null
+  function extract(line) {
+    const literals = []
+    for (const raw of extractPropValues(line, propNameSet)) {
+      for (const token of extractLengthTokensFromValue(raw, allowedUnits)) {
+        if (!isAllowlistedLength(token)) literals.push(token)
+      }
+    }
+    if (twRe) {
+      twRe.lastIndex = 0
+      let m
+      while ((m = twRe.exec(line))) {
+        const token = `${m[1]}${m[2]}`
+        if (!isAllowlistedLength(token)) literals.push(m[0])
+      }
+    }
+    return literals
+  }
+  return {
+    name,
+    extract,
+    test: (line) => extract(line).length > 0,
+    isExemptFile: opts.isExemptFile,
+    skipRelocatedCheck: opts.skipRelocatedCheck,
+  }
+}
+
+const FONT_SIZE_PROPS = new Set(['fontsize'])
+const SPACING_PROPS = new Set([
+  'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
+  'paddinginline', 'paddingblock', 'paddinginlinestart', 'paddinginlineend',
+  'paddingblockstart', 'paddingblockend',
+  'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',
+  'margininline', 'marginblock',
+  'gap', 'rowgap', 'columngap',
+])
+const RADIUS_PROPS = new Set([
+  'borderradius', 'bordertopleftradius', 'bordertoprightradius',
+  'borderbottomleftradius', 'borderbottomrightradius',
+])
 
 const RULES = [
   {
@@ -97,7 +230,76 @@ const RULES = [
       return literals
     },
   },
+  // GEN-2609-078 - font-size: numeric/px/rem `fontSize`, plus Tailwind
+  // arbitrary-value `text-[Npx]`/`text-[Nrem]`. rem included at the
+  // Tailwind layer too (the dispatch's own example only showed `Npx`,
+  // but the property-level spec explicitly lists px+rem - extended for
+  // consistency between the two forms of the same rule rather than
+  // leaving a gap; flagged here, not silently assumed).
+  makeLiteralRule(
+    'font-size-literal',
+    FONT_SIZE_PROPS,
+    ['px', 'rem'],
+    'text-\\[(-?\\d+(?:\\.\\d+)?)(px|rem)\\]'
+  ),
+  // GEN-2609-078 - spacing: non-zero PX `padding`/`margin`/`gap` (+
+  // longhands), Tailwind `p|px|py|.../m|mx|my|.../gap|gap-x|gap-y-[Npx]`.
+  // Deliberately px-only, per the dispatch's own literal wording ("non-
+  // zero px") - rem-based spacing literals are real but out of this
+  // rule's stated scope, not silently folded in.
+  makeLiteralRule(
+    'spacing-literal',
+    SPACING_PROPS,
+    ['px'],
+    '\\b(?:gap-x|gap-y|gap|px|py|pt|pr|pb|pl|p|mx|my|mt|mr|mb|ml|m)-\\[(-?\\d+(?:\\.\\d+)?)(px)\\]'
+  ),
+  // GEN-2609-078 - radius: numeric `borderRadius` (+ 4 corner
+  // longhands), Tailwind `rounded[-side]-[Npx]`. Also px-only, per the
+  // dispatch's literal wording ("numeric `borderRadius`,
+  // `rounded-[Npx]`") - same scoping rationale as spacing above.
+  makeLiteralRule(
+    'radius-literal',
+    RADIUS_PROPS,
+    ['px'],
+    'rounded(?:-[tbrl]{1,2})?-\\[(-?\\d+(?:\\.\\d+)?)(px)\\]'
+  ),
+  // GEN-2609-078 - raw <button>, allowed only inside Button.tsx itself
+  // (the one file where the literal tag is the actual implementation,
+  // not debt). Deliberately `skipRelocatedCheck: true`: the "extracted
+  // literal" here is always the same fixed string ("<button>"), and
+  // that string already exists in BASE_REF's tree at 216+ other sites
+  // today - the GEN-2609-057 relocated-literal exemption (built for
+  // value-uniqueness checks like a specific hex/rgba) would treat every
+  // new raw <button> as "already known" and never flag it, silently
+  // defeating the rule. A raw <button> tag isn't a value that can
+  // "relocate" the way a color can; every new site is new regardless of
+  // how many others already exist, so this rule always flags.
+  {
+    name: 'raw-button',
+    test: (line) => /<button\b/.test(line),
+    extract: (line) => (/<button\b/.test(line) ? ['<button>'] : []),
+    isExemptFile: (file) => file === 'src/components/ui/Button.tsx',
+    skipRelocatedCheck: true,
+  },
 ]
+
+// GEN-2609-078 - per-line escape hatch for genuinely-exempt literals
+// (the dispatch's own example: a fixed third-party brand SVG fill,
+// e.g. Google's 4-color logo, that must never be tokenized). Not
+// implemented as a hardcoded brand-hex allowlist - guessing which
+// specific hex values count as "brand" is exactly the kind of
+// assumption the dispatch says to flag instead of make (see this
+// ticket's handoff entry, "refused to guess" section). A trailing
+// `// token-ok: <reason>` comment on the SAME line as the literal
+// suppresses every rule on that line - and is always printed in CI
+// output (both pass and fail runs), so a bypass can never go quietly
+// unnoticed the way a silent allowlist entry could.
+const TOKEN_OK_RE = /\/\/\s*token-ok:\s*(.+?)\s*$/
+
+function tokenOkReason(line) {
+  const m = TOKEN_OK_RE.exec(line)
+  return m ? m[1] : null
+}
 
 // GEN-2609-057 - a pure refactor/extraction can move an existing literal
 // onto a new (added) line without changing its value at all - the diff
@@ -147,6 +349,20 @@ function isKnownLiteralInBase(literal) {
   return known
 }
 
+// GEN-2609-078 - extracted so both findOffenses() (diff-only) and
+// scripts/design-token-ratchet.js (whole-repo) share exactly one
+// decision about when a rule's literals are "relocated debt, skip" vs.
+// "flag it" - see the raw-button rule's own comment above for why
+// skipRelocatedCheck exists.
+// Callers only invoke this after rule.test(content) already returned true,
+// so "flag unconditionally" for a skipRelocatedCheck rule is safe - there's
+// always a real match to report.
+function shouldFlag(rule, literals, isKnownInBaseFn) {
+  if (rule.skipRelocatedCheck) return true
+  if (literals.length === 0) return true // extract() found nothing but test() fired - fail open
+  return !literals.every(isKnownInBaseFn)
+}
+
 // Exact-path exemptions - the actual token source and the tone
 // source-of-truth extracted in GEN-2609-051 legitimately hold literal
 // values; everything else should draw from them instead of re-typing.
@@ -193,6 +409,7 @@ function getDiff() {
 
 function findOffenses(diffText) {
   const offenses = []
+  const tokenOkUses = []
   let currentFile = null
   let checkCurrentFile = false
   let newLineNo = 0
@@ -214,15 +431,17 @@ function findOffenses(diffText) {
 
     if (rawLine.startsWith('+')) {
       const content = rawLine.slice(1)
+      const reason = tokenOkReason(content)
+      if (reason) {
+        tokenOkUses.push({ file: currentFile, line: newLineNo, reason, content: content.trim() })
+        newLineNo++
+        continue
+      }
       for (const rule of RULES) {
+        if (rule.isExemptFile && rule.isExemptFile(currentFile)) continue
         if (!rule.test(content)) continue
         const literals = rule.extract ? rule.extract(content) : []
-        // Only skip when every literal this rule found on the line is an
-        // exact match for something already in the base tree - if extract
-        // came back empty (shouldn't happen if it mirrors test correctly)
-        // or any single literal is new/edited, fail open and flag it.
-        const allRelocated = literals.length > 0 && literals.every(isKnownLiteralInBase)
-        if (!allRelocated) {
+        if (shouldFlag(rule, literals, isKnownLiteralInBase)) {
           offenses.push({ file: currentFile, line: newLineNo, rule: rule.name, content: content.trim() })
         }
       }
@@ -232,12 +451,21 @@ function findOffenses(diffText) {
     }
   }
 
-  return offenses
+  return { offenses, tokenOkUses }
 }
 
 function main() {
   const diffText = getDiff()
-  const offenses = findOffenses(diffText)
+  const { offenses, tokenOkUses } = findOffenses(diffText)
+
+  if (tokenOkUses.length > 0) {
+    console.log(`design-token check: ${tokenOkUses.length} line(s) allowed via // token-ok: (always shown, never a silent bypass):\n`)
+    for (const u of tokenOkUses) {
+      console.log(`  ${u.file}:${u.line}  reason: ${u.reason}`)
+      console.log(`    ${u.content}`)
+    }
+    console.log('')
+  }
 
   if (offenses.length === 0) {
     console.log(`design-token check: no new hardcoded design-token literals (${BASE_REF}...${HEAD_REF}).`)
@@ -250,6 +478,7 @@ function main() {
     console.error(`    ${o.content}`)
   }
   console.error('\nUse the --afa-* / --font-* tokens from src/app/globals.css instead of literal values.')
+  console.error('Genuinely exempt (e.g. a fixed third-party brand color)? Add a trailing `// token-ok: <reason>` comment on the same line.')
   console.error('See docs/afa-design-tokens-reference.md Section 1 and docs/design.md.')
   process.exit(1)
 }
@@ -258,4 +487,16 @@ if (require.main === module) {
   main()
 }
 
-module.exports = { RULES }
+module.exports = {
+  RULES,
+  isCheckedFile,
+  isExemptFile,
+  EXEMPT_FILES,
+  isKnownLiteralInBase,
+  shouldFlag,
+  tokenOkReason,
+  findOffenses,
+  extractPropValues,
+  extractLengthTokensFromValue,
+  isAllowlistedLength,
+}
