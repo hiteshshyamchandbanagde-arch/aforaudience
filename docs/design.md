@@ -7053,3 +7053,47 @@ Both are reminders that this migration's *contract* ("zero visual change") is on
 **Repo-wide near-miss counts, re-measured this session (unchanged from `081`'s own baseline count, none of batch 3's files individually cleared 50):** spacing `7px` **23**, spacing `9px` **34**, radius `3px` **46** (still the closest to the bar) - none added as tokens, per the dispatch's own instruction.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-083-1-seat-map`, `-2-organiser-event-detail`, `-3-organiser-event-create`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch, same resolution (keep every section, re-run `--update-baseline` fresh post-merge).
+
+## GEN-2609-084 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **83** at branch start - `083` was batch 3) - bulk token migration batch 4, file 2 of 3: `RegisterForm.tsx`
+
+Same method as file 1 - branched independently from `qa` (post-`083` merge), not stacked. `verify-equivalence.js` (built and validated in file 1's own entry) run against this file too - see Verify below.
+
+### SVG present, checked for in-scope properties before running the automated pass
+
+4 `<svg>` icons (`EyeIcon`, `CheckCircleIcon`, `GoogleIcon`). `CheckCircleIcon`'s own `style={{ marginRight: "4px" }}` is real chrome, not geometry - a static icon-to-text spacing choice, not a per-item dynamic render loop the way `079`'s seat-map markers were (`s.x`/`s.y`-positioned, computed per data row). Migrated normally, no exclusion needed. `GoogleIcon`'s 4 `fill="#..."` hex values are the brand-mandated Google logo colours (`#4285F4`/`#34A853`/`#FBBC05`/`#EA4335`) - real, quoted hex literals the checker does flag, left deliberately untouched per the dispatch's own explicit instruction (third-party brand colours, not this app's theme).
+
+### Coverage - matches the dispatch's own predicted numbers exactly
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 57 | 5 | **52** | 52 / 57 |
+| font-size | 30 | 0 | **30** | 30 / 30 |
+| radius | 11 | 3 | **8** | 8 / 11 |
+| rgba | 17 | 17 | 0 (none matched) | n/a |
+| hex | 4 | 4 | 0 (Google brand colours, deliberately untouched) | n/a |
+| raw-button | 7 | 7 | 0 (retrofit only) | n/a |
+
+Font-size hit **100%** coverage. **126 → 36 literals (71% reduction).** `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -30, `spacing-literal` -52, `radius-literal` -8, `rgb-rgba-literal`/`hex-color-literal`/`raw-button` all ±0.
+
+### Colour - zero manual matches, checked not assumed
+
+6 distinct `rgba()` values, 17 occurrences. `rgba(245,245,240,0.12)` (×8, the file's own dominant border/divider tint) is close to `--afa-border-resting`'s `0.15` but not equal - a real, deliberate different alpha in this file, not a near-miss to round. `rgba(179,38,30,0.1)`/`0.3` (error backgrounds/borders), `rgba(0,0,0,0.35)` (a dropdown-shadow-adjacent black tint), `rgba(201,151,58,0.15)` (gold, matches `STATUS_TONE.gold.bg`, not a `--afa-*` token, same standing finding as every prior file) - none byte-identical to a real token. Zero migrated.
+
+### Stays a literal
+
+spacing: `40px`×2 (the auth card's own outer `padding`, both off-scale copies of the same value), `44px`×2 (the password `<input>`'s `paddingRight`, reserving room for the eye-icon toggle button), `-8px`×1 (negative, per the dispatch's own explicit new rule - never a token candidate). radius: `16px`×2 (the same auth card, both copies), `2px`×1.
+
+### Raw `<button>` - 7 sites, 0 migrated to a `Button` variant
+
+- **Resend code (L366):** transparent, plain amber text, no border - no matching variant.
+- **Continue with Google (L400):** transparent, `1.5px solid rgba(245,245,240,0.12)` border (not a token), `radius: md` - no Google-styled variant exists in `Button.tsx`, and this shape (translucent-cream border) doesn't match `outline-neutral` exactly either.
+- **Username suggestion chip / "try more" / "use instead" (L452/470/502):** 3 small text-link/chip-shaped one-offs, none matching an existing variant shape.
+- **2 password-visibility eye-icon toggles (L570/614):** transparent, no border, icon-only - no circular/icon variant exists.
+
+All 7 already had every in-scope literal token-retrofitted.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. **`verify-equivalence.js` against `origin/qa`: 49 paired lines, 0 mismatches.** `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1200→1170, `spacing-literal` 2776→2724, `radius-literal` 461→453, `rgb-rgba-literal`/`hex-color-literal`/`raw-button` all ±0. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview click-through. This page has no admin-only auth gate (public registration flow) - a real Preview URL would let anyone verify it directly once one exists, unlike the Admin-only pages in this batch. Specific elements worth a targeted look once a Preview exists: the OTP-verification step's resend-code button, the Google sign-in button's border, and the password-strength meter's spacing (all migrated this entry).
