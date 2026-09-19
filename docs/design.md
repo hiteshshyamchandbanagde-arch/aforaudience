@@ -5977,3 +5977,19 @@ Future sessions copy the template's structure into `HANDOFF.md`'s new
 top entry each time; the template file itself stays a skeleton, not a
 changelog, except for section 6's permanent ledger, which accumulates
 in both places.
+
+**Section 13 amended same day, per Hitesh's own call.** Not an
+exception after all: before Hitesh provided a session-scoped PAT this
+session, chat had confirmed read-only access (clone-and-read, no
+write) - the PR-push/merge pattern across `GEN-2609-070`-`-074` is
+what chat's half of the split looks like *once authenticated*, not a
+lane crossing. Section 13 now states this as the standing model: chat
+owns all PR-open/merge/git-write, gated on a session-scoped PAT; CC
+owns all coding and its own branch pushes; neither crosses into the
+other's job. Flagged forward, not acted on: Hitesh is considering
+moving chat's git-write auth from a manually-pasted PAT to a proper
+GitHub connector (already configured for this project, not yet given
+repo-scoped write permissions) - removes the re-paste friction and
+gets a bare token out of the chat transcript. Update section 13 again
+if/when that lands; the split itself doesn't change, only how chat
+authenticates to exercise it.
