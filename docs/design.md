@@ -6451,3 +6451,41 @@ Added 2 steps to the existing `pull_request` workflow: the self-test suite, and 
 ### Next dispatch after this merges
 
 Bulk migration, largest-literal-count files first (the ratchet's own top-10 report above), not page-by-page - `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), and `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets.
+
+## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 2 of 3: `admin/settings/page.tsx`
+
+Same dispatch, same method as file 1 (`seat-map/page.tsx`, its own entry above/elsewhere in this doc depending on merge order - branched independently from `qa`, not stacked on file 1's branch, per the dispatch's "each PR stands alone"). Exact-match-only reverse-lookup script, dry-run reviewed in full before applying, no rounding, no new tokens/variants.
+
+**No geometry exclusion needed.** Checked first, not assumed: `grep getContext|<canvas|<svg` on this file returns nothing - it's a plain settings form (currency rates, vote weights, booking-fee/chat-cap/scene-status/direct-payouts toggles), no canvas/SVG drawing surface anywhere. Every literal in this file is real chrome.
+
+**Zero raw `<button>`, zero hex, zero hardcoded font-family in this file already** - confirmed live via the rule engine before starting, not assumed from the ratchet's aggregate report (which only gives whole-repo totals, not a per-file rule breakdown). This file's 208 literals were 100% rgba/font-size/spacing/radius.
+
+**83 lines changed, reviewed in full before applying** (not spot-checked) - every single diff hunk is an unambiguous exact-value swap (e.g. `padding: 24` -> `padding: 'var(--afa-space-6)'`, `borderRadius: 6` -> `borderRadius: 'var(--afa-radius-sm)'`, `border: '1px solid rgba(245,245,240,0.15)'` -> `border: '1px solid var(--afa-border-resting)'`). No template-literal conversions or helper-function calls needed this file (unlike `seat-map`'s `fillSolidTint` work) - every color/size/spacing/radius literal here was either a plain quoted CSS value or a bare React inline-style number, both handled by the same script path.
+
+### Off-scale decision table
+
+**rgba (9 left, 22 -> 9):** `rgba(245,245,240,0.08)` x8, `rgba(245,245,240,0.06)` x1 - neither matches a named `--afa-*` token (border-resting=0.15, muted=0.4, secondary=0.65). `0.08` recurs 8x in this file alone - carried into the batch-wide proposal list (also seen in `seat-map`, so this is a real cross-file recurring value, not a one-file coincidence).
+
+**font-size (21 left, 58 -> 21):** `20`x8 (all `h2` section headers - same literal, same role, every section of this settings page), `15`x12 (all form-input `fontSize: 15` - another same-role recurring literal), `18`x1. `20` and `15` both clear the 5+ threshold heavily - carried into the batch-wide proposal list.
+
+**spacing (44 left, 107 -> 44):** `6` (bare, unitless) x21 - overwhelmingly `marginBottom: 6` under every section `<h2>`, spot-checked 5 occurrences directly, all identical role. `10px`x13 (recurs both here and in `seat-map` - the strongest cross-file candidate). `10`(bare)x2, `14`x2, `28`x1, `32`x1, `48px`x1, `32px`x1, `64px`x1, `14px`x1. `6` and `10px` both carried into the batch-wide proposal list (`6` especially - 21 sites in one file, all the same semantic role, is about as clean a "should be a token" case as this migration will find).
+
+**radius (8 left, 21 -> 8):** `12` (bare) x8 - every "highlighted/active" panel's own corner radius, consistently 12 across all 8 sites. Recurs in `seat-map` too (12px x6 there). Strong cross-file proposal candidate.
+
+### Per-category ratchet, before -> after (whole repo, this file's migration only)
+
+| Category | Before | After | Delta |
+|---|---|---|---|
+| `hex-color-literal` | 87 | 87 | ±0 (file had none) |
+| `rgb-rgba-literal` | 997 | 984 | -13 |
+| `hardcoded-font-family` | 10 | 10 | ±0 |
+| `font-size-literal` | 1530 | 1493 | -37 |
+| `spacing-literal` | 3450 | 3387 | -63 |
+| `radius-literal` | 570 | 557 | -13 |
+| `raw-button` | 211 | 211 | ±0 (file had none) |
+
+This file alone: 208 -> 82 literals (61% reduction).
+
+**Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**Not verified this session:** a real QA-preview click-through. Flagged explicitly per the dispatch's own instruction: **no test credential exists for Admin** (Hitesh's own Google OAuth account, no scriptable QA admin login documented anywhere in this repo, confirmed by every prior ticket that touched an Admin page - e.g. `GEN-2609-035`'s verify section). This PR needs Hitesh's own live click-through on the settings page before merging, not a delegated/scripted check - flagged in the handoff as a hard requirement, not a nice-to-have.
