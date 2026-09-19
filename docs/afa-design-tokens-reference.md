@@ -21,9 +21,25 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-text-primary:    #F5F5F0;
 --afa-text-secondary:  rgba(245, 245, 240, 0.65);
 --afa-text-muted:      rgba(245, 245, 240, 0.4);
+--afa-text-inverse:    #F5F5F0;  /* pre-existing gap, fixed by GEN-2609-075 — defined in globals.css since before GEN-2609-074, 3 real consumers (src/app/page.tsx, for-artists/page.tsx, FourRooms.tsx), just never had a row in this table. Not caused by -074, which only added its own -on-image row correctly. */
 
 --afa-text-on-image:   rgba(255, 255, 255, 0.5);  /* GEN-2609-074 — hero-subtitle text over a PHOTOGRAPH, not a flat surface; a cooler/purer white than --afa-text-secondary's warm cream tint, tuned for legibility across a photo's unpredictable luminance rather than reused for token-count tidiness */
 ```
+
+**GEN-2609-075 — radius + button-padding scale (new tokens, admin-controlled).** Promoted out of `Button.tsx`'s `SIZE_CHROME`/per-variant `borderRadius`, where these were previously plain hardcoded numbers, never a CSS custom property:
+
+```css
+--afa-radius-sharp:    0px;    /* cards, sharp-corner house convention (Section 3) */
+--afa-radius-sm:       6px;    /* Button sm size tier, outline-neutral */
+--afa-radius-md:       8px;    /* Button md/lg size tier, form-submit */
+--afa-radius-pill:     999px;  /* primary, outline, toggle-pill, pill-sm/pill-md */
+
+--afa-btn-padding-sm:  4px 10px;
+--afa-btn-padding-md:  9px 17px;
+--afa-btn-padding-lg:  12px 24px;
+```
+
+**Admin-controlled runtime layer (GEN-2609-075, 19 Sep).** Every token in this section, plus `--font-display`/`--font-ui`/`--font-sans`/`--font-mono`, is now also a row in the `DesignToken` table (`aforaudience-qa`) and editable at `/dashboard/admin/design-system` — an admin change is cached (tag `"design-tokens"`) and takes effect on the next page load, no deploy, falling back to the static values in this file/`globals.css` if the DB is empty or unreachable. `globals.css` stays the authoritative *default* (and the only thing that matters for a fresh environment before the table is seeded); the DB is a runtime override layer on top of it, not a replacement. 5 tokens (`--afa-surface-page`, `--afa-surface-raised`, `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid`) are "locked" in the admin UI — still editable, gated behind a confirm dialog — unrelated to this section's own CI-enforced locked-palette rule below, which keeps blocking raw literals in application *code* regardless of what the DB holds. Full reasoning in `docs/design.md`'s `GEN-2609-075` entry.
 
 **Borders**: there is no single `--afa-border` token. In practice, borders are hand-authored `rgba(245,245,240, α)` (translucent cream-on-dark) at low opacity for resting state, with `--afa-amber` (or `rgba(201,151,58, α)`) on hover/focus:
 

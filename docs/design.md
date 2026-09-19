@@ -5993,3 +5993,226 @@ repo-scoped write permissions) - removes the re-paste friction and
 gets a bare token out of the chat transcript. Update section 13 again
 if/when that lands; the split itself doesn't change, only how chat
 authenticates to exercise it.
+
+## GEN-2609-075 - Admin-controlled design tokens, runtime layer (MVP) - built, PR open
+
+Dispatch: give an admin a UI to change button/color/font/size tokens
+and have the whole site pick it up on the next page load, no deploy.
+CC-owned (branch/build/verify/push); PR-open/merge stays chat's lane
+per section 13 above - CC handed off a compare URL rather than opening
+the PR itself (no `gh` CLI on this machine, no GitHub MCP connection
+this session).
+
+**Step 0 discovery, before building anything:**
+- Fonts load via `next/font/google` in `layout.tsx`, each exposed as a
+  CSS custom property (`--font-display`/`--font-ui`/`--font-sans`/
+  `--font-mono`) applied via `className` on `<body>` - not `:root`.
+  This matters: a runtime override targeting only `:root` would lose
+  to `<body>`'s own directly-declared class rule regardless of
+  `!important` (a property declared directly on an element beats one
+  merely inherited from an ancestor) - confirmed by reasoning through
+  the CSS custom-property inheritance/cascade model, not assumed. The
+  runtime override below targets `body` (not just `:root`) for exactly
+  this reason.
+- Type scale (`--afa-text-*`) and the 8px spacing grid (`--afa-space-*`)
+  already exist as real tokens (Step 1, 15 Sep) but `docs/afa-design-
+  tokens-reference.md` §8 itself says "zero adoption anywhere" - true
+  of every component except this ticket's own admin-panel Button
+  retrofit (see below). Radius and button sizes were **not** tokens at
+  all - `Button.tsx`'s `SIZE_CHROME` and its per-variant
+  `borderRadius` were plain hardcoded numbers, and every variant's
+  radius deliberately differs (sharp cards, `6px`/`8px` chrome, `999px`
+  pills, `50%` close-circle) per multiple prior tickets' own explicit
+  design calls - not something to collapse onto one "radius" knob.
+  Resolved by adding a real, small radius scale
+  (`--afa-radius-sharp/sm/md/pill`) and 3 button-padding tokens
+  (`--afa-btn-padding-sm/md/lg`), then retrofitting exactly the
+  `SIZE_CHROME` sm/md/lg tier and every 999px-pill/8px-radius variant
+  in `Button.tsx` to consume them - `pill-sm`/`pill-md`'s own padding/
+  font-size stay literal (never derived against the type scale the way
+  sm/md/lg's 12/13/14px happen to be, so not silently folded in).
+- Admin pages live under `src/app/dashboard/admin/*` (settings, users,
+  revenue, diary, ...), each its own client component doing
+  `useSession` + a `res.status === 403` → forbidden-state render, backed
+  by a route-local `requireAdmin()` (session → `prisma.user.findUnique`
+  → `role === 'ADMIN'`) - no shared helper exists, every route
+  duplicates its own, so this ticket matches that convention rather
+  than introducing a new shared one. No top-level `/admin` route exists
+  anywhere - the dispatch's literal "`/admin/design-system`" wording is
+  read as "the obvious admin-page location" and built at
+  `/dashboard/admin/design-system` instead, flagged here as the one
+  discovery-stage interpretation call, not silently deviated from.
+- Full editable token list, via the ledger's own pinned method
+  (`grep -oE -- '--afa-[a-z0-9-]+:' globals.css | sort -u | wc -l`):
+  **82** existing tokens, unchanged from the 19 Sep handoff's count.
+  Grouped: 68 color, 6 type-scale + 2 page-title = 8 size, 6 spacing.
+  Plus 11 new tokens this ticket adds (not in that 82): 4
+  `--afa-radius-*`, 3 `--afa-btn-padding-*`, and the 4 `--font-*` role
+  names themselves (newly DB-managed, previously only next/font-set).
+  93 `DesignToken` rows total, seeded 1:1 from `globals.css`'s real
+  values (verified via `information_schema` query post-migration:
+  68/4/8/6/4/3 by group, 5 locked - matches exactly).
+
+**Build.**
+- `DesignToken` (key/value/group/type/locked/updatedBy/updatedAt) +
+  `DesignTokenVersion` (snapshot JSON/createdBy/createdAt/note) -
+  applied via `Supabase:apply_migration` against `aforaudience-qa`
+  only (verified project id before running, per the standing
+  production-freeze rule), matching migration file under
+  `prisma/migrations/`, same "apply directly, file documents what ran"
+  pattern as every migration since `prisma migrate dev` broke.
+- Root layout (`RootLayout`, now `async`) reads via a cached
+  (`unstable_cache`, tag `"design-tokens"`) helper in the new
+  `src/lib/design-tokens.server.ts`, builds a `<style
+  id="afa-design-tokens-runtime">` block, and renders it as the first
+  child of `<head>`. Never throws - a DB error is caught, logged, and
+  treated as "no tokens," which renders no override `<style>` at all
+  (`globals.css`'s own `:root` defaults apply untouched). **Verified
+  live, not just reasoned about:** ran a local dev server against a
+  deliberately unreachable `DATABASE_URL` - the page still returned
+  `200` with full content and zero `afa-design-tokens-runtime`
+  occurrences in the HTML, confirming the fallback path for real.
+- **Client/server split found by a real `next build` failure, not
+  anticipated up front:** the admin page (a Client Component) importing
+  the token lib directly dragged `@/lib/prisma` (and transitively the
+  `pg` driver's Node-only `net`/`tls`/`fs`/`dns` requires) into the
+  browser bundle, failing Turbopack's build outright with 8 errors.
+  Split into `src/lib/design-tokens.ts` (pure - types, validation,
+  `FONT_ALLOWLIST`, `DEFAULT_TOKEN_VALUES`, the WCAG contrast helper,
+  `buildDesignTokenCss`) and `src/lib/design-tokens.server.ts`
+  (`prisma`/`next/cache` - only imported from Server Components/Route
+  Handlers). Re-verified clean with a real `next build` after the
+  split.
+- **A real Next 16 breaking change caught before it shipped**, per
+  `AGENTS.md`'s own "read the docs before writing code" instruction:
+  `tsc` failed on `revalidateTag(tag)` - this Next version (16.2.9)
+  requires a second `profile` argument. Read
+  `node_modules/next/dist/docs/.../revalidateTag.md` rather than
+  guessing: the new recommended default (`profile="max"`) is
+  stale-while-revalidate - the *next* visit after a save would still
+  serve the stale value while a background refresh happens, which
+  would have silently failed this ticket's own acceptance bar ("show
+  it on the next load"). Used the documented immediate-expiration form
+  instead - `revalidateTag(tag, { expire: 0 })` - the one the docs
+  name for exactly this shape of caller (a Route Handler revalidating
+  on demand, not a Server Action).
+- `/dashboard/admin/design-system`: color pickers (`<input
+  type="color">` for plain 6-digit hex, a swatch + text input for
+  `rgba()`/`var()` values `<input type=color>` can't represent), a
+  font-family `<select>` per role from `FONT_ALLOWLIST`, numeric `px`
+  inputs for size/spacing/radius, shorthand text inputs (validated) for
+  button padding. Live preview renders the real `Button` component
+  (all 8 variants + the 3 SIZE_CHROME tiers) inside a wrapper whose
+  inline style carries only the *dirty* (unsaved) token values as CSS
+  custom properties - real CSS-var inheritance previews unsaved edits
+  with zero global side effect. A fixed WCAG contrast-pair panel (5
+  real role pairs, e.g. "button text on Primary fill") recomputes live
+  against pending edits via a small `parseCssColor`/relative-luminance/
+  contrast-ratio helper - no such helper existed anywhere in the repo
+  before this (every prior contrast check in `HANDOFF.md` was done by
+  hand, ad hoc, per session).
+- **Security, not just data-integrity:** token values are admin-authored
+  strings concatenated directly into a `<style>` tag served to every
+  visitor - a real CSS/markup-injection surface, not just a validation
+  nicety. `isValidTokenValue()` is an allowlist per `type` (hex/`rgb()`/
+  `var(--afa-*)` for color, a strict dimension/shorthand regex for
+  size/spacing/radius/button, an exact-match enum against
+  `FONT_ALLOWLIST` for fonts), rejects `< > { } ;` and comment
+  delimiters outright, and is enforced server-side in the PATCH/revert/
+  reset routes - the client-side dialog/validation is a UX convenience,
+  not the actual gate.
+- **The 5 locked tokens** (`--afa-surface-page`, `--afa-surface-raised`,
+  `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid` - the core
+  brand surfaces + accent + CTA fill/text pair) are editable only
+  behind a confirm dialog client-side, re-checked server-side (`PATCH`
+  returns `409` with the touched locked keys if `confirmLocked` isn't
+  set). No canonical "5 locked tokens" list existed anywhere in the
+  docs before this - the dispatch's wording assumed one; asked Hitesh
+  rather than guessing, since which exact 5 gated the confirm dialog
+  and the acceptance test's own "primary button color" both hinged on
+  it. Hitesh's answer redirected toward broad category coverage (Font/
+  Size/Color/Button/Action/Toast) rather than naming the 5 directly, so
+  the originally-proposed "core brand 5" was kept and documented here,
+  not re-asked.
+- `Toast.tsx` already sources its accent/text/badge colors from
+  `--afa-*` vars (`--afa-error`/`--afa-amber`/`--afa-green-mid`/
+  `--afa-sage`/`--afa-on-fill-solid`/`--afa-cream`) - confirmed by
+  reading the file, not assumed - so it inherits admin-driven color
+  changes for free, no separate "Toast" work needed to satisfy that
+  part of Hitesh's category list. Its per-kind `rgba()` *background*
+  tints are pre-existing, untouched, out of this ticket's scope.
+- Save writes every changed row + one `DesignTokenVersion` snapshot
+  (the FULL token set post-save, not a diff) in one `$transaction`,
+  then calls `revalidateDesignTokens()`. Revert applies an older
+  snapshot back and writes ANOTHER new version recording the revert
+  (so reverting is itself reversible - version history never loses
+  information by being overwritten in place). Reset-to-defaults writes
+  `DEFAULT_TOKEN_VALUES` (mirrored 1:1 from `globals.css`, not re-read
+  from it at runtime, so a reset works even if `globals.css` has since
+  drifted) the same way.
+- `check-design-tokens.js`: `src/lib/design-tokens.ts`'s
+  `DEFAULT_TOKEN_VALUES` legitimately holds the same 82 literal hex/
+  rgba values `globals.css` does (it's the DB "reset to defaults"
+  source of truth) - added to `EXEMPT_FILES` alongside `globals.css`/
+  `statusStyle.ts`, same rationale. Everything else new (the admin
+  page, the 3 API routes, `layout.tsx`, `Button.tsx`) re-checked clean
+  against `origin/qa` with zero exemptions needed - two pre-existing
+  `rgba()` literals used in the admin page (a modal overlay, a disabled-
+  button tint) are byte-identical to values already live elsewhere in
+  `origin/qa`'s `src/`, so the checker's own relocated-literal allowance
+  covers them without a new exemption.
+
+**Verify.** `tsc --noEmit` clean. `check-design-tokens.js` against
+`origin/qa`: clean, 0 offenses. Real `next build`: clean, foreground,
+confirmed via `$PIPESTATUS`, all 114 static + all dynamic routes
+present including the 3 new API routes and
+`/dashboard/admin/design-system`. **Live-verified against this
+branch's actual Vercel Preview deployment** (not just locally): fetched
+the deployed homepage's HTML directly and confirmed
+`<style id="afa-design-tokens-runtime">` renders with all 93 tokens,
+values matching the QA database exactly. The one acceptance-criterion
+leg **not** independently verified this session: the full "admin edits
+a color in the UI → saves → public page shows it on the next load"
+round trip, and "revert restores it" - both require a real ADMIN
+session, and admin auth in this app is real login (no scriptable QA
+admin credential documented anywhere, and this session's attempt to
+create a throwaway QA-only admin test account for scripted
+verification was declined by the Claude Code auto-mode safety
+classifier as a sensitive action, correctly not worked around). Every
+other piece of that path (validation, the transaction, the immediate-
+expiration `revalidateTag` call, the cached read, the render) is
+verified individually; the end-to-end click-through itself needs
+Hitesh's own admin login, or explicit permission to script a throwaway
+account.
+
+`Feedback` row `GEN-2609-075`, status `IN_TEST` (PR open, not merged).
+`CodeCounter.GEN/2609` advanced `74` -> `75` (guarded on the read
+value, re-checked immediately before the write).
+
+**Coverage backlog - what the DB now controls vs. what it doesn't
+(yet):** every `--afa-*`/`--font-*` custom property flows through
+`var()` already, so color/font-role edits cascade to every consumer
+site-wide for free. Radius/button-size edits only visibly affect
+`Button.tsx`'s own sm/md/lg tier and its 999px/8px-radius variants -
+the type-scale/spacing tokens (`--afa-text-*`/`--afa-space-*`) still
+have **zero adoption** anywhere outside this ticket's own retrofit (per
+§8's own prior finding, unchanged), so editing e.g. `--afa-text-body`
+in the admin panel has no visible effect on ~1,621 hardcoded
+`font-size` call sites across the app - a real, separate, much larger
+retrofit (already flagged as follow-up scope in §8.3), not something
+this MVP's runtime layer was ever meant to close by itself. The
+locked-palette CI rule (`check-design-tokens.js`) is unrelated and
+unaffected - it keeps blocking new raw literals in application code
+regardless of what this table holds.
+
+## Next session starts by
+
+Getting the `GEN-2609-075` PR (`feat/gen-2609-075-admin-design-tokens`)
+reviewed and merged - CC pushed the branch and verified it locally +
+against its own Preview deployment, but per section 13's standing
+model, PR-open/merge is chat's lane, gated on a session PAT (none
+available to CC this session, and the GitHub MCP connector failed to
+connect). Either do the admin-login round-trip check yourself (change
+the primary button color, confirm it shows on the next load, revert,
+confirm it's restored) before merging, or say so and a throwaway QA
+admin test account can be scripted for it instead.
