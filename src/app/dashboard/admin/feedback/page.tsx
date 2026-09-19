@@ -122,7 +122,7 @@ function timeAgo(iso: string) {
 // a visible change.
 function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: 'var(--afa-radius-sm)', padding: '7px 12px', cursor: 'pointer' }}>
       Approve
     </button>
   )
@@ -130,7 +130,7 @@ function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: 
 
 function RejectButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: '6px', padding: '7px 12px', cursor: 'pointer' }}>
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px 12px', cursor: 'pointer' }}>
       Reject
     </button>
   )
@@ -766,7 +766,7 @@ function AdminFeedbackBoard() {
                   color: 'var(--afa-text-primary)',
                   background: 'var(--afa-surface-raised)',
                   border: '1px solid rgba(245,245,240,0.13)',
-                  borderRadius: '999px',
+                  borderRadius: 'var(--afa-radius-pill)',
                   padding: '5px 12px',
                   cursor: 'pointer',
                 }}

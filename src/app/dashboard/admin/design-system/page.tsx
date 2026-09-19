@@ -372,19 +372,22 @@ export default function AdminDesignSystemPage() {
                 <button onClick={() => setConfirmingReset(true)} disabled={saving} style={secondaryBtnStyle}>
                   Reset to defaults
                 </button>
-                <button
+                <Button
+                  variant="solid"
+                  size="md"
+                  fullWidth={false}
                   onClick={handleSave}
                   disabled={saving || dirty.length === 0}
-                  style={{
-                    ...secondaryBtnStyle,
-                    background: dirty.length ? 'var(--afa-fill-solid)' : 'rgba(245,245,240,0.08)',
-                    color: dirty.length ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-secondary)',
-                    border: 'none',
-                    fontWeight: 700,
-                  }}
+                  // No-pending-changes state stays its own distinct grey
+                  // (not just dimmed orange) - `solid`'s own disabled
+                  // handling (Button.tsx) only lowers opacity, so this
+                  // overrides background/color explicitly to keep that
+                  // real, meaningful color difference (nothing to save,
+                  // vs. saving is in flight).
+                  style={dirty.length === 0 ? { background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' } : undefined}
                 >
                   {saving ? 'Saving…' : dirty.length ? `Save ${dirty.length} change${dirty.length > 1 ? 's' : ''}` : 'Saved'}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -665,9 +668,9 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
           <button onClick={onCancel} style={secondaryBtnStyle}>
             Cancel
           </button>
-          <button onClick={onConfirm} style={{ ...secondaryBtnStyle, background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', border: 'none', fontWeight: 700 }}>
+          <Button variant="solid" size="md" fullWidth={false} onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

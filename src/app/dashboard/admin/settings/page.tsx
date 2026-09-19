@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import { ErrorBanner } from '@/components/ErrorBanner'
+import Button from '@/components/ui/Button'
 
 // /dashboard/admin/settings
 //
@@ -610,23 +611,9 @@ export default function AdminSettingsPage() {
             Absolute ceiling (code-level, requires a deploy to change): ₹{(maxPaise / 100).toLocaleString('en-IN')}. Rupees only; fractions are rounded to the nearest paise on save.
           </p>
 
-          <button
-            onClick={save}
-            disabled={saving || !isDirty || !isValid}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: saving || !isDirty || !isValid ? 'default' : 'pointer',
-              opacity: saving || !isDirty || !isValid ? 0.5 : 1,
-            }}
-          >
+          <Button variant="solid" size="lg" fullWidth={false} onClick={save} disabled={saving || !isDirty || !isValid}>
             {saving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
 
         <div
@@ -681,23 +668,9 @@ export default function AdminSettingsPage() {
             Maximum: {maxChatCap}. A new browser session (new tab, cleared storage, or a different device) gets a fresh count — this is a soft cost guard, not a hard security boundary.
           </p>
 
-          <button
-            onClick={saveChatCap}
-            disabled={chatSaving || !isChatCapDirty || !isChatCapValid}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: chatSaving || !isChatCapDirty || !isChatCapValid ? 'default' : 'pointer',
-              opacity: chatSaving || !isChatCapDirty || !isChatCapValid ? 0.5 : 1,
-            }}
-          >
+          <Button variant="solid" size="lg" fullWidth={false} onClick={saveChatCap} disabled={chatSaving || !isChatCapDirty || !isChatCapValid}>
             {chatSaving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
 
         <div
@@ -778,23 +751,9 @@ export default function AdminSettingsPage() {
             Counted by distinct organiser, not raw vouch count — one organiser repeat-booking the same artist can't single-handedly push them to Featured.
           </p>
 
-          <button
-            onClick={saveSceneStatusThresholds}
-            disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 'default' : 'pointer',
-              opacity: sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid ? 0.5 : 1,
-            }}
-          >
+          <Button variant="solid" size="lg" fullWidth={false} onClick={saveSceneStatusThresholds} disabled={sceneStatusSaving || !isSceneStatusDirty || !isSceneStatusValid}>
             {sceneStatusSaving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
 
         <div
@@ -823,23 +782,9 @@ export default function AdminSettingsPage() {
               placeholder="5"
               style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
-            <button
-              onClick={saveRosterLookback}
-              disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}
-              style={{
-                background: 'var(--afa-fill-solid)',
-                color: 'var(--afa-on-fill-solid)',
-                padding: '9px 16px',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 'default' : 'pointer',
-                opacity: rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid ? 0.5 : 1,
-              }}
-            >
+            <Button variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
               {rosterLookbackSaving ? 'Saving…' : 'Save'}
-            </button>
+            </Button>
           </div>
           <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)' }}>
             Used only on the <Link href="/dashboard/admin/artists" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Artists roster</Link> — averages each artist's most recent N shows that have a scored Hype Score (shows with no score yet are skipped, not counted as zero).
@@ -873,23 +818,9 @@ export default function AdminSettingsPage() {
               placeholder="3"
               style={{ width: 100, padding: '10px 12px', borderRadius: 6, border: '1px solid rgba(245,245,240,0.15)', fontSize: 15, background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
-            <button
-              onClick={saveEventWindow}
-              disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}
-              style={{
-                background: 'var(--afa-fill-solid)',
-                color: 'var(--afa-on-fill-solid)',
-                padding: '9px 16px',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 'default' : 'pointer',
-                opacity: eventWindowSaving || !isEventWindowDirty || !isEventWindowValid ? 0.5 : 1,
-              }}
-            >
+            <Button variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
               {eventWindowSaving ? 'Saving…' : 'Save'}
-            </button>
+            </Button>
           </div>
           <p style={{ fontSize: 11, color: 'var(--afa-text-secondary)' }}>
             How far out an organiser can pick an event date on Create/Edit Event without contacting admin. Enforced server-side (not just the date-picker's max) — capped at 24 months here as a sanity backstop.
@@ -957,23 +888,9 @@ export default function AdminSettingsPage() {
             Lazy-checked on read, no cron job — leave blank for no auto-expiry. If set, this flips back to disabled on its own past that time, without needing to remember to uncheck it.
           </p>
 
-          <button
-            onClick={saveDirectPayouts}
-            disabled={directPayoutsSaving || !isDirectPayoutsDirty}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: directPayoutsSaving || !isDirectPayoutsDirty ? 'default' : 'pointer',
-              opacity: directPayoutsSaving || !isDirectPayoutsDirty ? 0.5 : 1,
-            }}
-          >
+          <Button variant="solid" size="lg" fullWidth={false} onClick={saveDirectPayouts} disabled={directPayoutsSaving || !isDirectPayoutsDirty}>
             {directPayoutsSaving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
 
         <div
@@ -1010,23 +927,9 @@ export default function AdminSettingsPage() {
             Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
           </p>
 
-          <button
-            onClick={saveVoteWeightDefaults}
-            disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}
-            style={{
-              background: 'var(--afa-fill-solid)',
-              color: 'var(--afa-on-fill-solid)',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 'default' : 'pointer',
-              opacity: voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid ? 0.5 : 1,
-            }}
-          >
+          <Button variant="solid" size="lg" fullWidth={false} onClick={saveVoteWeightDefaults} disabled={voteWeightsSaving || !isVoteWeightsDirty || !isVoteWeightsValid}>
             {voteWeightsSaving ? 'Saving…' : 'Save'}
-          </button>
+          </Button>
         </div>
 
         <div
@@ -1085,23 +988,9 @@ export default function AdminSettingsPage() {
                       color: 'var(--afa-text-primary)',
                     }}
                   />
-                  <button
-                    onClick={() => saveCurrencyRate(c.code)}
-                    disabled={savingCode === c.code || !isDirtyRow || !isValidRow}
-                    style={{
-                      background: 'var(--afa-fill-solid)',
-                      color: 'var(--afa-on-fill-solid)',
-                      padding: '8px 16px',
-                      border: 'none',
-                      borderRadius: 6,
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: savingCode === c.code || !isDirtyRow || !isValidRow ? 'default' : 'pointer',
-                      opacity: savingCode === c.code || !isDirtyRow || !isValidRow ? 0.5 : 1,
-                    }}
-                  >
+                  <Button variant="solid" size="sm" fullWidth={false} onClick={() => saveCurrencyRate(c.code)} disabled={savingCode === c.code || !isDirtyRow || !isValidRow}>
                     {savingCode === c.code ? 'Saving…' : 'Save'}
-                  </button>
+                  </Button>
                 </div>
               )
             })

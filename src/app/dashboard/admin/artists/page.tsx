@@ -10,6 +10,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import SearchInputBox from '@/components/SearchInputBox'
+import Button from '@/components/ui/Button'
 
 // /dashboard/admin/artists — session 56, Hitesh's request: a roster view
 // with the real signals needed to make Featured/Headliner calls (gigs
@@ -266,7 +267,7 @@ export default function AdminArtistsPage() {
                         <button
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
                         >
                           Remove Headliner
                         </button>
@@ -278,13 +279,9 @@ export default function AdminArtistsPage() {
                             placeholder="Reason (optional)..."
                             style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                           />
-                          <button
-                            onClick={() => handleHeadlinerToggle(a)}
-                            disabled={actioningId === a.id}
-                            style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
-                          >
+                          <Button variant="solid" size="md" fullWidth={false} onClick={() => handleHeadlinerToggle(a)} disabled={actioningId === a.id}>
                             ★ Grant Headliner
-                          </button>
+                          </Button>
                         </div>
                       )}
                       {a.headlinerNote && (
