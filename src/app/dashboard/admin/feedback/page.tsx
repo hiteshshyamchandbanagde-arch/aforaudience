@@ -122,7 +122,7 @@ function timeAgo(iso: string) {
 // a visible change.
 function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: 'var(--afa-radius-sm)', padding: '7px 12px', cursor: 'pointer' }}>
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', cursor: 'pointer' }}>
       Approve
     </button>
   )
@@ -130,7 +130,7 @@ function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: 
 
 function RejectButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px 12px', cursor: 'pointer' }}>
+    <button disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', cursor: 'pointer' }}>
       Reject
     </button>
   )
@@ -489,8 +489,8 @@ function AdminFeedbackBoard() {
         <SiteNav />
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px var(--afa-space-6)', textAlign: 'center' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: 'var(--afa-space-3)' }}>
               Admin access only
             </h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -504,27 +504,27 @@ function AdminFeedbackBoard() {
   }
 
   const inputStyle: React.CSSProperties = {
-    fontSize: '13px',
-    padding: '7px 10px',
-    borderRadius: '8px',
-    border: '1px solid rgba(245,245,240,0.15)',
+    fontSize: 'var(--afa-text-ui)',
+    padding: '7px var(--afa-space-10px)',
+    borderRadius: 'var(--afa-radius-md)',
+    border: '1px solid var(--afa-border-resting)',
     background: 'var(--afa-surface-page)',
     color: 'var(--afa-text-primary)',
   }
 
   const cardStyle: React.CSSProperties = {
     background: 'var(--afa-surface-page)',
-    borderRadius: '12px',
-    padding: '16px',
+    borderRadius: 'var(--afa-radius-12px)',
+    padding: 'var(--afa-space-4)',
     border: '1px solid rgba(245,245,240,0.08)',
-    marginBottom: '10px',
+    marginBottom: 'var(--afa-space-10px)',
     cursor: 'pointer',
   }
 
   const renderCard = (item: FeedbackItem, showMobileDropdown: boolean) => (
     <div key={item.id} style={cardStyle} onClick={() => setSelectedId(item.id)}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '6px', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-6px)', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap', alignItems: 'center' }}>
           <Badge variant="micro" tone={CATEGORY_BADGE} style={{ letterSpacing: '0.03em' }}>
             {CATEGORY_LABELS[item.category] || item.category}
           </Badge>
@@ -534,18 +534,18 @@ function AdminFeedbackBoard() {
             </Badge>
           )}
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
+        <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', flexShrink: 0 }}>{timeAgo(item.createdAt)}</span>
       </div>
-      <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', fontWeight: 600, marginBottom: '4px' }}>
+      <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', fontWeight: 600, marginBottom: 'var(--afa-space-1)' }}>
         {item.title || item.message.slice(0, 80)}
       </div>
       {item.pageUrl && (
-        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', marginBottom: showMobileDropdown ? '8px' : 0 }}>
+        <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: showMobileDropdown ? '8px' : 0 }}>
           {item.pageUrl}
         </div>
       )}
       {showMobileDropdown && (
-        <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', gap: '6px' }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', gap: 'var(--afa-space-6px)' }}>
           <select
             value={item.status}
             disabled={actioningId === item.id}
@@ -562,7 +562,7 @@ function AdminFeedbackBoard() {
               }
               patchItem(item.id, { status: next })
             }}
-            style={{ ...inputStyle, fontSize: '12px', padding: '5px 8px', flex: 1 }}
+            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }}
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -574,7 +574,7 @@ function AdminFeedbackBoard() {
             value={item.severity || ''}
             disabled={actioningId === item.id}
             onChange={(e) => patchItem(item.id, { severity: e.target.value || null })}
-            style={{ ...inputStyle, fontSize: '12px', padding: '5px 8px', flex: 1 }}
+            style={{ ...inputStyle, fontSize: 'var(--afa-text-small)', padding: '5px var(--afa-space-2)', flex: 1 }}
           >
             <option value="">No severity</option>
             {SEVERITIES.map((s) => (
@@ -593,7 +593,7 @@ function AdminFeedbackBoard() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
           {/* Pending Approvals - merged in from the old separate
               /dashboard/admin page (session 39 unification, Feedback
               f96a1262). Collapsible like Trends below, so an admin who
@@ -601,25 +601,25 @@ function AdminFeedbackBoard() {
               it every time. */}
           <button
             onClick={() => setApprovalsOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {approvalsOpen ? '▾' : '▸'} Pending Approvals ({organisers.length + venueOwners.length})
           </button>
           {approvalsOpen && (
-            <div style={{ marginBottom: '28px' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, marginBottom: '10px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, marginBottom: 'var(--afa-space-10px)' }}>
                 Organisers ({organisers.length})
               </h2>
-              {organisers.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '18px' }}>Nothing pending.</p>}
+              {organisers.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-18px)' }}>Nothing pending.</p>}
               {organisers.map((o) => (
-                <div key={o.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div key={o.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{o.orgName}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
-                      {o.bio && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>{o.bio}</div>}
+                      <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{o.orgName}</div>
+                      <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{o.user.name} · {o.user.email}</div>
+                      {o.bio && <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: 'var(--afa-space-1)' }}>{o.bio}</div>}
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexShrink: 0 }}>
                       <ApproveButton disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'approve')} />
                       <RejectButton disabled={actioningApprovalId === o.id} onClick={() => actOnApproval('organiser', o.id, 'reject')} />
                     </div>
@@ -627,18 +627,18 @@ function AdminFeedbackBoard() {
                 </div>
               ))}
 
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, marginTop: '20px', marginBottom: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, marginTop: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-10px)' }}>
                 Venue Owners ({venueOwners.length})
               </h2>
-              {venueOwners.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
+              {venueOwners.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {venueOwners.map((v) => (
-                <div key={v.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div key={v.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
-                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{v.user.name}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{v.user.email}</div>
+                      <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{v.user.name}</div>
+                      <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{v.user.email}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexShrink: 0 }}>
                       <ApproveButton disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'approve')} />
                       <RejectButton disabled={actioningApprovalId === v.id} onClick={() => actOnApproval('venueOwner', v.id, 'reject')} />
                     </div>
@@ -656,21 +656,21 @@ function AdminFeedbackBoard() {
               GLOBAL filter surface. */}
           <button
             onClick={() => setGenreRequestsOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {genreRequestsOpen ? '▾' : '▸'} Pending Genre Requests ({genreRequests.length})
           </button>
           {genreRequestsOpen && (
-            <div style={{ marginBottom: '28px' }}>
-              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '10px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-10px)' }}>
                 New "Other" genre values artists have typed in - already visible on their own profile. Approving adds it as a public filter option on /artists; rejecting keeps it out of that shared list.
               </p>
-              {genreRequests.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
+              {genreRequests.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {genreRequests.map((g) => (
-                <div key={g.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{g.value}</div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                <div key={g.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{g.value}</div>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexShrink: 0 }}>
                       <ApproveButton disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'approve')} />
                       <RejectButton disabled={actioningGenreId === g.id} onClick={() => actOnGenreRequest(g.id, 'reject')} />
                     </div>
@@ -686,25 +686,25 @@ function AdminFeedbackBoard() {
               reason so the organiser knows what to fix. */}
           <button
             onClick={() => setEventNotesOpen((v) => !v)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '10px', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {eventNotesOpen ? '▾' : '▸'} Pending Event Notes ({eventNotes.length})
           </button>
           {eventNotesOpen && (
-            <div style={{ marginBottom: '28px' }}>
-              <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '10px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-10px)' }}>
                 Free-text "special notes" organisers added to an event - never shown publicly until approved here.
               </p>
-              {eventNotes.length === 0 && <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
+              {eventNotes.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {eventNotes.map((n) => (
-                <div key={n.id} style={{ background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div key={n.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{n.title}</div>
-                      {n.organiser && <div style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '8px' }}>{n.organiser.orgName}</div>}
-                      <div style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
+                      <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, marginBottom: 'var(--afa-space-2px)' }}>{n.title}</div>
+                      {n.organiser && <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-2)' }}>{n.organiser.orgName}</div>}
+                      <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8, lineHeight: 1.5 }}>{n.specialNotes}</div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexShrink: 0 }}>
                       <ApproveButton disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'approve')} />
                       <RejectButton disabled={actioningEventNoteId === n.id} onClick={() => actOnEventNote(n.id, 'reject')} />
                     </div>
@@ -714,24 +714,24 @@ function AdminFeedbackBoard() {
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>
             Feedback
           </h2>
-          <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
             Submitted via the support widget — both the manual form and questions the chatbot couldn&apos;t answer.
           </p>
 
           <button
             onClick={() => setTrendsOpen((v) => !v)}
             style={{
-              fontSize: '12px',
+              fontSize: 'var(--afa-text-small)',
               fontWeight: 700,
               color: 'var(--afa-text-primary)',
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
               padding: 0,
-              marginBottom: '10px',
+              marginBottom: 'var(--afa-space-10px)',
               opacity: 0.7,
             }}
           >
@@ -745,13 +745,13 @@ function AdminFeedbackBoard() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '10px',
+                gap: 'var(--afa-space-10px)',
                 background: 'rgba(201,151,58,0.15)',
                 border: '1px solid rgba(245,245,240,0.13)',
-                borderRadius: '10px',
-                padding: '10px 14px',
-                marginBottom: '12px',
-                fontSize: '13px',
+                borderRadius: 'var(--afa-radius-10px)',
+                padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+                marginBottom: 'var(--afa-space-3)',
+                fontSize: 'var(--afa-text-ui)',
                 color: 'var(--afa-text-primary)',
               }}
             >
@@ -761,13 +761,13 @@ function AdminFeedbackBoard() {
               <button
                 onClick={clearStatusFocus}
                 style={{
-                  fontSize: '12px',
+                  fontSize: 'var(--afa-text-small)',
                   fontWeight: 600,
                   color: 'var(--afa-text-primary)',
                   background: 'var(--afa-surface-raised)',
                   border: '1px solid rgba(245,245,240,0.13)',
                   borderRadius: 'var(--afa-radius-pill)',
-                  padding: '5px 12px',
+                  padding: '5px var(--afa-space-3)',
                   cursor: 'pointer',
                 }}
               >
@@ -776,7 +776,7 @@ function AdminFeedbackBoard() {
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', marginBottom: 'var(--afa-space-10px)', alignItems: 'center' }}>
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={inputStyle}>
               <option value="ALL">All categories</option>
               {Object.keys(CATEGORY_LABELS).map((c) => (
@@ -811,7 +811,7 @@ function AdminFeedbackBoard() {
               <option value="oldest">Oldest first</option>
               <option value="severity">Severity (high → low)</option>
             </select>
-            <label style={{ fontSize: '13px', color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', cursor: 'pointer' }}>
+            <label style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', marginLeft: 'auto', cursor: 'pointer' }}>
               <input type="checkbox" checked={showResolved} onChange={toggleShowResolved} disabled={resolvedLoading} />
               {resolvedLoading ? 'Loading…' : 'Show Resolved / Rejected'}
             </label>
@@ -826,19 +826,19 @@ function AdminFeedbackBoard() {
             style={{
               gridAutoFlow: 'column',
               gridAutoColumns: '220px',
-              gap: '16px',
-              marginTop: '16px',
+              gap: 'var(--afa-space-4)',
+              marginTop: 'var(--afa-space-4)',
               overflowX: 'auto',
-              paddingBottom: '8px',
+              paddingBottom: 'var(--afa-space-2)',
             }}
           >
             {(showResolved ? STATUSES : STATUSES.filter((s) => !CLOSED_STATUSES.includes(s))).map((statusCol) => (
               <div key={statusCol} id={`fb-col-${statusCol}`}>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+                <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
                   {labelize(statusCol)} <span style={{ color: 'var(--afa-text-secondary)', fontWeight: 400 }}>({columns[statusCol]?.length || 0})</span>
                 </div>
                 {(columns[statusCol] || []).length === 0 && (
-                  <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)' }}>Nothing here.</p>
+                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)' }}>Nothing here.</p>
                 )}
                 {(columns[statusCol] || []).map((item) => renderCard(item, false))}
               </div>
@@ -846,9 +846,9 @@ function AdminFeedbackBoard() {
           </div>
 
           {/* Mobile stacked list */}
-          <div className="lg:hidden" style={{ marginTop: '10px' }}>
+          <div className="lg:hidden" style={{ marginTop: 'var(--afa-space-10px)' }}>
             {filtered.length === 0 && (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing matches these filters.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing matches these filters.</p>
             )}
             {filtered.map((item) => renderCard(item, true))}
           </div>
