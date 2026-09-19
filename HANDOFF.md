@@ -1,3 +1,37 @@
+# Session Handoff — 19 Sept 2026 (chat — GEN-2609-073, Phase 1 public-pages token/typography/Button migration)
+
+## qa HEAD unchanged this session - PR open, not yet merged. Branch `feat/gen-2609-073-artist-pages-migration`, synced fresh from `origin/qa` (`38c1e43`) before branching, per the standing rule. Supersedes, does not delete, the 18 Sept section below - its still-open items (the `CodeCounter`/`GEN` drift investigation, the amber-accent decision) were resolved in a *separate* branch (`feat/gen-2609-070-amber-chip-family-collapse`), merged first per the merge-order note below.
+
+## `GEN-2609-073` - Phase 1 of the 18 Sep audit's page-migration work, shipped as 3 commits
+
+Migrated the 7 highest-traffic pages `GEN-2609-072`'s audit flagged as never touched by the design-token migration: Artist detail/list, Event detail/list/seat-select, Venue grid/detail. Sequenced smallest-to-largest per the dispatch (Artist pair -> Event trio -> Venue pair), one PR, 3 logical commits - not 3 separate PRs, matching this codebase's existing multi-commit-ticket convention. Full per-page reasoning in `docs/design.md`'s own `GEN-2609-073` entry; headline points only here:
+
+- **~60 `--afa-cream` text-color usages -> `--afa-text-primary`** across all 7 pages - one safe mapping, `Button.tsx`'s own `form-submit` variant already documents the two hex values as visually indistinguishable.
+- **One color flagged, then resolved once Hitesh made the call:** `events/page.tsx`'s view-toggle active state originally used a light cream *background* (not text) with no locked-4 equivalent. Hitesh's decision: `--afa-surface-raised`. Applying just that would have shipped a real bug though - the paired `color: var(--afa-surface-inverse)` computes to 1.20:1 contrast against the new background (real WCAG math), an essentially invisible icon. Moved `color` to `--afa-text-primary` (15.07:1) in the same fix. Caught a second, unrelated real bug along the way: the fix's own first-draft code comment had a stray backtick inside a `<style>{\`...\`}</style>` template literal that broke the build - and this session's own prior *backgrounded* `next build` had wrongly reported that broken commit as clean. Only surfaced because this session went on to actually start the dev server and drive it with Playwright (no `chromium-cli` available, fell back to a direct script) per Hitesh's explicit "verify it visually" ask. Fixed, re-verified for real (foreground `next build`, checked via `$PIPESTATUS`), confirmed visually via computed styles and screenshots.
+- **Two of the audit's own findings corrected on re-verification:** the "2 hex colors" in Event detail were 1 value (`#241a10`) at 3 sites, migrated to `--afa-surface-inverse` (real precedent: `OrganisersGridEmbed.tsx:172`); the "stray `--afa-terracotta`" in Venue grid doesn't exist live at all - only in a comment documenting an *earlier* migration.
+- **Typography:** exact scale matches only, non-matching values (10/15/17/18/20/22/26px, `clamp()`, `em`-relative) left as literals and flagged rather than rounded.
+- **Buttons: 2 of 37 migrated** (`artists/page.tsx`'s rising-star CTA -> `primary`/`pill-md`; `ArtistProfileClientPage.tsx`'s "Invite to Lineup" -> `form-submit`). The other 35 are genuine shape mismatches (underline tabs, circular icon toggles, 3px-radius controls, explicitly sharp-cornered Follow buttons per `VenueFollowButton.tsx`'s own comment) - not forced.
+- Confirmed `ArtistNoPhoto.tsx`/`VenueNoPhoto.tsx` are used beyond these 7 pages (also Wall of Fame, `layout.tsx`) before deciding not to touch them - real shared-layer work, `GEN-2609-072` finding #10's territory, not this ticket's.
+- Repo-wide `--afa-cream` re-check after the migration: 18 files still reference it legitimately, none orphaned, token itself untouched in `globals.css`.
+
+**Verify (post-rebase).** `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa` (now at `fc0421f`, post-`GEN-2609-070` merge): clean, 0 offenses. Real `next build`: clean, confirmed via a foreground run's `$PIPESTATUS`, all 7 routes present. Visually verified for the one resolved color decision (see above) - the rest reasoned/precedent-matched, not screenshotted, per the standing no-browser-tool convention elsewhere in this ticket.
+
+Logged as `GEN-2609-073`, `Feedback` row `IN_TEST` (PR open, not merged). `CodeCounter.GEN/2609` advanced `72` -> `73` (guarded on the read value).
+
+## Merge-order note, resolved
+
+`feat/gen-2609-070-amber-chip-family-collapse` (`GEN-2609-070`/`-071`/`-072`) merged first, as planned - PR #650, `qa` now at `fc0421f`. This branch (`feat/gen-2609-073-artist-pages-migration`) was then rebased onto the updated `qa`; the predicted `docs/design.md`/`HANDOFF.md` conflicts materialized exactly as flagged and were resolved by keeping both sessions' entries, reordered chronologically (this section now sits above the 18 Sept section below, matching when each was actually written) - neither side dropped.
+
+## Phase 2 candidates, still not started
+
+Wall of Fame, Organisers directory, Venue-owners list/detail - the remaining 4 of the audit's original 11 flagged pages. Hold until `GEN-2609-073` is fully merged and clean, per Hitesh's explicit instruction - not started early even though this rebase leaves it idle-ready.
+
+## Next session starts by
+
+Merging `feat/gen-2609-073-artist-pages-migration`'s PR (rebased, re-verified clean post-rebase) once reviewed, then getting Hitesh's go-ahead on Phase 2.
+
+---
+
 # Session Handoff — 18 Sept 2026 (chat — Supabase reconnected: GEN backfill, counter fix, GEN-2609-070/-071)
 
 ## qa HEAD unchanged this session — this was a docs/DB reconciliation session, no app code merged. Feature branch `feat/gen-2609-070-amber-chip-family-collapse` (PR open, not yet merged) gained one more commit (`bb30c58`, docs-only). Supersedes, does not delete, the 17 Sept section below — its still-open items are folded forward, resolved where noted.
@@ -28,9 +62,9 @@ Hitesh's call, `GEN-2609-070`: collapse onto `toggle-pill`'s orange convention, 
 
 Hitesh relayed a full-repo audit (69 page files + shared components — `SiteNav`/`DashboardShell`/`Toast`/`EventCard`/`Photo`/`Button`), verified by direct grep against `qa`. 10 findings, full detail in `design.md`'s `GEN-2609-072` entry — headline items: the type-scale/spacing tokens have **zero** live adoption anywhere including `Button.tsx` itself; 17 of 84 `--afa-*` color tokens are fully orphaned; `--afa-cream` (non-locked) leaks into `Toast.tsx`, a shared component, not just pages; 11 public content pages + static/marketing pages never migrated; the seat-map builder is the worst outlier in the repo (192 inline style blocks, 0 `Button` uses); checkout/tickets (the most business-critical flow) have mixed adoption; Admin has real raw-button residue despite clean colors; and `DashboardShell.tsx`/`SiteNav.tsx` — the shared layer — aren't clean either, which is *why* pages built on them look cleaner than they are. `CodeCounter.GEN/2609` advanced `71` → `72` (guarded on the read value, same pattern as every move this session). `Feedback` row logged `NEW` — audit only, nothing built. **No scope/sequencing decision made — this is next session's/Hitesh's call**, not something to start fixing unprompted.
 
-## Next session starts by
+## Next session starts by (superseded — see the 19 Sept section above: `feat/gen-2609-070-...` merged as PR #650, `GEN-2609-073` picked up its migration work, Phase 2 is still pending Hitesh's sequencing call)
 
-Merging `feat/gen-2609-070-amber-chip-family-collapse`'s PR once reviewed, then getting Hitesh's call on `GEN-2609-072`'s scope/sequencing before touching any of its 10 findings. `GEN-2609` numbering is otherwise fully reconciled (`001`-`072`, gapless) — no backfill/collision decisions outstanding.
+`GEN-2609` numbering is fully reconciled (`001`-`072`, gapless) — no backfill/collision decisions outstanding.
 
 ## Standing open items, unchanged
 
