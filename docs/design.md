@@ -6452,6 +6452,51 @@ Added 2 steps to the existing `pull_request` workflow: the self-test suite, and 
 
 Bulk migration, largest-literal-count files first (the ratchet's own top-10 report above), not page-by-page - `seat-map/page.tsx` (376), `admin/settings/page.tsx` (208), and `organiser/events/[id]/edit/page.tsx` (207) are the top 3 targets.
 
+## GEN-2609-079 (provisional - chat confirms/assigns the real number against `CodeCounter`, read **78** at branch start) - bulk token migration batch 1, file 1 of 3: `seat-map/page.tsx`
+
+Dispatch: migrate exact-scale-match literals in the 3 highest-count files from `078`'s own ratchet report to existing tokens/components, one PR per file, no rounding, no new tokens/variants invented. This entry covers file 1.
+
+### Method
+
+Built a reverse lookup (token value -> token name) straight from `globals.css`'s own `--afa-*` definitions (color hex/rgba, the 8 type-scale steps, the 6 spacing-grid steps, the 4 radius steps), then a one-off Node script (not committed, same throwaway-script convention `077`'s own audit used) that rewrites only **exact** matches: a hex/rgba literal byte-identical to a token's real value, or a bare/px length whose numeric value exactly equals a scale step. Off-scale values are never touched, never rounded - the script only ever *removes* an exact literal in favor of `var(...)`, it never *changes* one.
+
+**Two real bugs the dry-run caught before anything was applied (verified against a printed diff first, not trusted blind):**
+- A hex value living inside an *existing* `var(--afa-error, #b3261e)` fallback (`MARKER_META.FIRE_EXTINGUISHER`) got matched by the naive "any hex anywhere in the string" pass and rewritten into `var(--afa-error, var(--afa-error))` - a self-referential, meaningless fallback. Fixed by masking anything already inside a `var(...)` call before scanning for replaceable hex/rgba, so an existing deliberate CSS fallback is never touched.
+- The script's reverse map initially included `--afa-radius-sharp: 0px`, so a bare `0` in a mixed-corner `borderRadius` shorthand (`'var(--afa-radius-md) 0 0 var(--afa-radius-md)'`) got rewritten to `var(--afa-radius-sharp)`. Wrong per the dispatch's own words - "Intentional literals (hairlines, 0, %, ...) are allowlisted already" means `0` should stay a literal, not become a new dependency on an admin-editable token for what's really "no radius on this one corner." Removed `0` from the reverse map entirely rather than filtering it ad hoc per call site.
+
+**Geometry exclusion, precisely bounded, not guessed.** This page has no canvas/SVG at all (checked - `grep getContext|<canvas|<svg` returns nothing); seats/markers render as absolutely-positioned `<div>`s. 3 literal line-ranges are the actual per-seat/per-marker rendering loops (`wizardPreviewSeats.map` L1824-1831, the main canvas `seats.map` L2009-2056, `markers.map` L2062-2095) - excluded from the script entirely, listed below rather than migrated. Everything else (toolbar, sidebar panels, dialogs, the fixed "Stage" overlay badge) is chrome and went through the migration.
+
+### Drawing-geometry literals - listed, not tokenized, per the dispatch's own instruction
+
+| Location | Literal | Why it's geometry, not chrome |
+|---|---|---|
+| Wizard-preview + main-canvas seat markers (2 sites) | `borderRadius: '5px'` | Per-seat visual marker shape, computed alongside dynamic `left`/`top: s.x/s.y` - not a chrome radius, and 5px doesn't match any token anyway (sm=6/md=8) |
+| Same 2 sites | `fontSize: '9px'` | Seat-label text size on the tiny 22px marker itself, sized to the marker not the type scale |
+| Safety-marker circle (1 site) | `width/height: '22px'`, `borderRadius: '50%'` | Fixed marker-glyph circle size/shape |
+| Safety-marker glyph label | `fontSize: '11px'` | Coincidentally equals `--afa-text-micro` (11px) - deliberately left literal anyway: this is the marker glyph's own fixed size, not a type-scale choice, and tying it to an admin-editable token would be a coincidental, not designed, relationship |
+
+### Off-scale decision table (chrome only - geometry already excluded above)
+
+**Font-size** (6 off-scale literals, all single/low-frequency, no proposal-worthy recurrence): `15px`×1 (Advanced-spacing label edge case), `18px`×2, `17px`×1, `10px`×1 (Stage overlay badge), `20px`×1 (terminology-panel close ×). Left literal.
+
+**Radius** (14 off-scale): `12px`×6, `10px`×5, `3px`×1. `12px`/`10px` both recur 5+ times *within this file alone* - carried into the batch-wide proposal list below (§ at the end of file 3's entry).
+
+**Spacing** (79 off-scale, by numeric value - `6`/`6px` merged as the same value in different literal forms): `10px`×24, `6`×16 (14 as `'6px'` + 2 as bare `6`), `14px`×12, `7px`×9, `18px`×4, `9px`×4, `32px`×2, `22px`×2, `2px`×2, `28px`×1. Also 2 negative values (`-20px`×2, `-6px`×1) - a different semantic (bleed-margin pull on `.afa-glow-orange` panels, not a spacing gap) and correctly never matched by the script (no negative token exists, nor should one). `10px`/`6`/`14px`/`7px` all clear the 5+ threshold *within this one file* - carried into the batch-wide proposal list.
+
+### Colour: one real centralization beyond plain `--afa-*` token substitution
+
+7 sites hardcoded the `rgba(255,90,54,X)` triple (the `--afa-fill-solid` RGB values at a one-off alpha) instead of using `fillSolidTint(alpha)` - an existing, already-exported helper in `src/lib/statusStyle.ts` built for exactly this ("a handful of sites needed a one-off alpha... a function call instead of another named constant per alpha value"). Not a `--afa-*` token match (the dispatch's literal rule is "Colours -> locked `--afa-*` tokens"), but squarely an "existing central... component" per this ticket's own framing - migrated all 7 (`SECTION_TIER_FILLS`'s 2 static entries + 1 dynamic `${opacity}` call in `tierFill()`, plus 4 `border`/`background` sites requiring a plain-string-to-template-literal conversion to embed the function call). Zero visual change - `fillSolidTint(0.48)` returns the byte-identical `'rgba(255,90,54,0.48)'` string the literal was. `rgba(245,245,240,${opacity})` (the cream-family analog, 1 dynamic site) has no equivalent parameterized helper and wasn't invented here - left as-is, flagged as a possible future `statusStyle.ts` addition, not built without being asked.
+
+### Raw `<button>` - 23 sites, 0 migrated to a `Button` variant, all already token-retrofitted
+
+Reviewed every one individually against `Button.tsx`'s 9 real variants (`solid`/`outline-error`/`toggle-pill`/`primary`/`secondary`/`secondary-reveal`/`outline`/`outline-neutral`/`form-submit`/`close`) - none is a close enough shape match to migrate without inventing a new variant, which is explicitly out of this ticket's scope (same "no new tokens, no rounding" discipline extended to variants: a migration-only ticket doesn't get to unilaterally invent new shared-component shapes either).
+
+- **2 sites are shared local components already** (`RemoveGuidedRowButton`, `AddDashedRowButton`, each reused 3-4x elsewhere in the file) - no dashed-border or bare-× variant exists in `Button.tsx`, so these stay their own local abstraction, now token-retrofit.
+- **9 sites are the already-documented segmented-toggle family** (`GEN-2609-076`'s own words: "the seat-map's own dominant 9-declaration segmented-toggle family... a different geometry than `toggle-pill`") - `076` explicitly chose not to migrate these to `toggle-pill` (real, locked design call, not an oversight this ticket should second-guess). Confirmed the count still holds at 9 (seating-mode toggle x2, level-tab x1, guided-setup-open x1, manual-placement x1, wizard-shape x2, multi-zone x2 - the row-alignment 3-way toggle and safety-marker-type buttons use per-item dynamic colors, a related but distinct pattern, counted separately below).
+- **12 remaining one-offs**: the freeze/unfreeze CTA (2-state color-and-copy swap, doesn't fit any single-role variant), the joined level-tab "remove ×" (compound half-radius shape attached to its sibling button), "Add level" x2 (same dashed shape as `AddDashedRowButton` but needs a `disabled` prop that component doesn't expose - a real, documented reason it wasn't extracted, not a duplication bug), the 2 "choice card" buttons (icon+title+description content blocks, not simple CTAs), the "Back to setup options" text link (underlined, doesn't match `secondary`'s fixed no-underline/opacity-0.4 shape), the "?" help-circle button (32px transparent-bordered circle, doesn't match `close`'s 36px filled-circle shape), the row-alignment 3-way toggle, the 3 safety-marker-type buttons (dynamic per-marker-type color, not `--afa-fill-solid`), and the terminology-panel's own close `×` (20px, no circle).
+
+Every one of these already had its color/font-size/spacing/radius literals token-retrofitted by the mechanical pass above - satisfies "these follow an admin token/radius change" even though the elements themselves stay raw `<button>`, same precedent `GEN-2609-076` already established for its own un-migrated seat-map sites.
+
 ## GEN-2609-080 (provisional - chat confirms/assigns the real number against `CodeCounter`; read **79** live, not the dispatch's stated 78 - chat evidently advanced the counter to log `GEN-2609-079` between writing this dispatch and this session starting, which also confirms `079` as `079` batch-1's real number) - fix `raw-button`: count-based over the whole diff, not per-line
 
 ### The bug, and why `078` shipped it
@@ -6555,6 +6600,20 @@ Same dispatch, same method as file 1 (`seat-map/page.tsx`, its own entry above/e
 
 | Category | Before | After | Delta |
 |---|---|---|---|
+| `hex-color-literal` | 87 | 83 | -4 |
+| `rgb-rgba-literal` | 997 | 983 | -14 |
+| `hardcoded-font-family` | 10 | 10 | ±0 |
+| `font-size-literal` | 1530 | 1429 | -101 |
+| `spacing-literal` | 3450 | 3365 | -85 |
+| `radius-literal` | 570 | 561 | -9 |
+| `raw-button` | 211 | 211 | ±0 |
+
+This file alone: 376 -> 163 literals (57% reduction) - 1 hex (the deliberate `var()` fallback, correctly untouched), 37 rgba (30 genuinely off-scale + 7 already centralized via `fillSolidTint` before this count, so those don't show here at all), 0 font-family, 9 font-size (all off-scale, documented above), 79 spacing (all off-scale, documented above), 14 radius (all off-scale, documented above), 23 raw-button (all reviewed, 0 migrated, reasons documented above). Committed baseline updated via `--update-baseline` (refused-to-raise guard confirmed still intact from `078` - no category needed forcing).
+
+**Verify.** `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 34/34 passing (unchanged - no rule logic touched). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (migration only removes literals, never adds one). `node scripts/design-token-ratchet.js`: all 7 categories at/below the new baseline. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION` build stamp reverted before finishing.
+
+**Not verified this session:** a real QA-preview visual diff (before/after screenshots of the same screen) - this branch hasn't been merged/deployed yet, so there's no preview URL to screenshot against. Flagged for whoever reviews/merges the PR: confirm the seat-map builder renders identically pre/post on a real preview before merging, since "exact match, zero visual change" is this migration's entire safety argument and deserves an independent visual check, not just the mechanical guarantee.
+
 | `hex-color-literal` | 87 | 87 | ±0 (file had none) |
 | `rgb-rgba-literal` | 997 | 984 | -13 |
 | `hardcoded-font-family` | 10 | 10 | ±0 |
