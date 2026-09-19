@@ -1,3 +1,125 @@
+# Session Handoff — 19 Sept 2026, verification closeout (CC — GEN-2609-075/076/077 confirmed merged, `Feedback` backfilled, live re-verify)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **`HANDOFF.md` had not been updated since `GEN-2609-074`** (see the "18-19 Sept 2026, closeout" entry below) — the 075/076/077 build+merge work below happened in the gap and was never logged here; this entry is that missing write-up plus this session's own independent re-verification, not assumed from the dispatch that requested it.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Judge every ticket against this. Hitesh flagged that hours of chat↔CC process work was not real work — default to goal work, keep bookkeeping minimal.
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC+chat) | `GEN-2609-075` admin design tokens, `076` Button coverage, `077` type-scale/spacing phase 1 (homepage) | Complete (build+merge); acceptance partial | PRs #654 (`19568e6`)/#655 (`d5730b3`)/#656 (`27fd608`)/#657 (`75042c4`)/#658 (`cb2bfd8`), all independently API-confirmed `merged: true` with matching commit shas. Chat merged all five via the GitHub API using a Hitesh-supplied PAT (CC had no git-write credentials). `076` PR2/PR3 were stacked on PR1 — chat cherry-picked their commits onto the rebuilt `qa` and force-pushed (lease-protected) once PR1 landed. All 5 branches deleted on remote (confirmed via API, 404 on each). | `feat/gen-2609-075-admin-design-tokens`, `feat/gen-2609-076-pr1-button-variants-shared-layer`, `feat/gen-2609-076-pr2-admin-buttons`, `feat/gen-2609-076-pr3-seatmap-buttons`, `feat/gen-2609-077-typescale-spacing-phase1` (all deleted post-merge) |
+| 18-19 Sept 2026 (chat) | `GEN-2609` backfill, numbering collisions, UI/UX centralization audit + fixes | Complete | Audit (`GEN-2609-072`) → 4-ticket fix chain, PRs #650-653, all merged (API-verified). Ticket span 070-074: `069`→`071` renumber (2nd collision on 069, found mid-backfill) absorbs 071; `072` is the audit log itself, no code. | `feat/gen-2609-070-amber-chip-family-collapse`, `feat/gen-2609-073-artist-pages-migration`, `feat/gen-2609-073-phase2-remaining-pages`, `feat/gen-2609-074-text-on-image-token` |
+| 17 Sept 2026 (chat) | `BUG-2609-049` fix + counter-gap investigation | Partial | PR #649 merged. Found 14-ticket `Feedback` backfill gap, left decision open (resolved 18-19 Sept). | `fix/bug-2609-049-events-tab-underline-fillsolid` |
+| 17 Sept 2026 (CC) | Button consolidation phase 2 batch 1 + `toggle-pill` variant | Complete | PR #647 (`BUG-2609-048`) + PR #648 (`GEN-2609-069`) merged. Found amber-accent 2nd-convention question + `CodeCounter` drift, both left open (resolved 18-19 Sept). | PR #647, `feat/gen-2609-069-toggle-pill-button-variant` (PR #648) |
+| 15 Sept 2026 (chat) | `BUG-2609-047` merge + Step 1 (type-scale/spacing tokens) | Complete | PR #645 + PR #646 merged. Found + fixed a real `GEN-2609-054` numbering collision. PAT expired mid-session (first time mid- not between-session). | PR #645, PR #646 |
+
+(Oldest row, "14-15 Sept 2026 (CC) — Audit tail...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+None. All of `075`/`076`/`077` merged, `Feedback` rows updated `RESOLVED`/`DEPLOYED_QA` this session (see §5).
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | `success` (re-checked this session) | n/a — CI-config only, targets `main`, unrelated to this ticket chain, dated 14 Aug, pre-existing every session since |
+
+Verified via GitHub API (unauthenticated, public repo — works fine for read-only listing): exactly **1** open PR repo-wide. `#654`-`#658` each individually re-confirmed `merged: true`, `merge_commit_sha` matching `qa`'s real commit history exactly (not just the branch names). Repo has ~180 stale local/remote branches from long-closed work, unrelated to this check — not enumerated here, out of scope.
+
+## 4. Decisions sitting with Hitesh
+
+| Question | Options | Status | Resolution |
+|---|---|---|---|
+| Who merges when CC lacks GitHub credentials (no `gh` CLI, no PAT, GitHub MCP connector failed to connect this session)? | (a) chat merges via a Hitesh-supplied session PAT, same as `075`-`077` | (b) Hitesh gives CC its own PAT at session start | **open** | — |
+
+Resolved, one line each (carried forward, all pre-date this session, unchanged):
+
+- **(a)** `075` confirm-dialog lock set = `--afa-surface-page`/`--afa-surface-raised`/`--afa-amber`/`--afa-fill-solid`/`--afa-on-fill-solid` (kept as originally proposed — the docs' 5 `--afa-text-*` set has zero overlap with it, a different "5 locked" list entirely).
+- **(b)** `076` adds `Button` `solid` (16 sites) and `outline-error` (4 sites) variants — Hitesh-approved before build, matching this codebase's "3+ real sites" bar for a new variant; one-offs get token retrofit only, no new variant forced.
+- **(c)** Admin design-tokens page lives at `/dashboard/admin/design-system`, **not** `/admin/...` (no top-level `/admin` route exists anywhere in this app).
+- **(d)** `revalidateTag` calls use `{ expire: 0 }` — Next 16.2.9's immediate-expiration form, not the new `profile="max"` stale-while-revalidate default (which would've silently failed this ticket's own "shows on next load" acceptance bar).
+- **(e)** `077` phase ranking: no traffic data exists anywhere (Vercel Web Analytics not enabled for this project, no pageview table in the QA schema) — phase 1 was ranked by a structural proxy (entry-point centrality) instead, homepage won. Off-scale literals between token steps stay literal, one-line-per-value decision table lives in `docs/design.md`'s `GEN-2609-077` entry.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **77**. `BUG/2609`: **49**. Live-queried this task via direct SQL against `aforaudience-qa`, immediately before writing this section — matches the dispatch's expectation exactly, **no drift, no write made**.
+- Guard pattern unchanged: `SELECT` the real row immediately before any write; condition every `UPDATE ... currentSeq` on the value just read; never advance from a cached/remembered number.
+- `Feedback` table: `GEN-2609-075`/`076`/`077` were all still `IN_TEST`/`deployStage: null` despite being merged to `qa` for some time — backfilled this session to `RESOLVED`/`DEPLOYED_QA` (the standard post-merge state), pinned by `id`, re-read before writing.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session. Confirmed present in `docs/HANDOFF_TEMPLATE.md` (source of truth for this ledger, re-read this session, unchanged): `054` ✅, `069→071` ✅.
+
+## 7. Docs-conflict watchlist
+
+None open. Checked via GitHub API, not assumed: the repo's only open PR (`#450`) is CI-config-only and doesn't touch `docs/`.
+
+## 8. Verification standard checklist
+
+All three re-run **fresh this session**, foreground, directly on `qa` HEAD (`cb2bfd8`) after `git fetch && git reset --hard origin/qa` — not carried forward from any prior handoff's claim:
+
+- ✅ `tsc --noEmit` — clean, exit 0.
+- ✅ `check-design-tokens.js` (`BASE_REF=origin/qa HEAD_REF=HEAD`) — clean, "no new hardcoded design-token literals" (expected: HEAD *is* `origin/qa` here, zero diff to check).
+- ✅ `next build` — clean, exit 0 via `$PIPESTATUS`, all routes present including `/dashboard/admin/design-system` and all 3 new `075` API routes.
+
+**Side effect caught and reverted:** `npm run build` auto-bumps `public/sw.js`'s `CACHE_VERSION` to a local timestamp as a build artifact — same class of stray diff a `GEN-2609-054`-era session found and reverted. `git checkout -- public/sw.js` before finishing; tree left clean except the pre-existing untracked `Figma/` (Hitesh's own local drop, not part of this session, not touched — matches the standing "ignore Figma until told otherwise" instruction).
+
+**Live-verified by Hitesh on QA** (per this session's dispatch, not independently re-driven by CC — no QA admin credential available to script it): amber-token edit propagates site-wide on next load; Reset to defaults works.
+
+**NOT verified live — still open, unchanged from the prior (unwritten) handoff gap:**
+- `076` acceptance: does a primary-button color/radius admin edit actually reach the shared layer + Admin + seat-map consumers end-to-end (not just "the CSS var is wired," which is confirmed — see §10).
+- `077` acceptance: does editing one `--afa-text-*` and one `--afa-space-*` token in the admin UI visibly change the homepage on refresh, and does Reset restore it.
+- What "Revert to this" (version history) actually restores, click-through.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.**
+
+**Added this session, confirmed by direct query, not assumed:** the `075` migration (`DesignToken`, `DesignTokenVersion`, 93 seeded rows) is applied to **QA only** — `aforaudience-prod`'s `information_schema.tables` has zero rows for either table name. Apply it to production before this admin-token code ships there.
+
+## 10. UI/UX Design System Debt Ledger
+
+| Metric | Value | Method | As of |
+|---|---|---|---|
+| `--afa-*` token definitions in `globals.css` | **89** (was 82) | Same pinned grep (`grep -oE -- '--afa-[a-z0-9-]+:' globals.css \| sort -u \| wc -l`), fresh this session | `GEN-2609-075` added 7 (`--afa-radius-*` ×4, `--afa-btn-padding-*` ×3); its other 4 new `--font-*` role names aren't `--afa-`-prefixed, not counted here |
+| Orphaned tokens (defined, zero live usage) | **24** (was 17, unmeasured since `GEN-2609-072`) | Fresh re-measure this session: for every `--afa-*` def, `grep -rl "var(TOKEN" src` excluding `globals.css` itself, zero hits = orphaned | this session — includes `--afa-radius-sharp` (new from `075`, not yet retrofitted onto any sharp-corner site) among the growth |
+| Public content pages migrated to locked tokens | **11 of 11**, unchanged | Not re-measured (no new pages touched this session) | `GEN-2609-073` |
+| Raw `<button>` elements, repo-wide | **216** (73 files) | Same simple grep (`grep -roE '<button' src --include="*.tsx"`), fresh this session — down from ~229/73 pre-`076` (Admin + seat-map raw-button residue partly migrated to `Button` variants by `076` PR2/PR3) | this session |
+| `Button`-component imports, repo-wide | **54 files** (was 44) | `grep -rl` for the import line, fresh this session | this session |
+| Central-control status vs. the north star | Color, font-family, and Button variants+radius (`Button.tsx`'s `SIZE_CHROME` sm/md/lg tier + every 999px/8px-radius variant, now including `solid`/`outline-error`) all read from `--afa-*`/`--afa-radius-*`/`--afa-btn-padding-*` custom properties — an admin edit reaches every consumer site-wide for free. **Type-scale** (`--afa-text-micro/small/ui/body/title/heading/page-title[-lg]` — distinct from the same-prefixed `--afa-text-primary/secondary/muted/inverse/on-image` *color* roles, which must be greped separately or the count is swamped): real `var()` consumers confirmed this session across Homepage, Events, Artists, Venues, Organisers, Venue-owners, Wall of Fame, and `Button.tsx` (from `073`'s migration + `077` phase 1's own homepage build) — but hardcoded font-size literals also remain in every one of those same groups (off-scale counts in `docs/design.md`'s `077` entry). **Spacing** (`--afa-space-1..6`): confirmed `var()` consumers on Homepage files only (`page.tsx`, `FourRooms`/`Hero`/`HomeHeader`/`Ledger.tsx`) — zero elsewhere, not yet touched. | Fresh `grep -rl "var(--afa-text-" \| "var(--afa-space-"` this session, cross-checked against `src/lib/design-token-coverage.ts` | this session |
+
+**Discrepancy carried forward, still not chased down:** the original 18 Sep audit's own count was "84" `--afa-*` tokens vs. that session's fresh re-count of 82 (before `075`'s +7 → today's 89). Unaffected by anything in this session; flagged again rather than silently dropped.
+
+Remaining phases (`docs/design.md`'s `077` phase proposal, unchanged): Events next, then Artists+Venues paired, then Wall of Fame + "the rest" (90 files, ~2,500 combined literals — will very likely need its own sub-phasing once reached).
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** **20** `--afa-*` rows listed (`grep -c "^--afa-"`, verified this session) — includes all 5 `--afa-text-*` color roles (`primary`/`secondary`/`muted`/`inverse`/`on-image`); the `--afa-text-inverse` gap flagged 19 Sep is confirmed still fixed, present as its own row with its `GEN-2609-075` provenance comment intact.
+
+## 12. Immediate next action
+
+**`GEN-2609-077` phase 2 (Events).** Same method as phase 1: reuse the per-group grep script (counts already captured in `docs/design.md`'s `077` entry — Events is 42 font-size/141 spacing literals, 38%/69% clean), migrate clean matches to `var(--afa-text-*)`/`var(--afa-space-*)`, list off-scale values as an explicit decision table (don't round silently), regenerate `design-token-coverage.ts`, verify on a real QA preview before merge.
+
+## 13. Chat vs. CC ownership note
+
+**Standing model, decided (not an open question, not a one-off exception to re-flag each time):** **chat** owns all PR-open/merge and git-write operations (pushing branches, opening PRs, merging), gated on a session-scoped GitHub PAT Hitesh provides that session; **CC** owns all coding — branching, editing, committing, verifying locally, and pushing its own feature branches. Neither lane crosses into the other's job. Exactly the split observed across `075`-`077` (CC built/verified/pushed all three; chat merged all five PRs via a Hitesh-supplied PAT) and every session since `070`. This is the standing model going forward, not something to log as a deviation each time it recurs.
+
+**Forward-looking note, not yet acted on:** chat's half of this still depends on Hitesh manually re-pasting a short-lived PAT each session. Hitesh is considering moving chat's git-write auth to a proper GitHub connector (already configured for this project, not yet given repo-scoped write permissions) instead. If/when that changes, update this section again — the ownership split itself won't change, only *how* chat authenticates.
+
+---
+
+## Process learnings, this session (append to the standing list below)
+
+- `npm run build` auto-bumps `public/sw.js`'s `CACHE_VERSION` as a side effect of a clean local build — always `git status`/`git diff` right after a fresh build before treating the tree as clean, revert the stray bump. Same class of incident a `GEN-2609-054`-era session already hit once.
+- `--afa-text-` is an **overloaded prefix**: 5 color-role tokens (`primary`/`secondary`/`muted`/`inverse`/`on-image`) and 8 size-role tokens (`micro`/`small`/`ui`/`body`/`title`/`heading`/`page-title`/`page-title-lg`) share it. Grepping bare `var(--afa-text-` to measure type-scale adoption is wrong — the near-universal color-role usage swamps the count and manufactures false full coverage. Grep the specific size-token names instead.
+- Unauthenticated `api.github.com` reads (open PRs, branch existence, PR merge status) work fine for this public repo without a PAT — useful when CC has no GitHub credentials but still needs to verify chat's merge claims independently rather than trust them blind.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
+
 # Session Handoff — 19 Sept 2026, closeout (chat — GEN-2609 backfill, numbering collisions, UI/UX centralization audit + fixes)
 
 Template: `docs/HANDOFF_TEMPLATE.md`.
