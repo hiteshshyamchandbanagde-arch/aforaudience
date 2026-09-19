@@ -1,3 +1,133 @@
+# Session Handoff — 19 Sept 2026, later still (CC — GEN-2609-079 provisional: bulk token migration batch 1, 3 files, 3 PRs)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **78** immediately before branching (live-queried each time, not cached), confirmed unchanged at 78 again at the end of this session. Would be **079** if chat confirms no collision. Not self-assigned to `Feedback`, not written to `CodeCounter`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Restated 19 Sep: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files from `078`'s ratchet report, 1 PR each | Complete, unmerged | 791 → 337 combined literals across the 3 files (57% reduction). All 3 branches independent (each branched fresh from `origin/qa`), each with its own `docs/design.md` entry + baseline update. 1 real accessibility bug found and deliberately left unfixed (see §4). Batch-wide recurring-value proposal table appended for Hitesh. | `feat/gen-2609-079-batch1-seatmap`, `feat/gen-2609-079-batch1-admin-settings`, `feat/gen-2609-079-batch1-organiser-event-edit` |
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete, unmerged (still, as of this session's start) | No migration, zero visual change. Full precise measurement reconciled against the dispatch's own rough numbers. | `feat/gen-2609-078-design-token-guard-coverage` |
+| 19 Sept 2026 (CC) | Verification closeout: `GEN-2609-075`/`076`/`077` confirmed merged, `Feedback` backfilled, live re-verify | Complete | qa HEAD `d0a2c69` at the time. | none (docs-only, direct to qa) |
+| 19 Sept 2026 (CC+chat) | `GEN-2609-075` admin design tokens, `076` Button coverage, `077` type-scale/spacing phase 1 (homepage) | Complete (build+merge); acceptance partial | PRs #654-658, all merged. | 5 branches, all deleted post-merge |
+| 18-19 Sept 2026 (chat) | `GEN-2609` backfill, numbering collisions, UI/UX centralization audit + fixes | Complete | Audit (`GEN-2609-072`) → 4-ticket fix chain, PRs #650-653, all merged. | 4 branches |
+
+(Oldest row, "17 Sept 2026 (chat) — `BUG-2609-049`...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-079` (provisional) - 3 branches, all pushed, no PRs opened yet:
+  - `feat/gen-2609-079-batch1-seatmap` (file 1/3, `seat-map/page.tsx`, 376→163 literals)
+  - `feat/gen-2609-079-batch1-admin-settings` (file 2/3, `admin/settings/page.tsx`, 208→82 literals)
+  - `feat/gen-2609-079-batch1-organiser-event-edit` (file 3/3, `organiser/events/[id]/edit/page.tsx`, 207→92 literals)
+- `GEN-2609-078` (provisional) - `feat/gen-2609-078-design-token-guard-coverage` - **confirmed still NOT merged**: `git fetch` + `origin/qa` HEAD re-checked at the very end of this session, still `273b4c4` (this session's own starting commit) - unchanged the whole session. Still needs chat to confirm the ticket number and open/merge its PR before any `GEN-2609-079` branch can land (see §7 - the `079` branches all assume `078`'s baseline file already exists in `qa`).
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `feat/gen-2609-079-batch1-seatmap` | **`NOT YET OPENED`** | n/a | Locally verified clean (tsc/tests/diff-check/ratchet/build all pass). Needs a real QA-preview visual check before merge - not independently verified this session (branch not deployed). |
+| `feat/gen-2609-079-batch1-admin-settings` | **`NOT YET OPENED`** | n/a | Same local verification. **Needs Hitesh's own live click-through** - no scriptable Admin QA credential exists anywhere in this repo (Admin auth is Hitesh's real Google OAuth), confirmed by every prior Admin-page ticket. Not a nice-to-have, a hard blocker per this ticket's own dispatch. |
+| `feat/gen-2609-079-batch1-organiser-event-edit` | **`NOT YET OPENED`** | n/a | Same local verification, same QA-preview caveat as file 1. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | `success` | n/a - unrelated, pre-existing, out of scope every session since 14 Aug. |
+
+Re-verified via GitHub API this session: still exactly 1 open PR repo-wide (before this session's own 3 PRs are opened by chat).
+
+**Merge order and a real, expected conflict, flagged in advance:** all 3 branches independently modify the SAME 2 files at their tail - `docs/design.md` (each appends its own `## GEN-2609-079 ... file N of 3` section immediately after `078`'s own "Next dispatch" paragraph) and `scripts/design-token-baseline.json` (each lowers the same JSON object from the same starting values, to different final numbers). Merging all 3 sequentially **will** conflict on both files - expected, not a sign anything is wrong.
+
+- `docs/design.md`: keep every branch's own section, in file-order (1, 2, 3) - same "append, don't overwrite" convention this doc's own history already establishes repeatedly (e.g. the `073` Phase 1/Phase 2 merge-order precedent).
+- `scripts/design-token-baseline.json`: **do not hand-merge the JSON.** After all 3 branches are merged (with `design.md` conflicts resolved as above), run `node scripts/design-token-ratchet.js --update-baseline` once on the fully-merged `qa` - this regenerates the true combined baseline reflecting all 3 migrations stacked together, which is lower than any single branch's own number and avoids manually reconciling 7 numbers 3 ways. Projected combined baseline if all 3 merge cleanly (arithmetic only, not independently verified - re-run the real command instead of trusting this row): hex 83, rgba ~967, font-family 10, font-size ~1351, spacing ~3244, radius ~535, raw-button 211.
+
+## 4. Decisions sitting with Hitesh / chat
+
+| Question | Options | Status | Resolution |
+|---|---|---|---|
+| Real `GEN-2609` number for this ticket | `079` (if `CodeCounter` still reads 78 at logging time - confirmed still 78 as of this session's own end) | something else if another session claimed a number in between | **open, chat's job** | — |
+| Recurring off-scale values - add as new scale tokens? | See the batch-wide proposal table in `docs/design.md`'s tail (also copied below) | **open, Hitesh's product decision per the dispatch's own instruction** | Not built - flagged only. |
+
+**Batch-wide recurring-value proposals (copied from `docs/design.md` for visibility - full detail there):**
+
+| Value | Combined count | Category | Where it recurs |
+|---|---|---|---|
+| Spacing `10px` | 54 (seat-map 24, settings 13, organiser-edit 17) | spacing | All 3 files - strongest candidate |
+| Colour `rgba(245,245,240,0.08)` | 18 (seat-map 5, settings 8, organiser-edit 5) | rgba | All 3 files - strongest colour candidate |
+| Spacing `6`/`6px` | 37 (seat-map 16, settings 21) | spacing | 2 of 3 files; settings alone has 21 identical-role sites |
+| Radius `12px` | 18 (seat-map 6, settings 8, organiser-edit 4) | radius | All 3 files |
+| Spacing `14px` | 20 (seat-map 12, organiser-edit 6, settings 2) | spacing | All 3 files, lighter |
+| Spacing `18px` | 18 (seat-map 4, organiser-edit 14) | spacing | 2 files |
+| Font-size `20px`/`15px` | 8/12 (settings only) | font-size | 1 file, very high per-file density |
+
+**Resolved this session (not sitting with anyone - a real bug found, deliberately not fixed, flagged for its own ticket):**
+
+- **`organiser/events/[id]/edit/page.tsx`'s `specialNotesStatus` badge has a real, live WCAG contrast bug**, discovered as a side effect of exact-value color matching, **not fixed in this ticket**. Its 3 `rgba()` background literals are byte-identical to `STATUS_TONE.sage/error/gold`'s `.bg` values, but its `color` uses the OLD base hue tokens (`--afa-sage`/`--afa-error`) instead of the `-bright` variants `GEN-2609-068` introduced specifically to fix contrast against these translucent backgrounds - this page never actually imported `STATUS_TONE`, so it missed that fix entirely. Importing `STATUS_TONE` properly here would change the visible text color - a real fix, but a visual change, which breaks this ticket's own "exact match, zero visual change" contract. **Needs its own `BUG-2609-XXX` ticket** - flag to Hitesh/chat as a genuine, live accessibility issue, not cosmetic debt.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **78**, confirmed unchanged (read at branch start for each of the 3 branches, re-confirmed again at session end - no drift, no write made).
+- Guard pattern unchanged, zero writes this session.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session. `docs/HANDOFF_TEMPLATE.md`'s permanent ledger unchanged: `054` ✅, `069→071` ✅. Same standing risk as `078`'s own handoff flagged: confirm `079` is actually free at logging time, don't assume.
+
+## 7. Docs-conflict watchlist
+
+- All 3 of this session's own branches (`feat/gen-2609-079-batch1-*`) touch `docs/design.md` (each appends its own section) and `scripts/design-token-baseline.json` (each lowers it independently) - **see §3 above for the merge-order/reconciliation instructions**, not repeated here.
+- `feat/gen-2609-078-design-token-guard-coverage` - **confirmed still open/unmerged** (see §2). It also touches `HANDOFF.md`/`docs/design.md`, and it's the branch that CREATES `scripts/design-token-baseline.json` in the first place - a real ordering dependency: **`078` must merge before any `079` branch**, since all 3 `079` branches were built assuming that file already exists in `qa` and already reflects `078`'s starting values. Merging a `079` branch before `078` would be merging a diff against a baseline file `qa` doesn't have yet.
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, per-branch (3x, once per file), each branched independently from `origin/qa` (`273b4c4`):
+
+- ✅ `tsc --noEmit` - clean, exit 0, all 3 branches.
+- ✅ `node scripts/check-design-tokens.test.js` - 34/34 passing, all 3 branches (rule engine untouched by this ticket, no regression expected or found).
+- ✅ `check-design-tokens.js` (diff-only, `BASE_REF=origin/qa`) - clean, 0 offenses, all 3 branches (migration only removes literals, never adds one, so this is structurally guaranteed clean, not just observed clean).
+- ✅ `node scripts/design-token-ratchet.js` - all 7 categories at/below the newly-lowered baseline, all 3 branches, confirmed AFTER `--update-baseline` was run (not just before).
+- ✅ `next build` - clean, exit 0 via `$PIPESTATUS`, all 3 branches.
+- ✅ `public/sw.js`'s `CACHE_VERSION` build stamp reverted before each branch's commit (real `prebuild` infra, not debt - see `078`'s own handoff entry for why).
+
+**Real bugs caught in dry-run, before anything was applied** (method: a one-off reverse-lookup migration script, scratchpad-only, not committed - printed a full diff, reviewed every hunk, applied only after review):
+- A hex literal living inside an *existing* `var(--afa-error, #b3261e)` CSS fallback almost got rewritten into a self-referential `var(--afa-error, var(--afa-error))`. Fixed by masking anything already inside a `var(...)` call before scanning for replaceable hex/rgba.
+- A bare `0` in a mixed-corner `borderRadius` shorthand almost got mapped onto `--afa-radius-sharp`. Wrong per the dispatch's own words - `0` is an intentionally-allowlisted literal, not debt. Removed `0` from the reverse-lookup map entirely.
+
+**Not verified this session, for any of the 3 branches:** a real QA-preview visual diff (before/after screenshots of the same screen) - none of the 3 branches is merged/deployed yet, so there's no preview URL to check against. This migration's entire safety argument is "exact match = zero visual change," which is true by construction of the script, but an independent visual check is still the right gate before merging, not assumed. **Admin settings specifically has no scriptable path to that check at all** - needs Hitesh's own login.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** Unaffected by this ticket (source-only, no schema/data change).
+
+## 10. UI/UX Design System Debt Ledger
+
+| Metric | Value | Method | As of |
+|---|---|---|---|
+| Ratchet baseline, per-file branch (not yet merged/combined) | seat-map: 87/983/10/1429/3365/561/211 → after: hex 83/rgba 983/ff 10/fontsize 1429/spacing 3365/radius 561/button 211 (see design.md for the precise before/after table per category) | Each branch's own `--update-baseline` run | this session |
+| Combined literal reduction across the 3 files (once all merge) | 791 → 337 (57%) | Direct rule-engine count, before vs. after, summed across the 3 files | this session |
+| Raw `<button>` reviewed against every `Button.tsx` variant | 29 sites total (23 seat-map + 6 organiser-edit; `admin/settings` had 0) - **0 migrated to a variant**, all already token-retrofit for color/size/spacing/radius | Individual manual review against all 9 real variants, documented per-site in `docs/design.md`'s 2 relevant entries | this session |
+| `fillSolidTint()` centralization (beyond plain `--afa-*` matches) | 7 sites (`seat-map/page.tsx` only) converted from hardcoded `rgba(255,90,54,X)` to the existing `fillSolidTint(X)` helper in `src/lib/statusStyle.ts` | Manual, since it needed string-to-template-literal conversions at 4 of the 7 sites | this session |
+| Real accessibility bug found | 1 (`organiser/events/[id]/edit/page.tsx`'s `specialNotesStatus` badge, `STATUS_TONE` color-token mismatch) - **not fixed**, needs its own `BUG` ticket | Discovered as a side effect of exact-value color matching | this session |
+| Pre-existing `check-design-tokens.js` rule gaps found (informational, not fixed) | 2: raw-CSS-text-in-template-literal (found in `078`, unchanged) + `fontFamily: 'inherit'` not recognized as a legitimate CSS keyword (found this session, `organiser/events/[id]/edit/page.tsx`) | Both are checker-rule limitations, not code bugs - fixing the rule is its own dispatch, not bundled into a migration ticket | this session |
+
+Central-control status vs. the north star: unchanged in kind from `078`'s own summary (color/font-family/Button variants/radius all admin-controlled where wired; type-scale/spacing tokens now have real consumers in these 3 files too, on top of the Homepage adoption `077` established) - the measurable change this session is the DEBT COUNT going down, not new categories reaching admin control for the first time.
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Unaffected by this ticket - no new token added (the batch-wide proposals are explicitly NOT built, pending Hitesh's decision).
+
+## 12. Immediate next action
+
+**Chat: open and merge the 3 `GEN-2609-079` PRs** (seat-map first per file-numbering, but no hard ordering requirement between the 3 - they don't touch each other's files), resolving the `docs/design.md`/`design-token-baseline.json` conflicts per §3's instructions, gated first on confirming `078` itself is already merged (§7). **Admin settings PR additionally needs Hitesh's own live click-through** before merging - flag this explicitly, don't merge on local verification alone for that one file.
+
+**Next CC dispatch after this merges** (per the original dispatch's own instruction, not re-decided here): raw `<input>`/`<select>`/`<textarea>` guard rule (5th CI category) plus shared `Input` component adoption (`Input.tsx` exists, confirmed still just 1 import repo-wide as of `078`'s own audit - not re-verified this session), then the next batch of files from the ratchet's own top-10 report (`dashboard/artist/page.tsx` 177, `ArtistProfileClientPage.tsx` 175, `EventDetailClientPage.tsx` 174 were next in line as of `078`'s snapshot - re-run the ratchet fresh before trusting these numbers, they'll have shifted once `079` merges).
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model.** This session: CC built, verified, and pushed all 3 `GEN-2609-079` branches independently (no cross-branch stacking, per the dispatch's own "each PR stands alone" instruction); chat's half (confirm the ticket number, open the 3 PRs, resolve the flagged merge-order/conflict, merge) is next. CC never merges - not attempted, not asked for.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, later (CC — GEN-2609-078 provisional: token guard covers every category + whole-repo ratchet)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **77** immediately before this branch started (live-queried, not cached); this ticket would be **078** if chat confirms no collision at logging time. Not self-assigned to `Feedback`, not written to `CodeCounter`, per the dispatch's explicit instruction.
