@@ -94,7 +94,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
            :hover rule regardless of specificity tricks. */
         .afa-venue-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
         .afa-venue-card:hover { border-color: rgba(201,151,58,0.6); }
-        .afa-venue-card-title { color: var(--afa-cream); transition: color 0.3s ease; }
+        .afa-venue-card-title { color: var(--afa-text-primary); transition: color 0.3s ease; }
         .afa-venue-card:hover .afa-venue-card-title { color: var(--afa-amber); }
         .afa-venue-card-arrow { opacity: 0; }
         .afa-venue-card:hover .afa-venue-card-arrow { opacity: 1; }
@@ -151,7 +151,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   type="button"
                   onClick={() => { setSelectedCity("All Cities"); setCityOpen(false) }}
                   className="afa-city-filter-option"
-                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                 >
                   {tr.venuesPage.filterAllCities}
                 </button>
@@ -162,7 +162,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                     type="button"
                     onClick={() => { setSelectedCity(c.city); setCityOpen(false) }}
                     className="afa-city-filter-option"
-                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                   >
                     {c.label}
                   </button>
@@ -176,7 +176,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
       {/* Export (VenuesDirectory.tsx line 99-102) shows a live results
           count between the controls and the grid - missing entirely from
           the live build until this audit. */}
-      <div style={{ marginTop: "24px", marginBottom: "24px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+      <div style={{ marginTop: "24px", marginBottom: "24px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.5 }}>
         {filtered.length} {filtered.length === 1 ? tr.venuesPage.resultsCountSingular : tr.venuesPage.resultsCountPlural}
         {selectedCity !== "All Cities" && tr.venuesPage.resultsCountInCity.replace("{city}", cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity)}
       </div>
@@ -223,7 +223,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   export (VenueCard.tsx) overlays it on the media wrapper
                   regardless of whether a real photo or the fallback is
                   showing underneath. */}
-              <span style={{ position: "absolute", top: "10px", left: "10px", fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-cream)", opacity: 0.6 }}>
+              <span style={{ position: "absolute", top: "10px", left: "10px", fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.6 }}>
                 {tierLabel(v.capacity)}
               </span>
               <span
@@ -241,7 +241,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   border: "1px solid rgba(245,245,240,0.2)",
                   background: "rgba(10,10,10,0.4)",
                   backdropFilter: "blur(4px)",
-                  color: "var(--afa-cream)",
+                  color: "var(--afa-text-primary)",
                   transition: "opacity 0.3s ease",
                 }}
               >
@@ -253,13 +253,13 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "26px", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
                 {v.name}
               </h2>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "13px", color: "rgba(245,245,240,0.6)" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)" }}>
                 <span>{cityLabel(v.city, v.country)}</span>
                 <span style={{ opacity: 0.5 }}>·</span>
                 <span>{v.capacity.toLocaleString("en-IN")} {tr.venuesPage.seatsLabel}</span>
               </div>
               {v.priceRangeLabel && (
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "10px" }}>{v.priceRangeLabel}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.55, marginTop: "10px" }}>{v.priceRangeLabel}</div>
               )}
             </div>
           </div>

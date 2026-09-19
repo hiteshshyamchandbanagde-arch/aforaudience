@@ -132,10 +132,10 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             narrow viewports instead of forcing the row. */}
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", marginBottom: "28px" }}>
           <div>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
               {venue.city}{venue.state ? `, ${venue.state}` : ""} · {tierLabel}
             </span>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-cream)", marginTop: "16px", marginBottom: "6px" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)", marginTop: "16px", marginBottom: "6px" }}>
               {venue.name}
             </h1>
             <p style={{ maxWidth: "448px", fontSize: "17px", lineHeight: 1.4, color: "var(--afa-text-primary)", opacity: 0.6 }}>
@@ -152,7 +152,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
               href={venue.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid rgba(201,151,58,0.5)", fontSize: "13px", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid rgba(201,151,58,0.5)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
             >
               <DirectionsIcon style={{ width: "14px", height: "14px" }} />
               {tr.venueDetailPage.getDirections}
@@ -177,7 +177,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           </div>
         )}
         {!showGallery && (
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "24px" }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.03em", color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", marginBottom: "24px" }}>
             {noPhotosCaption}
           </p>
         )}
@@ -187,36 +187,36 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           <div>
             <section>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "12px" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)" }}>{tr.venueDetailPage.seatingHeading}</h2>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.seatingHeading}</h2>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                   {venue.sections.length} {tr.venueDetailPage.sectionsLabel}
                 </span>
               </div>
               {venue.sections.length === 0 ? (
-                <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "16px" }}>{tr.venueDetailPage.seatingComingSoon}</p>
+                <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "16px" }}>{tr.venueDetailPage.seatingComingSoon}</p>
               ) : (
                 <table style={{ width: "100%", marginTop: "8px", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "12px 0", textAlign: "left", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.sectionColumnLabel}</th>
-                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatsColumnLabel}</th>
-                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.priceColumnLabel}</th>
+                      <th style={{ padding: "12px 0", textAlign: "left", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.sectionColumnLabel}</th>
+                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.seatsColumnLabel}</th>
+                      <th style={{ padding: "12px 0", textAlign: "right", fontWeight: 400, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.priceColumnLabel}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {venue.sections.map((s) => (
                       <tr key={s.id} style={{ borderTop: "1px solid rgba(245,245,240,0.08)" }}>
-                        <td style={{ padding: "14px 0", fontFamily: "var(--font-display)", fontSize: "16px", color: "var(--afa-cream)" }}>{s.name}</td>
-                        <td style={{ padding: "14px 0", textAlign: "right", color: "var(--afa-text-primary)", opacity: 0.7, fontSize: "14px", fontVariantNumeric: "tabular-nums" }}>{s.seats.toLocaleString("en-IN")}</td>
-                        <td style={{ padding: "14px 0", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--afa-cream)", fontSize: "14px" }}>₹{s.price.toLocaleString("en-IN")}</td>
+                        <td style={{ padding: "14px 0", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)" }}>{s.name}</td>
+                        <td style={{ padding: "14px 0", textAlign: "right", color: "var(--afa-text-primary)", opacity: 0.7, fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>{s.seats.toLocaleString("en-IN")}</td>
+                        <td style={{ padding: "14px 0", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)" }}>₹{s.price.toLocaleString("en-IN")}</td>
                       </tr>
                     ))}
                     <tr style={{ borderTop: "1px solid rgba(245,245,240,0.15)" }}>
-                      <td style={{ paddingTop: "14px", fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.totalLabel}</td>
-                      <td style={{ paddingTop: "14px", textAlign: "right", fontWeight: 700, color: "var(--afa-cream)", fontSize: "14px", fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ paddingTop: "14px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.totalLabel}</td>
+                      <td style={{ paddingTop: "14px", textAlign: "right", fontWeight: 700, color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>
                         {venue.sections.reduce((sum, s) => sum + s.seats, 0).toLocaleString("en-IN")}
                       </td>
-                      <td style={{ paddingTop: "14px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--afa-amber)", fontSize: "14px" }}>
+                      <td style={{ paddingTop: "14px", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700, color: "var(--afa-amber)", fontSize: "var(--afa-text-body)" }}>
                         {totalPriceRange}
                       </td>
                     </tr>
@@ -227,7 +227,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
 
             {venue.facilities && venue.facilities.length > 0 && (
               <section style={{ marginTop: "56px" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 700, color: "var(--afa-cream)", borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "12px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "12px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
                 <div className="afa-venue-facilities">
                   {venue.facilities.map((facility) => (
                     <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 0", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
@@ -246,18 +246,18 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
               <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
                 <CapacityIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px", flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
-                  <p style={{ fontFamily: "var(--font-display)", fontSize: "28px", lineHeight: 1, color: "var(--afa-cream)" }}>{venue.capacity.toLocaleString("en-IN")}</p>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>
+                  <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", lineHeight: 1, color: "var(--afa-text-primary)" }}>{venue.capacity.toLocaleString("en-IN")}</p>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0" }}>
                 <AcousticIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px", flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.acousticRating}</p>
                   {venue.acousticRating != null ? (
-                    <p style={{ fontFamily: "var(--font-display)", fontSize: "28px", lineHeight: 1, color: "var(--afa-cream)" }}>
+                    <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", lineHeight: 1, color: "var(--afa-text-primary)" }}>
                       {venue.acousticRating.toFixed(1)}
-                      <span style={{ marginLeft: "4px", fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.5, verticalAlign: "top" }}>/5</span>
+                      <span style={{ marginLeft: "4px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, verticalAlign: "top" }}>/5</span>
                     </p>
                   ) : (
                     <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "18px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueDetailPage.notRatedYet}</p>
