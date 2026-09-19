@@ -360,7 +360,7 @@ function EventsPageContent() {
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
         /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
            --afa-surface-raised, a normal "selected chip on a raised panel"
-           look instead of the light-cream inversion. The paired `color`
+           look instead of the light-cream inversion. The paired color
            also had to move off --afa-surface-inverse - that pairing
            computes to 1.20:1 contrast against --afa-surface-raised
            (both near-black, computed via the real WCAG relative-
