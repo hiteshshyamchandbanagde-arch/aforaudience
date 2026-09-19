@@ -6911,3 +6911,42 @@ All 3 already had every in-scope literal token-retrofitted by the passes above.
 **Colour, batch-wide:** 16 manual `--afa-*`-token matches found across the 3 files (2 + 3 + 11) - `--afa-text-muted` (0.4-alpha cream, the largest single bucket at 9 sites, all in file 3) and `--afa-border-resting` (0.15-alpha cream border) were the two real recurring matches; `--afa-text-secondary` (0.65-alpha) matched once. One real **role-mismatch trap** found and deliberately NOT matched (file 2's `rgba(245,245,240,0.4)` used as a *border* color, byte-identical to `--afa-text-muted`'s value but the wrong semantic role) - flagged in that file's own entry, not silently applied. `rgba(245,245,240,0.08)` (`STATUS_TONE.muted.bg`, not a `--afa-*` token) recurred heavily across all 3 files, consistent with `081`'s own colour report - still not tokenized, per that ticket's own finding.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-082-1-artist-dashboard`, `-2-artist-profile`, `-3-event-detail`) - chat opens/merges each independently. All 3 touch the same 2 files at their tail (`docs/design.md`, `scripts/design-token-baseline.json`) - same expected 3-way conflict `GEN-2609-079`'s own batch already established a precedent for resolving: keep every branch's own `docs/design.md` section (file order, or actual merge order), and run `node scripts/design-token-ratchet.js --update-baseline` fresh on the fully-merged `qa` once all 3 land rather than hand-merging the JSON.
+
+## GEN-2609-083 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **82** at branch start - `082` was batch 2) - bulk token migration batch 3, file 2 of 3: `organiser/events/[id]/page.tsx`
+
+Same method as file 1 (`seat-map/page.tsx`, its own entry above/elsewhere in this doc depending on merge order) - branched independently from `qa` (post-`082` merge), not stacked. **No canvas/SVG, no Tailwind arbitrary-value classes, no `<style>` block** - checked first, none of the geometry/quoting traps file 1's own entry documented apply here. This is a first-pass migration (unlike file 1) - the file was never touched by `GEN-2609-079`.
+
+### Coverage - matches the dispatch's own predicted numbers exactly, and the batch's biggest single-file win
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 67 | 2 | **65** | 65 / 67 |
+| font-size | 38 | 0 | **38** | 38 / 38 |
+| radius | 18 | 0 | **18** | 18 / 18 |
+| rgba | 26 | 26 | 0 (none matched) | n/a |
+| raw-button | 4 | 4 | 0 (retrofit only) | n/a |
+
+**153 → 32 literals (79% reduction)** - the largest single-file reduction across all 3 migration batches so far (`079`/`082`/`083` combined). Both font-size and radius hit **100%** coverage - every single off-scale value in those 2 categories was already on the dispatch's known scale (post-`081`), nothing left over in either category. `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -38, `spacing-literal` -65, `radius-literal` -18, `rgb-rgba-literal`/`raw-button` ±0.
+
+### Colour - zero manual matches, checked not assumed
+
+9 distinct `rgba()` values, 26 occurrences total. 3 of them are byte-identical to `STATUS_TONE` entries (`rgba(201,151,58,0.15)` ×5 = `.gold.bg`, `rgba(74,103,65,0.12)` ×3 = `.sage.bg`, `rgba(179,38,30,0.1)` ×3 = `.error.bg` - this file's own local status-pill styling, same duplicate-of-the-governed-tone-table pattern every prior file in this migration has found) - none are `--afa-*` tokens, so none qualify under the dispatch's own rule. The remaining 6 values (`0.08`/`0.2`/`0.06`/`0.3`×2/`0.1`) don't hit `--afa-border-resting`'s `0.15` or either text-role token's alpha exactly. Zero migrated.
+
+### Stays a literal
+
+spacing: `5px`×2 (both `padding` first-halves, on the "stays a literal" list). Nothing else off-scale remains in any of the 3 numeric categories.
+
+### Raw `<button>` - 4 sites, 0 migrated to a `Button` variant, all already token-retrofitted
+
+- **Apply wallet credit (L372):** gold-tinted (`color: var(--afa-gold)`, `background: rgba(201,151,58,0.1)`) - no gold-fill variant exists in `Button.tsx`.
+- **"Keep as wallet credit instead" (L414):** transparent/neutral-border outline, `padding: 5px var(--afa-space-3)` / `radius: sm` - doesn't match `outline-neutral`'s own fixed chrome (different padding/radius pairing, same "no rounding into a variant" discipline every prior file's entry has applied).
+- **Approve application (L460):** `background: var(--afa-sage)` solid fill - no plain-sage-fill variant exists.
+- **Reject application (L467):** `color: var(--afa-error)`, `border: 1px solid rgba(179,38,30,0.3)` (not a token) - closest in spirit to `outline-error` but a real border-color and padding/radius mismatch (`6px 14px`/`sm` vs `outline-error`'s `9px 17px`/`md`), not an exact match.
+
+All 4 already had every in-scope literal token-retrofitted by the automated pass.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1281→1243, `spacing-literal` 2985→2920, `radius-literal` 500→482, `rgb-rgba-literal`/`raw-button` ±0 (this branch's own `qa` starting point, independent of files 1/3's branches). Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff - branch not yet merged/deployed. Same standing caveat as every file in this batch.
