@@ -1,3 +1,97 @@
+# Session Handoff — 19 Sept 2026, later still yet again (CC — GEN-2609-081 provisional: extend the central spacing/font-size/radius scales with the frequent off-scale values)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - the dispatch stated `GEN/2609` `CodeCounter` reads **80** live, confirmed by chat before dispatching this prompt. Would be **081** if chat confirms no collision at logging time. Not written to `CodeCounter` this session (per the dispatch's own explicit instruction).
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-081` (provisional) - extend spacing/font-size/radius scales with 14 frequent off-scale values (50+ repo-wide occurrences each) found by `079`'s migration | Complete, unmerged | Precise per-value measurement (AST-free, reused `check-design-tokens.js`'s own extraction) fully reconciled the dispatch's rough table - no value flipped status. Zero migration, zero visual change; a real CSS-comment `*/`-inside-prose bug caught by the actual `next build`, not the JS checks - see §4. | `feat/gen-2609-081-scale-token-extension` |
+| 19 Sept 2026 (CC) | `GEN-2609-080` (provisional) - fix `raw-button` rule: count-based over the whole diff, not per-line | Complete, unmerged as of last handoff - **not independently re-verified this session, no GitHub API access** (see §3) | Reproduced the bug independently before fixing (11 real offenses on the seat-map PR, not the dispatch's stated 6). | `feat/gen-2609-080-raw-button-count-based` |
+| 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files, 1 PR each | Complete; `admin/settings` merged as PR #661 (confirmed as of last handoff); seat-map (#660) and organiser-event-edit (#662) status **not re-verified this session** | 791 → 337 combined literals (57% reduction). | `feat/gen-2609-079-batch1-seatmap`, `feat/gen-2609-079-batch1-organiser-event-edit` (+ `-admin-settings`, merged/deleted) |
+| 19 Sept 2026 (CC) | `GEN-2609-078` (provisional) - token guard: 4 new CI rules, allowlist, `token-ok` escape hatch, whole-repo ratchet + baseline | Complete; merged as PR #659 (confirmed as of last handoff) | No migration, zero visual change. | (merged, deleted) |
+| 19 Sept 2026 (CC) | Verification closeout: `GEN-2609-075`/`076`/`077` confirmed merged, `Feedback` backfilled | Complete | qa HEAD `d0a2c69` at the time. | none (docs-only) |
+
+(Oldest row, "19 Sept 2026 (CC+chat) — `GEN-2609-075`/`076`/`077`...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-081` (provisional) - `feat/gen-2609-081-scale-token-extension`, pushed, no PR opened yet. Built, verified, DB-seeded on `aforaudience-qa`. Compare URL: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-081-scale-token-extension` (no `gh` CLI and no GitHub MCP connection this session - connector reported a connection failure, not "unconfigured" - see §13).
+- `GEN-2609-080` (provisional) - `feat/gen-2609-080-raw-button-count-based`, per last handoff: pushed, no PR opened. **Status not re-checked this session** - no GitHub API access (see §3).
+- `GEN-2609-079` batch 1 - per last handoff, 2 of 3 PRs (`#660`, `#662`) still open, blocked by the bug `080` fixes. **Status not re-checked this session.**
+
+## 3. Open PRs awaiting action
+
+**Could not re-verify live PR/CI status this session - GitHub MCP connector failed to connect (422, "Invalid content from server") and no `gh` CLI is installed on this machine (standing gap, see `feedback_no_gh_cli` memory).** The table below is carried forward from the last handoff's own confirmed state, NOT independently re-checked - flagged explicitly rather than presented as fresh:
+
+| Branch | PR # (as of last handoff) | Merge-ready? |
+|---|---|---|
+| `feat/gen-2609-081-scale-token-extension` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet, so the Design System admin-page live check is still open (see `docs/design.md`'s own `GEN-2609-081` verify section). |
+| `feat/gen-2609-080-raw-button-count-based` | `NOT YET OPENED` (per last handoff) | Unknown this session - not re-checked. |
+| `feat/gen-2609-079-batch1-seatmap` | `#660` | Unknown this session - per last handoff, failing on the bug `080` fixes. |
+| `feat/gen-2609-079-batch1-organiser-event-edit` | `#662` | Unknown this session - same. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | Unrelated, out of scope every session since 14 Aug. |
+
+## 4. Decisions / findings this session
+
+**Reconciled measurement confirms the dispatch's table - no override needed.** Built a fresh, uncommitted Node script reusing `check-design-tokens.js`'s own exported extraction functions (not a separate hand-written regex) to count every off-scale spacing/font-size/radius value's real repo-wide occurrence count on `qa` `a6ec083`. All 14 dispatched values clear the 50-occurrence bar (lowest: font-size `20px` at 51); all 4 explicitly-declined values (font-size `22px`/`17px`, radius `3px`/`16px`) stay below it on the precise count too. Full table in `docs/design.md`'s `GEN-2609-081` entry.
+
+**A real bug the build itself caught, not any of the JS-side checks.** The first draft of `globals.css`'s new comment block contained the literal substring `*/` inside prose (`text-*/radius-*`, meant as shorthand for "text-star, radius-star") - CSS comments end at the first `*/`, so this silently closed the comment early and every real `--afa-*` declaration after it got parsed as if it were plain CSS text, failing `next build` with a `CssSyntaxError`. `tsc --noEmit`, the design-token checker, and the self-test suite all passed cleanly with this bug still in place - none of them parse CSS. Only the actual `next build` (Turbopack/PostCSS) surfaced it. Fixed by rewording the comment; re-ran the full verify list clean afterward, `/*`/`*/` counts confirmed balanced (27/27). Flagged here as a real, generalizable lesson: a CSS-comment-authoring mistake is invisible to every check in this repo's toolchain except a real build - don't skip the real `next build` step for a "just adding comments/tokens" change, even one that feels config-only.
+
+**Colour report, not a token add (per the dispatch's explicit instruction).** `rgba(245,245,240,0.08)` is **byte-identical** to `STATUS_TONE.muted.bg` (`src/lib/statusStyle.ts:46`, the "completed/neutral end-state" tone) - not a near-miss, an exact match, but to a status-tone value, not a border/divider token. The nearest real border/divider token, `--afa-border-resting`, is `rgba(245,245,240,0.15)` - same RGB triple, alpha roughly double (0.15 vs 0.08), not close. 173 occurrences repo-wide (18 in the 3 `079` batch-1 files specifically, already documented there). Full finding in `docs/design.md`.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **80** per the dispatch (chat-confirmed before dispatching). Not written to this session, per the dispatch's own explicit instruction not to.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions found or introduced this session. `054` ✅, `069→071` ✅, per `docs/HANDOFF_TEMPLATE.md`'s permanent ledger, unchanged. Standing risk noted every session: confirm `081` is actually free at logging time - this session could not check `CodeCounter` itself (not connected to that data source; relied on the dispatch's own chat-confirmed number).
+
+## 7. Docs-conflict watchlist
+
+- `feat/gen-2609-081-scale-token-extension` touches both `docs/design.md` (new entry appended at the very end, after the `GEN-2609-079` file-2/admin-settings entry - the current tail as of this session's branch point) and `docs/afa-design-tokens-reference.md` (Section 1's token table + a short Section 8 pointer). **Real, expected conflict with `feat/gen-2609-080-raw-button-count-based`**, per that branch's own §7 note last handoff: `080` also appends to `design.md`'s tail (after `078`'s "Next dispatch" paragraph, a different anchor point than this branch's own append-at-the-very-end). Both branches' own sections should survive intact - resolve by keeping both, ordering by actual merge order, same standing convention as every prior multi-branch `design.md` conflict in this doc's history. `080` touches no `afa-design-tokens-reference.md` content (tooling-only), so no conflict there.
+- `scripts/design-token-baseline.json`: **not touched by this branch** - confirmed via a fresh `design-token-ratchet.js` run this session, all 7 categories exactly at the existing baseline (this ticket adds token *definitions*, not new literal *usages*, so none of the 7 rule categories' live counts move).
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, on `feat/gen-2609-081-scale-token-extension` (branched from `origin/qa` `a6ec083`):
+
+- ✅ `tsc --noEmit` - clean, exit 0 (re-run after the comment-bug fix too).
+- ✅ `node scripts/check-design-tokens.test.js` - 40/40 passing, unchanged (no rule logic touched).
+- ✅ `check-design-tokens.js` against `origin/qa` - clean, 0 offenses (checked after committing, per `076`'s own working-tree-vs-committed-ref finding).
+- ✅ `node scripts/design-token-ratchet.js` - all 7 categories exactly unchanged from session-start counts (hex 83, rgba 967, font-family 10, font-size 1351, spacing 3244, radius 535, raw-button 211).
+- ✅ `next build` - clean, foreground, confirmed via `$PIPESTATUS`. **Failed on the first attempt** (the `*/`-in-comment bug, see §4) - fixed, then re-run clean. Both runs foreground, neither backgrounded.
+- ✅ `public/sw.js`'s `CACHE_VERSION` - unchanged by either build run; nothing to revert.
+- ✅ **Live DB check, not just local**: `execute_sql` against `aforaudience-qa` (`nqiyrypmjtogoocerxtu`, verified via `list_projects` before writing) post-migration confirms all 14 new `DesignToken` rows exist with the exact expected `key`/`value`/`group`/`type`/`locked=false`. `DesignToken` now holds 107 rows (93 confirmed pre-existing + 14 new).
+
+**Not verified this session:** a real QA-preview check of the Design System admin page (no Preview deployment exists yet for an unopened PR) - same standing "no scriptable Admin QA credential" limitation every prior `design-system` ticket has hit. Flagged as the one real acceptance leg still open, not silently skipped.
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** This session's only Supabase write was the `DesignToken` seed migration, applied directly to `aforaudience-qa` (`nqiyrypmjtogoocerxtu`) only - verified via `list_projects` before running, per the standing rule. Never touched `aforaudience-prod` (`cncumfwwnjcwacggrgsr`).
+
+## 10. UI/UX Design System Debt Ledger
+
+Not a migration ticket - zero literal count changed (confirmed via the unchanged ratchet baseline, §7/§8). What changed: the central scale itself grew from 18 tokens (6 spacing + 8 size + 4 radius) to 32 (+14), all admin-editable from merge, none yet consumed by a page. The next migration batch (see `docs/design.md`'s own "next dispatch" note) should see its per-file match rate rise well above `079`'s ~57% ceiling now that these 14 real gaps are filled.
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Updated this session - Section 1 gets the 14 new tokens' definitions (own subsection, `GEN-2609-081`), Section 8 gets a short pointer note. Same PR, not a follow-up, per this doc's own standing rule (§11 of the template).
+
+## 12. Immediate next action
+
+**Chat: confirm `GEN-2609-081` is free against `CodeCounter`, open and merge its PR** (compare URL in §2) - then, per the dispatch's own next-dispatch note, draft migration batch 2 against the real token names this ticket adds: `dashboard/artist/page.tsx` (177), `ArtistProfileClientPage.tsx` (175), `EventDetailClientPage.tsx` (174), the same 3 files this session's own fresh `design-token-ratchet.js` top-10 re-confirmed as the current largest. Separately, and not blocking the above: chat should also re-check `GEN-2609-080`'s and `079`'s 2 remaining PRs' live status via GitHub API, since this session had no API access to do so itself (see §3).
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model.** This session: CC built, verified (including a real live-DB check against `aforaudience-qa`), and pushed `feat/gen-2609-081-scale-token-extension`. Chat's half (confirm the ticket number, open the PR, merge) is next. CC never merges. **New this session, worth flagging once:** the GitHub MCP connector failed to connect (422 error) rather than simply being absent - if this recurs next session too, it may be worth chat checking the connector's own configuration rather than assuming it's a one-off blip.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, later still again (CC — GEN-2609-080 provisional: fix `raw-button` to be count-based, unblocking the 079 batch)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - `GEN/2609` `CodeCounter` read **79** live (not the dispatch's stated 78 - chat evidently logged `GEN-2609-079` between writing this dispatch and this session starting, confirming `079` as that ticket's real number). This ticket would be **080** if chat confirms no collision. Not written to `CodeCounter`.
