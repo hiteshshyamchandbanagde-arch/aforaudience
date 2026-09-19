@@ -1,3 +1,102 @@
+# Session Handoff — 19 Sept 2026, later still one more time (CC — GEN-2609-083 provisional: bulk token migration batch 3, 3 files)
+
+Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - the dispatch stated `GEN/2609` `CodeCounter` reads **82** live (`082` was batch 2, already logged separately). Would be **083** if chat confirms no collision. Not written to `CodeCounter` this session.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 19 Sept 2026 (CC) | `GEN-2609-083` (provisional) - bulk token migration batch 3: 3 highest-count files, 1 PR each | Complete, unmerged | 464 → 132 combined literals (72% reduction). 2 real bugs found and fixed before committing (a re-introduced radius-map bug, and a manual `sed` mistake that would have silently dropped a border) - see §4. All numbers matched the dispatch's own predictions, with 1 flagged, deliberate 1-off. | `feat/gen-2609-083-1-seat-map`, `-2-organiser-event-detail`, `-3-organiser-event-create` |
+| 19 Sept 2026 (CC) | `GEN-2609-082` (provisional) - bulk token migration batch 2: 3 highest-count files, 1 PR each | Complete; **all 3 merged** (`#665`/`#666`/`#667`, confirmed via `git fetch` this session) | 526 → 146 combined literals (72% reduction). | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-081` (provisional) - extend spacing/font-size/radius scales with 14 frequent off-scale values | Complete; merged as PR #664 | Precise measurement fully reconciled the dispatch's rough table. | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-080` (provisional) - fix `raw-button` rule: count-based over the whole diff, not per-line | Complete; merged as PR #663 | | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-079` (provisional) - bulk token migration batch 1: 3 highest-count files, 1 PR each | Complete; all 3 merged (`#660`/`#661`/`#662`) | 791 → 337 combined literals (57% reduction). | (merged) |
+
+(Oldest row, "19 Sept 2026 (CC) — GEN-2609-078...", dropped to hold at 5.)
+
+## 2. Activity in progress
+
+- `GEN-2609-083` (provisional) - all 3 branches pushed, no PRs opened yet:
+  - `feat/gen-2609-083-1-seat-map` (`seat-map/page.tsx`, 2nd pass, 163→86 literals)
+  - `feat/gen-2609-083-2-organiser-event-detail` (`organiser/events/[id]/page.tsx`, 153→32 literals)
+  - `feat/gen-2609-083-3-organiser-event-create` (`organiser/events/create/page.tsx`, 148→14 literals)
+  - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as every prior batch's own handoff entry):
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-083-1-seat-map`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-083-2-organiser-event-detail`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-083-3-organiser-event-create`
+
+## 3. Open PRs awaiting action
+
+**Could not re-verify live PR/CI status via GitHub API this session (same standing gap - no `gh` CLI, GitHub MCP not attempted).** Confirmed via `git fetch` (real, not assumed) that all 3 of `082`'s branches are merged into `origin/qa` - `qa` HEAD is `8d33b70` at this session's start.
+
+| Branch | PR # | Merge-ready? |
+|---|---|---|
+| `feat/gen-2609-083-1-seat-map` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet. |
+| `feat/gen-2609-083-2-organiser-event-detail` | **`NOT YET OPENED`** (this session) | Same. |
+| `feat/gen-2609-083-3-organiser-event-create` | **`NOT YET OPENED`** (this session) | Same. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | Unrelated, out of scope every session since 14 Aug. |
+
+## 4. Decisions / findings this session
+
+**2 real bugs found and fixed before committing, neither a repeat of the exact same prior-batch bug:**
+
+1. **File 1 (`seat-map/page.tsx`) re-introduced a bug `GEN-2609-079` had already fixed once.** The migration script's `RADIUS_MAP` (extended from `082`, not rewritten) included `0px → --afa-radius-sharp`, copied from the dispatch's own documented reverse-lookup table. This file has 2 real mixed-corner `borderRadius` shorthands (a joined level-tab shape) where a bare `0` means "sharp on this one joined edge" structurally, not a considered token choice - `079`'s own file-1 entry already found and fixed this exact class of bug once, by removing `0` from the reverse map entirely. Re-derived the same fix independently this session (confirmed via `isAllowlistedLength()` that a bare `0` was never counted as ratchet debt to begin with, so migrating it would add a new dependency for zero real benefit). Retroactively checked all 3 already-merged `082` files for the same exposure - none had it, no follow-up needed.
+2. **File 3 (`organiser/events/create/page.tsx`) - a manual `sed` substitution dropped a `1px solid ` prefix**, turning `border: '1px solid rgba(245,245,240,0.15)'` into `border: 'var(--afa-border-resting)'` - a bare custom-property reference with no explicit border-style, which renders with no visible border at all (a real regression, not just a re-coloring). Caught immediately by re-reading the 3 edited lines right after running the command, before moving on to anything else - fixed with a corrected substitution, then re-verified via a full `git diff` sweep of every `border:`-containing line to confirm nothing else was touched.
+
+**Neither bug was caught by `tsc`/the self-test suite/`next build`** - both are visual-only or silent-drop bugs the toolchain has no way to see. The only thing that caught either one was reading the actual diff/edited lines by eye before moving on, reinforcing the same lesson `082`'s own `<style>`-block bug already taught: review every codemod's output, don't trust that a replacement did what it was supposed to.
+
+**File 1's font-size coverage is 1 lower than the dispatch predicted, deliberately - flagged in the entry, not silently reconciled.** The dispatch's own count (6/9) has no way to know about the safety-marker glyph's geometry exclusion (`079`'s own documented finding: `11px` there is coincidental, not a type-scale choice) - this session's real coverage is 5/9, with the 6th "migratable" match manually reverted and commented.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609`: **82** per the dispatch. Not written to this session.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions found or introduced this session. `054` ✅, `069→071` ✅, per the permanent ledger, unchanged. Standing risk noted every session: confirm `083` is actually free at logging time - not independently checkable this session (no `CodeCounter` access).
+
+## 7. Docs-conflict watchlist
+
+- All 3 of `feat/gen-2609-083-*` touch the same 2 files at their tail: `docs/design.md` (each appends its own file-N-of-3 section after `082`'s own tail, the current tail as of this session's branch point) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object). **Real, expected 3-way conflict on merge** - same shape as every prior batch's own precedent: keep every branch's own `docs/design.md` section, and run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 3 land, rather than hand-merging the JSON.
+
+## 8. Verification standard checklist
+
+All run **fresh this session**, foreground, per file, each branched from `origin/qa` `8d33b70`:
+
+- ✅ `tsc --noEmit` - clean, exit 0, all 3 files.
+- ✅ `node scripts/check-design-tokens.test.js` - 40/40 passing, unchanged, all 3 runs.
+- ✅ `check-design-tokens.js` against `origin/qa` - clean, 0 offenses, all 3.
+- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 3 branches, refused-to-raise guard intact each time. Deltas matched hand-predicted numbers exactly in all 3 cases (accounting for file 1's own flagged, deliberate 1-off).
+- ✅ `next build` - clean, foreground, confirmed via `$PIPESTATUS`, all 3 files.
+- ✅ `public/sw.js`'s `CACHE_VERSION` - unchanged by any of the 3 builds; nothing to revert.
+
+**Not verified this session:** a real QA-preview visual diff, any of the 3 files - no Preview deployment exists yet. File 1 carries 2 specific flags worth a targeted visual check once a Preview exists: the joined level-tab shape (the mixed-corner radius fix) and the safety-marker glyph (the geometry exclusion). File 3 carries 1: the 3 border-resting sites the `sed` bug touched, to independently confirm they render with a visible border (not just that the code reads correctly).
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** Unaffected this session.
+
+## 10. UI/UX Design System Debt Ledger
+
+Batch 3's combined reduction (72%) matches batch 2's own combined rate, despite file 1 being a 2nd pass on an already-partially-migrated file (its own reduction, 47%, is real but lower than files 2/3's 79%/91% - both first-pass files with no prior migration debt already cleared). File 3 in particular (91% reduction, 100% font-size coverage) is the highest single-file reduction across all 3 migration batches to date (`079`/`082`/`083`). 3 more colour literals matched to `--afa-border-resting` this session (all in file 3, after the `sed` bug fix). `radius-literal`'s repo-wide `3px` near-miss (46, still below 50) remains the closest unconverted near-miss value.
+
+## 11. Locked-tokens source of truth
+
+**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration-only, no new token added).
+
+## 12. Immediate next action
+
+**Chat: confirm `GEN-2609-083` is free against `CodeCounter`, open and merge all 3 PRs** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` 3-way conflict per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the merged result. Batch-4 candidates: re-run the ratchet fresh post-merge before drafting that dispatch, don't reuse this session's pre-merge top-10 (files below the current top-3 haven't been re-measured this session).
+
+## 13. Chat vs. CC ownership note
+
+**Unchanged from the standing model.** This session: CC built, verified (including catching and fixing 2 real bugs before they could ship), and pushed all 3 `feat/gen-2609-083-*` branches. Chat's half (confirm the ticket number, open the 3 PRs, merge) is next. CC never merges.
+
+---
+
+*Everything below this line is prior session history, unchanged, per this file's own "supersedes, does not delete" convention.*
 # Session Handoff — 19 Sept 2026, even later still yet again (CC — GEN-2609-082 provisional: bulk token migration batch 2, 3 files)
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Ticket number is provisional** - the dispatch stated `GEN/2609` `CodeCounter` reads **80** live (`081` is the scale-extension ticket, already logged separately). Would be **082** if chat confirms no collision. Not written to `CodeCounter` this session.
