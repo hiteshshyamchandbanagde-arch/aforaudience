@@ -7192,3 +7192,26 @@ Both already had every in-scope literal token-retrofitted.
 **Colour, batch-wide:** only 1 manual match this batch (admin/feedback's own `--afa-border-resting`) - the lowest colour-migration count of any batch so far, reflecting that files 2/3's own dominant translucent-cream tints (`0.12`/`0.65`-embedded-in-SVG) are real, different, already-considered values rather than near-misses. 1 more colour trap found and deliberately left alone (profile's SVG-embedded `--afa-text-secondary`-value chevron stroke) - a genuinely new class of non-match (context, not role or value), distinct from `082`'s role-mismatch trap.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-084-1-admin-feedback`, `-2-register-form`, `-3-profile`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json`, same resolution as every prior batch.
+
+## GEN-2609-086 (batch 5, provisional) - bulk token migration batch 5, file 2 of 3: `tickets/page.tsx`
+
+### A real bug in this session's own migration script, caught and fixed before applying - the exact `<style>{`...`}</style>` quoting trap `082`'s own dispatch already warned about
+
+The script's first pass wrapped a bare-number CSS value inside this file's one raw `<style>{`...`}</style>` block (`.afa-tickets-grid { ... gap: 16px; }`) in JS-style quotes - `gap: 'var(--afa-space-4)';` - which is invalid CSS (a quoted value breaks the whole declaration). Caught by the mandatory manual diff review before applying, same discipline [[feedback_style_template_literal_quoting]] documents from `082`'s own real occurrence of this exact class of bug. Fixed by hand (`gap: var(--afa-space-4);`, no quotes) after the automated pass; the script itself was not (and, per that same lesson, should not be) made "smart" about CSS-vs-JS context - every batch's dry-run diff gets read line by line regardless.
+
+### Coverage - matches the script's own predicted numbers, second-highest reduction of this batch
+
+111 → 26 literals (77% reduction). `spacing-literal` 61→2 (59/61), `font-size-literal` 25→8 (17/25 - the 8 remaining are all non-scale sizes: `17px`, `13.5px`, `12.5px`, `9px` × 4, none has a token), `radius-literal` 10→3 (7/10 - the 3 remaining are all `16px`, a value with no `--afa-radius-*` token at all, see the cross-file note below), `rgb-rgba-literal` 13→11 (2 manual matches below).
+
+### Colour - 2 manual matches, both `--afa-border-resting`
+
+Same value/role match as file 1: the decline-button's border and the loading-spinner's track-ring border, both `rgba(245,245,240,0.15)` used as a `border:` value.
+
+### A recurring gap surfaced 3 times independently this batch: no `--afa-radius-*` token exists for `16px`
+
+`borderRadius: 16` (empty-state icon box), `borderRadius: '16px'` (ticket-card outer radius) here, plus `rounded-[16px]` in file 3 (`login/page.tsx`) below - 3 independent, unrelated sites in 2 different files all landing on the exact same untokenized value. The existing radius scale (`sharp`=0, `sm`=6, `md`=8, `10px`, `12px`, `pill`=999) has no `16px` step. Flagged, not silently worked around - a future `--afa-radius-16px` token (matching `081`'s own precedent for filling gaps in the px-suffixed scale) is a real candidate, not assumed or added here.
+
+### Verify
+
+`tsc --noEmit` clean (after the `<style>`-block fix above). `node scripts/check-design-tokens.test.js`: 40/40 passing. `verify-equivalence.js`: 47 paired lines, 0 mismatches (after fixing the script's own bare-number-vs-`Npx` normalization gap the same way `084` already documented - `px` stripped symmetrically from both sides before comparing, not just resolved-and-compared raw).
+
