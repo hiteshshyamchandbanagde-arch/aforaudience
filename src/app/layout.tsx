@@ -157,7 +157,7 @@ export default async function RootLayout({
   const designTokenCss = buildDesignTokenCss(designTokens);
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${youngSerif.variable} ${schibstedGrotesk.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${youngSerifPhys.variable} ${schibstedGroteskPhys.variable} ${instrumentSansPhys.variable} ${jetBrainsMonoPhys.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
       <head>
         {designTokenCss && (
           <style id="afa-design-tokens-runtime" dangerouslySetInnerHTML={{ __html: designTokenCss }} />
@@ -205,7 +205,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className={`${youngSerif.variable} ${schibstedGrotesk.variable} ${instrumentSans.variable} ${jetBrainsMono.variable} ${youngSerifPhys.variable} ${schibstedGroteskPhys.variable} ${instrumentSansPhys.variable} ${jetBrainsMonoPhys.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoTelugu.variable} ${notoKannada.variable} ${notoMalayalam.variable} ${notoGujarati.variable} ${notoBengali.variable}`}>
+      <body>
         {/*
           Intro splash - deliberately NOT individual React-managed JSX
           elements, and deliberately not even a normal client component.
