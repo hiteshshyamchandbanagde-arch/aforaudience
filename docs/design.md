@@ -7284,3 +7284,28 @@ The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` al
 **`verify-equivalence.js` rebuilt from scratch this session** (not carried over as a file - `084`'s own copy was scratchpad-only, per that ticket's own note it's "a candidate for a future session to commit"). Same 2 normalization bugs `084` already found were re-derived and re-fixed independently this session (symmetric `var()` resolution on both diff sides, `px`-suffix stripping) - a real argument for actually committing this script rather than re-discovering the same 2 bugs a 3rd time next batch.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch. `login/page.tsx`'s branch does NOT depend on `GEN-2609-085`'s branch - both touch disjoint lines of the same file and merge cleanly in either order.
+
+## GEN-2609-087 - bulk token migration batch 6, file 2 of 3: `SupportWidget.tsx`
+
+Renders on every page (`layout.tsx`) - highest blast radius of the batch, per the dispatch's own flag. 2 `<svg>` icons and the already-`token-ok`-annotated chevron data-URI (`L712`) left untouched, as instructed. No `id`/`aria-*`/`name`/`placeholder`/`data-*` attribute touched - confirmed via diff review, none of those appear in any changed line.
+
+### Coverage - matches the dispatch's own scripted prediction exactly, highest reduction of the batch
+
+97 → 17 literals (82% reduction). `font-size-literal` 22→0 (22/22, predicted 22/22, full coverage), `spacing-literal` 52→1 (51/52, predicted 51/52), `radius-literal` 8→1 (7/8, predicted 7/8).
+
+### The one raw `<style>{`...`}</style>` block in this file (L444) - confirmed untouched, not just assumed
+
+Its only properties are `bottom`/`max-height` (via `calc()`) - neither is in `SPACING_PROPS`/`RADIUS_PROPS`/`FONT_SIZE_PROPS`, so the migration script never matched a line inside it at all. Diffed explicitly to confirm (not inferred from the property list alone) - 0 changed lines inside the block. The dispatch's lesson 1 (unquoted `var()` in raw CSS) didn't apply here, but was checked for regardless.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Spacing `40px` (×2, the fixed-button `bottom` offset and a padding shorthand's first part). Radius `16` (the panel's own `borderRadius: 16`, bare). 1 `hardcoded-font-family` (`fontFamily: 'inherit'` - a legitimate CSS keyword, not real hardcoding, same recurring false-positive-shaped hit every batch in this chain has found). 7 raw `<button>` sites, 0 migrated.
+
+### Colour - zero manual matches
+
+7 `rgba()` hits (box-shadow blacks at `0.25`/`0.32`/`0.3`, amber tints at `0.15`/`0.3`) checked individually - none match. The 2 `rgba(245,245,240,0.65)` hits (L707 comment prose, L712 the actual `token-ok`-annotated chevron value) are pre-existing, correctly untouched.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `verify-equivalence.js`: 61 paired lines, 0 mismatches.
+
