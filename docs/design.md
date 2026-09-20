@@ -7284,3 +7284,39 @@ The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` al
 **`verify-equivalence.js` rebuilt from scratch this session** (not carried over as a file - `084`'s own copy was scratchpad-only, per that ticket's own note it's "a candidate for a future session to commit"). Same 2 normalization bugs `084` already found were re-derived and re-fixed independently this session (symmetric `var()` resolution on both diff sides, `px`-suffix stripping) - a real argument for actually committing this script rather than re-discovering the same 2 bugs a 3rd time next batch.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch. `login/page.tsx`'s branch does NOT depend on `GEN-2609-085`'s branch - both touch disjoint lines of the same file and merge cleanly in either order.
+
+## GEN-2609-087 - bulk token migration batch 6, file 3 of 3: `dashboard/organiser/tours/[id]/page.tsx`
+
+### Coverage - matches font/radius exactly; spacing 1 higher than predicted, reconciled below
+
+96 → 14 literals (85% reduction, best single-file rate of the batch). `font-size-literal` 22→0 (22/22, predicted 22/22), `spacing-literal` 55→4 (51/55, predicted 51/55), `radius-literal` 8→0 (8/8, predicted 8/8) - all 3 numeric categories match the dispatch's table exactly. Total literal count after is 14, one lower than the dispatch's own predicted 15 - entirely explained by the 1 manual colour conversion below, which the dispatch's own predictions table explicitly excluded ("before any manual colour matches").
+
+### Colour - 1 manual match, `--afa-border-resting`
+
+The shared `inputStyle`'s own `border: '1px solid rgba(245,245,240,0.15)'` (L16) is byte-equivalent (after whitespace normalization) to `--afa-border-resting: rgba(245, 245, 240, 0.15)` - a genuine `border:` role match, same class of find as `086`'s own 4 hits. Converted to `var(--afa-border-resting)`. The other 7 `rgba()` hits (cream `0.08` ×5, green/amber status-pill tints `0.12`/`0.15`) checked individually - no further matches.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Spacing `100px`, `5px`, `9px` ×2 (no matching token).
+
+### Raw `<button>` - 3 sites, 0 migrated to a `Button` variant
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `verify-equivalence.js`: 47 paired lines, 0 mismatches.
+
+
+## Batch 6 summary (`GEN-2609-087`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `dashboard/venue/create/page.tsx` | 105 | 24 | 77% | 54/62 | 21/24 | 6/6 | 0 |
+| `SupportWidget.tsx` | 97 | 17 | 82% | 51/52 | 22/22 | 7/8 | 0 |
+| `dashboard/organiser/tours/[id]/page.tsx` | 96 | 14 | 85% | 51/55 | 22/22 | 8/8 | 1 |
+| **Batch total** | **298** | **55** | **82%** | **156/169** | **65/68** | **21/22** | **1** |
+
+**Every per-category number matched the dispatch's own scripted predictions exactly** (298→56 predicted, 298→55 actual - the 1-literal difference is entirely the tours/[id] manual colour conversion, which the dispatch's own prediction table explicitly excluded and asked to be reported). First batch in this chain with zero unexplained deviations across all 3 files. Real per-category ratchet movement once all 3 merge (each branch's own delta measured independently against its own isolated `qa` base, not stacked - a projection, same caveat as every prior batch summary): `font-size-literal` -65, `spacing-literal` -156, `radius-literal` -21, `rgb-rgba-literal` -1.
+
+**No new bug classes found this batch** - the 4 lessons from `082`-`086` (raw `<style>` block quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were all checked against explicitly and none recurred. `SupportWidget.tsx`'s one raw `<style>` block was confirmed untouched by diff, not assumed safe from the property-list scoping alone.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-087-1-venue-create`, `-2-support-widget`, `-3-organiser-tour`) - chat opens/merges each independently, per this dispatch's own standing rules. Expected `docs/design.md`/`scripts/design-token-baseline.json` conflict, same resolution as every prior batch.
