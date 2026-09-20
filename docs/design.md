@@ -7504,3 +7504,59 @@ Method: `grep -rn "<main"` across `src/app`/`src/components`, plus a separate sw
 `tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (`var(--font-sans)` isn't a hardcoded-font-family hit - the rule only fires when the quoted value does NOT contain `var(`). `design-token-ratchet.js`: all 7 categories unchanged from baseline, confirming this fix adds zero literal debt.
 
 **Not verified:** live visual check - needs Vinayak's account (`vinayak.venue@aforaudience.qa`), no scriptable Venue-Owner QA credential this session.
+
+## BUG-2609-055 (2/2) - site-wide font root cause: `<html>` never resolved `var(--font-sans)`
+
+Root cause chat-verified before dispatching, independently re-confirmed this session against `qa@84a2369`: `globals.css`'s `html { font-family: var(--font-sans), ... }` is unlayered and wins the cascade, but the next/font CSS variables it references were declared via `className` on `<body>`, not `<html>`. Custom properties inherit downward only - `<html>` is `<body>`'s ancestor, so `var(--font-sans)` was undefined at the point `html`'s own `font-family` rule needed it, the whole declaration was invalid at computed-value time, and `<html>` (having no parent to inherit from) fell back to the browser's UA-default serif, which then inherited down to every element that didn't set its own `fontFamily` explicitly.
+
+### The fix
+
+Moved the font-variable `className` template (all 14 next/font `.variable` references, byte-identical string, same order) from `<body>` to `<html lang="en">`. `<body>` keeps everything else (nothing else was in that `className`, so it now has no `className` attribute at all - left plain, no `className=""`, per the dispatch's own instruction). Confirmed `MobileTabBar.tsx`'s `document.body.classList.toggle('afa-mobile-tab-bar-active', ...)`/`.remove(...)` (the only other code in `src/` that touches `document.body`'s classes) is unaffected - it only ever adds/removes that one named class via `classList`, never reads or replaces the full `className` string, so it doesn't care what else is (or isn't) already there. `globals.css`, the design-token `<style>` block, the service-worker registration script, and the intro splash in `layout.tsx` are all byte-identical to before - a 2-line change on 1 file.
+
+### A real, undocumented dev-mode-only bug found in this fork's Turbopack dev server: `<html>` element attributes are silently dropped from SSR output
+
+Before trusting the fix, I ran a live server and checked computed styles per the dispatch's own instruction - and the fix appeared to do nothing under `npm run dev`: `curl`ing the raw SSR HTML showed `<html>` rendering with **zero attributes at all**, not just missing the new `className` but missing `lang="en"` too. Isolated the cause methodically rather than assuming my edit was wrong:
+
+1. Restarted the dev server with a fully cleared `.next` cache - same result.
+2. Temporarily swapped in `origin/qa`'s own untouched `layout.tsx` (before this fix existed) - **same result**: even the pre-existing `<html lang="en">` (no `className` at all) rendered as bare `<html>` under `next dev`. This ruled out my edit as the cause - it's a pre-existing, fork-wide dev-server behavior, not a regression this fix introduced.
+3. Added a throwaway `data-test123="hello"` attribute to `<html>` - also stripped. Confirmed this isn't specific to `lang` or `className` - **every** attribute on the root `<html>` element is dropped in dev-server SSR output in this fork, unconditionally.
+4. Ran a real `next build` + `next start` instead of `next dev` - **the production build renders `<html>` correctly**, with `lang="en"`, the test attribute, and the full `className` string all present and correct. Confirmed via `curl` against the built output directly (not just a passing build step).
+
+**Conclusion: the fix is correct and works in production; `next dev`'s Turbopack SSR path in this fork has a real, separate bug that silently drops all root-`<html>`-element attributes, unrelated to this ticket.** Not fixed here (out of scope - a dev-server-only quirk, not a shippable code change, and the fix's own correctness doesn't depend on it). Flagged because it's a serious trap for verifying ANY future change to `<html>`'s own attributes in this codebase: `npm run dev` will make a correct fix look broken. The dispatch's own "if you can run a local server" verification instruction is still satisfiable - just not via `next dev` for this specific element - a production build (`next build && next start`) is the reliable way to check `<html>`-level behavior in this fork going forward.
+
+### Live verification (production build, not dev server - see above)
+
+Ran `next build && next start -p 3001`, then a Playwright script against `/login`, `/register`, `/about`:
+
+| Page | `html` computed `font-family` | `body` computed `font-family` | `<p>` computed `font-family` |
+|---|---|---|---|
+| `/login` | Instrument Sans stack (+ Noto fallbacks) | same | Instrument Sans |
+| `/register` | Instrument Sans stack (+ Noto fallbacks) | same | Instrument Sans |
+| `/about` | Instrument Sans stack (+ Noto fallbacks) | same | **Young Serif** |
+
+`/about`'s `<p>` resolving to Young Serif (not the Instrument Sans default) is correct, not a miss - that page's editorial `PAPER`/`INK` theme sets its own explicit serif `fontFamily` on body text by design (see the `BUG-2609-055` file audit below, where `/about`'s `<main>` is listed as having no `fontFamily` of its own - true, and irrelevant here, since the `<p>` in question sets its own). Confirms the fix precisely: elements with an explicit font choice keep it; only inherited elements moved off the browser-default serif.
+
+### Weight/reflow observations (source review, not yet a live visual pass on every page)
+
+**Weights:** Instrument Sans is loaded at 400/500/600 only (confirmed in `layout.tsx`'s font loader calls, unchanged by this ticket). Any newly-sans element requesting `fontWeight: 700` or heavier (SiteNav's `ROLE_BADGE_STYLE` at 700, several dashboard sidebar labels) will render nearest-weight or synthetic-bold under the new face - same risk the dispatch's own text flagged, not something this session can rule in or out without a live visual pass per role.
+
+**Reflow risk:** Instrument Sans' metrics differ from the browser's default serif (usually Times-like). Elements most likely to show it: `SiteNav`'s primary nav links and account-row icon-links (fixed-height row, `nowrap` already defends against wrapping per that component's own existing comments), `DashboardShell`'s sidebar labels (fixed-width rail), `SupportWidget`'s panel copy, and any `<select>`/`<input>` using `fontFamily: 'inherit'` inside a fixed-width control. None of these were touched by this ticket - listed for chat's live QA pass, not fixed speculatively.
+
+### Read-only audit: every `<main>`/root wrapper still missing `fontFamily`
+
+Unchanged from the dispatch's own pre-existing table (12 files, several with 2+ instances) - `about/page.tsx`, `tours/[slug]/page.tsx` (both branches), `venue-owners/[id]/page.tsx` (not-found branch only), `admin/bookings/page.tsx` (all 3), `admin/diary/page.tsx`, `admin/page.tsx` (both branches), `organiser/tours/create/page.tsx`, `organiser/tours/page.tsx`, `organiser/tours/[id]/page.tsx` (both branches), `my-feedback/page.tsx`, `organisers/[id]/page.tsx` (both branches), `dev/razorpay-test/page.tsx`. **This fix makes every one of these render correctly anyway** (that's the whole point of moving the variables to `<html>` - `fontFamily` no longer needs to be set on each individual `<main>` for the inheritance chain to resolve), so this audit is now historical context for why the bug existed, not a list of remaining gaps - no follow-up ticket needed from it.
+
+### QA checklist for chat (per-role, since this is a whole-site visual change)
+
+- **Public nav, signed out and signed in** - `SiteNav`'s `page` variant on any non-home page (font moves from serif to sans on every text element that doesn't already set `fontFamily` explicitly - which per the seat-map fix and this audit, was already most of them via workarounds; this ticket makes the underlying mechanism correct site-wide).
+- **Mobile drawer and tab bar** - `MobileTopBar`/`MobileTabBar` text.
+- **Dashboard sidebars** - one look each: Audience, Organiser, Venue-Owner, Admin (`DashboardShell`'s nav labels were flagged in the dispatch's own "known affected" list).
+- **`SupportWidget` panel** - flagged explicitly in the dispatch.
+- **One page per audited file above** - confirm no unexpected reflow now that `fontFamily` resolves via inheritance instead of (previously, inconsistently) an explicit per-`<main>` override.
+- **Hydration check** - open devtools console on a couple of pages; the fix moves a `className` between two elements React renders every time, so confirm no hydration-mismatch warning appears (none expected - `next build`'s own React tree validation passed, and the change is server-rendered consistently, but worth a live glance since `next dev`'s own attribute-stripping bug above makes dev-mode console warnings unreliable for anything on `<html>` specifically).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing (no rule logic touched). `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories exactly unchanged from baseline (±0), confirming this fix adds zero literal debt - predicted and confirmed. Real `next build`: clean; `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert. Live computed-style verification: done via a production `next build && next start` server (not `next dev` - see the dev-mode bug above), Playwright-driven, table above.
+
+**Rollback:** single-commit `git revert` - the change is exactly 2 lines in 1 file with no dependent changes.
