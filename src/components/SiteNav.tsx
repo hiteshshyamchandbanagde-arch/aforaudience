@@ -73,13 +73,13 @@ function getDashboardLink(role?: string) {
 // fixes every role (Venue Owner, Artist, Organiser, Admin, Audience) in
 // one place, not just the Venue Owner case.
 const ROLE_BADGE_STYLE: CSSProperties = {
-  fontSize: "11px",
+  fontSize: "var(--afa-text-micro)",
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
   padding: "3px 9px",
-  borderRadius: "999px",
-  border: "1px solid rgba(245,245,240,0.15)",
+  borderRadius: "var(--afa-radius-pill)",
+  border: "1px solid var(--afa-border-resting)",
   background: "transparent",
   color: "rgba(245,245,240,0.6)",
   whiteSpace: "nowrap",
@@ -374,10 +374,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
            left in place for that reason, not because the page variant
            still relies on them. */
         @media (min-width: 901px) and (max-width: 1500px) {
-          .sitenav-row { padding: 16px 20px !important; }
-          .sitenav-logo { font-size: 20px !important; }
-          .sitenav-desktop { gap: 14px !important; }
-          .sitenav-account-row { gap: 8px !important; }
+          .sitenav-row { padding: var(--afa-space-4) var(--afa-space-5) !important; }
+          .sitenav-logo { font-size: var(--afa-text-20px) !important; }
+          .sitenav-desktop { gap: var(--afa-space-14px) !important; }
+          .sitenav-account-row { gap: var(--afa-space-2) !important; }
           .afa-search-input { max-width: 110px !important; }
           .sitenav-greeting { max-width: 70px !important; }
         }
@@ -389,11 +389,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
           transform: translateX(-50%) translateY(-4px);
           background: var(--afa-surface-inverse);
           color: var(--afa-on-fill-solid);
-          font-size: 11px;
+          font-size: var(--afa-text-micro);
           font-weight: 600;
           white-space: nowrap;
-          padding: 4px 9px;
-          border-radius: 6px;
+          padding: var(--afa-space-1) 9px;
+          border-radius: var(--afa-radius-sm);
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.12s ease, transform 0.12s ease;
@@ -421,7 +421,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
             page variant's collapsed profile-menu dropdown (GEN-2608-015). */}
         <div className="sitenav-desktop" style={{ gap: isHome ? "32px" : "24px", alignItems: "center", flexWrap: "nowrap" }}>
           {primaryLinks.map((l) => (
-            <Link key={l.key} href={l.href} style={{ fontSize: "14px", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
+            <Link key={l.key} href={l.href} style={{ fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 500, color: l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", textDecoration: "none", opacity: l.isActive ? 1 : 0.6 }}>
               {l.label}
             </Link>
           ))}
@@ -439,17 +439,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   title={t.languagePicker.label}
                   aria-label={t.languagePicker.label}
                   aria-expanded={langMenuOpen}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', cursor: 'pointer', fontSize: '11px', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--afa-border-resting)', background: 'transparent', cursor: 'pointer', fontSize: 'var(--afa-text-micro)', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
                 >
                   {locale.toUpperCase()}
                 </button>
                 {langMenuOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: '6px', minWidth: '160px', zIndex: 20 }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: 'var(--afa-radius-10px)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
                     {LOCALES.map((l) => (
                       <button
                         key={l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
                       >
                         {l.nativeLabel}
                       </button>
@@ -459,10 +459,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               </div>
 
               {status === "loading" ? null : user ? (
-                <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <div className="sitenav-account-row" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)" }}>
                   <span
                     className="sitenav-greeting"
-                    style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
+                    style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.7, maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-block", verticalAlign: "middle" }}
                   >
                     {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
                   </span>
@@ -478,21 +478,21 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       aria-label={l.label}
                       aria-current={l.isActive ? "page" : undefined}
                       className="sitenav-icon-link"
-                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "8px" }}
+                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCount}
                         </span>
                       )}
                       {l.key === "messages" && unreadCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {unreadCount}
                         </span>
                       )}
                       {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCompanionCount}
                         </span>
                       )}
@@ -501,17 +501,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   ))}
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "10px 22px", borderRadius: "var(--afa-radius-sm)" }}
+                    style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}
                   >
                     {t.nav.signOut}
                   </button>
                 </div>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <Link href="/login" style={{ fontSize: "14px", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-4)" }}>
+                  <Link href="/login" style={{ fontSize: "var(--afa-text-body)", fontWeight: 500, color: "var(--afa-text-primary)", textDecoration: "none", opacity: 0.7 }}>
                     {t.nav.signIn}
                   </Link>
-                  <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "10px 22px", borderRadius: "6px" }}>
+                  <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}>
                     {t.nav.signUp}
                   </Link>
                 </div>
@@ -547,10 +547,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   aria-label="Account menu"
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)", background: "transparent", cursor: "pointer" }}
                 >
                   {user ? (
-                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700 }}>
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
                       {initials(user.displayName || user.name || user.email || "?")}
                     </span>
                   ) : (
@@ -565,11 +565,11 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </button>
 
                 {menuOpen && (
-                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "8px 0", zIndex: 20 }}>
+                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-12px)", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
                     {user ? (
                       <>
-                        <div style={{ padding: "6px 16px 10px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+                        <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
+                          <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                             {t.nav.greeting} {(user.displayName || user.name || user.email || "there").split(" ")[0]}
                           </span>
                           {getRoleLabel(user.role, t.roles) && (
@@ -584,48 +584,48 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             href={l.href}
                             onClick={() => setMenuOpen(false)}
                             aria-current={l.isActive ? "page" : undefined}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "14px", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.08)" : "transparent", textDecoration: "none" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.08)" : "transparent", textDecoration: "none" }}
                           >
                             {l.label}
                             {l.badge > 0 && (
-                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "999px", padding: "1px 7px" }}>
+                              <span style={{ fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
                                 {l.badge}
                               </span>
                             )}
                           </Link>
                         ))}
-                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
                       </>
                     ) : (
                       <>
-                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 16px", fontSize: "14px", color: "var(--afa-text-primary)", textDecoration: "none" }}>
+                        <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                           {t.nav.signIn}
                         </Link>
-                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
                       </>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
                       {LOCALES.map((l) => (
                         <button
                           key={l.id}
                           onClick={() => setLocale(l.id)}
-                          style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, background: "transparent", border: "none", cursor: "pointer", padding: "2px 4px" }}
+                          style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, background: "transparent", border: "none", cursor: "pointer", padding: "var(--afa-space-2px) var(--afa-space-1)" }}
                         >
                           {l.id.toUpperCase()}
                         </button>
                       ))}
                     </div>
                     {!backHref && (
-                      <div style={{ padding: "0 12px 4px" }}>
+                      <div style={{ padding: "0 var(--afa-space-3) var(--afa-space-1)" }}>
                         <LocationChip />
                       </div>
                     )}
                     {user && (
                       <>
-                        <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
                         <button
                           onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "14px", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}
                         >
                           {t.nav.signOut}
                         </button>
@@ -636,7 +636,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               </div>
 
               {!user && status !== "loading" && (
-                <Link href="/register" style={{ fontSize: "14px", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "8px 20px", borderRadius: "6px", flexShrink: 0 }}>
+                <Link href="/register" style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", textDecoration: "none", background: "var(--afa-fill-solid)", padding: "var(--afa-space-2) var(--afa-space-5)", borderRadius: "var(--afa-radius-sm)", flexShrink: 0 }}>
                   {t.nav.signUp}
                 </Link>
               )}
