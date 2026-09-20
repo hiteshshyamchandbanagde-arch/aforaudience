@@ -11,17 +11,17 @@ import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
 
 const inputStyle = (hasError?: boolean) => ({
   width: "100%",
-  padding: "12px 14px",
-  borderRadius: "8px",
+  padding: "var(--afa-space-3) var(--afa-space-14px)",
+  borderRadius: "var(--afa-radius-md)",
   border: `1.5px solid ${hasError ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`,
-  fontSize: "14px",
+  fontSize: "var(--afa-text-body)",
   color: "var(--afa-text-primary)",
   background: "transparent",
   outline: "none",
   boxSizing: "border-box" as const,
 })
 
-const labelStyle = { fontSize: "13px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "6px" }
+const labelStyle = { fontSize: "var(--afa-text-ui)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "var(--afa-space-6px)" }
 
 // Auth Pages Dark Theme Redesign (4 Sep 2026, docs/design.md) - simple
 // two-path eye outline replacing the 🙈/👁️ emoji, per Figma. Re-skin only;
@@ -42,7 +42,7 @@ function EyeIcon({ visible }: { visible: boolean }) {
 
 function CheckCircleIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "var(--afa-space-1)" }} aria-hidden="true">
       <circle cx="12" cy="12" r="10" fill="var(--afa-green-dark)" />
       <path d="M7 12.5l3 3 7-7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
@@ -325,24 +325,24 @@ export default function RegisterForm() {
   if (stage === "otp") {
     return (
         <div style={{ width: "100%", maxWidth: "480px" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <Link href="/" className="lg:hidden" style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
+          <div style={{ textAlign: "center", marginBottom: "var(--afa-space-32px)" }}>
+            <Link href="/" className="lg:hidden" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
               <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               <EnvBadge />
             </Link>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "8px" }}>
+            <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "var(--afa-space-2)" }}>
               {tr.registerPage.verifyMobileSubtitle}
             </p>
           </div>
 
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid rgba(245,245,240,0.08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
             {devOtp && (
-              <div style={{ background: "rgba(201,151,58,0.15)", border: "1px solid var(--afa-amber)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", color: "var(--afa-text-primary)" }}>
+              <div style={{ background: "rgba(201,151,58,0.15)", border: "1px solid var(--afa-amber)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
             {error && (
-              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
+              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
                 {error}
               </div>
             )}
@@ -353,7 +353,7 @@ export default function RegisterForm() {
               onChange={(e) => setOtpCode(e.target.value)}
               maxLength={6}
               onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-              style={{ ...inputStyle(), marginBottom: "20px" }}
+              style={{ ...inputStyle(), marginBottom: "var(--afa-space-5)" }}
             />
 
             <Button
@@ -366,7 +366,7 @@ export default function RegisterForm() {
             <button
               onClick={handleResendOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "12px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: 500, cursor: "pointer", marginTop: "8px" }}
+              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "none", fontSize: "var(--afa-text-ui)", fontWeight: 500, cursor: "pointer", marginTop: "var(--afa-space-2)" }}
             >
               {tr.loginPage.resendCodeButton}
             </button>
@@ -377,12 +377,12 @@ export default function RegisterForm() {
 
   return (
       <div style={{ width: "100%", maxWidth: "480px" }}>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Link href="/" className="lg:hidden" style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
+        <div style={{ textAlign: "center", marginBottom: "var(--afa-space-32px)" }}>
+          <Link href="/" className="lg:hidden" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", textDecoration: "none" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
             <EnvBadge />
           </Link>
-          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "8px" }}>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, marginTop: "var(--afa-space-2)" }}>
             {intendedRoleLabel
               ? tr.registerPage.createAccountSubtitleForRoleTemplate.replace('{role}', intendedRoleLabel)
               : tr.registerPage.createAccountSubtitle}
@@ -400,26 +400,26 @@ export default function RegisterForm() {
               <button
                 type="button"
                 onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", background: "transparent", color: "var(--afa-text-primary)", padding: "14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", background: "transparent", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600, cursor: "pointer" }}
               >
                 <GoogleIcon />
                 {tr.loginPage.continueWithGoogle}
               </button>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "20px 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
                 <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
-                <span style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
+                <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
                 <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
               </div>
             </>
           )}
 
           {error && (
-            <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "14px", color: "var(--afa-error)" }}>
+            <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
               {error}
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
             <div>
               <label style={labelStyle}>{tr.registerPage.fullNameLabel}</label>
               <input
@@ -443,24 +443,24 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
               />
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
-                <div style={{ marginTop: "8px" }}>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.6 }}>
+                <div style={{ marginTop: "var(--afa-space-2)" }}>
+                  <p style={{ margin: 0, fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.6 }}>
                     {tr.registerPage.suggestedFromInitials}
                   </p>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "6px", alignItems: "center" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginTop: "var(--afa-space-6px)", alignItems: "center" }}>
                     {initialsSuggestions.map((suggestion) => (
                       <button
                         key={suggestion}
                         type="button"
                         onClick={() => setForm((f) => ({ ...f, username: suggestion }))}
                         style={{
-                          fontSize: "12px",
+                          fontSize: "var(--afa-text-small)",
                           fontWeight: 600,
                           color: "var(--afa-fill-solid)",
                           background: FILL_SOLID_TINT,
                           border: `1px solid ${FILL_SOLID_BORDER_TINT}`,
-                          borderRadius: "999px",
-                          padding: "4px 12px",
+                          borderRadius: "var(--afa-radius-pill)",
+                          padding: "var(--afa-space-1) var(--afa-space-3)",
                           cursor: "pointer",
                         }}
                       >
@@ -473,13 +473,13 @@ export default function RegisterForm() {
                       disabled={initialsLoading}
                       title={tr.registerPage.tryMoreSuggestionsTitle}
                       style={{
-                        fontSize: "12px",
+                        fontSize: "var(--afa-text-small)",
                         color: "var(--afa-text-primary)",
                         opacity: initialsLoading ? 0.4 : 0.6,
                         background: "none",
                         border: "none",
                         cursor: initialsLoading ? "default" : "pointer",
-                        padding: "4px 2px",
+                        padding: "var(--afa-space-1) var(--afa-space-2px)",
                       }}
                     >
                       {initialsLoading ? "…" : tr.registerPage.tryMoreButton}
@@ -488,21 +488,21 @@ export default function RegisterForm() {
                 </div>
               )}
               {usernameStatus === "checking" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.checkingAvailability}</p>
               )}
               {usernameStatus === "available" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-green-dark)", display: "flex", alignItems: "center" }}>
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-green-dark)", display: "flex", alignItems: "center" }}>
                   <CheckCircleIcon />{tr.registerPage.availableLabel}
                 </p>
               )}
               {usernameStatus === "taken" && (
-                <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-error)" }}>
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error)" }}>
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-error)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
+                      style={{ color: "var(--afa-error)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "var(--afa-text-small)", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </button>
@@ -510,7 +510,7 @@ export default function RegisterForm() {
                 </p>
               )}
               {fieldErrors.username && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.username}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.username}</p>
               )}
             </div>
 
@@ -525,7 +525,7 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.email)}
               />
               {fieldErrors.email && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.email}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.email}</p>
               )}
             </div>
 
@@ -535,8 +535,8 @@ export default function RegisterForm() {
                   bordered container replacing the old two-separate-boxes
                   look; +91 prefix and the number input now share one
                   border with an internal divider, per Figma. */}
-              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`, borderRadius: "8px", overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", padding: "0 14px", fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid rgba(245,245,240,0.12)" }}>
+              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`, borderRadius: "var(--afa-radius-md)", overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", padding: "0 var(--afa-space-14px)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid rgba(245,245,240,0.12)" }}>
                   +91
                 </div>
                 <input
@@ -545,14 +545,14 @@ export default function RegisterForm() {
                   placeholder={tr.registerPage.tenDigitPlaceholder}
                   value={form.phoneNumber}
                   onChange={handleChange}
-                  style={{ flex: 1, minWidth: 0, padding: "12px 14px", border: "none", background: "transparent", color: "var(--afa-text-primary)", fontSize: "14px", outline: "none", boxSizing: "border-box" }}
+                  style={{ flex: 1, minWidth: 0, padding: "var(--afa-space-3) var(--afa-space-14px)", border: "none", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", outline: "none", boxSizing: "border-box" }}
                 />
               </div>
-              <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
+              <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
-                <p style={{ marginTop: "8px", fontSize: "13px", color: "var(--afa-error)" }}>{fieldErrors.phone}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.phone}</p>
               )}
             </div>
 
@@ -571,7 +571,7 @@ export default function RegisterForm() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                 >
                   <EyeIcon visible={showPassword} />
                 </button>
@@ -580,8 +580,8 @@ export default function RegisterForm() {
                   length + character-variety strength meter (passwordStrength
                   above), not a static visual. */}
               {form.password.length > 0 && (
-                <div style={{ marginTop: "8px" }}>
-                  <div style={{ display: "flex", gap: "4px" }}>
+                <div style={{ marginTop: "var(--afa-space-2)" }}>
+                  <div style={{ display: "flex", gap: "var(--afa-space-1)" }}>
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
@@ -594,7 +594,7 @@ export default function RegisterForm() {
                       />
                     ))}
                   </div>
-                  <p style={{ marginTop: "4px", fontSize: "11px", color: strengthColor }}>
+                  <p style={{ marginTop: "var(--afa-space-1)", fontSize: "var(--afa-text-micro)", color: strengthColor }}>
                     {strengthLabel}
                   </p>
                 </div>
@@ -615,7 +615,7 @@ export default function RegisterForm() {
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
                   aria-label={showConfirm ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
                 >
                   <EyeIcon visible={showConfirm} />
                 </button>
@@ -633,7 +633,7 @@ export default function RegisterForm() {
               subtitle above (#415); only renders when a role param was
               recognized. */}
           {intendedRoleLabel && (
-            <p style={{ textAlign: "center", marginTop: "20px", marginBottom: "-8px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.65 }}>
+            <p style={{ textAlign: "center", marginTop: "var(--afa-space-5)", marginBottom: "-8px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.65 }}>
               {tr.registerPage.roleConfirmationTemplate.replace('{role}', intendedRoleLabel)}
             </p>
           )}
@@ -642,22 +642,22 @@ export default function RegisterForm() {
             variant="form-submit"
             onClick={handleRegister}
             disabled={loading || usernameStatus === "taken"}
-            style={{ marginTop: "24px" }}
+            style={{ marginTop: "var(--afa-space-6)" }}
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
           </Button>
-          <p style={{ textAlign: "center", marginTop: "14px", fontSize: "12px" }}>
+          <p style={{ textAlign: "center", marginTop: "var(--afa-space-14px)", fontSize: "var(--afa-text-small)" }}>
             <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.agreeToTermsPrefix}</span>{" "}
             <Link href="/terms" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.termsOfServiceLink}</Link> <span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.registerPage.andConjunction}</span>{" "}
             <Link href="/privacy" style={{ color: "var(--afa-amber)", textDecoration: "none" }}>{tr.registerPage.privacyPolicyLink}</Link><span style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>.</span>
           </p>
         </div>
 
-        <p style={{ textAlign: "center", marginTop: "24px", fontSize: "14px" }}>
+        <p style={{ textAlign: "center", marginTop: "var(--afa-space-6)", fontSize: "var(--afa-text-body)" }}>
           <span style={{ color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.registerPage.alreadyHaveAccountPrefix}</span> {" "}
           <Link href="/login" style={{ color: "var(--afa-amber)", textDecoration: "none", fontWeight: 500 }}>{tr.registerPage.signInLink}</Link>
         </p>
-        <p style={{ textAlign: "center", marginTop: "12px", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.45 }}>
+        <p style={{ textAlign: "center", marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.45 }}>
           {tr.registerPage.everyoneJoinsAsAudience}
         </p>
       </div>

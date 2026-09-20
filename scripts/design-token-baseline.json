@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-19T17:30:50.014Z",
+  "generatedAt": "2026-09-20T03:01:51.800Z",
   "counts": {
     "hex-color-literal": 83,
-    "rgb-rgba-literal": 948,
+    "rgb-rgba-literal": 947,
     "hardcoded-font-family": 10,
-    "font-size-literal": 1170,
-    "spacing-literal": 2721,
-    "radius-literal": 456,
+    "font-size-literal": 1102,
+    "spacing-literal": 2606,
+    "radius-literal": 441,
     "raw-button": 211
   }
 }
