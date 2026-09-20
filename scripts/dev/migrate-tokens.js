@@ -26,9 +26,9 @@
 const fs = require('fs')
 const path = require('path')
 
-const file = process.argv[2]
+const file = require.main === module ? process.argv[2] : null
 const APPLY = process.argv.includes('--apply')
-if (!file) {
+if (require.main === module && !file) {
   console.error('usage: node scripts/dev/migrate-tokens.js <file> [--apply]')
   process.exit(1)
 }
@@ -245,4 +245,8 @@ function run() {
   console.log(`applied migration to ${file}`)
 }
 
-run()
+if (require.main === module) {
+  run()
+}
+
+module.exports = { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP }
