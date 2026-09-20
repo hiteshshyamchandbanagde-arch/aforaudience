@@ -7199,7 +7199,11 @@ Base state for this file already reflects `GEN-2609-085`'s own separate fix (the
 
 ### Coverage - highest colour-adjacent complexity of the batch: Tailwind arbitrary-value classes, not just inline styles
 
-103 (post-`085`-annotation baseline, 107 raw) → 28 literals (73% reduction from the 103 baseline this batch actually started from). `spacing-literal` 45→1, `font-size-literal` 22→0 (full coverage, including 2 Tailwind `text-[Npx]` conversions - `text-[28px]`→`text-[var(--afa-text-page-title)]`, `text-[14px]`→`text-[var(--afa-text-body)]`, same `text-[var(--afa-text-primary)]`-embedding convention this exact line already used), `radius-literal` 14→1 (the 1 remaining is `rounded-[16px]` - the same untokenized-16px gap file 2 already found, a 3rd independent site), `hex-color-literal` and 4 of `rgb-rgba-literal`'s hits untouched (the Google-logo markup - out of this branch's scope, handled by `085`).
+103 (post-`085`-annotation baseline, 107 raw) → 26 literals (75% reduction). `spacing-literal` 45→1 (44/45), `font-size-literal` 22→2 (20/22 - see the fix below for why 2 of the original 22 stay literal, not 0), `radius-literal` 14→1 (13/14 - the 1 remaining is `rounded-[16px]`, the same untokenized-16px gap file 2 already found, a 3rd independent site), `hex-color-literal` 4 in this branch's own isolated diff (unaffected - the Google-logo markup is out of this branch's scope; already 0 on `qa`, since `085` merged mid-session), `rgb-rgba-literal` untouched (see Colour below).
+
+### A real bug in the original migration, found and fixed in a follow-up commit: `text-[var(--x)]` is ambiguous between font-size and colour in Tailwind v4
+
+The original pass converted 2 Tailwind arbitrary-value classes to `var()` form - `text-[28px]`→`text-[var(--afa-text-page-title)]` (L144) and `text-[14px]`→`text-[var(--afa-text-body)]` (L148) - each on an element that ALSO already carries `text-[var(--afa-text-primary)]` as its colour. A literal length (`text-[28px]`) is unambiguous to Tailwind's arbitrary-value parser - it can only be a font-size. A `var(--x)` reference has no such static type: two `text-[var(...)]` utilities on one element collide, and Tailwind silently drops one, losing either the size or the colour depending on utility order/specificity. Pure value-equivalence checking (`verify-equivalence.js`'s original design) can never catch this - each `var()` individually resolves to the exact right value, the bug is in which utility actually wins, not in what either one resolves to. **Fixed by reverting both classes to their original literal form** (`text-[28px]`, `text-[14px]`) - `rounded-[16px]` (L153, no matching radius token) was correctly left alone from the start and needed no change. `verify-equivalence.js` extended with a dedicated `classNameIssues()` check (flags any newly-introduced `<prefix>-[var(...)]` utility for `text-`/`rounded-`/`p*-`/`m*-`/`gap*-`, and any element carrying 2+ var()-based utilities sharing one prefix) - validated against a synthetic reintroduction of this exact bug before trusting it, catches it cleanly.
 
 ### Colour - zero manual matches this file
 
@@ -7209,7 +7213,7 @@ The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` al
 
 ### Verify
 
-`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing. `verify-equivalence.js`: 28 paired lines, 0 mismatches.
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing. `verify-equivalence.js` (extended with `classNameIssues()`, see above): 2 paired lines in the follow-up commit, 0 mismatches.
 
 
 ## Batch 5 summary (`GEN-2609-086`, all 3 files) - for whoever reviews/merges
@@ -7218,10 +7222,14 @@ The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` al
 |---|---|---|---|---|---|---|---|
 | `dashboard/venue/[id]/edit/page.tsx` | 112 | 16 | 86% | 54/56 | 29/29 | 11/11 | 2 |
 | `tickets/page.tsx` | 111 | 26 | 77% | 59/61 | 17/25 | 7/10 | 2 |
-| `(auth)/login/page.tsx` | 103 | 28 | 73% | 44/45 | 22/22 | 13/14 | 0 |
-| **Batch total** | **326** | **70** | **79%** | **157/162** | **68/76** | **31/35** | **4** |
+| `(auth)/login/page.tsx` | 103 | 26 | 75% | 44/45 | 20/22 | 13/14 | 0 |
+| **Batch total** | **326** | **68** | **79%** | **157/162** | **66/76** | **31/35** | **4** |
 
-**Highest batch reduction rate so far** (79%, beating `084`'s 76%) - `dashboard/venue/[id]/edit/page.tsx` alone hit 86%, the best single-file rate of any batch. Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (each branch's own delta measured independently against its own isolated `qa` base, not stacked - a projection, same caveat as every prior batch summary): `rgb-rgba-literal` -4, `font-size-literal` -76, `spacing-literal` -157, `radius-literal` -31.
+**`(auth)/login/page.tsx` corrected in a follow-up commit** (same branch, `feat/gen-2609-086-3-login`, no force-push): 2 of its original 22 font-size conversions were a real bug (a Tailwind `text-[var(--x)]` colour/font-size ambiguity - see that file's own entry above), reverted back to literals. Numbers in this table are post-fix.
+
+**Highest batch reduction rate so far** (79%, beating `084`'s 76%) - `dashboard/venue/[id]/edit/page.tsx` alone hit 86%, the best single-file rate of any batch. Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (each branch's own delta measured independently against its own isolated `qa` base, not stacked - a projection, same caveat as every prior batch summary): `rgb-rgba-literal` -4, `font-size-literal` -74, `spacing-literal` -157, `radius-literal` -31.
+
+**A real bug found post-push, fixed in a follow-up commit on the same branch: `text-[var(--x)]` is ambiguous between font-size and colour in Tailwind v4.** A literal Tailwind arbitrary value (`text-[28px]`) has a static type (length); a `var(--x)` reference inside the same bracket syntax does not, so two `text-` utilities on one element - one meant as a size, one as a colour - collide and Tailwind silently drops one. Hit on `login/page.tsx`'s own logo wordmark and welcome-back subtitle (both already carried `text-[var(--afa-text-primary)]` as colour before this migration touched the size utility). Pure value-equivalence checking can't see this class of bug - each `var()` resolves correctly in isolation, the loss is in utility resolution, not value. `verify-equivalence.js` extended with a `classNameIssues()` check for it (flags a newly-introduced `<prefix>-[var(...)]` utility, or 2+ var()-based utilities sharing one Tailwind prefix on the same element) - **a real, new trap to watch for on any future file with Tailwind arbitrary-value classes**, not just inline `style={{}}` objects.
 
 **A real bug in this batch's own migration script, caught before applying (see file 2's entry): the exact `<style>{`...`}</style>` CSS-block quoting trap `082` already documented once.** Confirms [[feedback_style_template_literal_quoting]]'s lesson generalizes across every batch's own from-scratch script, not just `082`'s - every batch needs the same manual diff read regardless of how many times the underlying bug class has already been found and fixed once.
 

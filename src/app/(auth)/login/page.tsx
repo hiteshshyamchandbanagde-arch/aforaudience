@@ -141,11 +141,11 @@ function LoginForm() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="text-[var(--afa-text-page-title)] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+        <Link href="/" className="text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
           <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
-        <p className="text-[var(--afa-text-body)] text-[var(--afa-text-primary)] opacity-50 mt-2">
+        <p className="text-[14px] text-[var(--afa-text-primary)] opacity-50 mt-2">
           {tr.loginPage.welcomeBack}
         </p>
       </div>
