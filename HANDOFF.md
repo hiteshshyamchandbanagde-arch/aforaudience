@@ -8,7 +8,7 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers provisional** - `GEN
 
 | Session / date | Goal | Status | Remarks | Branches |
 |---|---|---|---|---|
-| 20 Sept 2026 (CC) | `GEN-2609-085` - `token-ok` escape hatch: add a JSX-comment form (`{/* token-ok: */}`), annotate the Google-logo + chevron-data-URI sites it unblocks | Complete, unmerged | 10 sites annotated across 4 files. Baseline lowered: `hex-color-literal` 83→75, `rgb-rgba-literal` 947→945. No visual change. | `feat/gen-2609-085-token-ok-jsx-allowlist` |
+| 20 Sept 2026 (CC) | `GEN-2609-085` - `token-ok` escape hatch: add a JSX-comment form (`{/* token-ok: */}`), annotate the Google-logo + chevron-data-URI sites it unblocks | Complete; **merged as PR #674** (confirmed via `git fetch` mid-session - merged while batch 5 was in progress) | 10 sites annotated across 4 files. Baseline lowered: `hex-color-literal` 83→75, `rgb-rgba-literal` 947→945. No visual change. | (merged) |
 | 20 Sept 2026 (CC) | `GEN-2609-086` (provisional) - bulk token migration batch 5: 3 highest-count files, 1 PR each | Complete, unmerged | 326 → 70 combined literals (79% reduction, highest batch rate so far). Caught and fixed a real `<style>{`...`}</style>` CSS-quoting bug in the migration script before applying - see §4. | `feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login` |
 | 19 Sept 2026 (CC) | `GEN-2609-084` (provisional) - bulk token migration batch 4: 3 highest-count files, 1 PR each | Complete; **all 3 merged** (`#671`/`#672`/`#673`, confirmed via `git fetch` this session) | 381 → 92 combined literals (76% reduction), matching the dispatch's own predicted batch totals exactly. | (merged) |
 | 19 Sept 2026 (CC) | `GEN-2609-083` (provisional) - bulk token migration batch 3: 3 highest-count files, 1 PR each | Complete; all 3 merged (`#668`/`#669`/`#670`) | 464 → 132 combined literals (72% reduction). 2 real bugs found and fixed before committing. | (merged) |
@@ -18,25 +18,22 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers provisional** - `GEN
 
 ## 2. Activity in progress
 
-- `GEN-2609-085` - 1 branch pushed, no PR opened yet:
-  - `feat/gen-2609-085-token-ok-jsx-allowlist` (`check-design-tokens.js`/`.test.js`, `docs/design.md`, 4 annotated files - `RegisterForm.tsx`, `(auth)/login/page.tsx`, `profile/page.tsx`, `SupportWidget.tsx`)
+- `GEN-2609-085` - **merged as PR #674 mid-session** (`feat/gen-2609-085-token-ok-jsx-allowlist`, squash-merged with an edited commit message/docs entry - not a byte-identical merge of this session's own branch, but the same substance: `check-design-tokens.js` JSX-comment `token-ok` form + the 10 real annotations). Local `qa` rebased onto it before pushing this handoff entry.
 - `GEN-2609-086` (provisional) - all 3 branches pushed, no PRs opened yet:
   - `feat/gen-2609-086-1-venue-edit` (`dashboard/venue/[id]/edit/page.tsx`, 112→16 literals)
   - `feat/gen-2609-086-2-tickets` (`tickets/page.tsx`, 111→26 literals)
-  - `feat/gen-2609-086-3-login` (`(auth)/login/page.tsx`, 103→28 literals - independent of `085`'s branch, touches disjoint lines of the same file)
+  - `feat/gen-2609-086-3-login` (`(auth)/login/page.tsx`, 103→28 literals - branched from `qa` before `085` merged, independent of it, touches disjoint lines of the same file - still merges cleanly)
   - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as every prior batch's own handoff entry):
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-085-token-ok-jsx-allowlist`
     - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-1-venue-edit`
     - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-2-tickets`
     - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-3-login`
 
 ## 3. Open PRs awaiting action
 
-**Could not re-verify live PR/CI status via GitHub API this session (same standing gap).** Confirmed via `git fetch` (real, not assumed) that all 3 of `084`'s branches are merged into `origin/qa` - `qa` HEAD is `a9f9f35` at this session's start.
+**Could not re-verify live PR/CI status via GitHub API this session (same standing gap).** Confirmed via `git fetch` (real, not assumed) that all 3 of `084`'s branches, and `085`'s, are merged into `origin/qa` - `qa` HEAD is `f3f32ca` (`085`'s merge) as of this correction, `a9f9f35` at this session's start.
 
 | Branch | PR # | Merge-ready? |
 |---|---|---|
-| `feat/gen-2609-085-token-ok-jsx-allowlist` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8): `tsc`, 43/43 self-tests (3 new), ratchet. No Preview deployment yet. |
 | `feat/gen-2609-086-1-venue-edit` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8), including a line-pair equivalence check (0 mismatches). No Preview deployment yet. |
 | `feat/gen-2609-086-2-tickets` | **`NOT YET OPENED`** (this session) | Same, plus a real script bug (CSS-block quoting) caught and fixed pre-commit - see §4. |
 | `feat/gen-2609-086-3-login` | **`NOT YET OPENED`** (this session) | Same. Merges independently of `085`'s branch - both touch this file on disjoint lines. |
@@ -64,8 +61,7 @@ No new collisions found or introduced this session. `054` ✅, `069→071` ✅, 
 
 ## 7. Docs-conflict watchlist
 
-- All 3 of `feat/gen-2609-086-*` touch the same 2 files at their tail: `docs/design.md` (each appends its own file-N-of-3 section after `084`'s own tail, in sequence - branch 1 has just its own section, branch 2 additionally carries branch 1's already-appended section plus its own since each was branched and edited sequentially in this session, branch 3 carries the full batch including the summary table) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object, each from an isolated `qa` base). **Real, expected 3-way conflict on merge** - same resolution as every prior batch: keep every branch's own `docs/design.md` additions (they're sequential appends, not independent edits of the same lines, so a textual merge should mostly resolve cleanly export for the JSON), re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 4 branches (`085` + the 3 of `086`) land.
-- `feat/gen-2609-085-token-ok-jsx-allowlist` also touches `docs/design.md`/`scripts/design-token-baseline.json`, independently of the `086` branches - a 4-way interaction once all land, same resolution.
+- All 3 of `feat/gen-2609-086-*` touch the same 2 files at their tail, each branched independently from the same pre-`085` `qa` commit (`a9f9f35`): `docs/design.md` (branch 1 appends only its own file-1 section after `084`'s own tail; branch 2 appends only its own file-2 section, also directly after `084`'s tail, unaware of branch 1's addition; branch 3 appends its own file-3 section plus the full batch summary table, also directly after `084`'s tail) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object from that same pre-`085` starting point). **Real, expected conflict on merge**, now compounded by `085` having ALSO merged (as `#674`, mid-session, after all 3 `086` branches had already been branched off the pre-`085` state) and appending its own short `docs/design.md` entry at that exact same tail position: same resolution as every prior batch, just with one more party - keep every branch's own `docs/design.md` addition (concatenate all 4 in whatever order chat merges them), then re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 4 land (the individual per-branch baseline numbers will NOT simply add up, since 3 of the 4 were computed from a base that didn't yet reflect `085`'s own -8/-2 lowering).
 
 ## 8. Verification standard checklist
 
