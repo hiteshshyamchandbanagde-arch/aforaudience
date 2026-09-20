@@ -7194,3 +7194,24 @@ Both already had every in-scope literal token-retrofitted.
 **Colour, batch-wide:** only 1 manual match this batch (admin/feedback's own `--afa-border-resting`) - the lowest colour-migration count of any batch so far, reflecting that files 2/3's own dominant translucent-cream tints (`0.12`/`0.65`-embedded-in-SVG) are real, different, already-considered values rather than near-misses. 1 more colour trap found and deliberately left alone (profile's SVG-embedded `--afa-text-secondary`-value chevron stroke) - a genuinely new class of non-match (context, not role or value), distinct from `082`'s role-mismatch trap.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-084-1-admin-feedback`, `-2-register-form`, `-3-profile`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json`, same resolution as every prior batch.
+
+## GEN-2609-086 (batch 5, provisional) - bulk token migration batch 5, file 1 of 3: `dashboard/venue/[id]/edit/page.tsx`
+
+Same method as `084`: a scratch migration script (`migrate-batch5.js`, not committed - session scratchpad only, per every prior batch's own convention), built from a value→token reverse-lookup read directly off `globals.css`'s own `--afa-space-*`/`--afa-radius-*`/`--afa-text-*` definitions (not re-derived from memory/docs), scoped to exactly the same property sets `check-design-tokens.js` itself checks (`SPACING_PROPS`/`RADIUS_PROPS`/`FONT_SIZE_PROPS`, copied verbatim to avoid drift). Automates spacing/radius/font-size only, same allowlist as `isAllowlistedLength` (`0`, hairline `1px`/`0.5px`, any `%`) - colour and raw-`<button>` stay manual/measured-only, same division of labour as every prior batch.
+
+### Coverage - the highest reduction of any batch so far (86%), font-size fully converted
+
+112 → 16 literals (86% reduction). `spacing-literal` 56→2 (54/56, the 2 remaining are `26px` in a button's own shorthand - no token at that value), `font-size-literal` 29→0 (29/29, full coverage), `radius-literal` 11→0 (11/11, full coverage), `rgb-rgba-literal` 13→11 (2 manual matches below). `raw-button` and `hardcoded-font-family` unchanged (3→3, 0→0) - measured only, not this batch's scope.
+
+### Colour - 2 manual matches, both `--afa-border-resting`
+
+`rgba(245,245,240,0.15)` at 2 sites (the shared `inputStyle`'s own border, and the rate-type selector button's un-selected-state border) is byte-equivalent (after whitespace normalization) to `--afa-border-resting: rgba(245, 245, 240, 0.15)` - both are genuine `border:` property uses (role match, not a coincidental value collision), converted.
+
+### A real bug in this session's own migration script, caught and fixed before applying - not specific to this file, but first surfaced here
+
+None in this file specifically - see file 2's entry below for the real bug this batch's script hit.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `node scripts/design-token-ratchet.js`: no category above baseline before `--update-baseline`. `verify-equivalence.js` (rebuilt from `084`'s own description - symmetric `var()` resolution on both diff sides, `px`-suffix normalization to avoid `084`'s already-documented bare-number-vs-`Npx` false positive): 53 paired lines, 0 mismatches.
+
