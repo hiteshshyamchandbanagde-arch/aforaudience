@@ -341,7 +341,7 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', padding: 32, fontFamily: 'var(--font-sans)', color: 'var(--afa-text-primary)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', padding: 'var(--afa-space-32px)', fontFamily: 'var(--font-sans)', color: 'var(--afa-text-primary)' }}>
           {tr.checkoutPage.loadingCheckout}
         </div>
       </>
@@ -352,11 +352,11 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 32, fontFamily: 'var(--font-sans)', maxWidth: 640, margin: '0 auto' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 16 }}>
+        <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-32px)', fontFamily: 'var(--font-sans)', maxWidth: 640, margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-4)' }}>
             {tr.checkoutPage.somethingWrongTitle}
           </h1>
-          <p style={{ color: 'var(--afa-error)', marginBottom: 24 }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
+          <p style={{ color: 'var(--afa-error)', marginBottom: 'var(--afa-space-6)' }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
           <Link href="/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>
             {tr.nav.backToEvents}
           </Link>
@@ -436,11 +436,11 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
             {tr.checkoutPage.bookingCancelledTitle}
           </h1>
-          <p style={{ opacity: 0.7, marginBottom: 24 }}>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
             {tr.checkoutPage.bookingCancelledBody}
           </p>
           <Link
@@ -459,11 +459,11 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
             {tr.checkoutPage.reservationExpiredTitle}
           </h1>
-          <p style={{ opacity: 0.7, marginBottom: 24 }}>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
             {tr.checkoutPage.reservationExpiredBody}
           </p>
           <Button variant="primary" href={`/events/${state.booking.event.id}`} fullWidth={false}>
@@ -479,11 +479,11 @@ export default function CheckoutPage() {
     return (
       <>
         <SiteNav />
-        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: '48px 24px', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 12 }}>
+        <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', padding: 'var(--afa-space-48px) var(--afa-space-6)', maxWidth: 560, margin: '0 auto', fontFamily: 'var(--font-sans)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-3)' }}>
             {tr.checkoutPage.paymentsNotLiveTitle}
           </h1>
-          <p style={{ opacity: 0.7, marginBottom: 24 }}>
+          <p style={{ opacity: 0.7, marginBottom: 'var(--afa-space-6)' }}>
             {tr.checkoutPage.seatsReservedNotice}
           </p>
           <Link
@@ -505,17 +505,17 @@ export default function CheckoutPage() {
         style={{
           minHeight: '100vh',
           background: 'var(--afa-surface-page)',
-          padding: '32px 20px',
+          padding: 'var(--afa-space-32px) var(--afa-space-5)',
           maxWidth: 560,
           margin: '0 auto',
           fontFamily: 'var(--font-sans)',
           color: 'var(--afa-text-primary)',
         }}
       >
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 900, marginBottom: 8 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 900, marginBottom: 'var(--afa-space-2)' }}>
           {tr.checkoutPage.confirmYourBooking}
         </h1>
-        <p style={{ opacity: 0.6, marginBottom: 24, fontSize: 14 }}>
+        <p style={{ opacity: 0.6, marginBottom: 'var(--afa-space-6)', fontSize: 'var(--afa-text-body)' }}>
           {tr.checkoutPage.reserveSeatsNotice}
         </p>
 
@@ -525,21 +525,21 @@ export default function CheckoutPage() {
             color: 'var(--afa-text-primary)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
-            padding: 20,
-            marginBottom: 20,
+            padding: 'var(--afa-space-5)',
+            marginBottom: 'var(--afa-space-5)',
           }}
         >
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 20,
+              fontSize: 'var(--afa-text-20px)',
               fontWeight: 700,
-              marginBottom: 6,
+              marginBottom: 'var(--afa-space-6px)',
             }}
           >
             {state.booking.event.title}
           </div>
-          <div style={{ fontSize: 13, opacity: 0.6, marginBottom: 16 }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
             {new Date(state.booking.event.date).toLocaleDateString(undefined, {
               weekday: 'long',
               day: 'numeric',
@@ -557,8 +557,8 @@ export default function CheckoutPage() {
           <div
             style={{
               borderTop: '1px solid rgba(245,245,240,0.08)',
-              paddingTop: 16,
-              marginBottom: 12,
+              paddingTop: 'var(--afa-space-4)',
+              marginBottom: 'var(--afa-space-3)',
             }}
           >
             {numberedGroups.length > 0
@@ -568,13 +568,13 @@ export default function CheckoutPage() {
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      padding: '6px 0',
-                      fontSize: 14,
+                      padding: 'var(--afa-space-6px) 0',
+                      fontSize: 'var(--afa-text-body)',
                     }}
                   >
                     <span>
                       {g.tierLabel}{g.level ? ` · ${g.level}` : ''} × {g.count}
-                      <span style={{ fontSize: 11, opacity: 0.6, display: 'block', marginTop: 2 }}>
+                      <span style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6, display: 'block', marginTop: 'var(--afa-space-2px)' }}>
                         {g.count === 1 ? tr.checkoutPage.seatWordCapSingular : tr.checkoutPage.seatWordCapPlural} {g.seatLabels.join(', ')}
                       </span>
                     </span>
@@ -589,8 +589,8 @@ export default function CheckoutPage() {
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      padding: '6px 0',
-                      fontSize: 14,
+                      padding: 'var(--afa-space-6px) 0',
+                      fontSize: 'var(--afa-text-body)',
                     }}
                   >
                     <span>
@@ -606,16 +606,16 @@ export default function CheckoutPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  padding: '10px 0 4px',
-                  fontSize: 13,
+                  padding: 'var(--afa-space-10px) 0 var(--afa-space-1)',
+                  fontSize: 'var(--afa-text-ui)',
                   opacity: 0.75,
                   borderTop: '1px dashed rgba(245,245,240,0.12)',
-                  marginTop: 6,
+                  marginTop: 'var(--afa-space-6px)',
                 }}
               >
                 <span>
                   {tr.eventDetailPage.bookingFeeLabel}
-                  <span style={{ fontSize: 11, opacity: 0.75, display: 'block', marginTop: 2 }}>
+                  <span style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.75, display: 'block', marginTop: 'var(--afa-space-2px)' }}>
                     {tr.checkoutPage.bookingFeeHintCheckout}
                   </span>
                 </span>
@@ -632,17 +632,17 @@ export default function CheckoutPage() {
               justifyContent: 'space-between',
               alignItems: 'center',
               borderTop: '1px solid rgba(245,245,240,0.08)',
-              paddingTop: 16,
+              paddingTop: 'var(--afa-space-4)',
             }}
           >
-            <span style={{ fontSize: 14, opacity: 0.6 }}>{tr.eventDetailPage.totalLabel}</span>
+            <span style={{ fontSize: 'var(--afa-text-body)', opacity: 0.6 }}>{tr.eventDetailPage.totalLabel}</span>
             <span style={{ fontSize: 22, fontWeight: 700 }}>
               {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
             </span>
           </div>
 
           {state.booking.totalAmount > 0 && (
-            <Button variant="secondary-reveal" onClick={() => setFeeSheetOpen(true)} style={{ marginTop: 10 }}>
+            <Button variant="secondary-reveal" onClick={() => setFeeSheetOpen(true)} style={{ marginTop: 'var(--afa-space-10px)' }}>
               See fee breakdown →
             </Button>
           )}
@@ -657,12 +657,12 @@ export default function CheckoutPage() {
             color: 'var(--afa-text-primary)',
             border: '1px solid rgba(245,245,240,0.08)',
             borderRadius: 14,
-            padding: 20,
-            marginBottom: 20,
+            padding: 'var(--afa-space-5)',
+            marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{tr.checkoutPage.tagYourBuddies}</div>
-          <p style={{ fontSize: 13, opacity: 0.6, marginBottom: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-1)' }}>{tr.checkoutPage.tagYourBuddies}</div>
+          <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-3)' }}>
             {tr.checkoutPage.tagBuddiesIntro}
             {companionMax !== null && (
               <>
@@ -677,12 +677,12 @@ export default function CheckoutPage() {
             )}
           </p>
 
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, opacity: 0.75, marginBottom: 12, cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 12.5, opacity: 0.75, marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={companionConsent}
               onChange={(e) => toggleCompanionConsent(e.target.checked)}
-              style={{ marginTop: 2 }}
+              style={{ marginTop: 'var(--afa-space-2px)' }}
             />
             <span>
               {tr.checkoutPage.companionConsentLabel}
@@ -690,17 +690,17 @@ export default function CheckoutPage() {
           </label>
 
           {companionTags.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: companionConsent ? 12 : 0 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)', marginBottom: companionConsent ? 12 : 0 }}>
               {companionTags.map((t) => (
                 <span
                   key={t.id}
                   style={{
-                    fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6,
-                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 999, padding: '5px 6px 5px 12px',
+                    fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)',
+                    background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-pill)', padding: '5px var(--afa-space-6px) 5px var(--afa-space-3)',
                   }}
                 >
                   {t.taggedUser.displayName || t.taggedUser.name}
-                  <span style={{ opacity: 0.5, fontSize: 11 }}>
+                  <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-micro)' }}>
                     {t.status === 'PENDING' ? tr.checkoutPage.companionPending : t.status === 'ACCEPTED' ? tr.checkoutPage.companionConfirmed : tr.checkoutPage.companionDeclined}
                   </span>
                   <Button
@@ -709,7 +709,7 @@ export default function CheckoutPage() {
                     onClick={() => removeCompanion(t.id)}
                     disabled={companionBusy}
                     aria-label={tr.checkoutPage.removeAriaLabelTemplate.replace('{name}', t.taggedUser.name)}
-                    style={{ fontSize: 14 }}
+                    style={{ fontSize: 'var(--afa-text-body)' }}
                   >
                     ×
                   </Button>
@@ -735,10 +735,10 @@ export default function CheckoutPage() {
                 disabled={companionBusy}
               />
               {companionSearching && (
-                <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>{tr.checkoutPage.searchingEllipsis}</div>
+                <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, marginTop: 'var(--afa-space-6px)' }}>{tr.checkoutPage.searchingEllipsis}</div>
               )}
               {companionResults.length > 0 && (
-                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ marginTop: 'var(--afa-space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
                   {companionResults
                     .filter((u) => !companionTags.some((t) => t.taggedUser.id === u.id))
                     .map((u) => (
@@ -748,12 +748,12 @@ export default function CheckoutPage() {
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(245,245,240,0.1)',
+                          textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.1)',
                           background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
                         }}
                       >
-                        <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 12 }}>@{u.name}</span></span>
-                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 12 }}>{tr.checkoutPage.tagButtonLabel}</span>
+                        <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-small)' }}>@{u.name}</span></span>
+                        <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 'var(--afa-text-small)' }}>{tr.checkoutPage.tagButtonLabel}</span>
                       </button>
                     ))}
                 </div>
@@ -763,7 +763,7 @@ export default function CheckoutPage() {
           )}
 
           {companionError && (
-            <div style={{ fontSize: 12, color: 'var(--afa-error)', marginTop: 8 }}>{companionError}</div>
+            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: 'var(--afa-space-2)' }}>{companionError}</div>
           )}
         </div>
 
@@ -772,10 +772,10 @@ export default function CheckoutPage() {
             style={{
               background: 'rgba(179,38,30,0.08)',
               color: 'var(--afa-error)',
-              padding: '10px 14px',
-              borderRadius: 8,
-              fontSize: 13,
-              marginBottom: 16,
+              padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+              borderRadius: 'var(--afa-radius-md)',
+              fontSize: 'var(--afa-text-ui)',
+              marginBottom: 'var(--afa-space-4)',
             }}
           >
             {error}
@@ -795,9 +795,9 @@ export default function CheckoutPage() {
         <div
           style={{
             textAlign: 'center',
-            fontSize: 12,
+            fontSize: 'var(--afa-text-small)',
             opacity: 0.5,
-            marginTop: 14,
+            marginTop: 'var(--afa-space-14px)',
             lineHeight: 1.6,
           }}
         >
