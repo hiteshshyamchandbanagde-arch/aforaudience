@@ -1,6 +1,6 @@
-# Session Handoff — 20 Sept 2026 later (CC — GEN-2609-087: bulk token migration batch 6, 3 files)
+# Session Handoff — 20 Sept 2026 even later (CC — GEN-2609-088: bulk token migration batch 7, 3 files + BUG-2609-055: seat-map font fix)
 
-Template: `docs/HANDOFF_TEMPLATE.md`. **`087` is chat-assigned, not provisional** - dispatch text explicit, `CodeCounter`/Feedback table not touched this session (chat's job). Session started at `qa@8fb970e` (post-`086`'s all-3-merged state, confirmed by `git fetch` + `git reset --hard origin/qa` matching the dispatch's own stated baseline exactly, including the live ratchet counts).
+Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers chat-assigned** - `GEN-2609-088` new, `BUG-2609-055` existing - `CodeCounter`/Feedback table not touched this session (chat's job). Session started at `qa@f708531` (post-`087`'s all-3-merged state - `git fetch` + `git reset --hard origin/qa` matched the dispatch's own stated baseline exactly, including the live ratchet counts: hex 75, rgba 940, font-family 10, font-size 971, spacing 2293, radius 389, raw-button 211). Note for the report per the dispatch's own text: `087`'s dispatch had flagged "the updated `086-3-login`" as still open - it merged as `#677` before batch 6 started; nothing to do on it this session, confirmed already noted in `a626b37`'s own handoff entry.
 
 **NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
 
@@ -8,53 +8,56 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **`087` is chat-assigned, not provisional*
 
 | Session / date | Goal | Status | Remarks | Branches |
 |---|---|---|---|---|
+| 20 Sept 2026 (CC) | `GEN-2609-088` - bulk token migration batch 7: 3 files + `BUG-2609-055` - seat-map font fix | Complete, unmerged | Batch 7: 273 → 65 combined literals (76% reduction), 9 manual colour matches. Font fix: 1-file, 2-line change, intentional visual change (serif→sans). New false-positive class found (a documentation comment mentioning a CSS value) - see §4. | `feat/gen-2609-088-1-organiser-profile`, `-2-organiser-event-edit`, `-3-feedback-detail-panel`, `fix/bug-2609-055-seat-map-font` |
 | 20 Sept 2026 (CC) | `GEN-2609-087` - bulk token migration batch 6: 3 files, chat-assigned, no new tokens | Complete, unmerged | 298 → 55 combined literals (82% reduction). **Every per-category number matched the dispatch's own scripted predictions exactly** - first batch with zero unexplained deviations. 1 manual colour match, reported per the dispatch's own request. | `feat/gen-2609-087-1-venue-create`, `-2-support-widget`, `-3-organiser-tour` |
-| 20 Sept 2026 (CC) | `GEN-2609-086` (3/3) fix - `login/page.tsx`: revert 2 Tailwind `text-[var(--x)]` conversions | Complete; **pushed as a new commit on the existing branch** (`f2b5363`, no force-push), still unmerged | Real bug: `var()`-based Tailwind arbitrary utilities are ambiguous between colour/font-size and collide. `verify-equivalence.js` extended with `classNameIssues()` to catch this class going forward. | `feat/gen-2609-086-3-login` (updated) |
+| 20 Sept 2026 (CC) | `GEN-2609-086` (3/3) fix - `login/page.tsx`: revert 2 Tailwind `text-[var(--x)]` conversions | Complete; **pushed as a new commit on the existing branch** (`f2b5363`, no force-push) - **merged as `#677` before batch 6 started, confirmed this session** | Real bug: `var()`-based Tailwind arbitrary utilities are ambiguous between colour/font-size and collide. `verify-equivalence.js` extended with `classNameIssues()` to catch this class going forward. | (merged) |
 | 20 Sept 2026 (CC) | `GEN-2609-085`/`086` (batches 5) | **All 4 branches now merged** (`085`=`#674`, `086`=`#675`/`#676`/`#677`) - confirmed via `git fetch` this session | 326 → 68 combined (final, post-fix) literals for batch 5. | (merged) |
 | 19 Sept 2026 (CC) | `GEN-2609-084` - bulk token migration batch 4 | Complete; all 3 merged (`#671`/`#672`/`#673`) | 381 → 92 combined literals (76% reduction). | (merged) |
-| 19 Sept 2026 (CC) | `GEN-2609-083` - bulk token migration batch 3 | Complete; all 3 merged (`#668`/`#669`/`#670`) | 464 → 132 combined literals (72% reduction). | (merged) |
 
-(Oldest row, "19 Sept 2026 (CC) — GEN-2609-081...", dropped to hold at 5.)
+(Oldest row, "19 Sept 2026 (CC) — GEN-2609-083...", dropped to hold at 5.)
 
 ## 2. Activity in progress
 
-- `GEN-2609-087` - all 3 branches pushed, no PRs opened yet:
-  - `feat/gen-2609-087-1-venue-create` (`dashboard/venue/create/page.tsx`, 105→24, SHA `f850ebb`)
-  - `feat/gen-2609-087-2-support-widget` (`SupportWidget.tsx`, 97→17, SHA `8110c01`)
-  - `feat/gen-2609-087-3-organiser-tour` (`dashboard/organiser/tours/[id]/page.tsx`, 96→14, SHA `55e8780`)
+- `GEN-2609-088` - all 3 branches pushed, no PRs opened yet:
+  - `feat/gen-2609-088-1-organiser-profile` (`organisers/[id]/page.tsx`, 94→24, SHA `aa3fc03f3aa96fa4cc9b0b061cb444b95f461159`)
+  - `feat/gen-2609-088-2-organiser-event-edit` (`dashboard/organiser/events/[id]/edit/page.tsx`, 92→25, SHA `1b5aade7855c5add3b2cc47828a7b8d7f9bf8891`)
+  - `feat/gen-2609-088-3-feedback-detail-panel` (`components/admin/FeedbackDetailPanel.tsx`, 87→16, SHA `3c1f8252123b120a79646e3b517f7dc2721c010b`)
+- `BUG-2609-055` - `fix/bug-2609-055-seat-map-font` pushed (`dashboard/venue/[id]/seat-map/page.tsx`, SHA `175eebd7a9336c6dd9ac40b2083fbf0e5b0d2ba2`), no PR opened yet.
   - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as every prior batch):
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-1-venue-create`
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-2-support-widget`
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-3-organiser-tour`
-- `GEN-2609-086 (3/3)` fix pushed as a new commit (`f2b5363`, no force-push) on the already-open `feat/gen-2609-086-3-login` - see prior block for detail, still unmerged as of this session's start.
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-088-1-organiser-profile`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-088-2-organiser-event-edit`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-088-3-feedback-detail-panel`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/fix/bug-2609-055-seat-map-font`
 
 ## 3. Open PRs awaiting action
 
-Confirmed via `git fetch` that `085` (`#674`) and all of `086` (`#675`/`#676`/`#677`) are merged into `origin/qa` - `qa` HEAD was `8fb970e` at this session's start, matching the dispatch's own stated baseline exactly (ratchet counts verified identical too).
+Confirmed via `git fetch` that all of `087` (`#678`/`#679`/`#680`) are merged into `origin/qa` - `qa` HEAD was `f708531` at this session's start, matching the dispatch's own stated baseline exactly (ratchet counts verified identical too).
 
 | Branch | PR # | Merge-ready? |
 |---|---|---|
-| `feat/gen-2609-087-1-venue-create` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet. |
-| `feat/gen-2609-087-2-support-widget` | **`NOT YET OPENED`** (this session) | Same. Renders on every page - highest blast radius, flag for reviewer attention. |
-| `feat/gen-2609-087-3-organiser-tour` | **`NOT YET OPENED`** (this session) | Same, includes 1 manual colour conversion. |
-| `feat/gen-2609-086-3-login` | Still `NOT YET OPENED` | Updated this session with the Tailwind `var()`-ambiguity fix (see prior block). |
+| `feat/gen-2609-088-1-organiser-profile` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet. |
+| `feat/gen-2609-088-2-organiser-event-edit` | **`NOT YET OPENED`** (this session) | Same, second pass on this file (`079` did the first). |
+| `feat/gen-2609-088-3-feedback-detail-panel` | **`NOT YET OPENED`** (this session) | Same, admin-only component - no scriptable Admin QA credential to click-through. |
+| `fix/bug-2609-055-seat-map-font` | **`NOT YET OPENED`** (this session) | Intentional visual change (serif→sans) - flag for reviewer attention, needs Vinayak's venue-owner account for a live check. |
 | `ci/add-manual-e2e-workflows-to-main` | `#450` | Unrelated, out of scope every session since 14 Aug. |
 
 ## 4. Decisions / findings this session
 
-**Every per-category prediction in the dispatch's own scripted table matched exactly** - font-size, spacing, and radius all reconciled to the exact migrated/remaining count for all 3 files, first batch in this chain with zero unexplained deviations. The only delta from the dispatch's predicted totals (batch 298→56, actual 298→55) is the 1 manual colour conversion on `tours/[id]/page.tsx`, which the dispatch's own prediction table explicitly excluded ("before any manual colour matches") and asked to be reported - reported here and in `docs/design.md`.
+**A new false-positive class found and fixed before it shipped: a documentation comment mentioning a CSS value in `property: value` shape.** File 1 (`organisers/[id]/page.tsx`) has a `//` comment explaining a design decision that happens to contain the literal text `borderRadius: 999px` in prose - the migration script's detection regex (comment-blind, same shape `check-design-tokens.js` itself uses) matched it like real code and would have rewritten a sentence into `borderRadius: 'var(--afa-radius-pill)'`. Caught in the mandatory dry-run diff review, fixed by skipping comment lines in the migration script. Not fixed in `check-design-tokens.js` itself (pre-existing debt, same treatment as the `hardcoded-font-family: 'inherit'` false positive every batch already carries). Full writeup in `docs/design.md`'s file-1 entry.
 
-**1 manual colour match**: `tours/[id]/page.tsx`'s shared `inputStyle` had `border: '1px solid rgba(245,245,240,0.15)'`, byte-equivalent to `--afa-border-resting`, converted. `venue/create` and `SupportWidget` had zero matches - every `rgba()`/hex hit checked individually, none matched.
+**Batch 7: every per-category number matched the dispatch's own scripted predictions exactly, except the 1 radius deviation above** (which is the false-positive comment, correctly left unmigrated, not a real discrepancy - files 2/3 had zero deviation). 273 → 65 combined literals (76% reduction) after 9 manual colour matches (5 in file 1, 0 in file 2, 4 in file 3, all `--afa-border-resting`). File 2's 3 `rgba()` hits on the `specialNotesStatus` badge are `079`'s own already-documented `STATUS_TONE` duplicate-with-a-contrast-bug finding (not `--afa-*` tokens) - correctly left untouched again.
 
-**No new bug classes found** - all 4 lessons the dispatch flagged from `082`-`086` (raw `<style>` quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were checked against explicitly; none recurred. `SupportWidget.tsx`'s one raw `<style>` block (`bottom`/`max-height` properties only, neither in the checked property sets) was confirmed untouched by an explicit diff check, not assumed safe from the property-list scoping alone.
+**`BUG-2609-055`: root cause chat-verified before dispatch, confirmed independently this session.** The seat-map page's `<main>` set no `fontFamily`, unlike every sibling venue-portal page - `html`'s own `font-family: var(--font-sans)` can't resolve because the next/font CSS variables live on `<body className>`, not `<html>`. Fixed with a 2-line, 1-file change (`fontFamily: 'var(--font-sans)'` on both `<main>` elements). Read-only audit of every other `<main>`/root-wrapper missing `fontFamily` delivered in `docs/design.md` (12 files, several with 2+ instances) - not fixed, for chat to size a future site-wide ticket.
 
-**`public/sw.js`'s `CACHE_VERSION` got touched by each of the 3 `next build` runs this session** (local build stamp, e.g. `local-1789881455022`) - reverted via `git checkout -- public/sw.js` before every commit/push, confirmed not present in any of the 3 pushed branches' own diffs.
+**No other new bug classes found this batch** - the 4 lessons from `082`-`087` (raw `<style>` block quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were all checked against explicitly and none recurred. Both raw `<style>` blocks this batch (`organisers/[id]/page.tsx`, `FeedbackDetailPanel.tsx`) had zero in-scope properties, confirmed by diff.
 
-**No new tokens** - re-measured the dispatch's own 50-occurrence bar against live `qa@8fb970e`; nothing off-scale qualified. `--afa-radius-16px` (flagged as a candidate in `086`'s own handoff) was NOT added - out of this dispatch's explicit scope ("if you believe a value now qualifies, report the number - do not add it"). Not re-measured this session since no new 16px sites were found in these 3 files.
+**`public/sw.js`'s `CACHE_VERSION`** - checked after all 4 `next build` runs this session; none touched it (no revert needed, unlike prior sessions).
+
+**No new tokens** - re-measured the dispatch's own 50-occurrence bar against live `qa@f708531` per the dispatch's own instruction; nothing off-scale qualified. Not re-measured against the post-migration state since chat re-runs the ratchet fresh before drafting the next dispatch anyway.
 
 ## 5. `CodeCounter` state
 
-- `GEN/2609`: `087` is chat-assigned per the dispatch - not touched by CC this session.
+- `GEN/2609`: `088` is chat-assigned per the dispatch - not touched by CC this session. `BUG/2609`: `055` is an existing ticket per the dispatch - not touched.
 
 ## 6. Known `GEN`-numbering collisions/gaps ledger
 
@@ -62,21 +65,23 @@ No new collisions found or introduced this session. `054` ✅, `069→071` ✅, 
 
 ## 7. Docs-conflict watchlist
 
-- All 3 of `feat/gen-2609-087-*` touch the same 2 files at their tail, each branched independently from the same `qa@8fb970e`: `docs/design.md` (branch 1 appends its own file-1 section after `086`'s own tail; branch 2 appends only its own file-2 section, also directly after `086`'s tail; branch 3 appends its own file-3 section plus the full batch summary) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object from the same starting point). **Real, expected conflict on merge** - same resolution as every prior batch: keep every branch's own `docs/design.md` addition, re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 3 land.
-- `feat/gen-2609-086-3-login`'s new commit also touched `docs/design.md`/`scripts/design-token-baseline.json` - independent of the `087` branches (different tail position, `086`'s own file-3 section), no additional conflict expected beyond what was already flagged for that branch.
+- All 3 of `feat/gen-2609-088-*` touch the same 2 files at their tail, each branched independently from the same `qa@f708531`: `docs/design.md` (each appends its own file-N section, in order, after `087`'s own tail) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object from the same starting point). **Real, expected conflict on merge** - same resolution as every prior batch: keep every branch's own `docs/design.md` addition, re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 3 land.
+- `fix/bug-2609-055-seat-map-font` also touches `docs/design.md`'s tail (its own section, after the `088` batch summary) but **not** `scripts/design-token-baseline.json` (a font-family fix adds zero literal debt, confirmed via the ratchet - see §8) - no baseline conflict from this branch, only the same `design.md` tail-append conflict as the 3 migration branches.
 
 ## 8. Verification standard checklist
 
-All run **fresh this session**, foreground, each branched from `origin/qa` `8fb970e`:
+All run **fresh this session**, foreground, each branched from `origin/qa` `f708531`:
 
-- ✅ `tsc --noEmit` - clean, exit 0, all 3 branches.
-- ✅ `node scripts/check-design-tokens.test.js` - 43/43 passing, unchanged, all 3 runs.
-- ✅ `BASE_REF=origin/qa node scripts/check-design-tokens.js` - clean, 0 offenses, all 3 (run post-commit, per-branch).
-- ✅ `verify-equivalence.js` (reused from `086`, includes `classNameIssues()`) - 0 mismatches, all 3 files (50, 61, 47 paired lines respectively).
-- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 3 branches, refused-to-raise guard intact each time.
-- ✅ **`next build` - run for real this session** (flagged as a gap in `086`'s own handoff, closed here), clean exit 0, all 3 branches. `public/sw.js`'s `CACHE_VERSION` stamp reverted after each run, before commit/push.
+- ✅ `tsc --noEmit` - clean, exit 0, all 4 branches.
+- ✅ `node scripts/check-design-tokens.test.js` - 43/43 passing, unchanged, all 4 runs.
+- ✅ `BASE_REF=origin/qa node scripts/check-design-tokens.js` - clean, 0 offenses, all 4 (run post-commit, per-branch).
+- ✅ `verify-equivalence.js` (rebuilt this session, same 2 normalization bugs `084`-`087` already documented applied up front - `var()` symmetric resolution + `px`-suffix stripping, plus `rgba(a, b, c, d)` vs `rgba(a,b,c,d)` comma-spacing normalization, a 3rd normalization gap found this session, see below) - 0 mismatches, all 3 migration files (44, 54, 44 paired lines respectively). Not run against the font-fix branch (no value-equivalence claim to check - it's a real visual change, not a token swap).
+- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 3 migration branches, refused-to-raise guard intact each time. Ran (without `--update-baseline`) on the font-fix branch, confirmed all 7 categories exactly unchanged from baseline.
+- ✅ **`next build`** - clean exit 0, all 4 branches. `public/sw.js`'s `CACHE_VERSION` unaffected by any of the 4 runs (checked, nothing to revert).
 
-**Not verified this session:** a real QA-preview visual diff - no Preview deployment exists yet. `SupportWidget.tsx`'s open chat/feedback panel and select chevron, and the `venue/create`/`tours/[id]` pages (both need a real Organiser/Venue-Owner role account to reach), all need a live click-through once a Preview URL exists.
+**A 3rd `verify-equivalence.js` normalization gap found this session (rebuilt from scratch, same standing risk `feedback_verify_equivalence_recurring_bugs` flags):** `globals.css` always writes `rgba(245, 245, 240, 0.4)` with spaces after each comma; every real inline-style site in `src/` writes `rgba(245,245,240,0.4)` with none. The token-resolution step needs to strip that whitespace on both sides before comparing, or every colour-role match false-flags as a mismatch. Not committed this session (same "candidate for a future session to commit" status `084`/`086` already left it at) - a 4th consecutive rebuild-and-rediscover, now 3 known bugs deep; strengthens the case for actually committing this script.
+
+**Not verified this session:** a real QA-preview visual diff for any of the 4 branches - no Preview deployment exists yet. `FeedbackDetailPanel.tsx` needs the Admin account, `organisers/[id]/page.tsx` is public (no account needed, but still no Preview URL), `dashboard/organiser/events/[id]/edit/page.tsx` needs an Organiser account, and `BUG-2609-055`'s fix needs Vinayak's venue-owner account (`vinayak.venue@aforaudience.qa`) - all flagged individually in `docs/design.md`'s own per-file entries.
 
 ## 9. Production-freeze reminder
 
@@ -84,19 +89,19 @@ All run **fresh this session**, foreground, each branched from `origin/qa` `8fb9
 
 ## 10. UI/UX Design System Debt Ledger
 
-Batch 6's combined reduction (82%) is the highest of any batch's combined rate to date (`079` 57%, `082`/`083` 72%, `084` 76%, `086` 79% final). 1 more colour literal matched to `--afa-border-resting` this session (`tours/[id]/page.tsx`). The `--afa-radius-16px` gap flagged in `086`'s handoff was re-checked against this batch's own dispatch (which re-measured the 50-occurrence bar and confirmed nothing off-scale qualifies yet) - still open, still not added, per the north star's own "don't guess" discipline.
+Batch 7's combined reduction (76%) is below `087`'s own 82% combined high, though `FeedbackDetailPanel.tsx` alone (82%) matches that batch's per-file ceiling. 9 more colour literals matched to `--afa-border-resting` this session (5+4 across files 1/3, 0 in file 2). No new off-scale value crossed the 50-occurrence bar this session (re-measured per the dispatch's own instruction). `BUG-2609-055`'s audit surfaced a real, undersized gap in the font-family rollout: 12 files' `<main>`/root-wrapper elements still fall through to the browser default font, none fixed here except the one this bug ticket named - a real candidate for a future site-wide ticket, sized but not built.
 
 ## 11. Locked-tokens source of truth
 
-**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration-only, no new token added).
+**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration-only + a font-family fix, no new token added).
 
 ## 12. Immediate next action
 
-**Chat: confirm `GEN-2609-087` is logged correctly (chat-assigned, not provisional), open and merge all 3 `087` PRs plus the updated `086-3-login` PR** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` conflicts per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged result. Batch-7 candidates: re-run the ratchet fresh post-merge before drafting that dispatch.
+**Chat: confirm `GEN-2609-088` and `BUG-2609-055` are logged correctly, open and merge all 4 PRs** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` conflicts per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged result. Batch-8 candidates: re-run the ratchet fresh post-merge before drafting that dispatch. Separately: size a site-wide `<main>`-fontFamily ticket from the 12-file audit in `docs/design.md`'s `BUG-2609-055` entry, if the north star's visual-consistency goal extends there.
 
 ## 13. Chat vs. CC ownership note
 
-**Unchanged from the standing model.** This session: CC built (`087`'s 3-file migration, `086-3-login`'s post-push bug fix), verified (including a real `next build` per file this time), and pushed all 3 `087` branches plus the updated `086-3-login`. Chat's half (confirm the ticket number, open the PRs, merge) is next. CC never merges.
+**Unchanged from the standing model.** This session: CC built (`088`'s 3-file migration, `BUG-2609-055`'s font fix + read-only audit), verified (including a real `next build` per branch), and pushed all 4 branches. Chat's half (confirm the ticket numbers, open the PRs, merge) is next. CC never merges.
 
 ---
 

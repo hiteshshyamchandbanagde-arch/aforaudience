@@ -7369,6 +7369,103 @@ Spacing `100px`, `5px`, `9px` ×2 (no matching token).
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-087-1-venue-create`, `-2-support-widget`, `-3-organiser-tour`) - chat opens/merges each independently, per this dispatch's own standing rules. Expected `docs/design.md`/`scripts/design-token-baseline.json` conflict, same resolution as every prior batch.
 
+## GEN-2609-088 - bulk token migration batch 7, file 1 of 3: `organisers/[id]/page.tsx`
+
+Chat-assigned ticket number. Same method as `086`/`087`: exact-value swaps onto the existing spacing/font-size/radius scales via a value→token reverse lookup built from `globals.css`, no new tokens (re-measured against `qa@f708531` per the dispatch's own explicit rule - nothing off-scale reaches the 50-occurrence bar). Colour only on byte-identical role matches. No Tailwind arbitrary-value classes in this file.
+
+### A new false-positive class found: a documentation comment mentioning a CSS value in `property: value` shape
+
+A multi-line `//` comment (explaining why this page omits the dashboard family's `borderRadius: 999px` pill treatment) contains the literal text `borderRadius: 999px` in prose. The migration script's own detection regex - the same shape `check-design-tokens.js` uses - has no comment awareness, so it matched this prose exactly like real code and would have rewritten a documentation sentence into `borderRadius: 'var(--afa-radius-pill)'`, a nonsensical edit that doesn't correspond to any actual style object. Caught in the mandatory dry-run diff review, not by any automated check. Fixed by adding a comment-line skip (`//`, `/*`, `*`-prefixed trimmed lines) to the migration script before generating the real diff - same class of false positive this checker's own header already documents for `// ... (#212)`-style PR-reference comments matching the hex rule. **Not fixed in `check-design-tokens.js` itself** (out of this ticket's scope, pre-existing debt): the checker's own `radius-literal` rule still counts this same comment line as 1 literal on the whole-repo ratchet, exactly as `081` `082`'s hardcoded-font-family `'inherit'` false positives already do every batch - reported, not silently worked around.
+
+### Coverage - font/spacing match the dispatch's own scripted prediction exactly; radius differs by the comment false positive above
+
+94 → 29 literals before colour (69% reduction, before the 5 manual colour matches below). `font-size-literal` 24→2 (22/24, predicted 22/24), `spacing-literal` 51→8 (43/51, predicted 43/51) - both exact. `radius-literal` 1→1 (0/1 real migrated, predicted 1/1) - the dispatch's own prediction counted the comment-prose match above as a real migratable literal; it isn't one (see above), so it's correctly left untouched rather than force-migrated to hit the predicted number.
+
+### Colour - 5 manual matches, 2 roles, not predicted by the dispatch (excluded from its table on purpose)
+
+3× `color: rgba(245,245,240,0.4)` (the "00"/tour-count badge digits, the breadcrumb separator, the organiser code chip) - byte-identical to `--afa-text-muted`, a genuine `color:`-role match. 2× `rgba(245,245,240,0.15)` used as a `border:` value (the empty-state dashed border, the loading-spinner's track ring) - byte-identical to `--afa-border-resting`. All 5 converted. The other 12 `rgba()` hits (cream `0.1`/`0.08` ×7, near-black `0.4`/`0.7` on non-cream RGB ×2, amber `0.15`/`0.6` ×2) checked individually - none match an existing token's value.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Fonts `22px`, `17px` (no matching token). Spacing `56px`, `5px` (×2, badge/city-tag padding), `40px`, `64px` (no matching token). 1 raw `<button>` site, 0 migrated to a `Button` variant.
+
+### Coverage after colour - final count
+
+94 → 24 literals (74% reduction, after the 5 manual colour matches above).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing.
+
+## GEN-2609-088 - bulk token migration batch 7, file 2 of 3: `dashboard/organiser/events/[id]/edit/page.tsx`
+
+Second pass on this file - `GEN-2609-079`'s own batch-1 entry already migrated its first wave (seat-map/settings/this-file trio) and left a documented off-scale decision table (spacing `10px`/`18px`/`6px`/`14px`/`28px` etc., radius `12px`/`10px`, all below the 50-occurrence bar at the time). This batch's dispatch re-measured against `081`'s now-extended px-suffixed scale and found several of those exact values now have real tokens (`--afa-space-10px`, `-14px`, `-18px`, `-28px`, `--afa-radius-10px`, `-12px`) - this pass migrates onto that extended scale, same file, same "exact match only" discipline `079` used.
+
+### Coverage - matches the dispatch's own scripted prediction exactly, zero deviation
+
+92 → 25 literals (73% reduction). `font-size-literal` 8→0 (8/8, predicted 8/8, full coverage), `spacing-literal` 58→4 (54/58, predicted 54/58), `radius-literal` 6→1 (5/6, predicted 5/6) - every number reconciled exactly, no comment-prose false positive this time (checked for it explicitly after file 1's finding - none present).
+
+### Colour - zero manual matches
+
+All 13 `rgba()` hits checked individually against every `--afa-*` token's value: 6× cream `0.08`/`0.06` (no match), 1× `0.2` (no match), 1× ink-tint `rgba(14,12,10,0.15)` ×2 (dropdown shadow/border, not a cream-family token), 1× cream `0.1` (no match to `--afa-border-resting`'s `0.15`). The remaining 3 - `rgba(74,103,65,0.12)`/`rgba(179,38,30,0.1)`/`rgba(201,151,58,0.15)` (the `specialNotesStatus` badge) - are `079`'s own already-documented `STATUS_TONE.sage/error/gold.bg` duplicate-with-a-live-contrast-bug finding (§ that entry), not `--afa-*` tokens at all - correctly left untouched again, same reasoning: this migration doesn't fix that bug, and matching only half the value pair (bg without the accompanying `-bright` color fix) would make it worse, not better.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Spacing `3px`, `26px` (the "Save as Draft" button padding, `079`'s own documented one-off). Radius `2px` (a zone-color swatch, not a chrome radius). 1 `hardcoded-font-family` (`fontFamily: 'inherit'` on the description `<textarea>`, the same legitimate-keyword false positive `079`'s own entry already found on this exact file). 6 raw `<button>` sites, 0 migrated to a `Button` variant, same as `079`'s own pass.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing.
+
+## GEN-2609-088 - bulk token migration batch 7, file 3 of 3: `components/admin/FeedbackDetailPanel.tsx`
+
+Admin-only shared component, imported by the admin feedback page (`dashboard/admin/feedback`) - no scriptable Admin QA credential exists for this repo (same standing gap every admin-only ticket in this chain has hit), so a live click-through is flagged under Not verified rather than skipped silently.
+
+### Coverage - matches the dispatch's own scripted prediction exactly
+
+87 → 20 literals before colour (77% reduction, before the 4 manual colour matches below). `font-size-literal` 22→1 (21/22, predicted 21/22), `spacing-literal` 37→0 (37/37, predicted 37/37, full coverage), `radius-literal` 9→0 (9/9, predicted 9/9, full coverage) - all 3 numeric categories match the dispatch's table exactly, no comment-prose false positive this time (checked for explicitly, none present).
+
+### The one raw `<style>{`...`}</style>` block in this file - confirmed untouched, correctly so
+
+Its properties are `position`/`inset`/`background`/`width`/`max-width`/`height`/`box-shadow`/`overflow-y` (plus a `@media (max-width: 780px)` block) - none is in `SPACING_PROPS`/`RADIUS_PROPS`/`FONT_SIZE_PROPS`, so the migration script never matched a line inside it. Diffed explicitly to confirm (not inferred from the property list alone) - 0 changed lines inside the block, same discipline `087`'s `SupportWidget.tsx` entry already established for a raw `<style>` block with no in-scope properties.
+
+### Colour - 4 manual matches, all `--afa-border-resting`
+
+4× `border: '1px solid rgba(245,245,240,0.15)'` (the note-textarea, the "Cancel" reply-form button, and 2 dynamic deploy-stage/severity filter-chip borders) - byte-identical to `--afa-border-resting`, a genuine `border:`-role match, same class of find as `086`/`087`'s own hits. Converted all 4. The other 7 `rgba()` hits (backdrop `0.35`, panel shadow `0.12`, prev/next-button borders `0.13` ×2, cream `0.1` ×2, `0.06`) checked individually - none match an existing token's value.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Font `11.5px` (a metadata label, no matching token). 1 `hardcoded-font-family` (`fontFamily: 'inherit'` on the note `<textarea>`, the same legitimate-keyword false positive every batch in this chain finds). 7 raw `<button>` sites, 0 migrated to a `Button` variant.
+
+### Coverage after colour - final count
+
+87 → 16 literals (82% reduction, after the 4 manual colour matches above - highest single-file reduction of this batch).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing.
+
+## Batch 7 summary (`GEN-2609-088`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `organisers/[id]/page.tsx` | 94 | 24 | 74% | 43/51 | 22/24 | 0/1* | 5 |
+| `dashboard/organiser/events/[id]/edit/page.tsx` | 92 | 25 | 73% | 54/58 | 8/8 | 5/6 | 0 |
+| `components/admin/FeedbackDetailPanel.tsx` | 87 | 16 | 82% | 37/37 | 21/22 | 9/9 | 4 |
+| **Batch total** | **273** | **65** | **76%** | **134/146** | **51/54** | **14/16** | **9** |
+
+*`organisers/[id]/page.tsx`'s radius: the dispatch's own prediction table counted 1/1 migratable, but the "1" is a documentation comment's prose (`// ... minus its borderRadius: 999px, since that ...`) matched by the same comment-blind regex `check-design-tokens.js` itself uses - not real code. Correctly left untouched (migrating it would rewrite a sentence into fake code); the underlying literal remains as pre-existing ratchet debt, same class as the `hardcoded-font-family: 'inherit'` false positive every batch finds. See that file's own entry above for the full writeup - this is a new false-positive class, not a repeat of one of `082`-`087`'s 4 documented lessons.
+
+**Every per-category number matched the dispatch's own scripted predictions exactly except the 1 radius deviation above**, which is a checker false-positive correctly left unmigrated, not a real discrepancy. Before colour, the 3 files land at 29/25/20 literals respectively (74 combined, vs. the dispatch's own predicted 28+25+20=73) - the 1-literal gap is entirely the file-1 radius false positive documented above. **After the 9 combined manual colour matches, final batch total is 273→65 literals (76% reduction)** - below `087`'s own 82% combined high, though `FeedbackDetailPanel.tsx` alone (82%) matches that batch's per-file ceiling.
+
+**A new false-positive class found and fixed before it shipped: a documentation comment mentioning a CSS value in `property: value` shape.** The migration script's detection regex has no comment awareness (same as `check-design-tokens.js` itself) - a `//` comment in `organisers/[id]/page.tsx` explaining a design decision happened to contain literal text shaped like a real CSS declaration (`borderRadius: 999px`) and would have been silently rewritten into nonsense code. Caught in the mandatory dry-run diff review, fixed by adding a comment-line skip to the migration script. Not fixed in `check-design-tokens.js` itself (out of scope, pre-existing debt, same treatment as the `hardcoded-font-family: 'inherit'` false positive every batch already carries forward).
+
+**No other new bug classes found this batch** - the 4 lessons from `082`-`087` (raw `<style>` block quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were all checked against explicitly and none recurred. Both files with a raw `<style>` block (`organisers/[id]/page.tsx`, `FeedbackDetailPanel.tsx`) had zero in-scope properties inside their blocks, confirmed by diff, not assumed from the property-list scoping alone.
+
+**9 manual colour matches, all `--afa-border-resting`** (5 in file 1, 0 in file 2, 4 in file 3) - highest colour-match count of any batch since `086`. File 2's 3 `rgba()` hits on the `specialNotesStatus` badge are `079`'s own already-documented `STATUS_TONE` duplicate-with-a-contrast-bug finding, not `--afa-*` tokens - correctly left untouched again.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-088-1-organiser-profile`, `-2-organiser-event-edit`, `-3-feedback-detail-panel`) - chat opens/merges each independently, per this dispatch's own standing rules. Expected `docs/design.md`/`scripts/design-token-baseline.json` conflict, same resolution as every prior batch.
+
 ## BUG-2609-055 - Seat Map Builder renders in the browser-default serif
 
 Root cause (chat-verified before dispatching): this page's `<main>` set no `fontFamily`, unlike every other venue-portal page (e.g. `venue/[id]/edit/page.tsx`'s `fontFamily: 'var(--font-sans)'`). `html { font-family: var(--font-sans), ... }` in `globals.css` can't resolve on its own, because the next/font CSS variables are declared on `<body className>`, not `<html>` - a `<main>` (or any element) with no explicit `fontFamily` falls through to the browser's default serif rather than the app's sans stack. Predates the token migration - this file's 6 `fontFamily` uses are unchanged since `75042c4`, well before `081`-`088`'s work started.
