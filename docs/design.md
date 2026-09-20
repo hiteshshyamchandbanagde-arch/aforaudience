@@ -7601,3 +7601,29 @@ Spacing `3px`, `9px` (role-badge padding, and the "9px" half of 2 other mixed sh
 ### Verify
 
 `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `rgb-rgba-literal` -3, `font-size-literal` -21, `spacing-literal` -34, `radius-literal` -11, matching the reconciled coverage numbers above exactly. Real `next build`: clean; `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert.
+
+## GEN-2609-089 - bulk token migration batch 8, file 2 of 3: `src/app/checkout/[bookingId]/page.tsx`
+
+Chat-assigned ticket number. Same `scripts/dev/migrate-tokens.js` as file 1 (committed there this session - see that file's own design.md entry for the tooling writeup and the new bare-multi-value-shorthand finding), same exact-value method, no new tokens.
+
+### Coverage - matches the dispatch's own scripted prediction exactly
+
+100 -> 17 literals (83% reduction, zero manual colour matches needed - see below). `font-size-literal` 29->5 (24/29, predicted 24/29). `spacing-literal` 58->2 (56/58, predicted 56/58). `radius-literal` 5->2 (3/5, predicted 3/5) - every number reconciled exactly.
+
+### Colour - 0 manual matches, all 7 rgba() checked individually
+
+4x `rgba(245,245,240,0.08)` (border/borderTop on 4 different summary/detail panels) - `0.08` alpha, not byte-identical to `--afa-border-resting`'s `0.15` (same "matches `STATUS_TONE.muted.bg`, not a `--afa-*` token" value class `081`'s own entry already documented). 1x `rgba(245,245,240,0.12)` (a dashed borderTop divider) - `0.12`, no match. 1x `rgba(245,245,240,0.1)` (the companion-tag search-result row border) - `0.1`, no match. 1x `rgba(179,38,30,0.08)` (the fee-sheet warning background) - checked against `STATUS_TONE.error.bg`'s `rgba(179,38,30,0.1)` (a different, already-documented duplicate-tone value, per `088`'s own file-2 entry) - alpha doesn't match either that or any `--afa-*` token, left literal.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Fonts `22px`, `12.5px` x2, `13.5px` (this file only has `12.5` - no `13.5` instance found; the dispatch's own prediction listed both as "off-scale, no token" candidates, not a claim both are present in this specific file). Spacing `5px` (the companion-chip's own padding shorthand, `5px 6px 5px 12px` - the two `5px`s stay literal, `6px`/`12px` migrated). Radius `14px` (the fee-sheet toast). 1 raw `<button>` site, 0 migrated to a `Button` variant, `raw-button` count unchanged (1). 12 `fontFamily` uses (out of scope, already tokenized via `var(--font-sans)`/`var(--font-display)`). A `marginBottom: companionConsent ? 12 : 0` ternary - structurally invisible to the shared detection regex (the character immediately after `marginBottom:` is the identifier `companionConsent`, not a digit or quote - same class of blind spot as file 1's own finding, not a new one) - left as pre-existing, uncounted debt, not silently fixed under a rule this ticket's method doesn't touch.
+
+### Payment-page discipline
+
+Styles only. No handler, `id`, `name`, `data-*`, `aria-*`, script-loading call, or amount/currency-formatting line touched - confirmed via a full diff review, not just a search for those identifiers (all edits are inside `style={{...}}` objects or a raw CSS shorthand value).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `font-size-literal` -24, `spacing-literal` -56, `radius-literal` -3, matching the reconciled coverage numbers above exactly. `scripts/dev/verify-equivalence.js` (committed this session - see file 1's entry): 0 mismatches against `globals.css`'s live token values, 0 className issues. Real `next build`: clean after a clean `.next` rebuild (a first attempt hit an unrelated Windows `ChunkLoadError` on `/venue-owners/[id]`, a page this branch never touches - a stale/locked `.next` artifact, not a regression, resolved by `rm -rf .next` and rebuilding); `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert.
+
+**Not verified this session:** a real test-mode Razorpay payment run on this page - styles-only change, but chat should still repeat one after merge per this ticket's own dispatch instruction.
