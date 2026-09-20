@@ -1412,12 +1412,12 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)' }}><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></main></>)
+  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></main></>)
 
   return (
     <>
       <SiteNav />
-      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}>
+      <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)', fontFamily: 'var(--font-sans)' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5)' }}>
         <BackLink href={`/dashboard/venue/${id}/edit`} label="Back to Venue" />
 
