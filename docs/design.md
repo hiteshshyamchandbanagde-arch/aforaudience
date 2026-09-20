@@ -7560,3 +7560,44 @@ Unchanged from the dispatch's own pre-existing table (12 files, several with 2+ 
 `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing (no rule logic touched). `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: all 7 categories exactly unchanged from baseline (±0), confirming this fix adds zero literal debt - predicted and confirmed. Real `next build`: clean; `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert. Live computed-style verification: done via a production `next build && next start` server (not `next dev` - see the dev-mode bug above), Playwright-driven, table above.
 
 **Rollback:** single-commit `git revert` - the change is exactly 2 lines in 1 file with no dependent changes.
+
+## GEN-2609-089 - bulk token migration batch 8, file 1 of 3: `src/components/SiteNav.tsx`
+
+Chat-assigned ticket number. Same exact-value method as `086`-`088`: value->token reverse lookup built from `globals.css`'s live spacing/font-size/radius scale, no new tokens (nothing off-scale reaches the 50-occurrence bar this batch - none of this file's own off-scale values are anywhere near it). Colour only on byte-identical role matches.
+
+### A migration script committed for the first time - `scripts/dev/migrate-tokens.js` + `scripts/dev/count-file.js`
+
+Every batch since `086` rebuilt an equivalent scratch script from zero (`feedback_verify_equivalence_recurring_bugs`'s standing risk). Committed this time, under `scripts/dev/` specifically because `design-token-ratchet.js`'s `listCheckedFiles()` and `check-design-tokens.js`'s `isCheckedFile()` both scope to `git ls-files -- src` / `^src\/.*\.tsx?$` - confirmed by reading both functions before choosing the path, not assumed - so nothing under `scripts/` is ever scanned by either tool. `count-file.js` reuses `check-design-tokens.js`'s own exported `RULES`/`tokenOkReason` to report a single file's per-category literal count, the same method this batch's own before/after numbers below come from (not hand-counted from a diff).
+
+### A new, previously-undocumented gap found in `check-design-tokens.js`'s own `CSS_PROP_VALUE_RE`: bare (unquoted) multi-value CSS shorthand only counts its first token
+
+`CSS_PROP_VALUE_RE`'s bare-value branch matches a SINGLE number+unit token, terminated by a lookahead of `[,;}\s]` - correct for a JS object literal's bare numeric value (`fontSize: 14`, always one token), but this file's raw `<style>{`...`}</style>` block has real CSS text like `.sitenav-row { padding: 16px 20px !important; }`, an UNQUOTED two-value shorthand. The regex captures `16px` as the entire matched value and never looks for `20px` at all (nothing in the remaining text `" 20px !important; }"` matches `propName\s*:\s*` again) - so the checker's own live count silently never saw that second token as debt. Confirmed by measuring: this file's spacing-literal count was 46 both via `count-file.js` (which shares the exact same regex) and via the dispatch's own independently-scripted prediction - if `20px` had been counted, the before-total would have been 47, not 46, so the dispatch's own prediction script has this exact same blind spot, not something this session introduced.
+
+**Not fixed in `check-design-tokens.js` itself** (out of this ticket's scope, same treatment as the `hardcoded-font-family: 'inherit'` and comment-prose false positives every batch already carries forward) - but fixed in `migrate-tokens.js`, which uses a wider bare-value regex specifically inside a detected `<style>{`...`}</style>` block (a run of space-separated tokens up to `;`/`}`, matching how the quoted-value branch already handles multi-value shorthands) so this migration doesn't silently skip real, migratable hardcoded debt just because the checker can't see it. Net effect: `padding: 16px 20px !important` and `font-size: 20px !important`/`gap: 14px !important`/`gap: 8px !important` (the file's 4 raw `<style>` block declarations) all fully migrated, including the previously-invisible `20px`, with **zero change to the counted ratchet numbers** (the checker literally never counted that token, so removing it can't move a number it never held) - a pure bonus for the north star, not something the "34/46 spacing migrated" figure below double-counts.
+
+### Coverage - matches the dispatch's own scripted prediction exactly
+
+105 -> 39 literals before colour (63% reduction). `font-size-literal` 21->0 (21/21, full coverage, predicted 21/21). `radius-literal` 11->0 (11/11, full coverage, predicted 11/11). `spacing-literal` 46->12 (34/46, predicted 34/46) - every number reconciled exactly, including the bonus fix above (which the checker's count is structurally blind to, per above).
+
+### Colour - 3 manual matches, 1 role, all `--afa-border-resting`
+
+3x `border: '1px solid rgba(245,245,240,0.15)'` (the role badge's border, the language-picker button's border, the account-menu trigger's border) - byte-identical to `--afa-border-resting`. All 3 converted. The other 17 `rgba()` hits checked individually against every `--afa-*` token's value: `rgba(245,245,240,0.6)` (role-badge text, close to but not byte-identical to `--afa-text-secondary`'s `0.65` - left literal, not force-matched), `rgba(245,245,240,0.08)` (header border-bottom - `081`'s own already-documented "matches `STATUS_TONE.muted.bg`, not a `--afa-*` token" finding, not this file's border-role token at `0.15`), `rgba(20,20,20,0.92)`/`rgba(20,20,20,0.95)` (header background, isHome vs. page), `rgba(245,245,240,0.1)` x5 (2 dropdown-panel borders, 3 divider-line backgrounds - `0.1`, not `0.15`, no match), `rgba(0,0,0,0.14)`/`rgba(0,0,0,0.5)` (dropdown box-shadows, no `--afa-shadow-*` token exists), `rgba(201,151,58,0.08)` x2 and `rgba(201,151,58,0.1)` (amber-tinted active-state backgrounds, no matching amber-rgba token - `--afa-amber-tint` is a hex, not rgba).
+
+### Deliberately left literal, all predicted by the dispatch
+
+Spacing `3px`, `9px` (role-badge padding, and the "9px" half of 2 other mixed shorthands), `5px` (padding), `22px`, `7px` - none has a matching scale token. 3 `calc()` expressions (a tooltip offset, 2 dropdown-panel offsets) - untouched, structurally invisible to the detection regex (per that regex's own header comment - never matches inside `calc(...)`). 7 `<svg>` icon elements (geometry/attributes out of scope). 3 `fontFamily` uses (`var(--font-display)` logo, `var(--font-mono)` x2 initials/locale-code) - already tokenized, out of scope anyway. 7 raw `<button>` sites, 0 migrated to a `Button` variant, `raw-button` count unchanged (7) per the dispatch's own instruction. No Tailwind arbitrary-value classes in this file.
+
+### Coverage after colour - final count
+
+105 -> 36 literals (66% reduction, after the 3 manual colour matches above).
+
+### QA checklist for chat (73 importers - highest blast radius in this batch)
+
+- Public nav, signed out: desktop `isHome` variant (home hero overlay) and `page` variant (every other page) - logo, links, search icon, account-menu dropdown trigger + panel (border/radius/padding all migrated).
+- Public nav, signed in: greeting + role badge (border migrated to `--afa-border-resting`, confirm it still reads as a quiet neutral chip, not a nav-active color), the 4 icon-links row + tooltips, sign-out button, language picker dropdown (desktop `isHome` only).
+- Mobile: this component is hidden below 1024px (`.sitenav-root` display:none) - `MobileTopBar`/`MobileTabBar` cover mobile nav separately, not touched by this ticket - confirm SiteNav truly doesn't render on a phone-width viewport (no double-header regression).
+- The 901-1500px tightened band (`.sitenav-row`/`.sitenav-logo`/`.sitenav-desktop`/`.sitenav-account-row`/`.afa-search-input`/`.sitenav-greeting` media query, inside the migrated raw `<style>` block) - confirm the newly-tokenized `padding`/`font-size`/`gap` values in that band still render pixel-identical (they should - exact value swaps, zero visual change expected anywhere in this file).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `rgb-rgba-literal` -3, `font-size-literal` -21, `spacing-literal` -34, `radius-literal` -11, matching the reconciled coverage numbers above exactly. Real `next build`: clean; `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert.
