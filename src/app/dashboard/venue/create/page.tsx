@@ -18,11 +18,11 @@ import { PageHead, Card, SectionTitle, Button, ErrorBanner, IconSection, IconSea
 
 const inputStyle = {
   width: '100%',
-  padding: '10px 14px',
-  borderRadius: '8px',
+  padding: 'var(--afa-space-10px) var(--afa-space-14px)',
+  borderRadius: 'var(--afa-radius-md)',
   border: '1px solid rgba(245,245,240,0.08)',
   background: '#171717',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',
   color: 'var(--afa-text-primary)',
   boxSizing: 'border-box' as const,
@@ -30,9 +30,9 @@ const inputStyle = {
 
 const labelStyle = {
   display: 'block',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 500,
-  marginBottom: '8px',
+  marginBottom: 'var(--afa-space-2)',
   color: 'var(--afa-text-secondary)',
 }
 
@@ -270,26 +270,26 @@ export default function CreateVenuePage() {
       <SiteNav />
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '780px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto', padding: 'var(--afa-space-48px) var(--afa-space-6) 80px' }}>
           <div>
             <PageHead eyebrow="New listing" title="Register Venue" description="Add your space, design its seating layout, and set your prices per section." />
           </div>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '24px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-6)', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Basic details */}
-            <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
               <SectionTitle n="01" title="Basic Details" />
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Venue Name *</label>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g., The Grand Theater" style={inputStyle} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-18px)' }}>
                 <div>
                   <label style={labelStyle}>Address *</label>
                   <AddressAutocomplete
@@ -323,7 +323,7 @@ export default function CreateVenuePage() {
                     placeholder="e.g., Mumbai"
                   />
                   {(formData.state || formData.country) && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '4px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: 'var(--afa-space-1)' }}>
                       {[formData.state, formData.country].filter(Boolean).join(', ')}
                     </p>
                   )}
@@ -339,7 +339,7 @@ export default function CreateVenuePage() {
                   original editable paste-a-link input for manually-typed
                   addresses - Get Directions works either way, this field
                   is purely an accuracy upgrade in the manual case. */}
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Google Maps Link</label>
                 {formData.lat && formData.lng ? (
                   <>
@@ -357,38 +357,38 @@ export default function CreateVenuePage() {
                     >
                       📍 Directions
                     </a>
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)' }}>
                       Derived automatically from the address you picked above. Edit the address to change it.
                     </p>
                   </>
                 ) : (
                   <>
                     <input type="url" name="mapsUrl" value={formData.mapsUrl} onChange={handleChange} placeholder="e.g., https://maps.app.goo.gl/..." style={inputStyle} />
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-6px)' }}>
                       Optional - improves accuracy. Get Directions still works from your address either way.
                     </p>
                   </>
                 )}
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: 'var(--afa-space-18px)' }}>
                 <label style={labelStyle}>Facilities</label>
                 <FacilitiesPicker value={facilities} onChange={setFacilities} />
               </div>
 
               <div>
                 <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-muted)' }}>Not Rated Yet</p>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '4px' }}>
+                <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-muted)' }}>Not Rated Yet</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)' }}>
                   Based on real feedback from Artists and Organisers who've performed/booked here - not self-reported.
                 </p>
               </div>
             </Card>
 
             {/* Rental rate - what an Organiser pays to book this venue, separate from audience ticket prices */}
-            <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
               <SectionTitle n="02" title="Rental Rate" />
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginTop: '-8px', marginBottom: '18px' }}>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginTop: '-8px', marginBottom: 'var(--afa-space-18px)' }}>
                 What Organisers pay to book your space - separate from the ticket prices audiences pay, which you set per section above.
               </p>
 
@@ -396,14 +396,14 @@ export default function CreateVenuePage() {
                 Rate Type
                 <HelpIcon text={'Hourly and Daily publish a fixed rate. Flexible means no fixed rate - Organisers send you a date and duration, and you respond with a quote before it\'s confirmed.'} />
               </label>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-18px)' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setRateType(t)}
                     style={{
-                      flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
                       border: rateType === t ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
                       background: rateType === t ? 'rgba(201,151,58,0.12)' : '#171717',
                       color: rateType === t ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
@@ -415,7 +415,7 @@ export default function CreateVenuePage() {
               </div>
 
               {rateType === 'HOURLY' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-18px)', marginBottom: 'var(--afa-space-2)' }}>
                   <div>
                     <label style={labelStyle}>Rate per hour (₹) *</label>
                     <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} min="0" placeholder="e.g., 2500" style={inputStyle} />
@@ -428,35 +428,35 @@ export default function CreateVenuePage() {
               )}
 
               {rateType === 'DAILY' && (
-                <div style={{ marginBottom: '8px' }}>
+                <div style={{ marginBottom: 'var(--afa-space-2)' }}>
                   <label style={labelStyle}>Rate per day (₹) *</label>
                   <input type="number" value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} min="0" placeholder="e.g., 15000" style={{ ...inputStyle, maxWidth: '240px' }} />
                 </div>
               )}
 
               {rateType === 'FLEXIBLE' && (
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
                   No fixed rate published. Organisers will send you a duration and date, and you'll respond with a quote before it's confirmed.
                 </p>
               )}
 
               {rateType !== 'FLEXIBLE' && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
                   </label>
 
                   {useDayOverrides && (
                     <div>
-                      <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginBottom: '10px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginBottom: 'var(--afa-space-10px)' }}>
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
-                          <span style={{ fontSize: '13px', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontSize: '12px', color: 'var(--afa-text-muted)' }}>₹</span>
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
+                          <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
+                            <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>₹</span>
                             <input
                               type="number"
                               value={dayRates[day]}
@@ -475,7 +475,7 @@ export default function CreateVenuePage() {
             </Card>
 
             {/* Seating & pricing */}
-            <Card style={{ padding: '28px', marginBottom: '20px' }}>
+            <Card style={{ padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)' }}>
               <SectionTitle n="03" title="Seating & Pricing" />
 
               {/* Warm radial glow behind this key moment - matches the
@@ -483,15 +483,15 @@ export default function CreateVenuePage() {
                   Pricing fork (GEN-2608-082). Negative side/bottom margin
                   bleeds it to the card's own edges; top stays flush under
                   SectionTitle. */}
-              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: '4px 28px 28px', borderRadius: '0 0 12px 12px' }}>
-                <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '2px' }}>
+              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: 'var(--afa-space-1) var(--afa-space-28px) var(--afa-space-28px)', borderRadius: '0 0 var(--afa-radius-12px) var(--afa-radius-12px)' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2px)' }}>
                   How is this venue's seating arranged? Pick how your audience will choose where to sit.
                 </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '15px', color: 'var(--afa-amber)', marginTop: '6px', marginBottom: '20px' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-amber)', marginTop: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-5)' }}>
                   &ldquo;every seat is a decision about the room&rdquo;
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-5)' }}>
                   <PathCard
                     title="General Admission"
                     icon={<IconSection size={20} />}
@@ -512,7 +512,7 @@ export default function CreateVenuePage() {
 
                 {seatingChoice === 'GENERAL_ADMISSION' && (
                   <>
-                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '18px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-18px)' }}>
                       Design your own layout — add as many sections as you like (e.g. "VIP Front Row", "General", "Balcony") and set a price for each.
                     </p>
                     <SeatSectionEditor sections={sections} onChange={setSections} />
@@ -521,7 +521,7 @@ export default function CreateVenuePage() {
 
                 {seatingChoice === 'NUMBERED' && (
                   <div>
-                    <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-14px)' }}>
                       You'll place real, numbered seats on a canvas shaped like your venue from the Seat Map Builder once this venue is created. For now, just give an approximate total capacity — used for listings until your real layout is saved.
                     </p>
                     <label style={labelStyle}>Approximate total capacity</label>
@@ -539,20 +539,20 @@ export default function CreateVenuePage() {
             </Card>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               {seatingChoice === 'GENERAL_ADMISSION' && (
-                <Button type="button" disabled={saving} onClick={() => submit(true)} style={{ padding: '12px 26px', opacity: saving ? 0.6 : 1 }}>
+                <Button type="button" disabled={saving} onClick={() => submit(true)} style={{ padding: 'var(--afa-space-3) 26px', opacity: saving ? 0.6 : 1 }}>
                   {saving ? 'Publishing...' : 'Publish Venue'}
                 </Button>
               )}
-              <Button variant="outline" type="button" disabled={saving} onClick={() => submit(false)} style={{ padding: '12px 26px', opacity: saving ? 0.6 : 1 }}>
+              <Button variant="outline" type="button" disabled={saving} onClick={() => submit(false)} style={{ padding: 'var(--afa-space-3) 26px', opacity: saving ? 0.6 : 1 }}>
                 Save as Draft
               </Button>
-              <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: '14px', color: 'var(--afa-text-secondary)', textDecoration: 'none', marginLeft: '4px' }}>
+              <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', textDecoration: 'none', marginLeft: 'var(--afa-space-1)' }}>
                 Cancel
               </Link>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '14px' }}>
+            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-14px)' }}>
               {seatingChoice === 'GENERAL_ADMISSION'
                 ? 'Published venues appear immediately on the public Explore Venues page. Drafts stay private until you publish them.'
                 : "Numbered venues save as a draft here. Once you've built and saved a real seat map in the Seat Map Builder, you can publish from the venue's Edit page — organisers need real sections to price against, so publishing happens after the map is real."}
@@ -593,15 +593,15 @@ function PathCard({
       className={`afa-path-card${active ? ' afa-path-card-active afa-card-lift' : ''}`}
       style={{
         textAlign: 'left',
-        borderRadius: '12px',
+        borderRadius: 'var(--afa-radius-12px)',
         border: active ? '1px solid rgba(255,90,54,0.5)' : '1px solid rgba(245,245,240,0.12)',
         background: active ? undefined : 'var(--afa-surface-page)',
-        padding: '20px',
+        padding: 'var(--afa-space-5)',
         cursor: 'pointer',
         transition: 'border-color 150ms, transform 150ms',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)' }}>
         <span
           style={{
             display: 'flex',
@@ -609,7 +609,7 @@ function PathCard({
             justifyContent: 'center',
             width: '40px',
             height: '40px',
-            borderRadius: '8px',
+            borderRadius: 'var(--afa-radius-md)',
             background: active ? 'rgba(255,90,54,0.2)' : 'rgba(245,245,240,0.08)',
             color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
           }}
@@ -620,8 +620,8 @@ function PathCard({
           {title}
         </h3>
       </div>
-      <p style={{ marginTop: '14px', fontSize: '13.5px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
-      <ul style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>
+      <p style={{ marginTop: 'var(--afa-space-14px)', fontSize: '13.5px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
+      <ul style={{ marginTop: 'var(--afa-space-10px)', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>
         {points.map((p) => (
           <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: 'var(--afa-text-secondary)' }}>
             <IconCheck size={12} style={{ color: 'var(--afa-text-muted)' }} />
@@ -629,7 +629,7 @@ function PathCard({
           </li>
         ))}
       </ul>
-      <span style={{ display: 'inline-block', marginTop: '14px', fontSize: '13px', fontWeight: 600, color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)' }}>
+      <span style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)' }}>
         {active ? '✓ Selected' : 'Choose this →'}
       </span>
     </button>
