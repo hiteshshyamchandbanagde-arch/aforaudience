@@ -189,30 +189,30 @@ export default function FeedbackDetailPanel({
       `}</style>
       <div className="fb-detail-backdrop" onClick={onClose} />
       <div className="fb-detail-panel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <div style={{ padding: '20px 20px 32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-taupe)' }}>
+        <div style={{ padding: 'var(--afa-space-5) var(--afa-space-5) var(--afa-space-32px)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-4)' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-taupe)' }}>
                 {item.category}
               </span>
               {item.displayId && (
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--afa-fill-solid)', fontFamily: 'var(--font-mono)' }}>
+                <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-fill-solid)', fontFamily: 'var(--font-mono)' }}>
                   {item.displayId}
                 </span>
               )}
-              {item.fromChatbot && <span style={{ fontSize: '11px', color: 'var(--afa-taupe)' }}>via chatbot</span>}
+              {item.fromChatbot && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)' }}>via chatbot</span>}
             </div>
             <button
               onClick={onClose}
               aria-label="Close"
-              style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: '4px' }}
+              style={{ background: 'transparent', border: 'none', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
             >
               ×
             </button>
           </div>
 
           {position && (onPrev || onNext) && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--afa-space-4)' }}>
               <button
                 onClick={guardedPrev}
                 disabled={!hasPrev}
@@ -220,10 +220,10 @@ export default function FeedbackDetailPanel({
                 style={{
                   background: 'var(--afa-surface-raised)',
                   border: '1px solid rgba(245,245,240,0.13)',
-                  borderRadius: '999px',
+                  borderRadius: 'var(--afa-radius-pill)',
                   width: '32px',
                   height: '32px',
-                  fontSize: '16px',
+                  fontSize: 'var(--afa-text-title)',
                   cursor: hasPrev ? 'pointer' : 'default',
                   opacity: hasPrev ? 1 : 0.35,
                   color: 'var(--afa-text-primary)',
@@ -231,7 +231,7 @@ export default function FeedbackDetailPanel({
               >
                 ‹
               </button>
-              <span style={{ fontSize: '12px', color: 'var(--afa-taupe)' }}>
+              <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>
                 {position.index} of {position.total}
               </span>
               <button
@@ -241,10 +241,10 @@ export default function FeedbackDetailPanel({
                 style={{
                   background: 'var(--afa-surface-raised)',
                   border: '1px solid rgba(245,245,240,0.13)',
-                  borderRadius: '999px',
+                  borderRadius: 'var(--afa-radius-pill)',
                   width: '32px',
                   height: '32px',
-                  fontSize: '16px',
+                  fontSize: 'var(--afa-text-title)',
                   cursor: hasNext ? 'pointer' : 'default',
                   opacity: hasNext ? 1 : 0.35,
                   color: 'var(--afa-text-primary)',
@@ -255,16 +255,16 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', margin: '0 0 12px', color: 'var(--afa-text-primary)' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', margin: '0 0 var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
             {item.title || item.message.slice(0, 60)}
           </h2>
 
-          <div style={{ fontSize: '14px', color: 'var(--afa-text-primary)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+          <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 'var(--afa-space-4)' }}>
             {item.message}
           </div>
 
           {item.attachmentData && (
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-4)' }}>
               <img
                 src={item.attachmentData}
                 alt="Attachment"
@@ -272,7 +272,7 @@ export default function FeedbackDetailPanel({
                 style={{
                   maxWidth: expandedImage ? '100%' : '220px',
                   maxHeight: expandedImage ? 'none' : '140px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--afa-radius-md)',
                   border: '1px solid rgba(245,245,240,0.1)',
                   cursor: 'pointer',
                   display: 'block',
@@ -281,7 +281,7 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <div style={{ fontSize: '12px', color: 'var(--afa-taupe)', marginBottom: '20px', lineHeight: 1.8 }}>
+          <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)', marginBottom: 'var(--afa-space-5)', lineHeight: 1.8 }}>
             <div>Page: {item.pageUrl || '—'}</div>
             <div>
               From:{' '}
@@ -293,9 +293,9 @@ export default function FeedbackDetailPanel({
             <div>Resolved: {fmtDateTime(item.resolvedAt)}</div>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Status</div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ marginBottom: 'var(--afa-space-5)' }}>
+            <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>Status</div>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap' }}>
               {STATUSES.map((s) => (
                 <Button
                   key={s}
@@ -318,8 +318,8 @@ export default function FeedbackDetailPanel({
               ))}
             </div>
             {pendingNoteStatus && (
-              <div style={{ marginTop: '10px', padding: '10px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.1)' }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: '6px', color: 'var(--afa-text-primary)' }}>
+              <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.1)' }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: 'var(--afa-space-6px)', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>
                 <textarea
@@ -327,9 +327,9 @@ export default function FeedbackDetailPanel({
                   value={noteDraft}
                   onChange={(e) => setNoteDraft(e.target.value)}
                   rows={3}
-                  style={{ width: '100%', boxSizing: 'border-box', fontSize: '13px', padding: '8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', resize: 'vertical', fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ width: '100%', boxSizing: 'border-box', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', resize: 'vertical', fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-2)' }}>
                   <button
                     disabled={busy || !noteDraft.trim()}
                     onClick={() => {
@@ -337,14 +337,14 @@ export default function FeedbackDetailPanel({
                       setPendingNoteStatus(null)
                       setNoteDraft('')
                     }}
-                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
+                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
                   >
                     Confirm
                   </button>
                   <button
                     disabled={busy}
                     onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
-                    style={{ fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(245,245,240,0.15)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
+                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: '1px solid var(--afa-border-resting)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
                   >
                     Cancel
                   </button>
@@ -354,11 +354,11 @@ export default function FeedbackDetailPanel({
           </div>
 
           {item.status === 'RESOLVED' && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-5)' }}>
+              <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Deploy Stage
               </div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap' }}>
                 <Button
                   variant="toggle-pill"
                   size="pill-sm"
@@ -375,8 +375,8 @@ export default function FeedbackDetailPanel({
                     disabled={busy}
                     onClick={() => onSetDeployStage(ds)}
                     style={{
-                      fontSize: '12px', fontWeight: 600, padding: '6px 12px', borderRadius: '999px',
-                      border: item.deployStage === ds ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                      fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)',
+                      border: item.deployStage === ds ? 'none' : '1px solid var(--afa-border-resting)',
                       background: item.deployStage === ds ? 'var(--afa-sage)' : 'transparent',
                       color: item.deployStage === ds ? 'white' : 'var(--afa-text-primary)',
                       cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
@@ -389,9 +389,9 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>Severity</div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+            <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>Severity</div>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap' }}>
               <Button
                 variant="toggle-pill"
                 size="pill-sm"
@@ -408,11 +408,11 @@ export default function FeedbackDetailPanel({
                   disabled={busy}
                   onClick={() => onSetSeverity(sev)}
                   style={{
-                    fontSize: '12px',
+                    fontSize: 'var(--afa-text-small)',
                     fontWeight: 600,
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    border: item.severity === sev ? 'none' : '1px solid rgba(245,245,240,0.15)',
+                    padding: 'var(--afa-space-6px) var(--afa-space-3)',
+                    borderRadius: 'var(--afa-radius-pill)',
+                    border: item.severity === sev ? 'none' : '1px solid var(--afa-border-resting)',
                     background: item.severity === sev ? SEVERITY_COLORS[sev] : 'transparent',
                     color: item.severity === sev ? 'white' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
@@ -426,20 +426,20 @@ export default function FeedbackDetailPanel({
           </div>
 
           <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+            <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
               History
             </div>
             {item.changeLog.length === 0 && (
-              <p style={{ fontSize: '12px', color: 'var(--afa-taupe)' }}>No changes yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>No changes yet.</p>
             )}
             {item.changeLog.map((entry) => (
               <div
                 key={entry.id}
                 style={{
-                  fontSize: '12px',
+                  fontSize: 'var(--afa-text-small)',
                   color: 'var(--afa-text-primary)',
                   opacity: 0.75,
-                  padding: '8px 0',
+                  padding: 'var(--afa-space-2) 0',
                   borderTop: '1px solid rgba(245,245,240,0.06)',
                 }}
               >
@@ -447,7 +447,7 @@ export default function FeedbackDetailPanel({
                 {entry.fromValue ? labelize(entry.fromValue) : 'unset'} → {labelize(entry.toValue)}
                 <span style={{ color: 'var(--afa-taupe)' }}> · {fmtDateTime(entry.createdAt)}</span>
                 {entry.note && (
-                  <div style={{ marginTop: '4px', fontStyle: 'italic', opacity: 0.85 }}>"{entry.note}"</div>
+                  <div style={{ marginTop: 'var(--afa-space-1)', fontStyle: 'italic', opacity: 0.85 }}>"{entry.note}"</div>
                 )}
               </div>
             ))}
