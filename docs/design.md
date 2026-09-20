@@ -7132,3 +7132,63 @@ All 7 already had every in-scope literal token-retrofitted.
 `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. **`verify-equivalence.js` against `origin/qa`: 49 paired lines, 0 mismatches.** `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1200→1170, `spacing-literal` 2776→2724, `radius-literal` 461→453, `rgb-rgba-literal`/`hex-color-literal`/`raw-button` all ±0. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
 
 **Not verified this session:** a real QA-preview click-through. This page has no admin-only auth gate (public registration flow) - a real Preview URL would let anyone verify it directly once one exists, unlike the Admin-only pages in this batch. Specific elements worth a targeted look once a Preview exists: the OTP-verification step's resend-code button, the Google sign-in button's border, and the password-strength meter's spacing (all migrated this entry).
+
+## GEN-2609-084 (provisional - chat confirms/assigns the real number against `CodeCounter`, reads **83** at branch start - `083` was batch 3) - bulk token migration batch 4, file 3 of 3: `profile/page.tsx`
+
+Same method as files 1/2 - branched independently from `qa` (post-`083` merge), not stacked. `verify-equivalence.js` run against this file too - see Verify below.
+
+### A real `<style>{}` CSS block, an SVG icon family, and a deliberate colour non-match - all checked, none needed special handling beyond the last one
+
+**`<style>{`...`}</style>` block (L605-618):** 2 real `gap` values inside (`32px`/`20px`, both exact scale matches) - the `inRawCssBlock` detection built in `084` file 1 (and originally for the `082` bug) correctly emitted unquoted `var(...)` here, confirmed in the dry-run diff before applying, not assumed. **8 SVG icon components** (`BuildingIcon`/`UserBadgeIcon`/etc.) each take a `style` prop from their caller rather than declaring literal chrome inline - nothing to exclude at the definition site, the real call-site literals migrated normally like any other chrome.
+
+**A real colour trap, found and deliberately NOT migrated.** `rgba(245,245,240,0.65)` is byte-identical to `--afa-text-secondary`'s value - but it's not used as a `color:`/`border:` CSS property at all. It's the `stroke` attribute *inside a data-URI-encoded inline SVG string* (a `<select>` dropdown's custom chevron background-image), and the surrounding code's own comment already documents this as a deliberate choice ("Chevron stroke inlined as rgba(...) - the same..."). A `var(--afa-*)` reference embedded inside a `background-image: url("data:image/svg+xml,...")` string is a fundamentally different rendering context from the page's own CSS cascade - whether it would even resolve is browser/spec-dependent, and swapping it without testing across browsers would be a real risk to an already-working, already-documented pattern. Left untouched, flagged here rather than silently matched by value alone - the dispatch's own "role must match" rule extends naturally to "context must be swappable at all," and this one isn't a safe swap regardless of value equality.
+
+### Coverage - matches the dispatch's own predicted numbers exactly
+
+| Category | Before | After | Migrated | Dispatch predicted |
+|---|---|---|---|---|
+| spacing | 60 | 5 | **55** | 55 / 60 |
+| font-size | 33 | 3 | **30** | 30 / 33 |
+| radius | 8 | 3 | **5** | 5 / 8 |
+| rgba | 15 | 15 | 0 (the SVG-embedded trap above, deliberately not matched) | n/a |
+| raw-button | 2 | 2 | 0 (retrofit only) | n/a |
+
+**119 → 29 literals (76% reduction).** `scripts/design-token-baseline.json` deltas confirm independently: `font-size-literal` -30, `spacing-literal` -55, `radius-literal` -5, `rgb-rgba-literal`/`raw-button` ±0.
+
+### `hardcoded-font-family`'s 1 hit - same legitimate keyword every prior file in this batch/chain has found
+
+`fontFamily: 'inherit'` (L892, a `<textarea>`) - the same `GEN-2609-079`-documented rule gap (a real CSS keyword, not hardcoded debt). Left untouched.
+
+### Stays a literal
+
+font-size: `19px`×1, `12.5px`×1, `11.5px`×1 (both decimals, never scale candidates). spacing: `11px`×1, `9px`×1, `7px`×1, `40px`×1, `36px`×1. radius: `14px`×3 (3 separate cards/panels, all the same value - a real, repeated but still off-scale choice, not chased into a new token here).
+
+### Raw `<button>` - 2 sites, 0 migrated to a `Button` variant
+
+- **Role-switch approval CTA (L580):** amber outline (`border: 1.5px solid var(--afa-amber)`, `color: var(--afa-amber)`) - no plain-amber-outline variant exists (`outline`/`outline-neutral`/`outline-error` are all differently-coloured).
+- **Quick-links row button (L730):** full-width transparent list-row button (icon + title + chevron) - the same list-row shape every prior file's "no variant covers this" one-offs have already documented, not migrated to a component here either.
+
+Both already had every in-scope literal token-retrofitted.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing (unchanged). `check-design-tokens.js` against `origin/qa`: clean, 0 offenses. **`verify-equivalence.js` against `origin/qa`: 58 paired lines, 0 mismatches** (including the `<style>` block's own 2 `gap` lines). `node scripts/design-token-ratchet.js --update-baseline`: succeeded, refused-to-raise guard intact - `font-size-literal` 1200→1170, `spacing-literal` 2776→2721, `radius-literal` 461→456, `rgb-rgba-literal`/`raw-button` ±0. Real `next build`: clean, foreground, confirmed via `$PIPESTATUS`. `public/sw.js`'s `CACHE_VERSION`: untouched, nothing to revert.
+
+**Not verified this session:** a real QA-preview click-through. This page is reachable by any signed-in user (no admin gate) - a real Preview URL would let anyone verify it once one exists. Specific elements worth a targeted look: the `<style>` block's own `.afa-profile-grid`/`.afa-profile-col` responsive gap collapse at the 900px breakpoint (the exact 2 lines the `<style>`-block fix touched), the role-switch button, and the mobile "Quick links" hub rows.
+
+## Batch 4 summary (`GEN-2609-084`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `admin/feedback/page.tsx` | 136 | 27 | 80% | 63/70 | 38/38 | 7/7 | 1 |
+| `RegisterForm.tsx` | 126 | 36 | 71% | 52/57 | 30/30 | 8/11 | 0 |
+| `profile/page.tsx` | 119 | 29 | 76% | 55/60 | 30/33 | 5/8 | 0 |
+| **Batch total** | **381** | **92** | **76%** | **170/187** | **98/101** | **20/26** | **1** |
+
+**Matches the dispatch's own predicted batch totals exactly** (170/187 spacing, 98/101 font-size, 20/26 radius) - no deliberate 1-offs this batch (unlike `083`'s geometry-exclusion case), every per-file number reconciled cleanly. Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (each branch's own delta measured independently, not stacked, so this is a projection): `rgb-rgba-literal` -1 (948→~947), `font-size-literal` -98 (1200→~1102), `spacing-literal` -170 (2776→~2606), `radius-literal` -20 (461→~441) - matching the dispatch's own projected movement almost exactly (288 total literals predicted vs. this session's real 288 - `170+98+20=288`).
+
+**A new automated safety net built and validated this batch, per the dispatch's own explicit new requirement: `verify-equivalence.js`.** Resolves every `var(--afa-*)`/`var(--font-*)` in a changed line pair (paired via real `git diff` hunks, not naive line-index alignment) to its live `globals.css` value and requires the two to be identical after normalizing quotes/whitespace/bare-number-vs-`Npx`. Validated against 3 known cases before trusting it on real work (a known-clean migration, a migration with a deliberate comment-only insertion, and a re-injected copy of `083`'s own already-fixed `sed` bug) - 2 real bugs found and fixed in the checker itself during that validation (a CRLF line-ending mismatch, a comma-spacing normalization gap), same discipline this whole migration has needed from its own tooling every batch so far. Ran clean (0 mismatches) on all 3 files this batch, in addition to the manual diff review every prior file has already gotten.
+
+**Colour, batch-wide:** only 1 manual match this batch (admin/feedback's own `--afa-border-resting`) - the lowest colour-migration count of any batch so far, reflecting that files 2/3's own dominant translucent-cream tints (`0.12`/`0.65`-embedded-in-SVG) are real, different, already-considered values rather than near-misses. 1 more colour trap found and deliberately left alone (profile's SVG-embedded `--afa-text-secondary`-value chevron stroke) - a genuinely new class of non-match (context, not role or value), distinct from `082`'s role-mismatch trap.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-084-1-admin-feedback`, `-2-register-form`, `-3-profile`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json`, same resolution as every prior batch.
