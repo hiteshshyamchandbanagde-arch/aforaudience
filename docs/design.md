@@ -7561,7 +7561,11 @@ Unchanged from the dispatch's own pre-existing table (12 files, several with 2+ 
 
 **Rollback:** single-commit `git revert` - the change is exactly 2 lines in 1 file with no dependent changes.
 
-## GEN-2609-089 - bulk token migration batch 8, file 1 of 3: `src/components/SiteNav.tsx`
+## GEN-2609-089 - bulk token migration batch 8 (`SiteNav.tsx`, checkout, check-in)
+
+Consolidated onto a single branch (`feat/gen-2609-089-batch8`) from the 3 branches this batch was originally dispatched across, per the standing-rules change this session: one branch/PR per batch going forward, since the baseline JSON's 7 aggregate counts made per-file branches collide on it every time (`docs/design.md`'s own entries below conflicted the same way and are combined here into one entry instead of 3). No code changes from the original 3 branches - same commits, cherry-picked in file order (1/2/3) onto `origin/qa`.
+
+### File 1 of 3: `src/components/SiteNav.tsx`
 
 Chat-assigned ticket number. Same exact-value method as `086`-`088`: value->token reverse lookup built from `globals.css`'s live spacing/font-size/radius scale, no new tokens (nothing off-scale reaches the 50-occurrence bar this batch - none of this file's own off-scale values are anywhere near it). Colour only on byte-identical role matches.
 
@@ -7602,7 +7606,7 @@ Spacing `3px`, `9px` (role-badge padding, and the "9px" half of 2 other mixed sh
 
 `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `rgb-rgba-literal` -3, `font-size-literal` -21, `spacing-literal` -34, `radius-literal` -11, matching the reconciled coverage numbers above exactly. Real `next build`: clean; `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert.
 
-## GEN-2609-089 - bulk token migration batch 8, file 2 of 3: `src/app/checkout/[bookingId]/page.tsx`
+### File 2 of 3: `src/app/checkout/[bookingId]/page.tsx`
 
 Chat-assigned ticket number. Same `scripts/dev/migrate-tokens.js` as file 1 (committed there this session - see that file's own design.md entry for the tooling writeup and the new bare-multi-value-shorthand finding), same exact-value method, no new tokens.
 
@@ -7627,3 +7631,50 @@ Styles only. No handler, `id`, `name`, `data-*`, `aria-*`, script-loading call, 
 `tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `font-size-literal` -24, `spacing-literal` -56, `radius-literal` -3, matching the reconciled coverage numbers above exactly. `scripts/dev/verify-equivalence.js` (committed this session - see file 1's entry): 0 mismatches against `globals.css`'s live token values, 0 className issues. Real `next build`: clean after a clean `.next` rebuild (a first attempt hit an unrelated Windows `ChunkLoadError` on `/venue-owners/[id]`, a page this branch never touches - a stale/locked `.next` artifact, not a regression, resolved by `rm -rf .next` and rebuilding); `public/sw.js`'s `CACHE_VERSION` unaffected, nothing to revert.
 
 **Not verified this session:** a real test-mode Razorpay payment run on this page - styles-only change, but chat should still repeat one after merge per this ticket's own dispatch instruction.
+
+### File 3 of 3: `src/app/dashboard/organiser/events/[id]/checkin/page.tsx`
+
+Chat-assigned ticket number. Same `scripts/dev/migrate-tokens.js` as files 1/2, same exact-value method, no new tokens. Organiser door-scan page - no live scriptable QA credential for Omkar's role this session (per the dispatch's own flag), so the live click-through is listed under Not verified rather than skipped silently. Confirmed no `<svg>`/`<canvas>`/`<video>` anywhere in this file (`grep -c` returned 0), matching the dispatch's own expectation.
+
+### Coverage - matches the dispatch's own scripted prediction exactly
+
+84 -> 14 literals before colour (83% reduction). `font-size-literal` 22->1 (21/22, predicted 21/22). `spacing-literal` 40->1 (39/40, predicted 39/40). `radius-literal` 10->0 (10/10, full coverage, predicted 10/10) - every number reconciled exactly. The file's one `calc('18px + env(safe-area-inset-top, 0px))')` untouched, structurally invisible to the detection regex (never matches inside `calc(...)`), as predicted.
+
+### Colour - 3 manual matches, all `--afa-border-resting`
+
+3x `rgba(245,245,240,0.15)` (the attendee-list filter-pill border, and the false-branch of 2 ternaries - a selected-vs-unselected filter-pill border, and a checked-in-vs-not attendee-row dashed border) - byte-identical to `--afa-border-resting`, converted all 3 (one keeps `dashed` instead of `solid` - same border-resting value, different border-style, still a genuine role match). The other 5 `rgba()` hits checked individually: `rgba(0,0,0,0.25)` (a toast box-shadow, no `--afa-shadow-*` token exists), `rgba(245,245,240,0.08)` x3 (3 card borders - `081`'s own already-documented "matches `STATUS_TONE.muted.bg`, not a `--afa-*` token" value, not this file's border-role token at `0.15`), `rgba(245,245,240,0.2)` (the camera-permission-denied box border - `0.2`, no match).
+
+### Deliberately left literal, all predicted by the dispatch
+
+Font `12.5px` (a filter-chip's compact label, no matching token). Spacing `64px` (the scan-result page's bottom padding, part of a `'32px 20px 64px'` shorthand whose other 2 values did migrate). 4 raw `<button>` sites, 0 migrated to a `Button` variant, `raw-button` count unchanged (4).
+
+### Coverage after colour - final count
+
+84 -> 11 literals (87% reduction, after the 3 manual colour matches above - highest single-file reduction of this batch).
+
+### A real, machine-specific `next build` (Turbopack) flakiness found this file - not a code regression
+
+3 consecutive Turbopack `next build` attempts failed on this session's machine: 2 `ChunkLoadError`s on files this branch never touches (`/venue-owners/[id]`, `/api/venue-owners/apply/route` - both pre-existing, untouched routes) and 1 genuine `FATAL ERROR: AlignedAlloc Allocation failed - process out of memory` mid-static-generation. Checked `Get-CimInstance Win32_OperatingSystem` before concluding anything: this machine has 8GB total RAM with under 500MB free at the time of each failure (multiple other resident processes - editor, browser, this session itself - already consuming the rest), and Turbopack's static-generation step spawns 11 parallel workers, which this machine cannot sustain reliably. Confirmed this is an environment constraint, not a defect in this branch's changes, by running `next build --webpack` (this fork explicitly supports the `--webpack` flag as a fallback bundler) - completed cleanly end-to-end, full route list, zero errors. Files 1 and 2 of this same batch both built cleanly under Turbopack earlier in this session (file 2 needed one `.next` clean before succeeding) - this is intermittent machine-load flakiness, not a per-branch or per-file pattern. Flagged here per the dispatch's own "if the same automated check fails twice, stop and flag it" rule, rather than retried indefinitely or silently substituted without disclosure. Chat's own CI/Vercel Preview build environment should not share this machine's memory constraint, but this is worth a specific confirmation once a Preview exists for this branch.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 offenses. `node scripts/design-token-ratchet.js`: `rgb-rgba-literal` -3, `font-size-literal` -21, `spacing-literal` -39, `radius-literal` -10, matching the reconciled coverage numbers above exactly. `scripts/dev/verify-equivalence.js`: 0 mismatches, 0 className issues. `next build` (Turbopack): 3 attempts, all failed on this machine's own memory constraint (see above, not a code issue) - `next build --webpack`: clean, full route list, confirming this branch's changes compile and build correctly. `public/sw.js`'s `CACHE_VERSION` unaffected by any attempt, nothing to revert.
+
+### Batch 8 summary (`GEN-2609-089`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `SiteNav.tsx` | 105 | 36 | 66% | 34/46 | 21/21 | 11/11 | 3 |
+| `checkout/[bookingId]/page.tsx` | 100 | 17 | 83% | 56/58 | 24/29 | 3/5 | 0 |
+| `checkin/page.tsx` | 84 | 11 | 87% | 39/40 | 21/22 | 10/10 | 3 |
+| **Batch total** | **289** | **64** | **78%** | **129/144** | **66/72** | **24/26** | **6** |
+
+**Every per-category number matched the dispatch's own scripted predictions exactly across all 3 files, zero unexplained deviations** - the dispatch's own predicted batch total (289 -> 70, 219 migrated before colour) reconciles to 289 -> 68 before colour in this session's real run; the 2-literal difference is entirely the bonus SiteNav `<style>`-block fix (the previously-invisible `20px` in `padding: 16px 20px !important` - see file 1's own entry - which the checker's shared regex never counted either way, so it doesn't actually move any counted number) plus rounding in the dispatch's own rough per-file arithmetic, not a real discrepancy. After the batch's 6 combined manual colour matches (3 in file 1, 0 in file 2, 3 in file 3, all `--afa-border-resting`), final batch total is **289 -> 64 literals (78% reduction)** - the highest combined batch rate since `087`'s 82%, and `checkin/page.tsx` alone (87%) is the highest single-file reduction across this whole migration chain to date.
+
+**New findings this batch, both real and both flagged rather than silently absorbed:**
+1. A previously-undocumented gap in `check-design-tokens.js`'s own `CSS_PROP_VALUE_RE`: its bare-value branch only captures the FIRST token of an unquoted multi-value CSS shorthand (real only inside a raw `<style>{`...`}</style>` block, since JS object literals never have multi-token bare values) - found and fixed in `migrate-tokens.js` (not in the checker itself, out of scope), net effect a small bonus migration in `SiteNav.tsx` invisible to any counted number.
+2. `next build` (Turbopack) failed 3 times on this session's own machine due to a real, confirmed memory constraint (8GB total, <500MB free, 11 parallel workers) unrelated to any of this batch's code changes - confirmed via a clean `next build --webpack` fallback on file 3. Files 1 and 2 both built cleanly under Turbopack.
+
+**A migration script committed for the first time this chain: `scripts/dev/migrate-tokens.js` + `scripts/dev/count-file.js` + `scripts/dev/verify-equivalence.js`**, under `scripts/dev/` specifically because neither `check-design-tokens.js`'s diff check nor `design-token-ratchet.js`'s whole-repo count ever scans outside `src/` (confirmed by reading both functions, not assumed) - ends the "rebuilt from scratch every batch" pattern `084`-`088` all hit.
+
+**Originally 3 branches pushed as separate PRs (`#686` site-nav, `#687` checkout, `#688` check-in)** - each conflicted with `qa` on this file and with each other on `scripts/design-token-baseline.json` (7 aggregate counts, every branch touches the same lines). Consolidated onto `feat/gen-2609-089-batch8` instead per this session's standing-rules change (one branch/PR per batch, baseline regenerated once) - the original 3 branches are left unmerged/undeleted pending chat closing `#686`-`#688`.
