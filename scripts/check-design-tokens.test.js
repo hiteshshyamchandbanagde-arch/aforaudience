@@ -156,6 +156,37 @@ t('radius-literal: border-radius 50%/100% (circle/pill) is not flagged', () => {
 })
 
 // ---------------------------------------------------------------------
+// GEN-2609-089 (checker fix) - unquoted multi-value CSS shorthand. The
+// quoted form (`padding: '10px 20px'`) already counted every token (see
+// the shorthand test above); an UNQUOTED shorthand - the form raw CSS
+// text inside a `<style>{`...`}</style>` block uses, e.g.
+// `padding: 8px 12px;` - used to stop at the first token, because the
+// bare-value branch's lookahead treated plain whitespace as a valid
+// terminator on its own (needed so a JS single value like
+// `fontSize: 14 }` still matches). See CSS_PROP_VALUE_RE's own comment.
+// ---------------------------------------------------------------------
+t('spacing-literal: unquoted two-value shorthand counts both tokens', () => {
+  const rule = ruleByName('spacing-literal')
+  assert.deepEqual(rule.extract(`        padding: 8px 12px;`), ['8px', '12px'])
+})
+t('spacing-literal: unquoted four-value shorthand counts all four tokens', () => {
+  const rule = ruleByName('spacing-literal')
+  assert.deepEqual(rule.extract(`        margin: 4px 8px 4px 8px;`), ['4px', '8px', '4px', '8px'])
+})
+t('font-size-literal: unquoted shorthand with mixed units counts both tokens', () => {
+  const rule = ruleByName('font-size-literal')
+  assert.deepEqual(rule.extract(`        font-size: 8px 1rem;`), ['8px', '1rem'])
+})
+t('spacing-literal: two adjacent unquoted single-value declarations are each counted once, not merged', () => {
+  const rule = ruleByName('spacing-literal')
+  assert.deepEqual(
+    rule.extract(`        padding: 8px; margin: 12px;`),
+    ['8px', '12px'],
+    'each declaration is a single value terminated by its own semicolon - neither should bleed into the other or be counted twice'
+  )
+})
+
+// ---------------------------------------------------------------------
 // raw-button: file-level exemption for Button.tsx itself.
 // ---------------------------------------------------------------------
 t('raw-button: isExemptFile is true only for src/components/ui/Button.tsx', () => {

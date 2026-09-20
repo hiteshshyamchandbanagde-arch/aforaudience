@@ -79,7 +79,26 @@ const HEAD_REF = process.env.HEAD_REF || 'HEAD'
 // e.g. the `<style>{`...`}</style>` pattern this codebase uses in a
 // couple of places). Captures the raw (unquoted) value text in group 2
 // (numeric) or group 3 (quoted).
-const CSS_PROP_VALUE_RE = /([a-zA-Z-]+)\s*:\s*(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?)(?=[,;}\s]|$)|['"`]([^'"`]*)['"`])/g
+//
+// GEN-2609-089 (checker fix) - group 2's bare/unquoted branch used to
+// stop at the FIRST numeric token, because its lookahead treated a bare
+// `\s` as a valid terminator on its own (needed for JS object contexts
+// like `fontSize: 14 }` / `fontSize: 14, padding: ...`, where the value
+// is always a single token). That made it silently undercount an
+// unquoted multi-value CSS shorthand - the raw `<style>{`...`}</style>`
+// blocks this codebase uses can write `padding: 8px 12px;` with no
+// quotes, and everything after the first space was invisible to this
+// regex (found via SiteNav.tsx's raw <style> block; scripts/dev/migrate-
+// tokens.js's MATCH_RE_CSS already special-cased this, see its own
+// comment - this was the matching fix on the checker side, kept as one
+// shared regex rather than migrate-tokens.js's two-regex/block-tracking
+// split, since appending an optional repeated-numeric-token group here
+// is sufficient: it only ever consumes MORE same-shaped bare numeric
+// tokens, so a genuine single JS value (immediately followed by `,`/`}`
+// or end-of-line, per the original lookahead) still matches exactly as
+// before - it never fires when there isn't another numeric token
+// immediately available.
+const CSS_PROP_VALUE_RE = /([a-zA-Z-]+)\s*:\s*(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?(?:\s+-?\d+(?:\.\d+)?(?:px|rem|em|%)?)*)(?=[,;}\s]|$)|['"`]([^'"`]*)['"`])/g
 
 function extractPropValues(line, propNameSet) {
   const found = []

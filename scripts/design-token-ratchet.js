@@ -30,6 +30,20 @@
 //     for recording a migration PR's real progress, not a backdoor to
 //     silently raise the ratchet and hide a regression. Run this once
 //     with no existing baseline file to create the first one.
+//
+//   node scripts/design-token-ratchet.js --update-baseline --allow-raise
+//     GEN-2609-089 (checker fix) - the one legitimate exception to "never
+//     raises." check-design-tokens.js's CSS_PROP_VALUE_RE undercounted an
+//     unquoted multi-value CSS shorthand (`padding: 8px 12px;` only
+//     counted `8px`) - fixing that counts MORE of the pre-existing debt
+//     that was always there, it doesn't add new debt. Every prior batch's
+//     reductions were real counts under the OLD (undercounting) rule, so
+//     the corrected totals must rise once here to reflect what was always
+//     in the tree. --allow-raise is required IN ADDITION to
+//     --update-baseline specifically so this stays a deliberate,
+//     reviewed, one-off correction (recorded in docs/design.md) and never
+//     a silent way to paper over a real regression with an explicit flag
+//     someone reaches for out of habit.
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
@@ -37,6 +51,7 @@ const { RULES, isCheckedFile, isExemptFile, tokenOkReason } = require('./check-d
 
 const BASELINE_PATH = path.join(__dirname, 'design-token-baseline.json')
 const UPDATE = process.argv.includes('--update-baseline')
+const ALLOW_RAISE = process.argv.includes('--allow-raise')
 
 function listCheckedFiles() {
   // git ls-files respects .gitignore and skips node_modules/.next entirely
@@ -148,15 +163,21 @@ function main() {
       process.exit(0)
     }
     const raising = rows.filter((r) => r.base !== undefined && r.live > r.base)
-    if (raising.length > 0) {
+    if (raising.length > 0 && !ALLOW_RAISE) {
       console.error(
         `\ndesign-token ratchet: refusing to update baseline - ${raising.length} categor${raising.length === 1 ? 'y would' : 'ies would'} RISE: ${raising.map((r) => `${r.name} (${r.base} -> ${r.live})`).join(', ')}.`
       )
       console.error('--update-baseline only lowers a baseline deliberately (e.g. after a migration PR) - it never raises one as a side effect. Fix the regression first.')
+      console.error('If this rise is a deliberate, documented measurement correction (e.g. a counting-bug fix), re-run with --allow-raise.')
       process.exit(1)
     }
+    if (raising.length > 0) {
+      console.log(
+        `\ndesign-token ratchet: ${raising.length} categor${raising.length === 1 ? 'y' : 'ies'} RISING with --allow-raise (deliberate correction, not a regression): ${raising.map((r) => `${r.name} (${r.base} -> ${r.live})`).join(', ')}.`
+      )
+    }
     writeBaseline(counts)
-    console.log('\ndesign-token ratchet: baseline updated (no category raised).')
+    console.log('\ndesign-token ratchet: baseline updated.')
     process.exit(0)
   }
 
