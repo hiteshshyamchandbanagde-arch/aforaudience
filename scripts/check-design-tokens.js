@@ -328,10 +328,27 @@ const RULES = [
 // suppresses every rule on that line - and is always printed in CI
 // output (both pass and fail runs), so a bypass can never go quietly
 // unnoticed the way a silent allowlist entry could.
+//
+// GEN-2609-085 - the `//` form only works where the flagged literal
+// already sits inside a JS expression. It can't be used on a raw JSX
+// markup line like `<path fill="#4285F4" d="..."/>` (an SVG icon's own
+// attributes, not wrapped in `{}`): appending `// text` there isn't a
+// comment at all in JSX - it becomes a literal sibling text node
+// (`// text` would actually render inside the <svg>), which is exactly
+// the real-world case this ticket exists to fix (the Google 4-color
+// logo markup in RegisterForm.tsx/login/page.tsx, never annotated
+// because the `//` form couldn't be used on it). Added a second,
+// equally-visible form for exactly that context: a same-line JSX
+// comment, `{/* token-ok: <reason> */}`, placed immediately after the
+// element with no separating whitespace token (so it doesn't itself
+// inject a stray whitespace text node). Both forms are simple
+// substring/regex matches, same "honor system, not a parser" tradeoff
+// as the original - see this file's own header and docs/design.md.
 const TOKEN_OK_RE = /\/\/\s*token-ok:\s*(.+?)\s*$/
+const TOKEN_OK_JSX_RE = /\{\/\*\s*token-ok:\s*(.+?)\s*\*\/\}\s*$/
 
 function tokenOkReason(line) {
-  const m = TOKEN_OK_RE.exec(line)
+  const m = TOKEN_OK_RE.exec(line) || TOKEN_OK_JSX_RE.exec(line)
   return m ? m[1] : null
 }
 
