@@ -7368,3 +7368,31 @@ Spacing `100px`, `5px`, `9px` ×2 (no matching token).
 **No new bug classes found this batch** - the 4 lessons from `082`-`086` (raw `<style>` block quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were all checked against explicitly and none recurred. `SupportWidget.tsx`'s one raw `<style>` block was confirmed untouched by diff, not assumed safe from the property-list scoping alone.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-087-1-venue-create`, `-2-support-widget`, `-3-organiser-tour`) - chat opens/merges each independently, per this dispatch's own standing rules. Expected `docs/design.md`/`scripts/design-token-baseline.json` conflict, same resolution as every prior batch.
+
+## GEN-2609-088 - bulk token migration batch 7, file 1 of 3: `organisers/[id]/page.tsx`
+
+Chat-assigned ticket number. Same method as `086`/`087`: exact-value swaps onto the existing spacing/font-size/radius scales via a value→token reverse lookup built from `globals.css`, no new tokens (re-measured against `qa@f708531` per the dispatch's own explicit rule - nothing off-scale reaches the 50-occurrence bar). Colour only on byte-identical role matches. No Tailwind arbitrary-value classes in this file.
+
+### A new false-positive class found: a documentation comment mentioning a CSS value in `property: value` shape
+
+A multi-line `//` comment (explaining why this page omits the dashboard family's `borderRadius: 999px` pill treatment) contains the literal text `borderRadius: 999px` in prose. The migration script's own detection regex - the same shape `check-design-tokens.js` uses - has no comment awareness, so it matched this prose exactly like real code and would have rewritten a documentation sentence into `borderRadius: 'var(--afa-radius-pill)'`, a nonsensical edit that doesn't correspond to any actual style object. Caught in the mandatory dry-run diff review, not by any automated check. Fixed by adding a comment-line skip (`//`, `/*`, `*`-prefixed trimmed lines) to the migration script before generating the real diff - same class of false positive this checker's own header already documents for `// ... (#212)`-style PR-reference comments matching the hex rule. **Not fixed in `check-design-tokens.js` itself** (out of this ticket's scope, pre-existing debt): the checker's own `radius-literal` rule still counts this same comment line as 1 literal on the whole-repo ratchet, exactly as `081` `082`'s hardcoded-font-family `'inherit'` false positives already do every batch - reported, not silently worked around.
+
+### Coverage - font/spacing match the dispatch's own scripted prediction exactly; radius differs by the comment false positive above
+
+94 → 29 literals before colour (69% reduction, before the 5 manual colour matches below). `font-size-literal` 24→2 (22/24, predicted 22/24), `spacing-literal` 51→8 (43/51, predicted 43/51) - both exact. `radius-literal` 1→1 (0/1 real migrated, predicted 1/1) - the dispatch's own prediction counted the comment-prose match above as a real migratable literal; it isn't one (see above), so it's correctly left untouched rather than force-migrated to hit the predicted number.
+
+### Colour - 5 manual matches, 2 roles, not predicted by the dispatch (excluded from its table on purpose)
+
+3× `color: rgba(245,245,240,0.4)` (the "00"/tour-count badge digits, the breadcrumb separator, the organiser code chip) - byte-identical to `--afa-text-muted`, a genuine `color:`-role match. 2× `rgba(245,245,240,0.15)` used as a `border:` value (the empty-state dashed border, the loading-spinner's track ring) - byte-identical to `--afa-border-resting`. All 5 converted. The other 12 `rgba()` hits (cream `0.1`/`0.08` ×7, near-black `0.4`/`0.7` on non-cream RGB ×2, amber `0.15`/`0.6` ×2) checked individually - none match an existing token's value.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Fonts `22px`, `17px` (no matching token). Spacing `56px`, `5px` (×2, badge/city-tag padding), `40px`, `64px` (no matching token). 1 raw `<button>` site, 0 migrated to a `Button` variant.
+
+### Coverage after colour - final count
+
+94 → 24 literals (74% reduction, after the 5 manual colour matches above).
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing.
