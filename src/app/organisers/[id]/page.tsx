@@ -120,20 +120,20 @@ const TOUR_DISPLAY_LIMIT = Infinity
 
 function SectionHeader({ eyebrow, count }: { eyebrow: string; count: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: "12px", borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "12px" }}>
-      <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{eyebrow}</h2>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,245,240,0.4)" }}>{String(count).padStart(2, "0")}</span>
+    <div style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-3)", borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "var(--afa-space-3)" }}>
+      <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{eyebrow}</h2>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", color: "var(--afa-text-muted)" }}>{String(count).padStart(2, "0")}</span>
     </div>
   )
 }
 
 function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", border: "1px dashed rgba(245,245,240,0.15)", background: "rgba(31,31,31,0.4)", padding: "56px 24px", textAlign: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "rgba(31,31,31,0.4)", padding: "56px var(--afa-space-6)", textAlign: "center" }}>
       <span style={{ color: "var(--afa-amber)" }}>{icon}</span>
       <div>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
-        <p style={{ margin: "8px auto 0", maxWidth: "420px", fontSize: "15px", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{body}</p>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
+        <p style={{ margin: "var(--afa-space-2) auto 0", maxWidth: "420px", fontSize: "var(--afa-text-15px)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{body}</p>
       </div>
     </div>
   )
@@ -171,9 +171,9 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
         position: "relative",
         display: "flex",
         alignItems: "flex-start",
-        gap: "20px",
+        gap: "var(--afa-space-5)",
         background: "var(--afa-surface-raised)",
-        padding: "24px",
+        padding: "var(--afa-space-6)",
         textDecoration: "none",
         opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
         pointerEvents: navigatingId && !isNavigatingThis ? "none" : undefined,
@@ -182,24 +182,24 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
     >
       {isNavigatingThis && (
         <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+          <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
         </div>
       )}
-      <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid rgba(245,245,240,0.1)", padding: "8px 0" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
-        <span style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 500, color: "var(--afa-text-primary)" }}>{day}</span>
+      <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-2) 0" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
+        <span style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{day}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h4 className="afa-organiser-event-title" style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)", transition: "color 0.3s ease" }}>
+        <h4 className="afa-organiser-event-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)", transition: "color 0.3s ease" }}>
           {event.title}
         </h4>
-        <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--afa-text-secondary)" }}>
+        <div style={{ marginTop: "var(--afa-space-10px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
             <ClockIcon style={{ width: "14px", height: "14px", color: "var(--afa-amber)" }} />
             {formatStartTime(event.startTime)}
           </span>
           {event.venue && (
-            <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--afa-text-secondary)" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-6px)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
               <PinIcon style={{ width: "14px", height: "14px", color: "var(--afa-amber)" }} />
               {event.venue.name}, {event.venue.city}
             </span>
@@ -208,7 +208,7 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
       </div>
       <span
         className="afa-organiser-event-details"
-        style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "6px", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)", transition: "opacity 0.2s ease" }}
+        style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "var(--afa-space-6px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)", transition: "opacity 0.2s ease" }}
       >
         {tr.organiserDetailPage.detailsLink}
         <ArrowIcon style={{ width: "14px", height: "14px" }} />
@@ -226,11 +226,11 @@ function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
   // sharp-corner rule everywhere else on it.
   const chrome: React.CSSProperties = {
     fontFamily: "var(--font-mono)",
-    fontSize: "11px",
+    fontSize: "var(--afa-text-micro)",
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    padding: "5px 10px",
+    padding: "5px var(--afa-space-10px)",
     whiteSpace: "nowrap",
   }
   if (status === "LIVE") {
@@ -243,34 +243,34 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
   const cities = tourCities(tour.stops)
   const windowLabel = formatTourWindow(tour.stops)
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px", background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", padding: "24px" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-5)", background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-6)" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--afa-space-4)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", minWidth: 0 }}>
           <RouteIcon style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
           <h4 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)" }}>{tour.title}</h4>
         </div>
         <TourStatusBadge status={tour.status} tr={tr} />
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "32px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-32px)" }}>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStopsLabel}</div>
-          <div style={{ marginTop: "6px", fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 500, color: "var(--afa-text-primary)" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStopsLabel}</div>
+          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>
             {tr.organiserDetailPage.tourStopsTemplate.replace("{n}", String(tour.stops.length))}
           </div>
         </div>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourWindowLabel}</div>
-          <div style={{ marginTop: "6px", fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 500, color: "var(--afa-text-primary)" }}>{windowLabel || "—"}</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourWindowLabel}</div>
+          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{windowLabel || "—"}</div>
         </div>
       </div>
 
       {cities.length > 0 && (
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourCitiesLabel}</div>
-          <div style={{ marginTop: "8px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourCitiesLabel}</div>
+          <div style={{ marginTop: "var(--afa-space-2)", display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             {cities.map((c) => (
-              <span key={c} style={{ border: "1px solid rgba(245,245,240,0.1)", padding: "5px 10px", fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>
+              <span key={c} style={{ border: "1px solid rgba(245,245,240,0.1)", padding: "5px var(--afa-space-10px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>
                 {c}
               </span>
             ))}
@@ -310,7 +310,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
     return (
       <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)" }}>
         <SiteNav backHref="/events" backLabel={tr.organiserDetailPage.backToEvents} />
-        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "48px 24px", color: "var(--afa-text-primary)" }}>{tr.organiserDetailPage.notFound}</div>
+        <div style={{ maxWidth: "1024px", margin: "0 auto", padding: "var(--afa-space-48px) var(--afa-space-6)", color: "var(--afa-text-primary)" }}>{tr.organiserDetailPage.notFound}</div>
       </main>
     )
   }
@@ -332,7 +332,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         .afa-organiser-avatar { width: 144px; height: 144px; }
         @media (min-width: 768px) { .afa-organiser-avatar { width: 176px; height: 176px; } }
         .afa-organiser-hero { display: grid; grid-template-columns: 1fr; gap: 40px; }
-        @media (min-width: 768px) { .afa-organiser-hero { grid-template-columns: auto 1fr; align-items: start; gap: 48px; } }
+        @media (min-width: 768px) { .afa-organiser-hero { grid-template-columns: auto 1fr; align-items: start; gap: var(--afa-space-48px); } }
         .afa-organiser-tours-grid { display: grid; grid-template-columns: 1fr; }
         @media (min-width: 768px) { .afa-organiser-tours-grid { grid-template-columns: 1fr 1fr; } }
         .afa-organiser-breadcrumb-link { transition: color 0.2s ease; }
@@ -347,7 +347,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
       <SiteNav backHref="/events" backLabel={tr.organiserDetailPage.backToEvents} />
 
       <div className="afa-organiser-container">
-        <nav style={{ display: "flex", alignItems: "center", gap: "8px", padding: "32px 0", fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(245,245,240,0.4)" }}>
+        <nav style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: "var(--afa-space-32px) 0", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--afa-text-muted)" }}>
           <Link href="/events" className="afa-organiser-breadcrumb-link" style={{ color: "inherit", textDecoration: "none" }}>
             {tr.organiserDetailPage.breadcrumbEvents}
           </Link>
@@ -369,26 +369,26 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           </div>
 
           <div>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
                 {tr.organiserDetailPage.eyebrowOrganiser}
               </span>
               {organiser.code && (
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.12em", color: "rgba(245,245,240,0.4)" }}>{organiser.code}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 500, letterSpacing: "0.12em", color: "var(--afa-text-muted)" }}>{organiser.code}</span>
               )}
             </div>
 
-            <h1 style={{ marginTop: "16px", fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
+            <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)" }}>
               {organiser.orgName}
             </h1>
 
             {organiser.bio && (
-              <p style={{ marginTop: "24px", maxWidth: "640px", fontSize: "17px", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{organiser.bio}</p>
+              <p style={{ marginTop: "var(--afa-space-6)", maxWidth: "640px", fontSize: "17px", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{organiser.bio}</p>
             )}
 
-            <div style={{ marginTop: "32px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "24px" }}>
+            <div style={{ marginTop: "var(--afa-space-32px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-6)" }}>
               <OrganiserFollowButton organiserId={organiser.id} />
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-muted)" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-muted)" }}>
                 {tr.organiserDetailPage.memberSinceTemplate.replace("{year}", String(memberSinceYear))}
               </span>
             </div>
@@ -397,7 +397,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
 
         <section style={{ paddingTop: "64px" }}>
           <SectionHeader eyebrow={tr.organiserDetailPage.upcomingEventsHeading} count={upcoming.length} />
-          <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ marginTop: "var(--afa-space-6)", display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
             {upcoming.length > 0 ? (
               upcoming.map((e) => <EventDateCard key={e.id} event={e} tr={tr} navigatingId={navigatingId} onNavigate={setNavigatingId} />)
             ) : (
@@ -407,7 +407,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
 
           <div style={{ marginTop: "56px" }}>
             <SectionHeader eyebrow={tr.organiserDetailPage.pastEventsHeading} count={past.length} />
-            <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "16px", opacity: past.length > 0 ? 0.85 : 1 }}>
+            <div style={{ marginTop: "var(--afa-space-6)", display: "flex", flexDirection: "column", gap: "var(--afa-space-4)", opacity: past.length > 0 ? 0.85 : 1 }}>
               {past.length > 0 ? (
                 visiblePast.map((e) => <EventDateCard key={e.id} event={e} tr={tr} navigatingId={navigatingId} onNavigate={setNavigatingId} />)
               ) : (
@@ -418,7 +418,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
               <button
                 onClick={() => setPastExpanded(true)}
                 className="afa-organiser-view-all"
-                style={{ marginTop: "20px", display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}
+                style={{ marginTop: "var(--afa-space-5)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}
               >
                 {tr.organiserDetailPage.viewAllPastTemplate.replace("{n}", String(past.length))}
                 <ArrowIcon style={{ width: "14px", height: "14px" }} />
@@ -429,7 +429,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
 
         <section style={{ paddingTop: "64px" }}>
           <SectionHeader eyebrow={tr.organiserDetailPage.toursHeading} count={organiser.tours.length} />
-          <div className="afa-organiser-tours-grid" style={{ marginTop: "24px", gap: "16px" }}>
+          <div className="afa-organiser-tours-grid" style={{ marginTop: "var(--afa-space-6)", gap: "var(--afa-space-4)" }}>
             {visibleTours.length > 0 ? (
               visibleTours.map((t) => <TourCard key={t.id} tour={t} tr={tr} />)
             ) : (
