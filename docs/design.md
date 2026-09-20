@@ -7465,3 +7465,42 @@ Font `11.5px` (a metadata label, no matching token). 1 `hardcoded-font-family` (
 **9 manual colour matches, all `--afa-border-resting`** (5 in file 1, 0 in file 2, 4 in file 3) - highest colour-match count of any batch since `086`. File 2's 3 `rgba()` hits on the `specialNotesStatus` badge are `079`'s own already-documented `STATUS_TONE` duplicate-with-a-contrast-bug finding, not `--afa-*` tokens - correctly left untouched again.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-088-1-organiser-profile`, `-2-organiser-event-edit`, `-3-feedback-detail-panel`) - chat opens/merges each independently, per this dispatch's own standing rules. Expected `docs/design.md`/`scripts/design-token-baseline.json` conflict, same resolution as every prior batch.
+
+## BUG-2609-055 - Seat Map Builder renders in the browser-default serif
+
+Root cause (chat-verified before dispatching): this page's `<main>` set no `fontFamily`, unlike every other venue-portal page (e.g. `venue/[id]/edit/page.tsx`'s `fontFamily: 'var(--font-sans)'`). `html { font-family: var(--font-sans), ... }` in `globals.css` can't resolve on its own, because the next/font CSS variables are declared on `<body className>`, not `<html>` - a `<main>` (or any element) with no explicit `fontFamily` falls through to the browser's default serif rather than the app's sans stack. Predates the token migration - this file's 6 `fontFamily` uses are unchanged since `75042c4`, well before `081`-`088`'s work started.
+
+### Fix - minimal, one file
+
+Added `fontFamily: 'var(--font-sans)'` to the two `<main style={{...}}>` elements (the error-state early return, and the main render). Nothing else touched - no change to `globals.css`/`layout.tsx`'s font-variable placement, since moving them onto `<html>` is a site-wide decision out of this bug's scope.
+
+### This is an intentional visual change (serif → sans, whole page)
+
+Font metrics differ between the fallback serif and `var(--font-sans)`, so text reflow was checked across every fixed-width chrome element (toolbar buttons, dialogs, panel labels, the pill-shaped mode toggles) - nothing overflowed or wrapped unexpectedly at a quick visual pass of the source (see Not verified below for the live-account caveat).
+
+### Read-only audit: every top-level `<main>` (or root wrapper) with no `fontFamily`, for chat to size the site-wide fix
+
+No fix applied to any of these - list only, per the dispatch's own instruction.
+
+| File | Line(s) | Note |
+|---|---|---|
+| `src/app/about/page.tsx` | 174 | Editorial page, custom `PAPER`/`INK` theme, no font set at all |
+| `src/app/(public)/tours/[slug]/page.tsx` | 38, 48 | Both the not-found and main-render `<main>` |
+| `src/app/(public)/venue-owners/[id]/page.tsx` | 37 | Not-found branch only - the main render (L50) already has `fontFamily` |
+| `src/app/dashboard/admin/bookings/page.tsx` | 118, 131, 170 | All 3 `<main>` instances in this file |
+| `src/app/dashboard/admin/diary/page.tsx` | 233 | |
+| `src/app/dashboard/admin/page.tsx` | 219, 236 | Loading/error branch and main render |
+| `src/app/dashboard/organiser/tours/create/page.tsx` | 63 | |
+| `src/app/dashboard/organiser/tours/page.tsx` | 68 | |
+| `src/app/dashboard/organiser/tours/[id]/page.tsx` | 119, 228 | Not-found branch and main render |
+| `src/app/my-feedback/page.tsx` | 339 | |
+| `src/app/organisers/[id]/page.tsx` | 311, 328 | Not-found branch and main render - this batch's own `GEN-2609-088` file 1, unaffected by that migration since font-family placement was out of that ticket's scope |
+| `src/app/dev/razorpay-test/page.tsx` | 202 | Dev-only test page, lowest priority |
+
+Method: `grep -rn "<main"` across `src/app`/`src/components`, plus a separate sweep for pages using a `100vh` root `<div>` instead of `<main>` (found none missing `fontFamily` that `<main>`'s own sweep hadn't already covered - `dashboard/audience/page.tsx`'s own div-root already sets it).
+
+### Verify
+
+`tsc --noEmit` clean. `check-design-tokens.js` against `origin/qa`: clean, 0 offenses (`var(--font-sans)` isn't a hardcoded-font-family hit - the rule only fires when the quoted value does NOT contain `var(`). `design-token-ratchet.js`: all 7 categories unchanged from baseline, confirming this fix adds zero literal debt.
+
+**Not verified:** live visual check - needs Vinayak's account (`vinayak.venue@aforaudience.qa`), no scriptable Venue-Owner QA credential this session.
