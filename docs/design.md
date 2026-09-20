@@ -7285,6 +7285,54 @@ The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` al
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch. `login/page.tsx`'s branch does NOT depend on `GEN-2609-085`'s branch - both touch disjoint lines of the same file and merge cleanly in either order.
 
+## GEN-2609-087 - bulk token migration batch 6, file 1 of 3: `dashboard/venue/create/page.tsx`
+
+Chat-assigned ticket number (not provisional this time). Same method as `086`: exact-value swaps onto the existing spacing/font-size/radius scales via a value→token reverse lookup built from `globals.css`, no new tokens (re-measured against `qa@8fb970e` per the dispatch's own explicit rule - nothing off-scale reaches the 50-occurrence bar). Colour only on byte-identical role matches; Tailwind arbitrary-value classes left untouched if found (none were).
+
+### Coverage - matches the dispatch's own scripted prediction exactly
+
+105 → 24 literals (77% reduction). `font-size-literal` 24→3 (21/24, predicted 21/24), `spacing-literal` 62→8 (54/62, predicted 54/62), `radius-literal` 6→0 (6/6, predicted 6/6) - every number reconciled exactly against the dispatch's own table, first time this has happened with zero deviation across all 3 categories.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Fonts `17px`, `13.5px`, `12.5px` (no matching token). Spacing `80px`, `26px` ×2, `5px`, `7px`, negative margins `-8px`/`-28px` (no negative tokens, per `083`'s own precedent). 2 hex `#171717` (L24, L408) - checked against every `--afa-*` token value, no match, not guessed. 1 bare `#212` (L336) is a PR-reference comment (`PR #212`), not a real hex - same false-positive shape the checker's own regex already excludes by requiring a quoted match.
+
+### Colour - zero manual matches
+
+All 9 `rgba()` hits (alpha `0.08`/`0.12`/`0.05`/`0.5`/`0.2`, one on a non-cream RGB `255,90,54`) checked individually - none match an existing token's value.
+
+### Raw `<button>` - 2 sites, 0 migrated to a `Button` variant
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `verify-equivalence.js` (includes `086`'s `classNameIssues()` check): 50 paired lines, 0 mismatches.
+
+
+## GEN-2609-087 - bulk token migration batch 6, file 2 of 3: `SupportWidget.tsx`
+
+Renders on every page (`layout.tsx`) - highest blast radius of the batch, per the dispatch's own flag. 2 `<svg>` icons and the already-`token-ok`-annotated chevron data-URI (`L712`) left untouched, as instructed. No `id`/`aria-*`/`name`/`placeholder`/`data-*` attribute touched - confirmed via diff review, none of those appear in any changed line.
+
+### Coverage - matches the dispatch's own scripted prediction exactly, highest reduction of the batch
+
+97 → 17 literals (82% reduction). `font-size-literal` 22→0 (22/22, predicted 22/22, full coverage), `spacing-literal` 52→1 (51/52, predicted 51/52), `radius-literal` 8→1 (7/8, predicted 7/8).
+
+### The one raw `<style>{`...`}</style>` block in this file (L444) - confirmed untouched, not just assumed
+
+Its only properties are `bottom`/`max-height` (via `calc()`) - neither is in `SPACING_PROPS`/`RADIUS_PROPS`/`FONT_SIZE_PROPS`, so the migration script never matched a line inside it at all. Diffed explicitly to confirm (not inferred from the property list alone) - 0 changed lines inside the block. The dispatch's lesson 1 (unquoted `var()` in raw CSS) didn't apply here, but was checked for regardless.
+
+### Deliberately left literal, all predicted by the dispatch
+
+Spacing `40px` (×2, the fixed-button `bottom` offset and a padding shorthand's first part). Radius `16` (the panel's own `borderRadius: 16`, bare). 1 `hardcoded-font-family` (`fontFamily: 'inherit'` - a legitimate CSS keyword, not real hardcoding, same recurring false-positive-shaped hit every batch in this chain has found). 7 raw `<button>` sites, 0 migrated.
+
+### Colour - zero manual matches
+
+7 `rgba()` hits (box-shadow blacks at `0.25`/`0.32`/`0.3`, amber tints at `0.15`/`0.3`) checked individually - none match. The 2 `rgba(245,245,240,0.65)` hits (L707 comment prose, L712 the actual `token-ok`-annotated chevron value) are pre-existing, correctly untouched.
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 43/43 passing. `verify-equivalence.js`: 61 paired lines, 0 mismatches.
+
+
 ## GEN-2609-087 - bulk token migration batch 6, file 3 of 3: `dashboard/organiser/tours/[id]/page.tsx`
 
 ### Coverage - matches font/radius exactly; spacing 1 higher than predicted, reconciled below

@@ -1,6 +1,6 @@
-# Session Handoff — 20 Sept 2026 (CC — GEN-2609-085: token-ok JSX allowlist + GEN-2609-086 provisional: bulk token migration batch 5, 3 files)
+# Session Handoff — 20 Sept 2026 later (CC — GEN-2609-087: bulk token migration batch 6, 3 files)
 
-Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers provisional** - `GEN-2609-084` (batch 4) confirmed merged this session via `git fetch` (`#671`/`#672`/`#673`), so `085`/`086` follow it. Not written to `CodeCounter` this session.
+Template: `docs/HANDOFF_TEMPLATE.md`. **`087` is chat-assigned, not provisional** - dispatch text explicit, `CodeCounter`/Feedback table not touched this session (chat's job). Session started at `qa@8fb970e` (post-`086`'s all-3-merged state, confirmed by `git fetch` + `git reset --hard origin/qa` matching the dispatch's own stated baseline exactly, including the live ratchet counts).
 
 **NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
 
@@ -8,74 +8,75 @@ Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers provisional** - `GEN
 
 | Session / date | Goal | Status | Remarks | Branches |
 |---|---|---|---|---|
-| 20 Sept 2026 (CC) | `GEN-2609-085` - `token-ok` escape hatch: add a JSX-comment form (`{/* token-ok: */}`), annotate the Google-logo + chevron-data-URI sites it unblocks | Complete; **merged as PR #674** (confirmed via `git fetch` mid-session - merged while batch 5 was in progress) | 10 sites annotated across 4 files. Baseline lowered: `hex-color-literal` 83→75, `rgb-rgba-literal` 947→945. No visual change. | (merged) |
-| 20 Sept 2026 (CC) | `GEN-2609-086` (provisional) - bulk token migration batch 5: 3 highest-count files, 1 PR each | Complete, unmerged | 326 → 70 combined literals (79% reduction, highest batch rate so far). Caught and fixed a real `<style>{`...`}</style>` CSS-quoting bug in the migration script before applying - see §4. | `feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login` |
-| 19 Sept 2026 (CC) | `GEN-2609-084` (provisional) - bulk token migration batch 4: 3 highest-count files, 1 PR each | Complete; **all 3 merged** (`#671`/`#672`/`#673`, confirmed via `git fetch` this session) | 381 → 92 combined literals (76% reduction), matching the dispatch's own predicted batch totals exactly. | (merged) |
-| 19 Sept 2026 (CC) | `GEN-2609-083` (provisional) - bulk token migration batch 3: 3 highest-count files, 1 PR each | Complete; all 3 merged (`#668`/`#669`/`#670`) | 464 → 132 combined literals (72% reduction). 2 real bugs found and fixed before committing. | (merged) |
-| 19 Sept 2026 (CC) | `GEN-2609-082` (provisional) - bulk token migration batch 2: 3 highest-count files, 1 PR each | Complete; all 3 merged (`#665`/`#666`/`#667`) | 526 → 146 combined literals (72% reduction). | (merged) |
+| 20 Sept 2026 (CC) | `GEN-2609-087` - bulk token migration batch 6: 3 files, chat-assigned, no new tokens | Complete, unmerged | 298 → 55 combined literals (82% reduction). **Every per-category number matched the dispatch's own scripted predictions exactly** - first batch with zero unexplained deviations. 1 manual colour match, reported per the dispatch's own request. | `feat/gen-2609-087-1-venue-create`, `-2-support-widget`, `-3-organiser-tour` |
+| 20 Sept 2026 (CC) | `GEN-2609-086` (3/3) fix - `login/page.tsx`: revert 2 Tailwind `text-[var(--x)]` conversions | Complete; **pushed as a new commit on the existing branch** (`f2b5363`, no force-push), still unmerged | Real bug: `var()`-based Tailwind arbitrary utilities are ambiguous between colour/font-size and collide. `verify-equivalence.js` extended with `classNameIssues()` to catch this class going forward. | `feat/gen-2609-086-3-login` (updated) |
+| 20 Sept 2026 (CC) | `GEN-2609-085`/`086` (batches 5) | **All 4 branches now merged** (`085`=`#674`, `086`=`#675`/`#676`/`#677`) - confirmed via `git fetch` this session | 326 → 68 combined (final, post-fix) literals for batch 5. | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-084` - bulk token migration batch 4 | Complete; all 3 merged (`#671`/`#672`/`#673`) | 381 → 92 combined literals (76% reduction). | (merged) |
+| 19 Sept 2026 (CC) | `GEN-2609-083` - bulk token migration batch 3 | Complete; all 3 merged (`#668`/`#669`/`#670`) | 464 → 132 combined literals (72% reduction). | (merged) |
 
 (Oldest row, "19 Sept 2026 (CC) — GEN-2609-081...", dropped to hold at 5.)
 
 ## 2. Activity in progress
 
-- `GEN-2609-085` - **merged as PR #674 mid-session** (`feat/gen-2609-085-token-ok-jsx-allowlist`, squash-merged with an edited commit message/docs entry - not a byte-identical merge of this session's own branch, but the same substance: `check-design-tokens.js` JSX-comment `token-ok` form + the 10 real annotations). Local `qa` rebased onto it before pushing this handoff entry.
-- `GEN-2609-086` (provisional) - all 3 branches pushed, no PRs opened yet:
-  - `feat/gen-2609-086-1-venue-edit` (`dashboard/venue/[id]/edit/page.tsx`, 112→16 literals)
-  - `feat/gen-2609-086-2-tickets` (`tickets/page.tsx`, 111→26 literals)
-  - `feat/gen-2609-086-3-login` (`(auth)/login/page.tsx`, 103→28 literals - branched from `qa` before `085` merged, independent of it, touches disjoint lines of the same file - still merges cleanly)
-  - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as every prior batch's own handoff entry):
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-1-venue-edit`
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-2-tickets`
-    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-086-3-login`
+- `GEN-2609-087` - all 3 branches pushed, no PRs opened yet:
+  - `feat/gen-2609-087-1-venue-create` (`dashboard/venue/create/page.tsx`, 105→24, SHA `f850ebb`)
+  - `feat/gen-2609-087-2-support-widget` (`SupportWidget.tsx`, 97→17, SHA `8110c01`)
+  - `feat/gen-2609-087-3-organiser-tour` (`dashboard/organiser/tours/[id]/page.tsx`, 96→14, SHA `55e8780`)
+  - Compare URLs (no `gh` CLI, no GitHub MCP connection this session - same standing gap as every prior batch):
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-1-venue-create`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-2-support-widget`
+    - `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/pull/new/feat/gen-2609-087-3-organiser-tour`
+- `GEN-2609-086 (3/3)` fix pushed as a new commit (`f2b5363`, no force-push) on the already-open `feat/gen-2609-086-3-login` - see prior block for detail, still unmerged as of this session's start.
 
 ## 3. Open PRs awaiting action
 
-**Could not re-verify live PR/CI status via GitHub API this session (same standing gap).** Confirmed via `git fetch` (real, not assumed) that all 3 of `084`'s branches, and `085`'s, are merged into `origin/qa` - `qa` HEAD is `f3f32ca` (`085`'s merge) as of this correction, `a9f9f35` at this session's start.
+Confirmed via `git fetch` that `085` (`#674`) and all of `086` (`#675`/`#676`/`#677`) are merged into `origin/qa` - `qa` HEAD was `8fb970e` at this session's start, matching the dispatch's own stated baseline exactly (ratchet counts verified identical too).
 
 | Branch | PR # | Merge-ready? |
 |---|---|---|
-| `feat/gen-2609-086-1-venue-edit` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8), including a line-pair equivalence check (0 mismatches). No Preview deployment yet. |
-| `feat/gen-2609-086-2-tickets` | **`NOT YET OPENED`** (this session) | Same, plus a real script bug (CSS-block quoting) caught and fixed pre-commit - see §4. |
-| `feat/gen-2609-086-3-login` | **`NOT YET OPENED`** (this session) | Same. Merges independently of `085`'s branch - both touch this file on disjoint lines. |
+| `feat/gen-2609-087-1-venue-create` | **`NOT YET OPENED`** (this session) | Locally verified clean (see §8). No Preview deployment yet. |
+| `feat/gen-2609-087-2-support-widget` | **`NOT YET OPENED`** (this session) | Same. Renders on every page - highest blast radius, flag for reviewer attention. |
+| `feat/gen-2609-087-3-organiser-tour` | **`NOT YET OPENED`** (this session) | Same, includes 1 manual colour conversion. |
+| `feat/gen-2609-086-3-login` | Still `NOT YET OPENED` | Updated this session with the Tailwind `var()`-ambiguity fix (see prior block). |
 | `ci/add-manual-e2e-workflows-to-main` | `#450` | Unrelated, out of scope every session since 14 Aug. |
 
 ## 4. Decisions / findings this session
 
-**`GEN-2609-085` - the `// token-ok:` escape hatch couldn't actually be used on 2 real, known cases.** `078` documented "refused to guess a brand-hex allowlist, route through `// token-ok:` instead" for the Google 4-color logo - but that annotation was never actually applied anywhere (confirmed via `grep -r token-ok src/` - zero hits going into this session). The reason: the Google logo markup is raw JSX (`<path fill="#4285F4" d="..."/>`), and a trailing `//` there isn't a comment at all in JSX - it becomes a literal sibling text node rendered inside the `<svg>`. Fixed by extending `tokenOkReason()` with a second form, `{/* token-ok: <reason> */}`, placed with no separating whitespace so it doesn't itself inject a stray text node. Annotated all 10 real sites this unblocks (4 Google-logo hex lines each in `RegisterForm.tsx`/`login/page.tsx`, 1 chevron-stroke `rgba()` each in `profile/page.tsx`/`SupportWidget.tsx` - the latter two already had the `//` form available since they sit inside JS strings, just were never actually annotated either).
+**Every per-category prediction in the dispatch's own scripted table matched exactly** - font-size, spacing, and radius all reconciled to the exact migrated/remaining count for all 3 files, first batch in this chain with zero unexplained deviations. The only delta from the dispatch's predicted totals (batch 298→56, actual 298→55) is the 1 manual colour conversion on `tours/[id]/page.tsx`, which the dispatch's own prediction table explicitly excluded ("before any manual colour matches") and asked to be reported - reported here and in `docs/design.md`.
 
-**`GEN-2609-086` - a real bug in this batch's own migration script, caught before applying: the exact `<style>{`...`}</style>` CSS-quoting trap `082` already documented once.** The script's automated pass wrapped a bare-number CSS value inside `tickets/page.tsx`'s one raw `<style>` block in JS-style quotes (`gap: 'var(--afa-space-4)';` - invalid CSS, would have silently broken that declaration). Caught by the mandatory manual diff review before applying (not by any automated check), fixed by hand. Confirms [[feedback_style_template_literal_quoting]]'s lesson generalizes to every batch's own from-scratch script, not just `082`'s.
+**1 manual colour match**: `tours/[id]/page.tsx`'s shared `inputStyle` had `border: '1px solid rgba(245,245,240,0.15)'`, byte-equivalent to `--afa-border-resting`, converted. `venue/create` and `SupportWidget` had zero matches - every `rgba()`/hex hit checked individually, none matched.
 
-**`GEN-2609-086` - highest batch reduction rate so far: 79% combined, 86% on `dashboard/venue/[id]/edit/page.tsx` alone** (previous best: `084`'s 76% combined). Full breakdown in `docs/design.md`'s `GEN-2609-086` entries and Batch 5 summary table.
+**No new bug classes found** - all 4 lessons the dispatch flagged from `082`-`086` (raw `<style>` quoting, Tailwind `var()` ambiguity, `token-ok` scope, real `next build`) were checked against explicitly; none recurred. `SupportWidget.tsx`'s one raw `<style>` block (`bottom`/`max-height` properties only, neither in the checked property sets) was confirmed untouched by an explicit diff check, not assumed safe from the property-list scoping alone.
 
-**A recurring, cross-file gap found: no `--afa-radius-*` token exists for `16px`**, hit independently 3 times in 2 different files this batch (`tickets/page.tsx` ×2, `login/page.tsx` ×1 via `rounded-[16px]`). Flagged as a real candidate for a future `--afa-radius-16px` token (matching `081`'s own precedent) - not assumed or added here.
+**`public/sw.js`'s `CACHE_VERSION` got touched by each of the 3 `next build` runs this session** (local build stamp, e.g. `local-1789881455022`) - reverted via `git checkout -- public/sw.js` before every commit/push, confirmed not present in any of the 3 pushed branches' own diffs.
 
-**`verify-equivalence.js` rebuilt from scratch this session** (`084`'s own copy lived only in that session's scratchpad, never committed). Re-derived and re-fixed the same 2 normalization bugs `084` already found and documented (symmetric `var()` resolution needed on BOTH sides of a diff pair, not just the new side; `px`-suffix must be stripped symmetrically since React's bare-number shorthand and an explicit `Npx` string are the same value). Flagging again, more strongly this time: this script has now been independently rebuilt twice, hitting the same 2 bugs both times - a real case for committing it rather than re-discovering the same bugs a 3rd time in batch 6.
+**No new tokens** - re-measured the dispatch's own 50-occurrence bar against live `qa@8fb970e`; nothing off-scale qualified. `--afa-radius-16px` (flagged as a candidate in `086`'s own handoff) was NOT added - out of this dispatch's explicit scope ("if you believe a value now qualifies, report the number - do not add it"). Not re-measured this session since no new 16px sites were found in these 3 files.
 
 ## 5. `CodeCounter` state
 
-- `GEN/2609`: not independently checked this session (no `CodeCounter` access). `085`/`086` both provisional pending chat's confirmation.
+- `GEN/2609`: `087` is chat-assigned per the dispatch - not touched by CC this session.
 
 ## 6. Known `GEN`-numbering collisions/gaps ledger
 
-No new collisions found or introduced this session. `054` ✅, `069→071` ✅, per the permanent ledger, unchanged. Standing risk noted every session: confirm `085`/`086` are actually free at logging time - not independently checkable this session.
+No new collisions found or introduced this session. `054` ✅, `069→071` ✅, per the permanent ledger, unchanged.
 
 ## 7. Docs-conflict watchlist
 
-- All 3 of `feat/gen-2609-086-*` touch the same 2 files at their tail, each branched independently from the same pre-`085` `qa` commit (`a9f9f35`): `docs/design.md` (branch 1 appends only its own file-1 section after `084`'s own tail; branch 2 appends only its own file-2 section, also directly after `084`'s tail, unaware of branch 1's addition; branch 3 appends its own file-3 section plus the full batch summary table, also directly after `084`'s tail) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object from that same pre-`085` starting point). **Real, expected conflict on merge**, now compounded by `085` having ALSO merged (as `#674`, mid-session, after all 3 `086` branches had already been branched off the pre-`085` state) and appending its own short `docs/design.md` entry at that exact same tail position: same resolution as every prior batch, just with one more party - keep every branch's own `docs/design.md` addition (concatenate all 4 in whatever order chat merges them), then re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 4 land (the individual per-branch baseline numbers will NOT simply add up, since 3 of the 4 were computed from a base that didn't yet reflect `085`'s own -8/-2 lowering).
+- All 3 of `feat/gen-2609-087-*` touch the same 2 files at their tail, each branched independently from the same `qa@8fb970e`: `docs/design.md` (branch 1 appends its own file-1 section after `086`'s own tail; branch 2 appends only its own file-2 section, also directly after `086`'s tail; branch 3 appends its own file-3 section plus the full batch summary) and `scripts/design-token-baseline.json` (each independently lowers the same JSON object from the same starting point). **Real, expected conflict on merge** - same resolution as every prior batch: keep every branch's own `docs/design.md` addition, re-run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged `qa` after all 3 land.
+- `feat/gen-2609-086-3-login`'s new commit also touched `docs/design.md`/`scripts/design-token-baseline.json` - independent of the `087` branches (different tail position, `086`'s own file-3 section), no additional conflict expected beyond what was already flagged for that branch.
 
 ## 8. Verification standard checklist
 
-All run **fresh this session**, foreground, each branched from `origin/qa` `a9f9f35`:
+All run **fresh this session**, foreground, each branched from `origin/qa` `8fb970e`:
 
-- ✅ `tsc --noEmit` - clean, exit 0, all 4 branches (085 + 3× 086).
-- ✅ `node scripts/check-design-tokens.test.js` - `085`: 43/43 passing (3 new fixtures for the JSX-comment form). `086` branches: 40/40 passing, unchanged.
-- ✅ `node scripts/design-token-ratchet.js` - no category above baseline on any branch, before `--update-baseline` on each.
-- ✅ **`verify-equivalence.js` (rebuilt fresh this session, scratchpad-only) - 0 mismatches across all 3 `086` files** (53, 47, and 28 paired lines respectively).
-- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 4 branches, refused-to-raise guard intact each time.
-- ⬜ `next build` - **not run this session** (relied on `tsc --noEmit` + the design-token self-tests + the equivalence check; all 4 branches are comment/token-substitution-only changes with no new imports or control flow). Flagged as a gap for whoever merges, if the "real `next build`" step every prior batch ran is considered mandatory rather than a nice-to-have on this class of change.
-- ⬜ `public/sw.js`'s `CACHE_VERSION` - not touched by any of the 4 branches; nothing to revert (verified by not appearing in any branch's `git status`).
+- ✅ `tsc --noEmit` - clean, exit 0, all 3 branches.
+- ✅ `node scripts/check-design-tokens.test.js` - 43/43 passing, unchanged, all 3 runs.
+- ✅ `BASE_REF=origin/qa node scripts/check-design-tokens.js` - clean, 0 offenses, all 3 (run post-commit, per-branch).
+- ✅ `verify-equivalence.js` (reused from `086`, includes `classNameIssues()`) - 0 mismatches, all 3 files (50, 61, 47 paired lines respectively).
+- ✅ `node scripts/design-token-ratchet.js --update-baseline` - succeeded independently on all 3 branches, refused-to-raise guard intact each time.
+- ✅ **`next build` - run for real this session** (flagged as a gap in `086`'s own handoff, closed here), clean exit 0, all 3 branches. `public/sw.js`'s `CACHE_VERSION` stamp reverted after each run, before commit/push.
 
-**Not verified this session:** a real QA-preview visual diff, any of the 4 branches - no Preview deployment exists yet. All 4 target pages (`login`, `register`, `tickets`, `venue/[id]/edit`) are reachable without an Admin-only gate, so a Preview URL alone would suffice once one exists.
+**Not verified this session:** a real QA-preview visual diff - no Preview deployment exists yet. `SupportWidget.tsx`'s open chat/feedback panel and select chevron, and the `venue/create`/`tours/[id]` pages (both need a real Organiser/Venue-Owner role account to reach), all need a live click-through once a Preview URL exists.
 
 ## 9. Production-freeze reminder
 
@@ -83,19 +84,19 @@ All run **fresh this session**, foreground, each branched from `origin/qa` `a9f9
 
 ## 10. UI/UX Design System Debt Ledger
 
-Batch 5's combined reduction (79%) is the highest of any batch's combined rate to date (`079` 57%, `082`/`083` 72%, `084` 76%). 4 more colour literals matched to `--afa-border-resting` this session (2 in `venue/[id]/edit`, 2 in `tickets`). A new, recurring gap found: no `--afa-radius-16px` token exists, hit 3 times independently this batch alone (flagged in §4, not added). `GEN-2609-085` separately closed out a real gap in the `token-ok` mechanism itself (the JSX-comment form) - the Google-logo/chevron sites it unblocks had been *documented* as intentionally exempt since `078` but never actually annotated, meaning they were silently still counting against the ratchet baseline this whole time.
+Batch 6's combined reduction (82%) is the highest of any batch's combined rate to date (`079` 57%, `082`/`083` 72%, `084` 76%, `086` 79% final). 1 more colour literal matched to `--afa-border-resting` this session (`tours/[id]/page.tsx`). The `--afa-radius-16px` gap flagged in `086`'s handoff was re-checked against this batch's own dispatch (which re-measured the 50-occurrence bar and confirmed nothing off-scale qualifies yet) - still open, still not added, per the north star's own "don't guess" discipline.
 
 ## 11. Locked-tokens source of truth
 
-**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration + tooling-only, no new token added - see §4's radius-16px gap for a real future candidate).
+**`docs/afa-design-tokens-reference.md`.** Unaffected this session (migration-only, no new token added).
 
 ## 12. Immediate next action
 
-**Chat: confirm `GEN-2609-085`/`086` are free against `CodeCounter`, open and merge all 4 PRs** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` conflicts per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged result. Batch-6 candidates: re-run the ratchet fresh post-merge before drafting that dispatch - `SupportWidget.tsx`/`SiteNav.tsx`/`checkout/[bookingId]/page.tsx` remain deliberately excluded (same standing reasons as every batch since `084`) and may or may not belong in batch 6 depending on where those other decisions land by then. Also worth a decision: commit `verify-equivalence.js` for real (see §4 - rebuilt twice now, same 2 bugs both times) and consider a `--afa-radius-16px` token (hit 3 independent times this batch).
+**Chat: confirm `GEN-2609-087` is logged correctly (chat-assigned, not provisional), open and merge all 3 `087` PRs plus the updated `086-3-login` PR** (compare URLs in §2) - resolve the expected `docs/design.md`/`scripts/design-token-baseline.json` conflicts per §7, then run `node scripts/design-token-ratchet.js --update-baseline` once fresh on the fully-merged result. Batch-7 candidates: re-run the ratchet fresh post-merge before drafting that dispatch.
 
 ## 13. Chat vs. CC ownership note
 
-**Unchanged from the standing model.** This session: CC built (`085`'s JSX-comment extension + its 10 real annotations, `086`'s 3-file migration), verified (including rebuilding and re-validating the equivalence-check script), and pushed all 4 branches (`feat/gen-2609-085-token-ok-jsx-allowlist`, `feat/gen-2609-086-{1,2,3}-*`). Chat's half (confirm the ticket numbers, open the 4 PRs, merge) is next. CC never merges.
+**Unchanged from the standing model.** This session: CC built (`087`'s 3-file migration, `086-3-login`'s post-push bug fix), verified (including a real `next build` per file this time), and pushed all 3 `087` branches plus the updated `086-3-login`. Chat's half (confirm the ticket number, open the PRs, merge) is next. CC never merges.
 
 ---
 
