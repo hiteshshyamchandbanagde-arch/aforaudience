@@ -203,7 +203,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (loadError) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{loadError}</div></>)
+  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{loadError}</div></>)
 
   return (
     <>
@@ -218,55 +218,55 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           onClick={() => setLastResult(null)}
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-            padding: '18px 20px', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
+            padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
             background: lastResult.ok ? 'var(--afa-forest)' : 'var(--afa-error)',
             color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
             cursor: 'pointer',
           }}
         >
-          <p style={{ fontSize: '18px', fontWeight: 700, marginBottom: '4px' }}>
+          <p style={{ fontSize: 'var(--afa-text-18px)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
             {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
           </p>
           {lastResult.attendeeName && (
-            <p style={{ fontSize: '15px', marginBottom: '2px' }}>{lastResult.attendeeName}</p>
+            <p style={{ fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
           )}
           {lastResult.seats && seatsSummary(lastResult.seats) && (
-            <p style={{ fontSize: '13px', opacity: 0.85, marginBottom: '2px' }}>{seatsSummary(lastResult.seats)}</p>
+            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85, marginBottom: 'var(--afa-space-2px)' }}>{seatsSummary(lastResult.seats)}</p>
           )}
           {lastResult.message && (
-            <p style={{ fontSize: '13px', opacity: 0.85 }}>{lastResult.message}</p>
+            <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85 }}>{lastResult.message}</p>
           )}
-          <p style={{ fontSize: '11px', opacity: 0.7, marginTop: '6px' }}>Tap to dismiss</p>
+          <p style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.7, marginTop: 'var(--afa-space-6px)' }}>Tap to dismiss</p>
         </div>
       )}
 
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px 64px' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto', padding: 'var(--afa-space-32px) var(--afa-space-5) 64px' }}>
           <BackLink href={`/dashboard/organiser/events/${eventId}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '14px', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-1)' }}>
             Check-In
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '4px' }}>{eventTitle}</p>
+          <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-1)' }}>{eventTitle}</p>
           {counts && (
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-sage)', marginBottom: '24px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-sage)', marginBottom: 'var(--afa-space-6)' }}>
               {counts.checkedIn} of {counts.total} checked in
             </p>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
             {!cameraOn ? (
               <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
                 📷 Start Camera Scan
               </Button>
             ) : (
               <>
-                <div id="checkin-camera" style={{ width: '100%', borderRadius: '8px', overflow: 'hidden' }} />
+                <div id="checkin-camera" style={{ width: '100%', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden' }} />
                 <button
                   onClick={() => setCameraOn(false)}
                   style={{
-                    width: '100%', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
-                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: '8px', padding: '10px', cursor: 'pointer', marginTop: '12px',
+                    width: '100%', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
+                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', cursor: 'pointer', marginTop: 'var(--afa-space-3)',
                   }}
                 >
                   Stop Camera
@@ -274,15 +274,15 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               </>
             )}
             {cameraError && (
-              <p style={{ fontSize: '13px', color: 'var(--afa-error)', marginTop: '10px' }}>{cameraError}</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
             )}
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: 'var(--afa-text-primary)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-2)', color: 'var(--afa-text-primary)' }}>
               Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(booking ID printed on the ticket)</span>
             </label>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
               <input
                 type="text"
                 value={manualCode}
@@ -290,16 +290,16 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 onKeyDown={(e) => { if (e.key === 'Enter') submitCode(manualCode) }}
                 placeholder="e.g., ckabc123..."
                 style={{
-                  flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)',
-                  background: 'var(--afa-surface-raised)', fontSize: '14px', color: 'var(--afa-text-primary)',
+                  flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)',
+                  background: 'var(--afa-surface-raised)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)',
                 }}
               />
               <button
                 onClick={() => submitCode(manualCode)}
                 disabled={submitting || !manualCode.trim()}
                 style={{
-                  fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)',
-                  border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer',
+                  fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)',
+                  border: 'none', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-5)', cursor: 'pointer',
                   opacity: submitting || !manualCode.trim() ? 0.5 : 1,
                 }}
               >
@@ -308,7 +308,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
             <button
               onClick={() => {
                 const next = !listOpen
@@ -317,24 +317,24 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               }}
               style={{
                 width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
+                fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
                 border: 'none', cursor: 'pointer', padding: 0,
               }}
             >
               <span>Attendee List</span>
-              <span style={{ fontSize: '13px', opacity: 0.6 }}>{listOpen ? '▲ Hide' : '▼ Show'}</span>
+              <span style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>{listOpen ? '▲ Hide' : '▼ Show'}</span>
             </button>
 
             {listOpen && (
-              <div style={{ marginTop: '16px' }}>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ marginTop: 'var(--afa-space-4)' }}>
+                <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-14px)' }}>
                   {(['all', 'checked_in', 'pending'] as const).map((f) => (
                     <button
                       key={f}
                       onClick={() => setListFilter(f)}
                       style={{
-                        flex: 1, padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                        border: listFilter === f ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                        flex: 1, padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, cursor: 'pointer',
+                        border: listFilter === f ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: listFilter === f ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: listFilter === f ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
@@ -345,36 +345,36 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 </div>
 
                 {attendees === null ? (
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Loading...</p>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Loading...</p>
                 ) : (
                   (() => {
                     const filtered = attendees.filter((a) =>
                       listFilter === 'all' ? true : listFilter === 'checked_in' ? !!a.checkedInAt : !a.checkedInAt
                     )
                     if (filtered.length === 0) {
-                      return <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No one in this list yet.</p>
+                      return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No one in this list yet.</p>
                     }
                     return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-10px)' }}>
                         {filtered.map((a) => (
                           <div key={a.bookingId}>
                             <div
                               style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-                                padding: '10px 12px', borderRadius: '8px',
+                                padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)',
                                 background: a.checkedInAt ? 'var(--afa-mint-tint)' : 'var(--afa-surface-raised)',
                               }}
                             >
                               <div>
-                                <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
+                                <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>
                                   {a.name}
                                   {a.seatLabel && <span style={{ fontWeight: 400, opacity: 0.6 }}> · {a.seatLabel}</span>}
                                 </p>
                                 {seatsSummary(a.seats) && (
-                                  <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
+                                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
                                 )}
                               </div>
-                              <span style={{ fontSize: '12px', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
+                              <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>
                                 {a.checkedInAt ? '✓ In' : 'Pending'}
                               </span>
                             </div>
@@ -382,15 +382,15 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                 companions get their own check-in row, indented
                                 under the booking they're tagged on. */}
                             {a.companions.length > 0 && (
-                              <div style={{ marginLeft: '18px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div style={{ marginLeft: 'var(--afa-space-18px)', marginTop: 'var(--afa-space-1)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
                                 {a.companions.map((c) => (
                                   <div
                                     key={c.id}
                                     style={{
                                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                      padding: '8px 12px', borderRadius: '8px', fontSize: '12.5px',
+                                      padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: '12.5px',
                                       background: c.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
-                                      border: c.checkedInAt ? 'none' : '1px dashed rgba(245,245,240,0.15)',
+                                      border: c.checkedInAt ? 'none' : '1px dashed var(--afa-border-resting)',
                                     }}
                                   >
                                     <span style={{ color: 'var(--afa-text-primary)' }}>
