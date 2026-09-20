@@ -7192,3 +7192,41 @@ Both already had every in-scope literal token-retrofitted.
 **Colour, batch-wide:** only 1 manual match this batch (admin/feedback's own `--afa-border-resting`) - the lowest colour-migration count of any batch so far, reflecting that files 2/3's own dominant translucent-cream tints (`0.12`/`0.65`-embedded-in-SVG) are real, different, already-considered values rather than near-misses. 1 more colour trap found and deliberately left alone (profile's SVG-embedded `--afa-text-secondary`-value chevron stroke) - a genuinely new class of non-match (context, not role or value), distinct from `082`'s role-mismatch trap.
 
 **3 pushed branches, no PRs opened yet** (`feat/gen-2609-084-1-admin-feedback`, `-2-register-form`, `-3-profile`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json`, same resolution as every prior batch.
+
+## GEN-2609-086 (batch 5, provisional) - bulk token migration batch 5, file 3 of 3: `(auth)/login/page.tsx`
+
+Base state for this file already reflects `GEN-2609-085`'s own separate fix (the Google-logo `<path fill>` lines annotated there) as a documentation matter - but this branch does NOT include `085`'s commit (branched from the same `qa` independently, touches none of the same lines) - both merge cleanly in either order.
+
+### Coverage - highest colour-adjacent complexity of the batch: Tailwind arbitrary-value classes, not just inline styles
+
+103 (post-`085`-annotation baseline, 107 raw) → 28 literals (73% reduction from the 103 baseline this batch actually started from). `spacing-literal` 45→1, `font-size-literal` 22→0 (full coverage, including 2 Tailwind `text-[Npx]` conversions - `text-[28px]`→`text-[var(--afa-text-page-title)]`, `text-[14px]`→`text-[var(--afa-text-body)]`, same `text-[var(--afa-text-primary)]`-embedding convention this exact line already used), `radius-literal` 14→1 (the 1 remaining is `rounded-[16px]` - the same untokenized-16px gap file 2 already found, a 3rd independent site), `hex-color-literal` and 4 of `rgb-rgba-literal`'s hits untouched (the Google-logo markup - out of this branch's scope, handled by `085`).
+
+### Colour - zero manual matches this file
+
+The remaining `rgba()` hits (status-banner tints at `0.1`/`0.15`/`0.3`/`0.08` alpha, a `0.12` cream border repeated 6×, a `0.35` shadow) were checked individually against every `--afa-*` token's value - none match. Different from files 1/2's `--afa-border-resting` hits: this file's own border alpha is `0.12`, not `0.15`.
+
+### Raw `<button>` - 5 sites, 0 migrated to a `Button` variant, same as every prior batch
+
+### Verify
+
+`tsc --noEmit` clean. `node scripts/check-design-tokens.test.js`: 40/40 passing. `verify-equivalence.js`: 28 paired lines, 0 mismatches.
+
+
+## Batch 5 summary (`GEN-2609-086`, all 3 files) - for whoever reviews/merges
+
+| File | Before | After | Reduction | Spacing | Font-size | Radius | Colour (manual) |
+|---|---|---|---|---|---|---|---|
+| `dashboard/venue/[id]/edit/page.tsx` | 112 | 16 | 86% | 54/56 | 29/29 | 11/11 | 2 |
+| `tickets/page.tsx` | 111 | 26 | 77% | 59/61 | 17/25 | 7/10 | 2 |
+| `(auth)/login/page.tsx` | 103 | 28 | 73% | 44/45 | 22/22 | 13/14 | 0 |
+| **Batch total** | **326** | **70** | **79%** | **157/162** | **68/76** | **31/35** | **4** |
+
+**Highest batch reduction rate so far** (79%, beating `084`'s 76%) - `dashboard/venue/[id]/edit/page.tsx` alone hit 86%, the best single-file rate of any batch. Real per-category ratchet movement once all 3 merge and the baseline regenerates on the combined `qa` (each branch's own delta measured independently against its own isolated `qa` base, not stacked - a projection, same caveat as every prior batch summary): `rgb-rgba-literal` -4, `font-size-literal` -76, `spacing-literal` -157, `radius-literal` -31.
+
+**A real bug in this batch's own migration script, caught before applying (see file 2's entry): the exact `<style>{`...`}</style>` CSS-block quoting trap `082` already documented once.** Confirms [[feedback_style_template_literal_quoting]]'s lesson generalizes across every batch's own from-scratch script, not just `082`'s - every batch needs the same manual diff read regardless of how many times the underlying bug class has already been found and fixed once.
+
+**A recurring, cross-file gap found: no `--afa-radius-*` token exists for `16px`**, hit independently in 2 different files (`tickets/page.tsx` ×2, `login/page.tsx` ×1) this batch alone. Worth its own future ticket (a `--afa-radius-16px` token, matching `081`'s precedent) - not assumed or added here.
+
+**`verify-equivalence.js` rebuilt from scratch this session** (not carried over as a file - `084`'s own copy was scratchpad-only, per that ticket's own note it's "a candidate for a future session to commit"). Same 2 normalization bugs `084` already found were re-derived and re-fixed independently this session (symmetric `var()` resolution on both diff sides, `px`-suffix stripping) - a real argument for actually committing this script rather than re-discovering the same 2 bugs a 3rd time next batch.
+
+**3 pushed branches, no PRs opened yet** (`feat/gen-2609-086-1-venue-edit`, `-2-tickets`, `-3-login`) - chat opens/merges each independently. Same expected 3-way conflict on `docs/design.md`/`scripts/design-token-baseline.json` as every prior batch. `login/page.tsx`'s branch does NOT depend on `GEN-2609-085`'s branch - both touch disjoint lines of the same file and merge cleanly in either order.
