@@ -36,7 +36,7 @@ function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
       cancelled = true
     }
   }, [value, size])
-  if (!dataUrl) return <div style={{ width: size, height: size, background: 'rgba(245,245,240,0.08)', borderRadius: 6 }} />
+  if (!dataUrl) return <div style={{ width: size, height: size, background: 'rgba(245,245,240,0.08)', borderRadius: 'var(--afa-radius-sm)' }} />
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 4 }} />
 }
@@ -228,8 +228,8 @@ function stubCells(b: BookingItem, tr: Dictionary) {
 // see docs/design.md's GEN-2609-068 entry).
 function SectionLabel({ label }: { label: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-3)' }}>
+      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
       <div style={{ height: 1, flex: 1, background: 'rgba(245,245,240,0.08)' }} />
     </div>
   )
@@ -381,52 +381,52 @@ export default function MyTicketsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <style>{`
-          .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+          .afa-tickets-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
           @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
         `}</style>
-        <div style={{ maxWidth: '800px', padding: '48px 24px' }}>
-          <p style={{ margin: '0 0 6px', fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
+        <div style={{ maxWidth: '800px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
+          <p style={{ margin: '0 0 var(--afa-space-6px)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
             {tr.ticketsPage.pageKicker}
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             {tr.ticketsPage.pageSubtitle}
           </p>
 
           {error && (
-            <ErrorBanner style={{ marginBottom: '20px' }}>{error}</ErrorBanner>
+            <ErrorBanner style={{ marginBottom: 'var(--afa-space-5)' }}>{error}</ErrorBanner>
           )}
 
           {/* Companion Tagging Phase 1 (reputation epic §7) - "you've been
               tagged" inbox. Sits above the ticket list since it needs a
               response, unlike the tickets below which are just informational. */}
           {pendingTags.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
-                  <p style={{ fontSize: '13.5px', margin: '0 0 10px' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
+                  <p style={{ fontSize: '13.5px', margin: '0 0 var(--afa-space-10px)' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
                       .replace('{event}', t.booking.event.title)
                       .replace('{date}', new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }))}
                   </p>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                     <button
                       onClick={() => respondToTag(t.id, true)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
+                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
                       {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
                     </button>
                     <button
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: '12px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid rgba(245,245,240,0.15)', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer' }}
                     >
                       {tr.ticketsPage.declineButton}
                     </button>
@@ -443,25 +443,25 @@ export default function MyTicketsPage() {
               so this shows only what's actually true: they're confirmed
               to attend as someone else's guest. */}
           {acceptedTags.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+            <div style={{ marginBottom: 'var(--afa-space-6)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px 22px', marginBottom: '14px', border: '1px solid rgba(245,245,240,0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
+                    <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
                     </Link>
                     <Badge variant="status-compact" tone={STATUS_TONE.sage}>
                       {tr.ticketsPage.companionConfirmedPill}
                     </Badge>
                   </div>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 10px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, margin: '0 0 var(--afa-space-10px)' }}>
                     {new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {t.booking.event.startTime}
                     {t.booking.event.venue && <> · {t.booking.event.venue.name}, {t.booking.event.venue.city}</>}
                   </p>
-                  <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0 }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0 }}>
                     {tr.ticketsPage.guestOfTemplate.replace('{name}', t.taggedBy.displayName || t.taggedBy.name)}
                   </p>
                 </div>
@@ -470,14 +470,14 @@ export default function MyTicketsPage() {
           )}
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '64px 32px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: '64px var(--afa-space-32px)', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 16, border: '1px solid rgba(245,245,240,0.08)', background: 'var(--afa-surface-raised)' }}>
                 <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
               </div>
               <div>
-                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
-                <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{tr.ticketsPage.emptyDescription}</p>
-                <Link href="/events" style={{ display: 'inline-block', marginTop: '14px', fontSize: '13px', color: 'var(--afa-amber)', fontWeight: 600 }}>
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
+                <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{tr.ticketsPage.emptyDescription}</p>
+                <Link href="/events" style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600 }}>
                   {tr.ticketsPage.browseEventsLink}
                 </Link>
               </div>
@@ -493,7 +493,7 @@ export default function MyTicketsPage() {
                 past: tr.ticketsPage.sectionPast,
               }[section]
               return (
-                <div key={section} style={{ marginBottom: '28px' }}>
+                <div key={section} style={{ marginBottom: 'var(--afa-space-28px)' }}>
                   <SectionLabel label={heading} />
                   <div className="afa-tickets-grid">
                     {items.map((b) => renderCard(b))}
@@ -568,7 +568,7 @@ export default function MyTicketsPage() {
                 >
                   {isNavigating && (
                     <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'rgba(10,10,10,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '3px solid rgba(245,245,240,0.15)', borderTopColor: 'var(--afa-amber)', animation: 'afa-spin 0.7s linear infinite' }} />
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '3px solid var(--afa-border-resting)', borderTopColor: 'var(--afa-amber)', animation: 'afa-spin 0.7s linear infinite' }} />
                     </div>
                   )}
 
@@ -588,7 +588,7 @@ export default function MyTicketsPage() {
                       }}
                     />
                     <div style={{ position: 'absolute', right: 10, top: 10 }}>
-                      <span style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span style={{ display: 'flex', gap: 'var(--afa-space-6px)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                         <Badge
                           variant="status-compact"
                           tone={s}
@@ -610,7 +610,7 @@ export default function MyTicketsPage() {
                       </div>
                       <h3
                         style={{
-                          marginTop: 2, fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
+                          marginTop: 'var(--afa-space-2px)', fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         }}
                       >
@@ -620,13 +620,13 @@ export default function MyTicketsPage() {
                   </div>
 
                   {/* Meta row: date/time + venue, font-sans 12px. */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 16, rowGap: 4, padding: '10px 14px 0' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--afa-text-secondary)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 'var(--afa-space-4)', rowGap: 'var(--afa-space-1)', padding: 'var(--afa-space-10px) var(--afa-space-14px) 0' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)' }}>
                       <CalendarIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
                       {new Date(b.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {b.event.startTime}
                     </span>
                     {b.event.venue && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--afa-text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         <PinIcon style={{ width: 12, height: 12, color: 'var(--afa-text-muted)', flexShrink: 0 }} />
                         {b.event.venue.name}, {b.event.venue.city}
                       </span>
@@ -636,7 +636,7 @@ export default function MyTicketsPage() {
                   {/* Ticket stub row (Tier / Qty / Ref) - new shared
                       StubRow component (src/components/ui/StubRow.tsx),
                       inset on --afa-surface-inverse. */}
-                  <div style={{ margin: '10px 14px 0' }}>
+                  <div style={{ margin: 'var(--afa-space-10px) var(--afa-space-14px) 0' }}>
                     <StubRow cells={stubCells(b, tr)} />
                   </div>
 
@@ -645,12 +645,12 @@ export default function MyTicketsPage() {
                         price, 3-button equal-weight outline row. */}
                     {eff === 'CONFIRMED' && (
                       <>
-                        <div style={{ padding: '14px 14px 0' }}>
+                        <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-14px) 0' }}>
                           <PerfDivider />
                         </div>
-                        <div style={{ display: 'flex', gap: 14, padding: '12px 14px 14px', alignItems: 'flex-start' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 12, background: 'var(--afa-cream)' }}>
+                        <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-12px)', background: 'var(--afa-cream)' }}>
                               <TicketQr value={b.id} size={60} />
                             </div>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
@@ -659,12 +659,12 @@ export default function MyTicketsPage() {
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             {b.totalAmount > 0 && (
-                              <div style={{ marginBottom: 8 }}>
+                              <div style={{ marginBottom: 'var(--afa-space-2)' }}>
                                 <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
-                                <p style={{ margin: '2px 0 0', fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
                               </div>
                             )}
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                               {/* GEN-2609-069 - flex: '1 1 auto' let each button claim
                                   its own natural content width first, so in the 2-up
                                   desktop grid (narrower per-card than the mobile-first
@@ -689,9 +689,9 @@ export default function MyTicketsPage() {
                                 style={{
                                   flex: '1 1 0',
                                   minWidth: 0,
-                                  padding: '4px 10px',
-                                  borderRadius: 6,
-                                  fontSize: 12,
+                                  padding: 'var(--afa-space-1) var(--afa-space-10px)',
+                                  borderRadius: 'var(--afa-radius-sm)',
+                                  fontSize: 'var(--afa-text-small)',
                                   fontWeight: 600,
                                   border: '1px solid var(--afa-border-resting)',
                                   color: 'var(--afa-text-secondary)',
@@ -719,7 +719,7 @@ export default function MyTicketsPage() {
                     {/* PENDING: single fill-solid Pay Now + outline
                         Cancel - matches current behavior, restyled. */}
                     {isLivePending && (
-                      <div style={{ display: 'flex', gap: 8, padding: '12px 14px 14px' }}>
+                      <div style={{ display: 'flex', gap: 'var(--afa-space-2)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)' }}>
                         {b.totalAmount > 0 && (
                           <Button variant="primary" size="sm" href={`/checkout/${b.id}`} style={{ flex: 1 }}>
                             {tr.ticketsPage.payNowArrow}
@@ -741,7 +741,7 @@ export default function MyTicketsPage() {
                         actions - card itself is ghosted/non-interactive
                         above. */}
                     {isGhosted && b.cancelledAt && (
-                      <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, padding: '0 14px 14px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, padding: '0 var(--afa-space-14px) var(--afa-space-14px)' }}>
                         {eff === 'REFUNDED'
                           ? tr.ticketsPage.refundedNoteTemplate.replace('{amount}', (b.refundAmount ?? 0).toLocaleString('en-IN'))
                           : tr.ticketsPage.cancelledNoRefund}
