@@ -923,7 +923,7 @@ function ProfileContent() {
                 // value as --afa-text-secondary - since a data-URI can't
                 // reference a CSS custom property. Not a new color.
                 backgroundImage:
-                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,245,240,0.65)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", // token-ok: chevron stroke inlined into a data-URI, matches --afa-text-secondary, var() can't be embedded in a URL-encoded SVG string
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'right 14px center',
                 paddingRight: '36px',

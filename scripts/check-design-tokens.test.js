@@ -211,6 +211,41 @@ t('findOffenses: a line with // token-ok: is suppressed and reported separately,
   assert.equal(offenses.length, 1, 'the un-annotated hex literal on the next line is still flagged')
   assert.equal(offenses[0].rule, 'hex-color-literal')
 })
+
+// ---------------------------------------------------------------------
+// GEN-2609-085 - `{/* token-ok: <reason> */}` JSX-comment form. Needed
+// for raw JSX markup lines (e.g. an inline SVG icon's own attributes)
+// where a trailing `//` isn't a comment at all - it would become a
+// literal sibling text node instead. See check-design-tokens.js's own
+// comment above TOKEN_OK_JSX_RE.
+// ---------------------------------------------------------------------
+t('tokenOkReason: extracts the reason text from a trailing JSX comment', () => {
+  assert.equal(
+    tokenOkReason(`      <path fill="#4285F4" d="M1 2"/>{/* token-ok: Google-brand SVG fixed color */}`),
+    'Google-brand SVG fixed color'
+  )
+})
+t('tokenOkReason: JSX comment form returns null when malformed (missing closing brace)', () => {
+  assert.equal(
+    tokenOkReason(`      <path fill="#4285F4"/>{/* token-ok: reason */`),
+    null
+  )
+})
+t('findOffenses: a line with {/* token-ok: */} is suppressed and reported separately, not as an offense', () => {
+  const diff = [
+    'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
+    '--- a/src/app/foo.tsx',
+    '+++ b/src/app/foo.tsx',
+    '@@ -0,0 +1,2 @@',
+    '+      <path fill="#4285F4" d="M1 2"/>{/* token-ok: Google-brand SVG fixed color */}',
+    '+      <path fill="#111827" d="M3 4"/>',
+  ].join('\n')
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(tokenOkUses.length, 1, 'exactly one token-ok use recorded')
+  assert.equal(tokenOkUses[0].reason, 'Google-brand SVG fixed color')
+  assert.equal(offenses.length, 1, 'the un-annotated hex literal on the next line is still flagged')
+  assert.equal(offenses[0].rule, 'hex-color-literal')
+})
 t('findOffenses: a clean diff with no literals produces zero offenses', () => {
   const diff = [
     'diff --git a/src/app/foo.tsx b/src/app/foo.tsx',
