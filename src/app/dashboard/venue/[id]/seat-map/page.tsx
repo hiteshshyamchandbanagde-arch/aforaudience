@@ -1516,7 +1516,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       <button
                         onClick={() => setActiveLevel(lvl)}
                         style={{
-                          padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md) 0 0 var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                          padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md) var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
                           border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                           background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                           color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
@@ -1529,7 +1529,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         title={`Remove ${levelLabel(lvl)}`}
                         aria-label={`Remove ${levelLabel(lvl)}`}
                         style={{
-                          padding: '7px var(--afa-space-2)', borderRadius: '0 var(--afa-radius-md) var(--afa-radius-md) 0', fontSize: 'var(--afa-text-ui)', cursor: 'pointer',
+                          padding: '7px var(--afa-space-2)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp)', fontSize: 'var(--afa-text-ui)', cursor: 'pointer',
                           border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)', borderLeft: 'none',
                           background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                           color: 'var(--afa-error)',
