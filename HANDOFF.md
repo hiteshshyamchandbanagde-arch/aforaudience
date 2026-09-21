@@ -16,7 +16,7 @@ Template: `docs/HANDOFF_TEMPLATE.md`, delta-only (sections 7–11 unchanged from
 
 ## 2. Activity in progress
 
-- `GEN-2609-094` (`BUILD_QUEUE`) - hygiene bundle, prompt at `cc-prompt-gen-2609-094.md`, **drafted, NOT yet dispatched to CC**. Includes `BUG-2609-056` (themeColor).
+- `GEN-2609-094` (`BUILD_QUEUE`) - hygiene bundle, one branch/one PR/one handoff, prompt at `cc-prompt-gen-2609-094.md` (revised 22 Sept: was drafted as 2 PRs), **drafted, NOT yet dispatched to CC**. Includes `BUG-2609-056` (themeColor).
 - Batch 9 (`admin/revenue`, `admin/artists`, `my-feedback`) - not started; runs after 094 lands. Dry-run counts (lines): revenue 17 font-size + 6 radius, artists 15 + 6, my-feedback 13 + 8. Colour is a no-op for all 3 (0 hex/rgba match any map entry).
 - No open code branches.
 
@@ -61,7 +61,7 @@ Docs-conflict watchlist addendum: `TOKEN_COVERAGE` in `src/lib/design-token-cove
 
 ## 12. Immediate next action
 
-Hitesh dispatches `cc-prompt-gen-2609-094.md` to CC. Chat then opens/merges its 2 PRs (standard flow), and drafts the batch 9 dispatch from a fresh ratchet run. In parallel Hitesh answers the `GEN-2609-095` / `097` decisions.
+Hitesh dispatches `cc-prompt-gen-2609-094.md` to CC. Chat then opens/merges its single PR (branch `chore/gen-2609-094-hygiene`, standard flow) and writes the post-merge handoff (cadence rule, `docs/HANDOFF_TEMPLATE.md`), and drafts the batch 9 dispatch from a fresh ratchet run. In parallel Hitesh answers the `GEN-2609-095` / `097` decisions.
 
 ## 13. Chat vs. CC ownership note
 
