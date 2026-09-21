@@ -162,7 +162,7 @@ export default function AdminArtistsPage() {
       onClick={() => toggleSort(key)}
       style={{
         background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
-        fontSize: '11px', fontWeight: 700, color: sortKey === key ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
+        fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: sortKey === key ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
         textTransform: 'uppercase', letterSpacing: '0.04em',
       }}
     >
@@ -184,10 +184,10 @@ export default function AdminArtistsPage() {
             <BackLink href="/dashboard/admin/feedback" label="Back to Dashboard" />
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '8px' }}>
             Artist Roster
           </h1>
-          <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '680px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '680px' }}>
             Rising and Featured are fully automatic — thresholds live at{' '}
             <Link href="/dashboard/admin/settings" style={{ color: 'var(--afa-amber)', fontWeight: 700 }}>Platform Settings</Link>.
             Headliner is the one manual call here — deliberately not a formula. Organiser ratings are private everywhere except this page, where they're shown to inform your decision.
@@ -203,7 +203,7 @@ export default function AdminArtistsPage() {
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(245,245,240,0.15)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -212,7 +212,7 @@ export default function AdminArtistsPage() {
             </select>
             <button
               type="submit"
-              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)', cursor: 'pointer' }}
             >
               Search
             </button>
@@ -228,11 +228,11 @@ export default function AdminArtistsPage() {
             {sortButton('featuredOrganiserCount', 'Featured Progress')}
           </div>
 
-          {error && <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {sorted.length === 0 && !loading && (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No artists match.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No artists match.</p>
             )}
             {sorted.map((a) => {
               const tier = TIER_STYLE[a.sceneStatus]
@@ -240,7 +240,7 @@ export default function AdminArtistsPage() {
                 <div
                   key={a.id}
                   style={{
-                    background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px',
+                    background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: '16px',
                     border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
                   }}
                 >
@@ -250,13 +250,13 @@ export default function AdminArtistsPage() {
                         {!a.avatar && a.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {a.name}
-                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '999px', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          <span style={{ fontSize: 'var(--afa-text-10px)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                             {tier.label}
                           </span>
                         </p>
-                        <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '2px' }}>
                           {timeInScene(a.firstGigDate)} in the scene
                         </p>
                       </div>
@@ -267,7 +267,7 @@ export default function AdminArtistsPage() {
                         <button
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
+                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: 'var(--afa-text-small)', cursor: 'pointer' }}
                         >
                           Remove Headliner
                         </button>
@@ -277,7 +277,7 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '12px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                            style={{ padding: '7px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.15)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                           />
                           <Button variant="solid" size="md" fullWidth={false} onClick={() => handleHeadlinerToggle(a)} disabled={actioningId === a.id}>
                             ★ Grant Headliner
@@ -287,7 +287,7 @@ export default function AdminArtistsPage() {
                       {a.headlinerNote && (
                         <button
                           onClick={() => setExpandedNote(expandedNote === a.id ? null : a.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-secondary)', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-micro)', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                           {expandedNote === a.id ? 'Hide note' : 'View note'}
                         </button>
@@ -296,7 +296,7 @@ export default function AdminArtistsPage() {
                   </div>
 
                   {expandedNote === a.id && a.headlinerNote && (
-                    <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'rgba(201,151,58,0.08)', borderRadius: '6px' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'rgba(201,151,58,0.08)', borderRadius: 'var(--afa-radius-sm)' }}>
                       &quot;{a.headlinerNote}&quot;
                     </p>
                   )}
@@ -339,7 +339,7 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
   return (
     <div>
       <div style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: '10px', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
+      <div style={{ fontSize: 'var(--afa-text-10px)', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
         {label}{sub && <span style={{ opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}> · {sub}</span>}
       </div>
     </div>
