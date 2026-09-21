@@ -1,3 +1,91 @@
+# Session Handoff — 22 Sept 2026 (CC — GEN-2609-094 hygiene bundle, incl. BUG-2609-056)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only per the 22 Sept cadence rule (sections 6, 9, 11 unchanged - copied forward). Session started at `qa@1727b36` (dispatch's stated floor was `716d668`; `qa` had advanced 2 more docs-only commits by session start - session-start ratchet re-check matched the dispatch's stated baseline exactly before touching anything, so nothing between `716d668` and `1727b36` moved the numbers). Ended at branch `chore/gen-2609-094-hygiene` @ `14ad2cb`, 5 commits, pushed, no PR opened (no `gh` CLI/GitHub write access this session - chat opens/merges per the ownership split in §13).
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches committed |
+|---|---|---|---|---|
+| 22 Sept 2026 (CC) | `GEN-2609-094` hygiene bundle (`BUG-2609-056` + `EXEMPT_FILES` + `inherit` allowlist + wire `--afa-radius-sharp` + `TOKEN_COVERAGE` regen) | Done, pushed, no PR | 5 commits, 1 branch, 1 PR as dispatched. Full write-up in `docs/design.md`'s `GEN-2609-094` entry. See §4/§5 below for every number. | `chore/gen-2609-094-hygiene` |
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping catch-up + `GEN-2609-094` dispatch draft | Done | Audit merged as `#694` (`cd4225e`). Feedback/`CodeCounter` backfilled. | (merged) |
+| 21–22 Sept 2026 (CC→chat) | `GEN-2609-090` / `091` / `092` | Merged: `#691`/`#692`/`#693` | 090 category-first ordering + 8 named tokens; 091 removed 23 dead colour tokens; 092 wired `--afa-white`. | (merged) |
+| 20 Sept 2026 (CC→chat) | `GEN-2609-089` batch 8 + Task B + `BUG-2609-055` | Merged: `#689`/`#690`/`#685` (+`#684`) | 289 → 64 literals; checker shorthand undercount fixed; fonts moved to `<html>`. | (merged) |
+| 20 Sept 2026 (CC) | `GEN-2609-088` batch 7 | Merged `#681`–`#683` | 273 → 65 literals. | (merged) |
+
+## 2. Activity in progress
+
+- `GEN-2609-094` - `chore/gen-2609-094-hygiene` pushed, **`NOT YET OPENED`** as a PR (no `gh` CLI this session). Compare link: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-094-hygiene?expand=1`
+- Batch 9 (`admin/revenue`, `admin/artists`, `my-feedback`) - not started; runs after 094 lands and merges (its exemption/allowlist commits change the ratchet baseline batch 9's own dry-run counts were measured against - re-verify batch 9's per-file counts against the POST-094 baseline before dispatching, not the pre-094 numbers in the 20 Sept entry below).
+- No other open code branches.
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `chore/gen-2609-094-hygiene` | **`NOT YET OPENED`** | n/a (no PR yet) | Locally verified clean (tsc, checker, 55 self-tests, ratchet, eslint on every touched file - see `docs/design.md`'s `GEN-2609-094` Verify section). Chat opens + merges. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | - | Unrelated, out of scope since 14 Aug. |
+
+## 4. Decisions currently sitting with Hitesh
+
+| Question | Options | Status | Resolution |
+|---|---|---|---|
+| rgba opacity token family naming (925→918 literals after 094's exemptions, still 0% convertible) | e.g. `--afa-text-primary-08/-15/-20` scheme vs other | `open`, `GEN-2609-095` | - |
+| Token threshold: `GEN-2609-081`'s approved rule = 50+ repo-wide occurrences; `22px`(24)/`17px`(24)/radius `3px`(45)/spacing `40/5/9/80/7/64px` are all below it | keep 50 / lower it | `open`, `GEN-2609-095`. Audit's own §6 item 1 recommended adding them - deliberately NOT actioned in `094` (would contradict the rule) | - |
+| `viewport.themeColor` follow-up: static hex won't track a live admin change to `--afa-fill-solid` (new limitation from `094`'s `BUG-2609-056` fix, documented in `design.md`, not fixed) | DB-driven `generateViewport()` / accept the manual-sync coupling | `open`, new this session - not yet numbered | - |
+| Odd spacing `5/7/9px` | mint tokens / snap to 4px grid via deliberate visual-change ticket | `open`, only matters at the spacing phase | - |
+| 4 `toast-rollout/*` branches: last commit 19 Jul, 931–934 behind `qa` | land (rebase) / abandon | `open`, `GEN-2609-097` | - |
+| ~50 other stale remote branches | delete list / keep | `open`, `GEN-2609-097` | - |
+| Batch size: 3-file batches vs. category-wide sweeps | keep 3-file / sweep the (post-094) convertible pool | `open` | - |
+| Razorpay + Google Places key rotation | - | still outstanding since 25 Aug | - |
+
+## 5. `CodeCounter` state
+
+Unchanged this session - `GEN-2609-094`/`BUG-2609-056` were already chat-assigned and logged before this dispatch (per the dispatch's own instruction, CC did not touch the Feedback table or `CodeCounter`). Last verified by chat 22 Sept: `GEN/2609` = 97, `BUG/2609` = 56.
+
+## 6. Known GEN-numbering collisions/gaps ledger
+
+No new collisions found or introduced this session. Unchanged from the permanent ledger.
+
+## 7. Docs-conflict watchlist
+
+- `chore/gen-2609-094-hygiene` - touches both `design.md` (own new tail section) and `HANDOFF.md` (this entry) and `scripts/design-token-baseline.json` (2 sequential `--update-baseline` writes within its own 5 commits, no other branch touching it concurrently - no cross-branch conflict expected, this is the only open branch).
+
+## 8. Verification standard checklist
+
+- [x] `tsc --noEmit -p .` clean, exit 0
+- [x] `check-design-tokens.js` clean (`BASE_REF=origin/qa node scripts/check-design-tokens.js`) - 0 new offenses, 1 `token-ok:` line shown (this branch's own new `layout.tsx` annotation)
+- [ ] `next build` - not run this session (a docs/tooling + 2 one-line-value hygiene ticket, no build-affecting change; `tsc --noEmit` + the checker + 55 self-tests + `verify-equivalence.js` + `eslint` were judged sufficient verification for the actual diff - flagging the skip rather than silently omitting it)
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.**
+
+## 10. UI/UX Design System Debt Ledger
+
+| Metric | Value | As of |
+|---|---|---|
+| Legacy (non-locked) `--afa-*` color tokens still defined | 45 color + 12 size + 14 spacing + 6 radius + 3 button + 4 font = 84 total tokens, 5 locked (`LOCKED_TOKEN_KEYS`) | `GEN-2609-094`, 22 Sept |
+| Orphaned tokens (defined, zero live usages) | **0** (was 1 - `--afa-radius-sharp` - before this session) | `GEN-2609-094`, 22 Sept |
+| Ratchet literal totals (post-094 baseline) | hex 54, rgba 918, font-family 0, font-size 830, spacing 2029, radius 350, raw-button 211 | `GEN-2609-094`, 22 Sept |
+| Public content pages migrated to locked tokens | 11 of 11 | `GEN-2609-073` (carried forward, unchanged) |
+| Raw `<button>` elements repo-wide | 211 (unchanged this session - explicitly out of scope) | `GEN-2609-094`, 22 Sept |
+
+## 11. Canonical locked-tokens source-of-truth pointer
+
+Unchanged: **`docs/afa-design-tokens-reference.md`**. Not touched this session (no new `--afa-*` token was introduced).
+
+## 12. Immediate next action
+
+Chat opens and merges `chore/gen-2609-094-hygiene`'s PR (compare link in §2), confirms the merged ratchet/coverage numbers match this entry, then re-runs batch 9's dry-run counts against the post-merge baseline before dispatching it (the pre-094 counts in earlier handoff entries are now stale for the exact same reason `TOKEN_COVERAGE` kept going stale - re-derive, don't carry forward).
+
+## 13. Chat vs. CC ownership note
+
+Unchanged (see the permanent statement in the entry below, or `docs/HANDOFF_TEMPLATE.md` §13). This session: CC branched, edited, verified, and pushed `chore/gen-2609-094-hygiene`; did not touch the Feedback table, `CodeCounter`, or open/merge any PR, per the dispatch's explicit instruction.
+
+---
+
 # Session Handoff — 22 Sept 2026 (chat — GEN-2609-093 audit merged; bookkeeping catch-up; GEN-2609-094 hygiene dispatch drafted)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only (sections 7–11 unchanged from the entry below). **This entry supersedes the 20 Sept 089 entry's "Immediate next action": every branch it lists is already merged - do NOT open or merge anything from it.** Session started at `qa@29aaa22`; ended at `qa@cd4225e` + this docs commit. Vercel `READY`, 0 runtime errors in the 30 min after `#694`.
