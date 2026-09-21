@@ -1,4 +1,58 @@
+# Session Handoff — 22 Sept 2026 later (chat — GEN-2609-094 PR opened, merged, and closed out)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **Cadence rule in effect: one handoff per chat PR+merge.** This entry covers exactly `#695` - nothing else changed since the prior 22 Sept entry. Session started at `qa@1727b36`; ended at `qa@9079232`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`, CI green, Vercel `READY`, 0 runtime errors/30min. CC's own actuals table matched expected exactly except task 4 (audit said "4 sites", actual 3 lines/2 files/6 zeros - audit's grep missed a middle-position zero; `radius-literal` correctly unchanged 350->350). Final `TOKEN_COVERAGE` 81/3/0 exact. `chore/gen-2609-094-hygiene` deleted. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping catch-up + `GEN-2609-094` dispatch (revised to 1 branch/1 PR) | Done | Audit merged `#694` `cd4225e`. Feedback/`CodeCounter` backfilled for `089`/`090`/`093`. `HANDOFF_TEMPLATE.md` cadence rule added (`716d668`). Dispatch revised from 2 PRs to 1 (`1727b36`). | (merged) |
+| 21–22 Sept 2026 (CC->chat) | `GEN-2609-090`/`091`/`092` | Merged `#691`/`#692`/`#693` | 090 category-first ordering; 091 removed 23 dead colour tokens; 092 wired `--afa-white`. | (merged) |
+| 20 Sept 2026 (CC->chat) | `GEN-2609-089` batch 8 + Task B + `BUG-2609-055` | Merged `#689`/`#690`/`#685`/`#684` | 289 -> 64 literals; checker shorthand fix; fonts moved to `<html>`. | (merged) |
+| 20 Sept 2026 (CC) | `GEN-2609-088` batch 7 | Merged `#681`-`#683` | 273 -> 65 literals. | (merged) |
+
+## 2. Activity in progress
+
+- Nothing open. Batch 9 (`admin/revenue`, `admin/artists`, `my-feedback`) not started - ready to dispatch whenever Hitesh wants it; colour is a no-op for all 3 files (0 hex/rgba match any map entry after `094`'s exemptions/allowlist too).
+- Open decisions still with Hitesh, unchanged from the prior entry: `GEN-2609-095` (rgba opacity naming + 50-occurrence threshold + odd spacing 5/7/9px), `GEN-2609-097` (`toast-rollout/*` branches + ~50 stale branches).
+
+## 3. Open PRs awaiting action
+
+None against `qa`. `#450` (-> `main`, frozen, unrelated) untouched. `chore/gen-2609-094-hygiene` deleted post-merge. Still-undeleted squash-merged branches from the prior entry (`chore/gen-2609-090/091/092`) - low priority, not yet cleaned up.
+
+## 4. Decisions / findings this session
+
+- Verified CC's diff before opening the PR: `layout.tsx` themeColor, `EXEMPT_FILES`/`isAllowlistedFontFamily` additions, and the 3 `--afa-radius-sharp` line changes all matched value-for-value against the dispatch.
+- No new decisions surfaced. `GEN-2609-095`/`097` remain the two open items blocking further colour/spacing/branch work.
+
+## 5. `CodeCounter` state
+
+- Unchanged this session - no new ticket numbers assigned. `GEN/2609` = 97, `BUG/2609` = 56 (verified 22 Sept, prior entry).
+- `GEN-2609-094` and `BUG-2609-056` set to `RESOLVED`/`DEPLOYED_QA` in the Feedback table.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session.
+
+## 7-11. Unchanged
+
+## 12. Immediate next action
+
+Hitesh answers `GEN-2609-095` (rgba naming, 50-occurrence threshold, odd spacing) and `GEN-2609-097` (branch triage). Once either resolves, chat drafts the next CC dispatch (batch 9, or the branch cleanup). No blocking technical work pending.
+
+## 13. Chat vs. CC ownership note
+
+Unchanged. Chat this session: reviewed CC's diff, opened `#695`, polled CI, merged (pinned-SHA squash), deleted the branch, verified Vercel `READY` + 0 runtime errors, updated Feedback/`resolvedAt` for `094`/`BUG-2609-056`, wrote this handoff. No code written by chat.
+
+---
+
 # Session Handoff — 22 Sept 2026 (CC — GEN-2609-094 hygiene bundle, incl. BUG-2609-056)
+
+> **SUPERSEDED 22 Sept 2026 (later entry):** `GEN-2609-094` (`#695`) is merged. See the entry above for the close-out.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only per the 22 Sept cadence rule (sections 6, 9, 11 unchanged - copied forward). Session started at `qa@1727b36` (dispatch's stated floor was `716d668`; `qa` had advanced 2 more docs-only commits by session start - session-start ratchet re-check matched the dispatch's stated baseline exactly before touching anything, so nothing between `716d668` and `1727b36` moved the numbers). Ended at branch `chore/gen-2609-094-hygiene` @ `14ad2cb`, 5 commits, pushed, no PR opened (no `gh` CLI/GitHub write access this session - chat opens/merges per the ownership split in §13).
 
