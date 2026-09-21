@@ -19,17 +19,31 @@
 // intentional layout technique, never a token-scale value).
 //
 // Usage:
-//   node scripts/dev/migrate-tokens.js <file> [--apply]
+//   node scripts/dev/migrate-tokens.js <file> [--apply] [--categories=list]
 //   With no --apply, prints a unified-diff-style dry run to stdout and
 //   changes nothing on disk - always review this before re-running with
 //   --apply, per every prior batch's own "review before applying" rule.
+//
+// GEN-2609-090 - `--categories` restricts which of the 5 defined
+// categories (colour, font-size, font-family, radius, spacing) this run
+// even looks at. Default is colour+font-size+font-family+radius -
+// spacing is excluded by default (see CATEGORY_DEFS/DEFAULT_CATEGORIES
+// below and this file's own docs/design.md entry for the "Admin-
+// controlled Button/Color/Font/Size first, spacing last" rationale:
+// spacing is 2030+ of the ~4,400-literal total but the category least
+// relevant to what an Admin actually edits in the design-system panel).
+// `--categories=all` opts every category, spacing included, back in -
+// same as this script's pre-GEN-2609-090 behavior. Raw `<button>`
+// adoption stays entirely outside this script regardless of category
+// selection (a shared-component-adoption task, not a value-token swap -
+// see docs/design.md's own GEN-2609-089 Phase 2 dispatch).
 const fs = require('fs')
 const path = require('path')
 
 const file = require.main === module ? process.argv[2] : null
 const APPLY = process.argv.includes('--apply')
 if (require.main === module && !file) {
-  console.error('usage: node scripts/dev/migrate-tokens.js <file> [--apply]')
+  console.error('usage: node scripts/dev/migrate-tokens.js <file> [--apply] [--categories=list]')
   process.exit(1)
 }
 
@@ -48,17 +62,46 @@ const RADIUS_PROPS = new Set([
   'borderradius', 'bordertopleftradius', 'bordertoprightradius',
   'borderbottomleftradius', 'borderbottomrightradius',
 ])
+// GEN-2609-090 - minimal starting set for the new "colour" category,
+// scoped to the property names this codebase actually assigns a color
+// literal to in a JS style object (see the Task D coverage report this
+// ticket's dispatch was built from - every real `#fff`-shaped hit found
+// there was a plain `color:`). Intentionally NOT exhaustive (no SVG
+// `fill=`/`stroke=` JSX *attribute* support - those are markup
+// attributes, not `prop: value` object entries, a structurally different
+// shape MATCH_RE_JS/MATCH_RE_CSS was never built to match) - extend this
+// set only once a real migration batch needs a prop it doesn't cover.
+const COLOR_PROPS = new Set(['color', 'backgroundcolor', 'background', 'bordercolor', 'outlinecolor'])
+// GEN-2609-090 - font-family category exists (selectable via
+// --categories) for parity with the dispatch's own default-category
+// list, but FONT_FAMILY_MAP is deliberately empty: none of this ticket's
+// named exact-value tokens are font-family tokens (the 4 --font-* role
+// tokens resolve through FONT_ALLOWLIST's curated --font-phys-* aliases
+// in src/lib/design-tokens.ts, not a plain exact-string map like this
+// script's other 3 categories), and inventing an unrequested mapping
+// isn't this ticket's job. Selecting this category is a safe no-op
+// until a future ticket actually populates it.
+const FONT_FAMILY_PROPS = new Set(['fontfamily'])
+const FONT_FAMILY_MAP = {}
 
 // Reverse lookup, built directly from src/app/globals.css's live values
 // (GEN-2609-077's original scale + GEN-2609-081's px-suffixed
-// extension). 0px deliberately excluded from RADIUS_MAP - GEN-2609-079's
-// own file-1 entry found that a bare 0 in a mixed-corner radius
-// shorthand is structural ("sharp on this joined edge"), not a
-// considered token choice, and isAllowlistedLength() already excludes 0
-// from ever counting as ratchet debt - migrating it adds a dependency
-// for zero benefit. Hairline 1px is excluded from SPACING_MAP for the
-// same reason (isAllowlistedLength already treats it as free, and no
-// prior batch has ever migrated a hairline).
+// extension). Hairline 1px is excluded from SPACING_MAP - isAllowlistedLength
+// already treats it as free (never counted ratchet debt), and no prior
+// batch has ever migrated a hairline.
+//
+// GEN-2609-090 - `0: '--afa-radius-sharp'` was PREVIOUSLY deliberately
+// excluded here (GEN-2609-079's own file-1 entry: a bare 0 in a mixed-
+// corner radius shorthand is usually structural - "sharp on this joined
+// edge" - not a considered token choice, and isAllowlistedLength()
+// already excludes 0 from ever counting as ratchet debt, so migrating it
+// doesn't move that number). That reasoning is still true as a caveat,
+// not a reason to withhold it: this ticket's own dispatch explicitly
+// named `--afa-radius-sharp` as one of 8 exact-value tokens to wire the
+// tooling up for, so a literal `0`/`0px` borderRadius value IS a
+// legitimate migration target now, ratchet-invisible or not - the two
+// concerns (does the ratchet count move, is this a real token adoption)
+// are separate questions, and this ticket only asked about the second.
 const SPACING_MAP = {
   2: '--afa-space-2px',
   4: '--afa-space-1',
@@ -90,17 +133,74 @@ const FONT_SIZE_MAP = {
   32: '--afa-text-page-title-lg',
 }
 const RADIUS_MAP = {
+  0: '--afa-radius-sharp',
   6: '--afa-radius-sm',
   8: '--afa-radius-md',
   10: '--afa-radius-10px',
   12: '--afa-radius-12px',
   999: '--afa-radius-pill',
 }
+// GEN-2609-090 - exact-string colour map (case-insensitive key lookup,
+// see migrateExactStringValue()), same "byte/value-identical only" convention
+// as the 3 dimension maps above and as check-design-tokens.js's own
+// GEN-2609-057 relocated-literal check: `#FFF` matches `'#fff'`/`'#FFF'`
+// but NOT the visually-identical `#FFFFFF` (a different literal string),
+// and never the 6-digit expansion of any other unused colour token
+// either - no colour-space normalization, deliberately.
+const COLOR_MAP = {
+  '#FFF': '--afa-white',
+}
 
-function mapFor(normProp) {
-  if (FONT_SIZE_PROPS.has(normProp)) return { map: FONT_SIZE_MAP, units: ['px'] }
-  if (SPACING_PROPS.has(normProp)) return { map: SPACING_MAP, units: ['px'] }
-  if (RADIUS_PROPS.has(normProp)) return { map: RADIUS_MAP, units: ['px'] }
+// GEN-2609-090 - one definition per --categories name, so `mapFor()` can
+// be restricted to only the categories a given run selected (see this
+// file's header comment on --categories/DEFAULT_CATEGORIES/ALL_CATEGORIES
+// below). `kind` picks which value-matcher processLine() runs: 'dimension'
+// for the numeric px/rem maps (existing migrateValue()), 'exact-string'
+// for a quoted-value-only exact map-key lookup (migrateExactStringValue()
+// - shared by colour's hex map and font-family's - currently empty - map,
+// since both are "this precise string or nothing," never a numeric parse.
+// Quoted values only; see that function's own comment for the unquoted-
+// raw-CSS-hex gap this doesn't cover).
+const CATEGORY_DEFS = {
+  colour: { props: COLOR_PROPS, map: COLOR_MAP, kind: 'exact-string' },
+  'font-size': { props: FONT_SIZE_PROPS, map: FONT_SIZE_MAP, kind: 'dimension', units: ['px'] },
+  'font-family': { props: FONT_FAMILY_PROPS, map: FONT_FAMILY_MAP, kind: 'exact-string' },
+  radius: { props: RADIUS_PROPS, map: RADIUS_MAP, kind: 'dimension', units: ['px'] },
+  spacing: { props: SPACING_PROPS, map: SPACING_MAP, kind: 'dimension', units: ['px'] },
+}
+const ALL_CATEGORIES = Object.keys(CATEGORY_DEFS)
+// GEN-2609-090 - the dispatch's own ranking: an Admin edits Button/Color/
+// Font/Size in /dashboard/admin/design-system - spacing isn't one of the
+// controls there and is 2,055 of the ~4,400-literal total (see
+// docs/design.md's own GEN-2609-090 entry for the full rationale) -
+// least relevant to what changing a token in Admin actually affects, so
+// it's excluded from the default set and opted back in only via
+// `--categories=all`.
+const DEFAULT_CATEGORIES = ['colour', 'font-size', 'font-family', 'radius']
+
+function parseCategories(argv) {
+  const arg = argv.find((a) => a.startsWith('--categories='))
+  if (!arg) return DEFAULT_CATEGORIES
+  const raw = arg.slice('--categories='.length)
+  if (raw === 'all') return ALL_CATEGORIES
+  const requested = raw.split(',').map((s) => s.trim()).filter(Boolean)
+  for (const c of requested) {
+    if (!CATEGORY_DEFS[c]) {
+      console.error(`unknown category "${c}" - valid categories: ${ALL_CATEGORIES.join(', ')}, or "all"`)
+      process.exit(1)
+    }
+  }
+  return requested
+}
+
+function buildActiveDefs(categories) {
+  return categories.map((c) => CATEGORY_DEFS[c])
+}
+
+function mapFor(normProp, activeDefs) {
+  for (const def of activeDefs) {
+    if (def.props.has(normProp)) return def
+  }
   return null
 }
 
@@ -161,7 +261,28 @@ function migrateValue(raw, map, units, inRawBlock) {
   return out.join('')
 }
 
-function processLine(line, inRawBlock) {
+// GEN-2609-090 - exact-string match for the 'exact-string' categories
+// (colour's hex map, font-family's - currently empty - map): a single,
+// whole value, never a whitespace-split shorthand (unlike migrateValue()
+// above - `color`/`backgroundColor`/etc. never take a multi-value CSS
+// shorthand the way `padding`/`borderRadius` can). Case-insensitive key
+// lookup only ('#fff' matches map key '#FFF') - no other normalization,
+// same "byte/value-identical or leave it" convention as migrateValue().
+//
+// Quoted values only (m[5] in processLine, never m[3]): a hex colour
+// starts with `#`, never a digit, so it can never satisfy MATCH_RE_JS/
+// MATCH_RE_CSS's bare-numeric alternative in the first place - an
+// unquoted raw-CSS colour (`color: #fff;` with no quotes, inside a
+// `<style>{`...`}</style>` block) is real CSS but structurally
+// unreachable by either regex's bare-value branch as written, a known
+// gap left for a future ticket, not silently worked around here.
+function migrateExactStringValue(raw, map) {
+  const key = Object.keys(map).find((k) => k.toLowerCase() === raw.trim().toLowerCase())
+  if (!key) return null
+  return `var(${map[key]})`
+}
+
+function processLine(line, inRawBlock, activeDefs) {
   if (isCommentLine(line) || tokenOkReason(line)) return line
 
   const MATCH_RE = inRawBlock ? MATCH_RE_CSS : MATCH_RE_JS
@@ -173,10 +294,19 @@ function processLine(line, inRawBlock) {
   while ((m = MATCH_RE.exec(line))) {
     const propRaw = m[1]
     const norm = propRaw.replace(/-/g, '').toLowerCase()
-    const target = mapFor(norm)
+    const target = mapFor(norm, activeDefs)
     if (!target) continue
 
     const prefixLen = m[1].length + m[2].length
+    if (target.kind === 'exact-string') {
+      if (m[5] === undefined) continue // bare numeric branch never applies to a colour/font-family value
+      const migrated = migrateExactStringValue(m[5], target.map)
+      if (migrated === null) continue
+      const start = m.index + prefixLen + 1 // +1 to skip the opening quote
+      const end = start + m[5].length
+      edits.push({ start, end, replacement: migrated })
+      continue
+    }
     if (m[3] !== undefined) {
       // Bare numeric value (unquoted) - e.g. `fontSize: 14` (JS, always
       // a single token) or `padding: 16px 20px !important;` (raw CSS,
@@ -210,6 +340,10 @@ function processLine(line, inRawBlock) {
 }
 
 function run() {
+  const categories = parseCategories(process.argv)
+  const activeDefs = buildActiveDefs(categories)
+  console.log(`categories: ${categories.join(', ')}`)
+
   const original = fs.readFileSync(file, 'utf8')
   const lines = original.split('\n')
   let inRawBlock = false
@@ -220,7 +354,7 @@ function run() {
       out.push(line)
       continue
     }
-    out.push(processLine(line, inRawBlock))
+    out.push(processLine(line, inRawBlock, activeDefs))
     if (!inRawBlock && line.includes('<style>{`')) {
       inRawBlock = true
     }
@@ -249,4 +383,14 @@ if (require.main === module) {
   run()
 }
 
-module.exports = { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP }
+module.exports = {
+  SPACING_MAP,
+  FONT_SIZE_MAP,
+  RADIUS_MAP,
+  COLOR_MAP,
+  FONT_FAMILY_MAP,
+  CATEGORY_DEFS,
+  DEFAULT_CATEGORIES,
+  ALL_CATEGORIES,
+  parseCategories,
+}
