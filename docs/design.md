@@ -7771,3 +7771,59 @@ New migration `prisma/migrations/20260921120000_remove_dead_colour_design_tokens
 Full coverage regen, per-category convertibility breakdown, var()-unsafe-context inventory, and a data-backed batch 9 proposal: see `docs/token-migration-status.md`. No `src/`/`prisma/`/`scripts/` change in this ticket - reproducible commands are in the doc itself.
 
 Correction (22 Sep): the doc's section 5 wrongly listed hex-color as convertible for `my-feedback`; a dry run shows 0 hex conversions in all 3 batch 9 files (fixed). Its section 6 item 1 (add `--afa-text-17px`/`-22px`, `--afa-radius-3px`, 6 spacing tokens) contradicts `GEN-2609-081`'s approved 50+-occurrence rule (all are below 50) - NOT actioned; logged as a decision in `GEN-2609-095`. Follow-ups logged: `GEN-2609-094` (hygiene bundle incl. `BUG-2609-056` themeColor), `095` (scale decisions), `096` (raw-button track), `097` (stale branch triage).
+
+## GEN-2609-094 - token-migration hygiene bundle (incl. BUG-2609-056)
+
+One branch (`chore/gen-2609-094-hygiene`), 5 commits, off `origin/qa` at `1727b36` (`716d668` was the dispatch's stated floor; `qa` had advanced 2 more docs-only commits by session start, both re-verified as no-ops for the ratchet before starting). Fixes the tooling/hygiene gaps `GEN-2609-093`'s audit found. Zero visual change throughout - no new tokens, no `globals.css`/`design-tokens.ts`/`DesignToken` DB changes, no migrations. Session-start ratchet re-check matched the dispatch's stated baseline exactly (hex 73, rgba 925, font-family 10, font-size 854, spacing 2055, radius 351, raw-button 211) before anything was touched.
+
+### Commit 1 - `BUG-2609-056`: `viewport.themeColor` can't use `var()`
+
+`src/app/layout.tsx:142`'s `themeColor: "var(--afa-fill-solid)"` renders straight into `<meta name="theme-color" content="...">` - a `<meta>` tag's `content` attribute is never a CSS context, so no browser has ever resolved that custom property; the tag silently fell back to default chrome tinting instead of the brand orange, since `GEN-2609-067` introduced it. Replaced with the resolved `#FF5A36` (confirmed identical in `globals.css:148`, `design-tokens.ts:200`, and `manifest.ts`'s own hardcoded `theme_color`), annotated with a trailing `// token-ok:` comment (this codebase's existing JS-line escape hatch, per `GEN-2609-085`) explaining why it's a permanent literal, and rewrote the stale comment above it (no longer describes a `var()` retarget, since it's not a `var()` anymore).
+
+**Known limitation, deliberately not fixed here (out of scope per dispatch):** this is now a second static hex, independent of `manifest.ts`'s own hardcoded `theme_color` - if an admin ever changes `--afa-fill-solid` via `/dashboard/admin/design-system`, neither this value nor the manifest's will follow it; both would need to be hand-updated to stay in sync, same as they already had to be kept in sync by hand before this fix (the coupling itself isn't new - only the literal's shape changed, from a non-functional `var()` to a real, working hex). A DB-driven `generateViewport()` reading the live token (mirroring how the rest of the token system already reads from `DesignToken` rows) is a possible follow-up that would close this gap properly, but is out of scope for a zero-visual-change hygiene ticket.
+
+### Commit 2 - `EXEMPT_FILES`: `email.ts`, `ticket-pdf.ts`, `manifest.ts`
+
+Added all 3 files the audit found where `var()` structurally cannot resolve (docs/token-migration-status.md §3) to `scripts/check-design-tokens.js`'s `EXEMPT_FILES`, with a comment explaining each: Resend email HTML (most email clients, Outlook especially, don't support CSS custom properties), `pdf-lib`'s `rgb()` calls (a separate rendering pipeline, no CSS engine at all), and the static-JSON web manifest (already self-documented via `BUG-2609-015` but never actually exempted). Added 4 new self-tests to `check-design-tokens.test.js` (`isExemptFile` true for all 3, plus a `findOffenses` fixture per file proving a real hex/rgb() literal on an added line is correctly skipped) - 47 → 51 passing.
+
+**Honesty note (per dispatch):** this removes literals from the ratchet by exemption, not by migration - no code in these 3 files changed. Exact per-category drop, confirmed via a fresh ratchet run before/after: hex-color -19, rgb-rgba -7, hardcoded-font-family -1, font-size -24, spacing -26, radius -1 (**78 total**, matching the audit's own "~78" estimate exactly). Baseline regenerated (`--update-baseline`, only lowers, no `--allow-raise` needed): hex 73→54, rgba 925→918, font-family 10→9, font-size 854→830, spacing 2055→2029, radius 351→350. **This is bookkeeping hygiene. Nobody should read tomorrow's smaller ratchet numbers as migration progress from this commit** - the debt these 3 files held was never really addressable by the token system in the first place.
+
+A concrete reason this matters beyond tidiness, also found by the audit: 23 of `email.ts`'s literals (22 font-size + 1 radius) were already "script-convertible" per `migrate-tokens.js`'s own value maps - a naive whole-tree `--categories=all --apply` run, before this exemption existed, would have "successfully" rewritten them into `var(--afa-*)` references that silently render as nothing in every transactional email (password reset, booking confirmation, etc.).
+
+### Commit 3 - allowlist `font-family: inherit`
+
+The 9 remaining `hardcoded-font-family` sites after commit 2's exemption (email.ts's 10th, `'SF Mono'`, was already gone) are all `<textarea>`/`<input>` style objects deliberately deferring to the ambient, token-controlled font of their container - not a hand-picked replacement family the way `Georgia` or `'SF Mono'` would be:
+
+- `src/app/(public)/events/[id]/rate/RatePromptClientPage.tsx:156`
+- `src/app/dashboard/admin/diary/page.tsx:147`
+- `src/app/dashboard/organiser/edit/page.tsx:13`
+- `src/app/dashboard/organiser/events/[id]/edit/page.tsx:833`
+- `src/app/dashboard/organiser/events/create/page.tsx:699`
+- `src/app/profile/page.tsx:892`
+- `src/components/CorporateInquiryModal.tsx:279`
+- `src/components/SupportWidget.tsx:500`
+- `src/components/admin/FeedbackDetailPanel.tsx:330`
+
+Added `isAllowlistedFontFamily()` (case-insensitive exact match on `inherit`) to `scripts/check-design-tokens.js`, wired into the `hardcoded-font-family` rule's `test`/`extract`, exported and added 4 self-tests (allows `inherit`/`Inherit`/`INHERIT`, still flags a real family like `Georgia`, and 2 rule-level fixtures) - test count is cumulative: 47 baseline → 51 after commit 2's 4 exemption tests → **55 passed** after this commit's own 4. **This is a definition change to what counts as debt, not a migration** - same honesty framing as commit 2. Baseline regenerated: `hardcoded-font-family` 9 → 0.
+
+### Commit 4 - wire `--afa-radius-sharp`, the last unused token
+
+Same pattern as `GEN-2609-092`. **The audit's "4 sites" estimate was off by its own admission** - its grep only checked for a bare `0`/`'0'` in the *leading* position of a `borderRadius` shorthand and missed a *middle*-position zero. The real dry run (`node scripts/dev/migrate-tokens.js <file> --categories=radius`) shows **3 lines change, across 2 files, 6 individual `0` tokens converted**:
+
+- `src/app/dashboard/venue/[id]/seat-map/page.tsx:1519` - `'var(--afa-radius-md) 0 0 var(--afa-radius-md)'` → both middle `0`s convert (the audit's grep pattern never matched this line at all)
+- `src/app/dashboard/venue/[id]/seat-map/page.tsx:1532` - `'0 var(--afa-radius-md) var(--afa-radius-md) 0'` → both leading/trailing `0`s convert (this was the audit's own example)
+- `src/app/dashboard/venue/create/page.tsx:486` - `'0 0 var(--afa-radius-12px) var(--afa-radius-12px)'` → both leading `0`s convert
+
+Applied with `--categories=radius --apply`; `node scripts/dev/verify-equivalence.js` on both files: `0 mismatches (33 map entries, 2 file(s) className-checked)`. **Ratchet `radius-literal` unchanged (350 → 350)**, exactly as the dispatch predicted - `isAllowlistedLength()` treats bare `0` as free debt, so these sites were never counted as debt in the first place; this is real token adoption, not something the ratchet number can show.
+
+### Commit 5 - regenerate `TOKEN_COVERAGE`, once, last
+
+Re-ran `src/lib/design-token-coverage.ts`'s own documented method (`git grep -l --fixed-strings -- "var(<KEY>)" -- src` per `DEFAULT_TOKEN_VALUES` key, dropping `globals.css`) against the branch's final state. Result: **81 site-wide / 3 button-only / 0 unused**, exactly matching the dispatch's expected number. Both `--afa-white` (wired by `#693`, stale in the committed file since) and `--afa-radius-sharp` (wired by commit 4 above) now show real consumers. No other delta from the dispatch's expectation.
+
+### Verify (final, whole branch, foreground)
+
+`npx tsc --noEmit -p .`: clean, exit 0. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 new offenses (1 `token-ok:` use shown, `layout.tsx`'s own new annotation). `node scripts/check-design-tokens.test.js`: 55 passed, 0 failed. `node scripts/design-token-ratchet.js`: all 7 categories at or below baseline (`±0` after both baseline updates). `npx eslint` on every touched file: `layout.tsx` and `design-token-coverage.ts` clean; `check-design-tokens.js`/`.test.js` each show 1-2 pre-existing `@typescript-eslint/no-require-imports` errors, confirmed pre-existing (identical error on the unmodified `origin/qa` version of `check-design-tokens.js` via `git stash`) and on lines this ticket never touched - this file has used `require()` since it was written, not a regression. `git diff origin/qa --stat`: exactly 7 files changed (the 4 tooling/script files + `layout.tsx` + the 2 named page files) - no `globals.css`/`design-tokens.ts`/DB migration, no page beyond the 2 named, per the dispatch's constraints.
+
+### What this doesn't do (deliberately)
+
+No new tokens (the audit's own §6 item 1 recommendation - `--afa-text-17px`/`-22px`, `--afa-radius-3px`, 6 spacing tokens - all sit below `GEN-2609-081`'s approved 50+-occurrence rule; that decision sits with Hitesh as `GEN-2609-095`). No batch 9, no spacing, no rgba, no raw-button, no `toast-rollout/*` branches - all explicitly out of scope per the dispatch.

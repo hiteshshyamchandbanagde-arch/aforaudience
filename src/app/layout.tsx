@@ -135,11 +135,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Match the manifest's theme_color so the browser chrome (Android
   // address bar, iOS status bar in standalone) tints correctly.
-  // GEN-2609-067 - retargeted from the legacy --afa-terracotta to
-  // --afa-fill-solid alongside manifest.ts's own hardcoded hex, closing
-  // the coupling gap flagged since GEN-2609-063 (previously: swapping
-  // one side alone would have broken this "must match" invariant).
-  themeColor: "var(--afa-fill-solid)",
+  // GEN-2609-094 (BUG-2609-056) - this was `"var(--afa-fill-solid)"`
+  // from GEN-2609-067 onward, but a Viewport export renders straight
+  // into `<meta name="theme-color" content="...">` - a meta tag's
+  // `content` attribute is never a CSS context, so the browser can't
+  // resolve a CSS custom property there and silently ignored it,
+  // falling back to default chrome tinting instead of the brand color.
+  // Resolved hex instead, matching --afa-fill-solid's own value in
+  // globals.css/design-tokens.ts and manifest.ts's own hardcoded
+  // theme_color - all 3 must stay in sync by hand (see docs/design.md's
+  // GEN-2609-094 entry for the known limitation: this won't follow an
+  // admin's live change to --afa-fill-solid the way most tokens do).
+  themeColor: "#FF5A36", // token-ok: meta content attribute, not a CSS context - var() cannot resolve here; must equal manifest.ts's theme_color
 };
 
 export default async function RootLayout({

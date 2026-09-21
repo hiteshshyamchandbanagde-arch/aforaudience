@@ -24,6 +24,7 @@ const {
   tokenOkReason,
   findOffenses,
   isAllowlistedLength,
+  isAllowlistedFontFamily,
 } = require('./check-design-tokens')
 
 let passed = 0
@@ -142,6 +143,25 @@ t('isAllowlistedLength: any percent value is allowed', () => {
 t('isAllowlistedLength: an ordinary literal (2px, 14px) is NOT allowed', () => {
   assert.equal(isAllowlistedLength('2px'), false)
   assert.equal(isAllowlistedLength('14px'), false)
+})
+t('GEN-2609-094: isAllowlistedFontFamily allows inherit, case-insensitively', () => {
+  assert.equal(isAllowlistedFontFamily('inherit'), true)
+  assert.equal(isAllowlistedFontFamily('Inherit'), true)
+  assert.equal(isAllowlistedFontFamily('INHERIT'), true)
+})
+t('GEN-2609-094: isAllowlistedFontFamily does not allow a real hardcoded family', () => {
+  assert.equal(isAllowlistedFontFamily('Georgia'), false)
+  assert.equal(isAllowlistedFontFamily('SF Mono'), false)
+})
+t('GEN-2609-094: hardcoded-font-family rule does not flag fontFamily: inherit', () => {
+  const rule = ruleByName('hardcoded-font-family')
+  assert.equal(rule.test(`fontFamily: 'inherit',`), false)
+  assert.deepEqual(rule.extract(`fontFamily: 'inherit',`), [])
+})
+t('GEN-2609-094: hardcoded-font-family rule still flags a real hardcoded family', () => {
+  const rule = ruleByName('hardcoded-font-family')
+  assert.equal(rule.test(`fontFamily: 'Georgia',`), true)
+  assert.deepEqual(rule.extract(`fontFamily: 'Georgia',`), ['Georgia'])
 })
 t('spacing-literal: zero padding is not flagged, a real value in the same shorthand still is', () => {
   const rule = ruleByName('spacing-literal')
@@ -299,6 +319,44 @@ t('findOffenses: exempt files (globals.css-equivalent path) are skipped entirely
   ].join('\n')
   const { offenses } = findOffenses(diff)
   assert.equal(offenses.length, 0, 'the exempt token-definition file should never be scanned')
+})
+t('GEN-2609-094: email.ts, ticket-pdf.ts and manifest.ts are exempt - var() cannot resolve in any of them', () => {
+  assert.equal(isExemptFile('src/lib/email.ts'), true)
+  assert.equal(isExemptFile('src/lib/ticket-pdf.ts'), true)
+  assert.equal(isExemptFile('src/app/manifest.ts'), true)
+})
+t('GEN-2609-094: findOffenses skips a new hex literal added to email.ts', () => {
+  const diff = [
+    'diff --git a/src/lib/email.ts b/src/lib/email.ts',
+    '--- a/src/lib/email.ts',
+    '+++ b/src/lib/email.ts',
+    '@@ -0,0 +1,1 @@',
+    '+          <div style="color: #C8441A;">',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'email HTML literals are the intended value, not hardcoding debt')
+})
+t('GEN-2609-094: findOffenses skips a new rgb() literal added to ticket-pdf.ts', () => {
+  const diff = [
+    'diff --git a/src/lib/ticket-pdf.ts b/src/lib/ticket-pdf.ts',
+    '--- a/src/lib/ticket-pdf.ts',
+    '+++ b/src/lib/ticket-pdf.ts',
+    '@@ -0,0 +1,1 @@',
+    '+  ink: rgb(0.055, 0.047, 0.039), // #0E0C0A',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'pdf-lib rgb() calls have no CSS engine to resolve var() against')
+})
+t('GEN-2609-094: findOffenses skips a new hex literal added to manifest.ts', () => {
+  const diff = [
+    'diff --git a/src/app/manifest.ts b/src/app/manifest.ts',
+    '--- a/src/app/manifest.ts',
+    '+++ b/src/app/manifest.ts',
+    '@@ -0,0 +1,1 @@',
+    "+    theme_color: '#FF5A36',",
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'the web manifest is static JSON, not CSS-aware (BUG-2609-015)')
 })
 
 // ---------------------------------------------------------------------

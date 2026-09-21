@@ -154,6 +154,20 @@ function isAllowlistedLength(token) {
   return false
 }
 
+// GEN-2609-094 - `font-family: inherit` isn't hardcoding: every real
+// site found by the GEN-2609-093 audit is a form control (textarea/
+// input) deliberately deferring to the ambient, token-controlled font
+// of its container, not a hand-picked replacement family the way
+// `font-family: Georgia` or `'SF Mono'` would be. Same allowlist
+// pattern as isAllowlistedLength() above (0/1px/0.5px/% are "free"
+// because they're not real token-scale decisions either) - a
+// definition change to what counts as debt, not a migration.
+// Case-insensitive: `inherit` is a real CSS keyword, not a specific
+// casing this codebase happens to use.
+function isAllowlistedFontFamily(value) {
+  return value.trim().toLowerCase() === 'inherit'
+}
+
 function makeLiteralRule(name, propNameSet, allowedUnits, twRegexSource, opts = {}) {
   const twRe = twRegexSource ? new RegExp(twRegexSource, 'g') : null
   function extract(line) {
@@ -249,7 +263,7 @@ const RULES = [
       const re = /font-?[Ff]amily:\s*['"]([^'"]*)['"]/g
       let m
       while ((m = re.exec(line))) {
-        if (!m[1].includes('var(')) return true
+        if (!m[1].includes('var(') && !isAllowlistedFontFamily(m[1])) return true
       }
       return false
     },
@@ -258,7 +272,7 @@ const RULES = [
       const re = /font-?[Ff]amily:\s*['"]([^'"]*)['"]/g
       let m
       while ((m = re.exec(line))) {
-        if (!m[1].includes('var(')) literals.push(m[1])
+        if (!m[1].includes('var(') && !isAllowlistedFontFamily(m[1])) literals.push(m[1])
       }
       return literals
     },
@@ -444,10 +458,35 @@ function shouldFlag(rule, literals, isKnownInBaseFn) {
 // globals.css at runtime). Same exemption rationale as globals.css
 // itself: this is where these literals are SUPPOSED to live, not a new
 // gap in the checker.
+// GEN-2609-094 - 3 files where `var(--afa-*)` structurally cannot
+// resolve, found by the GEN-2609-093 audit (docs/token-migration-status.md
+// Section 3): CSS custom properties never reach these rendering paths, so
+// a literal here isn't hardcoding-debt the same way a JSX inline style is
+// - it's the only value that could ever work.
+//   - src/lib/email.ts - HTML strings sent through Resend
+//     (`resend.emails.send({ html: \`...\` })`); CSS custom properties are
+//     unsupported by most email clients (Outlook especially). Also the
+//     concrete reason this exemption matters beyond tidiness: 23 of this
+//     file's literals were already "script-convertible" per
+//     migrate-tokens.js's own maps - a naive whole-tree
+//     `--categories=all --apply` run would have "successfully" rewritten
+//     them into var() references that silently render as nothing in
+//     every transactional email.
+//   - src/lib/ticket-pdf.ts - PDF generation via pdf-lib's `rgb()`, a
+//     separate rendering pipeline with no CSS engine at all.
+//   - src/app/manifest.ts - the web app manifest is static JSON
+//     (`MetadataRoute.Manifest`), not CSS-aware; its own header comment
+//     already documents this from BUG-2609-015 ("CSS variable strings
+//     here were silently ignored by the browser"), but the exemption was
+//     never added here, leaving it silently exposed to a future
+//     colour-category migration batch.
 const EXEMPT_FILES = new Set([
   'src/app/globals.css',
   'src/lib/statusStyle.ts',
   'src/lib/design-tokens.ts',
+  'src/lib/email.ts',
+  'src/lib/ticket-pdf.ts',
+  'src/app/manifest.ts',
 ])
 
 function isExemptFile(file) {
@@ -614,4 +653,5 @@ module.exports = {
   extractPropValues,
   extractLengthTokensFromValue,
   isAllowlistedLength,
+  isAllowlistedFontFamily,
 }
