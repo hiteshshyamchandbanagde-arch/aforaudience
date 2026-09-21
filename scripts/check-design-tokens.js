@@ -444,10 +444,35 @@ function shouldFlag(rule, literals, isKnownInBaseFn) {
 // globals.css at runtime). Same exemption rationale as globals.css
 // itself: this is where these literals are SUPPOSED to live, not a new
 // gap in the checker.
+// GEN-2609-094 - 3 files where `var(--afa-*)` structurally cannot
+// resolve, found by the GEN-2609-093 audit (docs/token-migration-status.md
+// Section 3): CSS custom properties never reach these rendering paths, so
+// a literal here isn't hardcoding-debt the same way a JSX inline style is
+// - it's the only value that could ever work.
+//   - src/lib/email.ts - HTML strings sent through Resend
+//     (`resend.emails.send({ html: \`...\` })`); CSS custom properties are
+//     unsupported by most email clients (Outlook especially). Also the
+//     concrete reason this exemption matters beyond tidiness: 23 of this
+//     file's literals were already "script-convertible" per
+//     migrate-tokens.js's own maps - a naive whole-tree
+//     `--categories=all --apply` run would have "successfully" rewritten
+//     them into var() references that silently render as nothing in
+//     every transactional email.
+//   - src/lib/ticket-pdf.ts - PDF generation via pdf-lib's `rgb()`, a
+//     separate rendering pipeline with no CSS engine at all.
+//   - src/app/manifest.ts - the web app manifest is static JSON
+//     (`MetadataRoute.Manifest`), not CSS-aware; its own header comment
+//     already documents this from BUG-2609-015 ("CSS variable strings
+//     here were silently ignored by the browser"), but the exemption was
+//     never added here, leaving it silently exposed to a future
+//     colour-category migration batch.
 const EXEMPT_FILES = new Set([
   'src/app/globals.css',
   'src/lib/statusStyle.ts',
   'src/lib/design-tokens.ts',
+  'src/lib/email.ts',
+  'src/lib/ticket-pdf.ts',
+  'src/app/manifest.ts',
 ])
 
 function isExemptFile(file) {

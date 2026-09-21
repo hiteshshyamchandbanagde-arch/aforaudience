@@ -300,6 +300,44 @@ t('findOffenses: exempt files (globals.css-equivalent path) are skipped entirely
   const { offenses } = findOffenses(diff)
   assert.equal(offenses.length, 0, 'the exempt token-definition file should never be scanned')
 })
+t('GEN-2609-094: email.ts, ticket-pdf.ts and manifest.ts are exempt - var() cannot resolve in any of them', () => {
+  assert.equal(isExemptFile('src/lib/email.ts'), true)
+  assert.equal(isExemptFile('src/lib/ticket-pdf.ts'), true)
+  assert.equal(isExemptFile('src/app/manifest.ts'), true)
+})
+t('GEN-2609-094: findOffenses skips a new hex literal added to email.ts', () => {
+  const diff = [
+    'diff --git a/src/lib/email.ts b/src/lib/email.ts',
+    '--- a/src/lib/email.ts',
+    '+++ b/src/lib/email.ts',
+    '@@ -0,0 +1,1 @@',
+    '+          <div style="color: #C8441A;">',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'email HTML literals are the intended value, not hardcoding debt')
+})
+t('GEN-2609-094: findOffenses skips a new rgb() literal added to ticket-pdf.ts', () => {
+  const diff = [
+    'diff --git a/src/lib/ticket-pdf.ts b/src/lib/ticket-pdf.ts',
+    '--- a/src/lib/ticket-pdf.ts',
+    '+++ b/src/lib/ticket-pdf.ts',
+    '@@ -0,0 +1,1 @@',
+    '+  ink: rgb(0.055, 0.047, 0.039), // #0E0C0A',
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'pdf-lib rgb() calls have no CSS engine to resolve var() against')
+})
+t('GEN-2609-094: findOffenses skips a new hex literal added to manifest.ts', () => {
+  const diff = [
+    'diff --git a/src/app/manifest.ts b/src/app/manifest.ts',
+    '--- a/src/app/manifest.ts',
+    '+++ b/src/app/manifest.ts',
+    '@@ -0,0 +1,1 @@',
+    "+    theme_color: '#FF5A36',",
+  ].join('\n')
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 0, 'the web manifest is static JSON, not CSS-aware (BUG-2609-015)')
+})
 
 // ---------------------------------------------------------------------
 // GEN-2609-080 - raw-button is count-based over the WHOLE diff, not
