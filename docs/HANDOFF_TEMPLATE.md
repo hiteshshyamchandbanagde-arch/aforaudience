@@ -2,6 +2,8 @@
 
 This is a **template**, not a filled-in handoff. Copy this whole structure into a new top entry in `HANDOFF.md` at the start of every session's write-up (newest entry on top, per the existing "supersedes, does not delete" convention — older entries stay below, never deleted). Fill in every `[bracketed]` placeholder; delete guidance sentences that aren't bracketed once the real content replaces them. Sections 6, 9, 11 carry real, currently-true content already (not placeholders) — copy them forward unchanged unless the fact itself has actually changed, and say so explicitly if it has.
 
+**Cadence rule (Hitesh, 22 Sept 2026):** make a handoff after **every prompt run at CC** (CC writes it) and after **every PR + merge at chat** (chat writes it). Per run / per merge - not batched to the end of a session.
+
 ## 1. Last 5 sessions summary
 
 | Session / date | Goal | Status | Remarks | Branches committed |
