@@ -7769,3 +7769,5 @@ New migration `prisma/migrations/20260921120000_remove_dead_colour_design_tokens
 ## GEN-2609-093 - token-migration status audit (read-only)
 
 Full coverage regen, per-category convertibility breakdown, var()-unsafe-context inventory, and a data-backed batch 9 proposal: see `docs/token-migration-status.md`. No `src/`/`prisma/`/`scripts/` change in this ticket - reproducible commands are in the doc itself.
+
+Correction (22 Sep): the doc's section 5 wrongly listed hex-color as convertible for `my-feedback`; a dry run shows 0 hex conversions in all 3 batch 9 files (fixed). Its section 6 item 1 (add `--afa-text-17px`/`-22px`, `--afa-radius-3px`, 6 spacing tokens) contradicts `GEN-2609-081`'s approved 50+-occurrence rule (all are below 50) - NOT actioned; logged as a decision in `GEN-2609-095`. Follow-ups logged: `GEN-2609-094` (hygiene bundle incl. `BUG-2609-056` themeColor), `095` (scale decisions), `096` (raw-button track), `097` (stale branch triage).

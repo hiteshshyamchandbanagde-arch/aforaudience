@@ -1,4 +1,78 @@
+# Session Handoff — 22 Sept 2026 (chat — GEN-2609-093 audit merged; bookkeeping catch-up; GEN-2609-094 hygiene dispatch drafted)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only (sections 7–11 unchanged from the entry below). **This entry supersedes the 20 Sept 089 entry's "Immediate next action": every branch it lists is already merged - do NOT open or merge anything from it.** Session started at `qa@29aaa22`; ended at `qa@cd4225e` + this docs commit. Vercel `READY`, 0 runtime errors in the 30 min after `#694`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping catch-up + `GEN-2609-094` dispatch draft | Done, dispatch not yet sent | Audit merged as `#694` (`cd4225e`, pinned-SHA squash, CI green). Feedback/`CodeCounter` backfilled (§5). Caught that the audit's own "add 9 new tokens" recommendation contradicts the approved 50-occurrence rule (§4). | (merged) |
+| 21–22 Sept 2026 (CC→chat) | `GEN-2609-090` / `091` / `092` | Merged: `#691` `aacc034`, `#692` `29aaa22`, `#693` `20116da` | 090 category-first ordering + 8 named tokens; 091 removed 23 dead colour tokens (QA DB rows too); 092 wired `--afa-white`. Their `chore/gen-2609-09x` branches were never deleted. | (merged) |
+| 20 Sept 2026 (CC→chat) | `GEN-2609-089` batch 8 + Task B + `BUG-2609-055` | Merged: `#689` `ea0cf84`, `#690` `629576b`, `#685` `cc1c4a1` (+ `#684` `84a2369`) | 289 → 64 literals; checker shorthand undercount fixed; fonts moved to `<html>`. Batch 8 live check closed by Hitesh. | (merged) |
+| 20 Sept 2026 (CC) | `GEN-2609-088` batch 7 | Merged `#681`–`#683` | 273 → 65 literals. | (merged) |
+| 20 Sept 2026 (CC) | `GEN-2609-087` batch 6 | Merged (Feedback `RESOLVED`) | 298 → 55 literals. | (merged) |
+
+## 2. Activity in progress
+
+- `GEN-2609-094` (`BUILD_QUEUE`) - hygiene bundle, prompt at `cc-prompt-gen-2609-094.md`, **drafted, NOT yet dispatched to CC**. Includes `BUG-2609-056` (themeColor).
+- Batch 9 (`admin/revenue`, `admin/artists`, `my-feedback`) - not started; runs after 094 lands. Dry-run counts (lines): revenue 17 font-size + 6 radius, artists 15 + 6, my-feedback 13 + 8. Colour is a no-op for all 3 (0 hex/rgba match any map entry).
+- No open code branches.
+
+## 3. Open PRs awaiting action
+
+None against `qa`. `#450` (→ `main`, production freeze, unrelated since 14 Aug) untouched. Safe-to-delete, not yet deleted: `chore/gen-2609-090-category-first-ordering`, `-091-remove-dead-colour-tokens`, `-092-wire-afa-white` (squash-merged; ahead-only-by-squash). Other stale branches: see `GEN-2609-097`, need Hitesh's go-ahead.
+
+## 4. Decisions / findings this session
+
+Decisions sitting with Hitesh (all logged in Feedback):
+
+| Question | Options | Status |
+|---|---|---|
+| rgba opacity token family naming (925 literals, 0% convertible) | e.g. `--afa-text-primary-08/-15/-20` scheme vs other | `open`, `GEN-2609-095` - gates the colour half of the north star |
+| Token threshold: `GEN-2609-081`'s approved rule = 50+ repo-wide occurrences; `22px` (24), `17px` (24), radius `3px` (45), spacing `40/5/9/80/7/64px` (37/36/34/32/23/20) are all below it | keep 50 / lower it | `open`, `GEN-2609-095`. Audit §6 item 1 recommended adding them - that contradicts the rule; not put in 094 |
+| Odd spacing `5/7/9px` | mint tokens / snap to 4px grid via deliberate visual-change ticket | `open`, only matters at the spacing phase |
+| 4 `toast-rollout/*` branches: last commit 19 Jul, 931–934 behind `qa` | land (rebase) / abandon | `open`, `GEN-2609-097` - batches are avoiding ~82 literals to protect them |
+| ~50 other stale remote branches | delete list / keep | `open`, `GEN-2609-097` - needs explicit go-ahead |
+| Batch size: 9–12 as planned remove ~223 of 1288 default-category literals (17%; ~5% of all 4268) | keep 3-file batches / category-wide sweeps of the 710 font-size + 232 radius convertible | `open` - chat recommends sweeps after 094 |
+| Razorpay + Google Places key rotation | - | still outstanding since 25 Aug (parked deliberately with `GEN-2609-005`/`009`) |
+
+Findings:
+- Audit (`#694`) reconciled exactly; ratchet unchanged by it (docs-only): hex 73, rgba 925, font-family 10, font-size 854, spacing 2055, radius 351, raw-button 211.
+- `docs/token-migration-status.md` §5 labels `my-feedback` convertible as "font-size, radius, hex-color" - wrong, dry run shows 0 hex conversions (fixed in this commit).
+- `BUG-2609-053` re-verified still real on `qa`: `Booking.ticketCode` is `String? @unique`, never populated; `tickets/page.tsx:217` renders `—`.
+- Feedback bug board: 9 `NEW` + 14 `UNDER_REVIEW` BUG rows; only the token-related ones were cross-checked against `design.md`. The July/Aug `UNDER_REVIEW` rows are unverified (session-start step 2 not completed for them).
+- `BUG-2609-055` was still `IN_BUILD` after both parts merged; set to `BUILD_COMPLETE`. Site-wide serif→sans live check still with Hitesh.
+- `GEN-2609-089` marked `RESOLVED` on the strength of Hitesh closing the batch-8 live check; flip back if that was wrong.
+
+## 5. `CodeCounter` state
+
+- Verified 22 Sept 2026 by `SELECT` immediately before writing, then `UPDATE ... WHERE "currentSeq" = <value read>`: `GEN/2609` **88 → 97**, `BUG/2609` **55 → 56**.
+- Backfilled `GEN-2609-089`, `090`, `093`; new `094`–`097` and `BUG-2609-056`.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+New row (append to the permanent ledger): `GEN-2609-089`…`093` - numbers were chat-assigned while `CodeCounter GEN/2609` stayed at 88 and the Feedback rows for `089`/`090`/`093` were never inserted (`091`/`092` had rows). Resolved 22 Sept: rows backfilled, counter bumped to 97.
+
+## 7–11. Unchanged
+
+Docs-conflict watchlist addendum: `TOKEN_COVERAGE` in `src/lib/design-token-coverage.ts` goes stale after any wiring PR (recurred within two commits of `091`'s regen) - regenerate after every wiring PR (094 PR A regenerates it now).
+
+## 12. Immediate next action
+
+Hitesh dispatches `cc-prompt-gen-2609-094.md` to CC. Chat then opens/merges its 2 PRs (standard flow), and drafts the batch 9 dispatch from a fresh ratchet run. In parallel Hitesh answers the `GEN-2609-095` / `097` decisions.
+
+## 13. Chat vs. CC ownership note
+
+Unchanged. Chat this session: read-only audit of repo + Feedback board, opened and merged `#694` via API (PAT supplied by Hitesh in-session - revoke it when the session ends), Feedback/`CodeCounter` writes on QA project `nqiyrypmjtogoocerxtu` only, this docs commit. CC owns all code changes, including 094.
+
+---
+
 # Session Handoff — 20 Sept 2026 later still (CC — GEN-2609-089: bulk token migration batch 8, 3 files + BUG-2609-055 (2/2): site-wide font root cause)
+
+> **SUPERSEDED 22 Sept 2026:** all branches and PRs listed in this entry (`#689`, `#690`, `#685`, and the 4 branches in §2/§3) are merged into `qa`. Its "Immediate next action" is obsolete - read the entry above.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`. **Both ticket numbers chat-assigned** - `GEN-2609-089` new, `BUG-2609-055` (2/2) is part 2 of an existing ticket (part 1 = the seat-map `<main>` fix, merged as `#684`) - `CodeCounter`/Feedback table not touched this session (chat's job). Session started at `qa@84a2369` (post-`088`'s merge + `BUG-2609-055`'s seat-map fix, matching the dispatch's own stated baseline exactly, including the live ratchet counts: hex 75, rgba 931, font-family 10, font-size 920, spacing 2159, radius 375, raw-button 211 - verified via a fresh ratchet run before touching anything).
 

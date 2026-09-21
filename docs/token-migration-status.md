@@ -263,7 +263,7 @@ Following the standing convention (3 files, 1 PR each, exact-value only via `nod
 |---|---:|---:|---:|
 | `src/app/dashboard/admin/revenue/page.tsx` | 26 | 4 | 22 (font-size, radius) |
 | `src/app/dashboard/admin/artists/page.tsx` | 22 | 1 | 21 (font-size, radius) |
-| `src/app/my-feedback/page.tsx` | 23 | 2 | 21 (font-size, radius, hex-color) |
+| `src/app/my-feedback/page.tsx` | 23 | 2 | 21 (font-size, radius) |
 
 All 3 avoid the 4 known active `toast-rollout/*` branches and aren't shared components or the design-system page itself — lowest-risk batch on the current ranking. **64 literals convert, ratchet total (default categories) drops from 1288 to 1224.**
 
