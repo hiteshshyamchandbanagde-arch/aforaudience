@@ -13,7 +13,6 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 
 --afa-cream:           #F7F3EE;   /* primary text-on-dark color, NOT a light background anymore */
 --afa-amber:           #C9973A;   /* accent — eyebrows, icons, hover states, badges */
---afa-amber-tint:      #FFF8E1;
 
 --afa-fill-solid:      #FF5A36;   /* bright accent for solid CTA fills (Phase 2c) */
 --afa-on-fill-solid:   var(--afa-brown-black);  /* text color on top of fill-solid */
