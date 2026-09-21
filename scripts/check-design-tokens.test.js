@@ -24,6 +24,7 @@ const {
   tokenOkReason,
   findOffenses,
   isAllowlistedLength,
+  isAllowlistedFontFamily,
 } = require('./check-design-tokens')
 
 let passed = 0
@@ -142,6 +143,25 @@ t('isAllowlistedLength: any percent value is allowed', () => {
 t('isAllowlistedLength: an ordinary literal (2px, 14px) is NOT allowed', () => {
   assert.equal(isAllowlistedLength('2px'), false)
   assert.equal(isAllowlistedLength('14px'), false)
+})
+t('GEN-2609-094: isAllowlistedFontFamily allows inherit, case-insensitively', () => {
+  assert.equal(isAllowlistedFontFamily('inherit'), true)
+  assert.equal(isAllowlistedFontFamily('Inherit'), true)
+  assert.equal(isAllowlistedFontFamily('INHERIT'), true)
+})
+t('GEN-2609-094: isAllowlistedFontFamily does not allow a real hardcoded family', () => {
+  assert.equal(isAllowlistedFontFamily('Georgia'), false)
+  assert.equal(isAllowlistedFontFamily('SF Mono'), false)
+})
+t('GEN-2609-094: hardcoded-font-family rule does not flag fontFamily: inherit', () => {
+  const rule = ruleByName('hardcoded-font-family')
+  assert.equal(rule.test(`fontFamily: 'inherit',`), false)
+  assert.deepEqual(rule.extract(`fontFamily: 'inherit',`), [])
+})
+t('GEN-2609-094: hardcoded-font-family rule still flags a real hardcoded family', () => {
+  const rule = ruleByName('hardcoded-font-family')
+  assert.equal(rule.test(`fontFamily: 'Georgia',`), true)
+  assert.deepEqual(rule.extract(`fontFamily: 'Georgia',`), ['Georgia'])
 })
 t('spacing-literal: zero padding is not flagged, a real value in the same shorthand still is', () => {
   const rule = ruleByName('spacing-literal')

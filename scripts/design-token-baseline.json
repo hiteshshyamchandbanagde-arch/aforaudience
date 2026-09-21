@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-21T22:39:36.849Z",
+  "generatedAt": "2026-09-21T23:10:23.791Z",
   "counts": {
     "hex-color-literal": 54,
     "rgb-rgba-literal": 918,
-    "hardcoded-font-family": 9,
+    "hardcoded-font-family": 0,
     "font-size-literal": 830,
     "spacing-literal": 2029,
     "radius-literal": 350,
