@@ -338,24 +338,24 @@ function EventsPageContent() {
       <style>{`
         .afa-events-page-container { max-width: 1152px; margin: 0 auto; padding: 56px 24px 112px; }
         @media (min-width: 640px) { .afa-events-page-container { padding: 80px 32px 112px; } }
-        .afa-event-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.2s ease, opacity 0.15s ease; }
+        .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease, opacity 0.15s ease; }
         .afa-event-card:hover { border-color: rgba(201,151,58,0.3); }
         .afa-event-card-grid .afa-event-card-poster { aspect-ratio: 4 / 5; }
         .afa-event-card-list .afa-event-card-poster { width: 9rem; aspect-ratio: 3 / 4; }
         @media (min-width: 640px) { .afa-event-card-list .afa-event-card-poster { width: 11rem; } }
         @keyframes afa-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
         .afa-events-search-box { flex: 1; min-width: 220px; }
-        .afa-events-type-filter { font-family: var(--font-mono); font-size: var(--afa-text-micro); text-transform: uppercase; letter-spacing: 0.2em; color: rgba(245,245,240,0.4); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
+        .afa-events-type-filter { font-family: var(--font-mono); font-size: var(--afa-text-micro); text-transform: uppercase; letter-spacing: 0.2em; color: var(--afa-text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
         .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-type-filter.active { color: var(--afa-amber); }
         .afa-events-mode-tab { font-family: var(--font-ui); font-size: 18px; background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
         .afa-events-mode-tab:hover { color: rgba(245,245,240,0.7); }
         .afa-events-mode-tab.active { color: var(--afa-text-primary); }
         .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-amber); }
-        .afa-events-price-filter { font-family: var(--font-mono); font-size: var(--afa-text-small); text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: rgba(245,245,240,0.4); padding: 0; transition: color 0.2s ease; }
+        .afa-events-price-filter { font-family: var(--font-mono); font-size: var(--afa-text-small); text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: var(--afa-text-muted); padding: 0; transition: color 0.2s ease; }
         .afa-events-price-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-price-filter.active { color: var(--afa-amber); }
-        .afa-events-select { padding: 8px 12px; border-radius: 3px; border: 1px solid rgba(245,245,240,0.15); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
+        .afa-events-select { padding: 8px 12px; border-radius: 3px; border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
         .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 2px; border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
         /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
