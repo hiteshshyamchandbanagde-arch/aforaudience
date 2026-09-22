@@ -8042,3 +8042,27 @@ Diffed exact before/after consumer file **sets** (not just counts) for the 4 tok
 ### Ratchet summary this batch
 
 `rgb-rgba-literal`: 590 -> 576 (-14). Colour category is now, per this dispatch's own framing, closed out for this pass - the 3 known remaining gaps (Tailwind brackets, raw-style unquoted colour, login-page ambiguity) are resolved, with the actual reachable scope on 2 of the 3 turning out larger than estimated (measured before applying, per standing convention) and the 3rd (`BUG-2609-057`) turning out not to reproduce as an active defect against the real toolchain, though fixed defensively regardless. Remaining `rgb-rgba-literal` debt (576) is, per `GEN-2609-100`'s own prior analysis, almost entirely values with no `COLOR_MAP` entry at all - a new-token-naming decision, not a tooling gap this batch could close.
+
+
+## GEN-2609-103 — Runtime control mechanism (scoping decision)
+
+**Status:** Scoped, not yet built. Priority: this ticket blocks starting the next token category (font-size/font-family/radius) — those migrations should not proceed until this lands, to avoid re-touching the same call sites twice once the Admin-editable requirements are locked in.
+
+**Context:** The stated goal for this initiative is: UI/UX components (Button, Color, Font, Size) must be centrally controlled AND an admin must be able to change them when needed, with changes reflecting immediately across the whole website. Colour-category token migration (GEN-2609-089 through -102, BUG-2609-057) is now closed for this pass (ratchet 918 -> 576), but nothing yet consumes the `DesignToken` table at runtime — the table exists and is DB-backed (confirmed via the GEN-2609-099 tint-token INSERT), but no page currently reads from it.
+
+**Decision: SSR-injected CSS custom properties, read from `DesignToken` at request time.**
+
+Rejected alternatives and why:
+- **ISR / on-demand revalidation** — standard Next.js pattern, but introduces a propagation delay (seconds, not instant) that doesn't match "reflecting immediately" as stated.
+- **Full rebuild on token change** — simplest to reason about, but far too slow for an admin-facing live-edit workflow; wrong shape entirely.
+
+Chosen approach rationale: request-time DB read injecting `<style>:root{--afa-*: ...}</style>` server-side gives genuinely immediate updates with no rebuild step, and fits the existing Next.js/Vercel/Supabase stack without new infrastructure. Fallback behavior: if a `DesignToken` row is missing or the DB read fails, fall back to the compiled default value baked into the token map — never a broken/unstyled page.
+
+**Constraint this places on all token migration work going forward:** every literal-to-token conversion must resolve through an actual `var(--afa-*)` reference reachable by this read path — not just "no longer hardcoded." This constraint was already applied retroactively to the GEN-2609-101/102/BUG-2609-057 batch and should be the standing bar for font-size/font-family/radius categories once they start.
+
+**Not yet scoped as implementation tickets (deliberately, to keep this decision doc separate from build work):**
+- The actual SSR read + injection implementation (likely root layout, request-time query against `DesignToken`, with caching strategy TBD — e.g. short TTL vs. per-request, to be decided during implementation based on measured DB read cost)
+- The Admin editor UI itself (settings page, live preview, safe-apply/rollback) — not started, not scoped
+- Whether/how non-colour categories (font-size etc.) map onto the same `DesignToken` schema or need schema changes
+
+**Next up in parallel, no dependency on this ticket:** GEN-2609-097 (19 remaining stale branches needing manual diff-against-qa review, down from 21 after this session's cleanup of 59 confirmed-safe branches).
