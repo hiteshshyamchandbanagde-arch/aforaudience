@@ -156,3 +156,50 @@ export const TOKEN_COVERAGE: Record<string, TokenCoverage> = {
   "--afa-tint-10": { status: "site-wide", consumerCount: 36, consumerFiles: ["src/app/(auth)/login/page.tsx","src/app/(public)/artists/[id]/ArtistProfileClientPage.tsx","src/app/(public)/artists/page.tsx","src/app/(public)/events/[id]/EventDetailClientPage.tsx","src/app/(public)/events/[id]/rate/RatePromptClientPage.tsx","src/app/(public)/events/[id]/seats/SeatSelectionClientPage.tsx","src/app/(public)/events/page.tsx","src/app/(public)/organisers/page.tsx","src/app/(public)/venue-owners/[id]/page.tsx","src/app/(public)/venue-owners/page.tsx","src/app/(public)/wall-of-fame/page.tsx","src/app/checkout/[bookingId]/page.tsx","src/app/dashboard/admin/diary/page.tsx","src/app/dashboard/artist/edit/page.tsx","src/app/dashboard/messages/[id]/page.tsx","src/app/dashboard/organiser/edit/page.tsx","src/app/dashboard/organiser/events/[id]/edit/page.tsx","src/app/dashboard/venue/[id]/seat-map/page.tsx","src/app/dashboard/venue/edit/page.tsx","src/app/dashboard/venue/page.tsx","src/app/organisers/[id]/page.tsx","src/app/profile/page.tsx","src/app/saved/page.tsx","src/components/BrowseSearchDropdown.tsx","src/components/EventCard.tsx","src/components/FaqAccordion.tsx","src/components/FeeSheet.tsx","src/components/HomeHeader.tsx","src/components/Ledger.tsx","src/components/MobileEventFilterSheet.tsx","src/components/PosterShareCard.tsx","src/components/SearchBox.tsx","src/components/SeatLayoutPreview.tsx","src/components/SiteNav.tsx","src/components/admin/FeedbackDetailPanel.tsx","src/components/mobile/MobileTopBar.tsx"] },
   "--afa-white": { status: "site-wide", consumerCount: 1, consumerFiles: ["src/app/dashboard/messages/[id]/page.tsx"] },
 }
+
+// GEN-2609-077 - "applies to: <page groups>" labeling for the admin
+// panel's Size/Spacing sections (and any other group, generically).
+// Maps a consumer file to the human page-group name used in this
+// ticket's own audit (docs/design.md) - only the 5 named groups plus
+// "Button" get a real label; anything else collapses to "elsewhere"
+// rather than guessing a name for the ~90-file "rest" bucket that
+// hasn't been phased yet. Kept small and additive on purpose - extend
+// this map, not the underlying grep method, as later phases land.
+const PAGE_GROUP_OF_FILE: Record<string, string> = {
+  "src/app/page.tsx": "Homepage",
+  "src/components/HomeHeader.tsx": "Homepage",
+  "src/components/Hero.tsx": "Homepage",
+  "src/components/FourRooms.tsx": "Homepage",
+  "src/components/PlatformGrowthStrip.tsx": "Homepage",
+  "src/components/Ledger.tsx": "Homepage",
+  "src/app/(public)/events/page.tsx": "Events",
+  "src/app/(public)/events/[id]/EventDetailClientPage.tsx": "Events",
+  "src/app/(public)/events/[id]/rate/RatePromptClientPage.tsx": "Events",
+  "src/app/(public)/events/[id]/seats/SeatSelectionClientPage.tsx": "Events",
+  "src/app/(public)/artists/page.tsx": "Artists",
+  "src/app/(public)/artists/[id]/ArtistProfileClientPage.tsx": "Artists",
+  "src/app/venues/page.tsx": "Venues",
+  "src/app/venues/VenuesGridClient.tsx": "Venues",
+  "src/app/venues/VenuesHero.tsx": "Venues",
+  "src/app/venues/VenuesViewToggle.tsx": "Venues",
+  "src/app/venues/[id]/VenueDetailClient.tsx": "Venues",
+  "src/app/venues/[id]/VenueFollowButton.tsx": "Venues",
+  "src/app/(public)/wall-of-fame/page.tsx": "Wall of Fame",
+  "src/components/ui/Button.tsx": "Button",
+}
+
+// Real, not a guess: a token's `appliesTo` is derived from the exact
+// same `consumerFiles` the coverage badge itself is built from, not a
+// separate hand-maintained list that could drift from it.
+export function appliesTo(consumerFiles: string[]): string[] {
+  const groups = new Set<string>()
+  let elsewhere = false
+  for (const f of consumerFiles) {
+    const g = PAGE_GROUP_OF_FILE[f]
+    if (g) groups.add(g)
+    else elsewhere = true
+  }
+  const ordered = ["Homepage", "Events", "Artists", "Venues", "Wall of Fame", "Button"].filter((g) => groups.has(g))
+  if (elsewhere) ordered.push("elsewhere")
+  return ordered
+}
