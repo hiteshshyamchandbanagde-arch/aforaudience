@@ -260,7 +260,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
           </p>
         )}
 
-        <div style={{ borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "20px" }}>
+        <div style={{ borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "20px" }}>
           {contributionMoment ? null : isPast ? (
             <div>
               <div style={{ fontFamily: "var(--font-ui)", fontSize: "18px", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
@@ -302,7 +302,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                 <div style={{ marginBottom: "16px" }}>
                   {event.ticketTiers.length > 0 ? (
                     event.ticketTiers.map((t) => (
-                      <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
+                      <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
                         <div>
                           <div style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{t.sectionName}</div>
                           <div style={{ fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.5)" }}>₹{t.price}</div>
@@ -361,7 +361,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
               )}
 
               {totalAmount > 0 ? (
-                <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
+                <div style={{ marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid var(--afa-tint-10)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                     <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
                     <span style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
@@ -390,13 +390,13 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
                       />
                     </div>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <span style={{ fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.totalLabel}</span>
                     <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>₹{(totalAmount + feeInput).toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingTop: "12px", borderTop: "1px solid var(--afa-tint-10)" }}>
                   <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{totalSelected} {totalSelected === 1 ? tr.eventDetailPage.seatSingular : tr.eventDetailPage.seatPlural}</span>
                   <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.freeAmount}</span>
                 </div>

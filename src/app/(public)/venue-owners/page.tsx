@@ -119,7 +119,7 @@ export default function VenueOwnersPage() {
                     background: "var(--afa-surface-raised)",
                     borderRadius: "3px",
                     overflow: "hidden",
-                    border: "1px solid rgba(245,245,240,0.1)",
+                    border: "1px solid var(--afa-tint-10)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
@@ -128,10 +128,10 @@ export default function VenueOwnersPage() {
                 >
                   {isNavigatingThis && (
                     <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                     </div>
                   )}
-                  <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+                  <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid var(--afa-tint-10)" }}>
                     <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                       {owner.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element

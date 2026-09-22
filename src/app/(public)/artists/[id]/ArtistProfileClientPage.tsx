@@ -431,7 +431,7 @@ export default function ArtistProfilePage({
           on the right. Replaces the old small circular avatar treatment. */}
       <div style={{ padding: "40px var(--afa-space-48px) 0" }}>
         <div className="artist-hero-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gap: "40px" }}>
-          <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "var(--afa-radius-12px)", overflow: "hidden", border: "1px solid rgba(245,245,240,0.1)" }}>
+          <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "var(--afa-radius-12px)", overflow: "hidden", border: "1px solid var(--afa-tint-10)" }}>
             {portraitUrl && !portraitFailed ? (
               <Photo src={portraitUrl} alt={displayName} onError={() => setPortraitFailed(true)} />
             ) : (
@@ -517,7 +517,7 @@ export default function ArtistProfilePage({
                   title={notifyEnabled ? "Notifications on - tap to mute" : "Notifications off - tap to enable"}
                   style={{
                     width: "34px", height: "34px", borderRadius: "50%",
-                    border: "1.5px solid rgba(245,245,240,0.4)",
+                    border: "1.5px solid var(--afa-text-muted)",
                     background: notifyEnabled ? "rgba(255,90,54,0.3)" : "transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: followBusy ? "default" : "pointer",
@@ -554,7 +554,7 @@ export default function ArtistProfilePage({
             Vouched for by
           </h2>
           <div style={{ border: "1px solid rgba(201,151,58,0.25)", borderRadius: "var(--afa-radius-12px)", background: "var(--afa-surface-page)", overflow: "hidden" }}>
-            <div style={{ display: "flex", gap: "var(--afa-space-4)", padding: "var(--afa-space-5)", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+            <div style={{ display: "flex", gap: "var(--afa-space-4)", padding: "var(--afa-space-5)", borderBottom: "1px solid var(--afa-tint-10)" }}>
               <CheckSealIcon style={{ width: "28px", height: "28px", color: "var(--afa-amber)", flexShrink: 0, marginTop: "var(--afa-space-2px)" }} />
               <div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-2)" }}>
@@ -579,7 +579,7 @@ export default function ArtistProfilePage({
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(245,245,240,0.1)", marginTop: "var(--afa-space-3)", paddingTop: "var(--afa-space-3)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", marginTop: "var(--afa-space-3)", paddingTop: "var(--afa-space-3)" }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(245,245,240,0.5)" }}>Total performances</span>
             <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-20px)", color: "var(--afa-text-primary)" }}>{artist._count.performances}</span>
           </div>
@@ -597,7 +597,7 @@ export default function ArtistProfilePage({
               {upcomingShows.map((p) => {
                 const eventDate = new Date(p.event.date)
                 return (
-                  <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "var(--afa-space-4)", padding: "var(--afa-space-4) 0", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
+                  <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "var(--afa-space-4)", padding: "var(--afa-space-4) 0", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <div style={{ textAlign: "center", width: "48px" }}>
                       <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "26px", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
@@ -620,7 +620,7 @@ export default function ArtistProfilePage({
       <div className="artist-detail-grid" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px var(--afa-space-48px) var(--afa-space-32px)", display: "grid", gap: "var(--afa-space-32px)" }}>
         {/* LEFT */}
         <div>
-          <div style={{ display: "flex", gap: "0", marginBottom: "var(--afa-space-32px)", borderBottom: "2px solid rgba(245,245,240,0.1)" }}>
+          <div style={{ display: "flex", gap: "0", marginBottom: "var(--afa-space-32px)", borderBottom: "2px solid var(--afa-tint-10)" }}>
             {(["about", "shows"] as const).map((tab) => (
               <button
                 key={tab}
@@ -700,7 +700,7 @@ export default function ArtistProfilePage({
                   </h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                     {artist.tourStops.map((stop) => (
-                      <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid rgba(245,245,240,0.1)" }}>
+                      <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
                         <span style={{ fontSize: "var(--afa-text-18px)" }}>📍</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
@@ -745,7 +745,7 @@ export default function ArtistProfilePage({
                   {pastShows.map((p, i) => (
                     <div key={p.id} style={{ position: "relative", marginBottom: "var(--afa-space-5)" }}>
                       <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-amber)" : "rgba(245,245,240,0.2)" }} />
-                      <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-14px) var(--afa-space-4)", border: "1px solid rgba(245,245,240,0.1)" }}>
+                      <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-14px) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
                         <div style={{ fontWeight: 600, fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-1)" }}>{p.event.title}</div>
                         <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
@@ -760,7 +760,7 @@ export default function ArtistProfilePage({
         {/* RIGHT SIDEBAR */}
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
           {socialEntries.length > 0 && (
-            <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid rgba(245,245,240,0.1)" }}>
+            <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", marginBottom: "var(--afa-space-10px)", textDecoration: "none" }}>
@@ -830,7 +830,7 @@ export default function ArtistProfilePage({
           {/* FEAT-2608-046 - corporate/private booking, inquiry-only.
               Login required as of 11 Aug (Hitesh's rule) - same gate as
               Follow. */}
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid rgba(245,245,240,0.1)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>🏢 Corporate or Private Event?</div>
             <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "var(--afa-space-4)" }}>Send {displayName} a direct booking inquiry.</p>
             <button

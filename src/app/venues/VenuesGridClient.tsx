@@ -145,7 +145,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             <ChevronDownIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
           </button>
           {cityOpen && (
-            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid rgba(245,245,240,0.15)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
+            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
               <li>
                 <button
                   type="button"

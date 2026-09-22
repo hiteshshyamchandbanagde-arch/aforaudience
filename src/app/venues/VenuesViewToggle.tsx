@@ -48,7 +48,7 @@ export default function VenuesViewToggle({
         .afa-view-tab:hover { color: rgba(245,245,240,0.7); }
         .afa-view-tab.afa-view-tab-active, .afa-view-tab.afa-view-tab-active:hover { color: var(--afa-text-primary); }
       `}</style>
-      <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid rgba(245,245,240,0.15)", marginBottom: "32px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid var(--afa-border-resting)", marginBottom: "32px" }}>
         {tabs.map((t) => {
           const active = view === t.key
           return (

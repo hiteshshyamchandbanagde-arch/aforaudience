@@ -94,7 +94,7 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
 
 function MetaTile({ icon: Icon, label, value }: { icon: (p: { style?: React.CSSProperties }) => React.ReactElement; label: string; value: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--afa-space-3)", borderTop: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-4) 0" }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-4) 0" }}>
       <Icon style={{ width: "20px", height: "20px", marginTop: "var(--afa-space-2px)", flexShrink: 0, color: "var(--afa-amber)" }} />
       <div>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>{label}</div>
@@ -322,7 +322,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             )}
 
             {/* when / where */}
-            <div style={{ marginTop: "var(--afa-space-28px)", display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.8)" }}>
+            <div style={{ marginTop: "var(--afa-space-28px)", display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.8)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
                 <CalendarIcon style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />
                 <span>{new Date(event.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
@@ -349,7 +349,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 slider + Book button (see that route's own
                 SeatSelectionClientPage.tsx - this used to all live here,
                 relocated wholesale, not rewritten). */}
-            <div style={{ marginTop: "var(--afa-space-28px)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
+            <div style={{ marginTop: "var(--afa-space-28px)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
               {isPast ? (
                 <div>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
@@ -412,7 +412,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   </ul>
                 )}
                 {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
-                  <div style={{ marginTop: "var(--afa-space-4)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
+                  <div style={{ marginTop: "var(--afa-space-4)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
                     <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-6px)" }}>{tr.eventDetailPage.specialNoteLabel}</div>
                     <div style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)", lineHeight: 1.6 }}>{event.specialNotes}</div>
                   </div>
@@ -433,7 +433,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           {event.lineup.length === 0 ? (
             <p style={{ marginTop: "var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.5)" }}>{tr.eventDetailPage.lineupNotConfirmed}</p>
           ) : (
-            <div style={{ marginTop: "var(--afa-space-4)", borderTop: "1px solid rgba(245,245,240,0.1)" }}>
+            <div style={{ marginTop: "var(--afa-space-4)", borderTop: "1px solid var(--afa-tint-10)" }}>
               {event.lineup.map((p) => {
                 const performerName = p.artist.user.displayName || p.artist.user.name
                 return (
@@ -507,7 +507,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                           confirmed have a checked-in booking for this event
                           (canReview, computed in the parent server component). */}
                       {canReview && !submittedReviews[p.id] && !p.reviews.some((r) => r.user.name === (session?.user as any)?.name) && (
-                        <div style={{ marginTop: "var(--afa-space-10px)", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+                        <div style={{ marginTop: "var(--afa-space-10px)", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-08)" }}>
                           <div style={{ display: "flex", gap: "var(--afa-space-1)", marginBottom: "var(--afa-space-2)", alignItems: "center" }}>
                             {[1, 2, 3, 4, 5].map((n) => (
                               <button
@@ -573,7 +573,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   { rank: tr.eventDetailPage.secondPrize, value: event.competitionPrizeSecond, top: false },
                   { rank: tr.eventDetailPage.thirdPrize, value: event.competitionPrizeThird, top: false },
                 ].filter((p) => p.value).map((p) => (
-                  <div key={p.rank} style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
+                  <div key={p.rank} style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
                       <TrophyIcon style={{ width: "20px", height: "20px", color: p.top ? "var(--afa-amber)" : "var(--afa-text-muted)" }} />
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.5)" }}>{p.rank}</span>
@@ -587,7 +587,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             {event.celebrities && event.celebrities.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)", marginTop: "var(--afa-space-5)" }}>
                 {event.celebrities.map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
+                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
                     <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {c.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -610,7 +610,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-10px)" }}>{tr.eventDetailPage.panelists}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--afa-space-3)" }}>
                   {event.panelists.map((p) => (
-                    <div key={p.id} style={{ display: "flex", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px)" }}>
+                    <div key={p.id} style={{ display: "flex", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px)" }}>
                       <div style={{ width: "40px", height: "40px", borderRadius: "3px", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {p.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -641,7 +641,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <SectionEyebrow>{tr.eventDetailPage.venueDetailsHeading}</SectionEyebrow>
             <div className="afa-event-facility-grid" style={{ marginTop: "var(--afa-space-4)" }}>
               {event.venue.facilities.map((f) => (
-                <div key={f} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", borderTop: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-4) 0" }}>
+                <div key={f} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-4) 0" }}>
                   <FacilityIcon label={f} style={{ width: "18px", height: "18px", flexShrink: 0, color: "var(--afa-amber)" }} />
                   <span style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)" }}>{f}</span>
                 </div>
@@ -668,7 +668,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             gap: "var(--afa-space-4)",
             background: "rgba(10,10,10,0.94)",
             backdropFilter: "blur(12px)",
-            borderTop: "1px solid rgba(245,245,240,0.08)",
+            borderTop: "1px solid var(--afa-tint-08)",
             padding: "var(--afa-space-3) var(--afa-space-5)",
             paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
           }}
