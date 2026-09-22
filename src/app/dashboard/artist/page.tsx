@@ -361,7 +361,7 @@ export default function ArtistDashboard() {
                   Complete your profile →
                 </Link>
               </div>
-              <div style={{ height: '6px', borderRadius: 'var(--afa-radius-pill)', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
+              <div style={{ height: '6px', borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${completionPercent}%`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-pill)' }} />
               </div>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: 'var(--afa-space-2)' }}>

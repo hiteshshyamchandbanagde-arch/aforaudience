@@ -1580,7 +1580,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>
                   <IconSeatGlyph size={18} />
                 </span>
                 <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5 }}>For hands-on control</div>
@@ -2263,7 +2263,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         <div style={{ borderRadius: 'var(--afa-radius-12px)', border: '1px solid rgba(245,245,240,0.1)', background: 'var(--afa-surface-raised)' }}>
           {rows.map((r, i) => (
             <div key={r.term} style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-14px)', borderTop: i === 0 ? 'none' : '1px solid rgba(245,245,240,0.08)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: 'var(--afa-radius-md)', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>
                 {r.glyph}
               </span>
               <div>

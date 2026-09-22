@@ -172,7 +172,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                       <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{t.sectionName} {t.price > 0 ? `· ₹${t.price}` : '· Free'}</span>
                       <span style={{ color: 'rgba(245,245,240,0.6)' }}>{t.sold} / {t.totalSeats}</span>
                     </div>
-                    <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(245,245,240,0.08)', overflow: 'hidden' }}>
+                    <div style={{ height: '8px', borderRadius: '4px', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, background: 'var(--afa-sage)', borderRadius: '4px', transition: 'width 0.3s' }} />
                     </div>
                   </div>
@@ -212,7 +212,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                       {Object.entries(b.seats).map(([s, q]) => `${q}× ${s}`).join(', ')}
                     </span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'rgba(245,245,240,0.4)' }}>{timeAgo(b.createdAt)}</span>
+                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
                   </div>
                 ))}
               </div>
