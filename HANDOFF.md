@@ -1,4 +1,59 @@
+# Session Handoff — 22 Sept 2026 closeout (chat — GEN-2609-100 (#698) merged, verified live, closed out)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** Session started at `qa@e562807`; ended at `qa@f0da007`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat, no CC) | Merge `GEN-2609-100` (`#698`), verify live, close out | Done | Squash-merged `f0da007`. **Self-caught build break before merge, not after:** the `TOKEN_COVERAGE` regen step deleted `PAGE_GROUP_OF_FILE`/`appliesTo()` (code below the data table, missed on first read) - caught via the actual failed Vercel build log, root-caused, restored byte-for-byte against `origin/qa`, verified with an `esbuild` bundle of the broken page (installed fresh - network to npmjs.com is allowlisted) before re-pushing. Fixed commit went green, then merged. `qa` deploy confirmed `READY`, 0 runtime errors/30min. 3 follow-ups logged: `GEN-2609-101` (Tailwind colour brackets), `GEN-2609-102` (unquoted raw-CSS colour), `BUG-2609-057` (pre-existing login-page className bug). | (merged) |
+| 22 Sept 2026 (chat, no CC) | Build `GEN-2609-100` - shorthand colour matcher | Done | New `migrateCompoundStringValue()` for `border`/`outline`/`boxShadow` + `bg`/`fill` exact-props. 17 self-tests. 277 lines/89 files, 4 area commits. Ratchet: rgb-rgba 918->590 (-328). `statusStyle.ts` deliberately excluded. Found+flagged a real doc bug in `GEN-2609-099`'s own header comment (claimed 86/83, actual always 82/79). | (merged, same PR) |
+| 22 Sept 2026 (chat) | Verify, open, merge `GEN-2609-099` (`#697`) | Done | Squash-merged `28c5cbf`. First rgba `COLOR_MAP` entries; found the `border:`-shorthand gap `GEN-2609-100` then fixed. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`. | (merged) |
+
+## 2. Activity in progress
+
+- Nothing open. Ratchet: hex 54, rgba 590, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211.
+- 3 new tickets, all `NEW`, none scoped/dispatched: `GEN-2609-101` (Tailwind arbitrary-value colour brackets, 4 sites), `GEN-2609-102` (unquoted raw-CSS colour in a `<style>` block, 2 sites), `BUG-2609-057` (ambiguous `text-[var(...)]` classNames on the login page, 3 sites, `LOW` severity, pre-existing).
+- `GEN-2609-097` stale-branch triage: 21 branches still remain on weaker evidence only, untouched.
+
+## 3. Open PRs awaiting action
+
+None against `qa`. `#450` (-> `main`, frozen) untouched.
+
+## 4. Decisions / findings this session
+
+- The `esbuild`-bundle verification (installing it fresh, bundling the actual broken page plus all 89 touched files with `@/` aliases resolved the same way the real build does) is a new, heavier verification step used specifically because the mistake was build-breaking - not the standard per-batch process going forward, but worth knowing this sandbox *can* do it via the npmjs.com allowlist when a `tsc`-shaped check isn't enough.
+- No product/scope decisions surfaced - this was error-recovery and cleanup, not new judgment calls.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609` = 102 (was 100 at session start; `101`/`102` reserved for the two new `GEN` follow-ups). `BUG/2609` = 57 (was 56; reserved for `BUG-2609-057`). Both verified via `SELECT` before write.
+- `GEN-2609-100` set `RESOLVED`/`DEPLOYED_QA`.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session.
+
+## 7-11. Unchanged
+
+## 12. Immediate next action
+
+3 small follow-ups (`GEN-2609-101`, `GEN-2609-102`, `BUG-2609-057`) need scoping/prioritization from Hitesh if pursued - none urgent, all low-volume. `GEN-2609-097`'s remaining 21 branches still open, lower priority. No blocking decisions currently sitting with Hitesh. The standing chat/CC split (CC writes code, chat merges) resumes as the default next session - this session's chat-authored exception is logged, not a new precedent.
+
+## 13. Chat vs. CC ownership note
+
+Unchanged from the prior entry's framing: this was the logged one-off exception (Hitesh on mobile, no CC access, explicit "only you" instruction). Chat wrote the code, caught and fixed its own build-breaking mistake before shipping it, verified with tooling beyond the usual suite specifically because of that mistake, then reviewed/merged/verified-live exactly as it does for CC's own PRs. Next session's code work goes through CC again by default.
+
+---
+
 # Session Handoff — 22 Sept 2026 final (chat, no CC this ticket — GEN-2609-100 built, verified, and merged entirely in chat)
+
+> **SUPERSEDED 22 Sept 2026 (closeout entry):** `GEN-2609-100` (`#698`) is merged and verified live. See the entry above for the full close-out, including the self-caught build-break fix.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** Session started at `qa@e562807`; ended at `qa@<see PR #698 merge SHA>`.
 
