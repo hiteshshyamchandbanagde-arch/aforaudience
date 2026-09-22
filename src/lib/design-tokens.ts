@@ -199,6 +199,8 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-text-on-image": "rgba(255, 255, 255, 0.5)",
   "--afa-fill-solid": "#FF5A36",
   "--afa-border-resting": "rgba(245, 245, 240, 0.15)",
+  "--afa-tint-08": "rgba(245, 245, 240, 0.08)",
+  "--afa-tint-10": "rgba(245, 245, 240, 0.1)",
   "--afa-on-fill-solid": "var(--afa-brown-black)",
   "--afa-sage-bright": "#7AA86E",
   "--afa-error-bright": "#E67870",
