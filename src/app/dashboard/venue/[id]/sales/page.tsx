@@ -198,7 +198,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
-    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}

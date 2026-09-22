@@ -1606,7 +1606,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
 
               {isMobile ? (
-                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', marginBottom: 'var(--afa-space-14px)' }}>
+                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-14px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-1)' }}>
                     Viewing only on this screen
                   </p>
@@ -1689,7 +1689,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           </button>
                         </div>
                         {wizardShape === 'other' && (
-                          <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>
+                          <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>
                             Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. Draw that shape by hand below (turn on Manual placement), or keep using the straight-row fields here as a starting point and adjust by hand afterward.
                           </div>
                         )}
@@ -2250,7 +2250,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
       <div
         onClick={(e) => e.stopPropagation()}
         className="afa-glow-amber"
-        style={{ width: '100%', maxWidth: '440px', height: '100%', overflowY: 'auto', padding: 'var(--afa-space-28px) var(--afa-space-6)', borderLeft: '1px solid rgba(245,245,240,0.1)' }}
+        style={{ width: '100%', maxWidth: '440px', height: '100%', overflowY: 'auto', padding: 'var(--afa-space-28px) var(--afa-space-6)', borderLeft: '1px solid var(--afa-tint-10)' }}
       >
         <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', lineHeight: 1 }} aria-label="Close">×</button>
         <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-10px)' }}>
@@ -2260,7 +2260,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
           Section not Zone. Aisle not Walkway/Gangway. Each concept carries a small glyph so meaning survives translation and non-native English.
         </p>
-        <div style={{ borderRadius: 'var(--afa-radius-12px)', border: '1px solid rgba(245,245,240,0.1)', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ borderRadius: 'var(--afa-radius-12px)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)' }}>
           {rows.map((r, i) => (
             <div key={r.term} style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-14px)', borderTop: i === 0 ? 'none' : '1px solid rgba(245,245,240,0.08)' }}>
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>

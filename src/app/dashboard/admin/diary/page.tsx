@@ -114,7 +114,7 @@ export default function AdminDiaryPage() {
     width: '100%',
     padding: '12px 14px',
     borderRadius: '10px',
-    border: '1px solid rgba(245,245,240,0.1)',
+    border: '1px solid var(--afa-tint-10)',
     fontSize: '14px',
     boxSizing: 'border-box',
     background: 'var(--afa-surface-inverse)',
@@ -125,7 +125,7 @@ export default function AdminDiaryPage() {
     <div
       style={{
         background: 'var(--afa-surface-page)',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
         borderRadius: '16px',
         padding: '20px',
       }}
@@ -156,7 +156,7 @@ export default function AdminDiaryPage() {
     <div
       style={{
         background: 'var(--afa-surface-page)',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
         borderRadius: '16px',
         overflow: 'hidden',
       }}

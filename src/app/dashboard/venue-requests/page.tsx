@@ -197,7 +197,7 @@ export default function VenueRequestsPage() {
                           min="1"
                           max="10000000"
                           className="avp-field"
-                          style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
+                          style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-tint-08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ marginBottom: '12px' }}>
@@ -208,7 +208,7 @@ export default function VenueRequestsPage() {
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
                           className="avp-field"
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-tint-08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

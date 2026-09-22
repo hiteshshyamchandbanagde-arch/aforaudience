@@ -234,7 +234,7 @@ export default function VenueDashboard() {
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {venue.country && COUNTRY_FLAGS[venue.country] && (() => {
                           const Flag = COUNTRY_FLAGS[venue.country]
-                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: '2px', flexShrink: 0, boxShadow: '0 0 0 1px rgba(245,245,240,0.1)' }} />
+                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: '2px', flexShrink: 0, boxShadow: '0 0 0 1px var(--afa-tint-10)' }} />
                         })()}
                         {venue.city}
                       </p>
@@ -258,7 +258,7 @@ export default function VenueDashboard() {
                     <StatusPill tone={venue.isApproved ? 'sage' : 'gold'}>{venue.isApproved ? 'Published' : 'Draft'}</StatusPill>
                   </div>
 
-                  <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid rgba(245,245,240,0.08)', paddingTop: '16px' }}>
+                  <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--afa-tint-08)', paddingTop: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <IconUsers size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                       <div>

@@ -203,7 +203,7 @@ export default function AdminArtistsPage() {
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(245,245,240,0.15)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -277,7 +277,7 @@ export default function AdminArtistsPage() {
                             value={noteDraft[a.id] || ''}
                             onChange={(e) => setNoteDraft({ ...noteDraft, [a.id]: e.target.value })}
                             placeholder="Reason (optional)..."
-                            style={{ padding: '7px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.15)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                            style={{ padding: '7px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-small)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                           />
                           <Button variant="solid" size="md" fullWidth={false} onClick={() => handleHeadlinerToggle(a)} disabled={actioningId === a.id}>
                             ★ Grant Headliner

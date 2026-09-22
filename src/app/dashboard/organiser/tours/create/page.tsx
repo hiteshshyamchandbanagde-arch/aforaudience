@@ -13,7 +13,7 @@ const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '6px',
-  border: '1px solid rgba(245,245,240,0.15)',
+  border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
   fontSize: '14px',
   color: 'var(--afa-text-primary)',
@@ -71,7 +71,7 @@ export default function CreateTourPage() {
           Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
         </p>
 
-        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid rgba(245,245,240,0.08)' }}>
+        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid var(--afa-tint-08)' }}>
           <div style={{ marginBottom: '20px' }}>
             <label style={labelStyle}>Tour title</label>
             <input

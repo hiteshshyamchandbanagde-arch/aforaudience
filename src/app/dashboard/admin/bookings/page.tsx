@@ -208,7 +208,7 @@ export default function AdminBookingsPage() {
                       background: 'var(--afa-surface-page)',
                       borderRadius: '12px',
                       padding: '18px 20px',
-                      border: '1px solid rgba(245,245,240,0.08)',
+                      border: '1px solid var(--afa-tint-08)',
                     }}
                   >
                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
@@ -216,7 +216,7 @@ export default function AdminBookingsPage() {
                         <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
-                            <Badge variant="tag" tone={{ bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>
+                            <Badge variant="tag" tone={{ bg: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>
                               FREE
                             </Badge>
                           ) : null}

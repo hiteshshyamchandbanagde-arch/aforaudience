@@ -113,7 +113,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         position: 'relative',
         background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
         display: 'flex',
         alignItems: 'stretch',
         overflow: 'hidden',
@@ -254,7 +254,7 @@ export default function AdminCommandCenter() {
                   style={{
                     background: 'var(--afa-surface-raised)',
                     borderRadius: '10px',
-                    border: '1px solid rgba(245,245,240,0.08)',
+                    border: '1px solid var(--afa-tint-08)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -286,7 +286,7 @@ export default function AdminCommandCenter() {
             style={{
               marginBottom: '28px',
               background: 'rgba(22,101,52,0.12)',
-              border: '1px solid rgba(245,245,240,0.08)',
+              border: '1px solid var(--afa-tint-08)',
               borderLeft: '4px solid var(--afa-green-deep)',
               borderRadius: '10px',
               padding: '14px 18px',
@@ -325,7 +325,7 @@ export default function AdminCommandCenter() {
           style={{
             background: 'var(--afa-surface-raised)',
             borderRadius: '14px',
-            border: '1px solid rgba(245,245,240,0.08)',
+            border: '1px solid var(--afa-tint-08)',
             padding: '20px 22px',
             marginBottom: '26px',
           }}
@@ -341,7 +341,7 @@ export default function AdminCommandCenter() {
           <div style={{ position: 'relative', height: '130px' }}>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} style={{ borderTop: '1px solid rgba(245,245,240,0.08)' }} />
+                <div key={i} style={{ borderTop: '1px solid var(--afa-tint-08)' }} />
               ))}
             </div>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: '3px', height: '100%' }}>
