@@ -124,15 +124,15 @@ export default function AdminRevenueOverviewPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               Platform Revenue
             </h1>
-            <span style={{ fontSize: '12px', color: 'var(--afa-text-secondary)' }}>
+            <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
             </span>
           </div>
 
-          <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '640px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '20px', maxWidth: '640px' }}>
             Per the "never tax the scene" policy, the platform's only revenue is the audience-side
             booking fee, not organiser gross revenue. Venue rentals and performer fees pass through
             untaxed and don't appear here.
@@ -143,7 +143,7 @@ export default function AdminRevenueOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
@@ -155,12 +155,12 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Platform revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px 0 0' }} />
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
                     <span style={{ fontSize: '9px', color: 'var(--afa-text-secondary)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
@@ -172,10 +172,10 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Top organisers by platform fee generated">
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]" style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
+                <div className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]" style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
                   <span>Organiser</span>
                   <span>Platform Fee</span>
                   <span className="hidden lg:inline">Ticket Volume</span>
@@ -187,7 +187,7 @@ export default function AdminRevenueOverviewPage() {
                     className="grid grid-cols-[2fr_1fr_1fr] lg:grid-cols-[2fr_1fr_1fr_1fr]"
                     style={{
                       alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
+                      fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
                       border: '1px solid rgba(245,245,240,0.06)',
                     }}
                   >
@@ -203,10 +203,10 @@ export default function AdminRevenueOverviewPage() {
 
           <Section title="Top events by platform fee generated">
             {events.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-secondary)', padding: '0 12px' }}>
                   <span>Event</span>
                   <span>Platform Fee</span>
                   <span>Bookings</span>
@@ -216,7 +216,7 @@ export default function AdminRevenueOverviewPage() {
                     key={e.eventId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '13px', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: '8px',
+                      fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
                       border: '1px solid rgba(245,245,240,0.06)',
                     }}
                   >
@@ -229,14 +229,14 @@ export default function AdminRevenueOverviewPage() {
             )}
           </Section>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '14px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: 'var(--afa-radius-10px)', padding: '14px 18px' }}>
             <div>
-              <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', marginBottom: '4px' }}>
+              <p style={{ fontSize: 'var(--afa-text-10px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', marginBottom: '4px' }}>
                 Current booking fee
               </p>
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)' }}>{money(currentFeeSettingRupees)} per confirmed booking</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)' }}>{money(currentFeeSettingRupees)} per confirmed booking</p>
             </div>
-            <Link href="/dashboard/admin/settings" style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', whiteSpace: 'nowrap' }}>
+            <Link href="/dashboard/admin/settings" style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', whiteSpace: 'nowrap' }}>
               Edit in Settings →
             </Link>
           </div>
@@ -249,18 +249,18 @@ export default function AdminRevenueOverviewPage() {
 
 function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '10px', padding: '16px' }}>
-      <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid rgba(245,245,240,0.08)', borderRadius: 'var(--afa-radius-10px)', padding: '16px' }}>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'var(--afa-text-secondary)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
+    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-12px)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
   )

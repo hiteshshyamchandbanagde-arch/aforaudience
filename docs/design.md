@@ -7827,3 +7827,27 @@ Re-ran `src/lib/design-token-coverage.ts`'s own documented method (`git grep -l 
 ### What this doesn't do (deliberately)
 
 No new tokens (the audit's own §6 item 1 recommendation - `--afa-text-17px`/`-22px`, `--afa-radius-3px`, 6 spacing tokens - all sit below `GEN-2609-081`'s approved 50+-occurrence rule; that decision sits with Hitesh as `GEN-2609-095`). No batch 9, no spacing, no rgba, no raw-button, no `toast-rollout/*` branches - all explicitly out of scope per the dispatch.
+
+## GEN-2609-098 - bulk token migration batch 9
+
+One branch (`chore/gen-2609-098-batch-9`), 3 commits (1 per file), off `origin/qa` at `8312c30` (post-`GEN-2609-094`). Session-start ratchet re-check matched the dispatch's stated baseline exactly (hex 54, rgba 918, font-family 0, font-size 830, spacing 2029, radius 350, raw-button 211) before touching anything. Standing convention: `node scripts/dev/migrate-tokens.js <file> --apply`, default categories (colour, font-size, font-family, radius), exact-value only, zero visual change.
+
+**Every dispatch prediction matched exactly - zero unexplained deviations.** Before-counts, dry-run line counts, and per-category deltas all landed on the dispatch's own numbers.
+
+| File | Default-cat before | Default-cat after | Dry-run lines (predicted / actual) | Colour |
+|---|---:|---:|---|---|
+| `src/app/dashboard/admin/revenue/page.tsx` | 26 | 4 | 21 / 21 | no-op (0 hex/rgba match `COLOR_MAP`) |
+| `src/app/dashboard/admin/artists/page.tsx` | 22 | 1 | 16 / 16 | no-op |
+| `src/app/my-feedback/page.tsx` | 23 | 2 | 21 / 21 | no-op (confirmed: `--categories=colour` dry run alone shows 0 lines) |
+
+`node scripts/dev/verify-equivalence.js` on all 3 files individually: `0 mismatches` each. `npx tsc --noEmit -p .`: clean throughout, checked after every commit.
+
+**No manual colour matches this batch** (unlike several earlier batches). `my-feedback/page.tsx`'s 2 remaining hex-color-literal hits are a single line (348: `background: '#FFEBEE'`, `color: '#C62828'`, an error-state card) - neither value exactly matches `COLOR_MAP`'s one entry (`#FFF`) or any existing `DEFAULT_TOKEN_VALUES` colour, so nothing to hand-migrate without inventing a new token, which is out of this ticket's scope. Left as real, correctly-uncounted-as-convertible debt.
+
+Ratchet delta (whole-tree, before → after, confirmed via `node scripts/design-token-ratchet.js` run fresh after all 3 commits): font-size 830 → 785 (**-45**, exactly the sum of the 3 files' own before/after deltas: 17+15+13), radius 350 → 331 (**-19**: 5+6+8). hex-color, rgba, font-family, spacing, raw-button all unchanged (±0), as expected - none of those categories were touched this batch.
+
+**`scripts/design-token-baseline.json` deliberately NOT updated this batch** - checked the actual git history of that file (`git log --oneline -- scripts/design-token-baseline.json`) before deciding: none of the prior 3-file/3-PR batches (`GEN-2609-086` through `089`) touched it per-batch either; it's only been regenerated at separate consolidation points (a checker bug fix, `GEN-2609-092`'s wiring commit, `GEN-2609-094`'s hygiene bundle) - not a step this dispatch's own Steps section asked for either, unlike `094` which explicitly said so. The ratchet still passes clean (`all categories at or below baseline`) without the update; a future consolidation ticket can lower it to the new real numbers instead.
+
+### Verify (whole branch, foreground)
+
+`npx tsc --noEmit -p .`: clean, exit 0. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 new offenses. `node scripts/check-design-tokens.test.js`: 55 passed, 0 failed (unchanged from `094` - this batch adds no new rule logic). `node scripts/design-token-ratchet.js`: all 7 categories at or below baseline. `npx eslint` on all 3 touched files: each shows pre-existing errors (`react/no-unescaped-entities` on unrelated prose text, `@typescript-eslint/no-explicit-any`, `react-hooks/set-state-in-effect`) - confirmed none sit on a line this batch actually changed, by diffing each flagged line number against `git diff origin/qa`'s own hunks (e.g. `revenue/page.tsx:136` and `artists/page.tsx:193` are both plain paragraph text one line below an edited `fontSize`, never touched themselves). `git diff origin/qa --stat`: exactly the 3 named files, no other change.

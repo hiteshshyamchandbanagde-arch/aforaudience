@@ -192,19 +192,19 @@ function FeedbackDetailOverlay({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-          <div style={{ fontSize: '13px', color: 'rgba(245,245,240,0.5)' }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.5)' }}>
             {tr.myFeedbackPage.ofTemplate.replace('{i}', String(index + 1)).replace('{n}', String(items.length))}
           </div>
           <button
             onClick={onClose}
             aria-label={tr.myFeedbackPage.closeLabel}
-            style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
+            style={{ border: 'none', background: 'transparent', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
           >
             ✕
           </button>
         </div>
 
-        <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
           {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
           {item.displayId && <> · {item.displayId}</>}
         </div>
@@ -213,10 +213,10 @@ function FeedbackDetailOverlay({
           style={{
             display: 'inline-block',
             marginTop: '10px',
-            fontSize: '12px',
+            fontSize: 'var(--afa-text-small)',
             fontWeight: 600,
             padding: '4px 10px',
-            borderRadius: '999px',
+            borderRadius: 'var(--afa-radius-pill)',
             background: statusStyle.bg,
             color: statusStyle.color,
           }}
@@ -224,21 +224,21 @@ function FeedbackDetailOverlay({
           {statusStyle.label}
         </span>
 
-        <p style={{ marginTop: '18px', fontSize: '16px', lineHeight: 1.5, color: 'var(--afa-text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <p style={{ marginTop: '18px', fontSize: 'var(--afa-text-title)', lineHeight: 1.5, color: 'var(--afa-text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {item.message}
         </p>
 
         {item.latestNote && (
-          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.08)' }}>
-            <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
-            <p style={{ margin: 0, fontSize: '14px', fontStyle: 'italic', color: 'rgba(245,245,240,0.75)' }}>&quot;{item.latestNote}&quot;</p>
+            <p style={{ margin: 0, fontSize: 'var(--afa-text-body)', fontStyle: 'italic', color: 'rgba(245,245,240,0.75)' }}>&quot;{item.latestNote}&quot;</p>
           </div>
         )}
 
         {item.resolvedAt && (
-          <div style={{ marginTop: '16px', fontSize: '13px', color: 'rgba(245,245,240,0.55)' }}>
+          <div style={{ marginTop: '16px', fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.55)' }}>
             {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDateTime(item.resolvedAt))}
           </div>
         )}
@@ -250,7 +250,7 @@ function FeedbackDetailOverlay({
             style={{
               flex: 1,
               padding: '10px 16px',
-              borderRadius: '10px',
+              borderRadius: 'var(--afa-radius-10px)',
               border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
               color: hasPrev ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
@@ -266,7 +266,7 @@ function FeedbackDetailOverlay({
             style={{
               flex: 1,
               padding: '10px 16px',
-              borderRadius: '10px',
+              borderRadius: 'var(--afa-radius-10px)',
               border: '1px solid rgba(245,245,240,0.15)',
               background: 'var(--afa-surface-raised)',
               color: hasNext ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
@@ -337,7 +337,7 @@ export default function MyFeedbackPage() {
     <div style={{ background: 'var(--afa-surface-raised)', minHeight: '100vh' }}>
       <SiteNav variant="page" />
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-text-primary)' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-text-primary)' }}>
           {tr.myFeedbackPage.heading}
         </h1>
         <p style={{ color: 'rgba(245,245,240,0.6)', marginBottom: '28px' }}>
@@ -345,7 +345,7 @@ export default function MyFeedbackPage() {
         </p>
 
         {error && (
-          <div style={{ padding: '16px', background: '#FFEBEE', borderRadius: '10px', color: '#C62828', marginBottom: '20px' }}>
+          <div style={{ padding: '16px', background: '#FFEBEE', borderRadius: 'var(--afa-radius-10px)', color: '#C62828', marginBottom: '20px' }}>
             {error}
           </div>
         )}
@@ -356,7 +356,7 @@ export default function MyFeedbackPage() {
           <div
             style={{
               background: 'var(--afa-surface-raised)',
-              borderRadius: '12px',
+              borderRadius: 'var(--afa-radius-12px)',
               padding: '32px 24px',
               textAlign: 'center',
               border: '1px solid rgba(245,245,240,0.08)',
@@ -378,7 +378,7 @@ export default function MyFeedbackPage() {
                   onClick={() => setSelectedIndex(i)}
                   style={{
                     background: 'var(--afa-surface-raised)',
-                    borderRadius: '12px',
+                    borderRadius: 'var(--afa-radius-12px)',
                     padding: '18px 20px',
                     border: '1px solid rgba(245,245,240,0.08)',
                     textAlign: 'left',
@@ -390,15 +390,15 @@ export default function MyFeedbackPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                         {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>
-                      <p style={{ margin: '6px 0 0', fontSize: '15px', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
+                      <p style={{ margin: '6px 0 0', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
                         {item.title || item.message}
                       </p>
                       {item.latestNote && (
-                        <p style={{ margin: '8px 0 0', fontSize: '13px', color: 'rgba(245,245,240,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                        <p style={{ margin: '8px 0 0', fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
                           &quot;{item.latestNote}&quot;
                         </p>
                       )}
@@ -406,10 +406,10 @@ export default function MyFeedbackPage() {
                     <span
                       style={{
                         flexShrink: 0,
-                        fontSize: '12px',
+                        fontSize: 'var(--afa-text-small)',
                         fontWeight: 600,
                         padding: '4px 10px',
-                        borderRadius: '999px',
+                        borderRadius: 'var(--afa-radius-pill)',
                         background: statusStyle.bg,
                         color: statusStyle.color,
                         whiteSpace: 'nowrap',
