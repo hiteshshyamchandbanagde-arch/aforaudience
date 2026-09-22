@@ -200,7 +200,7 @@ const TONE_STYLE: Record<StatusPillTone, { bg: string; color: string }> = {
   gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
   sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
   error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
-  muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },
+  muted: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)' },
 }
 
 export function StatusPill({ tone, children }: { tone: StatusPillTone; children: ReactNode }) {
@@ -277,7 +277,7 @@ export function Card({
       className={className}
       style={{
         borderRadius: '12px',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
         background: 'var(--afa-surface-raised)',
         ...style,
       }}
@@ -301,7 +301,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '12px',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
         background: 'var(--afa-surface-raised)',
         padding: '80px 24px',
         textAlign: 'center',
@@ -343,7 +343,7 @@ export function PageHead({
         display: 'flex',
         flexDirection: 'column',
         gap: '20px',
-        borderBottom: '1px solid rgba(245,245,240,0.08)',
+        borderBottom: '1px solid var(--afa-tint-08)',
         paddingBottom: '28px',
         marginBottom: '32px',
       }}
@@ -412,7 +412,7 @@ export function SectionTitle({ n, title }: { n: string; title: string }) {
         display: 'flex',
         alignItems: 'baseline',
         gap: '12px',
-        borderBottom: '1px solid rgba(245,245,240,0.08)',
+        borderBottom: '1px solid var(--afa-tint-08)',
         paddingBottom: '12px',
         marginBottom: '20px',
       }}
@@ -467,7 +467,7 @@ export const navPillStyle: CSSProperties = {
   alignItems: 'center',
   gap: '8px',
   borderRadius: '8px',
-  border: '1px solid rgba(245,245,240,0.08)',
+  border: '1px solid var(--afa-tint-08)',
   padding: '9px 14px',
   fontFamily: 'var(--font-sans)',
   fontSize: '13px',
@@ -510,7 +510,7 @@ export function Label({ children }: { children: ReactNode }) {
 const fieldStyle: CSSProperties = {
   width: '100%',
   borderRadius: '8px',
-  border: '1px solid rgba(245,245,240,0.08)',
+  border: '1px solid var(--afa-tint-08)',
   background: '#171717',
   padding: '10px 14px',
   fontSize: '14px',

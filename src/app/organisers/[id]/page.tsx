@@ -120,7 +120,7 @@ const TOUR_DISPLAY_LIMIT = Infinity
 
 function SectionHeader({ eyebrow, count }: { eyebrow: string; count: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-3)", borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "var(--afa-space-3)" }}>
+    <div style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-3)", borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "var(--afa-space-3)" }}>
       <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{eyebrow}</h2>
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", color: "var(--afa-text-muted)" }}>{String(count).padStart(2, "0")}</span>
     </div>
@@ -185,7 +185,7 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
           <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
         </div>
       )}
-      <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-2) 0" }}>
+      <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-2) 0" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
         <span style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{day}</span>
       </div>
@@ -243,7 +243,7 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
   const cities = tourCities(tour.stops)
   const windowLabel = formatTourWindow(tour.stops)
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-5)", background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", padding: "var(--afa-space-6)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-5)", background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-6)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--afa-space-4)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", minWidth: 0 }}>
           <RouteIcon style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
@@ -270,7 +270,7 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourCitiesLabel}</div>
           <div style={{ marginTop: "var(--afa-space-2)", display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             {cities.map((c) => (
-              <span key={c} style={{ border: "1px solid rgba(245,245,240,0.1)", padding: "5px var(--afa-space-10px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>
+              <span key={c} style={{ border: "1px solid var(--afa-tint-10)", padding: "5px var(--afa-space-10px)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-text-secondary)" }}>
                 {c}
               </span>
             ))}
@@ -359,8 +359,8 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
           <span style={{ color: "var(--afa-text-secondary)" }}>{tr.organiserDetailPage.breadcrumbProfile}</span>
         </nav>
 
-        <header className="afa-organiser-hero" style={{ borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "56px" }}>
-          <div className="afa-organiser-avatar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", overflow: "hidden" }}>
+        <header className="afa-organiser-hero" style={{ borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "56px" }}>
+          <div className="afa-organiser-avatar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", overflow: "hidden" }}>
             {showAvatarPhoto ? (
               <Photo src={organiser.user.avatar} alt={organiser.orgName} />
             ) : (

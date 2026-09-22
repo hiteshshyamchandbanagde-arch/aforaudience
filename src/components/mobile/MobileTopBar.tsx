@@ -123,7 +123,7 @@ export default function MobileTopBar() {
         padding: '10px 14px',
         background: 'rgba(20,20,20,0.95)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(245,245,240,0.08)',
+        borderBottom: '1px solid var(--afa-tint-08)',
       }}
     >
       <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
@@ -200,7 +200,7 @@ export default function MobileTopBar() {
               top: 'calc(100% + 6px)',
               right: 0,
               background: 'var(--afa-surface-raised)',
-              border: '1px solid rgba(245,245,240,0.1)',
+              border: '1px solid var(--afa-tint-10)',
               borderRadius: '10px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
               padding: '6px',

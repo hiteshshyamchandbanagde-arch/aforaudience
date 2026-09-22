@@ -310,7 +310,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         zIndex: 100,
         background: isHome ? "rgba(20,20,20,0.92)" : "rgba(20,20,20,0.95)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(245,245,240,0.08)",
+        borderBottom: "1px solid var(--afa-tint-08)",
       }}
     >
       <style>{`
@@ -444,7 +444,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   {locale.toUpperCase()}
                 </button>
                 {langMenuOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.1)', borderRadius: 'var(--afa-radius-10px)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-10px)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
                     {LOCALES.map((l) => (
                       <button
                         key={l.id}
@@ -565,7 +565,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </button>
 
                 {menuOpen && (
-                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-12px)", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
+                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-12px)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
                     {user ? (
                       <>
                         <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>

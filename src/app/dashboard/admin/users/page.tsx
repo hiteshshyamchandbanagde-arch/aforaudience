@@ -148,7 +148,7 @@ export default function AdminUsersPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--afa-border-resting)', fontSize: '14px', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
@@ -205,7 +205,7 @@ export default function AdminUsersPage() {
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button variant="solid" size="md" fullWidth={false} onClick={() => handleSuspend(u.id)} disabled={actioningId === u.id}>
                           Suspend

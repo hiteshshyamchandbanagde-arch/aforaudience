@@ -233,7 +233,7 @@ export default function ArtistsPage() {
           </p>
         </div>
 
-        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid rgba(245,245,240,0.1)", borderBottom: "1px solid rgba(245,245,240,0.1)", padding: "20px 0" }}>
+        <div className="afa-artists-stat-row" style={{ marginTop: "40px", borderTop: "1px solid var(--afa-tint-10)", borderBottom: "1px solid var(--afa-tint-10)", padding: "20px 0" }}>
           <div style={{ flex: "1 1 280px" }}>
             <BrowseSearchDropdown
               query={search}
@@ -268,7 +268,7 @@ export default function ArtistsPage() {
         )}
 
         {/* FILTERS - editorial underline row, not pill-chip buttons */}
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "baseline", marginBottom: "24px", borderBottom: "1px solid rgba(245,245,240,0.1)", paddingBottom: "18px" }}>
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "baseline", marginBottom: "24px", borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "18px" }}>
           {["All", ...genres].map((g) => (
             <button
               key={g}
@@ -291,7 +291,7 @@ export default function ArtistsPage() {
 
         {/* FEATURED / RISING STAR */}
         {risingStar && (
-          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
+          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
             <div className="afa-featured-artist-photo" style={{ position: "relative", minHeight: "260px" }}>
               {risingStarPortraitUrl && !risingStarPhotoFailed ? (
                 <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} onError={() => setRisingStarPhotoFailed(true)} />
@@ -372,7 +372,7 @@ export default function ArtistsPage() {
                     background: "var(--afa-surface-raised)",
                     borderRadius: "10px",
                     overflow: "hidden",
-                    border: "1px solid rgba(245,245,240,0.1)",
+                    border: "1px solid var(--afa-tint-10)",
                     position: "relative",
                     cursor: navigatingId ? "default" : "pointer",
                     opacity: navigatingId && !isNavigatingThis ? 0.5 : 1,
@@ -396,7 +396,7 @@ export default function ArtistsPage() {
                           width: "28px",
                           height: "28px",
                           borderRadius: "50%",
-                          border: "3px solid rgba(245,245,240,0.15)",
+                          border: "3px solid var(--afa-border-resting)",
                           borderTopColor: "var(--afa-fill-solid)",
                           animation: "afa-spin 0.7s linear infinite",
                         }}

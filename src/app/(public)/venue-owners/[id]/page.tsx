@@ -50,7 +50,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <SiteNav />
 
-      <div style={{ background: "var(--afa-surface-raised)", padding: "48px 24px", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+      <div style={{ background: "var(--afa-surface-raised)", padding: "48px 24px", borderBottom: "1px solid var(--afa-tint-10)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
             {owner.user.avatar ? (
@@ -70,7 +70,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "24px", marginBottom: "24px", border: "1px solid rgba(245,245,240,0.1)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "24px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)" }}>
           <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.8 : 0.4, lineHeight: 1.6, fontStyle: owner.bio ? "normal" : "italic" }}>
             {owner.bio || tr.venueOwnerDetailPage.noBioYet}
           </p>
@@ -85,7 +85,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
               <Link
                 key={v.id}
                 href={`/venues/${v.id}`}
-                style={{ display: "block", background: "var(--afa-surface-raised)", borderRadius: "3px", overflow: "hidden", border: "1px solid rgba(245,245,240,0.1)", textDecoration: "none" }}
+                style={{ display: "block", background: "var(--afa-surface-raised)", borderRadius: "3px", overflow: "hidden", border: "1px solid var(--afa-tint-10)", textDecoration: "none" }}
               >
                 <div style={{ height: "120px", background: "var(--afa-surface-inverse)" }}>
                   {v.photos?.[0] && (

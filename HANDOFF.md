@@ -1,4 +1,63 @@
+# Session Handoff — 22 Sept 2026 final (chat, no CC this ticket — GEN-2609-100 built, verified, and merged entirely in chat)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** Session started at `qa@e562807`; ended at `qa@<see PR #698 merge SHA>`.
+
+**Process exception, explicit and one-off:** Hitesh was on mobile with no CC access ("no cc prompt, only you"). Chat wrote the code itself this ticket - the standing chat/CC split (chat merges, CC writes application code) was suspended for this one ticket by Hitesh's explicit instruction, same category as the GEN-2609-014/017 and #574/#575 precedents logged earlier in this file's history. Not a new precedent - logged as such.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat, no CC) | `GEN-2609-100` - shorthand colour matcher, built+verified+merged entirely in chat | Done | New `migrateCompoundStringValue()` matcher for `border`/`outline`/`boxShadow` shorthand + `bg`/`fill` exact-props. 17 new self-tests. Applied in 4 area commits, 277 lines/89 files. Ratchet: rgb-rgba 918->590 (-328). `statusStyle.ts` deliberately excluded (real `EXEMPT_FILES` reason, not oversight). Found and flagged (not silently fixed) a real doc bug in `GEN-2609-099`'s own header comment (claimed 86/83, actual was always 82/79). | (merged, see PR # below) |
+| 22 Sept 2026 (chat) | Verify, open, merge `GEN-2609-099` (`#697`) | Done | Squash-merged `28c5cbf`. First-ever rgba `COLOR_MAP` entries; found the `border:`-shorthand gap this ticket (100) then fixed. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-095` approved; dispatched as `GEN-2609-099` | Done | Naming revised to `--afa-tint-08/-10` after usage investigation. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`. | (merged) |
+
+## 2. Activity in progress
+
+- Nothing open once `GEN-2609-100` merges. Ratchet after this ticket: hex 54, rgba 590, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211.
+- 3 real follow-ups surfaced, not yet ticketed (small, low-volume, structurally distinct from `GEN-2609-100`'s own fix - listed in `docs/design.md`'s `GEN-2609-100` entry): Tailwind arbitrary-value colour brackets (4 sites), unquoted raw-CSS colour values (2 sites), one JSX SVG `fill=`/`stroke=` attribute site.
+- 1 pre-existing, unrelated bug surfaced by `verify-equivalence.js` during this ticket (not caused by it, confirmed identical on unmodified `origin/qa`): `(auth)/login/page.tsx` has 3 ambiguous Tailwind `text-[var(--afa-text-primary)]` arbitrary-value classNames - worth its own ticket.
+- `GEN-2609-097` stale-branch triage: 21 branches still remain on weaker evidence only (see the earlier 22 Sept entry), untouched.
+
+## 3. Open PRs awaiting action
+
+None against `qa` after this merges. `#450` (-> `main`, frozen) untouched.
+
+## 4. Decisions / findings this session
+
+- Confirmed `src/lib/statusStyle.ts` is `EXEMPT_FILES` for a real, documented reason (the shared raw-tone source - 3 of its 4 values have no matching token at all) and correctly excluded it from the batch despite one coincidental value match.
+- Found `GEN-2609-099`'s own `TOKEN_COVERAGE` header comment was wrong when written (claimed 86 keys/83 site-wide; a proper JS parse of the actual committed data shows it was always 82/79) - flagged in `design.md` and the file's own comment, not silently corrected as if it were new information.
+- Confirmed the `(auth)/login/page.tsx` className warning is pre-existing and unrelated before shipping past it, rather than assuming it away.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609` = 100, unchanged this session (no new ticket numbers - `GEN-2609-100` was already logged before this work started). `BUG/2609` = 56, unchanged.
+- `GEN-2609-100` to be set `RESOLVED`/`DEPLOYED_QA` once merge + Vercel verification completes.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session.
+
+## 7-11. Unchanged
+
+## 12. Immediate next action
+
+3 small follow-ups from this ticket need their own tickets if Hitesh wants them pursued (Tailwind brackets, unquoted raw-CSS colour, the login-page className bug) - none urgent, all low-volume. `GEN-2609-097`'s remaining 21 branches still open, lower priority. No blocking decisions currently sitting with Hitesh.
+
+## 13. Chat vs. CC ownership note
+
+**This session is the logged exception**, not the new normal: chat wrote `migrate-tokens.js`'s new matcher, its test file, and applied it across 89 files, entirely in-session, per Hitesh's explicit one-off "no cc prompt, only you" instruction (mobile, no CC access). Chat then reviewed its own work with the same rigor as a CC handoff review (full verification suite, precise before/after diffs, no unverified claims left in committed comments) before opening/merging the PR itself. Every other session in this file's history: CC writes code, chat reviews/merges - that split resumes next session unless Hitesh says otherwise again.
+
+---
+
 # Session Handoff — 22 Sept 2026 yet later (chat — GEN-2609-099 PR opened, verified, merged, and closed out)
+
+> **SUPERSEDED 22 Sept 2026 (final entry):** `GEN-2609-100` is merged (chat-authored, one-off exception). See the entry above for the close-out.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** This entry covers exactly `#697` - nothing else changed since the prior 22 Sept entry. Session started at `qa@af757e3`; ended at `qa@28c5cbf`.
 

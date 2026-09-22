@@ -292,7 +292,7 @@ export function EventCard({
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "12px", marginTop: "6px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "12px", marginTop: "6px" }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "rgba(245,245,240,0.8)" }}>{priceLabel}</span>
             {tab === "past" ? (
               <span style={{ fontSize: "13px", color: "rgba(245,245,240,0.5)" }}>{tr.eventsPage.ended}</span>
@@ -352,7 +352,7 @@ export function EventRow({
         gap: "14px",
         overflow: "hidden",
         background: "var(--afa-surface-raised)",
-        border: "1px solid rgba(245,245,240,0.08)",
+        border: "1px solid var(--afa-tint-08)",
         borderRadius: "12px",
         padding: "10px",
         cursor: disabled ? "default" : "pointer",

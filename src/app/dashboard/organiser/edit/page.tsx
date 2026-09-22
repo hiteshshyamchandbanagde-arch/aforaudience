@@ -10,7 +10,7 @@ import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
 
 const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '14px', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
 
 // Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
 // previously these could only be set once, at apply-time. Powers the new
@@ -143,13 +143,13 @@ export default function OrganiserEditPage() {
             <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Profile Picture</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
+                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
                 <label style={{ ...variantStyle('primary', false, 'md'), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}

@@ -20,7 +20,7 @@ const inputStyle = {
   width: '100%',
   padding: 'var(--afa-space-10px) var(--afa-space-14px)',
   borderRadius: 'var(--afa-radius-md)',
-  border: '1px solid rgba(245,245,240,0.08)',
+  border: '1px solid var(--afa-tint-08)',
   background: '#171717',
   fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',
@@ -441,7 +441,7 @@ export default function CreateVenuePage() {
               )}
 
               {rateType !== 'FLEXIBLE' && (
-                <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-08)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>

@@ -156,7 +156,7 @@ export default function MessageThreadPage() {
         </div>
 
         {thread.isActive ? (
-          <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(245,245,240,0.1)' }}>
+          <div style={{ display: 'flex', gap: '8px', paddingTop: '8px', borderTop: '1px solid var(--afa-tint-10)' }}>
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, 2000))}

@@ -58,7 +58,7 @@ function RoomIcon({ persona }: { persona: keyof Dictionary["roles"] }) {
 
 function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: string; flip: boolean }) {
   return (
-    <div className={`four-rooms-row${flip ? " four-rooms-row-flip" : ""}`} style={{ borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
+    <div className={`four-rooms-row${flip ? " four-rooms-row-flip" : ""}`} style={{ borderBottom: "1px solid var(--afa-tint-08)" }}>
       <div className="four-rooms-visual" style={{ position: "relative", minHeight: "280px", background: "radial-gradient(120% 120% at 18% 15%, var(--afa-ink) 0%, var(--afa-surface-inverse) 60%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <span style={{ position: "absolute", left: "24px", top: "20px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "56px", color: "var(--afa-border-resting)" }}>
           {room.n}
@@ -166,7 +166,7 @@ export default function FourRooms() {
   ]
 
   return (
-    <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+    <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
       <div style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px 36px 40px" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-6)" }}>
           {tr.homePage.fourRoomsEyebrow}
@@ -182,7 +182,7 @@ export default function FourRooms() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1360px", margin: "0 auto", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+      <div style={{ maxWidth: "1360px", margin: "0 auto", borderTop: "1px solid var(--afa-tint-08)" }}>
         <RoomRow room={rooms[0]} personaLabel={tr.roles.AUDIENCE} flip={false} />
         <RoomRow room={rooms[1]} personaLabel={tr.roles.ARTIST} flip={true} />
         <RoomRow room={rooms[2]} personaLabel={tr.roles.ORGANISER} flip={false} />

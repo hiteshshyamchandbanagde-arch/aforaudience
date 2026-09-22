@@ -121,7 +121,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     width: "100%",
     padding: "10px 12px",
     borderRadius: "10px",
-    border: "1px solid rgba(245,245,240,0.15)",
+    border: "1px solid var(--afa-border-resting)",
     background: "var(--afa-surface-page)",
     fontSize: "14px",
     color: "var(--afa-text-primary)",

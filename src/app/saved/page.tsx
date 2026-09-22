@@ -69,7 +69,7 @@ export default function SavedPage() {
 
           {events.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '64px 20px 0' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid rgba(245,245,240,0.1)', background: 'var(--afa-surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-muted)' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-muted)' }}>
                 <HeartIcon style={{ width: 26, height: 26 }} />
               </div>
               <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--afa-text-primary)' }}>

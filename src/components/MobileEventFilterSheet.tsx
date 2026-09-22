@@ -89,7 +89,7 @@ export default function MobileEventFilterSheet({
           overflowY: "auto",
           borderTopLeftRadius: "20px",
           borderTopRightRadius: "20px",
-          borderTop: "1px solid rgba(245,245,240,0.1)",
+          borderTop: "1px solid var(--afa-tint-10)",
           background: "var(--afa-surface-page)",
           paddingBottom: "32px",
         }}
@@ -177,7 +177,7 @@ export default function MobileEventFilterSheet({
             onClick={onReset}
             style={{
               borderRadius: "999px",
-              border: "1px solid rgba(245,245,240,0.15)",
+              border: "1px solid var(--afa-border-resting)",
               background: "transparent",
               color: "rgba(245,245,240,0.7)",
               padding: "14px 20px",

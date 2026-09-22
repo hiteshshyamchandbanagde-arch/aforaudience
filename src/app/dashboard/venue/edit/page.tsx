@@ -136,7 +136,7 @@ export default function VenueOwnerEditPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
                 {avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
+                  <img src={avatar} alt="Profile preview" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
                 )}
                 <label className="avp-btn-primary" style={{ ...primaryLinkStyle, cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                   {uploadingAvatar ? 'Uploading...' : avatar ? 'Change Photo' : 'Upload Photo'}

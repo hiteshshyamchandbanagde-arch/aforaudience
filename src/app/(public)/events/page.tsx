@@ -411,7 +411,7 @@ function EventsPageContent() {
             deliberately not a new top-level nav route. Underline-tab
             treatment (not pills) matching the Venues/Owners toggle
             convention elsewhere in the app. */}
-        <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
+        <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
           <button className={`afa-events-mode-tab${contentMode === "events" ? " active" : ""}`} onClick={() => setContentMode("events")}>
             {tr.eventsPage.toggleEvents}
           </button>
@@ -546,7 +546,7 @@ function EventsPageContent() {
               />
             )}
 
-            <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid rgba(245,245,240,0.1)", paddingTop: "20px" }}>
+            <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "20px" }}>
               <div className="events-type-row" style={{ marginBottom: "16px" }}>
                 <button
                   onClick={() => setSelectedType(null)}
@@ -600,7 +600,7 @@ function EventsPageContent() {
                   <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
                 </select>
 
-                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid rgba(245,245,240,0.15)", borderRadius: "3px", padding: "3px" }}>
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid var(--afa-border-resting)", borderRadius: "3px", padding: "3px" }}>
                   <button onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`}>
                     <GridViewIcon style={{ width: "16px", height: "16px" }} />
                   </button>
@@ -619,7 +619,7 @@ function EventsPageContent() {
             {loading ? (
               <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
             ) : filtered.length === 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed rgba(245,245,240,0.15)", borderRadius: "3px", padding: "96px 20px", textAlign: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "3px", padding: "96px 20px", textAlign: "center" }}>
                 <TheaterMark style={{ width: "40px", height: "40px", color: "rgba(201,151,58,0.6)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
                   {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}
@@ -648,7 +648,7 @@ function EventsPageContent() {
                     style={{
                       alignSelf: "flex-start",
                       borderRadius: "999px",
-                      border: "1px solid rgba(245,245,240,0.15)",
+                      border: "1px solid var(--afa-border-resting)",
                       background: "transparent",
                       color: "var(--afa-amber)",
                       padding: "10px 18px",

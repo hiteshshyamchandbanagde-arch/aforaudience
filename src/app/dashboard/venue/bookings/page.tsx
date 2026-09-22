@@ -220,7 +220,7 @@ export default function VenueBookingsPage() {
             </div>
 
             {selectedDay && bookingsByDate[selectedDay] && (
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--afa-tint-08)' }}>
                 {bookingsByDate[selectedDay].map((b) => (
                   <div key={b.id} style={{ fontSize: '13px', color: 'var(--afa-text-primary)', padding: '4px 0' }}>
                     <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: CAL_STATUS_DOT[b.status], marginRight: '6px' }} />

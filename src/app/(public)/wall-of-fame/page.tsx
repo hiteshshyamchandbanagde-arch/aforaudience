@@ -212,7 +212,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "var(--afa-surface-raised)",
                 borderRadius: "3px",
-                border: "1px solid rgba(245,245,240,0.1)",
+                border: "1px solid var(--afa-tint-10)",
                 overflow: "hidden",
                 cursor: data?.artistOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "artist-of-month" ? 0.5 : 1,
@@ -221,7 +221,7 @@ export default function WallOfFamePage() {
             >
               {navigatingKey === "artist-of-month" && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 </div>
               )}
               <MonthCardHeader
@@ -271,7 +271,7 @@ export default function WallOfFamePage() {
                 position: "relative",
                 background: "var(--afa-surface-raised)",
                 borderRadius: "3px",
-                border: "1px solid rgba(245,245,240,0.1)",
+                border: "1px solid var(--afa-tint-10)",
                 overflow: "hidden",
                 cursor: data?.eventOfMonth ? (navigatingKey ? "default" : "pointer") : "default",
                 opacity: navigatingKey && navigatingKey !== "event-of-month" ? 0.5 : 1,
@@ -280,7 +280,7 @@ export default function WallOfFamePage() {
             >
               {navigatingKey === "event-of-month" && (
                 <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 </div>
               )}
               <MonthCardHeader
@@ -323,7 +323,7 @@ export default function WallOfFamePage() {
               {tr.wallOfFamePage.allTimeLeaderboard}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", padding: "24px 28px" }}>
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
                 {data.topOrganisers.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
@@ -377,7 +377,7 @@ export default function WallOfFamePage() {
                                   width: "18px",
                                   height: "18px",
                                   borderRadius: "50%",
-                                  border: "2px solid rgba(245,245,240,0.15)",
+                                  border: "2px solid var(--afa-border-resting)",
                                   borderTopColor: "var(--afa-fill-solid)",
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}
@@ -394,7 +394,7 @@ export default function WallOfFamePage() {
                 )}
               </div>
 
-              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid rgba(245,245,240,0.1)", padding: "24px 28px" }}>
+              <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
                 {data.topVenues.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
@@ -448,7 +448,7 @@ export default function WallOfFamePage() {
                                   width: "18px",
                                   height: "18px",
                                   borderRadius: "50%",
-                                  border: "2px solid rgba(245,245,240,0.15)",
+                                  border: "2px solid var(--afa-border-resting)",
                                   borderTopColor: "var(--afa-fill-solid)",
                                   animation: "afa-spin 0.7s linear infinite",
                                 }}

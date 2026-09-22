@@ -667,7 +667,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
@@ -748,7 +748,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               </label>
 
               {/* FEAT-2608-045 */}
-              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-08)' }}>
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
@@ -965,7 +965,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   </div>
 
-                  <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.1)' }}>
+                  <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-10)' }}>
                     <label style={labelStyle}>Audience Choice vote weighting</label>
                     <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.55, marginBottom: 'var(--afa-space-10px)' }}>
                       How much each voter category counts toward the Audience Choice result. Leave blank to follow the platform default (currently 80/10/10). Must sum to 100, Audience at least 50.
@@ -1031,7 +1031,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
@@ -1114,7 +1114,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Artist Payment Terms
               </h2>
@@ -1150,7 +1150,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Venue
               </h2>

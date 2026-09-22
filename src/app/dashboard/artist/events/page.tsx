@@ -202,7 +202,7 @@ export default function BrowseEventsToApplyPage() {
             onChange={(e) => setSelectedCity(e.target.value)}
             style={{
               fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)',
-              background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.15)',
+              background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)',
               borderRadius: '999px', padding: '8px 14px', marginBottom: '32px', cursor: 'pointer',
             }}
           >
@@ -213,7 +213,7 @@ export default function BrowseEventsToApplyPage() {
           </select>
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
@@ -223,7 +223,7 @@ export default function BrowseEventsToApplyPage() {
                 const comp = compensationBadge(event)
                 const full = isEventFull(event)
                 return (
-                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid rgba(245,245,240,0.08)' }}>
+                  <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
                         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
@@ -283,7 +283,7 @@ export default function BrowseEventsToApplyPage() {
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
                           placeholder="Optional note to the organiser"
                           rows={2}
-                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button
                           variant="primary"

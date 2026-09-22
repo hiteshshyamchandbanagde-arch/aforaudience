@@ -110,9 +110,9 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             left: variant === 'mobile' || variant === 'topbar' ? 0 : 'auto',
             right: variant === 'mobile' || variant === 'topbar' ? 0 : 0,
             background: 'var(--afa-surface-raised)',
-            border: '1px solid rgba(245,245,240,0.15)',
+            border: '1px solid var(--afa-border-resting)',
             borderRadius: '10px',
-            boxShadow: '0 8px 24px rgba(245,245,240,0.15)',
+            boxShadow: '0 8px 24px var(--afa-border-resting)',
             zIndex: 40,
             width: '240px',
             padding: '10px',
@@ -124,7 +124,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
             autoFocus
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (

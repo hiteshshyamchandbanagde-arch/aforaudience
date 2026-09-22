@@ -523,7 +523,7 @@ export default function CheckoutPage() {
           style={{
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
-            border: '1px solid rgba(245,245,240,0.08)',
+            border: '1px solid var(--afa-tint-08)',
             borderRadius: 14,
             padding: 'var(--afa-space-5)',
             marginBottom: 'var(--afa-space-5)',
@@ -556,7 +556,7 @@ export default function CheckoutPage() {
 
           <div
             style={{
-              borderTop: '1px solid rgba(245,245,240,0.08)',
+              borderTop: '1px solid var(--afa-tint-08)',
               paddingTop: 'var(--afa-space-4)',
               marginBottom: 'var(--afa-space-3)',
             }}
@@ -631,7 +631,7 @@ export default function CheckoutPage() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid rgba(245,245,240,0.08)',
+              borderTop: '1px solid var(--afa-tint-08)',
               paddingTop: 'var(--afa-space-4)',
             }}
           >
@@ -655,7 +655,7 @@ export default function CheckoutPage() {
           style={{
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
-            border: '1px solid rgba(245,245,240,0.08)',
+            border: '1px solid var(--afa-tint-08)',
             borderRadius: 14,
             padding: 'var(--afa-space-5)',
             marginBottom: 'var(--afa-space-5)',
@@ -748,7 +748,7 @@ export default function CheckoutPage() {
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.1)',
+                          textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)',
                           background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
                         }}
                       >

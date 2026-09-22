@@ -84,7 +84,7 @@ function SortableRow({
         padding: '14px',
         background: 'var(--afa-surface-raised)',
         borderRadius: '10px',
-        border: '1px solid rgba(245,245,240,0.08)',
+        border: '1px solid var(--afa-tint-08)',
       }}
     >
       <button
@@ -151,7 +151,7 @@ function SortableRow({
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
         <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>min</span>
       </div>
@@ -304,7 +304,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
@@ -313,7 +313,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <Button
                   variant="primary"

@@ -156,7 +156,7 @@ export default function WelcomeSequence() {
           maxWidth: 440,
           background: 'var(--afa-surface-raised)',
           borderRadius: 16,
-          border: '1px solid rgba(245,245,240,0.08)',
+          border: '1px solid var(--afa-tint-08)',
           padding: 40,
           textAlign: 'center',
         }}
@@ -219,7 +219,7 @@ export default function WelcomeSequence() {
                     width: '100%',
                     padding: '12px 16px',
                     borderRadius: 8,
-                    border: '1px solid rgba(245,245,240,0.15)',
+                    border: '1px solid var(--afa-border-resting)',
                     fontSize: 18,
                     letterSpacing: '0.3em',
                     textAlign: 'center',

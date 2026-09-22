@@ -559,7 +559,7 @@ export default function CreateEventPage() {
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
@@ -648,7 +648,7 @@ export default function CreateEventPage() {
                   so an organiser can't accidentally write something that
                   conflicts with AFA's own refund/cancellation policy
                   (linked below, platform-wide, not editable here). */}
-              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ marginTop: 'var(--afa-space-6)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-08)' }}>
                 <label style={labelStyle}>Event terms</label>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>
                   Select anything that applies to this event. AFA's refund and cancellation policy applies to every
@@ -735,7 +735,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Book a Venue
               </h2>
@@ -785,7 +785,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Seats & pricing */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
@@ -862,7 +862,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Lineup & approvals */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-18px)' }}>
                 Lineup &amp; Approvals
               </h2>

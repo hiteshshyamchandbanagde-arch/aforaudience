@@ -186,7 +186,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
           {/* main column */}
           <div>
             <section>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "12px" }}>
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{tr.venueDetailPage.seatingHeading}</h2>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>
                   {venue.sections.length} {tr.venueDetailPage.sectionsLabel}
@@ -205,13 +205,13 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
                   </thead>
                   <tbody>
                     {venue.sections.map((s) => (
-                      <tr key={s.id} style={{ borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+                      <tr key={s.id} style={{ borderTop: "1px solid var(--afa-tint-08)" }}>
                         <td style={{ padding: "14px 0", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)" }}>{s.name}</td>
                         <td style={{ padding: "14px 0", textAlign: "right", color: "var(--afa-text-primary)", opacity: 0.7, fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>{s.seats.toLocaleString("en-IN")}</td>
                         <td style={{ padding: "14px 0", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)" }}>₹{s.price.toLocaleString("en-IN")}</td>
                       </tr>
                     ))}
-                    <tr style={{ borderTop: "1px solid rgba(245,245,240,0.15)" }}>
+                    <tr style={{ borderTop: "1px solid var(--afa-border-resting)" }}>
                       <td style={{ paddingTop: "14px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueDetailPage.totalLabel}</td>
                       <td style={{ paddingTop: "14px", textAlign: "right", fontWeight: 700, color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body)", fontVariantNumeric: "tabular-nums" }}>
                         {venue.sections.reduce((sum, s) => sum + s.seats, 0).toLocaleString("en-IN")}
@@ -227,10 +227,10 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
 
             {venue.facilities && venue.facilities.length > 0 && (
               <section style={{ marginTop: "56px" }}>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid rgba(245,245,240,0.15)", paddingBottom: "12px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", borderBottom: "1px solid var(--afa-border-resting)", paddingBottom: "12px" }}>{tr.venueDetailPage.facilitiesHeading}</h2>
                 <div className="afa-venue-facilities">
                   {venue.facilities.map((facility) => (
-                    <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 0", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+                    <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 0", borderTop: "1px solid var(--afa-tint-08)" }}>
                       <FacilityIcon label={facility} style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
                       <span style={{ fontSize: "15px", color: "var(--afa-text-primary)" }}>{facility}</span>
                     </div>
@@ -242,8 +242,8 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
 
           {/* sidebar */}
           <aside className="afa-venue-sidebar">
-            <div style={{ borderTop: "1px solid rgba(245,245,240,0.15)", borderBottom: "1px solid rgba(245,245,240,0.15)" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
+            <div style={{ borderTop: "1px solid var(--afa-border-resting)", borderBottom: "1px solid var(--afa-border-resting)" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "18px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
                 <CapacityIcon style={{ width: "18px", height: "18px", color: "var(--afa-text-primary)", opacity: 0.6, marginTop: "2px", flexShrink: 0 }} />
                 <div>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--afa-text-primary)", opacity: 0.5, marginBottom: "4px" }}>{tr.venueDetailPage.totalCapacity}</p>

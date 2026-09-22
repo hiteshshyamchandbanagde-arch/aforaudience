@@ -7933,3 +7933,58 @@ Running `verify-equivalence.js` against the first migrated file immediately fail
 
 1. **Extend `migrateExactStringValue()`/`COLOR_PROPS` to handle `border:`/`boxShadow:` shorthand values.** This is the single highest-value follow-up from this ticket - it would unlock roughly 265 of the ~321 currently-unreachable rgba literals (the `border:` family alone) using tokens that already exist as of this PR, no new tokens needed. Shape of the fix: teach the exact-string matcher to also extract and replace just the colour sub-token out of a compound shorthand value, the same capability `migrateValue()` already has for dimension shorthands (`padding: '4px 8px'`). Scoped as its own ticket, not built here.
 2. **Tailwind arbitrary-value colour brackets** (`border-[rgba(...)]`, 4 sites found) - same structural gap as `text-[Npx]` for font-size, already known and out of scope for `migrate-tokens.js` as designed. Low volume; probably not worth its own script capability unless it recurs at scale in a future audit.
+
+## GEN-2609-100 - shorthand colour matcher for border/outline/boxShadow + bg/fill
+
+Chat-authored end to end (Hitesh on mobile, no CC prompt this ticket - explicit one-off exception per Hitesh's "only you" instruction). Built on top of `GEN-2609-099`'s own decision item 1 above: extended `migrate-tokens.js` to reach the ~85% of rgba debt the exact-string-only matcher couldn't touch.
+
+### Root cause, precisely measured (not assumed)
+
+Ran a full repo-wide classification of every real occurrence of the 5 known `COLOR_MAP` values (excluding docs/definition files), grouped by exact surrounding property name:
+
+| Category | Count | Fix |
+|---|---:|---|
+| `border`/`borderTop`/`borderBottom`/`borderLeft` shorthand | 270 | new `migrateCompoundStringValue()` matcher |
+| `boxShadow` shorthand (multi-layer) | 2 | same matcher |
+| `bg` (a status-tone role key, not a DOM prop) | 7 | added to `COLOR_PROPS` (exact-string, no shorthand needed) |
+| `fill` (Recharts tick style) | 4 | added to `COLOR_PROPS` |
+| Tailwind arbitrary-value brackets (`border-[rgba(...)]`) | 4 | **out of scope** - className string, not a `prop: value` pair, structurally unreachable by `MATCH_RE_JS`/`MATCH_RE_CSS` |
+| Unquoted colour in raw `<style>{`...`}</style>` CSS text | 2 | **out of scope** - already flagged in `migrateExactStringValue()`'s own comment as a known gap; genuinely separate mechanism, not folded into this ticket |
+| JSX `fill="..."`/`stroke="..."` SVG attribute | 1 | **out of scope** - `attr="value"`, not `prop: value` |
+
+### The fix
+
+`migrateCompoundStringValue(raw, map)`: finds each `COLOR_MAP` key as an exact-text substring anywhere inside a larger compound value (`"1px solid rgba(245,245,240,0.08)"` → `"1px solid var(--afa-tint-08)"`) and splices in the replacement, leaving the rest of the shorthand untouched. Supports multiple non-overlapping matches in one value (a multi-layer `boxShadow` can have 2+ colours). Hex keys get a boundary guard (`#FFF` must not match as a prefix of the different literal `#FFFFFF`, same guarantee `COLOR_MAP`'s own header already documents for the whole-string case) - rgba keys are self-terminating via their own closing paren, so no equivalent risk exists there, verified by test.
+
+Wired via a new `compoundProps` field on the `colour` `CATEGORY_DEFS` entry, checked in `processLine()` before the category's own default `kind` - so `border`/`outline`/`boxShadow` route to the new matcher while `color`/`background`/etc keep using `migrateExactStringValue()` unchanged.
+
+17 new self-tests (`migrate-tokens.test.js` - first test file for this script), covering: basic extraction, multi-match, no-match, the hex-prefix collision guard, the 0.1-vs-0.15 non-collision, case-insensitivity, and the full `processLine()` pipeline on real line shapes (including a comment line and a `token-ok:`-annotated line correctly staying untouched, and the Tailwind-bracket case correctly staying structurally unreachable rather than being mis-converted). Wired into `.github/workflows/design-tokens.yml` alongside `check-design-tokens.test.js`.
+
+### Explicitly excluded from the batch: `src/lib/statusStyle.ts`
+
+`statusStyle.ts`'s `STATUS_TONE.muted.bg` happens to hold the exact same value as `--afa-tint-08` (245,245,240,0.08), but the file is `EXEMPT_FILES` for a real reason - it's the deliberate raw-literal "shared tone source" (`gold`/`sage`/`error`/`orange`'s `bg` values have no matching token at all, different base RGB each). Converting only the one coincidentally-matching line would be an arbitrary, inconsistent edit to a file whose whole documented purpose is holding literals. Left untouched.
+
+### Applied: 4 area commits, 277 line changes across 89 files
+
+| Commit | Area | Files | Lines |
+|---|---|---:|---:|
+| 1/4 | `src/app/(public)/*`, `src/app/venues/*`, `src/app/organisers/*` | 16 | 76 |
+| 2/4 | `src/app/dashboard/*`, `src/components/dashboard/*` | 36 | 124 |
+| 3/4 | `src/app/{profile,my-feedback,checkout,verify-phone,for-artists,tickets,saved}`, `src/app/(auth)/*` | 9 | 28 |
+| 4/4 | `src/components/*` (excl. `dashboard/`) | 28 | 49 |
+
+`verify-equivalence.js`: 0 mismatches after every commit. One pre-existing, unrelated finding surfaced by it on commit 3/4: `(auth)/login/page.tsx` has 3 ambiguous Tailwind `text-[var(--afa-text-primary)]` arbitrary-value classNames - confirmed identical on unmodified `origin/qa` (this diff touches zero `className` lines in that file), a real separate issue worth its own ticket, not fixed here.
+
+### Ratchet: rgb-rgba-literal 918 → 590 (-328)
+
+Bigger than the 277-line estimate because some lines convert more than one literal (the multi-shadow `boxShadow` case). hex/font-family/font-size/spacing/radius/raw-button all unchanged, as expected for a colour-only ticket. All verification (checker, 55+17 self-tests, ratchet, `tsc` - sandbox has no `node_modules` so only syntax-checkable, not fully type-checkable) clean.
+
+### `TOKEN_COVERAGE` regenerated once, last
+
+Same 82 keys, same 79 site-wide/3 button-only/0 unused aggregate - no token changed status. 3 tokens gained real consumer files: `--afa-border-resting` 23→59, `--afa-tint-08` 12→60, `--afa-tint-10` 8→36 (diffed the parsed before/after data directly, not estimated).
+
+**Documentation bug found and flagged, not silently fixed:** `GEN-2609-099`'s own header comment above claims "86 keys... 83 site-wide" - parsing the actual data committed at that commit shows the true state was always 82 keys / 79 site-wide. The prose was wrong when written; left as historical record with a correction note pointing future readers to the parsed data.
+
+### What this leaves for colour
+
+Roughly 270 of the ~278 total literals this ticket found are now converted (the border/boxShadow/bg/fill families). Still open, per the table above: Tailwind arbitrary-value brackets (4 sites, same shape as the known `text-[Npx]` font-size gap), unquoted raw-CSS colour values (2 sites), and one JSX SVG attribute (1 site) - all structurally different matching problems, correctly not folded into this ticket. Total remaining `rgb-rgba-literal` debt: 590, almost entirely values with no `COLOR_MAP` entry at all (the sub-50-occurrence values `GEN-2609-095` deliberately left unconverted, plus the `--afa-amber`/`--afa-error`/`--afa-sage` tint families).

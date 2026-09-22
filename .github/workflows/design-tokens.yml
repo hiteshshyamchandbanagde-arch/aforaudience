@@ -40,6 +40,12 @@ jobs:
       - name: Rule-engine self-tests
         run: node scripts/check-design-tokens.test.js
 
+      # GEN-2609-100 - migrate-tokens.js's shorthand colour matcher gets
+      # its own self-tests, same as check-design-tokens.js's rule engine
+      # above (see migrate-tokens.test.js's own header comment).
+      - name: Migration-script self-tests
+        run: node scripts/dev/migrate-tokens.test.js
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}

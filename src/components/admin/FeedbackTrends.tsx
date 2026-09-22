@@ -152,7 +152,7 @@ function buildKPIs(items: TrendFeedbackItem[]) {
 const kpiCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
-  border: '1px solid rgba(245,245,240,0.08)',
+  border: '1px solid var(--afa-tint-08)',
   padding: '14px 16px',
   flex: '1 1 120px',
 }
@@ -173,7 +173,7 @@ const kpiLabel: React.CSSProperties = {
 const chartCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   borderRadius: '12px',
-  border: '1px solid rgba(245,245,240,0.08)',
+  border: '1px solid var(--afa-tint-08)',
   padding: '18px',
 }
 

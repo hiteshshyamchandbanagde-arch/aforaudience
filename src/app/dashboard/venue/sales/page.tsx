@@ -204,14 +204,14 @@ export default function VenueOwnerSalesOverviewPage() {
                       tickFormatter={formatBucketLabel}
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
                     />
                     <YAxis
                       tickFormatter={compactMoney}
                       tickLine={false}
                       axisLine={false}
                       width={56}
-                      tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
                     />
                     <Tooltip
                       cursor={{ stroke: 'rgba(201,151,58,0.4)', strokeDasharray: '3 3' }}
@@ -237,8 +237,8 @@ export default function VenueOwnerSalesOverviewPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid stroke="rgba(245,245,240,0.06)" horizontal={false} />
-                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'rgba(245,245,240,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'rgba(245,245,240,0.65)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
+                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
+                      <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
                       <Tooltip
                         cursor={{ fill: 'rgba(245,245,240,0.03)' }}
                         contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12 }}
@@ -257,7 +257,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   <button
                     onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{ background: 'transparent', border: '1px solid rgba(245,245,240,0.08)', borderRadius: '8px', padding: '9px 14px', fontSize: '12.5px', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
+                    style={{ background: 'transparent', border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: '12.5px', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
                   >
                     View all {venues.length} venues
                   </button>
@@ -279,7 +279,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
                           fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
-                          border: '1px solid rgba(245,245,240,0.08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
+                          border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
                         <span style={{ fontWeight: 600 }}>{v.name}</span>

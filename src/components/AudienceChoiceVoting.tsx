@@ -97,7 +97,7 @@ function Ballot({
   const label = category === 'AUDIENCE' ? 'Your vote' : category === 'PANELIST' ? 'Your panelist vote' : 'Your celebrity guest vote'
 
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(245,245,240,0.08)', marginBottom: '12px' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid var(--afa-tint-08)', marginBottom: '12px' }}>
       <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
         {label}{alreadyVoted && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
       </div>
@@ -109,7 +109,7 @@ function Ballot({
           <select
             value={picks[rank]}
             onChange={(e) => setPicks((prev) => ({ ...prev, [rank]: e.target.value }))}
-            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.15)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           >
             <option value="">—</option>
             {lineup.map((p) => (

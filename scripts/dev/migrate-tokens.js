@@ -71,7 +71,51 @@ const RADIUS_PROPS = new Set([
 // attributes, not `prop: value` object entries, a structurally different
 // shape MATCH_RE_JS/MATCH_RE_CSS was never built to match) - extend this
 // set only once a real migration batch needs a prop it doesn't cover.
-const COLOR_PROPS = new Set(['color', 'backgroundcolor', 'background', 'bordercolor', 'outlinecolor'])
+const COLOR_PROPS = new Set(['color', 'backgroundcolor', 'background', 'bordercolor', 'outlinecolor', 'bg', 'fill'])
+// GEN-2609-100 - `bg`/`fill` added to the set above: found live via the
+// GEN-2609-093/099 audit's own "why did only 49 of ~371 estimated rgba
+// sites convert" investigation - a repo-wide grep of every real
+// occurrence of a COLOR_MAP value, classified by its exact surrounding
+// property name (not assumed). Both are bare, non-shorthand colour
+// values under a non-standard-CSS property name this script's
+// COLOR_PROPS set never covered: `bg` is this codebase's own convention
+// for a status/tone-role map key (`STATUS_TONE = { muted: { bg: 'rgba(...)',
+// color: '...' } }`, not a DOM style prop at all - the value is still
+// the WHOLE string though, so exact-string matching applies unchanged),
+// `fill` is Recharts' tick-style prop (`tick={{ fill: 'rgba(...)', ... }}`).
+// Both measured before adding: 7 and 4 real sites respectively.
+//
+// GEN-2609-100 - the SAME investigation found the actual dominant gap
+// (~270 of ~320 missed sites): `border`/`borderTop`/`borderBottom`/etc
+// and `outline`/`boxShadow` are CSS SHORTHAND properties - their value
+// is never just a colour, it's `"<width> <style> <colour>"` (e.g.
+// `border: '1px solid rgba(245,245,240,0.08)'`) or, for `boxShadow`,
+// `"<offsets> <blur> <colour>"`. `migrateExactStringValue()`'s whole-
+// string-only comparison can never match these (the whole string isn't
+// a COLOR_MAP key, just a piece of it is) - structurally the same
+// "shorthand" problem `migrateValue()` already solves for
+// `border-radius`/`padding`/etc, but those are all whitespace-split
+// NUMERIC parts; a colour value like `rgba(245,245,240,0.08)` contains
+// its own internal commas and can't be found by a naive
+// whitespace-split lookup. See COMPOUND_COLOR_PROPS/
+// migrateCompoundStringValue() below for the dedicated fix, and
+// docs/design.md's own GEN-2609-100 entry for the full occurrence
+// breakdown (dominant `border`-family: ~270; `boxShadow`: 2) and for
+// what this deliberately does NOT cover (Tailwind arbitrary-value
+// brackets like `border-[rgba(...)]` - a className string, not a
+// `prop: value` pair, structurally unreachable by MATCH_RE_JS/CSS at
+// all; a JSX `fill="..."`/`stroke="..."` SVG attribute - `attr="value"`,
+// not `prop: value`, same structural mismatch; and an UNQUOTED colour
+// value inside a raw `<style>{`...`}</style>` block, e.g.
+// `color: rgba(245,245,240,0.4);` with no quotes - a real, separate,
+// small (2 known sites) gap already flagged in
+// migrateExactStringValue()'s own comment, left there deliberately
+// rather than folded into this compound-value fix, which is scoped to
+// quoted values only same as every other category here).
+const COMPOUND_COLOR_PROPS = new Set([
+  'border', 'bordertop', 'borderbottom', 'borderleft', 'borderright',
+  'borderinlinestart', 'borderinlineend', 'outline', 'boxshadow',
+])
 // GEN-2609-090 - font-family category exists (selectable via
 // --categories) for parity with the dispatch's own default-category
 // list, but FONT_FAMILY_MAP is deliberately empty: none of this ticket's
@@ -182,7 +226,19 @@ const COLOR_MAP = {
 // Quoted values only; see that function's own comment for the unquoted-
 // raw-CSS-hex gap this doesn't cover).
 const CATEGORY_DEFS = {
-  colour: { props: COLOR_PROPS, map: COLOR_MAP, kind: 'exact-string' },
+  // GEN-2609-100 - `props` widened to also include COMPOUND_COLOR_PROPS
+  // (border/outline/boxShadow) so mapFor() recognizes them as belonging
+  // to the 'colour' category at all; `compoundProps` (checked first in
+  // processLine(), before `kind`) is what actually routes those specific
+  // property names to migrateCompoundStringValue() instead of the
+  // category's own default 'exact-string' kind - see COMPOUND_COLOR_PROPS'
+  // own comment above for why they need different handling.
+  colour: {
+    props: new Set([...COLOR_PROPS, ...COMPOUND_COLOR_PROPS]),
+    map: COLOR_MAP,
+    kind: 'exact-string',
+    compoundProps: COMPOUND_COLOR_PROPS,
+  },
   'font-size': { props: FONT_SIZE_PROPS, map: FONT_SIZE_MAP, kind: 'dimension', units: ['px'] },
   'font-family': { props: FONT_FAMILY_PROPS, map: FONT_FAMILY_MAP, kind: 'exact-string' },
   radius: { props: RADIUS_PROPS, map: RADIUS_MAP, kind: 'dimension', units: ['px'] },
@@ -302,6 +358,78 @@ function migrateExactStringValue(raw, map) {
   return `var(${map[key]})`
 }
 
+// GEN-2609-100 - shorthand counterpart to migrateExactStringValue()
+// above, for COMPOUND_COLOR_PROPS (border/outline/boxShadow): finds
+// each COLOR_MAP key as an exact-text occurrence ANYWHERE inside a
+// larger compound string (`"1px solid rgba(245,245,240,0.08)"`) and
+// splices in `var(--token)` in its place, leaving the rest of the
+// shorthand (width, style, other shadow layers) untouched - same
+// "byte/value-identical or leave it" convention as every other matcher
+// in this file, just located by substring search instead of whole-
+// string equality. Supports multiple, non-overlapping matches in one
+// value (a multi-layer `boxShadow` can have 2+ colours); returns null
+// (a full no-op, same convention as migrateValue()/migrateExactStringValue())
+// if nothing in the map is found.
+//
+// Case-insensitive search (mirrors migrateExactStringValue()'s own
+// case-insensitive whole-string lookup) - matters only for a hex key
+// like '#FFF' (a colour author could write '#fff' inline); an rgba key
+// has no letters to vary case on besides the literal word "rgba"
+// itself, which this codebase has never written any other way, but the
+// case-insensitive search costs nothing extra to also cover it.
+//
+// Boundary guard: after finding a hex key's text (e.g. '#FFF') inside
+// the raw string, the very next character must NOT be another hex
+// digit - otherwise '#FFF' would wrongly self-match as a prefix of the
+// visually-DIFFERENT, longer literal '#FFFFFF' (exactly the same
+// "distinct literal, not a colour-space equivalence" guarantee
+// COLOR_MAP's own header comment already documents for the whole-
+// string case). An rgba key is inherently self-terminating (it always
+// ends in the literal character ')'), so no equivalent chance exists
+// there - the parenthesis makes '...0.1)' structurally unable to match
+// inside '...0.15)' (the character immediately after '0.1' would have
+// to be ')' for a match, but '...0.15)' has '5' there instead) - no
+// extra guard is needed or added for that shape.
+function migrateCompoundStringValue(raw, map) {
+  const keys = Object.keys(map).sort((a, b) => b.length - a.length)
+  const found = []
+  for (const key of keys) {
+    const lowerRaw = raw.toLowerCase()
+    const lowerKey = key.toLowerCase()
+    const isHex = key.startsWith('#')
+    let searchFrom = 0
+    while (true) {
+      const idx = lowerRaw.indexOf(lowerKey, searchFrom)
+      if (idx === -1) break
+      const end = idx + key.length
+      if (isHex && /[0-9a-fA-F]/.test(raw[end] || '')) {
+        searchFrom = idx + 1 // prefix of a longer hex code - not a real match, keep scanning past it
+        continue
+      }
+      // Skip if this span overlaps a match already recorded for a
+      // different (earlier-checked, longer) key - longer keys are
+      // tried first via the length-descending sort above specifically
+      // so a more specific match always wins a genuine overlap.
+      if (found.some((f) => idx < f.end && end > f.start)) {
+        searchFrom = idx + 1
+        continue
+      }
+      found.push({ start: idx, end, token: map[key] })
+      searchFrom = end
+    }
+  }
+  if (found.length === 0) return null
+  found.sort((a, b) => a.start - b.start)
+  let result = ''
+  let cursor = 0
+  for (const f of found) {
+    result += raw.slice(cursor, f.start) + `var(${f.token})`
+    cursor = f.end
+  }
+  result += raw.slice(cursor)
+  return result
+}
+
 function processLine(line, inRawBlock, activeDefs) {
   if (isCommentLine(line) || tokenOkReason(line)) return line
 
@@ -318,6 +446,21 @@ function processLine(line, inRawBlock, activeDefs) {
     if (!target) continue
 
     const prefixLen = m[1].length + m[2].length
+    // GEN-2609-100 - checked BEFORE `target.kind === 'exact-string'`
+    // deliberately: `compoundProps` is a per-PROPERTY override within
+    // the 'colour' category (whose category-level `kind` stays
+    // 'exact-string' for its other props like `color`/`background`) -
+    // a property in this set always needs the shorthand-aware matcher
+    // regardless of what its category's default kind says.
+    if (target.compoundProps && target.compoundProps.has(norm)) {
+      if (m[5] === undefined) continue // bare numeric branch never applies - see migrateCompoundStringValue()'s own header for the unquoted-raw-CSS gap this leaves
+      const migrated = migrateCompoundStringValue(m[5], target.map)
+      if (migrated === null) continue
+      const start = m.index + prefixLen + 1 // +1 to skip the opening quote
+      const end = start + m[5].length
+      edits.push({ start, end, replacement: migrated })
+      continue
+    }
     if (target.kind === 'exact-string') {
       if (m[5] === undefined) continue // bare numeric branch never applies to a colour/font-family value
       const migrated = migrateExactStringValue(m[5], target.map)
@@ -413,4 +556,8 @@ module.exports = {
   DEFAULT_CATEGORIES,
   ALL_CATEGORIES,
   parseCategories,
+  COMPOUND_COLOR_PROPS,
+  migrateCompoundStringValue,
+  migrateExactStringValue,
+  processLine,
 }

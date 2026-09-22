@@ -27,7 +27,7 @@ export const INPUT_STYLES: Record<InputVariant, React.CSSProperties> = {
     width: '100%',
     padding: '12px 14px',
     borderRadius: 8,
-    border: '1.5px solid rgba(245,245,240,0.15)',
+    border: '1.5px solid var(--afa-border-resting)',
     fontSize: 14,
     fontFamily: FONT_FAMILY,
     color: 'var(--afa-text-primary)',
