@@ -46,13 +46,13 @@ function VerifyEmailContent() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
+        <Link href="/" className="text-[28px] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>
       </div>
 
-      <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[rgba(245,245,240,0.08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)] text-center">
+      <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)] text-center">
         {status === "checking" && (
           <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
         )}

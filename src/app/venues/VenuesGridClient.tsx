@@ -92,7 +92,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
            Border set here (not inline) so the :hover rule can actually
            win - an inline style's border would always beat a stylesheet
            :hover rule regardless of specificity tricks. */
-        .afa-venue-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
+        .afa-venue-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
         .afa-venue-card:hover { border-color: rgba(201,151,58,0.6); }
         .afa-venue-card-title { color: var(--afa-text-primary); transition: color 0.3s ease; }
         .afa-venue-card:hover .afa-venue-card-title { color: var(--afa-amber); }
@@ -101,7 +101,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         /* City filter (Gap 7, full-fidelity audit) - export's custom
            listbox trigger/option hover states, same inline-style-can't-
            :hover reasoning as the card border above. */
-        .afa-city-filter-trigger { border-color: rgba(245,245,240,0.15); }
+        .afa-city-filter-trigger { border-color: var(--afa-border-resting); }
         .afa-city-filter-trigger:hover { border-color: rgba(201,151,58,0.4); }
         .afa-city-filter-option { background: transparent; }
         .afa-city-filter-option:hover { background: rgba(245,245,240,0.06); }

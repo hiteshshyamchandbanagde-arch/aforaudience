@@ -280,7 +280,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         .afa-event-meta-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }
         @media (min-width: 640px) { .afa-event-meta-grid { grid-template-columns: 1fr 1fr; } }
         @media (min-width: 1024px) { .afa-event-meta-grid { grid-template-columns: repeat(4, 1fr); } }
-        .afa-event-lineup-row { display: flex; align-items: center; gap: var(--afa-space-4); padding: var(--afa-space-4) 0; border-top: 1px solid rgba(245,245,240,0.1); }
+        .afa-event-lineup-row { display: flex; align-items: center; gap: var(--afa-space-4); padding: var(--afa-space-4) 0; border-top: 1px solid var(--afa-tint-10); }
         .afa-event-prize-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-4); }
         @media (min-width: 640px) { .afa-event-prize-grid { grid-template-columns: repeat(3, 1fr); } }
         .afa-event-facility-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }

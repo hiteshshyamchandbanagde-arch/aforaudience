@@ -60,18 +60,18 @@ export default function AuthBrandPanel() {
       />
 
       <div className="absolute inset-0 flex flex-col justify-between p-10 pointer-events-none">
-        <div className="text-[28px] font-bold text-[var(--afa-text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-          <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
+        <div className="text-[28px] font-bold text-[color:var(--afa-text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
+          <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
         </div>
 
         <div>
           <p
-            className="font-light text-[var(--afa-text-primary)] leading-[1.15]"
+            className="font-light text-[color:var(--afa-text-primary)] leading-[1.15]"
             style={{ fontSize: "2.5rem", fontFamily: "var(--font-display)" }}
           >
             Every show.<br />Every story.
           </p>
-          <p className="text-sm text-[var(--afa-text-primary)] opacity-40 mt-3 tracking-wide">
+          <p className="text-sm text-[color:var(--afa-text-primary)] opacity-40 mt-3 tracking-wide">
             Comedy · Poetry · Music · Dance
           </p>
         </div>

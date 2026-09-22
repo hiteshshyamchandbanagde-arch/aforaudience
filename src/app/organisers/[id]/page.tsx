@@ -337,7 +337,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         @media (min-width: 768px) { .afa-organiser-tours-grid { grid-template-columns: 1fr 1fr; } }
         .afa-organiser-breadcrumb-link { transition: color 0.2s ease; }
         .afa-organiser-breadcrumb-link:hover { color: var(--afa-amber) !important; }
-        .afa-organiser-event-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
+        .afa-organiser-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
         .afa-organiser-event-card:hover { border-color: rgba(201,151,58,0.6); }
         .afa-organiser-event-card:hover .afa-organiser-event-title { color: var(--afa-amber); }
         .afa-organiser-event-card:hover .afa-organiser-event-details { text-decoration: underline; text-underline-offset: 3px; }

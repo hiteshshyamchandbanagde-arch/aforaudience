@@ -100,7 +100,7 @@ export default function VenueOwnersGridEmbed() {
            inline style's border always beats a stylesheet :hover rule
            regardless of specificity (same bug BUG-2608-072 hit on the
            venue card). */
-        .afa-owner-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.2s ease; }
+        .afa-owner-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease; }
         .afa-owner-card:hover { border-color: rgba(201,151,58,0.4); }
       `}</style>
       <div className="afa-owners-grid">

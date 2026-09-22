@@ -112,7 +112,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           wins over a stylesheet :hover rule regardless of specificity.
           Values copied verbatim from VenuesGridClient's .afa-venue-card. */}
       <style>{`
-        .afa-organisers-embed-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.3s ease; }
+        .afa-organisers-embed-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
         .afa-organisers-embed-card:hover { border-color: rgba(201,151,58,0.6); }
       `}</style>
 
