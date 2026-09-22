@@ -56,10 +56,26 @@ function loadGlobalsTokens() {
 // digits - has nothing in common with a dimension's `number + unit`).
 // Scoped to any `--afa-*` custom property (not just the 3 name prefixes
 // above), since colour tokens don't share a single naming convention.
+//
+// GEN-2609-099 - extended to also capture `rgba(...)`/`rgb(...)`
+// declarations, not just hex. Found the gap live: COLOR_MAP only ever
+// held one hex entry (--afa-white) until this ticket added 5 rgba
+// ones, so this regex's hex-only shape was never exercised against a
+// real rgba COLOR_MAP entry before - every one false-flagged as "not
+// found in globals.css at all" despite being defined there, simply
+// because the loader's regex couldn't match the value shape at all.
+// Comparison is whitespace-normalized (strip all spaces before
+// comparing) on BOTH sides in checkColorMap() below, since globals.css's
+// own convention is spaced (`rgba(245, 245, 240, 0.08)`) while
+// COLOR_MAP's keys are unspaced (matching real application code,
+// confirmed the unspaced form is the only one that appears there - see
+// migrate-tokens.js's own COLOR_MAP comment) - comparing the raw
+// strings directly would produce the same false mismatch for a
+// different reason (whitespace, not shape).
 function loadGlobalsColorTokens() {
   const css = fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'app', 'globals.css'), 'utf8')
   const tokens = {}
-  const re = /(--afa-[a-zA-Z0-9-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g
+  const re = /(--afa-[a-zA-Z0-9-]+):\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))\s*;/g
   let m
   while ((m = re.exec(css))) {
     tokens[m[1]] = m[2]
@@ -89,17 +105,21 @@ function checkMap(name, map, liveTokens) {
 // the dimension maps, aren't parsed to a number anywhere in this
 // pipeline - see migrate-tokens.js's own migrateExactStringValue()
 // comment for why that's deliberate).
+function normalizeColorValue(v) {
+  return v.replace(/\s+/g, '').toLowerCase()
+}
+
 function checkColorMap(name, map, liveColors) {
   let ok = true
-  for (const [hex, token] of Object.entries(map)) {
+  for (const [value, token] of Object.entries(map)) {
     const live = liveColors[token]
     if (live === undefined) {
       console.error(`  MISMATCH [${name}]: ${token} not found in globals.css at all`)
       ok = false
       continue
     }
-    if (live.toLowerCase() !== hex.toLowerCase()) {
-      console.error(`  MISMATCH [${name}]: map says ${hex} -> ${token}, globals.css defines ${token} as ${live}`)
+    if (normalizeColorValue(live) !== normalizeColorValue(value)) {
+      console.error(`  MISMATCH [${name}]: map says ${value} -> ${token}, globals.css defines ${token} as ${live}`)
       ok = false
     }
   }
