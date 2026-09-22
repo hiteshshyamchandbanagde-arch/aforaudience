@@ -1,4 +1,60 @@
+# Session Handoff — 22 Sept 2026 still later (chat — GEN-2609-098 batch 9 PR opened, merged, and closed out)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** This entry covers exactly `#696` - nothing else changed since the prior 22 Sept entry. Session started at `qa@8312c30`; ended at `qa@a3a43f2`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`, CI green, Vercel `READY`, 0 runtime errors/30min. All 3 dry-run predictions matched exactly - `revenue` 26->4 (21 lines), `artists` 22->1 (16 lines), `my-feedback` 23->2 (21 lines). `my-feedback`'s 2 leftover hex literals correctly untouched (no `COLOR_MAP` entry). Ratchet: font-size 830->785 (-45), radius 350->331 (-19). Baseline file deliberately left untouched by CC, matching the established per-batch convention (086-089 also skipped it) - chat agreed, deferred to a future consolidation ticket. `chore/gen-2609-098-batch-9` deleted. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`. Hygiene bundle - themeColor fix, `EXEMPT_FILES`, `inherit` allowlist, `--afa-radius-sharp` wired, coverage regen 81/3/0. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping catch-up + `GEN-2609-094`/`098` dispatched | Done | Audit merged `#694`. Feedback/`CodeCounter` backfilled. `HANDOFF_TEMPLATE.md` cadence rule added. rgba recommendation drafted and logged to `GEN-2609-095` (`UNDER_REVIEW`, awaiting Hitesh sign-off): 3 free `COLOR_MAP` matches (99 literals, zero new tokens) plus 2 new tokens `--afa-text-primary-08`/`-10` (272 literals, both clear the 50-occurrence bar) - captures ~40% of rgba debt. | (merged) |
+| 21-22 Sept 2026 (CC->chat) | `GEN-2609-090`/`091`/`092` | Merged `#691`/`#692`/`#693` | 090 category-first ordering; 091 removed 23 dead colour tokens; 092 wired `--afa-white`. | (merged) |
+| 20 Sept 2026 (CC->chat) | `GEN-2609-089` batch 8 + Task B + `BUG-2609-055` | Merged `#689`/`#690`/`#685`/`#684` | 289 -> 64 literals; checker shorthand fix; fonts moved to `<html>`. | (merged) |
+
+## 2. Activity in progress
+
+- Nothing open. Ratchet now: hex 54, rgba 918, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211.
+- Open decisions still with Hitesh: `GEN-2609-095` (`UNDER_REVIEW` - rgba recommendation drafted, awaiting sign-off), `GEN-2609-097` (`toast-rollout/*` branches + ~50 stale branches, still `NEW`).
+- No batch 10 candidates scoped yet - was deferred pending `GEN-2609-095`'s resolution (colour work is next priority once decided).
+
+## 3. Open PRs awaiting action
+
+None against `qa`. `#450` (-> `main`, frozen) untouched. Squash-merged branches not yet deleted: `chore/gen-2609-090/091/092` (low priority).
+
+## 4. Decisions / findings this session
+
+- Verified CC's diff before opening the PR: all 3 files' before/after values matched byte-for-byte against the dispatch, `my-feedback`'s 2 leftover literals confirmed genuinely unmatched (not a miss).
+- Baseline-file question (CC flagged it): agreed with CC's read of the convention - per-batch baseline updates were never the pattern (086-089 didn't either), only consolidation tickets. Left as-is; ratchet passes clean either way (live <= baseline).
+- No new decisions surfaced. `GEN-2609-095`/`097` remain the two open items.
+
+## 5. `CodeCounter` state
+
+- `GEN/2609` = 98 (verified via `SELECT` before write, 22 Sept). `BUG/2609` = 56, unchanged.
+- `GEN-2609-098` set to `RESOLVED`/`DEPLOYED_QA`.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session.
+
+## 7-11. Unchanged
+
+## 12. Immediate next action
+
+Hitesh answers `GEN-2609-095` (rgba sign-off) and `GEN-2609-097` (branch triage). `GEN-2609-095` approval unblocks the next dispatch (3 free `COLOR_MAP` matches + 2 new tokens, ~40% of rgba debt) - ready to draft the same session it's approved. No blocking technical work pending otherwise.
+
+## 13. Chat vs. CC ownership note
+
+Unchanged. Chat this session: reviewed CC's diff, opened `#696`, polled CI, merged (pinned-SHA squash), deleted the branch, verified Vercel `READY` + 0 runtime errors, updated Feedback/`resolvedAt` for `098`, wrote this handoff. No code written by chat.
+
+---
+
 # Session Handoff — 22 Sept 2026 later still (CC — GEN-2609-098 bulk token migration batch 9)
+
+> **SUPERSEDED 22 Sept 2026 (later entry):** `GEN-2609-098` (`#696`) is merged. See the entry above for the close-out.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only per the cadence rule - one handoff, this whole run. Session started at `qa@8312c30` (dispatch's stated floor, matched exactly - no drift since `GEN-2609-094` merged). Ratchet re-check at session start matched the dispatch's stated baseline exactly (hex 54, rgba 918, font-family 0, font-size 830, spacing 2029, radius 350, raw-button 211). Ended at branch `chore/gen-2609-098-batch-9` @ `42bed5a`, 3 commits (1 per file), pushed, no PR opened (no `gh` CLI - chat opens/merges per §13).
 
