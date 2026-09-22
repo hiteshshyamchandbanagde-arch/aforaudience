@@ -229,7 +229,7 @@ function FeedbackDetailOverlay({
         </p>
 
         {item.latestNote && (
-          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(245,245,240,0.08)' }}>
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
@@ -251,7 +251,7 @@ function FeedbackDetailOverlay({
               flex: 1,
               padding: '10px 16px',
               borderRadius: 'var(--afa-radius-10px)',
-              border: '1px solid rgba(245,245,240,0.15)',
+              border: '1px solid var(--afa-border-resting)',
               background: 'var(--afa-surface-raised)',
               color: hasPrev ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasPrev ? 'pointer' : 'default',
@@ -267,7 +267,7 @@ function FeedbackDetailOverlay({
               flex: 1,
               padding: '10px 16px',
               borderRadius: 'var(--afa-radius-10px)',
-              border: '1px solid rgba(245,245,240,0.15)',
+              border: '1px solid var(--afa-border-resting)',
               background: 'var(--afa-surface-raised)',
               color: hasNext ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasNext ? 'pointer' : 'default',
@@ -359,7 +359,7 @@ export default function MyFeedbackPage() {
               borderRadius: 'var(--afa-radius-12px)',
               padding: '32px 24px',
               textAlign: 'center',
-              border: '1px solid rgba(245,245,240,0.08)',
+              border: '1px solid var(--afa-tint-08)',
             }}
           >
             <p style={{ color: 'rgba(245,245,240,0.6)', margin: 0 }}>
@@ -380,7 +380,7 @@ export default function MyFeedbackPage() {
                     background: 'var(--afa-surface-raised)',
                     borderRadius: 'var(--afa-radius-12px)',
                     padding: '18px 20px',
-                    border: '1px solid rgba(245,245,240,0.08)',
+                    border: '1px solid var(--afa-tint-08)',
                     textAlign: 'left',
                     cursor: 'pointer',
                     width: '100%',

@@ -9,7 +9,7 @@ import { useLocale } from "@/lib/i18n/translate"
 
 function JourneyStep({ n, title, detail }: { n: number; title: string; detail: string }) {
   return (
-    <div style={{ display: "flex", gap: "24px", padding: "32px 0", borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
+    <div style={{ display: "flex", gap: "24px", padding: "32px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
       <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "16px", color: "var(--afa-amber)" }}>
         {n}
       </div>
@@ -77,7 +77,7 @@ export default function ForArtistsPage() {
           Numbered-circle treatment follows RoomRow's step-circle
           convention, adapted to a single vertical column since this page
           isn't alternating with other rooms. */}
-      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid rgba(245,245,240,0.08)" }}>
+      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "88px 36px 40px" }}>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
             {tr.forArtistsPage.journeyEyebrow}
@@ -105,7 +105,7 @@ export default function ForArtistsPage() {
       </section>
 
       {/* FINAL CTA — registration, role pre-selected. */}
-      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid rgba(245,245,240,0.08)", padding: "88px 36px", textAlign: "center" }}>
+      <section style={{ background: "var(--afa-surface-inverse)", borderTop: "1px solid var(--afa-tint-08)", padding: "88px 36px", textAlign: "center" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "16px" }}>
           {tr.forArtistsPage.finalCtaEyebrow}
         </div>

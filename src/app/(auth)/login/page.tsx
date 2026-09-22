@@ -171,7 +171,7 @@ function LoginForm() {
           </div>
         )}
         {wasIdle && !wasSuspended && (
-          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid rgba(245,245,240,0.1)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>
             {tr.loginPage.signedOutIdleBanner}
           </div>
         )}

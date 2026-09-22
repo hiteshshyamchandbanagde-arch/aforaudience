@@ -123,7 +123,7 @@ const fieldStyle: React.CSSProperties = {
   width: '100%',
   padding: '11px var(--afa-space-14px)',
   borderRadius: 'var(--afa-radius-md)',
-  border: '1px solid rgba(245,245,240,0.1)',
+  border: '1px solid var(--afa-tint-10)',
   fontSize: 'var(--afa-text-body)',
   boxSizing: 'border-box',
   background: 'var(--afa-surface-page)',
@@ -634,7 +634,7 @@ function ProfileContent() {
             <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
               {tr.profilePage.quickLinksLabel}
             </p>
-            <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+            <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
               {[
                 { icon: <DashboardIcon style={{ width: 18, height: 18 }} />, title: tr.nav.dashboard, badge: pendingCount, href: dashboardHref },
                 { icon: <MessageIcon style={{ width: 18, height: 18 }} />, title: tr.nav.messages, badge: unreadCount, href: '/dashboard/messages' },
@@ -671,10 +671,10 @@ function ProfileContent() {
               same cards/handlers the desktop column already has. */}
           {isAudience && (
             <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-28px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(245,245,240,0.1)' }} />
+                  <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--afa-tint-10)' }} />
                 ) : (
                   <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid rgba(201,151,58,0.3)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700 }}>
                     {(initialDisplayName || user?.name || '?').trim().slice(0, 1).toUpperCase()}
@@ -725,7 +725,7 @@ function ProfileContent() {
                   <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                     {group.label}
                   </p>
-                  <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.08)' }}>
+                  <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
                     {group.rows.map((row, i) => (
                       <button
                         key={row.title}
@@ -876,7 +876,7 @@ function ProfileContent() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-4)', marginBottom: 'var(--afa-space-14px)' }}>
               {avatar && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(245,245,240,0.1)' }} />
+                <img src={avatar} alt={tr.profilePage.profilePreviewAlt} style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--afa-tint-10)' }} />
               )}
               <label style={{ ...variantStyle('primary', false, 36), cursor: uploadingAvatar ? 'default' : 'pointer', opacity: uploadingAvatar ? 0.6 : 1 }}>
                 {uploadingAvatar ? tr.profilePage.uploadingLabel : avatar ? tr.profilePage.changePhotoLabel : tr.profilePage.uploadPhotoLabel}
