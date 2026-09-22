@@ -147,8 +147,28 @@ const RADIUS_MAP = {
 // but NOT the visually-identical `#FFFFFF` (a different literal string),
 // and never the 6-digit expansion of any other unused colour token
 // either - no colour-space normalization, deliberately.
+//
+// GEN-2609-099 - 5 rgba() entries added, same byte-identical convention.
+// Checked before assuming it: migrateExactStringValue()'s case-
+// insensitive lookup handles hex's only real-world variance (`#fff` vs
+// `#FFF`), but rgba has a DIFFERENT variance - internal whitespace
+// (`rgba(245,245,240,0.65)` vs `rgba(245, 245, 240, 0.65)`) - that
+// lookup does nothing for. Measured before adding these keys: the
+// spaced form appears ONLY in globals.css/design-tokens.ts (the
+// definition sites, both EXEMPT_FILES) - zero occurrences anywhere in
+// real application code. So a single unspaced-form key per value is
+// sufficient today; no normalization added to migrateExactStringValue()
+// itself, since that would be a broader behavior change than this
+// ticket's 5 known values need. If a spaced form ever appears in
+// application code in the future, add it as its own key here (same
+// "byte/value-identical only" convention), not by changing the matcher.
 const COLOR_MAP = {
   '#FFF': '--afa-white',
+  'rgba(245,245,240,0.65)': '--afa-text-secondary',
+  'rgba(245,245,240,0.4)': '--afa-text-muted',
+  'rgba(245,245,240,0.15)': '--afa-border-resting',
+  'rgba(245,245,240,0.08)': '--afa-tint-08',
+  'rgba(245,245,240,0.1)': '--afa-tint-10',
 }
 
 // GEN-2609-090 - one definition per --categories name, so `mapFor()` can
