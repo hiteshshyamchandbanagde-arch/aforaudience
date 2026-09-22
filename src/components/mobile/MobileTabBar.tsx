@@ -420,7 +420,7 @@ export default function MobileTabBar() {
         style={{
           background: 'rgba(10,10,10,0.92)',
           backdropFilter: 'blur(12px)',
-          borderTop: '1px solid rgba(245,245,240,0.08)',
+          borderTop: '1px solid var(--afa-tint-08)',
           zIndex: 40,
           paddingLeft: 8,
           paddingRight: 8,
@@ -506,7 +506,7 @@ export default function MobileTabBar() {
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
           >
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(245,245,240,0.08)' }}>
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--afa-tint-08)' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--afa-text-primary)' }}>More</span>
               <button
                 onClick={() => setMoreOpen(false)}

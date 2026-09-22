@@ -273,7 +273,7 @@ export default function FeedbackDetailPanel({
                   maxWidth: expandedImage ? '100%' : '220px',
                   maxHeight: expandedImage ? 'none' : '140px',
                   borderRadius: 'var(--afa-radius-md)',
-                  border: '1px solid rgba(245,245,240,0.1)',
+                  border: '1px solid var(--afa-tint-10)',
                   cursor: 'pointer',
                   display: 'block',
                 }}
@@ -318,7 +318,7 @@ export default function FeedbackDetailPanel({
               ))}
             </div>
             {pendingNoteStatus && (
-              <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.1)' }}>
+              <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)' }}>
                 <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: 'var(--afa-space-6px)', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>

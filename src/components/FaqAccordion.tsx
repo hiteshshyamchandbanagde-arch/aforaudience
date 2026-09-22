@@ -11,7 +11,7 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
       {items.map((item) => (
         <details
           key={item.q}
-          style={{ borderBottom: "1px solid rgba(245,245,240,0.1)", padding: "20px 0" }}
+          style={{ borderBottom: "1px solid var(--afa-tint-10)", padding: "20px 0" }}
         >
           <summary
             style={{

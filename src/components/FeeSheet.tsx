@@ -43,7 +43,7 @@ export function FeeSheet({
       <div
         style={{
           position: 'relative',
-          borderTop: '1px solid rgba(245,245,240,0.1)',
+          borderTop: '1px solid var(--afa-tint-10)',
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
           background: 'var(--afa-surface-raised)',
@@ -68,7 +68,7 @@ export function FeeSheet({
           On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
         </p>
 
-        <div style={{ margin: '20px 20px 0', overflow: 'hidden', borderRadius: 16, border: '1px solid rgba(245,245,240,0.08)' }}>
+        <div style={{ margin: '20px 20px 0', overflow: 'hidden', borderRadius: 16, border: '1px solid var(--afa-tint-08)' }}>
           <div
             style={{
               display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16,

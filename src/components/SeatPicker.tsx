@@ -343,7 +343,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           maxWidth: `${MAX_CONTAINER_WIDTH}px`,
           aspectRatio: `${aspect}`,
           background: 'var(--afa-surface-raised)',
-          border: '1px solid rgba(245,245,240,0.15)',
+          border: '1px solid var(--afa-border-resting)',
           borderRadius: '10px',
           overflow: 'hidden',
           containerType: 'inline-size',

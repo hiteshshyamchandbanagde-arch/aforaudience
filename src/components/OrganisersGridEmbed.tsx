@@ -132,7 +132,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
           placeholder={tr.organisersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--afa-border-resting)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
       )}
@@ -165,7 +165,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           >
             {isNavigatingThis && (
               <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>

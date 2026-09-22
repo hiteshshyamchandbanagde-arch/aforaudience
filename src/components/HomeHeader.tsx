@@ -184,7 +184,7 @@ export default function HomeHeader() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid rgba(245,245,240,0.15)", background: "transparent", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid var(--afa-border-resting)", background: "transparent", cursor: "pointer" }}
             >
               {user ? (
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
@@ -202,7 +202,7 @@ export default function HomeHeader() {
             </button>
 
             {menuOpen && (
-              <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(245,245,240,0.1)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "8px 0", zIndex: 20 }}>
+              <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "12px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "8px 0", zIndex: 20 }}>
                 {user ? (
                   <>
                     <div style={{ padding: "6px 16px 10px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>

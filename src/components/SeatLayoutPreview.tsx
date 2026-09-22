@@ -86,7 +86,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           </div>
         )}
       </div>
-      <div style={{ border: '1px solid rgba(245,245,240,0.1)', borderRadius: '10px', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
+      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: '10px', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
         <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
           STAGE
         </div>

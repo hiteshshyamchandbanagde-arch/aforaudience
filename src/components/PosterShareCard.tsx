@@ -38,7 +38,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
   }
 
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid rgba(245,245,240,0.08)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
         Share Poster
       </h3>
@@ -46,7 +46,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
       <img
         src={src}
         alt={title}
-        style={{ width: '100%', maxWidth: '260px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.1)', display: 'block', marginBottom: '14px' }}
+        style={{ width: '100%', maxWidth: '260px', borderRadius: '8px', border: '1px solid var(--afa-tint-10)', display: 'block', marginBottom: '14px' }}
       />
       <Button
         variant="primary"

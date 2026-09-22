@@ -84,7 +84,7 @@ export default function VenueOwnersGridEmbed() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={tr.venueOwnersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", border: "1px solid rgba(245,245,240,0.15)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", border: "1px solid var(--afa-border-resting)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
 
@@ -132,7 +132,7 @@ export default function VenueOwnersGridEmbed() {
           >
             {isNavigatingThis && (
               <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
               </div>
             )}
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)" }}>

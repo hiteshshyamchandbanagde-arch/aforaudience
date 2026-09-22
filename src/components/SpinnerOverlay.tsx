@@ -27,7 +27,7 @@ export default function SpinnerOverlay({
   if (!isNavigating) return null
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 2, background: scrimBackground, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ width: `${size}px`, height: `${size}px`, borderRadius: "50%", border: "3px solid rgba(245,245,240,0.15)", borderTopColor: accentColor, animation: "afa-spin 0.7s linear infinite" }} />
+      <div style={{ width: `${size}px`, height: `${size}px`, borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: accentColor, animation: "afa-spin 0.7s linear infinite" }} />
     </div>
   )
 }
