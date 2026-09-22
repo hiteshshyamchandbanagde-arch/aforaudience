@@ -113,7 +113,7 @@ function HypeStat({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, value))
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
-      <div style={{ width: "64px", height: "4px", borderRadius: "2px", overflow: "hidden", background: "rgba(245,245,240,0.1)" }}>
+      <div style={{ width: "64px", height: "4px", borderRadius: "2px", overflow: "hidden", background: "var(--afa-tint-10)" }}>
         <div style={{ height: "100%", borderRadius: "2px", background: "var(--afa-amber)", width: `${pct}%` }} />
       </div>
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{value.toFixed(1)}</span>

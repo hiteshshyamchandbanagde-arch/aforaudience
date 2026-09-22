@@ -227,7 +227,7 @@ export default function ArtistsPage() {
             <span style={{ color: "var(--afa-amber)" }}>{tr.artistsPage.heroEmphasis}</span>
             {tr.artistsPage.heroSuffix}
           </h1>
-          <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "rgba(245,245,240,0.65)" }}>
+          <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
             {tr.artistsPage.heroSubtitle}{" "}
             <span style={{ color: "var(--afa-text-primary)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
           </p>
@@ -458,7 +458,7 @@ export default function ArtistsPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
                   </div>

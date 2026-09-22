@@ -537,7 +537,7 @@ export default function ArtistProfilePage({
             </div>
             <div style={{ display: "flex", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
               {artist.styleTag.map((tag) => (
-                <span key={tag} style={{ background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "99px", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
+                <span key={tag} style={{ background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "99px", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
               ))}
             </div>
           </div>
@@ -741,7 +741,7 @@ export default function ArtistProfilePage({
                 <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>No past shows yet.</p>
               ) : (
                 <div style={{ position: "relative", paddingLeft: "var(--afa-space-6)" }}>
-                  <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "rgba(245,245,240,0.1)" }} />
+                  <div style={{ position: "absolute", left: "8px", top: 0, bottom: 0, width: "2px", background: "var(--afa-tint-10)" }} />
                   {pastShows.map((p, i) => (
                     <div key={p.id} style={{ position: "relative", marginBottom: "var(--afa-space-5)" }}>
                       <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-amber)" : "rgba(245,245,240,0.2)" }} />
@@ -788,7 +788,7 @@ export default function ArtistProfilePage({
                     <select
                       value={selectedInviteEventId}
                       onChange={(e) => { setSelectedInviteEventId(e.target.value); setInviteResult(null) }}
-                      style={{ width: "100%", padding: "var(--afa-space-10px) var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "1px solid rgba(245,245,240,0.2)", background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", marginBottom: "var(--afa-space-10px)" }}
+                      style={{ width: "100%", padding: "var(--afa-space-10px) var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "1px solid rgba(245,245,240,0.2)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", marginBottom: "var(--afa-space-10px)" }}
                     >
                       <option value="" style={{ color: "black" }}>Select an event...</option>
                       {invitableEvents.map((e) => (
