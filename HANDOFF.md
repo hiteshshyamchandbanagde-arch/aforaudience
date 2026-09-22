@@ -1,3 +1,45 @@
+# Session Handoff — 22 Sept 2026 (CC — GEN-2609-101/102/BUG-2609-057, closing out the colour token category)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@cc087b9`. Branch: `chore/gen-2609-101-102-bug-057-color-cleanup`, pushed, **`NOT YET OPENED`** as a PR.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (CC) | `GEN-2609-101`/`102`/`BUG-2609-057` - close out colour category | Done, pushed, no PR | Measured before applying (per standing convention): `-101` matched the ticket's 4 sites exactly; `-102` was 10 real sites vs. the ticket's estimated 2 (undercounted the raw-CSS-embedded-in-`border:`-shorthand case); `BUG-2609-057` was 12 real sites across 5 files vs. the ticket's 3 (login-page-only) - and empirically didn't reproduce as an active defect against the real Tailwind v4.3.3 toolchain, fixed defensively anyway. Ratchet: rgb-rgba 590->576 (-14). `statusStyle.ts` correctly excluded (pre-existing `EXEMPT_FILES` reason). Full detail in `docs/design.md`'s new entry. | `chore/gen-2609-101-102-bug-057-color-cleanup` |
+| 22 Sept 2026 (chat, no CC) | Merge `GEN-2609-100` (`#698`), verify live, close out | Done | Squash-merged `f0da007`. **Self-caught build break before merge, not after:** the `TOKEN_COVERAGE` regen step deleted `PAGE_GROUP_OF_FILE`/`appliesTo()` (code below the data table, missed on first read) - caught via the actual failed Vercel build log, root-caused, restored byte-for-byte against `origin/qa`, verified with an `esbuild` bundle of the broken page (installed fresh - network to npmjs.com is allowlisted) before re-pushing. Fixed commit went green, then merged. `qa` deploy confirmed `READY`, 0 runtime errors/30min. 3 follow-ups logged: `GEN-2609-101` (Tailwind colour brackets), `GEN-2609-102` (unquoted raw-CSS colour), `BUG-2609-057` (pre-existing login-page className bug). | (merged) |
+| 22 Sept 2026 (chat, no CC) | Build `GEN-2609-100` - shorthand colour matcher | Done | New `migrateCompoundStringValue()` for `border`/`outline`/`boxShadow` + `bg`/`fill` exact-props. 17 self-tests. 277 lines/89 files, 4 area commits. Ratchet: rgb-rgba 918->590 (-328). `statusStyle.ts` deliberately excluded. Found+flagged a real doc bug in `GEN-2609-099`'s own header comment (claimed 86/83, actual always 82/79). | (merged, same PR) |
+| 22 Sept 2026 (chat) | Verify, open, merge `GEN-2609-099` (`#697`) | Done | Squash-merged `28c5cbf`. First rgba `COLOR_MAP` entries; found the `border:`-shorthand gap `GEN-2609-100` then fixed. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`. | (merged) |
+
+## 2. Activity in progress
+
+- `GEN-2609-101`/`102`/`BUG-2609-057` - pushed, `NOT YET OPENED` as a PR. Compare link: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-101-102-bug-057-color-cleanup?expand=1`
+- Colour token category is now closed out for this pass per this dispatch's own framing - next category is font-size/font-family/radius (separate session, per this dispatch's own scope boundary).
+- `GEN-2609-097` stale-branch triage: 21 branches still remain on weaker evidence only, untouched (unchanged from before this session).
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `chore/gen-2609-101-102-bug-057-color-cleanup` | `NOT YET OPENED` | not checked (no `gh` CLI this environment) | y - full verification suite clean, see `docs/design.md` |
+
+## 4. Decisions currently sitting with Hitesh
+
+No new decisions this session - `BUG-2609-057`'s "is this a real bug" question was resolved by direct empirical measurement (Tailwind CLI compile test), not deferred to Hitesh; the defensive fix was applied regardless since it's zero-risk.
+
+## 5. `CodeCounter` state
+
+Unchanged this session - all 3 tickets (`GEN-2609-101`, `GEN-2609-102`, `BUG-2609-057`) were already reserved/logged by the prior `GEN-2609-100` closeout session (`GEN/2609` = 102, `BUG/2609` = 57 as of that session's end). This session did not create new tickets or touch `CodeCounter`.
+
+## 12. Immediate next action
+
+Review + merge `chore/gen-2609-101-102-bug-057-color-cleanup` (compare URL above). Once merged, colour category is fully closed out for this pass; next dispatch per the standing sequence is font-size/font-family/radius (a separate session/prompt, per this dispatch's own explicit scope boundary) or `GEN-2609-097`'s 21 remaining stale-branch reviews.
+
+---
+
 # Session Handoff — 22 Sept 2026 closeout (chat — GEN-2609-100 (#698) merged, verified live, closed out)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** Session started at `qa@e562807`; ended at `qa@f0da007`.
