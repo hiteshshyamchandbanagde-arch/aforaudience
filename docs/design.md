@@ -8066,3 +8066,13 @@ Chosen approach rationale: request-time DB read injecting `<style>:root{--afa-*:
 - Whether/how non-colour categories (font-size etc.) map onto the same `DesignToken` schema or need schema changes
 
 **Next up in parallel, no dependency on this ticket:** GEN-2609-097 (19 remaining stale branches needing manual diff-against-qa review, down from 21 after this session's cleanup of 59 confirmed-safe branches).
+
+### Correction, 23 Sep — this section's premise was wrong; the work above is already built
+
+A dispatch was drafted from the "Not yet scoped" list above to build the SSR read path, treating it as unbuilt. It is not unbuilt — `GEN-2609-075`/`076` (`docs/design.md`'s own earlier entries, PRs `#654`-`#658`, merged 19 Sep) already shipped exactly this: `layout.tsx` reads `DesignToken` via `getDesignTokensSafe()` (`src/lib/design-tokens.server.ts`), injects `<style id="afa-design-tokens-runtime">` in `<head>`, falls back to `[]` (no override, `globals.css` defaults apply) on any DB error, and caches via `unstable_cache` tagged `"design-tokens"` with on-demand `revalidateTag(..., { expire: 0 })` fired from the admin save route — not per-request, not a blind TTL, a better answer than either option this section posed. The Admin editor UI this section also called unbuilt exists too: `/dashboard/admin/design-system` + `api/admin/design-tokens/{route,reset,versions/[id]/revert}`, built in `GEN-2609-076`.
+
+Re-verified live before writing this correction (not assumed from the stale text): `DesignToken` holds 86 rows across all 6 groups in `aforaudience-qa`, values matching `design-tokens.ts`'s `DEFAULT_TOKEN_VALUES` 1:1 including which 5 keys are `locked`; fetched the current `qa` HEAD's actual Vercel deployment (`c14dfcd`, commit `docs: scope GEN-2609-103...`) and confirmed the served homepage HTML contains `<style id="afa-design-tokens-runtime">:root{...}` populated with those exact DB values. `Feedback` rows `GEN-2609-075`/`076` both already `RESOLVED`/`DEPLOYED_QA`; no `GEN-2609-103` row was ever created, so nothing needed correcting there.
+
+Not re-verified (same gap `GEN-2609-075`'s own entry already flagged and for the same reason): the full "admin edits a value in the UI → saves → public page shows it" click-through round trip, since that needs a real admin login and this session didn't create a throwaway credential to script around that. Every other piece of the path (DB truth, validation, cache tag, fallback, live render) is independently confirmed working.
+
+**No code was written against this ticket.** Font-size/font-family/radius migration is unblocked to proceed on the existing mechanism — no re-touching needed once it starts.
