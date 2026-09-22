@@ -37,16 +37,16 @@ export default function ForgotPasswordPage() {
     <AuthLayout>
       <div className="w-full max-w-[440px]">
         <div className="text-center mb-8">
-          <Link href="/" className="text-[28px] font-bold text-[var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="text-[var(--afa-brand-mark)]">A</span>forAudience
+          <Link href="/" className="text-[28px] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
             <EnvBadge />
           </Link>
-          <p className="text-[14px] text-[var(--afa-text-primary)] opacity-50 mt-2">
+          <p className="text-[14px] text-[color:var(--afa-text-primary)] opacity-50 mt-2">
             {tr.forgotPasswordPage.resetYourPasswordSubtitle}
           </p>
         </div>
 
-        <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[rgba(245,245,240,0.08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
+        <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
           {submitted ? (
             <div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
