@@ -67,7 +67,7 @@ export default function ForArtistsPage() {
           cards/breakdown/tax disclaimer) rather than new stat markup. */}
       <section style={{ maxWidth: "1360px", margin: "0 auto", padding: "88px 36px 56px" }}>
         <Ledger eyebrow={tr.forArtistsPage.moneyEyebrow} headline={tr.forArtistsPage.moneyHeadline} />
-        <p style={{ marginTop: "28px", maxWidth: "680px", fontFamily: "var(--font-sans)", fontSize: "16px", lineHeight: 1.7, color: "rgba(245,245,240,0.65)" }}>
+        <p style={{ marginTop: "28px", maxWidth: "680px", fontFamily: "var(--font-sans)", fontSize: "16px", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
           {tr.forArtistsPage.moneyPayoutTiming}
         </p>
       </section>

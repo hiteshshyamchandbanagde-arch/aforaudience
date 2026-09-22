@@ -236,7 +236,7 @@ function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
   if (status === "LIVE") {
     return <span style={{ ...chrome, background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStatusOnSale}</span>
   }
-  return <span style={{ ...chrome, background: "rgba(245,245,240,0.08)", color: "var(--afa-text-primary)" }}>{tr.organiserDetailPage.tourStatusCompleted}</span>
+  return <span style={{ ...chrome, background: "var(--afa-tint-08)", color: "var(--afa-text-primary)" }}>{tr.organiserDetailPage.tourStatusCompleted}</span>
 }
 
 function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {

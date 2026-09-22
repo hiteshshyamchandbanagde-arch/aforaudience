@@ -398,7 +398,7 @@ export default function MyFeedbackPage() {
                         {item.title || item.message}
                       </p>
                       {item.latestNote && (
-                        <p style={{ margin: '8px 0 0', fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.65)', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                        <p style={{ margin: '8px 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', fontStyle: 'italic', wordBreak: 'break-word' }}>
                           &quot;{item.latestNote}&quot;
                         </p>
                       )}

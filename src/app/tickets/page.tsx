@@ -36,7 +36,7 @@ function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
       cancelled = true
     }
   }, [value, size])
-  if (!dataUrl) return <div style={{ width: size, height: size, background: 'rgba(245,245,240,0.08)', borderRadius: 'var(--afa-radius-sm)' }} />
+  if (!dataUrl) return <div style={{ width: size, height: size, background: 'var(--afa-tint-08)', borderRadius: 'var(--afa-radius-sm)' }} />
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 4 }} />
 }
@@ -230,7 +230,7 @@ function SectionLabel({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-3)' }}>
       <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
-      <div style={{ height: 1, flex: 1, background: 'rgba(245,245,240,0.08)' }} />
+      <div style={{ height: 1, flex: 1, background: 'var(--afa-tint-08)' }} />
     </div>
   )
 }
