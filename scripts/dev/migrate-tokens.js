@@ -100,18 +100,31 @@ const COLOR_PROPS = new Set(['color', 'backgroundcolor', 'background', 'borderco
 // whitespace-split lookup. See COMPOUND_COLOR_PROPS/
 // migrateCompoundStringValue() below for the dedicated fix, and
 // docs/design.md's own GEN-2609-100 entry for the full occurrence
-// breakdown (dominant `border`-family: ~270; `boxShadow`: 2) and for
-// what this deliberately does NOT cover (Tailwind arbitrary-value
-// brackets like `border-[rgba(...)]` - a className string, not a
-// `prop: value` pair, structurally unreachable by MATCH_RE_JS/CSS at
-// all; a JSX `fill="..."`/`stroke="..."` SVG attribute - `attr="value"`,
-// not `prop: value`, same structural mismatch; and an UNQUOTED colour
-// value inside a raw `<style>{`...`}</style>` block, e.g.
-// `color: rgba(245,245,240,0.4);` with no quotes - a real, separate,
-// small (2 known sites) gap already flagged in
-// migrateExactStringValue()'s own comment, left there deliberately
-// rather than folded into this compound-value fix, which is scoped to
-// quoted values only same as every other category here).
+// breakdown (dominant `border`-family: ~270; `boxShadow`: 2).
+//
+// GEN-2609-100 deliberately left 3 further gaps uncovered, of which 2
+// are now also closed (see docs/design.md's GEN-2609-101/102 entries):
+// Tailwind arbitrary-value brackets like `border-[rgba(...)]` inside a
+// `className="..."` string - an `attr="value"` JSX attribute, not a
+// `prop: value` pair, so MATCH_RE_JS/CSS's colon-based matching could
+// never reach it - GEN-2609-101 added a dedicated className-scoped
+// regex (see MATCH_RE_JSX_CLASSNAME below) that reuses
+// migrateCompoundStringValue() unchanged, since a className string is
+// itself just another "compound value with one small literal substring
+// worth replacing," the exact same shape a `border` shorthand already
+// is; and an UNQUOTED colour value inside a raw `<style>{`...`}</style>`
+// block, e.g. `color: rgba(245,245,240,0.4);` with no quotes -
+// GEN-2609-102 added MATCH_RE_CSS_RAW_COLOR (see below) specifically
+// for this, again reusing migrateExactStringValue()/
+// migrateCompoundStringValue() unchanged. Still NOT covered, and out of
+// scope for both those tickets: a JSX `fill="..."`/`stroke="..."` SVG
+// attribute - same `attr="value"` shape as className, but this
+// codebase's only 5 known sites are the hardcoded Google-brand-logo
+// paths (already `token-ok:`'d) and one `icon.svg` file that isn't a
+// `.ts(x)` file at all, so there's no real site left to wire up; adding
+// general SVG-attribute support for zero real sites isn't worth the
+// risk of a generic `fill="..."` matcher misfiring on an unrelated
+// attribute somewhere else in the tree.
 const COMPOUND_COLOR_PROPS = new Set([
   'border', 'bordertop', 'borderbottom', 'borderleft', 'borderright',
   'borderinlinestart', 'borderinlineend', 'outline', 'boxshadow',
@@ -304,6 +317,47 @@ function mapFor(normProp, activeDefs) {
 const MATCH_RE_JS = /([a-zA-Z-]+)(\s*:\s*)(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?)(?=[,;}\s]|$)|(['"`])([^'"`]*)\4)/g
 const MATCH_RE_CSS = /([a-zA-Z-]+)(\s*:\s*)(?:(-?\d+(?:\.\d+)?(?:px|rem|em|%)?(?:\s+[a-zA-Z0-9.%!-]+)*)(?=\s*[;}]|$)|(['"`])([^'"`]*)\4)/g
 
+// GEN-2609-102 - a second, deliberately separate regex for raw
+// `<style>{`...`}</style>` CSS text, run ONLY for colour-category
+// property names (checked via mapFor() in processLine(), same as every
+// other path). An unquoted colour value - `color: rgba(245,245,240,0.4);`
+// or a compound `border: 1px solid rgba(245,245,240,0.1);` - can never
+// satisfy MATCH_RE_CSS's own bare-numeric branch: that branch requires
+// the value to START with a digit (`-?\d+...`), which neither `#`
+// (hex) nor `r` (of `rgba(`) ever do, and even the compound case's
+// leading `1px solid` prefix can't extend into `rgba(...)` because the
+// branch's own continuation-token class (`[a-zA-Z0-9.%!-]+`) excludes
+// parentheses and commas - so these declarations were entirely
+// INVISIBLE to MATCH_RE_CSS, not merely unmatched-then-skipped (measured
+// live: a repo-wide raw-<style>-block scan found 3 whole-value sites
+// and 7 more embedded in a `border:`/`border-top:` shorthand, 10 total
+// across 8 files - see docs/design.md's GEN-2609-102 entry for the
+// full breakdown against the ticket's own 2-site estimate).
+//
+// This regex captures the raw text between a property's `:` and its
+// own `;`/`}` terminator - colour values never contain either
+// character, so that terminator is always exact, letting `[^;{}]+?`
+// safely span internal commas/parens a numeric-only branch never could.
+// It is intentionally NOT restricted to colour-shaped text at the
+// regex level (it will also match `padding: 16px 20px;`,
+// `display: flex;`, etc.) - processLine() below filters to colour-
+// category props only via the same mapFor() lookup every other path
+// uses, so a non-colour match is just a harmless, discarded candidate,
+// never touched or reported as an edit.
+const MATCH_RE_CSS_RAW_COLOR = /([a-zA-Z-]+)(\s*:\s*)([^;{}]+?)(?=\s*[;}])/g
+
+// GEN-2609-101 - Tailwind arbitrary-value colour brackets inside a
+// `className="..."` JSX attribute (e.g. `border-[rgba(245,245,240,0.08)]`)
+// are `attr="value"` syntax (`=`, not `:`) - structurally unreachable by
+// MATCH_RE_JS/MATCH_RE_CSS, both of which only match colon-based
+// `prop: value` pairs. Scoped to `className` specifically (the only
+// attribute this codebase's known sites use) rather than a generic
+// `attr="..."` matcher, to avoid ever touching an unrelated JSX
+// attribute by accident. Same "no nested quotes" assumption MATCH_RE_JS's
+// own quoted-value group already makes (a className string never
+// contains a literal `"`/`'`).
+const MATCH_RE_JSX_CLASSNAME = /\bclassName=(["'])([^"']*)\1/g
+
 function isCommentLine(line) {
   const t = line.trim()
   return t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')
@@ -345,13 +399,15 @@ function migrateValue(raw, map, units, inRawBlock) {
 // lookup only ('#fff' matches map key '#FFF') - no other normalization,
 // same "byte/value-identical or leave it" convention as migrateValue().
 //
-// Quoted values only (m[5] in processLine, never m[3]): a hex colour
-// starts with `#`, never a digit, so it can never satisfy MATCH_RE_JS/
-// MATCH_RE_CSS's bare-numeric alternative in the first place - an
-// unquoted raw-CSS colour (`color: #fff;` with no quotes, inside a
-// `<style>{`...`}</style>` block) is real CSS but structurally
-// unreachable by either regex's bare-value branch as written, a known
-// gap left for a future ticket, not silently worked around here.
+// Quoted values only (m[5] in processLine, never m[3]) via the MAIN
+// MATCH_RE_JS/MATCH_RE_CSS pass: a hex colour starts with `#`, never a
+// digit, so it can never satisfy either regex's bare-numeric
+// alternative there. GEN-2609-102 reaches the unquoted-raw-CSS case
+// (`color: #fff;`/`color: rgba(...);` with no quotes, inside a
+// `<style>{`...`}</style>` block) through a SEPARATE regex
+// (MATCH_RE_CSS_RAW_COLOR below) that still calls this same function -
+// this function itself is unchanged; only processLine() gained a new
+// caller for it.
 function migrateExactStringValue(raw, map) {
   const key = Object.keys(map).find((k) => k.toLowerCase() === raw.trim().toLowerCase())
   if (!key) return null
@@ -494,6 +550,55 @@ function processLine(line, inRawBlock, activeDefs) {
     }
   }
 
+  // GEN-2609-102 - second pass, raw <style> blocks only: catches the
+  // unquoted-colour declarations the main loop above structurally can't
+  // (see MATCH_RE_CSS_RAW_COLOR's own header). Runs after the main loop
+  // so `edits` already reflects it, letting the overlap guard below
+  // avoid ever double-editing the same span (belt-and-braces - in
+  // practice the two loops never target the same characters, since
+  // anything the main loop already caught wouldn't still be unmatched
+  // colour text here).
+  if (inRawBlock && activeDefs.includes(CATEGORY_DEFS.colour)) {
+    MATCH_RE_CSS_RAW_COLOR.lastIndex = 0
+    let cm
+    while ((cm = MATCH_RE_CSS_RAW_COLOR.exec(line))) {
+      const norm = cm[1].replace(/-/g, '').toLowerCase()
+      const target = mapFor(norm, activeDefs)
+      if (target !== CATEGORY_DEFS.colour) continue
+      const rawValue = cm[3]
+      if (/^var\(/i.test(rawValue.trim())) continue // already a token, nothing to do
+      const prefixLen = cm[1].length + cm[2].length
+      const start = cm.index + prefixLen
+      const end = start + rawValue.length
+      if (edits.some((e) => start < e.end && end > e.start)) continue
+      const migrated = target.compoundProps && target.compoundProps.has(norm)
+        ? migrateCompoundStringValue(rawValue, target.map)
+        : migrateExactStringValue(rawValue, target.map)
+      if (migrated === null) continue
+      edits.push({ start, end, replacement: migrated })
+    }
+  }
+
+  // GEN-2609-101 - className-only pass, never inside a raw <style>
+  // block (a className attribute can't appear there). Reuses
+  // migrateCompoundStringValue() directly against the whole className
+  // string, same substring-splice behaviour a `border`/`boxShadow`
+  // shorthand already gets - a className string IS just another
+  // compound value with one small literal substring worth replacing.
+  if (!inRawBlock && activeDefs.includes(CATEGORY_DEFS.colour)) {
+    MATCH_RE_JSX_CLASSNAME.lastIndex = 0
+    let jm
+    while ((jm = MATCH_RE_JSX_CLASSNAME.exec(line))) {
+      const rawValue = jm[2]
+      const migrated = migrateCompoundStringValue(rawValue, COLOR_MAP)
+      if (migrated === null) continue
+      const start = jm.index + jm[0].indexOf(rawValue)
+      const end = start + rawValue.length
+      if (edits.some((e) => start < e.end && end > e.start)) continue
+      edits.push({ start, end, replacement: migrated })
+    }
+  }
+
   if (edits.length === 0) return line
   let result = line
   for (const e of edits.sort((a, b) => b.start - a.start)) {
@@ -560,4 +665,6 @@ module.exports = {
   migrateCompoundStringValue,
   migrateExactStringValue,
   processLine,
+  MATCH_RE_CSS_RAW_COLOR,
+  MATCH_RE_JSX_CLASSNAME,
 }

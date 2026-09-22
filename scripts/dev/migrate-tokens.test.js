@@ -5,6 +5,12 @@
 // check-design-tokens.test.js (checked package.json before writing
 // this one too - still no Jest/Vitest configured).
 //
+// GEN-2609-101/102 extended this same file rather than starting a new
+// one: both are small additional matchers (Tailwind className bracket
+// colours, unquoted raw-<style>-block colours) that reuse
+// migrateCompoundStringValue()/migrateExactStringValue() unchanged, so
+// their fixtures belong next to the matcher they exercise.
+//
 // Run directly:
 //   node scripts/dev/migrate-tokens.test.js
 //
@@ -132,9 +138,50 @@ t('processLine: a `token-ok:` annotated line is never touched', () => {
   assert.equal(out, line)
 })
 
-t('processLine: Tailwind arbitrary-value bracket colour is structurally unreachable (className, not prop:value) - left untouched, not mis-converted', () => {
+t('GEN-2609-101: processLine converts a Tailwind arbitrary-value colour bracket inside className, leaving the rest of the class list untouched', () => {
   const line = '      <div className="border border-[rgba(245,245,240,0.08)] shadow-lg">'
   const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, '      <div className="border border-[var(--afa-tint-08)] shadow-lg">')
+})
+
+t('GEN-2609-101: an unrelated className value with no COLOR_MAP entry stays literal', () => {
+  const line = '      <div className="shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">'
+  const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, line)
+})
+
+t('GEN-2609-101: a `--categories` run that excludes colour never touches className', () => {
+  const line = '      <div className="border-[rgba(245,245,240,0.08)]">'
+  const nonColourDefs = [CATEGORY_DEFS['font-size']]
+  const out = processLine(line, false, nonColourDefs)
+  assert.equal(out, line)
+})
+
+t('GEN-2609-102: processLine converts an unquoted whole-value colour inside a raw <style> block', () => {
+  const line = '        .afa-events-type-filter { color: rgba(245,245,240,0.4); background: none; }'
+  const out = processLine(line, true, DEFAULT_DEFS)
+  assert.equal(out, '        .afa-events-type-filter { color: var(--afa-text-muted); background: none; }')
+})
+
+t('GEN-2609-102: processLine converts an unquoted colour embedded in a raw-CSS border shorthand', () => {
+  const line = '        .afa-event-card { border: 1px solid rgba(245,245,240,0.1); transition: border-color 0.2s ease; }'
+  const out = processLine(line, true, DEFAULT_DEFS)
+  assert.equal(out, '        .afa-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.2s ease; }')
+})
+
+t('GEN-2609-102: same raw-CSS text outside a raw block (inRawBlock=false) stays untouched - the gap this pass fixes is <style>-block-scoped', () => {
+  const line = '        .afa-events-type-filter { color: rgba(245,245,240,0.4); }'
+  const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, line)
+})
+
+t('GEN-2609-102: an unrelated raw-CSS property (no COLOR_MAP match, not even a colour prop) stays literal', () => {
+  const line = '        .afa-events-select { padding: 8px 12px; border-radius: 3px; }'
+  const out = processLine(line, true, DEFAULT_DEFS)
+  // padding/border-radius already convert via the existing dimension
+  // path (8px/12px have no SPACING_MAP entry, 3px has no RADIUS_MAP
+  // entry either) - this line is a genuine full no-op, proving the new
+  // raw-colour pass doesn't misfire on non-colour props.
   assert.equal(out, line)
 })
 
