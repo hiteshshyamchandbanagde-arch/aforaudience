@@ -7851,3 +7851,85 @@ Ratchet delta (whole-tree, before → after, confirmed via `node scripts/design-
 ### Verify (whole branch, foreground)
 
 `npx tsc --noEmit -p .`: clean, exit 0. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 new offenses. `node scripts/check-design-tokens.test.js`: 55 passed, 0 failed (unchanged from `094` - this batch adds no new rule logic). `node scripts/design-token-ratchet.js`: all 7 categories at or below baseline. `npx eslint` on all 3 touched files: each shows pre-existing errors (`react/no-unescaped-entities` on unrelated prose text, `@typescript-eslint/no-explicit-any`, `react-hooks/set-state-in-effect`) - confirmed none sit on a line this batch actually changed, by diffing each flagged line number against `git diff origin/qa`'s own hunks (e.g. `revenue/page.tsx:136` and `artists/page.tsx:193` are both plain paragraph text one line below an edited `fontSize`, never touched themselves). `git diff origin/qa --stat`: exactly the 3 named files, no other change.
+
+## GEN-2609-099 - wire 3 free rgba matches + 2 new tint tokens
+
+One branch (`chore/gen-2609-099-tint-tokens`), 9 commits, off `origin/qa` at `af757e3`. Session-start ratchet re-check matched the dispatch's stated baseline exactly (hex 54, rgba 918, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211) before touching anything.
+
+### The headline finding: 49 conversions, not ~371
+
+**The dispatch's ~371 estimate assumed every raw `rgba(...)` occurrence sits in a shape `migrate-tokens.js` can reach. Measured, not assumed: only 49 do (13% of the estimate).** `COLOR_MAP`'s `migrateExactStringValue()` only converts a quoted value that is the WHOLE, EXACT string for one of 5 property names (`color`, `background`, `backgroundColor`, `borderColor`, `outlineColor`) - it has no sub-token splitting the way `migrateValue()` already does for dimension shorthands (`padding: '4px 8px'` → only the matching parts convert). Real usage doesn't match that shape for most of these 5 values:
+
+| Cause | Count | Convertible? |
+|---|---:|---|
+| `color:` / `background:` / `backgroundColor:` with the literal as the WHOLE value | 49 | ✅ yes - this is what actually converted |
+| `border:` (and `borderTop:`/`borderBottom:`/`borderLeft:`/`borderRight:`) shorthand, e.g. `border: "1px solid rgba(245,245,240,0.1)"` | ~265 | ❌ no - `borderColor` alone is in `COLOR_PROPS`, but nobody writes `borderColor:` for these; they all use the 3-part shorthand, and even if `border` were added to `COLOR_PROPS`, exact-string matching can't extract a sub-token from a compound value |
+| `boxShadow:` shorthand | 2 | ❌ no - not in `COLOR_PROPS` at all, same compound-value problem |
+| Tailwind arbitrary-value brackets, e.g. `border-[rgba(245,245,240,0.08)]` | 4 | ❌ no - `MATCH_RE_JS`/`MATCH_RE_CSS` only match colon-based `prop: value`, never `className` strings (same known gap as `text-[Npx]` for font-size) |
+| SVG `stroke=`/`fill=` attributes and data-URI-embedded values | 3 | ❌ no - attribute syntax (`=`), not `prop: value` |
+| Other compound-value properties (`borderTop`, etc. as a full shorthand, `outline`, mixed contexts) | ~47 | ❌ no - same compound-value problem as `border:` |
+
+(Reconciles to 370, 1 short of the raw 925-count histogram's 371 due to routine drift since the `GEN-2609-093` audit ran - `098`'s own batch touched none of these values, so this is measurement noise, not a real discrepancy - re-verified live via `RULES.extract()`, the exact code the ratchet itself uses, not a hand grep.)
+
+**This was found and quantified BEFORE running `--apply` anywhere** - a full dry-run sweep (`node scripts/dev/migrate-tokens.js <file> --categories=colour`, no `--apply`, across all 102 files the fresh grep found) confirmed only 31 files produce any changed line, 49 total. Applying blind across all 102 files per the dispatch's literal instruction would have been a no-op on 71 of them and would have needed manual review to even notice - checked first instead.
+
+**Not fixed in this ticket.** Teaching `migrateExactStringValue()` to extract a colour sub-token out of a `border`/`boxShadow` shorthand (the same shape of fix `migrateValue()` already has for dimensions) is a real script-capability change affecting every future colour-category run, not a "wire 5 map entries" task - flagged as the clearest, highest-value follow-up (see Decisions below), not built unilaterally here.
+
+### Step 1 - `COLOR_MAP` additions, and a whitespace question resolved before assuming an answer
+
+Added 5 entries to `scripts/dev/migrate-tokens.js`'s `COLOR_MAP`, unspaced form only (`rgba(245,245,240,0.65)`, not `rgba(245, 245, 240, 0.65)`). The dispatch explicitly asked not to assume the surrounding style object always writes these identically - checked: the spaced form (`globals.css`'s own convention) appears **only** in `globals.css` and `design-tokens.ts` (both `EXEMPT_FILES`, the definition sites) - zero occurrences anywhere in real application code. A single unspaced-form key per value is sufficient; `migrateExactStringValue()`'s matching itself is unchanged (its existing case-insensitive lookup handles hex's variance, not rgba's whitespace variance, but nothing in the codebase needs that handled today).
+
+Fresh occurrence counts for the 3 "existing" values (via `RULES.extract()`, the same code the ratchet uses, not a hand grep) - all close to the dispatch's own estimates:
+
+| Value | Token | Dispatch's estimate | Live count |
+|---|---|---:|---:|
+| `rgba(245,245,240,0.65)` | `--afa-text-secondary` | ~12 | **11** |
+| `rgba(245,245,240,0.4)` | `--afa-text-muted` | ~20 | **20** |
+| `rgba(245,245,240,0.15)` | `--afa-border-resting` | ~67 | **68** |
+| `rgba(245,245,240,0.08)` | `--afa-tint-08` (new) | ~172 | **171** |
+| `rgba(245,245,240,0.1)` | `--afa-tint-10` (new) | ~100 | **100** |
+
+### Step 2 - `--afa-tint-08`/`--afa-tint-10` defined, naming rationale verified
+
+Added to `globals.css`, `design-tokens.ts`'s `DEFAULT_TOKEN_VALUES`, and placeholder `TOKEN_COVERAGE` rows (regenerated for real in Step 4). Re-checked the dispatch's own naming justification with real numbers rather than copying its figures blindly (the dispatch's own prior tickets have had estimate errors - see the headline finding above and `GEN-2609-094`'s "4 sites" correction):
+
+| Value | Border-property sites (files) | Background-property sites (files) |
+|---|---:|---:|
+| 0.08 | 148 (61) | 10 (9) |
+| 0.1 | 88 (38) | 8 (4) |
+
+Both border-dominant but genuinely mixed with background usage (not merely "unclear") - confirms `--afa-tint-*` over a role-specific name like `--afa-border-*`.
+
+**Prisma migration applied to QA.** `prisma/migrations/20260922130000_add_tint_tokens/migration.sql`, 2 `INSERT`s, group/type `color`. Per the standing data-safety rule, the exact 2-row preview was shown and explicitly confirmed before running anything. Verified project identity first (`Supabase:get_project` on `nqiyrypmjtogoocerxtu` → confirmed name `aforaudience-qa`, not the hard-blocked prod ref) before calling `apply_migration`. Post-apply `SELECT` confirms both rows byte-identical to `globals.css`: `rgba(245, 245, 240, 0.08)` / `rgba(245, 245, 240, 0.1)`, group/type `color`, `locked=false`.
+
+### A second real bug found live: `verify-equivalence.js` couldn't see any rgba `COLOR_MAP` entry
+
+Running `verify-equivalence.js` against the first migrated file immediately failed with `MISMATCH: --afa-text-secondary not found in globals.css at all` - for a token that plainly is defined there. Root cause, in `loadGlobalsColorTokens()`: its regex only ever matched hex values (`#[0-9a-fA-F]{3,8}`), never exercised against a real rgba `COLOR_MAP` entry before since `COLOR_MAP` held only `--afa-white` (`#FFF`) until this ticket. Fixed the regex to also match `rgba?\([^)]+\)`. Fixing that surfaced a SECOND bug immediately: `globals.css` writes these spaced (`rgba(245, 245, 240, 0.08)`), `COLOR_MAP`'s keys are unspaced (per Step 1's finding) - a direct string compare of the two would keep failing on whitespace alone. `checkColorMap()` now normalizes both sides (strip all whitespace, lowercase) before comparing. Committed as its own fix commit before the first migration commit, so every subsequent `verify-equivalence.js` run in this branch is trustworthy.
+
+### Step 3 - applied to 31 files, 4 area commits (49 literal conversions total)
+
+| Commit | Area | Files | Conversions |
+|---|---|---:|---:|
+| 1/4 | `src/app/(public)/*` | 9 | 15 |
+| 2/4 | `src/app/dashboard/*` | 7 | 9 |
+| 3/4 | `src/app/{for-artists,my-feedback,organisers,tickets}` | 4 | 5 |
+| 4/4 | `src/components/*` | 11 | 20 |
+
+`node scripts/dev/verify-equivalence.js` run after every commit: `0 mismatches` throughout (38 map entries total: 32 dimension + 6 colour, including the pre-existing `--afa-white`). Per-token breakdown of the 49: `--afa-tint-08` 15 (12 files), `--afa-tint-10` 12 (8 files), `--afa-text-muted` 11 (6 files), `--afa-text-secondary` 6 (5 files), `--afa-border-resting` 5 (5 files).
+
+### Step 4 - `TOKEN_COVERAGE` regenerated once, last: 83/3/0
+
+86 keys now (2 new). Both new tokens landed `site-wide` immediately (`--afa-tint-08` 12 consumer files, `--afa-tint-10` 8) - neither ever sat "unused" in a committed version of this file, unlike `--afa-white`/`--afa-radius-sharp`'s earlier staleness episodes.
+
+### Explicitly not in scope (confirmed honored)
+
+`--afa-tint-08`/`--afa-tint-10` were NOT merged into one value - both defined and wired independently, exactly as named. No `--afa-amber`/`--afa-error`/`--afa-sage` rgba families touched. No sub-50 values converted or tokenized. No hex/font-size/spacing/radius/raw-button literal touched (only Steps' own colour-category runs). `--afa-text-on-image` untouched (different base colour, never matched). No `EXEMPT_FILES` file touched (`email.ts`/`ticket-pdf.ts`/`manifest.ts` don't contain any of these 5 values anyway - checked, not assumed).
+
+### Verify (whole branch, foreground)
+
+`npx tsc --noEmit -p .`: clean throughout, checked after every commit. `BASE_REF=origin/qa node scripts/check-design-tokens.js`: clean, 0 new offenses. `node scripts/check-design-tokens.test.js`: 55 passed, 0 failed (no rule logic changed - only `COLOR_MAP`'s data and `verify-equivalence.js`, neither covered by this test file). `node scripts/design-token-ratchet.js`: rgb-rgba-literal 918 → **869 (-49)**, font-size/radius unchanged from `098`'s own baseline (785/331, both still below the committed 830/350 baseline file per `098`'s own deliberate non-update), hex/font-family/spacing/raw-button all ±0. `npx eslint` on every touched `.ts`/`.tsx` file (36 total): the 5 tooling/definition files show only pre-existing `require()`-import errors (same file-wide convention as `check-design-tokens.js`); all 31 migrated page/component files' errors/warnings confirmed pre-existing by diffing every flagged line number against this branch's own diff hunks (`git diff origin/qa`) file-by-file - zero overlaps found. `git diff origin/qa --stat`: 37 files - the 31 migrated files, `migrate-tokens.js`, `verify-equivalence.js`, `globals.css`, `design-tokens.ts`, `design-token-coverage.ts`, and the migration file. No `EXEMPT_FILES` file, no spacing/radius/font-size/hex/raw-button literal, nothing outside this ticket's stated scope.
+
+### Decisions this surfaces for Hitesh
+
+1. **Extend `migrateExactStringValue()`/`COLOR_PROPS` to handle `border:`/`boxShadow:` shorthand values.** This is the single highest-value follow-up from this ticket - it would unlock roughly 265 of the ~321 currently-unreachable rgba literals (the `border:` family alone) using tokens that already exist as of this PR, no new tokens needed. Shape of the fix: teach the exact-string matcher to also extract and replace just the colour sub-token out of a compound shorthand value, the same capability `migrateValue()` already has for dimension shorthands (`padding: '4px 8px'`). Scoped as its own ticket, not built here.
+2. **Tailwind arbitrary-value colour brackets** (`border-[rgba(...)]`, 4 sites found) - same structural gap as `text-[Npx]` for font-size, already known and out of scope for `migrate-tokens.js` as designed. Low volume; probably not worth its own script capability unless it recurs at scale in a future audit.

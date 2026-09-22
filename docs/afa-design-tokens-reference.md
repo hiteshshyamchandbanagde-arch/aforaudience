@@ -59,6 +59,13 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-radius-12px: 12px;
 ```
 
+**GEN-2609-099 — general-purpose translucent tints (new tokens, wired on adoption).** The 2 `rgba(245,245,240,*)` alpha values (of `--afa-text-primary`'s own base RGB) that clear `GEN-2609-081`'s 50-occurrence bar — see `docs/design.md`'s `GEN-2609-099` entry for the full occurrence count and the naming rationale (checked real property context: both are border-dominant but genuinely mixed with background usage, not a single role, hence `--afa-tint-*` rather than `--afa-border-*`/`--afa-text-*`). Unlike `GEN-2609-081`'s tokens, these had real, immediate adoption in the same PR that defined them (49 literal sites across 31 files) — not "tokens only":
+
+```css
+--afa-tint-08: rgba(245, 245, 240, 0.08);
+--afa-tint-10: rgba(245, 245, 240, 0.1);
+```
+
 **Admin-controlled runtime layer (GEN-2609-075, 19 Sep).** Every token in this section, plus `--font-display`/`--font-ui`/`--font-sans`/`--font-mono`, is now also a row in the `DesignToken` table (`aforaudience-qa`) and editable at `/dashboard/admin/design-system` — an admin change is cached (tag `"design-tokens"`) and takes effect on the next page load, no deploy, falling back to the static values in this file/`globals.css` if the DB is empty or unreachable. `globals.css` stays the authoritative *default* (and the only thing that matters for a fresh environment before the table is seeded); the DB is a runtime override layer on top of it, not a replacement. 5 tokens (`--afa-surface-page`, `--afa-surface-raised`, `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid`) are "locked" in the admin UI — still editable, gated behind a confirm dialog — unrelated to this section's own CI-enforced locked-palette rule below, which keeps blocking raw literals in application *code* regardless of what the DB holds. Full reasoning in `docs/design.md`'s `GEN-2609-075` entry.
 
 **Do not confuse this 5 with the 5 `--afa-text-*` tokens two paragraphs up (`primary`/`secondary`/`muted`/`inverse`/`on-image`) — GEN-2609-076 found the two genuinely conflated once already.** Zero overlap between the two sets; they answer different questions (which named color a piece of text should use, vs. which tokens are core-identity-defining enough to need a confirm click before an admin changes them). Locking the text-role tokens behind a confirm dialog wouldn't make sense — they're ordinary content-color choices, not brand-identity primitives — so `GEN-2609-076` recommended keeping the surface/amber/fill-solid set as-is rather than reconciling toward this section's `--afa-text-*` table.

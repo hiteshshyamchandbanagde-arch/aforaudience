@@ -1,3 +1,84 @@
+# Session Handoff — 22 Sept 2026 yet later (CC — GEN-2609-099 wire 3 free rgba matches + 2 new tint tokens)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only, one handoff per the cadence rule. Session started at `qa@af757e3`, matching the dispatch's stated floor exactly. Ratchet re-check at session start matched the dispatch's stated baseline exactly (hex 54, rgba 918, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211). Ended at branch `chore/gen-2609-099-tint-tokens` @ (9 commits), pushed, no PR opened (no `gh` CLI - chat opens/merges per §13). **DB write happened this session** - the QA `DesignToken` table now has 2 new rows, applied after an explicit shown-preview confirmation (see §4).
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches committed |
+|---|---|---|---|---|
+| 22 Sept 2026 (CC) | `GEN-2609-099` - wire 3 free rgba matches + 2 new tint tokens | Done, pushed, no PR | **Major finding: only 49 of the dispatch's ~371-estimate literals were actually convertible** (border:/boxShadow: shorthand values are structurally unreachable by the exact-string matcher - see `design.md`). Applied the real 49 across 31 files, 4 area commits. Found and fixed a real `verify-equivalence.js` bug live (couldn't see any rgba `COLOR_MAP` entry at all). 2-row QA DB migration applied after explicit confirm. | `chore/gen-2609-099-tint-tokens` |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`. All 3 dry-run predictions matched exactly. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`. Hygiene bundle. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping + `094`/`098` dispatched | Done | Audit merged `#694`. rgba recommendation logged to `GEN-2609-095` (later approved, became this session's `099`). | (merged) |
+| 21-22 Sept 2026 (CC->chat) | `GEN-2609-090`/`091`/`092` | Merged `#691`/`#692`/`#693` | 090 category-first ordering; 091 removed 23 dead colour tokens; 092 wired `--afa-white`. | (merged) |
+
+## 2. Activity in progress
+
+- `GEN-2609-099` - `chore/gen-2609-099-tint-tokens` pushed, **`NOT YET OPENED`** as a PR. Compare link: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-099-tint-tokens?expand=1`
+- **New follow-up surfaced, not yet numbered**: extending `migrateExactStringValue()`/`COLOR_PROPS` to handle `border:`/`boxShadow:` shorthand values would unlock ~265 more rgba literals using tokens that already exist post-merge - no new tokens needed, just a script capability change (the same shape of fix `migrateValue()` already has for dimension shorthands). Flagged as the highest-value next colour-category move.
+- Open decisions still with Hitesh: `GEN-2609-097` (`toast-rollout/*` branches + ~50 stale branches, still `NEW`). `GEN-2609-095`'s rgba/threshold questions are now partially resolved (this ticket IS that resolution for the 5 named values) - the 50-occurrence-threshold question itself (for font-size `17px`/`22px`, radius `3px`, spacing values) remains open.
+
+## 3. Open PRs awaiting action
+
+| Branch | PR # | CI status | Merge-ready? |
+|---|---|---|---|
+| `chore/gen-2609-099-tint-tokens` | **`NOT YET OPENED`** | n/a | Locally verified clean (tsc, checker, 55 self-tests, ratchet, `verify-equivalence.js` after every commit, eslint line-by-line diff check on all 31 migrated files). Chat opens + merges. **Chat should double-check the QA DB rows exist before merging** (`SELECT * FROM "DesignToken" WHERE key IN ('--afa-tint-08','--afa-tint-10')` against `nqiyrypmjtogoocerxtu`) - code and DB are 2 separate changes that both need to be live together. |
+| `ci/add-manual-e2e-workflows-to-main` | `#450` | - | Unrelated, out of scope since 14 Aug. |
+
+## 4. Decisions / findings this session
+
+- **DB write performed**: 2 `INSERT`s into QA `DesignToken` (`--afa-tint-08`, `--afa-tint-10`), applied via `Supabase:apply_migration` against `nqiyrypmjtogoocerxtu` after (a) verifying project identity via `get_project` (confirmed name `aforaudience-qa`, not the hard-blocked prod ref) and (b) showing the exact 2-row preview and getting explicit confirmation before running it, per the dispatch's own standing data-safety rule. Post-apply `SELECT` confirmed both rows byte-identical to `globals.css`.
+- **The dispatch's ~371-literal estimate was off by an order of magnitude** - real, script-convertible count is 49 (13%). Root cause: `COLOR_MAP`'s exact-string matching can't extract a colour sub-token out of a `border: "1px solid rgba(...)"` shorthand (~265 of the ~321 unreached literals), the same category of gap the `GEN-2609-093` audit already flagged for font-size/radius Tailwind brackets, just not previously measured for colour specifically.
+- Found and fixed a real, previously-undiscovered bug in `verify-equivalence.js` (2 bugs actually: hex-only regex, then a whitespace-comparison gap once that was fixed) - see `design.md` for the full writeup. Never triggered before because `COLOR_MAP` held only 1 hex entry until this ticket.
+- No new `GEN`-numbering collisions.
+
+## 5. `CodeCounter` state
+
+Unchanged this session - `GEN-2609-099` was already chat-assigned and logged (`BUILD_QUEUE`) before this dispatch; CC did not touch the Feedback table or `CodeCounter`. Last verified by chat 22 Sept: `GEN/2609` = 98 (per prior entry), `BUG/2609` = 56.
+
+## 6. Known GEN-numbering collisions/gaps ledger
+
+No new collisions found or introduced this session.
+
+## 7. Docs-conflict watchlist
+
+- `chore/gen-2609-099-tint-tokens` - touches `design.md` (own tail section) and `HANDOFF.md` (this entry) only; no other open branch touches either concurrently.
+
+## 8. Verification standard checklist
+
+- [x] `tsc --noEmit -p .` clean, exit 0 (checked after every commit)
+- [x] `check-design-tokens.js` clean (`BASE_REF=origin/qa node scripts/check-design-tokens.js`) - 0 new offenses
+- [ ] `next build` - not run this session (37 files, but every application-code change is a single-value literal→`var()` swap, zero structural change; `tsc` + checker + 55 self-tests + `verify-equivalence.js` ×4 + line-by-line eslint diff check were judged sufficient - flagging the skip, same call as `094`/`098`)
+
+## 9. Production-freeze reminder
+
+**Freeze is active until "company registered." No exceptions. No production Supabase access. No `qa` → `main` merge.** (QA writes remain allowed and were used this session - see §4.)
+
+## 10. UI/UX Design System Debt Ledger
+
+| Metric | Value | As of |
+|---|---|---|
+| Ratchet literal totals (live; baseline file still at `098`'s point, not updated) | hex 54, rgba **869** (was 918), font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211 | `GEN-2609-099`, 22 Sept |
+| Total design tokens defined | 86 (was 84; +`--afa-tint-08`/`-10`) | `GEN-2609-099`, 22 Sept |
+| Orphaned tokens (defined, zero live usages) | 0 (both new tokens landed `site-wide` immediately) | `GEN-2609-099`, 22 Sept |
+| Colour-category script-convertible pool remaining | ~265 rgba literals reachable only if `border:`/`boxShadow:` shorthand support is added (see §2) | `GEN-2609-099`, 22 Sept |
+
+## 11. Canonical locked-tokens source-of-truth pointer
+
+**`docs/afa-design-tokens-reference.md`**. Updated this session, per this section's own standing rule ("must update... in the same PR, not a follow-up") - `--afa-tint-08`/`--afa-tint-10` added to Section 1, own paragraph after the `GEN-2609-081` block, same style. (Caught mid-write: `--afa-border-resting` itself has no row in that file at all, a pre-existing gap from an earlier ticket, not introduced or fixed here - flagging for whoever next touches that section, not silently folding it into this ticket's own diff.)
+
+## 12. Immediate next action
+
+Chat opens and merges `chore/gen-2609-099-tint-tokens`'s PR (compare link in §2), double-checks the QA DB rows per §3, and confirms the merged ratchet matches this entry (rgba 869).
+
+## 13. Chat vs. CC ownership note
+
+Unchanged (see `docs/HANDOFF_TEMPLATE.md` §13), with one addition worth naming explicitly: this session's Supabase DB write was performed by CC directly (via the `Supabase:apply_migration` tool), not deferred to chat, because the dispatch explicitly authorized it ("applied via Supabase:apply_migration against nqiyrypmjtogoocerxtu (QA) only") and the tool was available in-session. Did not touch the Feedback table, `CodeCounter`, or open/merge any PR.
+
+---
+
 # Session Handoff — 22 Sept 2026 still later (chat — GEN-2609-098 batch 9 PR opened, merged, and closed out)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** This entry covers exactly `#696` - nothing else changed since the prior 22 Sept entry. Session started at `qa@8312c30`; ended at `qa@a3a43f2`.
