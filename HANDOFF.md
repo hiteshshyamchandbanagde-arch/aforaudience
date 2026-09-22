@@ -1,4 +1,60 @@
+# Session Handoff — 22 Sept 2026 yet later (chat — GEN-2609-099 PR opened, verified, merged, and closed out)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. **One handoff per chat PR+merge.** This entry covers exactly `#697` - nothing else changed since the prior 22 Sept entry. Session started at `qa@af757e3`; ended at `qa@28c5cbf`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. Last 5 sessions summary
+
+| Session / date | Goal | Status | Remarks | Branches |
+|---|---|---|---|---|
+| 22 Sept 2026 (chat) | Verify, open, merge `GEN-2609-099` (`#697`) - first-ever rgba `COLOR_MAP` entries | Done | Squash-merged `28c5cbf`. Chat independently re-verified every claim (not taken on CC's word): `COLOR_MAP` diff, `globals.css`/`design-tokens.ts` byte-identical, QA `DesignToken` table queried directly (2 rows confirmed), `verify-equivalence.js`'s hex-only-regex bug fix read and understood, ratchet re-run (rgb-rgba 918->869 exact match), 55 self-tests + `verify-equivalence.js` re-run on all 31 files (0 mismatches). CC's headline finding - the ~371-literal estimate was 8x too high because `COLOR_MAP` can't extract sub-tokens from compound values like `border: "1px solid rgba(...)"` - logged as its own ticket, `GEN-2609-100`. Vercel `READY`, 0 runtime errors/30min. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-095` approved by Hitesh; naming revised to `--afa-tint-08/-10` after usage-context investigation; dispatched as `GEN-2609-099` | Done | Chat found the two values are border-dominant but genuinely mixed with background usage (checked real property context, not assumed) - renamed from the original `--afa-text-primary-08/-10` proposal. Explicitly decided NOT to merge the two values into one (would be a real ~25% visible alpha shift across ~270 sites) - logged as a standing constraint in the dispatch. | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-098` batch 9 (`#696`) | Done | Squash-merged `a3a43f2`. All 3 dry-run predictions matched exactly. Ratchet: font-size 830->785 (-45), radius 350->331 (-19). | (merged) |
+| 22 Sept 2026 (chat) | Open, verify, merge `GEN-2609-094` (`#695`) | Done | Squash-merged `9079232`. Hygiene bundle - themeColor fix, `EXEMPT_FILES`, `inherit` allowlist, `--afa-radius-sharp` wired, coverage regen 81/3/0. | (merged) |
+| 22 Sept 2026 (chat) | `GEN-2609-093` audit merge + bookkeeping catch-up | Done | Audit merged `#694`. Feedback/`CodeCounter` backfilled. `HANDOFF_TEMPLATE.md` cadence rule added. | (merged) |
+
+## 2. Activity in progress
+
+- Nothing open. Ratchet now: hex 54, rgba 869, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211.
+- `GEN-2609-100` (`NEW`) logged: extend `COLOR_MAP`'s matcher to handle compound/shorthand values (`border: "1px solid rgba(...)"` etc). This is the real path to the other ~85% of the rgba debt this session's 2 new tokens are aimed at, plus likely a meaningful chunk of remaining hex too. Not scoped yet - needs its own design (matcher semantics change, not a map-entry addition), no dispatch drafted.
+- `GEN-2609-097` stale-branch triage: 32 branches deleted with evidence (see the earlier 22 Sept entry), 21 remain on weaker evidence only, untouched pending closer review - not currently anyone's active task.
+
+## 3. Open PRs awaiting action
+
+None against `qa`. `#450` (-> `main`, frozen) untouched.
+
+## 4. Decisions / findings this session
+
+- Verified CC's diff before opening the PR: `COLOR_MAP`/`globals.css`/`design-tokens.ts` all byte-for-byte matched; QA DB rows queried directly and matched; `verify-equivalence.js`'s fix read line-by-line and is correctly scoped (extends the hex-only regex to `rgba?\(...\)`, adds whitespace-normalized comparison - a real, previously-latent gap, not over-engineered).
+- No naming or merge-decision changes this session - both were settled last session and executed as specified.
+- `GEN-2609-100` opened as the clear next step for colour, but deliberately not dispatched yet (needs scoping: how does a shorthand-aware matcher decide what NOT to touch, e.g. a `border` shorthand with a colour AND a non-token width/style that shouldn't be disturbed).
+
+## 5. `CodeCounter` state
+
+- `GEN/2609` = 100 (verified via `SELECT` before write, 22 Sept). `BUG/2609` = 56, unchanged.
+- `GEN-2609-099` set to `RESOLVED`/`DEPLOYED_QA`. `GEN-2609-100` new, `NEW`.
+
+## 6. Known `GEN`-numbering collisions/gaps ledger
+
+No new collisions this session.
+
+## 7-11. Unchanged
+
+## 12. Immediate next action
+
+`GEN-2609-100` (shorthand-aware matcher) is the highest-leverage next step toward the colour pillar of the north star - unblocks the ~85% of rgba debt this session's tokens were aimed at. Needs scoping before a dispatch (matcher-design decision, not a batch). `GEN-2609-097`'s remaining 21 branches also still open, lower priority. No blocking decisions currently sitting with Hitesh.
+
+## 13. Chat vs. CC ownership note
+
+Unchanged. Chat this session: reviewed CC's diff and re-ran every verification independently (ratchet, self-tests, `verify-equivalence.js`, checker) rather than trusting the handoff summary, opened `#697`, polled CI, merged (pinned-SHA squash), deleted the branch, verified Vercel `READY` + 0 runtime errors, updated Feedback/`CodeCounter`, logged `GEN-2609-100`, wrote this handoff. No code written by chat.
+
+---
+
 # Session Handoff — 22 Sept 2026 yet later (CC — GEN-2609-099 wire 3 free rgba matches + 2 new tint tokens)
+
+> **SUPERSEDED 22 Sept 2026 (later entry):** `GEN-2609-099` (`#697`) is merged. See the entry above for the close-out.
+
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only, one handoff per the cadence rule. Session started at `qa@af757e3`, matching the dispatch's stated floor exactly. Ratchet re-check at session start matched the dispatch's stated baseline exactly (hex 54, rgba 918, font-family 0, font-size 785, spacing 2029, radius 331, raw-button 211). Ended at branch `chore/gen-2609-099-tint-tokens` @ (9 commits), pushed, no PR opened (no `gh` CLI - chat opens/merges per §13). **DB write happened this session** - the QA `DesignToken` table now has 2 new rows, applied after an explicit shown-preview confirmation (see §4).
 
