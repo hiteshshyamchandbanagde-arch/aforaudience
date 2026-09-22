@@ -412,7 +412,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         height: diameter,
         borderRadius: '50%',
         flexShrink: 0,
-        background: 'rgba(245,245,240,0.08)',
+        background: 'var(--afa-tint-08)',
         color: 'var(--afa-text-secondary)',
         border: 'none',
         fontSize: 16,

@@ -384,7 +384,7 @@ export default function AdminDesignSystemPage() {
                   // overrides background/color explicitly to keep that
                   // real, meaningful color difference (nothing to save,
                   // vs. saving is in flight).
-                  style={dirty.length === 0 ? { background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-secondary)' } : undefined}
+                  style={dirty.length === 0 ? { background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' } : undefined}
                 >
                   {saving ? 'Saving…' : dirty.length ? `Save ${dirty.length} change${dirty.length > 1 ? 's' : ''}` : 'Saved'}
                 </Button>

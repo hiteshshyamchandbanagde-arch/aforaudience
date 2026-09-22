@@ -116,7 +116,7 @@ export default function MessagesInboxPage() {
                         justifyContent: 'center',
                         fontSize: '13px',
                         fontWeight: 700,
-                        background: 'rgba(245,245,240,0.08)',
+                        background: 'var(--afa-tint-08)',
                         color: 'var(--afa-text-primary)',
                       }}
                     >

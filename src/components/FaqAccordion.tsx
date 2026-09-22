@@ -30,7 +30,7 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
             {item.q}
             <span aria-hidden style={{ flexShrink: 0, fontFamily: "var(--font-mono)", fontSize: "18px", color: "var(--afa-amber)" }}>+</span>
           </summary>
-          <p style={{ marginTop: "14px", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.7, color: "rgba(245,245,240,0.65)" }}>
+          <p style={{ marginTop: "14px", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "15px", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
             {item.a}
           </p>
         </details>

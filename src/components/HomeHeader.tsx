@@ -218,14 +218,14 @@ export default function HomeHeader() {
                         )}
                       </Link>
                     ))}
-                    <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
                   </>
                 ) : (
                   <>
                     <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                       {t.nav.signIn}
                     </Link>
-                    <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
                   </>
                 )}
                 <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
@@ -244,7 +244,7 @@ export default function HomeHeader() {
                 </div>
                 {user && (
                   <>
-                    <div style={{ margin: "6px 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                    <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
                     <button
                       onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
                       style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}

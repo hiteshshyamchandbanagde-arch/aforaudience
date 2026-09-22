@@ -73,7 +73,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                   {stop.status === 'COMPLETED' && (
-                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
                       Completed
                     </span>
                   )}

@@ -114,7 +114,7 @@ export default function AuthPromptSheet({
 
         {/* Grab handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(245,245,240,0.15)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--afa-border-resting)" }} />
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>

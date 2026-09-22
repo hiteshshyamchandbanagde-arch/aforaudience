@@ -611,7 +611,7 @@ function EventsPageContent() {
               </div>
             </div>
 
-            <div style={{ marginTop: "16px", marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.4)" }}>
+            <div style={{ marginTop: "16px", marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
               {tr.eventsPage.showingCount.replace("{n}", String(filtered.length))}
             </div>
 

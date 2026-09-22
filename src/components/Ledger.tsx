@@ -63,7 +63,7 @@ export default function Ledger({ eyebrow, headline }: { eyebrow: string; headlin
         <FeeRow label={tr.homePage.feeBaseLabel} value="₹500" />
         <FeeRow label={tr.homePage.feeArtistVenueShareLabel} value="100%" accent />
         <FeeRow label={tr.homePage.feeCommissionLabel} value="₹0" accent />
-        <div style={{ height: "1px", background: "rgba(245,245,240,0.1)", margin: "10px 0" }} />
+        <div style={{ height: "1px", background: "var(--afa-tint-10)", margin: "10px 0" }} />
         <FeeRow label={tr.homePage.feeBookingFeeLabel} value="₹30" muted />
         <FeeRow label={tr.homePage.feeYouPayLabel} value="₹530" bold />
       </div>

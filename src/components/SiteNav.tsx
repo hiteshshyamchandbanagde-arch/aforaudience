@@ -594,14 +594,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             )}
                           </Link>
                         ))}
-                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                       </>
                     ) : (
                       <>
                         <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                           {t.nav.signIn}
                         </Link>
-                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                       </>
                     )}
                     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
@@ -622,7 +622,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     )}
                     {user && (
                       <>
-                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "rgba(245,245,240,0.1)" }} />
+                        <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
                         <button
                           onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
                           style={{ display: "block", width: "100%", textAlign: "left", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}

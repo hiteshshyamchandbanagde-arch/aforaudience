@@ -132,7 +132,7 @@ export default function VenueOwnersPage() {
                     </div>
                   )}
                   <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid rgba(245,245,240,0.1)" }}>
-                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(245,245,240,0.1)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
+                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                       {owner.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

@@ -60,7 +60,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
   return (
     <div className={`four-rooms-row${flip ? " four-rooms-row-flip" : ""}`} style={{ borderBottom: "1px solid rgba(245,245,240,0.08)" }}>
       <div className="four-rooms-visual" style={{ position: "relative", minHeight: "280px", background: "radial-gradient(120% 120% at 18% 15%, var(--afa-ink) 0%, var(--afa-surface-inverse) 60%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ position: "absolute", left: "24px", top: "20px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "56px", color: "rgba(245,245,240,0.15)" }}>
+        <span style={{ position: "absolute", left: "24px", top: "20px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "56px", color: "var(--afa-border-resting)" }}>
           {room.n}
         </span>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "84px", height: "84px", borderRadius: "50%", border: "1px solid rgba(201,151,58,0.35)" }}>

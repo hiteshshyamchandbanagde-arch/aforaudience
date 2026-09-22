@@ -199,7 +199,7 @@ export function SeatStateDot({ totalSeats, availableSeats, showCount = false }: 
       </span>
       {tr.availability[status]}
       {showCount && status !== "sold-out" && (
-        <span style={{ color: "rgba(245,245,240,0.4)" }}>· {availableSeats}{tr.eventsPage.leftSuffix}</span>
+        <span style={{ color: "var(--afa-text-muted)" }}>· {availableSeats}{tr.eventsPage.leftSuffix}</span>
       )}
     </span>
   )
@@ -279,14 +279,14 @@ export function EventCard({
         </h3>
 
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "6px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "rgba(245,245,240,0.65)" }}>
-            <CalendarIcon style={{ width: "15px", height: "15px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "var(--afa-text-secondary)" }}>
+            <CalendarIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
             <span>{new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>
-            <ClockIcon style={{ width: "15px", height: "15px", color: "rgba(245,245,240,0.4)", flexShrink: 0, marginLeft: "4px" }} />
+            <ClockIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0, marginLeft: "4px" }} />
             <span>{event.startTime}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "rgba(245,245,240,0.65)" }}>
-            <PinIcon style={{ width: "15px", height: "15px", color: "rgba(245,245,240,0.4)", flexShrink: 0 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "var(--afa-text-secondary)" }}>
+            <PinIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {event.venue ? `${event.venue.name}, ${event.venue.city}` : tr.eventsPage.venueTBD}
             </span>

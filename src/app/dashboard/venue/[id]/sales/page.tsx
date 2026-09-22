@@ -184,7 +184,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                     <span style={{ color: 'rgba(245,245,240,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
                     <span style={{ color: 'rgba(245,245,240,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
-                    <span style={{ color: 'rgba(245,245,240,0.4)' }}>{timeAgo(b.createdAt)}</span>
+                    <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
                   </div>
                 ))}
               </div>

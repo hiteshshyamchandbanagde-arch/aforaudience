@@ -172,7 +172,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
 
       <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "20px 20px 0 0", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "6px 0" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(245,245,240,0.15)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--afa-border-resting)" }} />
         </div>
 
         {submitted ? (

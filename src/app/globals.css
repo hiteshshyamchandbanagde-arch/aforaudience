@@ -155,6 +155,25 @@
      future consumer) can reference var() instead of adding another
      copy of the literal. */
   --afa-border-resting: rgba(245, 245, 240, 0.15);
+
+  /* GEN-2609-099 - general-purpose translucent tints of --afa-text-
+     primary's base RGB (245,245,240), the same family --afa-text-
+     secondary/-muted/--afa-border-resting already draw from at other
+     alphas. These 2 specifically (0.08, 0.1) are the two values that
+     clear GEN-2609-081's approved 50-occurrence bar for a new token
+     (--afa-tint-08 at 171 live literals, --afa-tint-10 at 100 - see
+     docs/token-migration-status.md's GEN-2609-093 audit and
+     docs/design.md's GEN-2609-099 entry for the full count and method).
+     Named `--afa-tint-*`, not `--afa-border-*`/`--afa-text-*`,
+     deliberately: checked real property context before naming, not
+     assumed - 0.08 is 148 border-property sites vs. 10 background
+     (61 vs. 9 files), 0.1 is 88 border-property vs. 8 background (38
+     vs. 4 files) - both border-dominant but genuinely mixed, not a
+     single role, so a role-specific name would misdescribe a real
+     minority of usage either way. */
+  --afa-tint-08: rgba(245, 245, 240, 0.08);
+  --afa-tint-10: rgba(245, 245, 240, 0.1);
+
   --afa-on-fill-solid: var(--afa-brown-black);
 
   /* GEN-2609-068 - lightened, AA-legible variants of --afa-sage/--afa-error
