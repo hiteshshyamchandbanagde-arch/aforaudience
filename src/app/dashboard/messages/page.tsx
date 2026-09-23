@@ -76,7 +76,7 @@ export default function MessagesInboxPage() {
       <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '760px', padding: '32px 24px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '24px' }}>
               {tr.messagesInboxPage.heading}
             </h1>
 
@@ -114,7 +114,7 @@ export default function MessagesInboxPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '13px',
+                        fontSize: 'var(--afa-text-ui)',
                         fontWeight: 700,
                         background: 'var(--afa-tint-08)',
                         color: 'var(--afa-text-primary)',
@@ -129,7 +129,7 @@ export default function MessagesInboxPage() {
                             label text only, not by color. */}
                         <span
                           style={{
-                            fontSize: '10px',
+                            fontSize: 'var(--afa-text-10px)',
                             fontWeight: 500,
                             letterSpacing: '0.04em',
                             padding: '2px 6px',
@@ -141,13 +141,13 @@ export default function MessagesInboxPage() {
                           {CONTEXT_LABEL[t.contextType]}
                         </span>
                         {!t.isActive && (
-                          <span style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
+                          <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.45 }}>{tr.messagesInboxPage.closedLabel}</span>
                         )}
                         {t.unread && (
                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--afa-amber)' }} />
                         )}
                       </div>
-                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'var(--font-sans)', fontSize: '13px' }}>
+                      <div style={{ fontWeight: t.unread ? 600 : 500, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-ui)' }}>
                         {name}
                         {t.label && <span style={{ fontWeight: 400, opacity: 0.6 }}> — {t.label}</span>}
                       </div>

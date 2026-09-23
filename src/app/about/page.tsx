@@ -42,7 +42,7 @@ function Ornament() {
         color: EMBER,
         opacity: 0.55,
         fontFamily: SERIF,
-        fontSize: "20px",
+        fontSize: "var(--afa-text-20px)",
         letterSpacing: "0.6em",
         paddingLeft: "0.6em",
         margin: "56px 0",
@@ -61,7 +61,7 @@ function ActLabel({ num, label }: { num: string; label: string }) {
     <div
       style={{
         fontFamily: MONO,
-        fontSize: "11px",
+        fontSize: "var(--afa-text-micro)",
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color: EMBER,
@@ -188,7 +188,7 @@ export default function AboutPage() {
         <div
           style={{
             fontFamily: MONO,
-            fontSize: "11px",
+            fontSize: "var(--afa-text-micro)",
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: EMBER,
@@ -568,7 +568,7 @@ export default function AboutPage() {
             <div
               style={{
                 fontFamily: MONO,
-                fontSize: "11px",
+                fontSize: "var(--afa-text-micro)",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: INK,
@@ -593,7 +593,7 @@ export default function AboutPage() {
               href="/events"
               style={{
                 fontFamily: SANS,
-                fontSize: "14px",
+                fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
@@ -608,7 +608,7 @@ export default function AboutPage() {
               href="/register"
               style={{
                 fontFamily: SANS,
-                fontSize: "14px",
+                fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 color: INK,
                 background: "transparent",

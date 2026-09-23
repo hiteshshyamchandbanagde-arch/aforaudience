@@ -65,7 +65,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
   return (
     <div style={{ marginTop: '8px', marginBottom: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Layout preview</span>
+        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Layout preview</span>
         {levels.length > 1 && (
           <div style={{ display: 'flex', gap: '6px' }}>
             {levels.map((lvl) => (
@@ -74,7 +74,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 type="button"
                 onClick={() => setActiveLevel(lvl)}
                 style={{
-                  fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer',
+                  fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer',
                   border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
                   background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                   color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
@@ -87,7 +87,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
         )}
       </div>
       <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: '10px', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
-        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
+        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
           STAGE
         </div>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>
@@ -109,7 +109,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           ))}
         </div>
       </div>
-      <p style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '6px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.5, marginTop: '6px' }}>
         Read-only preview of the venue's saved layout - colors match the sections priced below.{levels.length > 1 ? ' Switch levels above to see each one.' : ''}
       </p>
     </div>

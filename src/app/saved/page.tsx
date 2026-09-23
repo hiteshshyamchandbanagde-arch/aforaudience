@@ -56,15 +56,15 @@ export default function SavedPage() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 24px 96px' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--afa-amber)', marginBottom: 6 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--afa-amber)', marginBottom: 6 }}>
             {events.length} event{events.length === 1 ? '' : 's'} wishlisted
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 800, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
             Saved
           </h1>
 
           {error && (
-            <p style={{ color: 'var(--afa-error)', fontSize: 14, marginBottom: 20 }}>{error}</p>
+            <p style={{ color: 'var(--afa-error)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{error}</p>
           )}
 
           {events.length === 0 ? (
@@ -72,10 +72,10 @@ export default function SavedPage() {
               <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-muted)' }}>
                 <HeartIcon style={{ width: 26, height: 26 }} />
               </div>
-              <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+              <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 No saves yet
               </p>
-              <p style={{ marginTop: 4, maxWidth: 260, fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+              <p style={{ marginTop: 4, maxWidth: 260, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
                 Tap the heart on any event in Discover to keep it here for later.
               </p>
             </div>

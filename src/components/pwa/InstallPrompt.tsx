@@ -128,10 +128,10 @@ export default function InstallPrompt() {
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>
+        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 'var(--afa-text-15px)', marginBottom: 2 }}>
           Install AforAudience
         </div>
-        <div style={{ fontSize: 13, opacity: 0.75, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.75, lineHeight: 1.4 }}>
           Quick access, offline tickets, feels like an app.
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function InstallPrompt() {
           color: 'var(--afa-on-fill-solid)',
           border: 'none',
           padding: '8px 12px',
-          fontSize: 14,
+          fontSize: 'var(--afa-text-body)',
           opacity: 0.7,
           cursor: 'pointer',
         }}

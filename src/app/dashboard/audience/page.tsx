@@ -32,13 +32,13 @@ function StatTile({ label, value, icon, sub }: { label: string; value: string; i
   return (
     <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.06)' }} className="rounded-xl p-5">
       <div className="flex items-start justify-between mb-4">
-        <span style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontSize: 12, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontSize: 'var(--afa-text-small)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{label}</span>
         <span style={{ color: 'var(--afa-amber)', backgroundColor: 'rgba(201,151,58,0.12)' }} className="w-8 h-8 rounded-lg flex items-center justify-center">
           {icons[icon]}
         </span>
       </div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
-      {sub && <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 12, marginTop: 6 }}>{sub}</p>}
+      {sub && <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-small)', marginTop: 6 }}>{sub}</p>}
     </div>
   )
 }
@@ -103,10 +103,10 @@ export default function AudienceActivityPage() {
       <DashboardShell>
         <div style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '900px', padding: '48px 24px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.audienceActivityPage.heading}
             </h1>
-            <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
               {tr.audienceActivityPage.subtitle}
             </p>
 
@@ -115,16 +115,16 @@ export default function AudienceActivityPage() {
               <StatTile label={tr.audienceActivityPage.eventsAttended} value={String(totalEventsAttended)} icon="calendar" />
               <StatTile label={tr.audienceActivityPage.freeEventsAttended} value={String(freeEventsAttended)} icon="gift" />
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: '24px' }}>
+            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.4, marginBottom: '24px' }}>
               {tr.audienceActivityPage.tipsNote}
             </p>
 
             {confirmed.length === 0 && (
               <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(245,245,240,0.06)', textAlign: 'center', marginBottom: '24px' }}>
-                <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
                   {tr.audienceActivityPage.noConfirmedBookings}
                 </p>
-                <Link href="/events" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-amber)', textDecoration: 'none' }}>
+                <Link href="/events" style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', textDecoration: 'none' }}>
                   {tr.audienceActivityPage.browseEvents}
                 </Link>
               </div>

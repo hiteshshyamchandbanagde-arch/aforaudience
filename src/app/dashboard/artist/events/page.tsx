@@ -190,10 +190,10 @@ export default function BrowseEventsToApplyPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Browse Events
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
             Apply to perform at published events.
           </p>
 
@@ -201,7 +201,7 @@ export default function BrowseEventsToApplyPage() {
             value={selectedCity}
             onChange={(e) => setSelectedCity(e.target.value)}
             style={{
-              fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)',
+              fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)',
               background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)',
               borderRadius: '999px', padding: '8px 14px', marginBottom: '32px', cursor: 'pointer',
             }}
@@ -214,7 +214,7 @@ export default function BrowseEventsToApplyPage() {
 
           {events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
+              <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -226,12 +226,12 @@ export default function BrowseEventsToApplyPage() {
                   <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
-                        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>
                       </div>
-                      <span style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+                      <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
                         Audience pays: {event.isFree ? 'Free' : event.ticketPrice ? `₹${event.ticketPrice}` : '—'}
                       </span>
                     </div>
@@ -254,16 +254,16 @@ export default function BrowseEventsToApplyPage() {
                         dashboard's "Recorded Earnings" section, for
                         consistency. */}
                     {event.defaultCompensationType === 'BUY_IN' && (
-                      <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: '12px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '-6px', marginBottom: '12px' }}>
                         Pay directly to the organiser - not yet processed or confirmed by the platform.
                       </p>
                     )}
 
-                    <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
+                    <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '14px' }}>{event.description}</p>
 
                     {existingStatus ? (
                       <>
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-text-primary)' }}>
+                        <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: STATUS_LABEL[existingStatus]?.color || 'var(--afa-text-primary)' }}>
                           {STATUS_LABEL[existingStatus]?.label || existingStatus}
                         </span>
                         {performanceIdByEvent[event.id] && (
@@ -283,7 +283,7 @@ export default function BrowseEventsToApplyPage() {
                           onChange={(e) => setMessage((prev) => ({ ...prev, [event.id]: e.target.value }))}
                           placeholder="Optional note to the organiser"
                           rows={2}
-                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '10px', resize: 'vertical' as const, background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button
                           variant="primary"
@@ -292,7 +292,7 @@ export default function BrowseEventsToApplyPage() {
                           onClick={() => apply(event.id)}
                           disabled={applying === event.id}
                           style={{
-                            fontSize: '13px',
+                            fontSize: 'var(--afa-text-ui)',
                             color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                             background: full ? 'transparent' : undefined,
                             border: full ? '1.5px solid rgba(245,245,240,0.2)' : 'none',

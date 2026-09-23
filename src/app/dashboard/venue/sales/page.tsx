@@ -175,7 +175,7 @@ export default function VenueOwnerSalesOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
@@ -204,18 +204,18 @@ export default function VenueOwnerSalesOverviewPage() {
                       tickFormatter={formatBucketLabel}
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <YAxis
                       tickFormatter={compactMoney}
                       tickLine={false}
                       axisLine={false}
                       width={56}
-                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+                      tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <Tooltip
                       cursor={{ stroke: 'rgba(201,151,58,0.4)', strokeDasharray: '3 3' }}
-                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12 }}
+                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                       labelStyle={{ color: 'rgba(245,245,240,0.5)' }}
                       labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
                       itemStyle={{ color: '#c9973a' }}
@@ -230,18 +230,18 @@ export default function VenueOwnerSalesOverviewPage() {
 
           <Section title="By venue">
             {venues.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>No venues yet.</p>
             ) : (
               <>
                 <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: '20px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
                       <CartesianGrid stroke="rgba(245,245,240,0.06)" horizontal={false} />
-                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 11 }} />
+                      <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
+                      <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
                         cursor={{ fill: 'rgba(245,245,240,0.03)' }}
-                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12 }}
+                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                         formatter={(v: any) => [money(Number(v)), 'Revenue']}
                       />
                       <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
@@ -278,7 +278,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         className="avp-hover-border"
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                          fontSize: '13px', padding: '12px', background: '#171717', borderRadius: '8px',
+                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: '#171717', borderRadius: '8px',
                           border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
@@ -291,7 +291,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     {showAllVenues && (
                       <button
                         onClick={() => setShowAllVenues(false)}
-                        style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', padding: '4px 12px', fontSize: '12px', color: 'var(--afa-text-muted)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                        style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', padding: '4px 12px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px' }}
                       >
                         Show top {TOP_VENUES_SHOWN} only
                       </button>
@@ -309,7 +309,7 @@ export default function VenueOwnerSalesOverviewPage() {
               By organiser
             </p>
             {organisers.length === 0 ? (
-              <p style={{ fontSize: '13px', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
                 {organisers.map((o) => (
@@ -339,13 +339,13 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
   return (
     <Card style={{ padding: '18px' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '24px', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error)', marginTop: '6px', marginBottom: 0 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error)', marginTop: '6px', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
       ) : sub ? (
-        <p style={{ fontSize: '12px', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '6px', marginBottom: 0 }}>{sub}</p>
       ) : null}
     </Card>
   )

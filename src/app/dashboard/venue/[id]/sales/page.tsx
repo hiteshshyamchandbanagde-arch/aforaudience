@@ -119,16 +119,16 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <BackLink href={`/dashboard/venue/${id}`} label="Back to Venue" />
-            <Link href="/dashboard/venue/sales" style={{ fontSize: '14px', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
+            <Link href="/dashboard/venue/sales" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-fill-solid)', textDecoration: 'none', fontWeight: 600 }}>
               All venues →
             </Link>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               📊 {venue.name} — Revenue
             </h1>
-            <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>
+            <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
             </span>
           </div>
@@ -138,7 +138,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           {/* Summary cards */}
@@ -157,7 +157,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Timeline */}
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
@@ -175,11 +175,11 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Recent bookings */}
           <Section title="Recent bookings">
             {recentBookings.length === 0 ? (
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '13px', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: 'var(--afa-text-ui)', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
                     <span style={{ color: 'rgba(245,245,240,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
                     <span style={{ color: 'rgba(245,245,240,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
@@ -199,9 +199,9 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
     <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: '10px', padding: '16px' }}>
-      <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
 }
@@ -209,7 +209,7 @@ function SummaryCard({ label, value, sub, muted }: { label: string; value: strin
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
-      <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
+      <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>
   )

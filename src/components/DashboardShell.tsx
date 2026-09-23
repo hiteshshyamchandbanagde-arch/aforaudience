@@ -385,7 +385,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       {badge && badge > 0 ? (
         <span
           className="ml-auto"
-          style={{ fontSize: 11, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3 }}
+          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3 }}
         >
           {badge}
         </span>
@@ -611,13 +611,13 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                       every user whose count is genuinely zero. */}
                   {!!item.badge && item.badge > 0 && (
                     <span
-                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 10, fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-10px)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
                     >
                       {item.badge}
                     </span>
                   )}
                 </span>
-                <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{item.label}</span>
+                <span style={{ fontSize: 'var(--afa-text-10px)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
               </Link>
             )
           })}
@@ -629,7 +629,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
               style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
               <Icon name="more" size={20} />
-              <span style={{ fontSize: 10 }}>More</span>
+              <span style={{ fontSize: 'var(--afa-text-10px)' }}>More</span>
             </button>
           )}
         </nav>
@@ -644,7 +644,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--afa-text-primary)' }}>My Roles</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', color: 'var(--afa-text-primary)' }}>My Roles</span>
               <button
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close"

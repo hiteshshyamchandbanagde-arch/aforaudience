@@ -83,7 +83,7 @@ export default function OfflineBanner() {
         background: offline ? 'var(--afa-error)' : 'var(--afa-green-bright)',
         color: 'white',
         textAlign: 'center',
-        fontSize: 13,
+        fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
         padding: '8px 16px',
         letterSpacing: '0.01em',

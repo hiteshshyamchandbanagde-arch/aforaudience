@@ -311,7 +311,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
       <p
         style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
+          fontSize: 'var(--afa-text-micro)',
           textTransform: 'uppercase',
           letterSpacing: '0.14em',
           color: 'var(--afa-text-muted)',
@@ -353,7 +353,7 @@ export function PageHead({
           <p
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
+              fontSize: 'var(--afa-text-micro)',
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
               color: 'var(--afa-amber)',
@@ -376,7 +376,7 @@ export function PageHead({
             {title}
           </h1>
           {description ? (
-            <p style={{ fontSize: '14px', color: 'var(--afa-text-secondary)', marginTop: '10px', marginBottom: 0, maxWidth: '520px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginTop: '10px', marginBottom: 0, maxWidth: '520px' }}>
               {description}
             </p>
           ) : null}
@@ -392,12 +392,12 @@ export function PageHead({
 export function Stat({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
     <Card style={{ padding: '20px' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
         {label}
       </p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '26px', lineHeight: 1, color: 'var(--afa-text-primary)', margin: '12px 0 0' }}>{value}</p>
       {delta ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--afa-sage)', margin: '8px 0 0' }}>▲ {delta}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-sage)', margin: '8px 0 0' }}>▲ {delta}</p>
       ) : null}
     </Card>
   )
@@ -417,7 +417,7 @@ export function SectionTitle({ n, title }: { n: string; title: string }) {
         marginBottom: '20px',
       }}
     >
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--afa-amber)' }}>{n}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-amber)' }}>{n}</span>
       <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
     </div>
   )
@@ -470,7 +470,7 @@ export const navPillStyle: CSSProperties = {
   border: '1px solid var(--afa-tint-08)',
   padding: '9px 14px',
   fontFamily: 'var(--font-sans)',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   color: 'var(--afa-text-secondary)',
   textDecoration: 'none',
 }
@@ -501,7 +501,7 @@ export function NavBadge({ children }: { children: ReactNode }) {
 
 export function Label({ children }: { children: ReactNode }) {
   return (
-    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: 'var(--afa-text-secondary)' }}>
+    <label style={{ display: 'block', marginBottom: '8px', fontSize: 'var(--afa-text-ui)', fontWeight: 500, color: 'var(--afa-text-secondary)' }}>
       {children}
     </label>
   )
@@ -513,7 +513,7 @@ const fieldStyle: CSSProperties = {
   border: '1px solid var(--afa-tint-08)',
   background: '#171717',
   padding: '10px 14px',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',
   color: 'var(--afa-text-primary)',
   boxSizing: 'border-box',

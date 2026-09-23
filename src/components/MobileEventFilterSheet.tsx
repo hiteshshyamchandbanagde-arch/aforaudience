@@ -35,7 +35,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
         color: active ? "var(--afa-fill-solid)" : "rgba(245,245,240,0.7)",
         padding: "8px 14px",
         fontFamily: "var(--font-mono)",
-        fontSize: "12px",
+        fontSize: "var(--afa-text-small)",
         cursor: "pointer",
       }}
     >
@@ -98,13 +98,13 @@ export default function MobileEventFilterSheet({
           <div style={{ width: "40px", height: "4px", borderRadius: "999px", background: "var(--afa-border-resting)" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 4px" }}>
-          <h2 style={{ fontFamily: "var(--font-ui)", fontSize: "20px", fontWeight: 700, color: "var(--afa-cream)", margin: 0 }}>
+          <h2 style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-cream)", margin: 0 }}>
             {tr.eventsPage.filterSheetTitle}
           </h2>
         </div>
 
         <section style={{ padding: "16px 20px 0" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
             {tr.eventsPage.filterAllNights}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
@@ -125,7 +125,7 @@ export default function MobileEventFilterSheet({
         </section>
 
         <section style={{ padding: "20px 20px 0" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
             {tr.eventsPage.filterAllCities}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
@@ -141,7 +141,7 @@ export default function MobileEventFilterSheet({
         </section>
 
         <section style={{ padding: "20px 20px 0" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
             {tr.eventsPage.filterAll}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
@@ -154,7 +154,7 @@ export default function MobileEventFilterSheet({
         </section>
 
         <section style={{ padding: "20px 20px 0" }}>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--afa-amber)", margin: 0 }}>
             {tr.eventsPage.sortLabel}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
@@ -182,7 +182,7 @@ export default function MobileEventFilterSheet({
               color: "rgba(245,245,240,0.7)",
               padding: "14px 20px",
               fontFamily: "var(--font-mono)",
-              fontSize: "12px",
+              fontSize: "var(--afa-text-small)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               cursor: "pointer",

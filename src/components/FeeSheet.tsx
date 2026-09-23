@@ -64,7 +64,7 @@ export function FeeSheet({
             ×
           </Button>
         </div>
-        <p style={{ padding: '4px 20px 0', fontSize: 14, lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+        <p style={{ padding: '4px 20px 0', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
           On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
         </p>
 
@@ -73,7 +73,7 @@ export function FeeSheet({
             style={{
               display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16,
               background: 'var(--afa-surface-page)', padding: '10px 16px',
-              fontFamily: 'var(--font-mono)', fontSize: 10, textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase',
               letterSpacing: '0.1em', color: 'var(--afa-text-muted)',
             }}
           >
@@ -89,9 +89,9 @@ export function FeeSheet({
                 borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
               }}
             >
-              <span style={{ fontSize: 13, color: 'var(--afa-text-primary)', opacity: 0.8 }}>{r.label}</span>
-              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--afa-amber)' }}>{r.you}</span>
-              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--afa-text-secondary)' }}>{r.afa}</span>
+              <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>{r.label}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)' }}>{r.you}</span>
+              <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{r.afa}</span>
             </div>
           ))}
         </div>
@@ -102,10 +102,10 @@ export function FeeSheet({
             border: '1px solid rgba(201,151,58,0.3)', background: 'rgba(201,151,58,0.08)',
           }}
         >
-          <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--afa-amber)' }}>
+          <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-amber)' }}>
             Artist &amp; venue share: 100% · ₹0 commission
           </p>
-          <p style={{ margin: '6px 0 0', fontSize: 13, lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
+          <p style={{ margin: '6px 0 0', fontSize: 'var(--afa-text-ui)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>
             We keep the lights on through venue subscriptions and optional artist promotions — never by taxing your
             ticket.
           </p>

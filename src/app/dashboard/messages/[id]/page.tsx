@@ -116,7 +116,7 @@ export default function MessageThreadPage() {
             {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
-            <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '4px' }}>
+            <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.55, marginTop: '4px' }}>
               {tr.messageThreadPage.closedNotice}
             </p>
           )}
@@ -124,7 +124,7 @@ export default function MessageThreadPage() {
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
           {thread.messages.length === 0 && (
-            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-sans)', fontSize: '14px' }}>
+            <p style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body)' }}>
               {tr.messageThreadPage.emptyMessages}
             </p>
           )}
@@ -141,12 +141,12 @@ export default function MessageThreadPage() {
                   borderRadius: '14px',
                   padding: '8px 12px',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: '14px',
+                  fontSize: 'var(--afa-text-body)',
                   wordBreak: 'break-word',
                 }}
               >
                 {m.body}
-                <div style={{ fontSize: '10px', opacity: 0.6, marginTop: '4px' }}>
+                <div style={{ fontSize: 'var(--afa-text-10px)', opacity: 0.6, marginTop: '4px' }}>
                   {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function MessageThreadPage() {
                 borderRadius: '20px',
                 border: '1px solid rgba(245,245,240,0.2)',
                 fontFamily: 'var(--font-sans)',
-                fontSize: '14px',
+                fontSize: 'var(--afa-text-body)',
                 background: 'var(--afa-surface-raised)',
                 color: 'var(--afa-text-primary)',
               }}

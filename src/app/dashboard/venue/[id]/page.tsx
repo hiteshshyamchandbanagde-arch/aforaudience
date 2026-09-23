@@ -170,27 +170,27 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             <SectionTitle n="01" title="Overview" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{venue.capacity} seats</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Total Capacity</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{venue.capacity} seats</p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Price Range</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                   {minPrice !== null ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : '—'}
                 </p>
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
-                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Not Rated Yet</p>
+                <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Acoustic Rating</p>
+                <p style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Not Rated Yet</p>
               </div>
             </div>
 
             {venue.facilities && venue.facilities.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Facilities</h2>
+                <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Facilities</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: '13px', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>
+                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>
                       {facility}
                     </span>
                   ))}
@@ -204,7 +204,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             <div>
               {venue.seatingMode === 'NUMBERED' ? (
                 numberedZones.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
+                  <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>
                     No seat map built yet — use Seat Map Builder to add zones and seats.
                   </p>
                 ) : (
@@ -218,7 +218,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           padding: '12px 16px',
                           background: 'var(--afa-surface-page)',
                           borderRadius: '8px',
-                          fontSize: '14px',
+                          fontSize: 'var(--afa-text-body)',
                         }}
                       >
                         <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>
@@ -237,7 +237,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                             // "never priced" here) or a broken price.
                             <span
                               style={{
-                                fontSize: '11px',
+                                fontSize: 'var(--afa-text-micro)',
                                 fontWeight: 700,
                                 color: 'var(--afa-gold)',
                                 background: 'rgba(201,151,58,0.15)',
@@ -255,7 +255,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )
               ) : sections.length === 0 ? (
-                <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No seating sections defined yet.</p>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>No seating sections defined yet.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {sections.map((s) => (
@@ -267,7 +267,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         padding: '12px 16px',
                         background: 'var(--afa-surface-page)',
                         borderRadius: '8px',
-                        fontSize: '14px',
+                        fontSize: 'var(--afa-text-body)',
                       }}
                     >
                       <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{s.name}</span>
@@ -283,7 +283,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           // SeatSectionEditor.
                           <span
                             style={{
-                              fontSize: '11px',
+                              fontSize: 'var(--afa-text-micro)',
                               fontWeight: 700,
                               color: 'var(--afa-gold)',
                               background: 'rgba(201,151,58,0.15)',
@@ -306,13 +306,13 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               Edit Venue
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
             >
               📊 Revenue
             </Link>

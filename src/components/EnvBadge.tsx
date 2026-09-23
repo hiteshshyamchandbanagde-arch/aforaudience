@@ -22,7 +22,7 @@ export default function EnvBadge() {
         display: "inline-block",
         marginLeft: "8px",
         padding: "2px 8px",
-        fontSize: "11px",
+        fontSize: "var(--afa-text-micro)",
         fontWeight: 600,
         letterSpacing: "0.02em",
         color: fg,

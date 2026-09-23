@@ -78,7 +78,7 @@ export default function OrganisersPage() {
               placeholder={tr.organisersPage.searchPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "20px" }}>🔍</span>
+            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "var(--afa-text-20px)" }}>🔍</span>
           </BrowseSearchDropdown>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function OrganisersPage() {
                         org.orgName.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "var(--afa-text-primary)" }}>{org.orgName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{org.orgName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
                     <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: org.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: org.bio ? "normal" : "italic" }}>

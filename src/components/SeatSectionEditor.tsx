@@ -123,7 +123,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     borderRadius: "10px",
     border: "1px solid var(--afa-border-resting)",
     background: "var(--afa-surface-page)",
-    fontSize: "14px",
+    fontSize: "var(--afa-text-body)",
     color: "var(--afa-text-primary)",
   }
 
@@ -133,7 +133,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {sections.length === 0 && (
-          <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5, fontStyle: "italic" }}>
             No sections yet. Add one to start designing your seating layout — e.g. "VIP Front Row", "General", "Balcony".
           </p>
         )}
@@ -195,7 +195,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             />
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "14px" }}>₹</span>
+                <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--afa-text-primary)", opacity: 0.5, fontSize: "var(--afa-text-body)" }}>₹</span>
                 <input
                   type="number"
                   placeholder="Price"
@@ -213,7 +213,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   }}
                 />
               </div>
-              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.75, cursor: "pointer", userSelect: "none" }}>
                 <input
                   type="checkbox"
                   checked={isFree}
@@ -233,7 +233,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 border: "none",
                 color: "var(--afa-text-muted)",
                 cursor: "pointer",
-                fontSize: "14px",
+                fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 padding: "8px",
               }}
@@ -246,7 +246,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       </div>
 
       {duplicateNames.size > 0 && (
-        <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-error)", fontWeight: 600 }}>
+        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)", fontWeight: 600 }}>
           Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
         </p>
       )}
@@ -257,7 +257,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           return hasSomeContent && isIncompleteSection(s)
         }).length
         return partialCount > 0 ? (
-          <p style={{ marginTop: "10px", fontSize: "13px", color: "var(--afa-amber)", fontWeight: 600 }}>
+          <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>
             {partialCount} row{partialCount === 1 ? '' : 's'} {partialCount === 1 ? 'is' : 'are'} missing a name, seat count, or price (check "Free" for a free section) — fill {partialCount === 1 ? 'it' : 'them'} in or remove {partialCount === 1 ? 'it' : 'them'} with ✕.
           </p>
         ) : null
@@ -277,7 +277,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           border: "1px dashed rgba(245,245,240,0.3)",
           borderRadius: "10px",
           padding: "10px 18px",
-          fontSize: "14px",
+          fontSize: "var(--afa-text-body)",
           fontWeight: 600,
           color: "var(--afa-text-secondary)",
           cursor: "pointer",
@@ -301,14 +301,14 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         >
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
-            <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
           </div>
           <div style={{ width: "1px", background: "rgba(245,245,240,0.12)" }} />
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}
             </div>
-            <div style={{ fontSize: "11px", color: "var(--afa-text-muted)", marginTop: "2px" }}>per-seat range</div>
+            <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "2px" }}>per-seat range</div>
           </div>
         </div>
       )}

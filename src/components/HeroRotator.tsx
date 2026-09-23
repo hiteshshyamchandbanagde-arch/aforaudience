@@ -65,7 +65,7 @@ export default function HeroRotator() {
         }}
       />
       <div style={{ position: 'absolute', left: '24px', right: '24px', top: '20px' }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
           {tr.homePage.heroRotatorEyebrow}
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-on-fill-solid)', lineHeight: 1.3 }}>

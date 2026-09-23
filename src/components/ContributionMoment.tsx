@@ -59,13 +59,13 @@ function ContributionBody({
         <CloseButton onClose={onClose} />
       </div>
 
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', marginBottom: 8 }}>
         CONFIRMED
       </div>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 900, color: 'var(--afa-text-primary)', margin: 0, lineHeight: 1.05 }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 900, color: 'var(--afa-text-primary)', margin: 0, lineHeight: 1.05 }}>
         You&rsquo;re going.
       </h1>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-secondary)', marginTop: 8 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-secondary)', marginTop: 8 }}>
         {seatSummary} · {venueLabel}
       </div>
 
@@ -86,7 +86,7 @@ function ContributionBody({
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 28, fontWeight: 800, color: 'var(--afa-on-fill-solid)' }}>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-page-title)', fontWeight: 800, color: 'var(--afa-on-fill-solid)' }}>
               {supporterCount}
             </span>
           </div>
@@ -94,10 +94,10 @@ function ContributionBody({
       </div>
 
       <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 16, padding: 16 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 8 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 8 }}>
           YOUR CONTRIBUTION
         </div>
-        <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: 14, lineHeight: 1.6, color: 'var(--afa-text-primary)' }}>
+        <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body)', lineHeight: 1.6, color: 'var(--afa-text-primary)' }}>
           You&rsquo;re one of {supporterCount} people supporting {artistName}&rsquo;s show — every seat helps decide if this show happens.
         </p>
       </div>
@@ -111,7 +111,7 @@ function ContributionBody({
 // 11-locale dictionary (see build report's flagged i18n scope call).
 function EmailedTicketNote() {
   return (
-    <p style={{ margin: '12px 0 0', fontFamily: 'var(--font-sans)', fontSize: 12, lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
+    <p style={{ margin: '12px 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)', textAlign: 'center' }}>
       We&rsquo;ve also emailed the ticket to you. Show the QR at the door — screen or print is fine.
     </p>
   )

@@ -159,13 +159,13 @@ const kpiCard: React.CSSProperties = {
 
 const kpiValue: React.CSSProperties = {
   fontFamily: 'var(--font-display)',
-  fontSize: '24px',
+  fontSize: 'var(--afa-text-heading)',
   fontWeight: 700,
   color: 'var(--afa-text-primary)',
 }
 
 const kpiLabel: React.CSSProperties = {
-  fontSize: '11px',
+  fontSize: 'var(--afa-text-micro)',
   color: 'var(--afa-taupe)',
   marginTop: '2px',
 }
@@ -178,7 +178,7 @@ const chartCard: React.CSSProperties = {
 }
 
 const chartTitle: React.CSSProperties = {
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 700,
   color: 'var(--afa-text-primary)',
   marginBottom: '14px',
@@ -297,7 +297,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
               </g>
             ))}
           </svg>
-          <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: '11px' }}>
+          <div style={{ display: 'flex', gap: '14px', marginTop: '6px', fontSize: 'var(--afa-text-micro)' }}>
             <span style={{ color: 'var(--afa-fill-solid)' }}>● Opened</span>
             <span style={{ color: 'var(--afa-sage)' }}>● Resolved</span>
           </div>
@@ -306,11 +306,11 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
       <div style={chartCard}>
         <div style={chartTitle}>Category breakdown</div>
         {categories.length === 0 && (
-          <p style={{ fontSize: '12px', color: 'var(--afa-taupe)' }}>No data yet.</p>
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>No data yet.</p>
         )}
         {categories.map((c) => (
           <div key={c.category} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '3px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-micro)', marginBottom: '3px' }}>
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
@@ -335,7 +335,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '110px' }}>
           {ageBuckets.map((b) => (
             <div key={b.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-              <span style={{ fontSize: '11px', color: 'var(--afa-taupe)', marginBottom: '4px' }}>{b.count}</span>
+              <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)', marginBottom: '4px' }}>{b.count}</span>
               <div
                 style={{
                   width: '100%',
@@ -346,7 +346,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                   borderRadius: '4px 4px 0 0',
                 }}
               />
-              <span style={{ fontSize: '10px', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>
+              <span style={{ fontSize: 'var(--afa-text-10px)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>
             </div>
           ))}
         </div>

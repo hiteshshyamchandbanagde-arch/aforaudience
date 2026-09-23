@@ -29,7 +29,7 @@ export type BadgeVariant = 'status' | 'status-compact' | 'micro' | 'tag' | 'pill
 // once there's more than one child.
 const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   status: {
-    fontSize: '11px',
+    fontSize: 'var(--afa-text-micro)',
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
@@ -38,7 +38,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   'status-compact': {
-    fontSize: '11px',
+    fontSize: 'var(--afa-text-micro)',
     fontWeight: 700,
     padding: '4px 10px',
     borderRadius: '999px',
@@ -50,7 +50,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   // 0.03em via its own `style` override rather than picking one value
   // and quietly changing the other site.
   micro: {
-    fontSize: '10px',
+    fontSize: 'var(--afa-text-10px)',
     fontWeight: 700,
     padding: '2px 8px',
     borderRadius: '999px',
@@ -60,7 +60,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   // event (isFree), not a lifecycle state with multiple tone-driven
   // values, so `tag` rather than another `status-*` name.
   tag: {
-    fontSize: '11px',
+    fontSize: 'var(--afa-text-micro)',
     fontWeight: 500,
     padding: '2px 8px',
     borderRadius: '999px',
@@ -68,7 +68,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   // artist/events' compensation pill + "Lineup full" pill - identical
   // chrome on both real call sites, no per-site override needed.
   pill: {
-    fontSize: '13px',
+    fontSize: 'var(--afa-text-ui)',
     fontWeight: 700,
     padding: '5px 12px',
     borderRadius: '999px',

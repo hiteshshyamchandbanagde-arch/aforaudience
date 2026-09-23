@@ -64,7 +64,7 @@ export default function VenuesViewToggle({
                 border: "none",
                 cursor: "pointer",
                 fontFamily: "var(--font-ui)",
-                fontSize: "20px",
+                fontSize: "var(--afa-text-20px)",
                 letterSpacing: "-0.01em",
                 transition: "color 0.2s ease",
               }}
@@ -83,7 +83,7 @@ export default function VenuesViewToggle({
 
       {view === "venues" ? (
         venues.length === 0 ? (
-          <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venuesPage.emptyNoVenues}</p>
+          <p style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venuesPage.emptyNoVenues}</p>
         ) : (
           <VenuesGridClient venues={venues} defaultCity={defaultCity} />
         )

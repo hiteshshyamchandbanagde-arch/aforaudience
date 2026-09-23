@@ -20,7 +20,7 @@ export default function SearchInputBox({ value, onChange, placeholder, className
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        style={{ flex: 1, border: "none", background: "transparent", fontSize: "14px", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
+        style={{ flex: 1, border: "none", background: "transparent", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", color: "var(--afa-text-primary)", outline: "none" }}
       />
     </label>
   )

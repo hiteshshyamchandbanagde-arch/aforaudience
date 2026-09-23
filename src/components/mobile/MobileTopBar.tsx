@@ -127,7 +127,7 @@ export default function MobileTopBar() {
       }}
     >
       <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
           <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
         </span>
         <LocationChip variant="topbar" />
@@ -152,7 +152,7 @@ export default function MobileTopBar() {
             border: '1px solid rgba(245,245,240,0.12)',
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
-            fontSize: '13px',
+            fontSize: 'var(--afa-text-ui)',
             outline: 'none',
           }}
         />
@@ -212,7 +212,7 @@ export default function MobileTopBar() {
               <button
                 key={l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: '13px', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
               >
                 {l.nativeLabel}
               </button>
@@ -225,7 +225,7 @@ export default function MobileTopBar() {
         {status === 'loading' ? null : user ? (
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
           >
             {t.nav.signOut}
           </button>
@@ -235,12 +235,12 @@ export default function MobileTopBar() {
                 Out button on purpose - two elements here (vs one) eat
                 into the search input's width at 360-375px, this is the
                 sizing-only fold-in for that. */}
-            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
+            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
               {t.nav.signIn}
             </Link>
             <Link
               href="/register"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
             >
               {t.nav.signUp}
             </Link>

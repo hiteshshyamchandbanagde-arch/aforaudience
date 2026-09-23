@@ -151,7 +151,7 @@ export default function VenueDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px' }}>You're not registered as a Venue Owner</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '24px' }}>Apply to list your venue from your profile to start managing bookings.</p>
             <BackLink href="/" label="Back to Home" />
           </div>
@@ -168,8 +168,8 @@ export default function VenueDashboard() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>⏳</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>
+            <div style={{ fontSize: 'var(--afa-text-page-title-lg)', marginBottom: '8px' }}>⏳</div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px' }}>Your Venue Owner account is pending approval</h1>
             <p style={{ color: 'var(--afa-text-primary)', opacity: 0.6 }}>
               Our team reviews new Venue Owner applications before you can list a venue and accept bookings. We'll notify you as soon as you're approved.
             </p>
@@ -262,7 +262,7 @@ export default function VenueDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <IconUsers size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                       <div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
                       </div>
                     </div>
@@ -270,7 +270,7 @@ export default function VenueDashboard() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                         <div>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
                         </div>
                       </div>
@@ -278,7 +278,7 @@ export default function VenueDashboard() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                         <div>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>
                         </div>
                       </div>
@@ -288,14 +288,14 @@ export default function VenueDashboard() {
                   <p style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--afa-amber)', marginTop: '14px', marginBottom: 0 }}>{rateLabel(venue)}</p>
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }} onClick={(e) => e.stopPropagation()}>
-                    <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: '13px' }}>
+                    <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                       View
                     </Link>
-                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-primary" style={{ ...primaryLinkStyle, flex: 1, padding: '9px 0', fontSize: '13px' }}>
+                    <Link href={`/dashboard/venue/${venue.id}/edit`} className="avp-btn-primary" style={{ ...primaryLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                       Edit
                     </Link>
                     {venue.seatingMode === 'NUMBERED' && (
-                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: '13px' }}>
+                      <Link href={`/dashboard/venue/${venue.id}/seat-map`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>
                         <IconMap size={14} />
                       </Link>
                     )}
