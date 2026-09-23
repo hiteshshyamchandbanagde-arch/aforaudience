@@ -61,11 +61,11 @@ export default function PhoneVerifyNudge() {
         alignItems: 'center',
         gap: 12,
         padding: '10px 16px',
-        fontSize: 14,
+        fontSize: 'var(--afa-text-body)',
         lineHeight: 1.4,
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 18, lineHeight: 1 }}>
+      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-18px)', lineHeight: 1 }}>
         📱
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>

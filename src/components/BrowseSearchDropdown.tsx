@@ -87,7 +87,7 @@ export default function BrowseSearchDropdown<T>({
                 onClick={() => { setFocused(false); onSelect(item) }}
                 style={{
                   display: "block", width: "100%", textAlign: "left", padding: "10px 20px",
-                  border: "none", background: "transparent", cursor: "pointer", fontSize: "14px",
+                  border: "none", background: "transparent", cursor: "pointer", fontSize: "var(--afa-text-body)",
                   color: "var(--afa-text-primary)", fontFamily: "var(--font-sans)",
                 }}
               >

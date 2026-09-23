@@ -25,7 +25,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
     <main style={{ minHeight: "100vh", background: PAPER, fontFamily: SANS }}>
       <SiteNav />
       <div style={{ maxWidth: "720px", margin: "0 auto", padding: "48px 24px 96px" }}>
-        <Link href="/" style={{ fontSize: "14px", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
+        <Link href="/" style={{ fontSize: "var(--afa-text-body)", color: EMBER, textDecoration: "none", fontWeight: 600 }}>
           ← Back to AforAudience
         </Link>
 
@@ -39,10 +39,10 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
             border: "1px solid var(--afa-amber)",
           }}
         >
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "4px" }}>
+          <p style={{ fontSize: "var(--afa-text-ui)", fontWeight: 700, color: "var(--afa-amber)", marginBottom: "4px" }}>
             Draft — pending legal review
           </p>
-          <p style={{ fontSize: "13px", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
+          <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.75, lineHeight: 1.6 }}>
             This page reflects our current plan, not a finalized legal document. It will be reviewed with our CA and a
             lawyer once the company is formally registered, and this notice will be removed once that review is
             complete.
@@ -52,9 +52,9 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
         <h1 style={{ fontFamily: SERIF, fontSize: "clamp(30px, 4vw, 42px)", fontWeight: 700, color: INK, marginBottom: "8px" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "13px", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
+        <p style={{ fontSize: "var(--afa-text-ui)", color: INK, opacity: 0.5, marginBottom: "40px" }}>Last updated: {lastUpdated}</p>
 
-        <div style={{ fontSize: "16px", lineHeight: 1.75, color: INK }}>{children}</div>
+        <div style={{ fontSize: "var(--afa-text-title)", lineHeight: 1.75, color: INK }}>{children}</div>
       </div>
     </main>
   )

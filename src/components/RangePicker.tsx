@@ -18,7 +18,7 @@ export default function RangePicker({ value, onChange }: { value: string; onChan
           key={r.value}
           onClick={() => onChange(r.value)}
           style={{
-            fontSize: '13px',
+            fontSize: 'var(--afa-text-ui)',
             fontWeight: 600,
             padding: '6px 14px',
             borderRadius: '6px',

@@ -39,7 +39,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
 
   return (
     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
         Share Poster
       </h3>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -58,7 +58,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
       >
         {sharing ? 'Preparing...' : 'Share / Download'}
       </Button>
-      {error && <p style={{ fontSize: '12px', color: 'var(--afa-error)', marginTop: '8px' }}>{error}</p>}
+      {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: '8px' }}>{error}</p>}
     </div>
   )
 }

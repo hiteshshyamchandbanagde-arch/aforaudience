@@ -76,7 +76,7 @@ export default function GenrePicker({ value, onChange, size = 'default' }: Props
           )
         })}
       </div>
-      <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
+      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
         {tr.genrePicker.otherLabel} <span style={{ fontWeight: 400, opacity: 0.7 }}>{tr.genrePicker.otherHint}</span>
       </label>
       <input
@@ -85,7 +85,7 @@ export default function GenrePicker({ value, onChange, size = 'default' }: Props
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder={tr.genrePicker.otherPlaceholder}
-        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: '14px', boxSizing: 'border-box', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
       />
     </div>
   )

@@ -25,19 +25,19 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
           padding: "48px 24px",
         }}
       >
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", letterSpacing: "0.12em", color: "var(--afa-fill-solid)", textTransform: "uppercase", marginBottom: "20px" }}>
           {tr.comingSoon.badge}
         </div>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
+        <p style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
           {description ?? tr.comingSoon.defaultDescription}
         </p>
         <Link
           href="/"
           style={{
-            fontSize: "14px",
+            fontSize: "var(--afa-text-body)",
             fontWeight: 600,
             color: "var(--afa-on-fill-solid)",
             textDecoration: "none",

@@ -16,7 +16,7 @@ export default function BackLink({ href, label }: { href: string; label: string 
         display: 'inline-flex',
         alignItems: 'center',
         gap: '4px',
-        fontSize: '13px',
+        fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
         color: 'var(--afa-fill-solid)',
         textDecoration: 'none',

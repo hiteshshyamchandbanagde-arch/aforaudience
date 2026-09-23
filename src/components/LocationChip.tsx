@@ -90,10 +90,10 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
   // size TopBar.tsx's own Figma reference uses for this exact spot.
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
-      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
+      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-15px)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
       : variant === 'topbar'
       ? { display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
+      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
@@ -124,18 +124,18 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
             autoFocus
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (
-              <div style={{ fontSize: '12px', opacity: 0.5, padding: '6px 4px' }}>{t.location.noMatchingCities}</div>
+              <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: '6px 4px' }}>{t.location.noMatchingCities}</div>
             ) : (
               filteredCities.map((c) => (
                 <button
                   key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? FILL_SOLID_TINT : 'transparent', cursor: 'pointer', fontSize: '13px', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? FILL_SOLID_TINT : 'transparent', cursor: 'pointer', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
                 >
                   {c.label}
                 </button>

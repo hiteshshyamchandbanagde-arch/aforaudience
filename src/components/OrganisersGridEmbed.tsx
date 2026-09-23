@@ -100,8 +100,8 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
   }
 
   if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "14px" }}>{error}</div>
-  if (organisers.length === 0) return <p style={{ fontSize: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
+  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "var(--afa-text-body)" }}>{error}</div>
+  if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
@@ -132,7 +132,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           value={internalSearch}
           onChange={(e) => setInternalSearch(e.target.value)}
           placeholder={tr.organisersEmbed.searchPlaceholder}
-          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--afa-border-resting)", fontSize: "14px", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
+          style={{ width: "100%", maxWidth: "360px", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", marginBottom: "20px", boxSizing: "border-box", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none" }}
         />
       </BrowseSearchDropdown>
       )}
@@ -169,7 +169,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-              <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
+              <div style={{ position: "relative", width: "40px", height: "40px", borderRadius: "50%", background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                 {org.user.avatar && !isPlaceholderImageUrl(org.user.avatar) ? (
                   <Photo src={org.user.avatar} alt={org.orgName} />
                 ) : (
@@ -178,10 +178,10 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
               </div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
             </div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}
             </p>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "rgba(245,245,240,0.6)" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>
               {org._count.events} {org._count.events === 1 ? tr.organisersEmbed.eventSingular : tr.organisersEmbed.eventPlural}
             </div>
           </div>

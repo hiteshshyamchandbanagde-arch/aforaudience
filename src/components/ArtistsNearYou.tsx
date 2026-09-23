@@ -84,7 +84,7 @@ export default function ArtistsNearYou() {
   return (
     <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
-        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '14px', margin: 0 }}>{tr.homePage.artistsRailHeading}</h4>
+        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.artistsRailHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.artistsRailBadge}</span>
       </div>
 
@@ -108,7 +108,7 @@ export default function ArtistsNearYou() {
       )}
 
       {artists !== null && artists.length === 0 && (
-        <p style={{ fontSize: '12px', color: '#a89880', lineHeight: 1.6 }}>{tr.homePage.artistsRailEmpty}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: '#a89880', lineHeight: 1.6 }}>{tr.homePage.artistsRailEmpty}</p>
       )}
 
       {artists !== null && artists.length > 0 && (
@@ -135,10 +135,10 @@ export default function ArtistsNearYou() {
                 </div>
               )}
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                <div style={{ fontSize: '10px', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+                <div style={{ fontSize: 'var(--afa-text-10px)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}
               </div>
             </Link>
@@ -154,7 +154,7 @@ export default function ArtistsNearYou() {
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {tr.homePage.artistsRailApplyEyebrow}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 700, color: '#F7F3EE' }}>
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: '#F7F3EE' }}>
             <span>{tr.homePage.artistsRailApplyCta}</span>
             <span aria-hidden="true">→</span>
           </span>

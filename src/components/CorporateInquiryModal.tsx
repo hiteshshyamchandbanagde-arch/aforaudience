@@ -88,7 +88,7 @@ function FormField({ label, name, type, placeholder, value, onChange, maxLength,
 }) {
   return (
     <div style={wrapperStyle}>
-      <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
+      <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
         {label}
       </label>
       <Input
@@ -178,10 +178,10 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
         {submitted ? (
           <div style={{ textAlign: "center", padding: "24px 8px" }}>
             <div style={{ fontSize: "40px", marginBottom: "12px" }}>✅</div>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               Inquiry sent!
             </h2>
-            <p style={{ fontSize: "14px", color: "var(--afa-text-primary)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
+            <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
               {artistName} has been notified and will reach out to you directly at the email/phone you provided.
             </p>
             <Button variant="primary" onClick={handleClose}>
@@ -194,13 +194,13 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "19px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
                 Book {artistName} for your event
               </h2>
-              <div style={{ fontSize: "12px", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.4 }}>
+              <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.4 }}>
                 For corporate or private events. Sends directly to the artist - no payment happens here.
               </div>
             </div>
 
             {error && (
-              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "14px", fontSize: "13px", color: "var(--afa-error)" }}>
+              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "14px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>
                 {error}
               </div>
             )}
@@ -227,7 +227,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 <FormField label="Phone" name="contactPhone" type="tel" placeholder="+91 98765 43210" value={form.contactPhone} onChange={handleChange} maxLength={FIELD_LIMITS.contactPhone} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
                 <div style={{ flex: "1 1 140px", minWidth: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
+                  <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
                     City
                   </label>
                   {/* Real Google Places lookup (11 Aug) - safe to use now
@@ -252,7 +252,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 <FormField label="Preferred Date" name="preferredDate" type="date" value={form.preferredDate} onChange={handleChange} wrapperStyle={{ flex: "1 1 140px", minWidth: 0 }} />
                 <div style={{ flex: "1 1 140px", minWidth: 0 }}>
-                  <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
+                  <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
                     Budget Range
                   </label>
                   <PresetSelectWithOther
@@ -266,7 +266,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
               </div>
 
               <div>
-                <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
+                <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "4px" }}>
                   Message
                 </label>
                 <textarea

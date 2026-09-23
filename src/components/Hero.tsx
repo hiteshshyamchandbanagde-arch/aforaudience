@@ -46,7 +46,7 @@ export default function Hero() {
             {tr.homePage.heroLine2}<em style={{ fontStyle: "italic", fontWeight: 500, color: "var(--afa-amber)" }}>{tr.homePage.heroLine3}</em>
           </h1>
 
-          <p style={{ marginTop: "26px", maxWidth: "560px", fontFamily: "var(--font-sans)", fontSize: "18px", lineHeight: 1.65, color: "var(--afa-text-primary)", opacity: 0.75 }}>
+          <p style={{ marginTop: "26px", maxWidth: "560px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-18px)", lineHeight: 1.65, color: "var(--afa-text-primary)", opacity: 0.75 }}>
             {tr.homePage.heroSubtitle}
           </p>
 

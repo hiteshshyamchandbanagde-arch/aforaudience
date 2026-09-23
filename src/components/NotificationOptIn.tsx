@@ -93,7 +93,7 @@ export default function NotificationOptIn() {
         alignItems: 'center',
         gap: 12,
         padding: '10px 16px',
-        fontSize: 14,
+        fontSize: 'var(--afa-text-body)',
         lineHeight: 1.4,
       }}
     >
@@ -106,7 +106,7 @@ export default function NotificationOptIn() {
         fullWidth={false}
         onClick={enable}
         disabled={busy}
-        style={{ padding: '6px 14px', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}
+        style={{ padding: '6px 14px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, whiteSpace: 'nowrap' }}
       >
         {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
       </Button>
@@ -117,7 +117,7 @@ export default function NotificationOptIn() {
           background: 'transparent',
           color: 'rgba(247,243,238,0.6)',
           border: 'none',
-          fontSize: 18,
+          fontSize: 'var(--afa-text-18px)',
           lineHeight: 1,
           cursor: 'pointer',
           padding: '0 4px',

@@ -163,10 +163,10 @@ export default function WelcomeSequence() {
       >
         {step === 1 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 12 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 12 }}>
               {tr.welcomeSequence.step1Heading}
             </h1>
-            <p style={{ fontSize: 15, color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 28 }}>
+            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 28 }}>
               {tr.welcomeSequence.step1Subtitle}
             </p>
             <Button variant="primary" onClick={() => setStep(2)}>
@@ -177,12 +177,12 @@ export default function WelcomeSequence() {
 
         {step === 2 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 8 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 8 }}>
               {tr.welcomeSequence.step2Heading}
             </h1>
             {user.isVerified ? (
               <>
-                <p style={{ fontSize: 14, color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
                   {tr.verifyPhonePage.alreadyVerifiedMessage}
                 </p>
                 <Button variant="primary" onClick={() => setStep(3)}>
@@ -191,7 +191,7 @@ export default function WelcomeSequence() {
               </>
             ) : !user.phone ? (
               <>
-                <p style={{ fontSize: 14, color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
                   {tr.welcomeSequence.noPhoneOnFileMessage}
                 </p>
                 <Button variant="primary" onClick={() => setStep(3)}>
@@ -200,12 +200,12 @@ export default function WelcomeSequence() {
               </>
             ) : (
               <>
-                <p style={{ fontSize: 14, color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
+                <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', marginBottom: 24 }}>
                   {tr.welcomeSequence.step2Intro}
                 </p>
-                {otp.error && <p style={{ fontSize: 13, color: 'var(--afa-error)', marginBottom: 16 }}>{otp.error}</p>}
+                {otp.error && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: 16 }}>{otp.error}</p>}
                 {otp.devOtp && (
-                  <div style={{ background: 'rgba(201,151,58,0.08)', border: '1px solid var(--afa-amber)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: 'var(--afa-text-primary)' }}>
+                  <div style={{ background: 'rgba(201,151,58,0.08)', border: '1px solid var(--afa-amber)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                     QA Mode — dev OTP: <strong>{otp.devOtp}</strong>
                   </div>
                 )}
@@ -220,7 +220,7 @@ export default function WelcomeSequence() {
                     padding: '12px 16px',
                     borderRadius: 8,
                     border: '1px solid var(--afa-border-resting)',
-                    fontSize: 18,
+                    fontSize: 'var(--afa-text-18px)',
                     letterSpacing: '0.3em',
                     textAlign: 'center',
                     color: 'var(--afa-text-primary)',
@@ -251,7 +251,7 @@ export default function WelcomeSequence() {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
               <BellIcon style={{ width: 32, height: 32, color: 'var(--afa-text-primary)' }} />
             </div>
-            <p style={{ fontSize: 15, color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
               {tr.notificationOptIn.message}
             </p>
             <Button variant="primary" onClick={handleEnablePush} disabled={pushBusy}>
@@ -265,7 +265,7 @@ export default function WelcomeSequence() {
 
         {step === 4 && (
           <>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 24 }}>
               {tr.welcomeSequence.step4Heading}
             </h1>
             <Button

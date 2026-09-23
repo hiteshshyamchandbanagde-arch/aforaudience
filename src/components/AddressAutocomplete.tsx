@@ -127,7 +127,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
         autoComplete="off"
       />
       {resolving && (
-        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', opacity: 0.5 }}>
+        <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: 'var(--afa-text-micro)', opacity: 0.5 }}>
           ...
         </span>
       )}
@@ -160,7 +160,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
                 border: 'none',
                 background: 'transparent',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: 'var(--afa-text-body)',
                 color: 'var(--afa-text-primary)',
               }}
               onMouseDown={(e) => e.preventDefault()}
@@ -174,7 +174,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
         </div>
       )}
       {loading && open && predictions.length === 0 && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: '12px', opacity: 0.5, padding: '4px 2px' }}>
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: '4px 2px' }}>
           Searching...
         </div>
       )}

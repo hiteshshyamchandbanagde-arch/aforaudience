@@ -98,18 +98,18 @@ function Ballot({
 
   return (
     <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '16px', border: '1px solid var(--afa-tint-08)', marginBottom: '12px' }}>
-      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
-        {label}{alreadyVoted && <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
+      <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>
+        {label}{alreadyVoted && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-sage)' }}>✓ Submitted — you can change it until voting closes</span>}
       </div>
       {[1, 2, 3].map((rank) => (
         <div key={rank} style={{ marginBottom: '8px' }}>
-          <label style={{ fontSize: '11px', color: 'var(--afa-text-primary)', opacity: 0.6, display: 'block', marginBottom: '4px' }}>
+          <label style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.6, display: 'block', marginBottom: '4px' }}>
             {rank === 1 ? '1st choice' : rank === 2 ? '2nd choice (optional)' : '3rd choice (optional)'}
           </label>
           <select
             value={picks[rank]}
             onChange={(e) => setPicks((prev) => ({ ...prev, [rank]: e.target.value }))}
-            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           >
             <option value="">—</option>
             {lineup.map((p) => (
@@ -118,7 +118,7 @@ function Ballot({
           </select>
         </div>
       ))}
-      {error && <div style={{ fontSize: '12px', color: 'var(--afa-fill-solid)', marginBottom: '8px' }}>{error}</div>}
+      {error && <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-fill-solid)', marginBottom: '8px' }}>{error}</div>}
       <Button
         variant="primary"
         size="md"
@@ -161,32 +161,32 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
 
   return (
     <div style={{ marginTop: '20px' }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
         🗳️ Audience Choice
       </h3>
 
       {results?.available ? (
         <div>
-          <p style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '14px' }}>
             A separate, audience-weighted result — not the organiser's own decision. Blended from Audience/Panelist/Celebrity votes ({results.voterCounts?.AUDIENCE || 0} / {results.voterCounts?.PANELIST || 0} / {results.voterCounts?.CELEBRITY || 0} voters).
           </p>
           {(results.ranking || []).map((r, i) => (
             <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '12px 16px', marginBottom: '8px', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.08)' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: i === 0 ? 'var(--afa-gold)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: i === 0 ? 'var(--afa-gold)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
                 {i + 1}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>{r.artistName}</div>
-                <div style={{ fontSize: '11px', opacity: 0.5 }}>Audience {r.byCategory.AUDIENCE} · Panelist {r.byCategory.PANELIST} · Celebrity {r.byCategory.CELEBRITY}</div>
+                <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700 }}>{r.artistName}</div>
+                <div style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.5 }}>Audience {r.byCategory.AUDIENCE} · Panelist {r.byCategory.PANELIST} · Celebrity {r.byCategory.CELEBRITY}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700 }}>{r.blendedScore}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700 }}>{r.blendedScore}</div>
             </div>
           ))}
         </div>
       ) : results && !results.isOpen ? (
-        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Voting opens once the show ends.</p>
+        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Voting opens once the show ends.</p>
       ) : status !== 'authenticated' ? (
-        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Log in to vote if you're a checked-in attendee, panelist, or celebrity guest.</p>
+        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Log in to vote if you're a checked-in attendee, panelist, or celebrity guest.</p>
       ) : voteState ? (
         voteState.eligibility.isPanelist || voteState.eligibility.isCelebrity || voteState.eligibility.audienceBookingIds.length > 0 ? (
           <div>
@@ -209,7 +209,7 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
             ))}
           </div>
         ) : (
-          <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
             Voting is open for checked-in attendees, accepted panelists, and the celebrity guest.
           </p>
         )

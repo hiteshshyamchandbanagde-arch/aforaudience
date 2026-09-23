@@ -64,7 +64,7 @@ export default function MessageButton({ contextType, contextId, label = 'Message
         color: 'var(--afa-sage, #4a6741)',
         fontFamily: 'var(--font-sans)',
         fontWeight: 600,
-        fontSize: '13px',
+        fontSize: 'var(--afa-text-ui)',
         cursor: loading ? 'default' : 'pointer',
         opacity: loading ? 0.6 : 1,
         ...style,

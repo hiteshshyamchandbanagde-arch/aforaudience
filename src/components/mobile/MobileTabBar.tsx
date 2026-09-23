@@ -464,7 +464,7 @@ export default function MobileTabBar() {
               <span
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: 10,
+                  fontSize: 'var(--afa-text-10px)',
                   fontWeight: active ? 600 : 500,
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
@@ -487,7 +487,7 @@ export default function MobileTabBar() {
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: 10,
+                fontSize: 'var(--afa-text-10px)',
                 fontWeight: moreActive ? 600 : 500,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
@@ -507,7 +507,7 @@ export default function MobileTabBar() {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--afa-tint-08)' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--afa-text-primary)' }}>More</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', color: 'var(--afa-text-primary)' }}>More</span>
               <button
                 onClick={() => setMoreOpen(false)}
                 aria-label="Close"
@@ -532,7 +532,7 @@ export default function MobileTabBar() {
                   }}
                 >
                   <item.Icon style={{ width: 20, height: 20 }} />
-                  <span style={{ fontSize: 15 }}>{item.label}</span>
+                  <span style={{ fontSize: 'var(--afa-text-15px)' }}>{item.label}</span>
                 </Link>
               ))}
             </div>

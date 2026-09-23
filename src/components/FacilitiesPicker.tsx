@@ -99,7 +99,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
           )
         })}
       </div>
-      <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
+      <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.7, display: 'block', marginBottom: '6px' }}>
         Other <span style={{ fontWeight: 400, opacity: 0.7 }}>(comma separated, optional)</span>
       </label>
       <input
@@ -108,7 +108,7 @@ export default function FacilitiesPicker({ value, onChange }: Props) {
         onChange={(e) => handleOtherChange(e.target.value)}
         maxLength={MAX_OTHER_LENGTH}
         placeholder="e.g., Rooftop seating, Valet"
-        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: '14px', boxSizing: 'border-box' }}
+        style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' }}
       />
     </div>
   )

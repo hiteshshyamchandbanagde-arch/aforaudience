@@ -55,7 +55,7 @@ export default function ArtistNoPhoto({ name, genres, caption, size = "card" }: 
       />
       <div style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: size === "hero" ? "32px" : "18px" }}>
         {caption && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "10px" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "10px" }}>
             {caption}
           </span>
         )}

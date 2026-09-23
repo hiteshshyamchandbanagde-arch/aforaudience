@@ -85,7 +85,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
               <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-amber)" }}>
                 {i + 1}
               </span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "15px", color: "rgba(245,245,240,0.85)" }}>{step}</span>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-15px)", color: "rgba(245,245,240,0.85)" }}>{step}</span>
             </li>
           ))}
         </ol>

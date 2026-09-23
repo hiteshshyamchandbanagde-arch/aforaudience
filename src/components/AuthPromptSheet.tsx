@@ -118,14 +118,14 @@ export default function AuthPromptSheet({
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "4px" : 0 }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: subtitle ? "4px" : 0 }}>
             {title}
           </h2>
-          {subtitle && <div style={{ fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.55 }}>{subtitle}</div>}
+          {subtitle && <div style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.55 }}>{subtitle}</div>}
         </div>
 
         {error && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", color: "var(--afa-error)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>
             {error}
           </div>
         )}
@@ -136,7 +136,7 @@ export default function AuthPromptSheet({
             { label: "Password", name: "password", type: "password", placeholder: "Your password" },
           ].map((field) => (
             <div key={field.name}>
-              <label style={{ fontSize: "12px", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
+              <label style={{ fontSize: "var(--afa-text-small)", fontWeight: 500, color: "var(--afa-text-primary)", opacity: 0.7, display: "block", marginBottom: "5px" }}>
                 {field.label}
               </label>
               <Input
@@ -155,7 +155,7 @@ export default function AuthPromptSheet({
           {loading ? "Signing in..." : "Sign In & Continue"}
         </Button>
 
-        <div style={{ textAlign: "center", fontSize: "13px", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "4px" }}>
           New here?{" "}
           <Link href="/register" style={{ color: "var(--afa-amber)", fontWeight: 600, textDecoration: "none" }}>
             Create an account
