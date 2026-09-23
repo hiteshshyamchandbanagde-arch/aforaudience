@@ -79,7 +79,7 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
           border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
           background: following ? "transparent" : "var(--afa-fill-solid)",
           color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
-          fontSize: "13px",
+          fontSize: "var(--afa-text-ui)",
           fontWeight: 600,
           cursor: busy ? "default" : "pointer",
           opacity: busy ? 0.6 : 1,
