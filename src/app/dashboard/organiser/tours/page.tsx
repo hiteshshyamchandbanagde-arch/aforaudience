@@ -69,8 +69,8 @@ export default function OrganiserToursPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 24px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
-            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Tours</h1>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '4px' }}>
               A Tour wraps a series of stops under one umbrella so audiences know they're the same run of shows.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function OrganiserToursPage() {
         {tours.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid var(--afa-tint-08)' }}>
             <p style={{ fontSize: '17px', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No Tours yet</p>
-            <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>
               Create a Tour to group a series of stops under one shared page for your audience.
             </p>
             <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/tours/create">
@@ -109,13 +109,13 @@ export default function OrganiserToursPage() {
                     <div>
                       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{tour.title}</h3>
                       {tour.subject && (
-                        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
+                        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>{tour.subject}</p>
                       )}
                     </div>
                     <Badge tone={statusStyle}>{statusStyle.label}</Badge>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', flexWrap: 'wrap' }}>
                     <span><strong>{tour.stops.length}</strong> stop{tour.stops.length !== 1 ? 's' : ''}</span>
                     <span><strong>{liveStops}</strong> live</span>
                     {pendingConsents > 0 && (

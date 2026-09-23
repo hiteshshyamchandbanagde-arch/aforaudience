@@ -98,7 +98,7 @@ function IconTicket() {
   )
 }
 function IconRupee() {
-  return <span style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1 }}>₹</span>
+  return <span style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, lineHeight: 1 }}>₹</span>
 }
 // --- Ticket-stub KPI tile --------------------------------------------------
 // Perforation notches punched into the left/right edges (colored to match
@@ -145,7 +145,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         {icon}
       </div>
       <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
         <div style={{ fontSize: '11.5px', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>
@@ -167,7 +167,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
 }
 
 const sectionLabel: React.CSSProperties = {
-  fontSize: '11px',
+  fontSize: 'var(--afa-text-micro)',
   fontWeight: 700,
   letterSpacing: '0.06em',
   color: 'var(--afa-text-secondary)',
@@ -218,7 +218,7 @@ export default function AdminCommandCenter() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
-            <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
+            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
           </div>
         </main>
         </DashboardShell>
@@ -235,10 +235,10 @@ export default function AdminCommandCenter() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', overflowX: 'hidden' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 64px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
           Command Center
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>
+        <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '26px' }}>
           Everything that needs your attention, at a glance.
         </p>
 
@@ -263,10 +263,10 @@ export default function AdminCommandCenter() {
                     padding: '14px 18px',
                   }}
                 >
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.label}</span>
+                  <span style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{a.label}</span>
                   <span
                     style={{
-                      fontSize: '13px',
+                      fontSize: 'var(--afa-text-ui)',
                       fontWeight: 700,
                       color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)',
                       background: a.tone === 'critical' ? 'rgba(179,38,30,0.15)' : 'rgba(201,151,58,0.15)',
@@ -291,7 +291,7 @@ export default function AdminCommandCenter() {
               borderRadius: '10px',
               padding: '14px 18px',
               color: 'var(--afa-green-deep)',
-              fontSize: '13px',
+              fontSize: 'var(--afa-text-ui)',
               fontWeight: 600,
             }}
           >
@@ -330,7 +330,7 @@ export default function AdminCommandCenter() {
             marginBottom: '26px',
           }}
         >
-          <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
             Issues raised vs. resolved <span style={{ opacity: 0.5, fontWeight: 400 }}>· last 14 days</span>
           </div>
           {/* Fluid width, no horizontal scroll — bars compress on narrow

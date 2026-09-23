@@ -115,7 +115,7 @@ export default function AdminDiaryPage() {
     padding: '12px 14px',
     borderRadius: '10px',
     border: '1px solid var(--afa-tint-10)',
-    fontSize: '14px',
+    fontSize: 'var(--afa-text-body)',
     boxSizing: 'border-box',
     background: 'var(--afa-surface-inverse)',
     color: 'var(--afa-text-primary)',
@@ -130,7 +130,7 @@ export default function AdminDiaryPage() {
         padding: '20px',
       }}
     >
-      <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', marginBottom: '14px' }}>
         New entry
       </p>
       <input
@@ -161,7 +161,7 @@ export default function AdminDiaryPage() {
         overflow: 'hidden',
       }}
     >
-      <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', padding: '18px 20px 4px' }}>
+      <p style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-secondary)', padding: '18px 20px 4px' }}>
         Past entries
       </p>
       {loading ? (
@@ -181,13 +181,13 @@ export default function AdminDiaryPage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '6px' : '0' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
+                  <div style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                   <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
                     {meta.label}
                   </Badge>
                 </div>
                 {entry.notes && (
-                  <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>{entry.notes}</div>
+                  <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: '10px' }}>{entry.notes}</div>
                 )}
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {STATUS_ORDER.map((s) => (
@@ -196,7 +196,7 @@ export default function AdminDiaryPage() {
                       onClick={() => handleStatusChange(entry.id, s)}
                       disabled={updatingId === entry.id || s === entry.status}
                       style={{
-                        fontSize: '11px',
+                        fontSize: 'var(--afa-text-micro)',
                         fontWeight: 600,
                         padding: '5px 12px',
                         borderRadius: 'var(--afa-radius-pill)',
@@ -210,7 +210,7 @@ export default function AdminDiaryPage() {
                       {STATUS_META[s].label}
                     </button>
                   ))}
-                  <span style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', opacity: 0.7, marginLeft: 'auto' }}>
+                  <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, marginLeft: 'auto' }}>
                     Updated {new Date(entry.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
@@ -219,7 +219,7 @@ export default function AdminDiaryPage() {
           })}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '48px 20px 40px', color: 'var(--afa-text-secondary)', fontSize: '14px' }}>
+        <div style={{ textAlign: 'center', padding: '48px 20px 40px', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
           No diary entries yet. Add the first one on the left.
         </div>
       )}
@@ -232,10 +232,10 @@ export default function AdminDiaryPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 20px 80px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 6px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', margin: '0 0 6px' }}>
           Admin Diary
         </h1>
-        <p style={{ color: 'var(--afa-text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
+        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: '24px' }}>
           Company, legal, and administrative milestones — registration, PAN, GST, current account, CA sign-offs, and anything else worth tracking outside the product Feedback board.
         </p>
 

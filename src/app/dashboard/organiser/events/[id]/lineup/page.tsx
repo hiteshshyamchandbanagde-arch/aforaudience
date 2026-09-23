@@ -95,7 +95,7 @@ function SortableRow({
           cursor: 'grab',
           background: 'transparent',
           border: 'none',
-          fontSize: '18px',
+          fontSize: 'var(--afa-text-18px)',
           color: 'var(--afa-text-muted)',
           padding: '4px 8px',
           touchAction: 'none',
@@ -104,16 +104,16 @@ function SortableRow({
         ⠿
       </button>
 
-      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {item.slot}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {item.artistName}
         </p>
         {item.startLabel && item.endLabel && (
-          <p style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
         )}
       </div>
 
@@ -130,7 +130,7 @@ function SortableRow({
           gap: '4px',
           padding: '5px 10px',
           borderRadius: '999px',
-          fontSize: '11px',
+          fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
           whiteSpace: 'nowrap',
           cursor: 'pointer',
@@ -151,9 +151,9 @@ function SortableRow({
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
-        <span style={{ fontSize: '12px', color: 'rgba(245,245,240,0.5)' }}>min</span>
+        <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>min</span>
       </div>
 
       <MessageButton contextType="PERFORMANCE" contextId={item.id} label="Message" />
@@ -291,21 +291,21 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '48px 24px 96px' }}>
           <BackLink href={`/dashboard/organiser/events/${id}`} label="Back to Event" />
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.55)', marginBottom: '24px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.55)', marginBottom: '24px' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
             {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}
           </p>
 
           {error && (
-            <div style={{ fontSize: '13px', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>
           )}
 
           {lineup.length > 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -313,7 +313,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: '13px', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <Button
                   variant="primary"
@@ -331,7 +331,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
           {lineup.length === 0 ? (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)' }}>
-              <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.6)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.6)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>
             </div>

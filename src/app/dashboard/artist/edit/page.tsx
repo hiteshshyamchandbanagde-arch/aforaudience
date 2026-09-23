@@ -17,13 +17,13 @@ const inputStyle = {
   borderRadius: '6px',
   border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
-  fontSize: '14px',
+  fontSize: 'var(--afa-text-body)',
   color: 'var(--afa-text-primary)',
 }
 
 const labelStyle = {
   display: 'block',
-  fontSize: '13px',
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
   marginBottom: '6px',
   color: 'var(--afa-text-primary)',
@@ -195,10 +195,10 @@ export default function EditArtistProfilePage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Edit Your Profile
           </h1>
-          <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             This is what organisers see when you apply to their events.
           </p>
 
@@ -216,7 +216,7 @@ export default function EditArtistProfilePage() {
                 </label>
               </div>
               <details>
-                <summary style={{ fontSize: '12px', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
+                <summary style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer' }}>Or paste an image link instead</summary>
                 <input type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="https://..." style={{ ...inputStyle, marginTop: '8px' }} />
               </details>
             </div>
@@ -251,10 +251,10 @@ export default function EditArtistProfilePage() {
           {/* Artist Background - a richer, entirely optional storytelling
               section beyond the short bio above. Nothing here is required. */}
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               Your Background
             </h2>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '18px' }}>
               All optional - share as much or as little of your story as you want.
             </p>
 
@@ -295,7 +295,7 @@ export default function EditArtistProfilePage() {
               shows aren't happening through the platform. */}
           <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid var(--afa-tint-08)', marginBottom: '20px' }}>
             <label style={labelStyle}>Tour</label>
-            <p style={{ fontSize: '13px', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
               Show where else you're performing — city, country, and an optional date or link. Shown on your public profile.
             </p>
             {tourStops.map((stop) => (
@@ -319,7 +319,7 @@ export default function EditArtistProfilePage() {
                 <button
                   onClick={() => removeTourStop(stop.key)}
                   aria-label="Remove tour stop"
-                  style={{ fontSize: '13px', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer', width: '100%' }}
+                  style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer', width: '100%' }}
                 >
                   ✕ Remove
                 </button>
@@ -327,7 +327,7 @@ export default function EditArtistProfilePage() {
             ))}
             <button
               onClick={addTourStop}
-              style={{ fontSize: '13px', fontWeight: 600, color: 'var(--afa-fill-solid)', background: 'transparent', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
+              style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', background: 'transparent', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
             >
               + Add tour stop
             </button>
@@ -344,7 +344,7 @@ export default function EditArtistProfilePage() {
             >
               {saving ? 'Saving...' : 'Save Profile'}
             </Button>
-            <Link href="/dashboard/artist" style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
+            <Link href="/dashboard/artist" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
               Cancel
             </Link>
           </div>

@@ -110,7 +110,7 @@ function groupCoverage(tokens: DesignToken[]): CoverageStatus {
 function CoverageBadge({ status }: { status: CoverageStatus }) {
   const meta = COVERAGE_META[status]
   return (
-    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 999, color: meta.color, background: meta.bg }}>
+    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 999, color: meta.color, background: meta.bg }}>
       {meta.label}
     </span>
   )
@@ -333,7 +333,7 @@ export default function AdminDesignSystemPage() {
         <DashboardShell>
           <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', padding: '48px 24px', fontFamily: 'var(--font-sans)' }}>
             <div style={{ maxWidth: 560, margin: '0 auto' }}>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: 12, color: 'var(--afa-text-primary)' }}>
                 Admins only
               </h1>
               <p style={{ opacity: 0.7, color: 'var(--afa-text-primary)' }}>This page is only visible to platform admins.</p>
@@ -355,10 +355,10 @@ export default function AdminDesignSystemPage() {
           <div style={{ maxWidth: 1040, margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
               <div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 4 }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 4 }}>
                   Design System
                 </h1>
-                <p style={{ color: 'var(--afa-text-secondary)', fontSize: 14 }}>
+                <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)' }}>
                   Edit here, save, and it's live on the next page load — everywhere, no deploy.
                 </p>
               </div>
@@ -395,7 +395,7 @@ export default function AdminDesignSystemPage() {
               <div style={panelStyle}>
                 <h2 style={sectionTitleStyle}>Version history</h2>
                 {versions.length === 0 ? (
-                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13 }}>No versions yet.</p>
+                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)' }}>No versions yet.</p>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {versions.map((v, i) => {
@@ -413,8 +413,8 @@ export default function AdminDesignSystemPage() {
                         <li key={v.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                             <div>
-                              <div style={{ color: 'var(--afa-text-primary)', fontSize: 13, fontWeight: 600 }}>{v.note || 'Update'}</div>
-                              <div style={{ color: 'var(--afa-text-muted)', fontSize: 12 }}>
+                              <div style={{ color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>{v.note || 'Update'}</div>
+                              <div style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>
                                 {new Date(v.createdAt).toLocaleString()}
                                 {v.creatorLabel && <> · by {v.creatorLabel}</>}
                               </div>
@@ -423,7 +423,7 @@ export default function AdminDesignSystemPage() {
                               onClick={() => handleRevert(v.id)}
                               disabled={saving || wouldRestore === 0}
                               title={wouldRestore === 0 ? 'Already matches the current live values' : `Would change ${wouldRestore} token(s) back to this version's values`}
-                              style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 12, flexShrink: 0, opacity: wouldRestore === 0 ? 0.5 : 1 }}
+                              style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 'var(--afa-text-small)', flexShrink: 0, opacity: wouldRestore === 0 ? 0.5 : 1 }}
                             >
                               {wouldRestore === 0 ? 'Already current' : `Revert (${wouldRestore})`}
                             </button>
@@ -431,7 +431,7 @@ export default function AdminDesignSystemPage() {
                           {changedByThisSave.length > 0 && (
                             <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
                               {changedByThisSave.map((c) => (
-                                <li key={c.key} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--afa-text-muted)' }}>
+                                <li key={c.key} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)' }}>
                                   {c.key}: <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{c.from}</span> → <span style={{ color: 'var(--afa-text-secondary)' }}>{c.to}</span>
                                 </li>
                               ))}
@@ -447,7 +447,7 @@ export default function AdminDesignSystemPage() {
 
             <div style={{ ...panelStyle, marginBottom: 24 }}>
               <h2 style={sectionTitleStyle}>Live preview</h2>
-              <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+              <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 16 }}>
                 Reflects unsaved edits below, using the real Button component.
               </p>
               <div style={{ ...previewStyle, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: 20, background: 'var(--afa-surface-page)' }}>
@@ -491,7 +491,7 @@ export default function AdminDesignSystemPage() {
                     const ratio = contrastRatio(fg, bg)
                     const pass = ratio !== null && ratio >= 4.5
                     return (
-                      <li key={pair.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, color: 'var(--afa-text-secondary)' }}>
+                      <li key={pair.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
                         <span>{pair.label}</span>
                         {ratio === null ? (
                           <span style={{ color: 'var(--afa-text-muted)' }}>—</span>
@@ -525,12 +525,12 @@ export default function AdminDesignSystemPage() {
                     <h2 style={{ ...sectionTitleStyle, marginBottom: 0 }}>{GROUP_META[group].label}</h2>
                     <CoverageBadge status={coverage} />
                   </div>
-                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+                  <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 16 }}>
                     {GROUP_META[group].blurb}
                     {groupAppliesTo.length > 0 && <> Applies to: {groupAppliesTo.join(', ')}.</>}
                   </p>
                   {groupDisabled && (
-                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 13, fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
+                    <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 16, padding: '8px 12px', background: STATUS_TONE.error.bg, border: '1px solid var(--afa-error)' }}>
                       Not consumed anywhere in the app right now (checked via a real grep of every var(--…) usage, not assumed). Editing these has no visible effect until a future ticket adopts them — disabled here so that isn't a trap.
                     </p>
                   )}
@@ -593,7 +593,7 @@ function TokenField({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, opacity: disabled ? 0.55 : 1 }}>
-      <label style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+      <label style={{ fontSize: 'var(--afa-text-micro)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         {token.key}
         {token.locked && (
           <span title="Locked — editable only with confirmation" style={{ color: 'var(--afa-amber)' }}>
@@ -601,12 +601,12 @@ function TokenField({
           </span>
         )}
         {coverage === 'unused' && (
-          <span title="No consumers found anywhere in src/ — editing this has no visible effect" style={{ color: 'var(--afa-error-bright)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span title="No consumers found anywhere in src/ — editing this has no visible effect" style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             unused
           </span>
         )}
         {coverage === 'button-only' && (
-          <span title="Only Button.tsx reads this token" style={{ color: 'var(--afa-amber)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span title="Only Button.tsx reads this token" style={{ color: 'var(--afa-amber)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Button only
           </span>
         )}
@@ -648,7 +648,7 @@ function TokenField({
             onChange={(e) => onChange(`${e.target.value}px`)}
             style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
           />
-          <span style={{ color: 'var(--afa-text-muted)', fontSize: 12 }}>px</span>
+          <span style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>px</span>
         </div>
       )}
 
@@ -663,7 +663,7 @@ function TokenField({
         />
       )}
 
-      {token.group === 'font' && <span style={{ fontSize: 11, color: 'var(--afa-text-muted)' }}>{FONT_ROLE_LABEL[token.key] ?? ''}</span>}
+      {token.group === 'font' && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)' }}>{FONT_ROLE_LABEL[token.key] ?? ''}</span>}
     </div>
   )
 }
@@ -672,8 +672,8 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 24, maxWidth: 440, width: '100%' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
-        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 14, marginBottom: 20 }}>{body}</p>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
+        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <button onClick={onCancel} style={secondaryBtnStyle}>
             Cancel
@@ -694,7 +694,7 @@ const panelStyle: React.CSSProperties = {
 }
 const sectionTitleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-display)',
-  fontSize: 18,
+  fontSize: 'var(--afa-text-18px)',
   color: 'var(--afa-text-primary)',
   marginBottom: 4,
 }
@@ -702,14 +702,14 @@ const inputStyle: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
   padding: '6px 10px',
-  fontSize: 13,
+  fontSize: 'var(--afa-text-ui)',
   background: 'var(--afa-surface-raised)',
   color: 'var(--afa-text-primary)',
   border: '1px solid var(--afa-border-resting)',
 }
 const secondaryBtnStyle: React.CSSProperties = {
   padding: '9px 17px',
-  fontSize: 13,
+  fontSize: 'var(--afa-text-ui)',
   fontWeight: 600,
   background: 'transparent',
   color: 'var(--afa-text-primary)',

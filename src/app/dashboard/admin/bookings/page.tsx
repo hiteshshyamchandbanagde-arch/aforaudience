@@ -130,7 +130,7 @@ export default function AdminBookingsPage() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', marginBottom: '12px', color: 'var(--afa-text-primary)' }}>
               Admin access only
             </h1>
             <p style={{ color: 'var(--afa-text-secondary)' }}>This page is restricted to platform administrators.</p>
@@ -169,10 +169,10 @@ export default function AdminBookingsPage() {
       <DashboardShell>
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 20px 80px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '4px' }}>
             Bookings &amp; delivery
           </h1>
-          <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '20px', fontSize: '14px' }}>
+          <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '20px', fontSize: 'var(--afa-text-body)' }}>
             Confirmed bookings, grouped by ticket-delivery state. Retry re-fires the delivery pipeline on failed
             attempts (30-second cooldown enforced by the endpoint).
           </p>
@@ -213,7 +213,7 @@ export default function AdminBookingsPage() {
                   >
                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
                             <Badge variant="tag" tone={{ bg: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>
@@ -221,25 +221,25 @@ export default function AdminBookingsPage() {
                             </Badge>
                           ) : null}
                         </div>
-                        <div style={{ fontSize: '13px', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '6px' }}>
                           {displayName} — {b.user.email}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>
+                        <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>
                           {b.id}
                         </div>
                       </div>
-                      <div className="text-left lg:text-right" style={{ fontSize: '13px', flexShrink: 0 }}>
+                      <div className="text-left lg:text-right" style={{ fontSize: 'var(--afa-text-ui)', flexShrink: 0 }}>
                         <div style={{ fontWeight: 600, color: s.color }}>{s.label}</div>
                         <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px' }}>{formatDate(b.createdAt)}</div>
                         {isDelivered && b.deliveredAt ? (
-                          <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px', fontSize: '12px' }}>
+                          <div style={{ color: 'var(--afa-text-secondary)', marginTop: '2px', fontSize: 'var(--afa-text-small)' }}>
                             Delivered {formatDate(b.deliveredAt)}
                           </div>
                         ) : null}
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '10px', fontSize: '13px', display: 'flex', gap: '16px', flexWrap: 'wrap', color: 'var(--afa-text-secondary)' }}>
+                    <div style={{ marginTop: '10px', fontSize: 'var(--afa-text-ui)', display: 'flex', gap: '16px', flexWrap: 'wrap', color: 'var(--afa-text-secondary)' }}>
                       <span>Total: <strong style={{ color: 'var(--afa-text-primary)' }}>{formatMoney(b.totalAmount)}</strong></span>
                       {b.bookingFeeAmount > 0 ? <span>Fee: {formatMoney(b.bookingFeeAmount)}</span> : null}
                       {b.payment ? (
@@ -260,7 +260,7 @@ export default function AdminBookingsPage() {
                           background: 'rgba(179,38,30,0.12)',
                           border: '1px solid rgba(179,38,30,0.3)',
                           borderRadius: '8px',
-                          fontSize: '13px',
+                          fontSize: 'var(--afa-text-ui)',
                           color: 'var(--afa-error)',
                           fontFamily: 'var(--font-mono)',
                           whiteSpace: 'pre-wrap',
@@ -275,7 +275,7 @@ export default function AdminBookingsPage() {
                       <div
                         style={{
                           marginTop: '10px',
-                          fontSize: '13px',
+                          fontSize: 'var(--afa-text-ui)',
                           color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : 'var(--afa-error)',
                         }}
                       >
@@ -294,7 +294,7 @@ export default function AdminBookingsPage() {
                             border: 'none',
                             background: 'var(--afa-fill-solid)',
                             color: 'var(--afa-on-fill-solid)',
-                            fontSize: '13px',
+                            fontSize: 'var(--afa-text-ui)',
                             fontWeight: 600,
                             cursor: retryingId === b.id ? 'default' : 'pointer',
                             opacity: retryingId === b.id ? 0.6 : 1,

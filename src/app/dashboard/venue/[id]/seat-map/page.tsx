@@ -2084,7 +2084,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           // marker glyph's own fixed size, not a type-scale choice
                           // - same reasoning GEN-2609-079's own seat-map entry
                           // documented for this exact site.
-                          fontSize: '11px',
+                          fontSize: 'var(--afa-text-micro)',
                           fontWeight: 700,
                           display: 'flex',
                           alignItems: 'center',
