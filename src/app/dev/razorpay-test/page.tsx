@@ -211,7 +211,7 @@ export default function RazorpayTestPage() {
         <div
           style={{
             fontFamily: MONO,
-            fontSize: "11px",
+            fontSize: "var(--afa-text-micro)",
             letterSpacing: "0.24em",
             textTransform: "uppercase",
             color: EMBER,
@@ -250,12 +250,12 @@ export default function RazorpayTestPage() {
             borderRadius: "10px",
             marginBottom: "32px",
             fontFamily: MONO,
-            fontSize: "13px",
+            fontSize: "var(--afa-text-ui)",
             lineHeight: 1.7,
             color: INK,
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: "8px", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "11px", color: EMBER }}>
+          <div style={{ fontWeight: 700, marginBottom: "8px", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "var(--afa-text-micro)", color: EMBER }}>
             Test card values (Razorpay India)
           </div>
           Card: 5267 3181 8797 5449<br />
@@ -269,7 +269,7 @@ export default function RazorpayTestPage() {
             modal, choose any bank, then click <strong>Success</strong> on
             the simulated bank page — it almost always works.
           </div>
-          <div style={{ marginTop: "10px", opacity: 0.6, fontSize: "12px" }}>
+          <div style={{ marginTop: "10px", opacity: 0.6, fontSize: "var(--afa-text-small)" }}>
             Note: Razorpay Test sends a real SMS OTP for card-save
             tokenization, not for the payment itself. Safe to ignore or
             enter — no real money moves in Test Mode.
@@ -288,7 +288,7 @@ export default function RazorpayTestPage() {
               onClick={() => signIn(undefined, { callbackUrl: "/dev/razorpay-test" })}
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "14px",
+                fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
@@ -306,7 +306,7 @@ export default function RazorpayTestPage() {
             <div
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "13px",
+                fontSize: "var(--afa-text-ui)",
                 color: INK,
                 opacity: 0.6,
                 marginBottom: "16px",
@@ -320,7 +320,7 @@ export default function RazorpayTestPage() {
                 style={{
                   display: "block",
                   fontFamily: MONO,
-                  fontSize: "11px",
+                  fontSize: "var(--afa-text-micro)",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: INK,
@@ -338,7 +338,7 @@ export default function RazorpayTestPage() {
                 onChange={(e) => setAmount(Number(e.target.value))}
                 style={{
                   fontFamily: MONO,
-                  fontSize: "16px",
+                  fontSize: "var(--afa-text-title)",
                   padding: "10px 14px",
                   border: `1px solid ${MIST}`,
                   borderRadius: "6px",
@@ -359,7 +359,7 @@ export default function RazorpayTestPage() {
               }
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "16px",
+                fontSize: "var(--afa-text-title)",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
@@ -390,7 +390,7 @@ export default function RazorpayTestPage() {
             border: `1px solid ${MIST}`,
             borderRadius: "10px",
             fontFamily: MONO,
-            fontSize: "13px",
+            fontSize: "var(--afa-text-ui)",
             lineHeight: 1.7,
           }}
         >
@@ -400,7 +400,7 @@ export default function RazorpayTestPage() {
               marginBottom: "12px",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              fontSize: "11px",
+              fontSize: "var(--afa-text-micro)",
               color: EMBER,
             }}
           >
@@ -426,7 +426,7 @@ export default function RazorpayTestPage() {
           )}
         </div>
 
-        <div style={{ marginTop: "40px", fontFamily: "var(--font-sans)", fontSize: "13px", opacity: 0.55 }}>
+        <div style={{ marginTop: "40px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", opacity: 0.55 }}>
           <Link href="/" style={{ color: INK, textDecoration: "underline" }}>
             ← Back home
           </Link>

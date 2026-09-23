@@ -17,7 +17,7 @@ const inputStyle = {
   padding: '14px 16px',
   borderRadius: '8px',
   border: '1px solid var(--afa-border-resting)',
-  fontSize: '18px',
+  fontSize: 'var(--afa-text-18px)',
   letterSpacing: '0.3em',
   textAlign: 'center' as const,
   color: 'var(--afa-text-primary)',
@@ -90,30 +90,30 @@ function VerifyPhoneInner() {
       <SiteNav />
       <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)', fontFamily: 'var(--font-sans)' }}>
         <div style={{ maxWidth: '440px', margin: '0 auto', padding: '48px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             {tr.verifyPhonePage.verifyYourPhoneHeading}
           </h1>
 
           {alreadyVerified ? (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: '15px', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
+              <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
-              <Link href={next} style={{ fontSize: '14px', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
+              <Link href={next} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
                 {tr.verifyPhonePage.continueArrow}
               </Link>
             </div>
           ) : (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: '14px', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
                 {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>
 
               {error && (
-                <ErrorBanner style={{ marginBottom: '18px', fontSize: '13px' }}>{error}</ErrorBanner>
+                <ErrorBanner style={{ marginBottom: '18px', fontSize: 'var(--afa-text-ui)' }}>{error}</ErrorBanner>
               )}
               {devOtp && (
-                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: '13px', color: 'var(--afa-text-primary)' }}>
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}
@@ -148,7 +148,7 @@ function VerifyPhoneInner() {
                   <button
                     onClick={sendCode}
                     disabled={submitting}
-                    style={{ width: '100%', background: 'transparent', color: 'var(--afa-fill-solid)', padding: '10px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                    style={{ width: '100%', background: 'transparent', color: 'var(--afa-fill-solid)', padding: '10px', borderRadius: '8px', border: 'none', fontSize: 'var(--afa-text-ui)', fontWeight: 500, cursor: 'pointer' }}
                   >
                     {tr.loginPage.resendCodeButton}
                   </button>
