@@ -8076,3 +8076,37 @@ Re-verified live before writing this correction (not assumed from the stale text
 Not re-verified (same gap `GEN-2609-075`'s own entry already flagged and for the same reason): the full "admin edits a value in the UI → saves → public page shows it" click-through round trip, since that needs a real admin login and this session didn't create a throwaway credential to script around that. Every other piece of the path (DB truth, validation, cache tag, fallback, live render) is independently confirmed working.
 
 **No code was written against this ticket.** Font-size/font-family/radius migration is unblocked to proceed on the existing mechanism — no re-touching needed once it starts.
+
+## GEN-2609-104 — font-size token migration (785 → 142)
+
+**Shipped:** PR #701, squash-merged `5292040` on 24 Sep. CI was green (`design-tokens`, Vercel). The deploy is `dpl_8PXpxrfZySyYo8W8k6PyMinqxNpp` `READY`, with 0 runtime errors in the 15 min after deploy. `Feedback` is `RESOLVED`/`DEPLOYED_QA`.
+
+**What changed:**
+- `migrate-tokens.js --categories=font-size --apply` ran over 105 files and converted 643 literals.
+- The run was split into 4 area batches: app-root 35, public 73, dashboard 287, components 248.
+- No new tooling was needed; the existing `FONT_SIZE_MAP` covered it.
+- Raw `<style>` blocks now use unquoted `font-size: var(...)`.
+
+**Tokens:** The change uses 12 font-size tokens: `--afa-text-{micro,small,ui,body,title,heading,page-title,page-title-lg,10px,15px,18px,20px}`. All 12 are in the `design-tokens.ts` registry, so they are admin-editable. The live check fetched the served homepage HTML: the `afa-design-tokens-runtime` block carries all 12 values from `DesignToken`, and page markup uses `font-size:var(--afa-text-*)`.
+
+**Ratchet baseline:**
+- font-size went 830 → 142.
+- rgba went 918 → 576 and radius 350 → 331. Both are catch-up for earlier merged work (GEN-2609-099/100/101/102) whose baseline updates never landed, not work from this PR.
+
+**Observation:** The homepage is served as `x-vercel-cache: PRERENDER`, i.e. statically prerendered. For admin token edits to show there immediately, the `revalidateTag("design-tokens")` on admin save has to invalidate the prerendered route as well as the `unstable_cache` entry. Next.js semantics say it should, but this has never been observed live. The admin round-trip test below is what confirms it.
+
+**Still unverified:** The admin round-trip (edit a token in `/dashboard/admin/design-system`, save, see it on a public page) has never been tested. It needs Hitesh's real admin login and is the only missing proof for the North Star.
+
+**Bookkeeping corrections made in the same pass:**
+- `CodeCounter` GEN/2609 went 102 → 106. 103 and 104 had been used without being reserved; 105 and 106 are the new follow-ups.
+- GEN-2609-101, GEN-2609-102 and BUG-2609-057 were still `NEW` even though #699 merged them. They are now `RESOLVED`/`DEPLOYED_QA`.
+
+**Follow-ups logged:**
+- `GEN-2609-105`: a font-size className-bracket matcher for the 8 `text-[Npx]` sites (auth pages + `AuthBrandPanel`). It mirrors GEN-2609-101.
+- `GEN-2609-106`: a decision on the 134 off-scale values, needed from Hitesh. Chat's recommendation:
+  - add a 22px token (about 30 uses);
+  - round the half-pixels;
+  - round 9/9.5px up to 10px;
+  - map 17px and 19px case by case;
+  - leave the 26–84px display one-offs as they are.
+  It is paired with renaming the pixel-named tokens (`text-10px/15px/18px/20px`) to role names, because once admins can edit values, pixel names become misleading.

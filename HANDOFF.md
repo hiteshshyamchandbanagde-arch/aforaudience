@@ -1,3 +1,34 @@
+# Session Handoff — 24 Sept 2026 (chat — GEN-2609-104 (#701) merged, verified live, closed out)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@7a69190`; `#701` squash-merged as `5292040`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. This session
+- Before opening, chat re-checked the diff:
+  - the branch base equals the `qa` HEAD and merges cleanly;
+  - every file has symmetric +/− line counts;
+  - all 643 edits are pure `fontSize` swaps;
+  - all 12 tokens are defined in `globals.css` and registered in `design-tokens.ts`.
+- `#701`: CI green, merged with a pinned SHA, branch deleted. The `qa` tree is byte-identical to the PR head. The Vercel deploy is `READY` with 0 runtime errors. The served HTML shows the runtime token block carrying the `--afa-text-*` values and the page using `var(--afa-text-*)`.
+- Ratchet: hex 54, rgba 576, font-family 0, **font-size 142**, spacing 2029, radius 331, raw-button 211.
+- Bookkeeping fixed:
+  - `CodeCounter` GEN/2609 went 102 → 106 (103 and 104 had been used without being reserved).
+  - 101/102/BUG-057 went `NEW` → `RESOLVED`/`DEPLOYED_QA`; #699 had already merged them.
+  - 104 is `RESOLVED`/`DEPLOYED_QA`.
+
+## 2. Open, in priority order
+1. **Hitesh:** do the admin round-trip test. Change `--afa-text-body` in `/dashboard/admin/design-system`, save, check that a public page changes, then revert. This is the only end-to-end proof of the North Star, and it has never been done. The homepage is `PRERENDER`, so the test also confirms that `revalidateTag` invalidates prerendered routes.
+2. **Hitesh decision `GEN-2609-106`:** the 134 off-scale font sizes, plus renaming the pixel-named tokens. Chat's recommendation is in `docs/design.md`.
+3. `GEN-2609-105` (CC): font-size className-bracket matcher, 8 sites.
+4. Next category: chat recommends raw-button (`GEN-2609-096`, 211 sites, named in the North Star) before radius (331).
+5. Parked (unchanged): Razorpay and Google key rotation, the GEN-2609-005 click-through, the GEN-2609-009 FeeSheet copy, and `GEN-2609-097` (19 stale branches).
+
+## 3. Open PRs
+None against `qa`. `#450` (→ `main`, frozen) untouched.
+
+---
+
 # Session Handoff — 22 Sept 2026 (CC — GEN-2609-101/102/BUG-2609-057, closing out the colour token category)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@cc087b9`. Branch: `chore/gen-2609-101-102-bug-057-color-cleanup`, pushed, **`NOT YET OPENED`** as a PR.
