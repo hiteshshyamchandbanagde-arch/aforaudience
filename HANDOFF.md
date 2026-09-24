@@ -1,3 +1,41 @@
+# Session Handoff — 24 Sept 2026, part 2 (chat — North Star proven end-to-end; plan + decisions)
+
+Delta-only. `qa@6ceb040`, no code changes this part.
+
+## 1. North Star round-trip — VERIFIED LIVE (first time ever)
+- Hitesh set `--afa-text-body` 14→16 in `/dashboard/admin/design-system`. The DB row updated at 01:08:25.
+- The prerendered `/about` page, fetched 33s later, served `--afa-text-body: 16px` with `x-vercel-cache: REVALIDATED`. `revalidateTag` does invalidate prerendered routes, and no redeploy is needed.
+- Reverted to 14px through the UI at 01:11:40. The DB is confirmed at 14px.
+- The admin-to-DB-to-site mechanism is proven. The remaining work is coverage only.
+
+## 2. Decisions (delegated by Hitesh: "as a collaborator, go ahead with your planning")
+- **GEN-2609-106 font-size:**
+  - add `--afa-text-subheading` 22px;
+  - round 9/9.5→10, 10.5→11, 11.5→12, 12.5→13, 13.5→14;
+  - 17px defaults to 16 and 19px to 20, with per-site override listed in the handoff;
+  - display sizes of 26px and above, and `clamp()` values, stay as literals;
+  - rename `text-10px/15px/18px/20px` → `text-caption/body-lg/lead/subtitle`.
+- **Order:**
+  1. 105/106 font-size closeout
+  2. 096 Button phase 1
+  3. radius
+  4. a translucent-colour decision session with Hitesh
+  5. spacing
+  6. editor usability
+- **GEN-2609-096 rescoped:**
+  - `Button.tsx` already exists (10 variants, 51 importers), so this is adoption, not a build.
+  - Phase 1: tokenize about 25 Button-internal literals, classify all 216 raw buttons into classes A–E, add at most `icon` and `bare` variants, adopt.
+- **GEN-2609-107 (new):** spacing migrates onto the scale but is hidden from the admin editor, or exposed as a single density control. The 14 spacing tokens are currently visible there.
+- **GEN-2609-108 (new):** the editor needs human labels, "used for" text, live preview and min/max guardrails before the North Star is called done. Pixel-named radius and spacing tokens get renamed when their categories run.
+- `CodeCounter` GEN/2609 moved 106 → 108.
+
+## 3. Dispatches delivered (chat outputs, not committed)
+- `cc-prompt-gen-2609-105-106-font-size-closeout.md` — run first.
+- `cc-prompt-gen-2609-096-button-adoption-phase1.md` — run after 105/106 merges, because it uses the renamed tokens.
+- Both require a QA-DB SQL preview and Hitesh's OK before any `DesignToken` write.
+
+---
+
 # Session Handoff — 24 Sept 2026 (chat — GEN-2609-104 (#701) merged, verified live, closed out)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@7a69190`; `#701` squash-merged as `5292040`.
