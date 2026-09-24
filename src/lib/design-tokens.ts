@@ -226,6 +226,8 @@ export const DEFAULT_TOKEN_VALUES: Record<string, string> = {
   "--afa-btn-padding-sm": "4px 10px",
   "--afa-btn-padding-md": "9px 17px",
   "--afa-btn-padding-lg": "12px 24px",
+  "--afa-btn-padding-pill-sm": "6px 14px",
+  "--afa-btn-padding-pill-md": "10px 18px",
   "--afa-space-2px": "2px",
   "--afa-space-6px": "6px",
   "--afa-space-10px": "10px",

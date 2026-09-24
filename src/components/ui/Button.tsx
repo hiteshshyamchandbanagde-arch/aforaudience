@@ -131,8 +131,8 @@ const SIZE_CHROME: Record<ButtonSizeToken, { padding: string; borderRadius: stri
   sm: { padding: 'var(--afa-btn-padding-sm)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-small)', fontWeight: 600 },
   md: { padding: 'var(--afa-btn-padding-md)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 },
   lg: { padding: 'var(--afa-btn-padding-lg)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-body)', fontWeight: 600 },
-  'pill-sm': { padding: '6px 14px', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 },
-  'pill-md': { padding: '10px 18px', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-body)', fontWeight: 600 },
+  'pill-sm': { padding: 'var(--afa-btn-padding-pill-sm)', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-ui)', fontWeight: 600 },
+  'pill-md': { padding: 'var(--afa-btn-padding-pill-md)', borderRadius: 'var(--afa-radius-pill)', fontSize: 'var(--afa-text-body)', fontWeight: 600 },
 }
 
 // Exported (not just used internally) so a caller that can't render a
@@ -155,11 +155,11 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 'var(--afa-space-2)',
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-fill-solid)',
         color: 'var(--afa-on-fill-solid)',
-        padding: 16,
+        padding: 'var(--afa-space-4)',
         border: 'none',
         borderRadius: 'var(--afa-radius-pill)',
         fontSize: 'var(--afa-text-title)',
@@ -184,7 +184,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         opacity: 0.4,
         fontSize: 'var(--afa-text-ui)',
         fontFamily: FONT_FAMILY,
-        padding: '8px 0 0',
+        padding: 'var(--afa-space-2) 0 0',
         cursor: 'pointer',
       }
     case 'secondary-reveal':
@@ -219,11 +219,11 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 'var(--afa-space-2)',
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         color: 'var(--afa-on-fill-solid)',
-        padding: 16,
+        padding: 'var(--afa-space-4)',
         border: '1.5px solid var(--afa-on-fill-solid)',
         borderRadius: 'var(--afa-radius-pill)',
         fontSize: 'var(--afa-text-title)',
@@ -248,7 +248,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
         background: 'transparent',
         color: 'var(--afa-text-secondary)',
@@ -257,7 +257,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         // this renders sensibly even if a future caller omits `size` -
         // same defensive convention every other variant already follows.
         // A `size` token (this ticket always passes `sm`) overrides these.
-        padding: '4px 10px',
+        padding: 'var(--afa-btn-padding-sm)',
         borderRadius: 'var(--afa-radius-sm)',
         fontSize: 'var(--afa-text-small)',
         fontWeight: 600,
@@ -281,14 +281,14 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 'var(--afa-space-2)',
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-fill-solid)',
         color: 'var(--afa-on-fill-solid)',
         border: 'none',
         // md-shaped fallback if a caller omits `size` - same defensive
         // convention as outline-neutral/toggle-pill above.
-        padding: '9px 17px',
+        padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
         fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
@@ -308,12 +308,12 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 'var(--afa-space-2)',
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-surface-raised)',
         color: 'var(--afa-error)',
         border: '1px solid var(--afa-error)',
-        padding: '9px 17px',
+        padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
         fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
@@ -346,7 +346,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-fill-solid)',
         color: 'var(--afa-cream)',
-        padding: 16,
+        padding: 'var(--afa-space-4)',
         border: 'none',
         borderRadius: 'var(--afa-radius-md)',
         fontSize: 'var(--afa-text-body-lg)',
@@ -382,7 +382,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: 'var(--afa-space-6px)',
         width: fullWidth ? '100%' : undefined,
         background: selected ? FILL_SOLID_TINT : 'transparent',
         border: `1px solid ${selected ? FILL_SOLID_BORDER_TINT : 'var(--afa-border-resting)'}`,
@@ -391,7 +391,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         // `outline-neutral`) so this renders sensibly even if a future
         // caller omits `size` - callers should always pass `pill-sm`/
         // `pill-md` per the spec, this is only the fallback.
-        padding: '6px 14px',
+        padding: 'var(--afa-btn-padding-pill-sm)',
         borderRadius: 'var(--afa-radius-pill)',
         fontSize: 'var(--afa-text-ui)',
         fontWeight: 600,
@@ -410,7 +410,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         justifyContent: 'center',
         width: diameter,
         height: diameter,
-        borderRadius: '50%',
+        borderRadius: '50%', // token-ok: geometric circle, not a design-scale radius choice
         flexShrink: 0,
         background: 'var(--afa-tint-08)',
         color: 'var(--afa-text-secondary)',
