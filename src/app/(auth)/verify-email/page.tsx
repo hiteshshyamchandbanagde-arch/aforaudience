@@ -46,7 +46,7 @@ function VerifyEmailContent() {
   return (
     <div className="w-full max-w-[440px]">
       <div className="text-center mb-8">
-        <Link href="/" className="text-[28px] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
+        <Link href="/" className="text-[length:var(--afa-text-page-title)] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden" style={{ fontFamily: "var(--font-display)" }}>
           <span className="text-[color:var(--afa-brand-mark)]">A</span>forAudience
           <EnvBadge />
         </Link>

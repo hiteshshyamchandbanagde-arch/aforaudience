@@ -21,9 +21,11 @@
 const assert = require('node:assert/strict')
 const {
   COLOR_MAP,
+  FONT_SIZE_MAP,
   COMPOUND_COLOR_PROPS,
   migrateCompoundStringValue,
   migrateExactStringValue,
+  migrateTailwindFontSizeBracket,
   processLine,
   CATEGORY_DEFS,
   DEFAULT_CATEGORIES,
@@ -199,6 +201,46 @@ t('COMPOUND_COLOR_PROPS is a subset of colour category props (mapFor() can actua
     assert.ok(colourDef.props.has(p), `colour category props should include "${p}"`)
   }
   assert.equal(colourDef.compoundProps, COMPOUND_COLOR_PROPS)
+})
+
+t('GEN-2609-105: migrateTailwindFontSizeBracket converts a bare text-[Npx] bracket to the hinted length: form', () => {
+  const out = migrateTailwindFontSizeBracket('text-[28px] font-bold', FONT_SIZE_MAP, ['px'])
+  assert.equal(out, 'text-[length:var(--afa-text-page-title)] font-bold')
+})
+
+t('GEN-2609-105: never produces the bare (unhinted) text-[var(...)] form - that resolves as colour, not font-size, on the real Tailwind v4 toolchain', () => {
+  const out = migrateTailwindFontSizeBracket('text-[14px]', FONT_SIZE_MAP, ['px'])
+  assert.equal(out, 'text-[length:var(--afa-text-body)]')
+  assert.ok(!/text-\[var\(/.test(out), 'must never emit the unhinted form')
+})
+
+t('GEN-2609-105: a value with no FONT_SIZE_MAP entry stays literal', () => {
+  const out = migrateTailwindFontSizeBracket('text-[17px]', FONT_SIZE_MAP, ['px'])
+  assert.equal(out, null)
+})
+
+t('GEN-2609-105: a rem bracket stays literal when only px is in scope', () => {
+  const out = migrateTailwindFontSizeBracket('text-[1.75rem]', FONT_SIZE_MAP, ['px'])
+  assert.equal(out, null)
+})
+
+t('GEN-2609-105: processLine converts a Tailwind arbitrary-value font-size bracket inside className, leaving the rest of the class list untouched', () => {
+  const line = '        <span className="text-[28px] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden">'
+  const out = processLine(line, false, DEFAULT_DEFS)
+  assert.equal(out, '        <span className="text-[length:var(--afa-text-page-title)] font-bold text-[color:var(--afa-text-primary)] no-underline lg:hidden">')
+})
+
+t('GEN-2609-105: a `--categories` run that excludes font-size never touches className', () => {
+  const line = '      <p className="text-[14px] text-[color:var(--afa-text-primary)] opacity-50 mt-2">'
+  const colourOnlyDefs = [CATEGORY_DEFS.colour]
+  const out = processLine(line, false, colourOnlyDefs)
+  assert.equal(out, line)
+})
+
+t('GEN-2609-105: never runs inside a raw <style> block - a className attribute cannot appear there', () => {
+  const line = '        .afa-events-mode-tab { text-decoration: none; }' // not a real className scenario, just proves the block is skipped when inRawBlock=true
+  const out = processLine(line, true, DEFAULT_DEFS)
+  assert.equal(out, line)
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)

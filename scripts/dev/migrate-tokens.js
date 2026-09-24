@@ -358,6 +358,54 @@ const MATCH_RE_CSS_RAW_COLOR = /([a-zA-Z-]+)(\s*:\s*)([^;{}]+?)(?=\s*[;}])/g
 // contains a literal `"`/`'`).
 const MATCH_RE_JSX_CLASSNAME = /\bclassName=(["'])([^"']*)\1/g
 
+// GEN-2609-105 - Tailwind arbitrary-value FONT-SIZE bracket inside a
+// className="..." JSX attribute (e.g. `text-[28px]`) - structurally the
+// same className-only gap GEN-2609-101 closed for colour
+// (MATCH_RE_JS/MATCH_RE_CSS only match colon-based `prop: value` pairs,
+// never `attr="value"` JSX syntax), but NOT handled by reusing
+// migrateCompoundStringValue()/COLOR_MAP the way -101 did: a font-size
+// bracket's value is a bare dimension (`28px`), not a substring to
+// splice inside a larger string, so it needs its own whole-bracket
+// replacement, same shape as migrateValue()'s dimension lookup but
+// applied to `text-[Npx]` instead of a `prop: value` pair.
+//
+// Replacement is `text-[length:var(--afa-token)]`, NEVER the bare
+// `text-[var(--afa-token)]` form colour's own matcher produces -
+// empirically verified via the real installed Tailwind CLI (v4.3.3,
+// same toolchain check as GEN-2609-101/BUG-2609-057): an UNHINTED
+// `text-[var(--afa-text-page-title)]` compiles to
+// `color: var(--afa-text-page-title)`, not `font-size:` - Tailwind v4's
+// own type-inference for a bare var() reference defaults to colour
+// regardless of the variable's actual name, so reusing colour's plain
+// form here would silently break font-size (`color: 28px` is invalid,
+// the declaration is dropped, and the text falls back to its
+// inherited/default size - not visually obvious). The explicit
+// `length:` type-hint (mirroring colour's own `color:` hint from
+// BUG-2609-057) makes Tailwind's inference unambiguous by construction;
+// re-verified same-session that `text-[length:var(--afa-text-page-title)]`
+// does compile to `font-size: var(--afa-text-page-title)`.
+const MATCH_RE_TW_FONTSIZE_BRACKET = /\btext-\[(-?\d+(?:\.\d+)?)(px|rem)\]/g
+
+// px-only, mirroring CATEGORY_DEFS['font-size'].units - the dimension
+// matcher's own unit scope, and matching every real site found (no rem
+// bracket site exists in this codebase as of GEN-2609-105's own
+// measurement).
+function migrateTailwindFontSizeBracket(raw, map, units) {
+  MATCH_RE_TW_FONTSIZE_BRACKET.lastIndex = 0
+  let changed = false
+  const result = raw.replace(MATCH_RE_TW_FONTSIZE_BRACKET, (whole, numStr, unit) => {
+    const value = parseFloat(numStr)
+    if (value < 0) return whole // negative values always stay literal, same convention as migrateValue()
+    if (!units.includes(unit)) return whole
+    const key = String(value)
+    if (!Object.prototype.hasOwnProperty.call(map, key)) return whole
+    changed = true
+    return `text-[length:var(${map[key]})]`
+  })
+  if (!changed) return null
+  return result
+}
+
 function isCommentLine(line) {
   const t = line.trim()
   return t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')
@@ -599,6 +647,23 @@ function processLine(line, inRawBlock, activeDefs) {
     }
   }
 
+  // GEN-2609-105 - font-size className-bracket pass, same
+  // never-inside-a-raw-<style>-block scoping as colour's className pass
+  // above (a className attribute can't appear there either).
+  if (!inRawBlock && activeDefs.includes(CATEGORY_DEFS['font-size'])) {
+    MATCH_RE_JSX_CLASSNAME.lastIndex = 0
+    let jm
+    while ((jm = MATCH_RE_JSX_CLASSNAME.exec(line))) {
+      const rawValue = jm[2]
+      const migrated = migrateTailwindFontSizeBracket(rawValue, FONT_SIZE_MAP, CATEGORY_DEFS['font-size'].units)
+      if (migrated === null) continue
+      const start = jm.index + jm[0].indexOf(rawValue)
+      const end = start + rawValue.length
+      if (edits.some((e) => start < e.end && end > e.start)) continue
+      edits.push({ start, end, replacement: migrated })
+    }
+  }
+
   if (edits.length === 0) return line
   let result = line
   for (const e of edits.sort((a, b) => b.start - a.start)) {
@@ -667,4 +732,6 @@ module.exports = {
   processLine,
   MATCH_RE_CSS_RAW_COLOR,
   MATCH_RE_JSX_CLASSNAME,
+  MATCH_RE_TW_FONTSIZE_BRACKET,
+  migrateTailwindFontSizeBracket,
 }
