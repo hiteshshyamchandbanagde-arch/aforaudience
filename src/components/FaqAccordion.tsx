@@ -22,15 +22,15 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
               justifyContent: "space-between",
               gap: "16px",
               fontFamily: "var(--font-display)",
-              fontSize: "17px",
+              fontSize: "var(--afa-text-title)",
               fontWeight: 600,
               color: "var(--afa-text-primary)",
             }}
           >
             {item.q}
-            <span aria-hidden style={{ flexShrink: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-18px)", color: "var(--afa-amber)" }}>+</span>
+            <span aria-hidden style={{ flexShrink: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-lead)", color: "var(--afa-amber)" }}>+</span>
           </summary>
-          <p style={{ marginTop: "14px", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-15px)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
+          <p style={{ marginTop: "14px", marginBottom: 0, maxWidth: "640px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>
             {item.a}
           </p>
         </details>

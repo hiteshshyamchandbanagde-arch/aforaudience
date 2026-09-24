@@ -50,7 +50,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
   // 0.03em via its own `style` override rather than picking one value
   // and quietly changing the other site.
   micro: {
-    fontSize: 'var(--afa-text-10px)',
+    fontSize: 'var(--afa-text-caption)',
     fontWeight: 700,
     padding: '2px 8px',
     borderRadius: '999px',

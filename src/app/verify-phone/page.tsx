@@ -17,7 +17,7 @@ const inputStyle = {
   padding: '14px 16px',
   borderRadius: '8px',
   border: '1px solid var(--afa-border-resting)',
-  fontSize: 'var(--afa-text-18px)',
+  fontSize: 'var(--afa-text-lead)',
   letterSpacing: '0.3em',
   textAlign: 'center' as const,
   color: 'var(--afa-text-primary)',
@@ -96,7 +96,7 @@ function VerifyPhoneInner() {
 
           {alreadyVerified ? (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
               <Link href={next} style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>

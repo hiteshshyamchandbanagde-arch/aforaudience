@@ -85,7 +85,7 @@ export default function ArtistsNearYou() {
     <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.artistsRailHeading}</h4>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.artistsRailBadge}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.artistsRailBadge}</span>
       </div>
 
       {artists === null && (
@@ -114,7 +114,7 @@ export default function ArtistsNearYou() {
       {artists !== null && artists.length > 0 && (
         <>
           {!matchedCity && (
-            <p style={{ fontSize: '10.5px', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.artistsRailCityFallbackNote}
             </p>
           )}
@@ -130,15 +130,15 @@ export default function ArtistsNearYou() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={a.avatar} alt="" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(247,243,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(247,243,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                   {initials(a.name)}
                 </div>
               )}
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                <div style={{ fontSize: 'var(--afa-text-10px)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}
               </div>
             </Link>
@@ -151,7 +151,7 @@ export default function ArtistsNearYou() {
           href="/profile"
           style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(247,243,238,0.12)', textDecoration: 'none', color: 'inherit' }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {tr.homePage.artistsRailApplyEyebrow}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: '#F7F3EE' }}>

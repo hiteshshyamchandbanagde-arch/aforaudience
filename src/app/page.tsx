@@ -84,7 +84,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
             padding: "5px 9px",
             borderRadius: "2px",
             fontFamily: "var(--font-mono)",
-            fontSize: "var(--afa-text-10px)",
+            fontSize: "var(--afa-text-caption)",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             color: "var(--afa-amber)",

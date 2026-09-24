@@ -93,7 +93,7 @@ export default function CorporateInquiriesPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Corporate Inquiries
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             Direct booking inquiries from companies and private event organisers. Reach out to them directly - AforAudience doesn't handle payment for these.
           </p>
 
@@ -109,7 +109,7 @@ export default function CorporateInquiriesPage() {
                   <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                       </div>
                       <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', background: meta.bg, color: meta.color }}>{meta.label}</span>

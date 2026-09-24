@@ -31,7 +31,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>
           {title}
         </h1>
-        <p style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
+        <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6, maxWidth: "440px", lineHeight: 1.6, marginBottom: "32px" }}>
           {description ?? tr.comingSoon.defaultDescription}
         </p>
         <Link

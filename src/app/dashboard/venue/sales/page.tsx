@@ -257,7 +257,7 @@ export default function VenueOwnerSalesOverviewPage() {
                   <button
                     onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{ background: 'transparent', border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: '12.5px', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
+                    style={{ background: 'transparent', border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
                   >
                     View all {venues.length} venues
                   </button>
@@ -265,7 +265,7 @@ export default function VenueOwnerSalesOverviewPage() {
 
                 {(showAllVenues || !hasMoreVenues) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: hasMoreVenues ? '16px' : 0 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
                       <span>Venue</span>
                       <span>City</span>
                       <span>Revenue</span>
@@ -305,7 +305,7 @@ export default function VenueOwnerSalesOverviewPage() {
           {/* Demoted relative to "By venue" - secondary context for a
               venue owner (who they're renting to), not a primary metric. */}
           <div style={{ padding: '4px 4px 40px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 10px' }}>
               By organiser
             </p>
             {organisers.length === 0 ? (
@@ -317,7 +317,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: '12.5px', padding: '9px 12px', background: 'rgba(245,245,240,0.02)', color: 'var(--afa-text-secondary)',
+                      fontSize: 'var(--afa-text-ui)', padding: '9px 12px', background: 'rgba(245,245,240,0.02)', color: 'var(--afa-text-secondary)',
                     }}
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>
@@ -338,7 +338,7 @@ export default function VenueOwnerSalesOverviewPage() {
 function StatCard({ label, value, delta, sub }: { label: string; value: string; delta?: number | null; sub?: string }) {
   return (
     <Card style={{ padding: '18px' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null ? (
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error)', marginTop: '6px', marginBottom: 0 }}>
@@ -354,7 +354,7 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Card style={{ padding: '20px', marginBottom: '20px' }}>
-      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: '0 0 16px' }}>{title}</h2>
       {children}
     </Card>
   )

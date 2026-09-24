@@ -42,7 +42,7 @@ function Ornament() {
         color: EMBER,
         opacity: 0.55,
         fontFamily: SERIF,
-        fontSize: "var(--afa-text-20px)",
+        fontSize: "var(--afa-text-subtitle)",
         letterSpacing: "0.6em",
         paddingLeft: "0.6em",
         margin: "56px 0",
@@ -276,7 +276,7 @@ export default function AboutPage() {
             style={{
               fontFamily: SERIF,
               fontStyle: "italic",
-              fontSize: "17px",
+              fontSize: "var(--afa-text-title)",
               color: INK,
               opacity: 0.55,
               marginTop: "40px",

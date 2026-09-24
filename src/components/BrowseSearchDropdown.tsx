@@ -75,7 +75,7 @@ export default function BrowseSearchDropdown<T>({
           }}
         >
           {visible.length === 0 ? (
-            <div style={{ fontSize: "13.5px", color: "var(--afa-text-primary)", opacity: 0.5 }}>
+            <div style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
               {translate
                 ? tr.common.noResultsMatchTemplate.replace("{items}", emptyLabel).replace("{query}", query)
                 : <>No {emptyLabel} match &quot;{query}&quot;</>}
@@ -96,7 +96,7 @@ export default function BrowseSearchDropdown<T>({
             ))
           )}
           {items.length > maxVisible && (
-            <div style={{ fontSize: "11.5px", color: "var(--afa-text-primary)", opacity: 0.45, padding: "6px 20px 2px", borderTop: "1px solid var(--afa-tint-08)", marginTop: "4px" }}>
+            <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.45, padding: "6px 20px 2px", borderTop: "1px solid var(--afa-tint-08)", marginTop: "4px" }}>
               +{items.length - maxVisible} more below
             </div>
           )}

@@ -147,11 +147,11 @@ export default function HomeHeader() {
 
       <div style={{ maxWidth: "1400px", margin: "0 auto", display: "flex", alignItems: "center", gap: "var(--afa-space-6)", padding: "20px 24px" }}>
         <Link href="/" style={{ display: "flex", alignItems: "baseline", gap: "var(--afa-space-2)", textDecoration: "none", flexShrink: 0 }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)" }}>
             <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
           </span>
           <EnvBadge />
-          <span className="home-header-desktop" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
+          <span className="home-header-desktop" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--afa-amber)" }}>
             Where Art Finds Its Crowd
           </span>
         </Link>
@@ -212,7 +212,7 @@ export default function HomeHeader() {
                       <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", textDecoration: "none" }}>
                         {l.label}
                         {l.badge > 0 && (
-                          <span style={{ fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "999px", padding: "1px 7px" }}>
+                          <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "999px", padding: "1px 7px" }}>
                             {l.badge}
                           </span>
                         )}

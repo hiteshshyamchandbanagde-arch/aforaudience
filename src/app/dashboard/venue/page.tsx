@@ -231,7 +231,7 @@ export default function VenueDashboard() {
                         the line-clamp/ellipsis below it. minHeight raised
                         92->118px to fit the address's 2nd line. */}
                     <div style={{ minHeight: '118px', minWidth: 0 }}>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {venue.country && COUNTRY_FLAGS[venue.country] && (() => {
                           const Flag = COUNTRY_FLAGS[venue.country]
                           return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: '2px', flexShrink: 0, boxShadow: '0 0 0 1px var(--afa-tint-10)' }} />
@@ -248,7 +248,7 @@ export default function VenueDashboard() {
                       </h3>
                       <p
                         style={{
-                          fontSize: '12.5px', color: 'var(--afa-text-muted)', marginTop: '4px', lineHeight: 1.35,
+                          fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)', marginTop: '4px', lineHeight: 1.35,
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         }}
                       >
@@ -262,30 +262,30 @@ export default function VenueDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <IconUsers size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                       <div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
                       </div>
                     </div>
                     {venue.seatingMode === 'NUMBERED' ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                         <div>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
                         </div>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
                         <div>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <p style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--afa-amber)', marginTop: '14px', marginBottom: 0 }}>{rateLabel(venue)}</p>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-amber)', marginTop: '14px', marginBottom: 0 }}>{rateLabel(venue)}</p>
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }} onClick={(e) => e.stopPropagation()}>
                     <Link href={`/dashboard/venue/${venue.id}`} className="avp-btn-outline" style={{ ...outlineLinkStyle, flex: 1, padding: '9px 0', fontSize: 'var(--afa-text-ui)' }}>

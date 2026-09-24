@@ -31,7 +31,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, COLOR_MAP } = require('./migrate-tokens')
+const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, COLOR_MAP, FONT_SIZE_ROUNDED_KEYS } = require('./migrate-tokens')
 
 const files = process.argv.slice(2)
 if (files.length === 0) {
@@ -83,7 +83,13 @@ function loadGlobalsColorTokens() {
   return tokens
 }
 
-function checkMap(name, map, liveTokens) {
+// GEN-2609-106 - `roundedKeys` (FONT_SIZE_MAP only) names keys that are
+// a deliberate ROUND to their target token, not an exact-value
+// transcription - see migrate-tokens.js's own FONT_SIZE_ROUNDED_KEYS
+// comment for why. Those keys still must resolve to a real token in
+// globals.css (a renamed/deleted target token is still a real bug),
+// just not to the identical px number.
+function checkMap(name, map, liveTokens, roundedKeys) {
   let ok = true
   for (const [px, token] of Object.entries(map)) {
     const live = liveTokens[token]
@@ -92,6 +98,7 @@ function checkMap(name, map, liveTokens) {
       ok = false
       continue
     }
+    if (roundedKeys && roundedKeys.has(px)) continue
     if (live !== parseFloat(px)) {
       console.error(`  MISMATCH [${name}]: map says ${px}px -> ${token}, globals.css defines ${token} as ${live}px`)
       ok = false
@@ -145,7 +152,7 @@ const liveTokens = loadGlobalsTokens()
 const liveColorTokens = loadGlobalsColorTokens()
 let allOk = true
 allOk = checkMap('SPACING_MAP', SPACING_MAP, liveTokens) && allOk
-allOk = checkMap('FONT_SIZE_MAP', FONT_SIZE_MAP, liveTokens) && allOk
+allOk = checkMap('FONT_SIZE_MAP', FONT_SIZE_MAP, liveTokens, FONT_SIZE_ROUNDED_KEYS) && allOk
 allOk = checkMap('RADIUS_MAP', RADIUS_MAP, liveTokens) && allOk
 allOk = checkColorMap('COLOR_MAP', COLOR_MAP, liveColorTokens) && allOk
 for (const file of files) {

@@ -101,7 +101,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
 
   if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
   if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "var(--afa-text-body)" }}>{error}</div>
-  if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
+  if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
 
@@ -176,7 +176,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
                   org.orgName.charAt(0).toUpperCase()
                 )}
               </div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "17px", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{org.orgName}</h2>
             </div>
             <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}

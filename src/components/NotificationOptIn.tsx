@@ -117,7 +117,7 @@ export default function NotificationOptIn() {
           background: 'transparent',
           color: 'rgba(247,243,238,0.6)',
           border: 'none',
-          fontSize: 'var(--afa-text-18px)',
+          fontSize: 'var(--afa-text-lead)',
           lineHeight: 1,
           cursor: 'pointer',
           padding: '0 4px',

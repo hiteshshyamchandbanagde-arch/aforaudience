@@ -304,7 +304,7 @@ export default function ArtistDashboard() {
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-gold)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 'var(--afa-space-2)' }}>
                     Tour invite
                   </p>
-                  <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>{inv.tour.title}</h3>
+                  <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>{inv.tour.title}</h3>
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>
                     {inv.tour.organiser.orgName} wants to feature you on this Tour
                     {inv.tour.stops.length > 0 && ` — ${inv.tour.stops.length} stop${inv.tour.stops.length > 1 ? 's' : ''}`}.
@@ -393,7 +393,7 @@ export default function ArtistDashboard() {
               see an empty ₹0/₹0/₹0 block. */}
           {(totalCompensation > 0 || totalSpend > 0) && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Recorded Earnings
               </h2>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-18px)' }}>
@@ -402,15 +402,15 @@ export default function ArtistDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--afa-space-4)' }}>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Compensation</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalCompensation.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Recorded Spend</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Net</p>
-                  <p style={{ fontSize: '22px', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error)' }}>
                     {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function ArtistDashboard() {
           {/* Reviews */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-14px)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 Reviews
               </h2>
               {avgRating !== null && (
@@ -491,7 +491,7 @@ export default function ArtistDashboard() {
 
           {/* Followers */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Followers
             </h2>
             {profile.followers.length === 0 ? (
@@ -523,7 +523,7 @@ export default function ArtistDashboard() {
 
           {/* Upcoming performances */}
           <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               Upcoming Performances
             </h2>
             {upcoming.length === 0 ? (
@@ -533,7 +533,7 @@ export default function ArtistDashboard() {
                 {upcoming.map((p) => (
                   <div key={p.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4) var(--afa-space-5)', border: '1px solid var(--afa-tint-08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--afa-space-10px)' }}>
                     <div>
-                      <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
+                      <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{p.event.title}</p>
                       <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
                         {new Date(p.event.date).toLocaleDateString()} · {p.event.startTime} · {p.event.venue ? `${p.event.venue.name}, ${p.event.venue.city}` : 'Venue TBD'}
                       </p>
@@ -562,7 +562,7 @@ export default function ArtistDashboard() {
 
           {/* Applications */}
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>
               My Applications
             </h2>
             {profile.applications.length === 0 ? (
@@ -625,7 +625,7 @@ export default function ArtistDashboard() {
                         </div>
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-6px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
-                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
+                        <p style={{ fontWeight: 600, fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>{app.event.title}</p>
                         <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: 'var(--afa-space-1) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: appStyle.bg, color: appStyle.color }}>
                           {app.status.toLowerCase()}
                         </span>

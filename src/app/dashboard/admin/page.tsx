@@ -98,7 +98,7 @@ function IconTicket() {
   )
 }
 function IconRupee() {
-  return <span style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, lineHeight: 1 }}>₹</span>
+  return <span style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, lineHeight: 1 }}>₹</span>
 }
 // --- Ticket-stub KPI tile --------------------------------------------------
 // Perforation notches punched into the left/right edges (colored to match
@@ -148,7 +148,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
           {value}
         </div>
-        <div style={{ fontSize: '11.5px', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>
+        <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '3px' }}>{label}</div>
       </div>
     </div>
   )
@@ -218,7 +218,7 @@ export default function AdminCommandCenter() {
         <DashboardShell>
         <main style={{ minHeight: '100vh', background: 'var(--afa-surface-raised)' }}>
           <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 20px' }}>
-            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)' }}>Admin access required.</p>
           </div>
         </main>
         </DashboardShell>
@@ -357,14 +357,14 @@ export default function AdminCommandCenter() {
                       style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: '3px 3px 0 0' }}
                     />
                   </div>
-                  <span style={{ fontSize: '9.5px', color: 'var(--afa-text-secondary)', marginTop: '6px', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
+                  <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: '6px', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
                     {dayLabel(d.day)}
                   </span>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: '11.5px' }}>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: 'var(--afa-text-small)' }}>
             <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
             </span>

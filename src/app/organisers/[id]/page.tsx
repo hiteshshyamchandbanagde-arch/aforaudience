@@ -132,8 +132,8 @@ function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: strin
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "rgba(31,31,31,0.4)", padding: "56px var(--afa-space-6)", textAlign: "center" }}>
       <span style={{ color: "var(--afa-amber)" }}>{icon}</span>
       <div>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
-        <p style={{ margin: "var(--afa-space-2) auto 0", maxWidth: "420px", fontSize: "var(--afa-text-15px)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{body}</p>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
+        <p style={{ margin: "var(--afa-space-2) auto 0", maxWidth: "420px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{body}</p>
       </div>
     </div>
   )
@@ -186,11 +186,11 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
         </div>
       )}
       <div style={{ display: "flex", flexShrink: 0, width: "56px", flexDirection: "column", alignItems: "center", border: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-2) 0" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}>{month}</span>
         <span style={{ marginTop: "var(--afa-space-1)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{day}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h4 className="afa-organiser-event-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)", transition: "color 0.3s ease" }}>
+        <h4 className="afa-organiser-event-title" style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)", transition: "color 0.3s ease" }}>
           {event.title}
         </h4>
         <div style={{ marginTop: "var(--afa-space-10px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-4)" }}>
@@ -247,7 +247,7 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--afa-space-4)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", minWidth: 0 }}>
           <RouteIcon style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
-          <h4 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)" }}>{tour.title}</h4>
+          <h4 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 500, lineHeight: 1.2, color: "var(--afa-text-primary)" }}>{tour.title}</h4>
         </div>
         <TourStatusBadge status={tour.status} tr={tr} />
       </div>
@@ -255,13 +255,13 @@ function TourCard({ tour, tr }: { tour: OrganiserTour; tr: Dictionary }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-32px)" }}>
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStopsLabel}</div>
-          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>
+          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 500, color: "var(--afa-text-primary)" }}>
             {tr.organiserDetailPage.tourStopsTemplate.replace("{n}", String(tour.stops.length))}
           </div>
         </div>
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourWindowLabel}</div>
-          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{windowLabel || "—"}</div>
+          <div style={{ marginTop: "var(--afa-space-6px)", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{windowLabel || "—"}</div>
         </div>
       </div>
 
@@ -383,7 +383,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
             </h1>
 
             {organiser.bio && (
-              <p style={{ marginTop: "var(--afa-space-6)", maxWidth: "640px", fontSize: "17px", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{organiser.bio}</p>
+              <p style={{ marginTop: "var(--afa-space-6)", maxWidth: "640px", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>{organiser.bio}</p>
             )}
 
             <div style={{ marginTop: "var(--afa-space-32px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--afa-space-6)" }}>

@@ -68,7 +68,7 @@ export default function HeroRotator() {
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', letterSpacing: '0.1em', color: 'var(--afa-peach)', textTransform: 'uppercase', marginBottom: '6px' }}>
           {tr.homePage.heroRotatorEyebrow}
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '19px', color: 'var(--afa-on-fill-solid)', lineHeight: 1.3 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-on-fill-solid)', lineHeight: 1.3 }}>
           {tr.homePage.heroRotatorTagline}
         </div>
       </div>

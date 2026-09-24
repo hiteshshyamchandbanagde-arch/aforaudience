@@ -67,7 +67,7 @@ export default function PlatformGrowthStrip() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: '#F7F3EE' }}>
                   {s.value!.toLocaleString('en-IN')}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#a89880', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: '#a89880', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   {s.label}
                 </div>
               </div>

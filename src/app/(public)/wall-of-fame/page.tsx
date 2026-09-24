@@ -60,7 +60,7 @@ function InitialsChip({ name }: { name: string }) {
         justifyContent: "center",
         fontFamily: "var(--font-mono)",
         fontWeight: 600,
-        fontSize: "var(--afa-text-20px)",
+        fontSize: "var(--afa-text-subtitle)",
         color: "var(--afa-amber)",
       }}
     >
@@ -240,7 +240,7 @@ export default function WallOfFamePage() {
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
                 <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "12px 0 0" }}>
                   {data?.artistOfMonth
@@ -299,7 +299,7 @@ export default function WallOfFamePage() {
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-secondary)" }}>{tr.wallOfFamePage.notEnoughReviews}</div>
                 )}
                 <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.55, lineHeight: 1.6, margin: "12px 0 0" }}>
                   {data?.eventOfMonth
@@ -324,7 +324,7 @@ export default function WallOfFamePage() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
               <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topOrganisers)}</div>
                 {data.topOrganisers.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noOrganiserReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (
@@ -395,7 +395,7 @@ export default function WallOfFamePage() {
               </div>
 
               <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", padding: "24px 28px" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{stripLeadingEmoji(tr.wallOfFamePage.topVenues)}</div>
                 {data.topVenues.length === 0 ? (
                   <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{tr.wallOfFamePage.noVenueReviews.replace("{n}", String(data.minReviews))}</p>
                 ) : (

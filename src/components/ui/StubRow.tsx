@@ -41,7 +41,7 @@ export default function StubRow({ cells, style }: { cells: StubCell[]; style?: R
             style={{
               margin: 0,
               fontFamily: 'var(--font-mono)',
-              fontSize: 9,
+              fontSize: 'var(--afa-text-caption)',
               textTransform: 'uppercase',
               letterSpacing: '0.14em',
               color: 'var(--afa-text-muted)',

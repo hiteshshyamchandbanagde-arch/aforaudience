@@ -97,7 +97,7 @@ function MetaTile({ icon: Icon, label, value }: { icon: (p: { style?: React.CSSP
     <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--afa-space-3)", borderTop: "1px solid var(--afa-tint-10)", padding: "var(--afa-space-4) 0" }}>
       <Icon style={{ width: "20px", height: "20px", marginTop: "var(--afa-space-2px)", flexShrink: 0, color: "var(--afa-amber)" }} />
       <div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>{label}</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>{label}</div>
         <div style={{ marginTop: "var(--afa-space-1)", fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)" }}>{value}</div>
       </div>
     </div>
@@ -311,7 +311,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <h1 style={{ marginTop: "var(--afa-space-4)", fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.05, color: "var(--afa-text-primary)" }}>
               {event.title}
             </h1>
-            <p style={{ marginTop: "var(--afa-space-4)", maxWidth: "560px", fontSize: "var(--afa-text-15px)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>{event.description}</p>
+            <p style={{ marginTop: "var(--afa-space-4)", maxWidth: "560px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.7, color: "var(--afa-text-secondary)" }}>{event.description}</p>
             {event.organiser && (
               <p style={{ marginTop: "var(--afa-space-3)", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.5)" }}>
                 {tr.eventDetailPage.organisedBy}{" "}
@@ -352,13 +352,13 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             <div style={{ marginTop: "var(--afa-space-28px)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
               {isPast ? (
                 <div>
-                  <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
+                  <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
                   <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)", lineHeight: 1.6 }}>{tr.eventDetailPage.browseUpcoming}</p>
                 </div>
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-6px)" }}>
-                    <span style={{ fontFamily: "var(--font-ui)", fontSize: "22px", color: "var(--afa-text-primary)" }}>
+                    <span style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
                       {priceLabel}
                     </span>
                     <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount />
@@ -413,7 +413,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 )}
                 {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
                   <div style={{ marginTop: "var(--afa-space-4)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-6px)" }}>{tr.eventDetailPage.specialNoteLabel}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-6px)" }}>{tr.eventDetailPage.specialNoteLabel}</div>
                     <div style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)", lineHeight: 1.6 }}>{event.specialNotes}</div>
                   </div>
                 )}
@@ -442,13 +442,13 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       {p.artist.user.avatar ? (
                         <img src={p.artist.user.avatar} alt={performerName} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.25) brightness(0.9)" }} />
                       ) : (
-                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", color: "var(--afa-amber)" }}>
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-amber)" }}>
                           {performerName.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
                     <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                      <div style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{performerName}</div>
+                      <div style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{performerName}</div>
                       <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-muted)", marginTop: "var(--afa-space-2px)" }}>
                         {p.artist.genre.length > 0 ? p.artist.genre.join(", ") : tr.eventDetailPage.slotDuration.replace("{n}", String(p.slot)).replace("{duration}", String(p.duration))}
                       </div>
@@ -513,7 +513,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               <button
                                 key={n}
                                 onClick={() => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: n, comment: prev[p.id]?.comment || "" } }))}
-                                style={{ width: "20px", height: "20px", borderRadius: "50%", background: "none", border: "1px solid var(--afa-amber)", cursor: "pointer", fontSize: "var(--afa-text-10px)", padding: 0, color: "var(--afa-amber)", opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.3 }}
+                                style={{ width: "20px", height: "20px", borderRadius: "50%", background: "none", border: "1px solid var(--afa-amber)", cursor: "pointer", fontSize: "var(--afa-text-caption)", padding: 0, color: "var(--afa-amber)", opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.3 }}
                               >
                                 {n}
                               </button>
@@ -544,7 +544,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       {p.hypeScore != null && (
                         <>
-                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.35)" }}>
+                          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.35)" }}>
                             {tr.eventDetailPage.hypeLabel}
                           </div>
                           <div style={{ marginTop: "var(--afa-space-1)" }}>
@@ -597,8 +597,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                       )}
                     </div>
                     <div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>{tr.eventDetailPage.celebrityAttending}</div>
-                      <div style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)", marginTop: "var(--afa-space-2px)" }}>{c.name}</div>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>{tr.eventDetailPage.celebrityAttending}</div>
+                      <div style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", marginTop: "var(--afa-space-2px)" }}>{c.name}</div>
                     </div>
                   </div>
                 ))}
@@ -607,7 +607,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
 
             {event.panelists && event.panelists.length > 0 && (
               <div style={{ marginTop: "var(--afa-space-5)" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-10px)" }}>{tr.eventDetailPage.panelists}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-10px)" }}>{tr.eventDetailPage.panelists}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--afa-space-3)" }}>
                   {event.panelists.map((p) => (
                     <div key={p.id} style={{ display: "flex", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px)" }}>
@@ -674,10 +674,10 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
           }}
         >
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)" }}>
               {typeLabel}
             </div>
-            <div style={{ fontFamily: "var(--font-ui)", fontSize: "17px", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {priceLabel}
             </div>
           </div>

@@ -166,7 +166,7 @@ export default function WelcomeSequence() {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 12 }}>
               {tr.welcomeSequence.step1Heading}
             </h1>
-            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 28 }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 28 }}>
               {tr.welcomeSequence.step1Subtitle}
             </p>
             <Button variant="primary" onClick={() => setStep(2)}>
@@ -220,7 +220,7 @@ export default function WelcomeSequence() {
                     padding: '12px 16px',
                     borderRadius: 8,
                     border: '1px solid var(--afa-border-resting)',
-                    fontSize: 'var(--afa-text-18px)',
+                    fontSize: 'var(--afa-text-lead)',
                     letterSpacing: '0.3em',
                     textAlign: 'center',
                     color: 'var(--afa-text-primary)',
@@ -251,7 +251,7 @@ export default function WelcomeSequence() {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
               <BellIcon style={{ width: 32, height: 32, color: 'var(--afa-text-primary)' }} />
             </div>
-            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
               {tr.notificationOptIn.message}
             </p>
             <Button variant="primary" onClick={handleEnablePush} disabled={pushBusy}>

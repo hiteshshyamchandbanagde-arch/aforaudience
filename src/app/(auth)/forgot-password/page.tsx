@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
           {submitted ? (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
                 {tr.forgotPasswordPage.checkYourEmailHeading}
               </h2>
               <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.7, lineHeight: 1.6 }}>
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
                 {tr.forgotPasswordPage.forgotPasswordHeading}
               </h2>
               <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.6, marginBottom: "20px" }}>

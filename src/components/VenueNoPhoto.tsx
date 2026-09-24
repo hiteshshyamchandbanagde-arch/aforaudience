@@ -93,7 +93,7 @@ export default function VenueNoPhoto({ capacity, seed, caption, size = "card" }:
       <Mark v={v} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber)", opacity: 0.55 }} />
 
       {caption && (
-        <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "9px", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>
+        <span style={{ position: "absolute", bottom: size === "hero" ? "16px" : "8px", left: size === "hero" ? "16px" : "10px", right: size === "hero" ? "16px" : "10px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", letterSpacing: "0.04em", color: "var(--afa-cream)", opacity: 0.4, textTransform: "uppercase" }}>
           {caption}
         </span>
       )}

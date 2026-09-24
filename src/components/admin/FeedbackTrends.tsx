@@ -346,7 +346,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                   borderRadius: '4px 4px 0 0',
                 }}
               />
-              <span style={{ fontSize: 'var(--afa-text-10px)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>
+              <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>
             </div>
           ))}
         </div>

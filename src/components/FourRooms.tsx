@@ -75,7 +75,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 500, lineHeight: 1, letterSpacing: "-0.01em", color: "var(--afa-text-inverse)", margin: 0 }}>
           {room.name}
         </h3>
-        <p style={{ marginTop: "var(--afa-space-5)", maxWidth: "440px", fontFamily: "var(--font-sans)", fontSize: "17px", lineHeight: 1.65, color: "var(--afa-text-inverse)", opacity: 0.75 }}>
+        <p style={{ marginTop: "var(--afa-space-5)", maxWidth: "440px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-inverse)", opacity: 0.75 }}>
           {room.promise}
         </p>
 
@@ -85,7 +85,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
               <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-amber)" }}>
                 {i + 1}
               </span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-15px)", color: "rgba(245,245,240,0.85)" }}>{step}</span>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", color: "rgba(245,245,240,0.85)" }}>{step}</span>
             </li>
           ))}
         </ol>
@@ -176,7 +176,7 @@ export default function FourRooms() {
             {tr.homePage.fourRoomsHeadingLine1}<br />
             <em style={{ fontStyle: "italic", color: "var(--afa-amber)" }}>{tr.homePage.fourRoomsHeadingEmphasis}</em>{tr.homePage.fourRoomsHeadingSuffix}
           </h2>
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", lineHeight: 1.65, color: "rgba(245,245,240,0.75)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "rgba(245,245,240,0.75)", margin: 0 }}>
             {tr.homePage.fourRoomsSubtitle}
           </p>
         </div>

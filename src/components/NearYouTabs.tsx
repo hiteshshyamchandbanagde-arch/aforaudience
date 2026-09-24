@@ -117,7 +117,7 @@ export default function NearYouTabs() {
     <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.nearYouHeading}</h4>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>
           {isEvents ? tr.homePage.tonightRailLive : tr.homePage.artistsRailBadge}
         </span>
       </div>
@@ -166,7 +166,7 @@ export default function NearYouTabs() {
       {isEvents && events !== null && events.length > 0 && (
         <>
           {!eventsCity && (
-            <p style={{ fontSize: '10.5px', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.tonightRailCityFallbackNote}
             </p>
           )}
@@ -180,9 +180,9 @@ export default function NearYouTabs() {
             >
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
-                <div style={{ fontSize: 'var(--afa-text-10px)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(ev.date, ev.startTime)}
               </div>
             </Link>
@@ -193,7 +193,7 @@ export default function NearYouTabs() {
       {!isEvents && artists !== null && artists.length > 0 && (
         <>
           {!artistsCity && (
-            <p style={{ fontSize: '10.5px', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.artistsRailCityFallbackNote}
             </p>
           )}
@@ -209,15 +209,15 @@ export default function NearYouTabs() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={a.avatar} alt="" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(247,243,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(247,243,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                   {initials(a.name)}
                 </div>
               )}
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                <div style={{ fontSize: 'var(--afa-text-10px)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}
               </div>
             </Link>

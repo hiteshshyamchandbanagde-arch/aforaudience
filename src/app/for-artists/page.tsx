@@ -14,7 +14,7 @@ function JourneyStep({ n, title, detail }: { n: number; title: string; detail: s
         {n}
       </div>
       <div>
-        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 600, color: "var(--afa-text-inverse)", margin: "0 0 8px" }}>
+        <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-inverse)", margin: "0 0 8px" }}>
           {title}
         </h3>
         <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "rgba(245,245,240,0.75)", margin: 0, maxWidth: "560px" }}>
@@ -112,7 +112,7 @@ export default function ForArtistsPage() {
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-inverse)", margin: "0 0 16px" }}>
           {tr.forArtistsPage.finalCtaHeading}
         </h2>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", lineHeight: 1.6, color: "rgba(245,245,240,0.75)", maxWidth: "480px", margin: "0 auto 32px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "rgba(245,245,240,0.75)", maxWidth: "480px", margin: "0 auto 32px" }}>
           {tr.forArtistsPage.finalCtaSubtitle}
         </p>
         <Link

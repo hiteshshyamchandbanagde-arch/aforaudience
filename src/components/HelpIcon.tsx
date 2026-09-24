@@ -30,7 +30,7 @@ export default function HelpIcon({ text }: { text: string }) {
           background: 'transparent',
           color: 'var(--afa-text-primary)',
           opacity: 0.7,
-          fontSize: 'var(--afa-text-10px)',
+          fontSize: 'var(--afa-text-caption)',
           fontWeight: 700,
           fontFamily: 'var(--font-sans)',
           cursor: 'pointer',

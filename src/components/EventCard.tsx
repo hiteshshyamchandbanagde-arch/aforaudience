@@ -147,7 +147,7 @@ export function IllustratedEventFallback({ type, typeLabel, hideCaption = false 
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", color: "var(--afa-amber)" }}>
         <EventTypeIcon type={type} style={{ width: "44px", height: "44px", opacity: 0.9 }} />
         {!hideCaption && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", opacity: 0.7 }}>
             {tr.eventsPage.noPosterCaption.replace("{type}", typeLabel)}
           </span>
         )}
@@ -368,7 +368,7 @@ export function EventRow({
 
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, minWidth: 0, padding: "2px 0" }}>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.13em", color: "var(--afa-amber)" }}>
             {typeLabel}
           </div>
           <h3 style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

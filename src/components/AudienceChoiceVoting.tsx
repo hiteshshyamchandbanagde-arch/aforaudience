@@ -161,7 +161,7 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
 
   return (
     <div style={{ marginTop: '20px' }}>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '12px' }}>
         🗳️ Audience Choice
       </h3>
 
@@ -172,7 +172,7 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
           </p>
           {(results.ranking || []).map((r, i) => (
             <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--afa-surface-raised)', borderRadius: '10px', padding: '12px 16px', marginBottom: '8px', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.08)' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: i === 0 ? 'var(--afa-gold)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: i === 0 ? 'var(--afa-gold)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
                 {i + 1}
               </div>
               <div style={{ flex: 1 }}>

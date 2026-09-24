@@ -129,7 +129,7 @@ export default function MessagesInboxPage() {
                             label text only, not by color. */}
                         <span
                           style={{
-                            fontSize: 'var(--afa-text-10px)',
+                            fontSize: 'var(--afa-text-caption)',
                             fontWeight: 500,
                             letterSpacing: '0.04em',
                             padding: '2px 6px',
@@ -154,7 +154,7 @@ export default function MessagesInboxPage() {
                       {t.lastMessage && (
                         <div
                           style={{
-                            fontSize: '12.5px',
+                            fontSize: 'var(--afa-text-ui)',
                             opacity: 0.6,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',

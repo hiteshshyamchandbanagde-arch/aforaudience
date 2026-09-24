@@ -119,10 +119,10 @@ export default function OrganiserPayoutsPage() {
             {payout?.linked ? (
               <>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
-                <p style={{ fontSize: 'var(--afa-text-15px)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>{payout.accountId}</p>
+                <p style={{ fontSize: 'var(--afa-text-body-lg)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>{payout.accountId}</p>
 
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Status</p>
-                <p style={{ fontSize: '17px', fontWeight: 700, color: statusInfo?.color || 'var(--afa-text-primary)', marginBottom: '8px' }}>
+                <p style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: statusInfo?.color || 'var(--afa-text-primary)', marginBottom: '8px' }}>
                   {statusInfo?.label || payout.status}
                 </p>
                 {statusInfo?.detail && (

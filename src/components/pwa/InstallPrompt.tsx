@@ -128,7 +128,7 @@ export default function InstallPrompt() {
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 'var(--afa-text-15px)', marginBottom: 2 }}>
+        <div id="pwa-install-title" style={{ fontWeight: 700, fontSize: 'var(--afa-text-body-lg)', marginBottom: 2 }}>
           Install AforAudience
         </div>
         <div style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.75, lineHeight: 1.4 }}>

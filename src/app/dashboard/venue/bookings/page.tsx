@@ -158,7 +158,7 @@ export default function VenueBookingsPage() {
               { label: 'Pending value', value: pendingValue },
             ].map((s) => (
               <Card key={s.label} style={{ padding: '18px 20px' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{s.label}</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{s.label}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>₹{s.value.toLocaleString('en-IN')}</p>
               </Card>
             ))}
@@ -173,7 +173,7 @@ export default function VenueBookingsPage() {
               >
                 ←
               </button>
-              <p style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+              <p style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
                 {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
               </p>
               <button
@@ -186,7 +186,7 @@ export default function VenueBookingsPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: '4px 0' }}>{d}</div>
+                <div key={i} style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-text-muted)', padding: '4px 0' }}>{d}</div>
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
@@ -233,7 +233,7 @@ export default function VenueBookingsPage() {
 
           {/* Pending */}
           <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+            <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
               Pending {pending.length > 0 && `(${pending.length})`}
             </h2>
             {pending.length === 0 ? (
@@ -249,7 +249,7 @@ export default function VenueBookingsPage() {
                           for {b.venue.name}, {b.venue.city} · requested by {b.organiser.orgName}
                         </p>
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '17px', color: 'var(--afa-amber)' }}>₹{b.amount}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-amber)' }}>₹{b.amount}</span>
                     </div>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '16px' }}>
                       📅 {new Date(b.fromDate).toLocaleDateString()}
@@ -272,7 +272,7 @@ export default function VenueBookingsPage() {
           {/* Resolved */}
           {resolved.length > 0 && (
             <div>
-              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
+              <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>
                 Past Requests
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

@@ -236,7 +236,7 @@ export default function RazorpayTestPage() {
         >
           Razorpay — Checkpoint 1
         </h1>
-        <p style={{ fontFamily: SERIF, fontSize: "17px", lineHeight: 1.65, color: INK, opacity: 0.75, marginBottom: "32px" }}>
+        <p style={{ fontFamily: SERIF, fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: INK, opacity: 0.75, marginBottom: "32px" }}>
           End-to-end sanity test. Click the button, complete a Razorpay test
           payment, and confirm the round trip works: create-order → Checkout
           modal → verify signature. No real money, no database writes yet.

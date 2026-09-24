@@ -106,7 +106,7 @@ export default function AudienceActivityPage() {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '6px' }}>
               {tr.audienceActivityPage.heading}
             </h1>
-            <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
               {tr.audienceActivityPage.subtitle}
             </p>
 

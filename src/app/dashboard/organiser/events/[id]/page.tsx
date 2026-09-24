@@ -310,11 +310,11 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--afa-space-5)' }}>
               <div>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Seats</p>
-                <p style={{ fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.availableSeats} / {event.totalSeats} available</p>
+                <p style={{ fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.availableSeats} / {event.totalSeats} available</p>
               </div>
               <div>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Ticket Price</p>
-                <p style={{ fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                <p style={{ fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                   {event.isFree
                     ? 'Free'
                     : event.ticketPrice
@@ -349,7 +349,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-14px)' }}>Venue</h2>
             {event.venue ? (
               <div>
-                <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{event.venue.name}</p>
+                <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{event.venue.name}</p>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-10px)' }}>{event.venue.address}, {event.venue.city}</p>
                 {event.venueBooking && (
                   <>

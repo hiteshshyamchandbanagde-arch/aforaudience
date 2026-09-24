@@ -175,20 +175,52 @@ const SPACING_MAP = {
   32: '--afa-space-32px',
   48: '--afa-space-48px',
 }
+// GEN-2609-106 - font-size closeout, per Hitesh's delegated decision
+// ("go ahead with your planning"): renamed the 4 pixel-named keys to
+// their new semantic names (matching globals.css/design-tokens.ts's
+// own GEN-2609-106 rename), added --afa-text-subheading (22px, new),
+// and added the approved rounding entries - each an off-scale value
+// close enough to an existing scale step that it's now DEFINED as
+// that step, not a new token of its own: 9/9.5->10 (caption),
+// 10.5->11 (micro), 11.5->12 (small), 12.5->13 (ui), 13.5->14 (body),
+// 17->16 (title, the "default to 16" decision - measured per-site
+// first via docs/design.md's GEN-2609-106 entry, no override sites
+// found), 19->20 (subtitle, same "default" treatment). Display sizes
+// (26px+) and non-px units (rem/em/%/clamp()) are explicitly NOT
+// covered here - stay literal per the same decision.
 const FONT_SIZE_MAP = {
-  10: '--afa-text-10px',
+  9: '--afa-text-caption',
+  9.5: '--afa-text-caption',
+  10: '--afa-text-caption',
+  10.5: '--afa-text-micro',
   11: '--afa-text-micro',
+  11.5: '--afa-text-small',
   12: '--afa-text-small',
+  12.5: '--afa-text-ui',
   13: '--afa-text-ui',
+  13.5: '--afa-text-body',
   14: '--afa-text-body',
-  15: '--afa-text-15px',
+  15: '--afa-text-body-lg',
   16: '--afa-text-title',
-  18: '--afa-text-18px',
-  20: '--afa-text-20px',
+  17: '--afa-text-title',
+  18: '--afa-text-lead',
+  19: '--afa-text-subtitle',
+  20: '--afa-text-subtitle',
+  22: '--afa-text-subheading',
   24: '--afa-text-heading',
   28: '--afa-text-page-title',
   32: '--afa-text-page-title-lg',
 }
+// GEN-2609-106 - the 8 FONT_SIZE_MAP keys above that are deliberate
+// ROUNDS (not exact-value matches) to their target token - verify-
+// equivalence.js's checkMap() exact-equality check predates this
+// decision and would otherwise flag every one of these as a stale/
+// mistyped map entry forever (9px really does map to a 10px token on
+// purpose). Exported so that script can skip exact-equality for just
+// these keys while still requiring the target token to exist in
+// globals.css at all - a genuine typo (token renamed/removed, or an
+// unrelated key pointing at the wrong token entirely) still fails.
+const FONT_SIZE_ROUNDED_KEYS = new Set(['9', '9.5', '10.5', '11.5', '12.5', '13.5', '17', '19'])
 const RADIUS_MAP = {
   0: '--afa-radius-sharp',
   6: '--afa-radius-sm',
@@ -734,4 +766,5 @@ module.exports = {
   MATCH_RE_JSX_CLASSNAME,
   MATCH_RE_TW_FONTSIZE_BRACKET,
   migrateTailwindFontSizeBracket,
+  FONT_SIZE_ROUNDED_KEYS,
 }

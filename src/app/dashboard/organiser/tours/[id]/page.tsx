@@ -241,7 +241,7 @@ export default function TourDetailPage() {
 
         {/* Artist consent status */}
         <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-6)' }}>
-          <h2 style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>Artist consent</h2>
+          <h2 style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>Artist consent</h2>
           {tour.consents.length === 0 ? (
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
           ) : (
@@ -261,7 +261,7 @@ export default function TourDetailPage() {
 
         {/* Stops */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-14px)' }}>
-          <h2 style={{ fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Stops</h2>
+          <h2 style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Stops</h2>
           <Button variant="primary" size="md" fullWidth={false} onClick={() => setShowAddStop((v) => !v)}>
             {showAddStop ? 'Cancel' : '+ Add Stop'}
           </Button>

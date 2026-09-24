@@ -250,9 +250,9 @@ export default function AdminArtistsPage() {
                         {!a.avatar && a.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {a.name}
-                          <span style={{ fontSize: 'var(--afa-text-10px)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          <span style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, padding: '3px 9px', borderRadius: 'var(--afa-radius-pill)', background: tier.bg, color: tier.color, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                             {tier.label}
                           </span>
                         </p>
@@ -338,8 +338,8 @@ export default function AdminArtistsPage() {
 function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div>
-      <div style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 'var(--afa-text-10px)', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
+      <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-primary)', opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '3px' }}>
         {label}{sub && <span style={{ opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}> · {sub}</span>}
       </div>
     </div>

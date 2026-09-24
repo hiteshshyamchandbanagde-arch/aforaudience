@@ -178,7 +178,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
         {submitted ? (
           <div style={{ textAlign: "center", padding: "24px 8px" }}>
             <div style={{ fontSize: "40px", marginBottom: "12px" }}>✅</div>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "8px" }}>
               Inquiry sent!
             </h2>
             <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.65, lineHeight: 1.6, marginBottom: "20px" }}>
@@ -191,7 +191,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
         ) : (
           <>
             <div style={{ textAlign: "center", marginBottom: "12px" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "19px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "4px" }}>
                 Book {artistName} for your event
               </h2>
               <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.55, lineHeight: 1.4 }}>

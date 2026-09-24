@@ -375,7 +375,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
            still relies on them. */
         @media (min-width: 901px) and (max-width: 1500px) {
           .sitenav-row { padding: var(--afa-space-4) var(--afa-space-5) !important; }
-          .sitenav-logo { font-size: var(--afa-text-20px) !important; }
+          .sitenav-logo { font-size: var(--afa-text-subtitle) !important; }
           .sitenav-desktop { gap: var(--afa-space-14px) !important; }
           .sitenav-account-row { gap: var(--afa-space-2) !important; }
           .afa-search-input { max-width: 110px !important; }
@@ -482,17 +482,17 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCount}
                         </span>
                       )}
                       {l.key === "messages" && unreadCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {unreadCount}
                         </span>
                       )}
                       {l.key === "myTickets" && pendingCompanionCount > 0 && (
-                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
+                        <span style={{ position: "absolute", top: "-4px", right: "-6px", fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 5px", minWidth: "15px", textAlign: "center", lineHeight: 1.4 }}>
                           {pendingCompanionCount}
                         </span>
                       )}
@@ -588,7 +588,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                           >
                             {l.label}
                             {l.badge > 0 && (
-                              <span style={{ fontSize: "var(--afa-text-10px)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
+                              <span style={{ fontSize: "var(--afa-text-caption)", fontWeight: 700, color: "var(--afa-on-fill-solid)", background: "var(--afa-amber)", borderRadius: "var(--afa-radius-pill)", padding: "1px 7px" }}>
                                 {l.badge}
                               </span>
                             )}

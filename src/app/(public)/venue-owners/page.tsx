@@ -75,7 +75,7 @@ export default function VenueOwnersPage() {
               placeholder={tr.venueOwnersPage.searchPlaceholder}
               style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
-            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "var(--afa-text-20px)" }}>🔍</span>
+            <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "var(--afa-text-subtitle)" }}>🔍</span>
           </BrowseSearchDropdown>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function VenueOwnersPage() {
                     </div>
                   )}
                   <div style={{ padding: "24px", display: "flex", gap: "16px", alignItems: "center", borderBottom: "1px solid var(--afa-tint-10)" }}>
-                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
+                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
                       {owner.user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -140,7 +140,7 @@ export default function VenueOwnersPage() {
                         displayName.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{displayName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)" }}>{displayName}</div>
                   </div>
                   <div style={{ padding: "16px 20px" }}>
                     <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)", opacity: owner.bio ? 0.7 : 0.4, marginBottom: "12px", lineHeight: 1.5, minHeight: "36px", fontStyle: owner.bio ? "normal" : "italic" }}>

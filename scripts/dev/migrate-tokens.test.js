@@ -215,7 +215,7 @@ t('GEN-2609-105: never produces the bare (unhinted) text-[var(...)] form - that 
 })
 
 t('GEN-2609-105: a value with no FONT_SIZE_MAP entry stays literal', () => {
-  const out = migrateTailwindFontSizeBracket('text-[17px]', FONT_SIZE_MAP, ['px'])
+  const out = migrateTailwindFontSizeBracket('text-[26px]', FONT_SIZE_MAP, ['px'])
   assert.equal(out, null)
 })
 

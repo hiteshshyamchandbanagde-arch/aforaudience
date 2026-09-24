@@ -377,7 +377,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
         color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
         opacity: active ? 1 : 0.75,
         fontWeight: active ? 600 : 400,
-        ...(compact ? { fontSize: 12.5, paddingTop: 8, paddingBottom: 8 } : {}),
+        ...(compact ? { fontSize: 'var(--afa-text-ui)', paddingTop: 8, paddingBottom: 8 } : {}),
       }}
     >
       <Icon name={icon} size={compact ? 14 : 16} />
@@ -611,13 +611,13 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                       every user whose count is genuinely zero. */}
                   {!!item.badge && item.badge > 0 && (
                     <span
-                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-10px)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-caption)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
                     >
                       {item.badge}
                     </span>
                   )}
                 </span>
-                <span style={{ fontSize: 'var(--afa-text-10px)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
+                <span style={{ fontSize: 'var(--afa-text-caption)', fontWeight: active ? 600 : 400 }}>{item.label}</span>
               </Link>
             )
           })}
@@ -629,7 +629,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
               style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
               <Icon name="more" size={20} />
-              <span style={{ fontSize: 'var(--afa-text-10px)' }}>More</span>
+              <span style={{ fontSize: 'var(--afa-text-caption)' }}>More</span>
             </button>
           )}
         </nav>
@@ -644,7 +644,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', color: 'var(--afa-text-primary)' }}>My Roles</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>My Roles</span>
               <button
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close"

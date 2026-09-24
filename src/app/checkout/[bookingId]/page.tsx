@@ -532,7 +532,7 @@ export default function CheckoutPage() {
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'var(--afa-text-20px)',
+              fontSize: 'var(--afa-text-subtitle)',
               fontWeight: 700,
               marginBottom: 'var(--afa-space-6px)',
             }}
@@ -636,7 +636,7 @@ export default function CheckoutPage() {
             }}
           >
             <span style={{ fontSize: 'var(--afa-text-body)', opacity: 0.6 }}>{tr.eventDetailPage.totalLabel}</span>
-            <span style={{ fontSize: 22, fontWeight: 700 }}>
+            <span style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700 }}>
               {state.booking.totalAmount > 0 ? formatDisplayMoney(state.booking.totalAmount, displayCurrency) : tr.eventDetailPage.freeAmount}
             </span>
           </div>
@@ -661,7 +661,7 @@ export default function CheckoutPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-1)' }}>{tr.checkoutPage.tagYourBuddies}</div>
+          <div style={{ fontWeight: 700, fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-1)' }}>{tr.checkoutPage.tagYourBuddies}</div>
           <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6, marginBottom: 'var(--afa-space-3)' }}>
             {tr.checkoutPage.tagBuddiesIntro}
             {companionMax !== null && (
@@ -677,7 +677,7 @@ export default function CheckoutPage() {
             )}
           </p>
 
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 12.5, opacity: 0.75, marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-ui)', opacity: 0.75, marginBottom: 'var(--afa-space-3)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={companionConsent}
@@ -695,7 +695,7 @@ export default function CheckoutPage() {
                 <span
                   key={t.id}
                   style={{
-                    fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)',
+                    fontSize: 'var(--afa-text-ui)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)',
                     background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-pill)', padding: '5px var(--afa-space-6px) 5px var(--afa-space-3)',
                   }}
                 >
@@ -721,7 +721,7 @@ export default function CheckoutPage() {
           {companionConsent && (
             companionMax !== null && companionTags.filter((t) => t.status !== 'DECLINED').length >= companionMax ? (
               companionMax > 0 && (
-                <p style={{ fontSize: 12.5, opacity: 0.55, fontStyle: 'italic' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.55, fontStyle: 'italic' }}>
                   {tr.checkoutPage.maxTaggedNoticeTemplate.replace('{max}', String(companionMax))}
                 </p>
               )
@@ -749,7 +749,7 @@ export default function CheckoutPage() {
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)',
-                          background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 13.5,
+                          background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 'var(--afa-text-body)',
                         }}
                       >
                         <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-small)' }}>@{u.name}</span></span>

@@ -581,7 +581,7 @@ export default function ArtistProfilePage({
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", marginTop: "var(--afa-space-3)", paddingTop: "var(--afa-space-3)" }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(245,245,240,0.5)" }}>Total performances</span>
-            <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-20px)", color: "var(--afa-text-primary)" }}>{artist._count.performances}</span>
+            <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-subtitle)", color: "var(--afa-text-primary)" }}>{artist._count.performances}</span>
           </div>
         </div>
 
@@ -600,10 +600,10 @@ export default function ArtistProfilePage({
                   <div key={p.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "var(--afa-space-4)", padding: "var(--afa-space-4) 0", borderTop: "1px solid var(--afa-tint-10)" }}>
                     <div style={{ textAlign: "center", width: "48px" }}>
                       <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "26px", lineHeight: 1, color: "var(--afa-text-primary)" }}>{eventDate.getDate()}</div>
-                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--afa-amber)" }}>{eventDate.toLocaleDateString("en-IN", { month: "short" })}</div>
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.title}</div>
+                      <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.title}</div>
                       <div style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"}</div>
                     </div>
                     <Link href={`/events/${p.event.id}`} className="afa-cta-solid" style={{ background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "var(--afa-space-2) var(--afa-space-18px)", borderRadius: "var(--afa-radius-sm)", fontSize: "var(--afa-text-small)", fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}>
@@ -634,8 +634,8 @@ export default function ArtistProfilePage({
 
           {activeTab === "about" && (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>About</h2>
-              <p style={{ fontSize: "var(--afa-text-15px)", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: artist.bio ? 0.75 : 0.4, marginBottom: "var(--afa-space-32px)", fontStyle: artist.bio ? "normal" : "italic" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>About</h2>
+              <p style={{ fontSize: "var(--afa-text-body-lg)", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: artist.bio ? 0.75 : 0.4, marginBottom: "var(--afa-space-32px)", fontStyle: artist.bio ? "normal" : "italic" }}>
                 {artist.bio || "This artist hasn't added a bio yet."}
               </p>
 
@@ -647,7 +647,7 @@ export default function ArtistProfilePage({
                 { label: "Goals & Ambitions", value: artist.goals },
               ].filter((section) => section.value).map((section) => (
                 <div key={section.label} style={{ marginBottom: "var(--afa-space-28px)" }}>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-10px)" }}>
                     {section.label}
                   </h3>
                   <p style={{ fontSize: "var(--afa-text-body)", lineHeight: 1.8, color: "var(--afa-text-primary)", opacity: 0.75, whiteSpace: "pre-wrap" }}>
@@ -662,7 +662,7 @@ export default function ArtistProfilePage({
                   taps expecting to book and finds out it's just a note. */}
               {realTourStops && realTourStops.length > 0 && (
                 <div style={{ marginBottom: "var(--afa-space-28px)" }}>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                     Tour
                   </h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
@@ -672,7 +672,7 @@ export default function ArtistProfilePage({
                         href={`/events/${stop.id}`}
                         style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-sage)", textDecoration: "none" }}
                       >
-                        <span style={{ fontSize: "var(--afa-text-18px)" }}>🎟️</span>
+                        <span style={{ fontSize: "var(--afa-text-lead)" }}>🎟️</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>
                             {stop.title}{stop.venue && ` — ${stop.venue.city}`}
@@ -695,13 +695,13 @@ export default function ArtistProfilePage({
                   date server-side; undated stops sort last. */}
               {artist.tourStops && artist.tourStops.length > 0 && (
                 <div style={{ marginBottom: "var(--afa-space-28px)" }}>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>
                     Tour
                   </h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                     {artist.tourStops.map((stop) => (
                       <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
-                        <span style={{ fontSize: "var(--afa-text-18px)" }}>📍</span>
+                        <span style={{ fontSize: "var(--afa-text-lead)" }}>📍</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
                           {stop.date && (
@@ -723,7 +723,7 @@ export default function ArtistProfilePage({
 
               {artist.videoReel.length > 0 && (
                 <>
-                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>Reels</h3>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-3)" }}>Reels</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-2)" }}>
                     {artist.videoReel.map((url) => (
                       <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-fill-solid)", wordBreak: "break-all" }}>{url}</a>
@@ -736,7 +736,7 @@ export default function ArtistProfilePage({
 
           {activeTab === "shows" && (
             <div>
-              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-5)" }}>Past Shows</h2>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-5)" }}>Past Shows</h2>
               {pastShows.length === 0 ? (
                 <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>No past shows yet.</p>
               ) : (
@@ -764,7 +764,7 @@ export default function ArtistProfilePage({
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", marginBottom: "var(--afa-space-10px)", textDecoration: "none" }}>
-                  <span style={{ fontSize: "var(--afa-text-18px)" }}>{SOCIAL_ICON[platform] || "🔗"}</span>
+                  <span style={{ fontSize: "var(--afa-text-lead)" }}>{SOCIAL_ICON[platform] || "🔗"}</span>
                   <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.7, wordBreak: "break-all" }}>{handle}</span>
                 </a>
               ))}
