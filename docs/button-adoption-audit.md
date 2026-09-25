@@ -596,3 +596,583 @@ Every raw `<button\b` site in `src/` (excluding `Button.tsx` itself), classified
 |---|---|---|
 | 138 | C | dismiss install prompt, icon-only |
 
+---
+
+# Phase 2: re-audit of the 176 `variant="bare"` uses (GEN-2609-109)
+
+Read-only pass against `qa@1a9bc18`. Phase 1 routed 162 raw buttons through `<Button variant="bare">`, which is reset-only: the caller's own `style` still decides every colour, border, radius, padding and font-size, so an admin edit in `/dashboard/admin/design-system` never reaches them. This section puts each of the 176 `bare` uses in exactly one class.
+
+**Method:** every `variant="bare"` occurrence under `src/` (`git grep`), with the whole opening tag read, not just the line.
+- **CTA:** it looks like a button. It has a filled background, an outlined border (solid or dashed), or a pill/radius plus padding. It gets mapped to a variant and size.
+- **Icon:** icon-only controls (×, ‹ ›, zoom ±, the heart toggle, the chat FAB). Phase 1 should have put these in Class C. They move to the existing `icon` variant. That variant is also caller-styled, so this is a correct reclassification, **not** a gain in central control. It's counted separately here so it doesn't flatter the CTA number.
+- **Structural:** stays `bare`, with a one-line reason for each.
+
+## Counts
+
+| Class | Count | Disposition |
+|---|---|---|
+| CTA | 72 | mapped to a real variant (below) |
+| Icon-only | 13 | moved to `icon` (misclassified as D in phase 1) |
+| Structural | 91 | stays `bare` |
+| **Total** | **176** | |
+
+**Target miss:** the dispatch aimed for about 60 or fewer. The real structural count is **91**, reported as-is rather than force-fitted. Structural families:
+
+| Family | Sites |
+|---|---|
+| Option selectors: box-shaped (GEN-2609-063 2px-fill-solid-when-selected convention) plus status, severity, deploy-stage, marker, range and vouch selectors | 23 |
+| List, dropdown, search, menu and autocomplete rows | 19 |
+| Tabs and tab-bar items | 13 |
+| Inline text links and text-only actions | 10 |
+| Accordion and disclosure toggles | 5 |
+| Card-as-button | 4 |
+| Menu and dropdown triggers (account chip, city trigger, location chip) | 4 |
+| Misc: sort header, calendar cell, carousel dot, seat-map zoom-toolbar Reset | 4 |
+| Filter chips, className-driven | 3 |
+| Star-rating cells | 3 |
+| Modal backdrops | 3 |
+
+The two clusters that could come out of `bare` next, as follow-ups rather than force-fits in this ticket:
+- **Box-shaped selectors (17 of the 23):** these share one real shape (selected: 2px `--afa-fill-solid` border, `FILL_SOLID_TINT` fill, fill-solid text; resting: 1px border, `--afa-surface-raised`, text-primary), but `Button.tsx`'s `toggle-pill` comment deliberately keeps them apart from `toggle-pill`. A `toggle-box` variant would bring all 17 under the editor, most of them on the seat-map builder.
+- **Inline text links (about 9):** underlined or plain inline text actions. They have no button chrome, so they aren't CTAs by this audit's definition, but they're a 3+-site shape that no variant covers (`link` is full-width and padded).
+
+## Chat-identified CTA sites: all confirmed
+
+| Site | Found at | Target |
+|---|---|---|
+| `admin/bookings/page.tsx:~295` | :288 (retry delivery) | `primary` pill-sm |
+| `organiser/events/[id]/checkin/page.tsx:~303` | :298 (Check In) | `solid` lg |
+| `SupportWidget.tsx:~550` | :546 ("Go to feedback form") | `primary` pill-md |
+| `FeedbackDetailPanel.tsx:~344` | :336 Confirm / :348 Cancel | `primary` pill-sm / `outline-neutral` pill-sm |
+| design-system "Show version history" / "Reset to defaults" / "Revert" | :366 / :373 / :423 (+ the confirm dialog's Cancel, :680) | `outline-neutral` md / md / sm / md |
+
+**`secondaryBtnStyle` siblings:** the local constant is `padding 9px 17px` (= `--afa-btn-padding-md`), `text-ui`, 600, transparent, `1px solid --afa-border-resting`, text-primary, no radius. That is `outline-neutral` + `md` in everything except text colour and corners. A grep for siblings found the same neutral-outline shape at 25 CTA sites, plus the "on" state of 5 two-state toggles (Save as Draft ×4, Stop Camera, Refresh status, Send Inquiry, prev/next, the Google sign-in pair, and others). They all map to the **existing** `outline-neutral`. No near-duplicate "secondary outline" variant was added. The cost is one class-wide colour delta: text-primary becomes `--afa-text-secondary` (65% cream), and square or 10px corners become the size's radius.
+
+## New variants (3-site rule, GEN-2609-066)
+
+| Variant | Sites | Shape | Why not an existing variant |
+|---|---|---|---|
+| `outline-accent` | 8 | transparent, `--afa-amber` text + 1px amber border | the amber-outline family (+1 confirm, 2× admin Search, wallet credit, switch role, confirm tag, "See all events", "Send this to the team"). No variant has amber chrome; `link` is amber text only, full-width. |
+| `success` | 5 | `--afa-sage` fill, `--afa-cream` text | positive/approve actions (Approve ×2, Accept, Publish Stop, Send message). `solid` is fill-solid (ember), which would read as a brand CTA, not approval. |
+| `outline-success` | 3 | transparent, sage text + 1px sage border | Unsuspend, Mark Contacted, and the shared `MessageButton`. The outline counterpart of `success`, as `outline-error` is to the destructive family. |
+| `dashed` | 6 | transparent, text-secondary, `1px dashed --afa-border-resting` | the "+ Add ..." row family (the shared seat-map `AddDashedRowButton`, add level ×2, add vertical aisle, add tour stop, add section). |
+
+The existing variants absorb the rest: `outline-neutral` 25, `solid` 8, two-state `solid`/`outline-neutral` 5 (3 follow buttons + the artist follow + seat-map freeze), `outline-error` 7, `primary` 3, `link` 1, `toggle-pill` 1. With the 22 new-variant sites, that is 72.
+
+## Full per-site table (phase 2)
+
+### `src/app/(auth)/login/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 311 | CTA | outline-neutral lg, fullWidth - Google sign-in, bordered+radius+padding |
+
+### `src/app/(auth)/register/RegisterForm.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 401 | CTA | outline-neutral lg, fullWidth - Google sign-in (same shape as login) |
+| 476 | structural | inline text action ("try more suggestions"), no button chrome |
+| 507 | structural | inline underlined text link inside an error message |
+
+### `src/app/(public)/artists/[id]/ArtistProfileClientPage.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 500 | CTA | follow toggle: `solid` md (not following) / `outline-neutral` md (following) |
+| 628 | structural | profile tab (underline tab strip) |
+| 840 | CTA | outline-neutral md, fullWidth - "Send Inquiry" |
+
+### `src/app/(public)/artists/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 273 | structural | genre filter tab, className-driven (`.afa-genre-filter`) |
+
+### `src/app/(public)/events/[id]/EventDetailClientPage.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 468 | CTA | outline-accent sm - confirm +1 |
+| 515 | structural | star-rating cell (1 of 5), rating widget |
+| 525 | CTA | solid sm - submit review |
+
+### `src/app/(public)/events/[id]/rate/RatePromptClientPage.tsx` (5)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 21 | structural | star-rating cell (1 of 5), rating widget |
+| 161 | CTA | solid lg, fullWidth - submit overall rating |
+| 178 | CTA | outline-neutral lg - "rate specific performers" |
+| 203 | structural | star-rating cell (1 of 5), rating widget |
+| 214 | CTA | solid sm - submit performer rating |
+
+### `src/app/(public)/events/page.tsx` (7)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 416 | structural | events/organisers mode tab, className-driven (`.afa-events-mode-tab`) |
+| 419 | structural | events/organisers mode tab, className-driven |
+| 493 | structural | upcoming/past tab, className-driven |
+| 553 | structural | type filter chip, className-driven (`.afa-events-type-filter`) |
+| 565 | structural | type filter chip, className-driven |
+| 587 | structural | price filter chip, className-driven |
+| 653 | CTA | outline-accent pill-md - "See all events" |
+
+### `src/app/checkout/[bookingId]/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 745 | structural | add-companion list row |
+
+### `src/app/dashboard/admin/artists/page.tsx` (4)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 161 | structural | table sort-column header |
+| 214 | CTA | outline-accent md - Search submit |
+| 269 | CTA | outline-neutral sm - "Remove Headliner" |
+| 291 | structural | inline underlined disclosure text ("View note") |
+
+### `src/app/dashboard/admin/bookings/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 288 | CTA | primary pill-sm - retry delivery |
+
+### `src/app/dashboard/admin/design-system/page.tsx` (4)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 366 | CTA | outline-neutral md - "Show version history" (was local secondaryBtnStyle) |
+| 373 | CTA | outline-neutral md - "Reset to defaults" (was secondaryBtnStyle) |
+| 423 | CTA | outline-neutral sm - "Revert (n)" (was secondaryBtnStyle + smaller padding) |
+| 680 | CTA | outline-neutral md - confirm-dialog Cancel (was secondaryBtnStyle) |
+
+### `src/app/dashboard/admin/diary/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 194 | structural | status selector row, selected pill takes per-status colour from STATUS_META |
+
+### `src/app/dashboard/admin/feedback/page.tsx` (7)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 126 | CTA | success md - Approve |
+| 134 | CTA | outline-error md - Reject |
+| 603 | structural | accordion section toggle (▸/▾) |
+| 659 | structural | accordion section toggle (▸/▾) |
+| 690 | structural | accordion section toggle (▸/▾) |
+| 728 | structural | accordion section toggle (▸/▾) |
+| 763 | CTA | outline-neutral pill-sm - "View full board" |
+
+### `src/app/dashboard/admin/users/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 157 | CTA | outline-accent md - Search submit |
+| 196 | CTA | outline-success md - Unsuspend |
+
+### `src/app/dashboard/artist/corporate-inquiries/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 135 | CTA | outline-success md - "Mark Contacted" |
+| 145 | CTA | outline-neutral md - Close inquiry |
+
+### `src/app/dashboard/artist/edit/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 319 | CTA | outline-error md, fullWidth - remove tour stop |
+| 329 | CTA | dashed md - "+ Add tour stop" |
+
+### `src/app/dashboard/artist/page.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 320 | CTA | success md - Accept tour invite |
+| 328 | CTA | outline-error md - Decline tour invite |
+| 546 | CTA | outline-error sm - cancel performance |
+
+### `src/app/dashboard/messages/[id]/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 182 | CTA | success pill-md - Send message |
+
+### `src/app/dashboard/organiser/events/[id]/checkin/page.tsx` (4)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 265 | CTA | outline-neutral md, fullWidth - Stop Camera |
+| 298 | CTA | solid lg - Check In |
+| 314 | structural | accordion header row ("Attendee List" + count) |
+| 335 | structural | box-shaped option selector (All/Checked in/Pending), GEN-2609-063 convention |
+
+### `src/app/dashboard/organiser/events/[id]/edit/page.tsx` (5)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 896 | structural | search-result dropdown row |
+| 954 | structural | search-result dropdown row |
+| 1022 | CTA | outline-neutral md - "Use platform default" |
+| 1133 | structural | box-shaped option selector (compensation type) |
+| 1207 | CTA | outline-neutral lg - Save as Draft |
+
+### `src/app/dashboard/organiser/events/[id]/lineup/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 119 | structural | Featured-vouch toggle; gold state colour carries meaning (★ Featured), not a CTA colour |
+
+### `src/app/dashboard/organiser/events/[id]/page.tsx` (4)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 372 | CTA | outline-accent sm - apply wallet credit |
+| 415 | CTA | outline-neutral sm - "Keep as wallet credit instead" |
+| 462 | CTA | success sm - Approve application |
+| 470 | CTA | outline-error sm - Reject application |
+
+### `src/app/dashboard/organiser/events/create/page.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 901 | structural | box-shaped option selector (compensation type) |
+| 929 | structural | box-shaped option selector (approval mode) |
+| 972 | CTA | outline-neutral lg - Save as Draft |
+
+### `src/app/dashboard/organiser/payouts/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 137 | CTA | outline-neutral lg - Refresh status |
+
+### `src/app/dashboard/organiser/tours/[id]/page.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 396 | CTA | outline-error sm - remove artist from stop |
+| 440 | CTA | success md - Publish Stop |
+| 456 | CTA | outline-error md - Cancel Tour |
+
+### `src/app/dashboard/venue/[id]/edit/page.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 371 | structural | box-shaped option selector (rate type) |
+| 508 | CTA | outline-neutral lg - Save & Unpublish |
+| 518 | CTA | outline-neutral lg - Save as Draft |
+
+### `src/app/dashboard/venue/[id]/seat-map/page.tsx` (19)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 505 | CTA | dashed sm - shared AddDashedRowButton (every "+ Add ..." row on the seat-map page) |
+| 1439 | structural | box-shaped option selector (seating mode) |
+| 1451 | structural | box-shaped option selector (seating mode) |
+| 1484 | CTA | freeze toggle: `solid` md (unfrozen) / `outline-neutral` md (frozen) |
+| 1510 | CTA | dashed sm - "+ This venue has more than one level" |
+| 1519 | structural | level tab (asymmetric radius, joined to its remove-icon sibling) |
+| 1547 | CTA | dashed sm - "+ Add level" |
+| 1561 | structural | card-as-button (setup wizard choice card) |
+| 1582 | structural | card-as-button (setup wizard choice card) |
+| 1609 | structural | inline underlined back link |
+| 1632 | structural | panel disclosure toggle styled as a box selector (open/closed state) |
+| 1650 | structural | box-shaped on/off selector (manual placement) |
+| 1695 | structural | box-shaped option selector (wizard shape) |
+| 1698 | structural | box-shaped option selector (wizard shape) |
+| 1719 | structural | box-shaped option selector (single/multi zone) |
+| 1722 | structural | box-shaped option selector (single/multi zone) |
+| 1760 | CTA | dashed sm - "+ Add vertical aisle" |
+| 1782 | structural | box-shaped option selector (row alignment) |
+| 1864 | structural | marker-type selector, each option colour-coded by MARKER_META |
+
+### `src/app/dashboard/venue/bookings/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 202 | structural | calendar day cell |
+
+### `src/app/dashboard/venue/create/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 402 | structural | box-shaped option selector (rate type) |
+| 592 | structural | card-as-button (path choice card) |
+
+### `src/app/dashboard/venue/edit/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 155 | CTA | solid lg - Save Profile (was VenuePortalUI primaryLinkStyle) |
+
+### `src/app/dashboard/venue/sales/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 258 | CTA | outline-neutral md - "View all n venues" |
+| 294 | structural | inline underlined text link ("Show top n only") |
+
+### `src/app/dev/razorpay-test/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 288 | CTA | solid lg - dev page Sign in |
+| 351 | CTA | solid lg - dev page Pay |
+
+### `src/app/my-feedback/page.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 249 | CTA | outline-neutral md - Previous |
+| 267 | CTA | outline-neutral md - Next |
+| 382 | structural | card-as-button (feedback list item) |
+
+### `src/app/organisers/[id]/OrganiserFollowButton.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 74 | CTA | follow toggle: `solid` md / `outline-neutral` md |
+
+### `src/app/organisers/[id]/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 419 | structural | inline mono text link with arrow ("View all past") |
+
+### `src/app/profile/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 580 | CTA | outline-accent md - switch role |
+| 731 | structural | settings list row |
+
+### `src/app/tickets/page.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 419 | CTA | outline-accent sm - confirm tag |
+| 427 | CTA | outline-neutral sm - decline tag |
+
+### `src/app/venues/VenuesGridClient.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 137 | structural | select-style dropdown trigger (city filter) |
+| 152 | structural | dropdown option row |
+| 164 | structural | dropdown option row |
+
+### `src/app/venues/VenuesViewToggle.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 56 | structural | view tab, className-driven (`.afa-view-tab`) |
+
+### `src/app/venues/[id]/VenueFollowButton.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 98 | CTA | follow toggle: `solid` md / `outline-neutral` md |
+| 157 | CTA | follow toggle: `solid` lg / `outline-neutral` lg, fullWidth (sidebar) |
+
+### `src/app/verify-phone/page.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 148 | CTA | link - "resend code" (same role as login/register's `link` sites) |
+
+### `src/components/AddressAutocomplete.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 152 | structural | autocomplete suggestion row |
+
+### `src/components/BrowseSearchDropdown.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 86 | structural | search dropdown row |
+
+### `src/components/CityAutocomplete.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 141 | structural | autocomplete suggestion row |
+
+### `src/components/ContributionMoment.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 171 | structural | modal backdrop (click-to-close) |
+
+### `src/components/DashboardShell.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 626 | structural | bottom tab-bar item ("More") |
+| 650 | icon | icon - drawer close × |
+
+### `src/components/DisplayNameNudge.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 132 | icon | icon - dismiss × |
+
+### `src/components/EventSaveButton.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 78 | icon | icon - save/heart circle toggle |
+
+### `src/components/FeeSheet.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 38 | structural | modal backdrop (click-to-close) |
+
+### `src/components/HomeHeader.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 185 | structural | account-menu trigger (avatar chip) |
+| 236 | structural | locale switcher option |
+| 252 | structural | menu item row |
+
+### `src/components/LocationChip.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 101 | structural | location chip / dropdown trigger |
+| 135 | structural | dropdown option row |
+
+### `src/components/MessageButton.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 53 | CTA | outline-success pill-sm - shared MessageButton (tickets caller -> outline-neutral sm) |
+
+### `src/components/MobileEventFilterSheet.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 25 | CTA | toggle-pill pill-sm - filter chip, exact toggle-pill shape |
+| 78 | structural | modal backdrop (click-to-close) |
+| 178 | CTA | outline-neutral pill-md - filter sheet Reset |
+
+### `src/components/NearYouTabs.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 127 | structural | underline tab |
+| 134 | structural | underline tab |
+
+### `src/components/NotificationOptIn.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 113 | icon | icon - dismiss × |
+
+### `src/components/PhotoRotationDots.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 27 | structural | carousel progress dot |
+
+### `src/components/RangePicker.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 18 | structural | segmented range selector option |
+
+### `src/components/SearchBox.tsx` (3)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 89 | structural | search result row |
+| 100 | structural | search result row |
+| 111 | structural | search result row |
+
+### `src/components/SeatLayoutPreview.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 73 | structural | box-shaped level selector |
+
+### `src/components/SeatPicker.tsx` (4)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 277 | icon | icon - zoom out (−) |
+| 287 | icon | icon - zoom in (+) |
+| 298 | structural | seat-map zoom toolbar Reset, shares the 28px toolbar chrome with the zoom icons |
+| 322 | structural | box-shaped level selector |
+
+### `src/components/SeatSectionEditor.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 227 | icon | icon - remove section ✕ |
+| 265 | CTA | dashed md, fullWidth - "Add another section" |
+
+### `src/components/SiteNav.tsx` (5)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 451 | structural | language menu row |
+| 505 | CTA | solid lg - Sign out |
+| 550 | structural | account-menu trigger (avatar chip) |
+| 615 | structural | locale switcher option |
+| 633 | structural | menu item row |
+
+### `src/components/SupportWidget.tsx` (7)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 452 | icon | icon - floating support-chat FAB |
+| 503 | structural | panel tab (chat/feedback) |
+| 517 | structural | panel tab (chat/feedback) |
+| 546 | CTA | primary pill-md - "Go to feedback form" |
+| 590 | CTA | outline-accent pill-sm - "Send this to the team" |
+| 627 | structural | inline underlined text link inside a sentence |
+| 805 | structural | inline underlined text link ("Remove" attachment) |
+
+### `src/components/Toast.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 150 | icon | icon - toast dismiss × |
+
+### `src/components/admin/FeedbackDetailPanel.tsx` (7)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 205 | icon | icon - panel close × |
+| 217 | icon | icon - previous ‹ (circle) |
+| 239 | icon | icon - next › (circle) |
+| 336 | CTA | primary pill-sm - Confirm |
+| 348 | CTA | outline-neutral pill-sm - Cancel |
+| 378 | structural | deploy-stage selector (selected = sage fill) |
+| 412 | structural | severity selector, selected pill takes per-severity colour |
+
+### `src/components/mobile/MobileTabBar.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 481 | structural | bottom tab-bar item ("More") |
+| 513 | icon | icon - drawer close × |
+
+### `src/components/mobile/MobileTopBar.tsx` (2)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 209 | structural | language menu row |
+| 224 | structural | inline mono text action (sign out, top bar) |
+
+### `src/components/pwa/InstallPrompt.tsx` (1)
+
+| Line | Class | Target / reason |
+|---|---|---|
+| 138 | structural | text-only "Not now" dismiss on a fill-solid banner |
