@@ -1,3 +1,38 @@
+# Session Handoff — 25 Sept 2026, part 2 (chat — #704 merged, verified live)
+
+Delta-only. `qa@f81221d`.
+
+## 1. Merged
+- **#704 GEN-2609-109 Button phase 2** (`f81221d`).
+  - bare 176 → 91: all 91 are structural, with per-site reasons in `docs/button-adoption-audit.md`. That's above the ~60 target, and CC reported the real number rather than force-fitting.
+  - raw-button 4 → 2 (the regex now matches JSX only).
+  - New variants: `outline-accent`, `success`, `outline-success`, `dashed`.
+  - `bare-button` ratchet is live.
+- Chat checks: the branch was based on the `qa` HEAD, not stacked, merged cleanly; 0 real-variant Buttons override look properties through `style`.
+- CI green, merged with a pinned SHA, branch deleted. Deploy `dpl_28ypETDs354K1QZQs2hSAtJnr93f` READY with 0 runtime errors.
+- Ratchet on qa: hex 51, rgba 543, font-family 0, font-size 13, spacing 1931, radius 310, raw-button 2, bare-button 91.
+- The earlier admin feedback-panel click-through for phase 1 passed: the GEN-2609-109 status and severity edits persisted in the DB, and History recorded them.
+
+## 2. Decisions (chat)
+- `success` button text = `--afa-cream`: kept, since it raises contrast from about 3.0:1 to about 5.7:1.
+- `--afa-error-border` has 0 consumers: remove it in the colour decision session (logged on GEN-2609-110).
+
+## 3. Logged
+- GEN-2609-110: toggle-box and inline-link variants (bare 91 → about 65).
+- GEN-2609-111: exclude markdown docs from Tailwind scanning. `next dev` is currently broken by `text-[var(...)]` strings in HANDOFF/design.md. Small; do it first.
+- BUG-2609-058: `venue/create:550` uses `variant="outline"`, whose border is invisible on the dark page.
+- `CodeCounter`: GEN/2609 → 111, BUG/2609 → 58.
+
+## 4. Open, in priority order
+1. Hitesh: admin click-through. Design-system (Show history, Reset, Revert, Cancel); bookings (Retry); feedback (Approve/Reject, note Confirm/Cancel); organiser check-in (Check In, Stop Camera). Also eyeball the visual deltas listed in the CC 109 handoff.
+2. GEN-2609-111 plus BUG-2609-058, as one small CC run.
+3. Radius (310).
+4. Colour decision session with Hitesh (rgba 543, hex 51), with a proposal prepared by chat.
+5. GEN-2609-110; editor usability (GEN-2609-108); spacing (GEN-2609-107).
+6. Parked: key rotation, 005, 009, 097.
+
+---
+
 # Session Handoff — 25 Sept 2026 (chat — #702 + #703 merged, verified live, closed out)
 
 Delta-only. Session started at `qa@e9e18df`.
