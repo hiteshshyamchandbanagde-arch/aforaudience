@@ -577,13 +577,14 @@ function ProfileContent() {
       )
     }
     return (
-      <button
+      <Button
+        variant="bare"
         onClick={() => switchRole(kind)}
         disabled={switching === kind}
-        style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', background: 'transparent', border: '1.5px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '9px var(--afa-space-18px)', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
+        style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', border: '1.5px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '9px var(--afa-space-18px)', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
         {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
-      </button>
+      </Button>
     )
   }
 
@@ -727,12 +728,13 @@ function ProfileContent() {
                   </p>
                   <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
                     {group.rows.map((row, i) => (
-                      <button
+                      <Button
                         key={row.title}
+                        variant="bare"
                         onClick={row.onClick}
                         style={{
                           display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
-                          background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                          textAlign: 'left',
                           borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
                           color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-primary)',
                         }}
@@ -743,7 +745,7 @@ function ProfileContent() {
                           {row.hint && <span style={{ display: 'block', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '1px' }}>{row.hint}</span>}
                         </span>
                         {!row.danger && <ChevronRightIcon style={{ width: 16, height: 16, color: 'var(--afa-text-muted)', flexShrink: 0 }} />}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession, signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Button from "@/components/ui/Button"
 
 // ---------------------------------------------------------------------------
 // /dev/razorpay-test
@@ -284,22 +285,20 @@ export default function RazorpayTestPage() {
               You need to be signed in to run this test — the API endpoints
               require an authenticated session.
             </p>
-            <button
+            <Button
+              variant="bare"
               onClick={() => signIn(undefined, { callbackUrl: "/dev/razorpay-test" })}
               style={{
-                fontFamily: "var(--font-sans)",
                 fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
                 padding: "12px 24px",
                 borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
               }}
             >
               Sign in
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -349,7 +348,8 @@ export default function RazorpayTestPage() {
               />
             </div>
 
-            <button
+            <Button
+              variant="bare"
               onClick={handlePay}
               disabled={
                 status.kind === "loading-script" ||
@@ -358,15 +358,12 @@ export default function RazorpayTestPage() {
                 status.kind === "verifying"
               }
               style={{
-                fontFamily: "var(--font-sans)",
                 fontSize: "var(--afa-text-title)",
                 fontWeight: 600,
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
                 padding: "16px 32px",
                 borderRadius: "6px",
-                border: "none",
-                cursor: "pointer",
                 opacity:
                   status.kind === "loading-script" ||
                   status.kind === "creating-order" ||
@@ -377,7 +374,7 @@ export default function RazorpayTestPage() {
               }}
             >
               Pay ₹{(amount / 100).toFixed(2)} (test)
-            </button>
+            </Button>
           </>
         )}
 

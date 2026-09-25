@@ -742,19 +742,20 @@ export default function CheckoutPage() {
                   {companionResults
                     .filter((u) => !companionTags.some((t) => t.taggedUser.id === u.id))
                     .map((u) => (
-                      <button
+                      <Button
                         key={u.id}
+                        variant="bare"
                         onClick={() => addCompanion(u)}
                         disabled={companionBusy}
                         style={{
                           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           textAlign: 'left', padding: 'var(--afa-space-2) var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)',
-                          background: 'transparent', cursor: companionBusy ? 'default' : 'pointer', fontSize: 'var(--afa-text-body)',
+                          cursor: companionBusy ? 'default' : 'pointer', fontSize: 'var(--afa-text-body)', opacity: 1,
                         }}
                       >
                         <span>{u.displayName || u.name} <span style={{ opacity: 0.5, fontSize: 'var(--afa-text-small)' }}>@{u.name}</span></span>
                         <span style={{ color: 'var(--afa-fill-solid)', fontWeight: 600, fontSize: 'var(--afa-text-small)' }}>{tr.checkoutPage.tagButtonLabel}</span>
-                      </button>
+                      </Button>
                     ))}
                 </div>
               )}
