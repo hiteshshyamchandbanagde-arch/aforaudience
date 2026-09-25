@@ -32,7 +32,12 @@ import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 // Class C (icon-only controls) and Class D (structural, one-off CTAs)
 // route through - see their own case blocks below for what each
 // resets and why neither one re-skins anything.
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error' | 'link' | 'icon' | 'bare'
+// GEN-2609-109 - `outline-accent`/`success`/`outline-success`/`dashed`
+// added for phase-2 bare -> real-variant adoption (docs/button-adoption-
+// audit.md, "Phase 2"): each is a shape found at 3+ CTA-styled `bare`
+// sites that no existing variant covered (the GEN-2609-066 3-site rule).
+// See each case block below for its sites.
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error' | 'outline-accent' | 'success' | 'outline-success' | 'dashed' | 'link' | 'icon' | 'bare'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -324,6 +329,104 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',
         fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'outline-accent':
+      // GEN-2609-109 - the amber-outline family, 8 sites that were all
+      // hand-styled `bare` (event +1 confirm, 2x admin Search submit,
+      // organiser wallet credit, profile switch-role, tickets confirm-tag,
+      // events "See all events", support "Send this to the team"). Their
+      // borders drifted between full amber and 40%-alpha amber, 1px and
+      // 1.5px - unified on a full-amber 1px border so it reads off the
+      // one token. Same chrome and md fallback as `outline-error`.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-2)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        color: 'var(--afa-amber)',
+        border: '1px solid var(--afa-amber)',
+        padding: 'var(--afa-btn-padding-md)',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'success':
+      // GEN-2609-109 - positive/approve actions, 5 `bare` sites (admin
+      // feedback Approve, organiser Approve application, artist Accept tour
+      // invite, organiser Publish Stop, messages Send). `solid`'s ember
+      // fill reads as "the page's main CTA", not "approve", so these were
+      // always a different colour family - see `outline-error`'s note on
+      // GEN-2609-076 deliberately not folding them in. Text is
+      // `--afa-cream`, not `--afa-on-fill-solid`: 3 of the 5 sites used
+      // on-fill-solid (near-black #1A1000) on sage, which is ~3.0:1 contrast;
+      // cream on sage is ~5.7:1, close to the white the messages Send button and
+      // FeedbackDetailPanel's sage-selected pills already used.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-2)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'var(--afa-sage)',
+        color: 'var(--afa-cream)',
+        border: 'none',
+        padding: 'var(--afa-btn-padding-md)',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'outline-success':
+      // GEN-2609-109 - the outline counterpart of `success` (as
+      // `outline-error` is to the destructive family): admin Unsuspend,
+      // corporate-inquiry Mark Contacted, and the shared MessageButton.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-6px)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        color: 'var(--afa-sage)',
+        border: '1px solid var(--afa-sage)',
+        padding: 'var(--afa-btn-padding-md)',
+        borderRadius: 'var(--afa-radius-md)',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+        textDecoration: 'none',
+      }
+    case 'dashed':
+      // GEN-2609-109 - the "+ Add ..." row, 6 `bare` sites (seat-map's
+      // shared AddDashedRowButton, add level x2, add vertical aisle;
+      // artist add tour stop; GA add section). Sites drew the dash at
+      // 30%-alpha cream with 60%-opacity text; unified on the shared
+      // resting-border token and text-secondary (65%), so an admin edit to
+      // either reaches every add row.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 'var(--afa-space-2)',
+        width: fullWidth ? '100%' : undefined,
+        background: 'transparent',
+        color: 'var(--afa-text-secondary)',
+        border: '1px dashed var(--afa-border-resting)',
+        padding: 'var(--afa-btn-padding-sm)',
+        borderRadius: 'var(--afa-radius-sm)',
+        fontSize: 'var(--afa-text-small)',
         fontWeight: 600,
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
