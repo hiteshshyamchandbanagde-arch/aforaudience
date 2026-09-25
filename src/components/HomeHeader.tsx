@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react"
 import EnvBadge from "@/components/EnvBadge"
 import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
+import Button from "@/components/ui/Button"
 import { useLocale } from "@/lib/i18n/translate"
 import { LOCALES } from "@/lib/i18n/locales"
 
@@ -168,23 +169,25 @@ export default function HomeHeader() {
           <div style={{ overflow: "hidden", transition: "width 0.25s ease, opacity 0.25s ease", width: searchOpen ? "220px" : 0, opacity: searchOpen ? 1 : 0 }}>
             {searchOpen && <SearchBox />}
           </div>
-          <button
+          <Button
+            variant="icon"
             aria-label={t.search.placeholder}
             onClick={() => setSearchOpen((v) => !v)}
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "50%", border: "none", background: "transparent", cursor: "pointer", color: "var(--afa-text-primary)", opacity: 0.7 }}
+            style={{ width: "36px", height: "36px", borderRadius: "50%", color: "var(--afa-text-primary)", opacity: 0.7 }}
           >
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.2-3.2" strokeLinecap="round" />
             </svg>
-          </button>
+          </Button>
 
           <div ref={menuRef} style={{ position: "relative" }}>
-            <button
+            <Button
+              variant="bare"
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid var(--afa-border-resting)", background: "transparent", cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "8px", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "999px", border: "1px solid var(--afa-border-resting)" }}
             >
               {user ? (
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
@@ -199,7 +202,7 @@ export default function HomeHeader() {
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>
                 <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </button>
+            </Button>
 
             {menuOpen && (
               <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "12px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "8px 0", zIndex: 20 }}>
@@ -230,13 +233,14 @@ export default function HomeHeader() {
                 )}
                 <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 6px", padding: "6px 16px 8px" }}>
                   {LOCALES.map((l) => (
-                    <button
+                    <Button
+                      variant="bare"
                       key={l.id}
                       onClick={() => setLocale(l.id)}
-                      style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, background: "transparent", border: "none", cursor: "pointer", padding: "2px 4px" }}
+                      style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, padding: "2px 4px" }}
                     >
                       {l.id.toUpperCase()}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 <div style={{ padding: "0 12px 4px" }}>
@@ -245,12 +249,13 @@ export default function HomeHeader() {
                 {user && (
                   <>
                     <div style={{ margin: "6px 0", height: "1px", background: "var(--afa-tint-10)" }} />
-                    <button
+                    <Button
+                      variant="bare"
                       onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
-                      style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}
+                      style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 16px", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}
                     >
                       {t.nav.signOut}
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>

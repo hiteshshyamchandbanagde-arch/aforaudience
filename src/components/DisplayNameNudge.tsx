@@ -129,22 +129,20 @@ export default function DisplayNameNudge() {
       >
         Add name
       </Button>
-      <button
+      <Button
+        variant="bare"
         onClick={onDismiss}
         aria-label="Dismiss"
         style={{
-          background: 'transparent',
-          border: 'none',
           color: 'var(--afa-text-primary)',
           padding: '4px 8px',
           fontSize: 'var(--afa-text-lead)',
           opacity: 0.6,
-          cursor: 'pointer',
           lineHeight: 1,
         }}
       >
         ×
-      </button>
+      </Button>
     </div>
   );
 }

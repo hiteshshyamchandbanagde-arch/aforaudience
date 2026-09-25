@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Button from '@/components/ui/Button'
 
 // Feedback c6416be5 (Hitesh's decision, 26 Jul session 36): a small (i)
 // icon attached to a field's label, showing a short explanation on
@@ -13,33 +14,29 @@ export default function HelpIcon({ text }: { text: string }) {
 
   return (
     <span style={{ position: 'relative', display: 'inline-block', marginLeft: '5px', verticalAlign: 'middle' }}>
-      <button
+      <Button
+        variant="icon"
         type="button"
         onClick={() => setOpen((v) => !v)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         aria-label="More info"
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           width: '16px',
           height: '16px',
           borderRadius: '50%',
           border: '1px solid rgba(245,245,240,0.35)',
-          background: 'transparent',
           color: 'var(--afa-text-primary)',
           opacity: 0.7,
           fontSize: 'var(--afa-text-caption)',
           fontWeight: 700,
           fontFamily: 'var(--font-sans)',
-          cursor: 'pointer',
           padding: 0,
           lineHeight: 1,
         }}
       >
         i
-      </button>
+      </Button>
       {open && (
         <span
           role="tooltip"

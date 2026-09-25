@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/Toast'
+import Button from '@/components/ui/Button'
 
 interface MessageButtonProps {
   contextType: 'PERFORMANCE' | 'VENUE_BOOKING' | 'BOOKING'
@@ -49,7 +50,8 @@ export default function MessageButton({ contextType, contextId, label = 'Message
   }
 
   return (
-    <button
+    <Button
+      variant="bare"
       onClick={handleClick}
       disabled={loading}
       style={{
@@ -60,9 +62,7 @@ export default function MessageButton({ contextType, contextId, label = 'Message
         padding: '8px 16px',
         borderRadius: '18px',
         border: '1px solid var(--afa-sage, #4a6741)',
-        background: 'transparent',
         color: 'var(--afa-sage, #4a6741)',
-        fontFamily: 'var(--font-sans)',
         fontWeight: 600,
         fontSize: 'var(--afa-text-ui)',
         cursor: loading ? 'default' : 'pointer',
@@ -71,6 +71,6 @@ export default function MessageButton({ contextType, contextId, label = 'Message
       }}
     >
       {icon ?? '💬'} {label}
-    </button>
+    </Button>
   )
 }

@@ -202,18 +202,20 @@ export default function FeedbackDetailPanel({
               )}
               {item.fromChatbot && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)' }}>via chatbot</span>}
             </div>
-            <button
+            <Button
+              variant="bare"
               onClick={onClose}
               aria-label="Close"
-              style={{ background: 'transparent', border: 'none', fontSize: 'var(--afa-text-subtitle)', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
+              style={{ fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
             >
               ×
-            </button>
+            </Button>
           </div>
 
           {position && (onPrev || onNext) && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--afa-space-4)' }}>
-              <button
+              <Button
+                variant="bare"
                 onClick={guardedPrev}
                 disabled={!hasPrev}
                 aria-label="Previous"
@@ -230,11 +232,12 @@ export default function FeedbackDetailPanel({
                 }}
               >
                 ‹
-              </button>
+              </Button>
               <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-taupe)' }}>
                 {position.index} of {position.total}
               </span>
-              <button
+              <Button
+                variant="bare"
                 onClick={guardedNext}
                 disabled={!hasNext}
                 aria-label="Next"
@@ -251,7 +254,7 @@ export default function FeedbackDetailPanel({
                 }}
               >
                 ›
-              </button>
+              </Button>
             </div>
           )}
 
@@ -330,24 +333,26 @@ export default function FeedbackDetailPanel({
                   style={{ width: '100%', boxSizing: 'border-box', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', resize: 'vertical', fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-2)' }}>
-                  <button
+                  <Button
+                    variant="bare"
                     disabled={busy || !noteDraft.trim()}
                     onClick={() => {
                       onSetStatus(pendingNoteStatus, noteDraft.trim())
                       setPendingNoteStatus(null)
                       setNoteDraft('')
                     }}
-                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: 'none', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
+                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
                   >
                     Confirm
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="bare"
                     disabled={busy}
                     onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
-                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: '1px solid var(--afa-border-resting)', background: 'transparent', color: 'var(--afa-text-primary)', cursor: 'pointer' }}
+                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: '1px solid var(--afa-border-resting)', color: 'var(--afa-text-primary)' }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -370,20 +375,21 @@ export default function FeedbackDetailPanel({
                   Unset
                 </Button>
                 {DEPLOY_STAGES.map((ds) => (
-                  <button
+                  <Button
+                    variant="bare"
                     key={ds}
                     disabled={busy}
                     onClick={() => onSetDeployStage(ds)}
                     style={{
                       fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-pill)',
                       border: item.deployStage === ds ? 'none' : '1px solid var(--afa-border-resting)',
-                      background: item.deployStage === ds ? 'var(--afa-sage)' : 'transparent',
+                      background: item.deployStage === ds ? 'var(--afa-sage)' : undefined,
                       color: item.deployStage === ds ? 'white' : 'var(--afa-text-primary)',
                       cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
                     }}
                   >
                     {labelize(ds)}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -403,7 +409,8 @@ export default function FeedbackDetailPanel({
                 Unset
               </Button>
               {SEVERITIES.map((sev) => (
-                <button
+                <Button
+                  variant="bare"
                   key={sev}
                   disabled={busy}
                   onClick={() => onSetSeverity(sev)}
@@ -413,14 +420,14 @@ export default function FeedbackDetailPanel({
                     padding: 'var(--afa-space-6px) var(--afa-space-3)',
                     borderRadius: 'var(--afa-radius-pill)',
                     border: item.severity === sev ? 'none' : '1px solid var(--afa-border-resting)',
-                    background: item.severity === sev ? SEVERITY_COLORS[sev] : 'transparent',
+                    background: item.severity === sev ? SEVERITY_COLORS[sev] : undefined,
                     color: item.severity === sev ? 'white' : 'var(--afa-text-primary)',
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.6 : 1,
                   }}
                 >
                   {labelize(sev)}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useLocale } from '@/lib/i18n/translate'
+import Button from '@/components/ui/Button'
 
 // GEN-2608-032 (session 3rd iteration): combines what were two separate
 // hero cards (TonightNearYou + ArtistsNearYou) into one tabbed panel per
@@ -123,18 +124,20 @@ export default function NearYouTabs() {
       </div>
 
       <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
-        <button
+        <Button
+          variant="bare"
           onClick={() => setTab('events')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 6px', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
+          style={{ padding: '0 0 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabEvents}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="bare"
           onClick={() => setTab('artists')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 6px', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
+          style={{ padding: '0 10px 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabArtists}
-        </button>
+        </Button>
       </div>
 
       {loading && (

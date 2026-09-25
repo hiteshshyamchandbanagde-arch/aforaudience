@@ -35,11 +35,14 @@ export function FeeSheet({
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <button
+      <Button
+        variant="bare"
         aria-label="Close"
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.6)', border: 'none', cursor: 'pointer' }}
-      />
+        style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.6)' }}
+      >
+        {null}
+      </Button>
       <div
         style={{
           position: 'relative',

@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react"
 import { normalizeWhitespace, normalizeForCompare } from "@/lib/text"
 import { IconSection } from "@/components/dashboard/VenuePortalUI"
+import Button from "@/components/ui/Button"
 
 export type SeatSection = {
   id: string
@@ -223,23 +224,21 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 Free
               </label>
             </div>
-            <button
+            <Button
+              variant="bare"
               type="button"
               onClick={() => removeSection(section.id)}
               aria-label="Remove section"
               className="ga-remove-btn"
               style={{
-                background: "none",
-                border: "none",
                 color: "var(--afa-text-muted)",
-                cursor: "pointer",
                 fontSize: "var(--afa-text-body)",
                 fontWeight: 600,
                 padding: "8px",
               }}
             >
               ✕
-            </button>
+            </Button>
           </div>
           )
         })}
@@ -263,7 +262,8 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
         ) : null
       })()}
 
-      <button
+      <Button
+        variant="bare"
         type="button"
         onClick={addSection}
         className="ga-add-row"
@@ -273,19 +273,17 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          background: "none",
           border: "1px dashed rgba(245,245,240,0.3)",
           borderRadius: "10px",
           padding: "10px 18px",
           fontSize: "var(--afa-text-body)",
           fontWeight: 600,
           color: "var(--afa-text-secondary)",
-          cursor: "pointer",
           width: "100%",
         }}
       >
         <IconSection size={16} /> Add another section
-      </button>
+      </Button>
 
       {sections.length > 0 && (
         <div

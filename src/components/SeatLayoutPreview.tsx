@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 // Read-only visual preview of a NUMBERED venue's saved seat layout, shown
 // on the event-creation/edit pricing screen. Confirmed still missing
@@ -69,19 +70,20 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
         {levels.length > 1 && (
           <div style={{ display: 'flex', gap: '6px' }}>
             {levels.map((lvl) => (
-              <button
+              <Button
+                variant="bare"
                 key={lvl}
                 type="button"
                 onClick={() => setActiveLevel(lvl)}
                 style={{
-                  fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer',
+                  fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: '6px',
                   border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
                   background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                   color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                 }}
               >
                 {lvl || 'Main'}
-              </button>
+              </Button>
             ))}
           </div>
         )}

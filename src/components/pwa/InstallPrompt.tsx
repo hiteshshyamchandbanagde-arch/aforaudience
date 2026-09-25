@@ -135,21 +135,19 @@ export default function InstallPrompt() {
           Quick access, offline tickets, feels like an app.
         </div>
       </div>
-      <button
+      <Button
+        variant="bare"
         onClick={onDismiss}
         aria-label="Dismiss install prompt"
         style={{
-          background: 'transparent',
           color: 'var(--afa-on-fill-solid)',
-          border: 'none',
           padding: '8px 12px',
           fontSize: 'var(--afa-text-body)',
           opacity: 0.7,
-          cursor: 'pointer',
         }}
       >
         Not now
-      </button>
+      </Button>
       <Button variant="primary" size="pill-md" fullWidth={false} onClick={onInstall}>
         Install
       </Button>

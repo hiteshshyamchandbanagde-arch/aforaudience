@@ -449,7 +449,8 @@ export default function SupportWidget() {
           .afa-support-chat-panel { bottom: ${CHAT_PANEL_MOBILE_BOTTOM}; max-height: ${CHAT_PANEL_MOBILE_MAX_HEIGHT}; }
         }
       `}</style>
-      <button
+      <Button
+        variant="bare"
         className="afa-support-chat-btn"
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
@@ -463,10 +464,8 @@ export default function SupportWidget() {
           borderRadius: '50%',
           background: 'var(--afa-amber)',
           color: 'var(--afa-on-fill-solid)',
-          border: 'none',
           boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
           fontSize: 'var(--afa-text-heading)',
-          cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -476,7 +475,7 @@ export default function SupportWidget() {
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)' }}
       >
         {panel === 'closed' ? <ChatIcon size={26} pulse /> : <CloseIcon size={22} />}
-      </button>
+      </Button>
 
       {panel !== 'closed' && (
         <div
@@ -501,36 +500,34 @@ export default function SupportWidget() {
           }}
         >
           <div style={{ display: 'flex', borderBottom: '1px solid var(--afa-border-resting)' }}>
-            <button
+            <Button
+              variant="bare"
               onClick={() => setPanel('chat')}
               style={{
                 flex: 1,
                 padding: 'var(--afa-space-3) var(--afa-space-2)',
-                background: panel === 'chat' ? 'var(--afa-amber)' : 'transparent',
+                background: panel === 'chat' ? 'var(--afa-amber)' : undefined,
                 color: panel === 'chat' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-                border: 'none',
                 fontWeight: 600,
                 fontSize: 'var(--afa-text-body)',
-                cursor: 'pointer',
               }}
             >
               Ask a question
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="bare"
               onClick={switchToFeedbackPanel}
               style={{
                 flex: 1,
                 padding: 'var(--afa-space-3) var(--afa-space-2)',
-                background: panel === 'feedback' ? 'var(--afa-amber)' : 'transparent',
+                background: panel === 'feedback' ? 'var(--afa-amber)' : undefined,
                 color: panel === 'feedback' ? 'var(--afa-on-fill-solid)' : 'var(--afa-text-primary)',
-                border: 'none',
                 fontWeight: 600,
                 fontSize: 'var(--afa-text-body)',
-                cursor: 'pointer',
               }}
             >
               Feedback
-            </button>
+            </Button>
           </div>
 
           {panel === 'chat' && (
@@ -546,21 +543,20 @@ export default function SupportWidget() {
                   <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-4)' }}>
                     Please use the feedback form instead — the team reads these personally.
                   </div>
-                  <button
+                  <Button
+                    variant="bare"
                     onClick={switchToFeedbackPanel}
                     style={{
                       background: 'var(--afa-amber)',
                       color: 'var(--afa-on-fill-solid)',
-                      border: 'none',
                       borderRadius: 'var(--afa-radius-pill)',
                       padding: 'var(--afa-space-2) var(--afa-space-4)',
                       fontWeight: 600,
                       fontSize: 'var(--afa-text-body)',
-                      cursor: 'pointer',
                     }}
                   >
                     Go to feedback form
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <>
@@ -591,22 +587,21 @@ export default function SupportWidget() {
                         </div>
                         {m.role === 'assistant' && m.suggestsFallback && (
                           <div style={{ clear: 'both', marginTop: 'var(--afa-space-1)' }}>
-                            <button
+                            <Button
+                              variant="bare"
                               onClick={() =>
                                 openFeedbackFromChat(chatMessages[i - 1]?.content ?? m.content)
                               }
                               style={{
                                 fontSize: 'var(--afa-text-small)',
                                 color: 'var(--afa-amber)',
-                                background: 'transparent',
                                 border: '1px solid var(--afa-amber)',
                                 borderRadius: 'var(--afa-radius-pill)',
                                 padding: 'var(--afa-space-1) var(--afa-space-10px)',
-                                cursor: 'pointer',
                               }}
                             >
                               Send this to the team →
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -629,20 +624,18 @@ export default function SupportWidget() {
                       >
                         You&apos;ve reached the question limit for this session. Need more
                         help?{' '}
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={switchToFeedbackPanel}
                           style={{
                             color: 'var(--afa-amber)',
-                            background: 'transparent',
-                            border: 'none',
                             fontWeight: 600,
-                            cursor: 'pointer',
                             padding: 0,
                             textDecoration: 'underline',
                           }}
                         >
                           Use the feedback form
-                        </button>
+                        </Button>
                         .
                       </div>
                     )}
@@ -809,20 +802,18 @@ export default function SupportWidget() {
                           marginBottom: 'var(--afa-space-6px)',
                         }}
                       />
-                      <button
+                      <Button
+                        variant="bare"
                         onClick={clearAttachment}
                         style={{
                           fontSize: 'var(--afa-text-small)',
                           color: 'var(--afa-amber)',
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
                           padding: 0,
                           textDecoration: 'underline',
                         }}
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div style={{ marginBottom: 'var(--afa-space-3)' }}>

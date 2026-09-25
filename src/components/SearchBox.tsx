@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
 
 interface SearchResults {
   events: { id: string; title: string; date: string; city: string | null }[]
@@ -85,10 +86,10 @@ export default function SearchBox() {
                 <div style={{ marginBottom: "6px" }}>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.events}</div>
                   {results.events.map((e) => (
-                    <button key={e.id} onClick={() => go(`/events/${e.id}`)} style={rowStyle}>
+                    <Button variant="bare" key={e.id} onClick={() => go(`/events/${e.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{e.title}</span>
                       <span style={{ opacity: 0.5, marginLeft: "8px" }}>{new Date(e.date).toLocaleDateString()}{e.city ? ` · ${e.city}` : ""}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -96,10 +97,10 @@ export default function SearchBox() {
                 <div style={{ marginBottom: "6px" }}>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.artists}</div>
                   {results.artists.map((a) => (
-                    <button key={a.id} onClick={() => go(`/artists/${a.id}`)} style={rowStyle}>
+                    <Button variant="bare" key={a.id} onClick={() => go(`/artists/${a.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{a.name}</span>
                       {a.genre && <span style={{ opacity: 0.5, marginLeft: "8px" }}>{a.genre}</span>}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -107,10 +108,10 @@ export default function SearchBox() {
                 <div>
                   <div style={{ fontSize: "var(--afa-text-micro)", fontWeight: 700, color: "var(--afa-text-primary)", opacity: 0.4, textTransform: "uppercase", letterSpacing: "0.05em", padding: "4px 16px" }}>{t.nav.venues}</div>
                   {results.venues.map((v) => (
-                    <button key={v.id} onClick={() => go(`/venues/${v.id}`)} style={rowStyle}>
+                    <Button variant="bare" key={v.id} onClick={() => go(`/venues/${v.id}`)} style={rowStyle}>
                       <span style={{ fontWeight: 600 }}>{v.name}</span>
                       <span style={{ opacity: 0.5, marginLeft: "8px" }}>{v.city}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
