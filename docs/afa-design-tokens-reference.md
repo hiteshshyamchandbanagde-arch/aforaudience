@@ -50,10 +50,12 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-space-32px:  32px;
 --afa-space-48px:  48px;
 
---afa-text-10px:   10px;
---afa-text-15px:   15px;
---afa-text-18px:   18px;
---afa-text-20px:   20px;
+/* renamed 25 Sep (GEN-2609-106, #702) from --afa-text-10px/15px/18px/20px */
+--afa-text-caption:    10px;
+--afa-text-body-lg:    15px;
+--afa-text-lead:       18px;
+--afa-text-subtitle:   20px;
+--afa-text-subheading: 22px;  /* new, GEN-2609-106 */
 
 --afa-radius-10px: 10px;
 --afa-radius-12px: 12px;

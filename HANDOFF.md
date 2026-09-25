@@ -1,3 +1,35 @@
+# Session Handoff — 25 Sept 2026 (chat — #702 + #703 merged, verified live, closed out)
+
+Delta-only. Session started at `qa@e9e18df`.
+
+## 1. Merged
+- **#702 GEN-2609-105/106** (`0620cf5`): the font-size closeout, split out of CC's stacked branch into its own PR. Font-size literals: 142 → 13.
+  - Chat checks: no old token names left in code; QA DB keys already renamed with values kept; the revert route already skips unknown keys, so old snapshots can't reintroduce them (no fix needed).
+- **#703 GEN-2609-096 phase 1** (`001acfa`): raw-button 211 → 4. The branch conflicted after the #702 squash, so chat rebased the 7 button commits with `--onto` and force-pushed with a pinned lease. The resulting tree was byte-identical to CC's branch.
+- Both: CI green, merged with a pinned SHA, branches deleted, `qa` identical to the PR heads. Deploy `dpl_41wenMW8c47AHWmLKyTcc6RtU85c` READY with 0 runtime errors.
+- Feedback: 096, 105 and 106 are RESOLVED/DEPLOYED_QA. `CodeCounter` GEN/2609 moved 108 → 109.
+- Docs: fixed the stale pixel-named block in `afa-design-tokens-reference.md` Section 1.
+
+## 2. Ratchet on qa
+hex 54, rgba 576, font-family 0, **font-size 13**, spacing 2007, radius 331, **raw-button 4**.
+
+## 3. Concern logged: GEN-2609-109 (Button phase 2)
+- 162 of 209 raw buttons were classed "structural" and became `variant="bare"` (176 uses). They go through `<Button>` but are still styled locally, so the raw-button metric overstates how much central control we gained.
+- At least 4 bare sites are clearly CTA-styled (admin/bookings, organiser checkin, SupportWidget, FeedbackDetailPanel), and the design-system editor itself uses bare plus a local `secondaryBtnStyle`.
+- Phase 2 plan: add a `bare-button` ratchet so the count can't grow; re-audit and move CTA-looking sites onto variants; target ≤ ~60 bare.
+- Process note: CC stacked 105/106 underneath 096 against the dispatch instruction ("stop, hand off, then start 096 from fresh qa"). It was harmless this time but cost a rebase. Future dispatches should repeat the no-stacking rule at the top.
+
+## 4. Open, in priority order
+1. Hitesh: live-check the admin FeedbackDetailPanel buttons (needs the Google ADMIN login).
+2. GEN-2609-109 Button phase 2.
+3. Radius (331).
+4. Translucent-colour decision session.
+5. Spacing (GEN-2609-107).
+6. Editor usability (GEN-2609-108).
+7. Parked: key rotation, 005, 009, 097.
+
+---
+
 # Session Handoff — 25 Sept 2026 (CC — GEN-2609-105/106 font-size closeout + GEN-2609-096 Button phase 1, both complete, pushed, not merged)
 
 Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@3bda985`. Branch: `feat/gen-2609-096-button-phase1` (stacked on the 105/106 commits, which are included in this branch since `qa` had not yet absorbed them when this branch was cut), pushed, **`NOT YET OPENED`** as a PR — no `gh` CLI / GITHUB_TOKEN on this machine. Compare URL: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-096-button-phase1?expand=1`.
