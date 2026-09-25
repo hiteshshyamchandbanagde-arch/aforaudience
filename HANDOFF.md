@@ -1,3 +1,39 @@
+# Session Handoff — 25 Sept 2026, part 3 (chat — admin click-through, 2 bugs, dispatch queued). END OF SESSION
+
+Delta-only. `qa` code is unchanged since `f81221d` (#704).
+
+## 1. Hitesh's admin click-through of #703/#704
+- **PASS:**
+  - feedback panel status/severity (persisted, with History);
+  - design-system history toggle and the Reset→Cancel dialog;
+  - bookings tabs and "Attempt delivery" render;
+  - the feedback page renders (0 pending approvals, so nothing to Approve/Reject).
+- **NOT DONE:** feedback-panel note Cancel, and organiser check-in (optional; needs Omkar's login).
+- **Incident:** chat told Hitesh to try "Revert → Cancel", but Revert has no confirm dialog. It applied instantly and set `--afa-text-body` to 16px site-wide. Hitesh restored it through the UI (the 6:41 AM row) and the DB was confirmed back at 14px (13:17:19 UTC). Side effect: this proved restore works end to end through the UI. Raised as BUG-2609-059.
+
+## 2. Logged
+- **BUG-2609-059 (Medium):** Revert has no confirm and a misleading label; it re-applies the row's after-state.
+- **BUG-2609-060 (Low):** admin bookings shows "No payment (free event)" whenever `payment` is null, even when the total is greater than 0 (seeded bookings, or no Razorpay).
+- **GEN-2609-108:** added the Revert-label note.
+- `CodeCounter` BUG/2609 → 60. GEN-2609-111, BUG-2609-058, BUG-2609-059 and BUG-2609-060 are now BUILD_QUEUE.
+
+## 3. Queued for CC (not yet run)
+- `docs/cc-dispatches/cc-prompt-small-fixes-111-058-059-060.md`: one branch, 4 commits.
+  - Tailwind `@source not` for the markdown docs (fixes `next dev`).
+  - `venue/create` outline → outline-neutral.
+  - Revert → "Restore this version" plus a ConfirmDialog listing the diff.
+  - Free-event label logic.
+
+## 4. Next session, in order
+1. Merge the small-fixes bundle once CC hands off.
+2. **Chat owes:** a radius dispatch (310 literals, same pattern as font-size) and a colour-decision proposal for Hitesh (rgba 543 + hex 51; yes/no calls, and remove `--afa-error-border`).
+3. GEN-2609-108 (editor usability), GEN-2609-110 (toggle-box and inline-link variants), GEN-2609-107 (spacing, not in the editor).
+4. Parked: key rotation, 005, 009, 097.
+
+**Ratchet on qa:** hex 51, rgba 543, font-family 0, font-size 13, spacing 1931, radius 310, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 25 Sept 2026, part 2 (chat — #704 merged, verified live)
 
 Delta-only. `qa@f81221d`.
