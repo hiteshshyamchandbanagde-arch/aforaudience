@@ -22,6 +22,7 @@ const {
   isExemptFile,
   shouldFlag,
   tokenOkReason,
+  stripLineComments,
   findOffenses,
   isAllowlistedLength,
   isAllowlistedFontFamily,
@@ -79,6 +80,10 @@ const RULE_FIXTURES = {
   'raw-button': {
     positive: `        <button onClick={onSave}>Save</button>`,
     negative: `        <Button onClick={onSave}>Save</Button>`,
+  },
+  'bare-button': {
+    positive: `        <Button variant="bare" onClick={onSave}>Save</Button>`,
+    negative: `        <Button variant="solid" size="sm" onClick={onSave}>Save</Button>`,
   },
 }
 
@@ -443,6 +448,108 @@ t('raw-button (count-based): Button.tsx stays exempt (an added <button> there ne
   ].join('\n')
   const { offenses } = findOffenses(diff)
   assert.equal(offenses.length, 0)
+})
+
+// ---------------------------------------------------------------------
+// GEN-2609-109 - raw-button matches JSX only, never prose in comments.
+// The 2 real false positives on qa before this fix are the fixtures.
+// ---------------------------------------------------------------------
+t('raw-button: <button inside a // comment is NOT flagged (EventSaveButton.tsx:90)', () => {
+  const rule = ruleByName('raw-button')
+  const line = '        // toggle save (native <button> keyboard activation) AND navigate'
+  assert.equal(rule.test(line), false)
+  assert.deepEqual(rule.extract(line), [])
+})
+t('raw-button: <button inside a /* */ comment is NOT flagged (VenuePortalUI.tsx:426)', () => {
+  const rule = ruleByName('raw-button')
+  assert.equal(rule.test('/* ---------------- Nav pills + CTA links (Next <Link>, not <button>) ---------------- */'), false)
+  assert.equal(rule.test(' * a block-comment continuation line mentioning <button> tags'), false)
+})
+t('raw-button: real JSX is still flagged - multi-line open tag, trailing comment, bare <button>', () => {
+  const rule = ruleByName('raw-button')
+  assert.equal(rule.test('                      <button'), true, 'multi-line JSX opening tag (RegisterForm.tsx:458 shape)')
+  assert.equal(rule.test('      <button onClick={x}>Go</button> // TODO restyle'), true)
+  assert.equal(rule.test('      {/* note */}<button>Go</button>'), true)
+  assert.equal(rule.test('      <button>'), true)
+})
+t('raw-button: a tag that merely starts with "button" is NOT a raw button', () => {
+  const rule = ruleByName('raw-button')
+  assert.equal(rule.test('      <buttonGroup items={x} />'), false)
+})
+t("stripLineComments keeps a URL's // intact", () => {
+  assert.equal(stripLineComments("  const u = 'https://example.com'"), "  const u = 'https://example.com'")
+})
+t('raw-button (count-based): adding a comment that mentions <button> never counts', () => {
+  const diff = [
+    'diff --git a/src/components/EventSaveButton.tsx b/src/components/EventSaveButton.tsx',
+    '--- a/src/components/EventSaveButton.tsx',
+    '+++ b/src/components/EventSaveButton.tsx',
+    '@@ -0,0 +1,1 @@',
+    '+        // toggle save (native <button> keyboard activation) AND navigate',
+  ].join('\n')
+  assert.equal(findOffenses(diff).offenses.length, 0)
+})
+
+// ---------------------------------------------------------------------
+// GEN-2609-109 - bare-button: count-based, same diff-wide surplus as
+// raw-button. Converting bare -> a real variant must never trip it.
+// ---------------------------------------------------------------------
+function oneFileDiff(lines, file = 'src/app/foo.tsx') {
+  return [`diff --git a/${file} b/${file}`, `--- a/${file}`, `+++ b/${file}`, '@@ -1,1 +1,1 @@', ...lines].join('\n')
+}
+t('bare-button: matches every quoting form, and counts occurrences not lines', () => {
+  const rule = ruleByName('bare-button')
+  assert.equal(rule.test(`<Button variant='bare'>`), true)
+  assert.equal(rule.test(`<Button variant={'bare'}>`), true)
+  assert.equal(rule.test('<Button variant={`bare`}>'), true)
+  assert.equal(rule.extract('<Button variant="bare">a</Button><Button variant="bare">b</Button>').length, 2)
+})
+t('bare-button: does not match other variants, the type union, a case label, or comments', () => {
+  const rule = ruleByName('bare-button')
+  assert.equal(rule.test('<Button variant="barely">'), false)
+  assert.equal(rule.test("type ButtonVariant = 'primary' | 'bare'"), false)
+  assert.equal(rule.test("    case 'bare':"), false)
+  assert.equal(rule.test('  // routed via <Button variant="bare"> for now'), false)
+})
+t('bare-button (count-based): converting bare -> a real variant passes', () => {
+  const diff = oneFileDiff([
+    '-      <Button variant="bare" onClick={retry} style={{ padding: 8 }}>Retry</Button>',
+    '+      <Button variant="solid" size="sm" fullWidth={false} onClick={retry}>Retry</Button>',
+  ])
+  assert.equal(findOffenses(diff).offenses.length, 0)
+})
+t('bare-button (count-based): restyling an existing bare site (-1/+1) passes', () => {
+  const diff = oneFileDiff([
+    `-      <Button variant="bare" style={{ padding: 'var(--afa-space-2)' }}>Row</Button>`,
+    `+      <Button variant="bare" style={{ padding: 'var(--afa-space-3)' }}>Row</Button>`,
+  ])
+  assert.equal(findOffenses(diff).offenses.length, 0)
+})
+t('bare-button (count-based): raw <button> -> bare passes raw-button but fails bare-button', () => {
+  const diff = oneFileDiff([
+    '-      <button onClick={go}>Go</button>',
+    '+      <Button variant="bare" onClick={go}>Go</Button>',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'bare-button')
+})
+t('bare-button (count-based): 2 bare on one added line vs 1 removed nets a surplus of 1', () => {
+  const diff = oneFileDiff([
+    '-      <Button variant="bare">a</Button>',
+    '+      <Button variant="bare">a</Button><Button variant="bare">b</Button>',
+  ])
+  const { offenses } = findOffenses(diff)
+  assert.equal(offenses.length, 1)
+  assert.equal(offenses[0].rule, 'bare-button')
+})
+t('bare-button (count-based): token-ok suppresses it like every other rule', () => {
+  const diff = oneFileDiff([
+    '+      <Button variant="bare" onClick={go}>Cell</Button> {/* token-ok: seat cell, structural */}',
+  ])
+  const { offenses, tokenOkUses } = findOffenses(diff)
+  assert.equal(offenses.length, 0)
+  assert.equal(tokenOkUses.length, 1)
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)
