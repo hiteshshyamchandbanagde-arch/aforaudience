@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import SiteNav from '@/components/SiteNav'
 import { useToast } from '@/components/Toast'
+import Button from '@/components/ui/Button'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { fillSolidTint } from '@/lib/statusStyle'
@@ -131,22 +132,24 @@ export default function CorporateInquiriesPage() {
 
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {inq.status !== 'CONTACTED' && (
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => updateStatus(inq.id, 'CONTACTED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-sage)', background: 'transparent', border: '1px solid rgba(74,103,65,0.3)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer', opacity: updating === inq.id ? 0.6 : 1 }}
+                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-sage)', border: '1px solid rgba(74,103,65,0.3)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer', opacity: updating === inq.id ? 0.6 : 1 }}
                         >
                           Mark Contacted
-                        </button>
+                        </Button>
                       )}
                       {inq.status !== 'CLOSED' && (
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => updateStatus(inq.id, 'CLOSED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, background: 'transparent', border: '1px solid var(--afa-border-resting)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
+                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
                         >
                           Close
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

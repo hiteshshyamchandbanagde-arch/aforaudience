@@ -393,12 +393,13 @@ export default function TourDetailPage() {
                       stop.lineup.map((l) => (
                         <div key={l.artistId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--afa-text-ui)', padding: 'var(--afa-space-1) 0' }}>
                           <span>{l.artist.user.displayName || l.artist.user.name}</span>
-                          <button
+                          <Button
+                            variant="bare"
                             onClick={() => handleRemoveArtist(stop.id, l.artistId)}
-                            style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-1) var(--afa-space-10px)', cursor: 'pointer' }}
+                            style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', border: '1px solid var(--afa-error-border)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-1) var(--afa-space-10px)' }}
                           >
                             Remove
-                          </button>
+                          </Button>
                         </div>
                       ))
                     )}
@@ -436,12 +437,13 @@ export default function TourDetailPage() {
                   ) : null}
 
                   {stop.status !== 'APPROVED' && (
-                    <button
+                    <Button
+                      variant="bare"
                       onClick={() => handlePublishStop(stop.id)}
-                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', padding: '9px var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', padding: '9px var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)' }}
                     >
                       Publish Stop
-                    </button>
+                    </Button>
                   )}
                 </div>
               )
@@ -451,12 +453,13 @@ export default function TourDetailPage() {
 
         {tour.status !== 'CANCELLED' && tour.status !== 'COMPLETED' && (
           <div style={{ marginTop: 'var(--afa-space-32px)', paddingTop: 'var(--afa-space-5)', borderTop: '1px solid var(--afa-tint-08)' }}>
-            <button
+            <Button
+              variant="bare"
               onClick={handleCancelTour}
-              style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
+              style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', border: '1px solid var(--afa-error-border)', padding: '9px var(--afa-space-18px)', borderRadius: 'var(--afa-radius-md)' }}
             >
               Cancel Tour
-            </button>
+            </Button>
           </div>
         )}
         </div>

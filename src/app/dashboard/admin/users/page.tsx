@@ -154,12 +154,13 @@ export default function AdminUsersPage() {
                 <option key={r} value={r}>{r || 'All roles'}</option>
               ))}
             </select>
-            <button
+            <Button
+              variant="bare"
               type="submit"
-              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)' }}
             >
               Search
-            </button>
+            </Button>
           </form>
 
           {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
@@ -192,13 +193,14 @@ export default function AdminUsersPage() {
 
                   {u.role !== 'ADMIN' && (
                     u.isSuspended ? (
-                      <button
+                      <Button
+                        variant="bare"
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-green-deep)', background: 'transparent', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: 'var(--afa-text-ui)', cursor: 'pointer', flexShrink: 0 }}
+                        style={{ padding: '8px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-green-deep)', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: 'var(--afa-text-ui)', flexShrink: 0, opacity: 1 }}
                       >
                         Unsuspend
-                      </button>
+                      </Button>
                     ) : (
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                         <input

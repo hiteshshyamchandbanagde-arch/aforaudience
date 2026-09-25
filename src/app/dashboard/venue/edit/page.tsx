@@ -7,6 +7,7 @@ import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Label, Field, primaryLinkStyle, ErrorBanner, SuccessBanner } from '@/components/dashboard/VenuePortalUI'
+import Button from '@/components/ui/Button'
 
 // Session 62, design.md §9.5. First edit surface for VenueOwner - the role
 // had no editable fields of its own at all until bio was added this
@@ -151,14 +152,15 @@ export default function VenueOwnerEditPage() {
             </div>
           </Card>
 
-          <button
+          <Button
+            variant="bare"
             onClick={save}
             disabled={saving}
             className="avp-btn-primary"
-            style={{ ...primaryLinkStyle, border: 'none', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{ ...primaryLinkStyle, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Saving...' : 'Save Profile'}
-          </button>
+          </Button>
         </div>
       </main>
       </DashboardShell>

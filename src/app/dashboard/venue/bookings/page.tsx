@@ -9,6 +9,7 @@ import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, StatusPill, Button, IconCheck, IconX, ErrorBanner, type StatusPillTone } from '@/components/dashboard/VenuePortalUI'
+import SharedButton from '@/components/ui/Button'
 
 interface BookingRequest {
   id: string
@@ -167,21 +168,23 @@ export default function VenueBookingsPage() {
           {/* F3 - Calendar */}
           <Card style={{ padding: '20px 24px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <button
+              <SharedButton
+                variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)); setSelectedDay(null) }}
-                style={{ background: 'none', border: 'none', fontSize: 'var(--afa-text-title)', cursor: 'pointer', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
               >
                 ←
-              </button>
+              </SharedButton>
               <p style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
                 {calendarMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
               </p>
-              <button
+              <SharedButton
+                variant="icon"
                 onClick={() => { setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)); setSelectedDay(null) }}
-                style={{ background: 'none', border: 'none', fontSize: 'var(--afa-text-title)', cursor: 'pointer', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
+                style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-secondary)', padding: '4px 8px' }}
               >
                 →
-              </button>
+              </SharedButton>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
@@ -196,7 +199,8 @@ export default function VenueBookingsPage() {
                 const dayBookings = bookingsByDate[key] || []
                 const isSelected = selectedDay === key
                 return (
-                  <button
+                  <SharedButton
+                    variant="bare"
                     key={i}
                     onClick={() => dayBookings.length > 0 && setSelectedDay(isSelected ? null : key)}
                     style={{
@@ -214,7 +218,7 @@ export default function VenueBookingsPage() {
                         ))}
                       </div>
                     )}
-                  </button>
+                  </SharedButton>
                 )
               })}
             </div>

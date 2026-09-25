@@ -316,21 +316,23 @@ export default function EditArtistProfilePage() {
                 <input type="text" value={stop.country} onChange={(e) => updateTourStop(stop.key, 'country', e.target.value)} placeholder="Country" style={inputStyle} />
                 <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
                 <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder="Link (optional)" style={inputStyle} />
-                <button
+                <Button
+                  variant="bare"
                   onClick={() => removeTourStop(stop.key)}
                   aria-label="Remove tour stop"
-                  style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', cursor: 'pointer', width: '100%' }}
+                  style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', width: '100%' }}
                 >
                   ✕ Remove
-                </button>
+                </Button>
               </div>
             ))}
-            <button
+            <Button
+              variant="bare"
               onClick={addTourStop}
-              style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', background: 'transparent', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer', marginTop: '4px' }}
+              style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', marginTop: '4px' }}
             >
               + Add tour stop
-            </button>
+            </Button>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

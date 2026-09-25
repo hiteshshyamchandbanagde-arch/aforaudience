@@ -136,7 +136,7 @@ function nowLocalTimeString() {
 // visible change from `secondary` (0.4 opacity, 13px).
 function RemoveRowButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-primary)', opacity: 0.5, cursor: 'pointer', fontSize: 'var(--afa-text-title)' }} aria-label="Remove">✕</button>
+    <Button variant="icon" type="button" onClick={onClick} style={{ color: 'var(--afa-text-primary)', opacity: 0.5, fontSize: 'var(--afa-text-title)' }} aria-label="Remove">✕</Button>
   )
 }
 
@@ -893,15 +893,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       {celebritySearchResults.length > 0 && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {celebritySearchResults.map((u) => (
-                            <button
+                            <Button
                               key={u.id}
+                              variant="bare"
                               type="button"
                               onClick={() => inviteCelebrity(u.id)}
                               disabled={celebrityInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 'var(--afa-text-ui)' }}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', fontSize: 'var(--afa-text-ui)', opacity: 1 }}
                             >
                               {u.displayName || u.name}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       )}
@@ -950,15 +951,16 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       {panelistSearchResults.length > 0 && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {panelistSearchResults.map((u) => (
-                            <button
+                            <Button
                               key={u.id}
+                              variant="bare"
                               type="button"
                               onClick={() => invitePanelist(u.id)}
                               disabled={panelistInviting}
-                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 'var(--afa-text-ui)' }}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', padding: 'var(--afa-space-10px) var(--afa-space-3)', fontSize: 'var(--afa-text-ui)', opacity: 1 }}
                             >
                               {u.displayName || u.name}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       )}
@@ -1017,14 +1019,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       >
                         {voteWeightSaving ? 'Saving…' : 'Save override'}
                       </Button>
-                      <button
+                      <Button
+                        variant="bare"
                         type="button"
                         onClick={() => saveVoteWeights(true)}
                         disabled={voteWeightSaving}
-                        style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.6, background: 'transparent', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-2) var(--afa-space-4)', cursor: voteWeightSaving ? 'default' : 'pointer' }}
+                        style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-2) var(--afa-space-4)', cursor: voteWeightSaving ? 'default' : 'pointer' }}
                       >
                         Use platform default
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1127,19 +1130,20 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   { value: 'PAID', label: 'Paid' },
                   { value: 'BUY_IN', label: 'Buy-in (pay to play)' },
                 ] as const).map((opt) => (
-                  <button
+                  <Button
                     key={opt.value}
+                    variant="bare"
                     type="button"
                     onClick={() => setDefaultCompensationType(opt.value)}
                     style={{
-                      padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                      padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
                       border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                       background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                       color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {opt.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
               {defaultCompensationType === 'PAID' && (
@@ -1200,14 +1204,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                 {saving ? 'Saving...' : event.status === 'APPROVED' ? 'Save Changes' : 'Save & Publish'}
               </Button>
               {event.status !== 'APPROVED' && (
-                <button
+                <Button
+                  variant="bare"
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
-                </button>
+                </Button>
               )}
               <Link href={`/dashboard/organiser/events/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel

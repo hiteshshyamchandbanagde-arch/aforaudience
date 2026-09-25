@@ -898,19 +898,20 @@ export default function CreateEventPage() {
                     { value: 'PAID', label: 'Paid' },
                     { value: 'BUY_IN', label: 'Buy-in (pay to play)' },
                   ] as const).map((opt) => (
-                    <button
+                    <Button
                       key={opt.value}
+                      variant="bare"
                       type="button"
                       onClick={() => setDefaultCompensationType(opt.value)}
                       style={{
-                        padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                        padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-sm)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
                         border: defaultCompensationType === opt.value ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: defaultCompensationType === opt.value ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: defaultCompensationType === opt.value ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {opt.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 {defaultCompensationType === 'PAID' && (
@@ -925,19 +926,20 @@ export default function CreateEventPage() {
                 <label style={labelStyle}>Artist Application Approval</label>
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                   {(['MANUAL', 'AUTO'] as const).map((mode) => (
-                    <button
+                    <Button
                       key={mode}
+                      variant="bare"
                       type="button"
                       onClick={() => setApplicationApprovalMode(mode)}
                       style={{
-                        flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                        flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
                         border: applicationApprovalMode === mode ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: applicationApprovalMode === mode ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: applicationApprovalMode === mode ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {mode === 'MANUAL' ? 'Manual — I review each one' : 'Auto — verified artists only'}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 {applicationApprovalMode === 'AUTO' && (
@@ -967,14 +969,15 @@ export default function CreateEventPage() {
               >
                 {saving ? 'Publishing...' : 'Publish Event'}
               </Button>
-              <button
+              <Button
+                variant="bare"
                 type="button"
                 disabled={saving}
                 onClick={() => submit(false)}
-                style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
               >
                 Save as Draft
-              </button>
+              </Button>
               <Link href="/dashboard/organiser" style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none', marginLeft: 'var(--afa-space-1)' }}>
                 Cancel
               </Link>

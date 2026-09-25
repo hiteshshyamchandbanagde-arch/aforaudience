@@ -87,14 +87,13 @@ function SortableRow({
         border: '1px solid var(--afa-tint-08)',
       }}
     >
-      <button
+      <Button
+        variant="icon"
         {...attributes}
         {...listeners}
         aria-label="Drag to reorder"
         style={{
           cursor: 'grab',
-          background: 'transparent',
-          border: 'none',
           fontSize: 'var(--afa-text-lead)',
           color: 'var(--afa-text-muted)',
           padding: '4px 8px',
@@ -102,7 +101,7 @@ function SortableRow({
         }}
       >
         ⠿
-      </button>
+      </Button>
 
       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {item.slot}
@@ -117,7 +116,8 @@ function SortableRow({
         )}
       </div>
 
-      <button
+      <Button
+        variant="bare"
         onClick={() => onFeaturedToggle(item.id)}
         title={
           item.isFeaturedVouch
@@ -133,14 +133,13 @@ function SortableRow({
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
           whiteSpace: 'nowrap',
-          cursor: 'pointer',
           border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.15)',
           background: item.isFeaturedVouch ? 'rgba(201,151,58,0.15)' : 'transparent',
           color: item.isFeaturedVouch ? 'var(--afa-gold)' : 'rgba(245,245,240,0.5)',
         }}
       >
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
-      </button>
+      </Button>
 
       <Badge variant="status-compact" tone={comp}>{comp.label}{compAmount ? ` · ₹${compAmount}` : ''}</Badge>
 

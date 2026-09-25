@@ -15,6 +15,7 @@ import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, SectionTitle, Button, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
+import SharedButton from '@/components/ui/Button'
 
 const inputStyle = {
   width: '100%',
@@ -398,19 +399,20 @@ export default function CreateVenuePage() {
               </label>
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-18px)' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
-                  <button
+                  <SharedButton
+                    variant="bare"
                     key={t}
                     type="button"
                     onClick={() => setRateType(t)}
                     style={{
-                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
                       border: rateType === t ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
                       background: rateType === t ? 'rgba(201,151,58,0.12)' : '#171717',
                       color: rateType === t ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
-                  </button>
+                  </SharedButton>
                 ))}
               </div>
 
@@ -587,7 +589,8 @@ function PathCard({
   onClick: () => void
 }) {
   return (
-    <button
+    <SharedButton
+      variant="bare"
       type="button"
       onClick={onClick}
       className={`afa-path-card${active ? ' afa-path-card-active afa-card-lift' : ''}`}
@@ -632,6 +635,6 @@ function PathCard({
       <span style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)' }}>
         {active ? '✓ Selected' : 'Choose this →'}
       </span>
-    </button>
+    </SharedButton>
   )
 }
