@@ -224,11 +224,11 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             cursor: 'pointer',
           }}
         >
-          <p style={{ fontSize: 'var(--afa-text-18px)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
+          <p style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, marginBottom: 'var(--afa-space-1)' }}>
             {lastResult.ok ? '✓ Checked in' : lastResult.reason === 'ALREADY_CHECKED_IN' ? '⚠ Already checked in' : '✗ Not valid'}
           </p>
           {lastResult.attendeeName && (
-            <p style={{ fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
+            <p style={{ fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-2px)' }}>{lastResult.attendeeName}</p>
           )}
           {lastResult.seats && seatsSummary(lastResult.seats) && (
             <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.85, marginBottom: 'var(--afa-space-2px)' }}>{seatsSummary(lastResult.seats)}</p>
@@ -388,7 +388,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                     key={c.id}
                                     style={{
                                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                      padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: '12.5px',
+                                      padding: 'var(--afa-space-2) var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)',
                                       background: c.checkedInAt ? 'var(--afa-mint-tint)' : 'transparent',
                                       border: c.checkedInAt ? 'none' : '1px dashed var(--afa-border-resting)',
                                     }}

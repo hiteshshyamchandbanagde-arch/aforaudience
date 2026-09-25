@@ -368,7 +368,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
             width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px',
-            background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-10px)', fontWeight: 700,
+            background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
           }}
         >

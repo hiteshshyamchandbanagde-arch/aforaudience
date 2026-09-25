@@ -378,7 +378,7 @@ export default function CreateVenuePage() {
 
               <div>
                 <label style={labelStyle}>Acoustic Rating <span style={{ fontWeight: 400, opacity: 0.6 }}>(0-5)</span></label>
-                <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-muted)' }}>Not Rated Yet</p>
+                <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-muted)' }}>Not Rated Yet</p>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: 'var(--afa-space-1)' }}>
                   Based on real feedback from Artists and Organisers who've performed/booked here - not self-reported.
                 </p>
@@ -487,7 +487,7 @@ export default function CreateVenuePage() {
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2px)' }}>
                   How is this venue's seating arranged? Pick how your audience will choose where to sit.
                 </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-amber)', marginTop: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-5)' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-amber)', marginTop: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-5)' }}>
                   &ldquo;every seat is a decision about the room&rdquo;
                 </p>
 
@@ -616,14 +616,14 @@ function PathCard({
         >
           {icon}
         </span>
-        <h3 style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
+        <h3 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>
           {title}
         </h3>
       </div>
-      <p style={{ marginTop: 'var(--afa-space-14px)', fontSize: '13.5px', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
+      <p style={{ marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{consequence}</p>
       <ul style={{ marginTop: 'var(--afa-space-10px)', display: 'flex', flexDirection: 'column', gap: '5px', listStyle: 'none', padding: 0 }}>
         {points.map((p) => (
-          <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: 'var(--afa-text-secondary)' }}>
+          <li key={p} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
             <IconCheck size={12} style={{ color: 'var(--afa-text-muted)' }} />
             {p}
           </li>

@@ -229,7 +229,7 @@ function stubCells(b: BookingItem, tr: Dictionary) {
 function SectionLabel({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-3)' }}>
-      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
+      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--afa-amber)', whiteSpace: 'nowrap' }}>{label}</p>
       <div style={{ height: 1, flex: 1, background: 'var(--afa-tint-08)' }} />
     </div>
   )
@@ -385,13 +385,13 @@ export default function MyTicketsPage() {
           @media (min-width: 640px) { .afa-tickets-grid { grid-template-columns: 1fr 1fr; } }
         `}</style>
         <div style={{ maxWidth: '800px', padding: 'var(--afa-space-48px) var(--afa-space-6)' }}>
-          <p style={{ margin: '0 0 var(--afa-space-6px)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
+          <p style={{ margin: '0 0 var(--afa-space-6px)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--afa-amber)' }}>
             {tr.ticketsPage.pageKicker}
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             {tr.ticketsPage.pageTitle}
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             {tr.ticketsPage.pageSubtitle}
           </p>
 
@@ -404,12 +404,12 @@ export default function MyTicketsPage() {
               response, unlike the tickets below which are just informational. */}
           {pendingTags.length > 0 && (
             <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
                 <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
-                  <p style={{ fontSize: '13.5px', margin: '0 0 var(--afa-space-10px)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-body)', margin: '0 0 var(--afa-space-10px)' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
                       .replace('{event}', t.booking.event.title)
@@ -444,7 +444,7 @@ export default function MyTicketsPage() {
               to attend as someone else's guest. */}
           {acceptedTags.length > 0 && (
             <div style={{ marginBottom: 'var(--afa-space-6)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-10px)' }}>
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
@@ -475,7 +475,7 @@ export default function MyTicketsPage() {
                 <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
               </div>
               <div>
-                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
+                <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', opacity: 0.85 }}>{tr.ticketsPage.emptyTitle}</p>
                 <p style={{ margin: 'var(--afa-space-6px) 0 0', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>{tr.ticketsPage.emptyDescription}</p>
                 <Link href="/events" style={{ display: 'inline-block', marginTop: 'var(--afa-space-14px)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600 }}>
                   {tr.ticketsPage.browseEventsLink}
@@ -605,12 +605,12 @@ export default function MyTicketsPage() {
                       </span>
                     </div>
                     <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10 }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                         {typeLabel}
                       </div>
                       <h3
                         style={{
-                          marginTop: 'var(--afa-space-2px)', fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
+                          marginTop: 'var(--afa-space-2px)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, lineHeight: 1.25, color: 'var(--afa-text-primary)',
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                         }}
                       >
@@ -653,15 +653,15 @@ export default function MyTicketsPage() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-12px)', background: 'var(--afa-cream)' }}>
                               <TicketQr value={b.id} size={60} />
                             </div>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>
                               {used ? tr.ticketsPage.scannedLabel : tr.ticketsPage.scanAtDoor}
                             </span>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             {b.totalAmount > 0 && (
                               <div style={{ marginBottom: 'var(--afa-space-2)' }}>
-                                <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
-                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                                <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)' }}>{tr.ticketsPage.paidLabel}</p>
+                                <p style={{ margin: 'var(--afa-space-2px) 0 0', fontFamily: 'var(--font-sans)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
                               </div>
                             )}
                             <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
@@ -749,7 +749,7 @@ export default function MyTicketsPage() {
                     )}
 
                     {b.companionTags && b.companionTags.length > 0 && (
-                      <p style={{ fontSize: '12.5px', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 14px 14px' : '0 14px 14px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.65, margin: 0, padding: isGhosted ? '0 14px 14px' : '0 14px 14px' }}>
                         {tr.ticketsPage.goingWith}{' '}
                         {b.companionTags.map((t, i) => (
                           <span key={t.id}>

@@ -109,7 +109,7 @@ export default function DisplayNameNudge() {
         lineHeight: 1.4,
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-18px)', lineHeight: 1 }}>
+      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-lead)', lineHeight: 1 }}>
         ✨
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
@@ -137,7 +137,7 @@ export default function DisplayNameNudge() {
           border: 'none',
           color: 'var(--afa-text-primary)',
           padding: '4px 8px',
-          fontSize: 'var(--afa-text-18px)',
+          fontSize: 'var(--afa-text-lead)',
           opacity: 0.6,
           cursor: 'pointer',
           lineHeight: 1,

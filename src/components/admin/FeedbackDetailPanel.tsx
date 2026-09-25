@@ -205,7 +205,7 @@ export default function FeedbackDetailPanel({
             <button
               onClick={onClose}
               aria-label="Close"
-              style={{ background: 'transparent', border: 'none', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
+              style={{ background: 'transparent', border: 'none', fontSize: 'var(--afa-text-subtitle)', cursor: 'pointer', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
             >
               ×
             </button>
@@ -255,7 +255,7 @@ export default function FeedbackDetailPanel({
             </div>
           )}
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', margin: '0 0 var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', margin: '0 0 var(--afa-space-3)', color: 'var(--afa-text-primary)' }}>
             {item.title || item.message.slice(0, 60)}
           </h2>
 
@@ -319,7 +319,7 @@ export default function FeedbackDetailPanel({
             </div>
             {pendingNoteStatus && (
               <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-10px)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-10)' }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 600, marginBottom: 'var(--afa-space-6px)', color: 'var(--afa-text-primary)' }}>
+                <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, marginBottom: 'var(--afa-space-6px)', color: 'var(--afa-text-primary)' }}>
                   {pendingNoteStatus === 'REJECTED' ? 'Reason for rejecting' : 'Comment - what\'s still wrong?'}
                 </div>
                 <textarea

@@ -65,7 +65,7 @@ export default function PhoneVerifyNudge() {
         lineHeight: 1.4,
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-18px)', lineHeight: 1 }}>
+      <span aria-hidden="true" style={{ fontSize: 'var(--afa-text-lead)', lineHeight: 1 }}>
         📱
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>

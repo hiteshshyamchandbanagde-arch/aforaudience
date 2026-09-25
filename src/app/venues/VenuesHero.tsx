@@ -28,7 +28,7 @@ export default function VenuesHero({ count }: { count: number }) {
         <em style={{ color: "var(--afa-amber)", fontStyle: "italic", fontWeight: 400 }}>{tr.venuesPage.headingEmphasis}</em>
         {tr.venuesPage.headingSuffix}
       </h1>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: "17px", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "20px", maxWidth: "420px", lineHeight: 1.6 }}>
+      <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", color: "var(--afa-text-primary)", opacity: 0.65, marginTop: "20px", maxWidth: "420px", lineHeight: 1.6 }}>
         {tr.venuesPage.subtitle}
       </p>
     </header>

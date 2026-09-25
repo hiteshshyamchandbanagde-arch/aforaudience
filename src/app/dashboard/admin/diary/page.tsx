@@ -181,7 +181,7 @@ export default function AdminDiaryPage() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '6px' : '0' }}>
-                  <div style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
+                  <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>{entry.title}</div>
                   <Badge variant="status-compact" tone={meta} style={{ fontWeight: 600, flexShrink: 0 }}>
                     {meta.label}
                   </Badge>

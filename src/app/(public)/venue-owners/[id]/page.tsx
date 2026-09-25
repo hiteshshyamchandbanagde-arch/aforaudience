@@ -76,7 +76,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
           </p>
         </div>
 
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.venueOwnerDetailPage.venuesHeading}</h2>
         {owner.venues.length === 0 ? (
           <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnerDetailPage.noPublishedVenuesYet}</p>
         ) : (
@@ -94,7 +94,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
                   )}
                 </div>
                 <div style={{ padding: "14px 16px" }}>
-                  <div style={{ fontSize: "var(--afa-text-15px)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
+                  <div style={{ fontSize: "var(--afa-text-body-lg)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{v.name}</div>
                   <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)", opacity: 0.5 }}>{v.city} · {v.capacity} {tr.venueOwnerDetailPage.seatsLabel}</div>
                 </div>
               </Link>

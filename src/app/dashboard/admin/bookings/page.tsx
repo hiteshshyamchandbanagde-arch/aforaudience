@@ -213,7 +213,7 @@ export default function AdminBookingsPage() {
                   >
                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3">
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
+                        <div style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '2px' }}>
                           {b.event?.title || 'Event deleted'}
                           {b.event?.isFree ? (
                             <Badge variant="tag" tone={{ bg: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }} style={{ marginLeft: '8px' }}>

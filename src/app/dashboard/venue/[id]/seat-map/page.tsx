@@ -1431,7 +1431,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: 'var(--afa-space-6px)' }}>
             General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
           </p>
-          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-amber)', marginTop: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-18px)' }}>
+          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-amber)', marginTop: 'var(--afa-space-6px)', marginBottom: 'var(--afa-space-18px)' }}>
             &ldquo;the shape of the room decides the show&rdquo;
           </p>
 
@@ -1567,7 +1567,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </span>
                 <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-fill-solid)' }}>Recommended</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-18px)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>Guided Setup</div>
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>Guided Setup</div>
               <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Answer a few simple questions — rows, seats per row, walkways — and we'll lay out the seats for you. Best if your seating is straight rows facing the stage.
               </div>
@@ -1585,7 +1585,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </span>
                 <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--afa-text-primary)', opacity: 0.5 }}>For hands-on control</div>
               </div>
-              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-18px)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>Draw It Myself</div>
+              <div style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>Draw It Myself</div>
               <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, lineHeight: 1.5 }}>
                 Place and drag every seat by hand on a canvas shaped like your real venue. Good for curved rows, round tables, or any layout that isn't straight rows.
               </div>
@@ -1668,7 +1668,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                   {guidedPanelOpen && (
                     <div className="afa-glow-orange" style={{ marginBottom: 'var(--afa-space-18px)', padding: 'var(--afa-space-18px)', borderRadius: 'var(--afa-radius-12px)', border: `1px solid ${fillSolidTint(0.18)}` }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-1)' }}>
-                        <span style={{ fontFamily: 'var(--font-ui)', fontSize: '17px', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
+                        <span style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
                       </div>
                       <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
                         Every field below updates the preview instantly. Click Generate / Update Layout when it looks right - it adds these seats to the canvas without disturbing anything you've already placed by hand.
@@ -1818,13 +1818,13 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </div>
                         <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-10px) 0' }}>
                           <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
-                            <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-10px)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                               Stage
                             </div>
                             {wizardPreviewSeats.map((s, i) => {
                               const tf = tierFill(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel))))
                               return (
-                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: 'var(--afa-text-caption)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {s.row}{s.number}
                                 </div>
                               )
@@ -2042,7 +2042,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         outline: selectedId === s.clientId ? '2px solid var(--afa-fill-solid)' : 'none',
                         outlineOffset: '2px',
                         color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)',
-                        fontSize: '9px',
+                        fontSize: 'var(--afa-text-caption)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -2252,7 +2252,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         className="afa-glow-amber"
         style={{ width: '100%', maxWidth: '440px', height: '100%', overflowY: 'auto', padding: 'var(--afa-space-28px) var(--afa-space-6)', borderLeft: '1px solid var(--afa-tint-10)' }}
       >
-        <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', lineHeight: 1 }} aria-label="Close">×</button>
+        <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-subtitle)', cursor: 'pointer', lineHeight: 1 }} aria-label="Close">×</button>
         <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--afa-amber)', marginBottom: 'var(--afa-space-10px)' }}>
           Terminology · used consistently across every screen
         </div>

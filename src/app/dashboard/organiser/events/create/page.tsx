@@ -549,7 +549,7 @@ export default function CreateEventPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
             Create an Event
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-32px)' }}>
             Set up your event details, book a venue, and publish when ready.
           </p>
 
@@ -560,7 +560,7 @@ export default function CreateEventPage() {
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-5)' }}>
@@ -736,7 +736,7 @@ export default function CreateEventPage() {
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Book a Venue
               </h2>
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-18px)' }}>
@@ -772,7 +772,7 @@ export default function CreateEventPage() {
                           {selectedVenue.rateType === 'HOURLY' ? 'Hourly rate' : 'Daily rate'}
                           {suggestedAmountNote && ` · ${suggestedAmountNote}`}
                         </div>
-                        <div style={{ fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                        <div style={{ fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                           {suggestedAmount !== null ? `₹${suggestedAmount.toLocaleString('en-IN')}` : 'Set your event date & time to calculate'}
                         </div>
                       </div>
@@ -786,7 +786,7 @@ export default function CreateEventPage() {
 
             {/* Seats & pricing */}
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
 
@@ -863,7 +863,7 @@ export default function CreateEventPage() {
 
             {/* Lineup & approvals */}
             <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-18px)' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-18px)' }}>
                 Lineup &amp; Approvals
               </h2>
 

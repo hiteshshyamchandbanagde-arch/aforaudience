@@ -198,7 +198,7 @@ function FeedbackDetailOverlay({
           <button
             onClick={onClose}
             aria-label={tr.myFeedbackPage.closeLabel}
-            style={{ border: 'none', background: 'transparent', fontSize: 'var(--afa-text-20px)', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
+            style={{ border: 'none', background: 'transparent', fontSize: 'var(--afa-text-subtitle)', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
           >
             ✕
           </button>
@@ -394,7 +394,7 @@ export default function MyFeedbackPage() {
                         {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>
-                      <p style={{ margin: '6px 0 0', fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
+                      <p style={{ margin: '6px 0 0', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', wordBreak: 'break-word' }}>
                         {item.title || item.message}
                       </p>
                       {item.latestNote && (

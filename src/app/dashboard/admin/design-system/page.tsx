@@ -601,12 +601,12 @@ function TokenField({
           </span>
         )}
         {coverage === 'unused' && (
-          <span title="No consumers found anywhere in src/ — editing this has no visible effect" style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span title="No consumers found anywhere in src/ — editing this has no visible effect" style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             unused
           </span>
         )}
         {coverage === 'button-only' && (
-          <span title="Only Button.tsx reads this token" style={{ color: 'var(--afa-amber)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span title="Only Button.tsx reads this token" style={{ color: 'var(--afa-amber)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Button only
           </span>
         )}
@@ -672,7 +672,7 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 24, maxWidth: 440, width: '100%' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
         <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <button onClick={onCancel} style={secondaryBtnStyle}>
@@ -694,7 +694,7 @@ const panelStyle: React.CSSProperties = {
 }
 const sectionTitleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-display)',
-  fontSize: 'var(--afa-text-18px)',
+  fontSize: 'var(--afa-text-lead)',
   color: 'var(--afa-text-primary)',
   marginBottom: 4,
 }

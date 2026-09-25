@@ -68,7 +68,7 @@ function DiscoverCarouselRow({
 }) {
   return (
     <div>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-primary)", marginBottom: "12px" }}>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", marginBottom: "12px" }}>
         {title}
       </div>
       <div className="afa-discover-carousel-track" style={{ display: "flex", gap: "12px", overflowX: "auto", scrollSnapType: "x proximity", paddingBottom: "4px", WebkitOverflowScrolling: "touch" }}>
@@ -348,7 +348,7 @@ function EventsPageContent() {
         .afa-events-type-filter { font-family: var(--font-mono); font-size: var(--afa-text-micro); text-transform: uppercase; letter-spacing: 0.2em; color: var(--afa-text-muted); background: none; border: none; cursor: pointer; transition: color 0.2s ease; display: inline-flex; align-items: center; gap: 8px; padding: 0; }
         .afa-events-type-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-type-filter.active { color: var(--afa-amber); }
-        .afa-events-mode-tab { font-family: var(--font-ui); font-size: var(--afa-text-18px); background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
+        .afa-events-mode-tab { font-family: var(--font-ui); font-size: var(--afa-text-lead); background: none; border: none; cursor: pointer; padding: 0 0 12px; position: relative; color: rgba(245,245,240,0.45); transition: color 0.2s ease; }
         .afa-events-mode-tab:hover { color: rgba(245,245,240,0.7); }
         .afa-events-mode-tab.active { color: var(--afa-text-primary); }
         .afa-events-mode-tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--afa-amber); }
@@ -396,7 +396,7 @@ function EventsPageContent() {
             )}
           </h1>
           {contentMode === "events" && (
-            <p style={{ marginTop: "20px", maxWidth: "560px", fontSize: "var(--afa-text-15px)", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
+            <p style={{ marginTop: "20px", maxWidth: "560px", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "rgba(245,245,240,0.6)" }}>
               {tr.eventsPage.heroSubtitleEvents}
             </p>
           )}

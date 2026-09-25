@@ -66,7 +66,7 @@ export function H2({ children, id }: { children: React.ReactNode; id?: string })
       id={id}
       style={{
         fontFamily: SERIF,
-        fontSize: "22px",
+        fontSize: "var(--afa-text-subheading)",
         fontWeight: 700,
         color: INK,
         marginTop: "40px",

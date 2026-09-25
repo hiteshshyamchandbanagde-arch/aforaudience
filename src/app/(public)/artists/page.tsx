@@ -227,7 +227,7 @@ export default function ArtistsPage() {
             <span style={{ color: "var(--afa-amber)" }}>{tr.artistsPage.heroEmphasis}</span>
             {tr.artistsPage.heroSuffix}
           </h1>
-          <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-15px)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
+          <p className="afa-artists-hero-subtitle" style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", lineHeight: 1.6, color: "var(--afa-text-secondary)" }}>
             {tr.artistsPage.heroSubtitle}{" "}
             <span style={{ color: "var(--afa-text-primary)" }}>{tr.artistsPage.heroSubtitleEmphasis}</span>
           </p>
@@ -300,7 +300,7 @@ export default function ArtistsPage() {
               )}
               <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <SparkIcon style={{ width: "16px", height: "16px", color: "var(--afa-fill-solid)" }} />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
                   {tr.artistsPage.topArtistNow}
                 </span>
               </div>
@@ -430,7 +430,7 @@ export default function ArtistsPage() {
                           top: "12px",
                           right: "12px",
                           fontFamily: "var(--font-sans)",
-                          fontSize: "var(--afa-text-10px)",
+                          fontSize: "var(--afa-text-caption)",
                           fontWeight: 700,
                           padding: "3px 10px",
                           borderRadius: "99px",
@@ -455,7 +455,7 @@ export default function ArtistsPage() {
                   </div>
 
                   <div style={{ padding: "6px 18px 18px" }}>
-                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-20px)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
                         <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>

@@ -112,7 +112,7 @@ export default function MessageThreadPage() {
       <SiteNav />
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
         <div style={{ marginBottom: '12px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--afa-text-primary)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subheading)', color: 'var(--afa-text-primary)', margin: 0 }}>
             {thread.label ?? tr.messageThreadPage.fallbackTitle}
           </h1>
           {!thread.isActive && (
@@ -146,7 +146,7 @@ export default function MessageThreadPage() {
                 }}
               >
                 {m.body}
-                <div style={{ fontSize: 'var(--afa-text-10px)', opacity: 0.6, marginTop: '4px' }}>
+                <div style={{ fontSize: 'var(--afa-text-caption)', opacity: 0.6, marginTop: '4px' }}>
                   {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>

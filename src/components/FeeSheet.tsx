@@ -57,7 +57,7 @@ export function FeeSheet({
           <div style={{ height: 4, width: 40, borderRadius: 999, background: 'var(--afa-border-resting)' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 4px' }}>
-          <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 22, fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
+          <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subheading)', fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
             Fee breakdown
           </h2>
           <Button variant="close" onClick={onClose} aria-label="Close">
@@ -73,7 +73,7 @@ export function FeeSheet({
             style={{
               display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16,
               background: 'var(--afa-surface-page)', padding: '10px 16px',
-              fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase',
               letterSpacing: '0.1em', color: 'var(--afa-text-muted)',
             }}
           >

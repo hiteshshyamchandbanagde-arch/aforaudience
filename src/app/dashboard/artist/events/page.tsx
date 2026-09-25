@@ -193,7 +193,7 @@ export default function BrowseEventsToApplyPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Browse Events
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '16px' }}>
             Apply to perform at published events.
           </p>
 
@@ -214,7 +214,7 @@ export default function BrowseEventsToApplyPage() {
 
           {events.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
+              <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No published events yet. Check back soon!</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -226,7 +226,7 @@ export default function BrowseEventsToApplyPage() {
                   <div key={event.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px', border: '1px solid var(--afa-tint-08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '10px', flexWrap: 'wrap' }}>
                       <div>
-                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
+                        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{event.title}</h3>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6, marginTop: '2px' }}>
                           {new Date(event.date).toLocaleDateString()} · {event.startTime} · {event.venue ? `${event.venue.name}, ${event.venue.city}` : 'Venue TBD'}
                         </p>

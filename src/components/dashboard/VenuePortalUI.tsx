@@ -211,7 +211,7 @@ export function StatusPill({ tone, children }: { tone: StatusPillTone; children:
         display: 'inline-flex',
         alignItems: 'center',
         fontFamily: 'var(--font-mono)',
-        fontSize: '10.5px',
+        fontSize: 'var(--afa-text-micro)',
         fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
@@ -246,7 +246,7 @@ export function Button({
     gap: '8px',
     borderRadius: '8px',
     fontFamily: 'var(--font-sans)',
-    fontSize: '13.5px',
+    fontSize: 'var(--afa-text-body)',
     padding: '11px 20px',
     cursor: 'pointer',
     transition: 'filter 150ms, border-color 150ms, background 150ms, color 150ms',
@@ -392,7 +392,7 @@ export function PageHead({
 export function Stat({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
     <Card style={{ padding: '20px' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-text-muted)', margin: 0 }}>
         {label}
       </p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '26px', lineHeight: 1, color: 'var(--afa-text-primary)', margin: '12px 0 0' }}>{value}</p>
@@ -418,7 +418,7 @@ export function SectionTitle({ n, title }: { n: string; title: string }) {
       }}
     >
       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: 'var(--afa-amber)' }}>{n}</span>
-      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: '19px', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
+      <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 500, color: 'var(--afa-text-primary)', margin: 0 }}>{title}</h2>
     </div>
   )
 }
@@ -436,7 +436,7 @@ export const primaryLinkStyle: CSSProperties = {
   gap: '8px',
   borderRadius: '8px',
   fontFamily: 'var(--font-sans)',
-  fontSize: '13.5px',
+  fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
   padding: '11px 20px',
   background: 'var(--afa-fill-solid)',
@@ -452,7 +452,7 @@ export const outlineLinkStyle: CSSProperties = {
   gap: '8px',
   borderRadius: '8px',
   fontFamily: 'var(--font-sans)',
-  fontSize: '13.5px',
+  fontSize: 'var(--afa-text-body)',
   fontWeight: 600,
   padding: '11px 20px',
   background: 'transparent',
@@ -485,7 +485,7 @@ export function NavBadge({ children }: { children: ReactNode }) {
         background: 'var(--afa-gold)',
         color: 'var(--afa-text-primary)',
         fontFamily: 'var(--font-mono)',
-        fontSize: '10.5px',
+        fontSize: 'var(--afa-text-micro)',
         fontWeight: 600,
         borderRadius: '999px',
         padding: '2px 7px',

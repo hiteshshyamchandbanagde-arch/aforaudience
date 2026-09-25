@@ -138,7 +138,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 0.95, color: "var(--afa-text-primary)", marginTop: "16px", marginBottom: "6px" }}>
               {venue.name}
             </h1>
-            <p style={{ maxWidth: "448px", fontSize: "17px", lineHeight: 1.4, color: "var(--afa-text-primary)", opacity: 0.6 }}>
+            <p style={{ maxWidth: "448px", fontSize: "var(--afa-text-title)", lineHeight: 1.4, color: "var(--afa-text-primary)", opacity: 0.6 }}>
               {venue.address}, {venue.city}{venue.state ? `, ${venue.state}` : ""}
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
                   {venue.facilities.map((facility) => (
                     <div key={facility} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 0", borderTop: "1px solid var(--afa-tint-08)" }}>
                       <FacilityIcon label={facility} style={{ width: "18px", height: "18px", color: "var(--afa-amber)", flexShrink: 0 }} />
-                      <span style={{ fontSize: "var(--afa-text-15px)", color: "var(--afa-text-primary)" }}>{facility}</span>
+                      <span style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)" }}>{facility}</span>
                     </div>
                   ))}
                 </div>
@@ -260,7 +260,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
                       <span style={{ marginLeft: "4px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5, verticalAlign: "top" }}>/5</span>
                     </p>
                   ) : (
-                    <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-18px)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueDetailPage.notRatedYet}</p>
+                    <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueDetailPage.notRatedYet}</p>
                   )}
                 </div>
               </div>

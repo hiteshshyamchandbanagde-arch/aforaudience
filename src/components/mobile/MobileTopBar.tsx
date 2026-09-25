@@ -127,7 +127,7 @@ export default function MobileTopBar() {
       }}
     >
       <Link href="/" style={{ flexShrink: 0, lineHeight: 1, textDecoration: 'none' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', display: 'block', whiteSpace: 'nowrap' }}>
           <span style={{ color: 'var(--afa-brand-mark)' }}>A</span>forAudience
         </span>
         <LocationChip variant="topbar" />
@@ -225,7 +225,7 @@ export default function MobileTopBar() {
         {status === 'loading' ? null : user ? (
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
           >
             {t.nav.signOut}
           </button>
@@ -235,12 +235,12 @@ export default function MobileTopBar() {
                 Out button on purpose - two elements here (vs one) eat
                 into the search input's width at 360-375px, this is the
                 sizing-only fold-in for that. */}
-            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
+            <Link href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-text-secondary)', textDecoration: 'none' }}>
               {t.nav.signIn}
             </Link>
             <Link
               href="/register"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-10px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
             >
               {t.nav.signUp}
             </Link>

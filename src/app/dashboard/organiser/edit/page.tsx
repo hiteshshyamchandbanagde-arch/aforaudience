@@ -132,7 +132,7 @@ export default function OrganiserEditPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '8px' }}>
             Edit Your Profile
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-15px)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
+          <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '32px' }}>
             This is what audience members and artists see on your public Organiser page.
           </p>
 

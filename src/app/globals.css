@@ -213,6 +213,11 @@
   --afa-text-ui: 13px;
   --afa-text-body: 14px;
   --afa-text-title: 16px;
+  /* GEN-2609-106 - added per Hitesh's font-size-closeout decision
+     (delegated: "go ahead with your planning"): a real gap between
+     title (16px) and heading (24px) that off-scale literals had been
+     filling ad hoc at 22px, 23 sites repo-wide. */
+  --afa-text-subheading: 22px;
   --afa-text-heading: 24px;
 
   --afa-space-1: 4px;
@@ -273,10 +278,16 @@
   --afa-space-32px: 32px;
   --afa-space-48px: 48px;
 
-  --afa-text-10px: 10px;
-  --afa-text-15px: 15px;
-  --afa-text-18px: 18px;
-  --afa-text-20px: 20px;
+  /* GEN-2609-106 - renamed from pixel-named to semantic (formerly
+     --afa-text-10px/15px/18px/20px), per Hitesh's font-size-closeout
+     decision - the pixel-named scheme was always meant as a stopgap
+     (see GEN-2609-081's own comment above), and these 4 are now
+     genuinely adopted (not "zero adoption yet" like when that scheme
+     was chosen), so the semantic names are no longer premature. */
+  --afa-text-caption: 10px;
+  --afa-text-body-lg: 15px;
+  --afa-text-lead: 18px;
+  --afa-text-subtitle: 20px;
 
   --afa-radius-10px: 10px;
   --afa-radius-12px: 12px;

@@ -38,7 +38,7 @@ export default function Ledger({ eyebrow, headline }: { eyebrow: string; headlin
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-3)" }}>
           {eyebrow}
         </div>
-        <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "22px", lineHeight: 1.35, color: "var(--afa-text-primary)" }}>
+        <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--afa-text-subheading)", lineHeight: 1.35, color: "var(--afa-text-primary)" }}>
           {headline}
         </div>
         <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", lineHeight: 1.6, color: "rgba(245,245,240,0.5)", borderLeft: "2px solid rgba(201,151,58,0.5)", paddingLeft: "var(--afa-space-4)", marginTop: "var(--afa-space-5)", maxWidth: "420px" }}>

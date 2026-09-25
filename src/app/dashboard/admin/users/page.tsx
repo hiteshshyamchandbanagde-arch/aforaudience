@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
               >
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '10px' }}>
                   <div>
-                    <p style={{ fontSize: 'var(--afa-text-15px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+                    <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
                       {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>

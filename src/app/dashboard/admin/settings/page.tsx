@@ -554,7 +554,7 @@ export default function AdminSettingsPage() {
             padding: 'var(--afa-space-6)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Audience booking fee
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -580,7 +580,7 @@ export default function AdminSettingsPage() {
                 {f.label}
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-3)' }}>
-                <span style={{ fontSize: 'var(--afa-text-18px)', opacity: 0.5 }}>₹</span>
+                <span style={{ fontSize: 'var(--afa-text-lead)', opacity: 0.5 }}>₹</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -594,7 +594,7 @@ export default function AdminSettingsPage() {
                     padding: '10px var(--afa-space-3)',
                     borderRadius: 'var(--afa-radius-sm)',
                     border: '1px solid var(--afa-border-resting)',
-                    fontSize: 'var(--afa-text-15px)',
+                    fontSize: 'var(--afa-text-body-lg)',
                     background: 'var(--afa-surface-inverse)',
                     color: 'var(--afa-text-primary)',
                   }}
@@ -625,7 +625,7 @@ export default function AdminSettingsPage() {
             marginTop: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Support chat message cap
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -658,7 +658,7 @@ export default function AdminSettingsPage() {
                 padding: '10px var(--afa-space-3)',
                 borderRadius: 'var(--afa-radius-sm)',
                 border: '1px solid var(--afa-border-resting)',
-                fontSize: 'var(--afa-text-15px)',
+                fontSize: 'var(--afa-text-body-lg)',
                 background: 'var(--afa-surface-inverse)',
                 color: 'var(--afa-text-primary)',
               }}
@@ -682,7 +682,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Scene Status thresholds
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -700,7 +700,7 @@ export default function AdminSettingsPage() {
             value={risingMinGigs}
             onChange={(e) => setRisingMinGigs(e.target.value)}
             placeholder="3"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
           <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -715,7 +715,7 @@ export default function AdminSettingsPage() {
             value={risingMinAvgRating}
             onChange={(e) => setRisingMinAvgRating(e.target.value)}
             placeholder="4.0"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
           <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -729,7 +729,7 @@ export default function AdminSettingsPage() {
             value={risingMinAttendees}
             onChange={(e) => setRisingMinAttendees(e.target.value)}
             placeholder="5"
-            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', marginBottom: 'var(--afa-space-4)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
           />
 
           <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -744,7 +744,7 @@ export default function AdminSettingsPage() {
               value={featuredVouchThreshold}
               onChange={(e) => setFeaturedVouchThreshold(e.target.value)}
               placeholder="5"
-              style={{ flex: 1, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ flex: 1, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
           </div>
           <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
@@ -765,7 +765,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Hype Score lookback window
           </h2>
           <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -780,7 +780,7 @@ export default function AdminSettingsPage() {
               value={rosterLookback}
               onChange={(e) => setRosterLookback(e.target.value)}
               placeholder="5"
-              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
             <Button variant="solid" size="md" fullWidth={false} onClick={saveRosterLookback} disabled={rosterLookbackSaving || !isRosterLookbackDirty || !isRosterLookbackValid}>
               {rosterLookbackSaving ? 'Saving…' : 'Save'}
@@ -800,7 +800,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Event-creation forward window
           </h2>
           <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>
@@ -816,7 +816,7 @@ export default function AdminSettingsPage() {
               value={eventWindow}
               onChange={(e) => setEventWindow(e.target.value)}
               placeholder="3"
-              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+              style={{ width: 100, padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
             />
             <Button variant="solid" size="md" fullWidth={false} onClick={saveEventWindow} disabled={eventWindowSaving || !isEventWindowDirty || !isEventWindowValid}>
               {eventWindowSaving ? 'Saving…' : 'Save'}
@@ -836,7 +836,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Direct payouts (Razorpay Route)
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -877,7 +877,7 @@ export default function AdminSettingsPage() {
               padding: '10px var(--afa-space-3)',
               borderRadius: 'var(--afa-radius-sm)',
               border: '1px solid var(--afa-border-resting)',
-              fontSize: 'var(--afa-text-15px)',
+              fontSize: 'var(--afa-text-body-lg)',
               marginBottom: 'var(--afa-space-2)',
               opacity: directPayoutsEnabled ? 1 : 0.5,
               background: 'var(--afa-surface-inverse)',
@@ -902,7 +902,7 @@ export default function AdminSettingsPage() {
             marginBottom: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Audience Choice default weights
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>
@@ -912,15 +912,15 @@ export default function AdminSettingsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--afa-space-3)', marginBottom: 'var(--afa-space-2)' }}>
             <div>
               <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>AUDIENCE</label>
-              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <input type="number" inputMode="numeric" min={50} step="1" value={audienceWeight} onChange={(e) => setAudienceWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>PANELIST</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <input type="number" inputMode="numeric" min={0} step="1" value={panelistWeight} onChange={(e) => setPanelistWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', letterSpacing: '0.06em', marginBottom: 6 }}>CELEBRITY</label>
-              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-15px)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
+              <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
           </div>
           <p style={{ fontSize: 'var(--afa-text-micro)', color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error)', marginBottom: 'var(--afa-space-4)' }}>
@@ -941,7 +941,7 @@ export default function AdminSettingsPage() {
             marginTop: 'var(--afa-space-5)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-20px)', fontWeight: 700, marginBottom: 6 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, marginBottom: 6 }}>
             Display currency rates
           </h2>
           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--afa-space-4)' }}>

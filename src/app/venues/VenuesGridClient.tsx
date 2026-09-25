@@ -137,7 +137,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             type="button"
             onClick={() => setCityOpen((o) => !o)}
             className="afa-city-filter-trigger"
-            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-15px)", fontFamily: "var(--font-sans)", cursor: "pointer", textAlign: "left" }}
+            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body-lg)", fontFamily: "var(--font-sans)", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ opacity: selectedCity === "All Cities" ? 0.65 : 1 }}>
               {selectedCity === "All Cities" ? tr.venuesPage.filterAllCities : cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity}
@@ -223,7 +223,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   export (VenueCard.tsx) overlays it on the media wrapper
                   regardless of whether a real photo or the fallback is
                   showing underneath. */}
-              <span style={{ position: "absolute", top: "10px", left: "10px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-10px)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.6 }}>
+              <span style={{ position: "absolute", top: "10px", left: "10px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-text-primary)", opacity: 0.6 }}>
                 {tierLabel(v.capacity)}
               </span>
               <span

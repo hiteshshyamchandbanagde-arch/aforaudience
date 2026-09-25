@@ -95,7 +95,7 @@ function SortableRow({
           cursor: 'grab',
           background: 'transparent',
           border: 'none',
-          fontSize: 'var(--afa-text-18px)',
+          fontSize: 'var(--afa-text-lead)',
           color: 'var(--afa-text-muted)',
           padding: '4px 8px',
           touchAction: 'none',

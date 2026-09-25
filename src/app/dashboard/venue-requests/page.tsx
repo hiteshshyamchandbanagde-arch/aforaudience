@@ -181,7 +181,7 @@ export default function VenueRequestsPage() {
                   )}
 
                   {r.status === 'PENDING' && (
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 14px' }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-muted)', margin: '0 0 14px' }}>
                       Round {roundsUsed} of 6 · expires 48hr after the last offer with no response
                     </p>
                   )}

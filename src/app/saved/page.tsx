@@ -72,7 +72,7 @@ export default function SavedPage() {
               <div style={{ width: 64, height: 64, borderRadius: '50%', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--afa-text-muted)' }}>
                 <HeartIcon style={{ width: 26, height: 26 }} />
               </div>
-              <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-18px)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
+              <p style={{ marginTop: 16, fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                 No saves yet
               </p>
               <p style={{ marginTop: 4, maxWidth: 260, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', lineHeight: 1.6, color: 'var(--afa-text-secondary)' }}>

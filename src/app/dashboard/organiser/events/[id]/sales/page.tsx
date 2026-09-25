@@ -190,7 +190,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${t.seats} seats, ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: '3px 3px 0 0' }} />
-                    <span style={{ fontSize: '9px', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -228,7 +228,7 @@ function SummaryCard({ label, value, sub, muted }: { label: string; value: strin
   return (
     <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: '10px', padding: '16px' }}>
       <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
-      <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
+      <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
