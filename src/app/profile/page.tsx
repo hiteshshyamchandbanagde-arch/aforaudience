@@ -578,10 +578,11 @@ function ProfileContent() {
     }
     return (
       <Button
-        variant="bare"
+        variant="outline-accent"
+        size="md"
+        fullWidth={false}
         onClick={() => switchRole(kind)}
         disabled={switching === kind}
-        style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)', border: '1.5px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '9px var(--afa-space-18px)', cursor: switching === kind ? 'default' : 'pointer', opacity: switching === kind ? 0.6 : 1 }}
       >
         {switching === kind ? tr.profilePage.switchingEllipsis : tr.profilePage.approvedSwitchTemplate.replace('{label}', label)}
       </Button>

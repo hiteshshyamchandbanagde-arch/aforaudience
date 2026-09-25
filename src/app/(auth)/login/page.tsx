@@ -309,10 +309,10 @@ function LoginForm() {
               <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
             </div>
             <Button
-              variant="bare"
+              variant="outline-neutral"
+              size="lg"
               type="button"
               onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>{/* token-ok: Google brand logo, fixed official 4-color palette, cannot be tokenized */}
