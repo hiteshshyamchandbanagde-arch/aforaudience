@@ -24,7 +24,15 @@ import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from '@/lib/statusStyle'
 // Roman in the case that was actually caught live). Applied once here
 // so no future button in this flow can reintroduce it.
 
-type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error'
+// GEN-2609-096 - `link`/`icon`/`bare` added for phase-1 raw-<button>
+// adoption (see docs/button-adoption-audit.md's classification):
+// `link` is the one real 3+-site exact-match shape found (Class B);
+// `icon`/`bare` are the two general-purpose "keep the caller's own
+// look, just reset the missing browser-default properties" variants
+// Class C (icon-only controls) and Class D (structural, one-off CTAs)
+// route through - see their own case blocks below for what each
+// resets and why neither one re-skins anything.
+type ButtonVariant = 'primary' | 'secondary' | 'secondary-reveal' | 'close' | 'outline' | 'outline-neutral' | 'form-submit' | 'toggle-pill' | 'solid' | 'outline-error' | 'link' | 'icon' | 'bare'
 
 // GEN-2609-058 - a size scale orthogonal to variant: controls padding/
 // font-size/font-weight/border-radius only, never color/background.
@@ -398,6 +406,69 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         fontFamily: FONT_FAMILY,
         cursor: 'pointer',
         textDecoration: 'none',
+      }
+    case 'link':
+      // GEN-2609-096 - Class B: the one real 3+-site exact-match shape
+      // found in the raw-<button> audit (docs/button-adoption-audit.md)
+      // - login's "use OTP instead"/"use password instead"/"resend
+      // code" + RegisterForm's "resend code", byte-identical style at
+      // all 4 sites before this migration.
+      return {
+        width: '100%',
+        background: 'transparent',
+        color: 'var(--afa-amber)',
+        padding: 'var(--afa-space-3)',
+        borderRadius: 'var(--afa-radius-md)',
+        border: 'none',
+        fontSize: 'var(--afa-text-ui)',
+        fontWeight: 500,
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+      }
+    case 'icon':
+      // GEN-2609-096 - Class C: icon-only controls (password show/hide,
+      // close/dismiss, prev/next, notify-bell, zoom, search/menu/
+      // language toggles, drag handle, save/bookmark toggle - 43 sites,
+      // see the audit doc). Deliberately a plain ghost reset, not a
+      // fixed circle/fill the way `close` is - every real site already
+      // carries its own width/height/background/border via its own
+      // `style` prop (which always wins, merged after this), so this
+      // variant's only real job is the shared fontFamily/cursor/
+      // color:inherit reset plus flex-centering the icon child. Never
+      // reads `size` as a diameter the way `close` does - a caller that
+      // wants a fixed footprint still sets it explicitly via `style`,
+      // same as every one of the 43 real sites already does.
+      return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'transparent',
+        border: 'none',
+        color: 'inherit',
+        fontFamily: FONT_FAMILY,
+        cursor: 'pointer',
+      }
+    case 'bare':
+      // GEN-2609-096 - Class D: structural/one-off raw buttons (162
+      // sites, see the audit doc) whose look is the caller's own -
+      // list rows, tabs, filter chips, status pills, dashed "add" rows,
+      // disclosure toggles, etc. Reset-only, per the dispatch's own
+      // spec: fontFamily (the GEN-2609-028 bug this whole file's header
+      // comment already documents - a raw <button> never inherits
+      // font-family from its ancestors), background/border cleared so
+      // a caller's own `style` starts from a truly blank slate instead
+      // of fighting the browser's default button chrome, cursor, and
+      // color:inherit so text color still flows from the caller's own
+      // wrapping context by default. Every real site already supplies
+      // its own full `style` object, which is merged in after this and
+      // wins on every property it sets - this reset only ever fills a
+      // gap a site's own style doesn't already cover.
+      return {
+        fontFamily: FONT_FAMILY,
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        color: 'inherit',
       }
     case 'close': {
       // `close` is the one variant that reads `size` as a pixel diameter,
