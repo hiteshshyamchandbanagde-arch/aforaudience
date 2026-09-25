@@ -8110,3 +8110,19 @@ Not re-verified (same gap `GEN-2609-075`'s own entry already flagged and for the
   - map 17px and 19px case by case;
   - leave the 26–84px display one-offs as they are.
   It is paired with renaming the pixel-named tokens (`text-10px/15px/18px/20px`) to role names, because once admins can edit values, pixel names become misleading.
+
+## GEN-2609-111 / BUG-2609-058 / BUG-2609-059 / BUG-2609-060 — small fixes bundle (PR #705, qa @ 6c5a315, 26 Sep)
+
+**GEN-2609-111 — `next dev` fixed; Tailwind source scanning rule (standing):**
+- `src/app/globals.css` now has `@source not` for root `*.md`, `docs/`, `ddoc/`, `e2e/`, `scripts/`. It sits after the 3 `@import` lines, not directly after `@import "tailwindcss"`, because CSS drops any `@import` that follows another rule.
+- Cause: Tailwind v4 auto-detection turned placeholder class names quoted in prose (`text-[var(...)]`, `border-[var(...)]`) into invalid CSS.
+- **Rule:** `src/` is still scanned, comments included. Never quote a placeholder arbitrary-value class (`xxx-[var(...)]`) in any `src/` comment — quote a real class instead. It will break `next dev` again.
+- CSS 1,170 → 1,141 classes; 0 added, 0 used classes removed.
+
+**BUG-2609-058 — correction to the GEN-2609-109 finding:** venue/create used VenuePortalUI's *local* `Button`, whose `outline` has a faint 20% cream border. The shared `Button` `outline` variant is correct as designed (both uses sit on `--afa-fill-solid` ember). venue/create now uses shared `solid md` (Publish Venue) and `outline-neutral md` (Save as Draft). `venue-requests:221` and `venue/bookings:266` still use the local VenuePortalUI outline — left for a VenuePortalUI migration.
+
+**BUG-2609-059 — design-system Revert:** button reads "Restore this version (N)"; click opens `ConfirmDialog` ("Restore this version?" / "Yes, restore") listing `token: current → will become`, max 10 rows then "+N more". No request until confirm. `ConfirmDialog` body now accepts rich content. **Pending Hitesh admin click-through** before RESOLVED.
+
+**BUG-2609-060 — admin bookings payment label:** "Free event" only when total is 0; amber (`--afa-amber`) "No payment record" when total > 0 and no payment; payment line unchanged otherwise.
+
+Feedback: all 4 → `IN_TEST`. Vercel READY, 0 runtime errors.
