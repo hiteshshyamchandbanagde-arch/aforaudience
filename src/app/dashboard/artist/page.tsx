@@ -317,20 +317,22 @@ export default function ArtistDashboard() {
                     </ul>
                   )}
                   <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
-                    <button
+                    <Button
+                      variant="bare"
                       onClick={() => respondToTourInvite(inv.id, true)}
                       disabled={respondingTour === inv.id}
-                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', opacity: 1 }}
                     >
                       Accept
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="bare"
                       onClick={() => respondToTourInvite(inv.id, false)}
                       disabled={respondingTour === inv.id}
-                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid var(--afa-error-border)', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid var(--afa-error-border)', padding: '9px var(--afa-space-5)', borderRadius: 'var(--afa-radius-md)', opacity: 1 }}
                     >
                       Decline
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -541,13 +543,14 @@ export default function ArtistDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)' }}>
                       <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-fill-solid)' }}>Slot #{p.slot} · {p.duration} min</span>
                       {canCancel(p) ? (
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => cancelPerformance(p.id)}
                           disabled={cancelling === p.id}
-                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-3)', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
+                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-3)', cursor: cancelling === p.id ? 'default' : 'pointer', opacity: cancelling === p.id ? 0.6 : 1 }}
                         >
                           {cancelling === p.id ? 'Cancelling...' : 'Cancel'}
-                        </button>
+                        </Button>
                       ) : (
                         <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-primary)', opacity: 0.4 }} title="Cancellations must be made at least 24 hours before the event">
                           Too close to cancel

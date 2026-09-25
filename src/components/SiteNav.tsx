@@ -9,6 +9,7 @@ import SearchBox from "@/components/SearchBox"
 import LocationChip from "@/components/LocationChip"
 import { useLocale, type Dictionary } from "@/lib/i18n/translate"
 import { LOCALES } from "@/lib/i18n/locales"
+import Button from "@/components/ui/Button"
 
 type NavLinkKey = "events" | "artists" | "venues" | "wall-of-fame"
 
@@ -434,25 +435,27 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
               {!backHref && <LocationChip />}
 
               <div ref={langMenuRef} style={{ position: 'relative' }}>
-                <button
+                <Button
+                  variant="icon"
                   onClick={() => setLangMenuOpen((v) => !v)}
                   title={t.languagePicker.label}
                   aria-label={t.languagePicker.label}
                   aria-expanded={langMenuOpen}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--afa-border-resting)', background: 'transparent', cursor: 'pointer', fontSize: 'var(--afa-text-micro)', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
+                  style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, padding: 0, color: 'var(--afa-text-primary)' }}
                 >
                   {locale.toUpperCase()}
-                </button>
+                </Button>
                 {langMenuOpen && (
                   <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-10px)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
                     {LOCALES.map((l) => (
-                      <button
+                      <Button
+                        variant="bare"
                         key={l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
                       >
                         {l.nativeLabel}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 )}
@@ -499,12 +502,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       <span className="sitenav-tooltip">{l.label}</span>
                     </Link>
                   ))}
-                  <button
+                  <Button
+                    variant="bare"
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", cursor: "pointer", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}
+                    style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}
                   >
                     {t.nav.signOut}
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-4)" }}>
@@ -529,25 +533,27 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </div>
               )}
               {!backHref && (
-                <button
+                <Button
+                  variant="icon"
                   aria-label={t.search.placeholder}
                   onClick={() => setSearchOpen((v) => !v)}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "50%", border: "none", background: "transparent", cursor: "pointer", color: "var(--afa-text-primary)", opacity: 0.7, flexShrink: 0 }}
+                  style={{ width: "36px", height: "36px", borderRadius: "50%", color: "var(--afa-text-primary)", opacity: 0.7, flexShrink: 0 }}
                 >
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="7" />
                     <path d="m20 20-3.2-3.2" strokeLinecap="round" />
                   </svg>
-                </button>
+                </Button>
               )}
 
               <div ref={menuRef} style={{ position: "relative" }}>
-                <button
+                <Button
+                  variant="bare"
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-label="Account menu"
                   aria-haspopup="menu"
                   aria-expanded={menuOpen}
-                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)", background: "transparent", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: user ? "4px 10px 4px 4px" : "8px 10px", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}
                 >
                   {user ? (
                     <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", background: "var(--afa-amber)", color: "var(--afa-surface-inverse)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", fontWeight: 700 }}>
@@ -562,7 +568,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" style={{ color: "var(--afa-text-primary)", opacity: 0.5 }}>
                     <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                </button>
+                </Button>
 
                 {menuOpen && (
                   <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-12px)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
@@ -606,13 +612,14 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     )}
                     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "var(--afa-space-1) var(--afa-space-6px)", padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-2)" }}>
                       {LOCALES.map((l) => (
-                        <button
+                        <Button
+                          variant="bare"
                           key={l.id}
                           onClick={() => setLocale(l.id)}
-                          style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, background: "transparent", border: "none", cursor: "pointer", padding: "var(--afa-space-2px) var(--afa-space-1)" }}
+                          style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: locale === l.id ? 700 : 500, color: locale === l.id ? "var(--afa-amber)" : "var(--afa-text-primary)", opacity: locale === l.id ? 1 : 0.5, padding: "var(--afa-space-2px) var(--afa-space-1)" }}
                         >
                           {l.id.toUpperCase()}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     {!backHref && (
@@ -623,12 +630,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     {user && (
                       <>
                         <div style={{ margin: "var(--afa-space-6px) 0", height: "1px", background: "var(--afa-tint-10)" }} />
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }) }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", border: "none", cursor: "pointer" }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}
                         >
                           {t.nav.signOut}
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>

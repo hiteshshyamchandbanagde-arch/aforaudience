@@ -216,14 +216,15 @@ function LoginForm() {
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                 />
-                <button
+                <Button
+                  variant="icon"
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
                 >
                   <EyeIcon visible={showPassword} />
-                </button>
+                </Button>
               </div>
             </div>
             <Button
@@ -233,12 +234,13 @@ function LoginForm() {
             >
               {loading ? tr.loginPage.signingInEllipsis : tr.loginPage.signInButton}
             </Button>
-            <button
+            <Button
+              variant="link"
               onClick={() => { setMode("otp-request"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "none", fontSize: "var(--afa-text-ui)", fontWeight: 500, cursor: "pointer", marginTop: "var(--afa-space-2)" }}
+              style={{ marginTop: "var(--afa-space-2)" }}
             >
               {tr.loginPage.useOtpInstead}
-            </button>
+            </Button>
           </>
         )}
 
@@ -251,12 +253,13 @@ function LoginForm() {
             >
               {loading ? tr.loginPage.sendingEllipsis : tr.loginPage.sendCodeButton}
             </Button>
-            <button
+            <Button
+              variant="link"
               onClick={() => { setMode("password"); setError("") }}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "none", fontSize: "var(--afa-text-ui)", fontWeight: 500, cursor: "pointer", marginTop: "var(--afa-space-2)" }}
+              style={{ marginTop: "var(--afa-space-2)" }}
             >
               {tr.loginPage.usePasswordInstead}
-            </button>
+            </Button>
           </>
         )}
 
@@ -281,13 +284,14 @@ function LoginForm() {
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.loginPage.verifyAndSignInButton}
             </Button>
-            <button
+            <Button
+              variant="link"
               onClick={handleRequestOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "none", fontSize: "var(--afa-text-ui)", fontWeight: 500, cursor: "pointer", marginTop: "var(--afa-space-2)" }}
+              style={{ marginTop: "var(--afa-space-2)", opacity: 1 }}
             >
               {tr.loginPage.resendCodeButton}
-            </button>
+            </Button>
           </>
         )}
 
@@ -304,10 +308,11 @@ function LoginForm() {
               <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
               <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
             </div>
-            <button
+            <Button
+              variant="bare"
               type="button"
               onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", background: "transparent", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600, cursor: "pointer" }}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}
             >
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.68-3.88 2.68-6.62z"/>{/* token-ok: Google brand logo, fixed official 4-color palette, cannot be tokenized */}
@@ -316,7 +321,7 @@ function LoginForm() {
                 <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97l3 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>{/* token-ok: Google brand logo, fixed official 4-color palette, cannot be tokenized */}
               </svg>
               {tr.loginPage.continueWithGoogle}
-            </button>
+            </Button>
           </>
         )}
 

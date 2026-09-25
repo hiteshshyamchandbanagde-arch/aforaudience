@@ -158,16 +158,17 @@ export default function AdminArtistsPage() {
   }
 
   const sortButton = (key: SortKey, label: string) => (
-    <button
+    <Button
+      variant="bare"
       onClick={() => toggleSort(key)}
       style={{
-        background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+        padding: 0,
         fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: sortKey === key ? 'var(--afa-amber)' : 'var(--afa-text-secondary)',
         textTransform: 'uppercase', letterSpacing: '0.04em',
       }}
     >
       {label}{sortKey === key ? (sortDesc ? ' ↓' : ' ↑') : ''}
-    </button>
+    </Button>
   )
 
   if (status === 'loading' || (loading && roster.length === 0)) return (<><SiteNav /><BrandLoader /></>)
@@ -210,12 +211,13 @@ export default function AdminArtistsPage() {
                 <option key={key} value={key}>{s.label}</option>
               ))}
             </select>
-            <button
+            <Button
+              variant="bare"
               type="submit"
-              style={{ padding: '10px 18px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(201,151,58,0.4)', background: 'transparent', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(201,151,58,0.4)', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)' }}
             >
               Search
-            </button>
+            </Button>
           </form>
 
           <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap', padding: '0 4px' }}>
@@ -264,13 +266,14 @@ export default function AdminArtistsPage() {
 
                     <div className="lg:items-end" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
                       {a.isSceneStatusHeadliner ? (
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'transparent', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: 'var(--afa-text-small)', cursor: 'pointer' }}
+                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: 'var(--afa-text-small)', opacity: 1 }}
                         >
                           Remove Headliner
-                        </button>
+                        </Button>
                       ) : (
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                           <input
@@ -285,12 +288,13 @@ export default function AdminArtistsPage() {
                         </div>
                       )}
                       {a.headlinerNote && (
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => setExpandedNote(expandedNote === a.id ? null : a.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-micro)', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-micro)', textDecoration: 'underline' }}
                         >
                           {expandedNote === a.id ? 'Hide note' : 'View note'}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

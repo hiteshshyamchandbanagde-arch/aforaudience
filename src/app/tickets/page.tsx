@@ -416,20 +416,22 @@ export default function MyTicketsPage() {
                       .replace('{date}', new Date(t.booking.event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }))}
                   </p>
                   <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
-                    <button
+                    <Button
+                      variant="bare"
                       onClick={() => respondToTag(t.id, true)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', background: 'transparent', border: '1px solid rgba(201,151,58,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: respondingTag === t.id ? 0.6 : 1 }}
+                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', border: '1px solid rgba(201,151,58,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
                       {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="bare"
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, background: 'transparent', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer' }}
+                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)' }}
                     >
                       {tr.ticketsPage.declineButton}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

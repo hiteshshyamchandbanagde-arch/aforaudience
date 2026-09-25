@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useState } from 'react';
+import Button from '@/components/ui/Button';
 
 /**
  * Global toast/snackbar. Fixed-position, so it's visible regardless of
@@ -146,23 +147,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 {t.kind === 'error' ? '!' : t.kind === 'info' ? 'i' : '✓'}
               </span>
               <span style={{ flex: 1, fontWeight: 500 }}>{t.message}</span>
-              <button
+              <Button
+                variant="bare"
                 aria-label="Dismiss"
                 onClick={() => dismiss(t.id)}
                 style={{
                   flexShrink: 0,
-                  background: 'transparent',
-                  border: 'none',
                   color: text,
                   opacity: 0.5,
                   fontSize: 'var(--afa-text-title)',
                   lineHeight: 1,
-                  cursor: 'pointer',
                   padding: 2,
                 }}
               >
                 ×
-              </button>
+              </Button>
               <div
                 style={{
                   position: 'absolute',

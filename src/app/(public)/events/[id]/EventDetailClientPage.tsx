@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import SiteNav from "@/components/SiteNav"
+import Button from "@/components/ui/Button"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
 import AudienceChoiceVoting from "@/components/AudienceChoiceVoting"
 import { EventPoster, EventTypeBadge, SeatStateDot } from "@/components/EventCard"
@@ -464,13 +465,14 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               {tr.eventDetailPage.plusOneFullySupported.replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                             </span>
                           ) : (
-                            <button
+                            <Button
+                              variant="bare"
                               onClick={() => confirmPlusOne(p.id)}
                               disabled={plusOneBusy === p.id}
-                              style={{ fontSize: "var(--afa-text-small)", fontWeight: 600, padding: "5px var(--afa-space-3)", borderRadius: "3px", border: "1.5px solid var(--afa-amber)", background: "transparent", color: "var(--afa-amber)", cursor: plusOneBusy === p.id ? "default" : "pointer", opacity: plusOneBusy === p.id ? 0.6 : 1 }}
+                              style={{ fontSize: "var(--afa-text-small)", fontWeight: 600, padding: "5px var(--afa-space-3)", borderRadius: "3px", border: "1.5px solid var(--afa-amber)", color: "var(--afa-amber)", cursor: plusOneBusy === p.id ? "default" : "pointer", opacity: plusOneBusy === p.id ? 0.6 : 1 }}
                             >
                               {plusOneBusy === p.id ? tr.eventDetailPage.plusOneConfirming : tr.eventDetailPage.plusOneIllBeThere.replace("{name}", performerName.split(" ")[0]).replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
-                            </button>
+                            </Button>
                           )}
                           {plusOneError && (
                             <div style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-error)" }}>{plusOneError}</div>
@@ -510,22 +512,24 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                         <div style={{ marginTop: "var(--afa-space-10px)", paddingTop: "var(--afa-space-10px)", borderTop: "1px solid var(--afa-tint-08)" }}>
                           <div style={{ display: "flex", gap: "var(--afa-space-1)", marginBottom: "var(--afa-space-2)", alignItems: "center" }}>
                             {[1, 2, 3, 4, 5].map((n) => (
-                              <button
+                              <Button
                                 key={n}
+                                variant="bare"
                                 onClick={() => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: n, comment: prev[p.id]?.comment || "" } }))}
-                                style={{ width: "20px", height: "20px", borderRadius: "50%", background: "none", border: "1px solid var(--afa-amber)", cursor: "pointer", fontSize: "var(--afa-text-caption)", padding: 0, color: "var(--afa-amber)", opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.3 }}
+                                style={{ width: "20px", height: "20px", borderRadius: "50%", border: "1px solid var(--afa-amber)", fontSize: "var(--afa-text-caption)", padding: 0, color: "var(--afa-amber)", opacity: (reviewDrafts[p.id]?.rating || 0) >= n ? 1 : 0.3 }}
                               >
                                 {n}
-                              </button>
+                              </Button>
                             ))}
                             {reviewDrafts[p.id]?.rating > 0 && (
-                              <button
+                              <Button
+                                variant="bare"
                                 onClick={() => submitReview(p.id)}
                                 disabled={reviewSubmitting === p.id}
-                                style={{ marginLeft: "var(--afa-space-2)", fontSize: "var(--afa-text-small)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", border: "none", borderRadius: "3px", padding: "var(--afa-space-1) var(--afa-space-3)", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                style={{ marginLeft: "var(--afa-space-2)", fontSize: "var(--afa-text-small)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "3px", padding: "var(--afa-space-1) var(--afa-space-3)", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
                               >
                                 {reviewSubmitting === p.id ? tr.eventDetailPage.ratingSubmitting : tr.eventDetailPage.ratePrompt}
-                              </button>
+                              </Button>
                             )}
                           </div>
                           {reviewDrafts[p.id]?.rating > 0 && (

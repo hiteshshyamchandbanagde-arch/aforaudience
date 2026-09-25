@@ -368,19 +368,20 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               </label>
               <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-18px)' }}>
                 {(['HOURLY', 'DAILY', 'FLEXIBLE'] as const).map((t) => (
-                  <button
+                  <Button
                     key={t}
+                    variant="bare"
                     type="button"
                     onClick={() => setRateType(t)}
                     style={{
-                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600, cursor: 'pointer',
+                      flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
                       border: rateType === t ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                       background: rateType === t ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                       color: rateType === t ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                     }}
                   >
                     {t === 'HOURLY' ? 'Hourly' : t === 'DAILY' ? 'Daily' : 'Flexible'}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
@@ -504,23 +505,25 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 {saving ? 'Saving...' : venue.isApproved ? 'Save Changes' : 'Save & Publish'}
               </Button>
               {venue.isApproved ? (
-                <button
+                <Button
+                  variant="bare"
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save & Unpublish
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant="bare"
                   type="button"
                   disabled={saving}
                   onClick={() => save(undefined)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
-                </button>
+                </Button>
               )}
               <Link href={`/dashboard/venue/${id}`} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, textDecoration: 'none' }}>
                 Cancel

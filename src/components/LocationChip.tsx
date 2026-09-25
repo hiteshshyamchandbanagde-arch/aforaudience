@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { cityLabel } from '@/lib/country-codes'
 import { useLocale } from '@/lib/i18n/translate'
 import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 interface LocationState {
   city: string | null
@@ -97,11 +98,11 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
-      <button type="button" onClick={() => setOpen((v) => !v)} style={chipStyle}>
+      <Button variant="bare" type="button" onClick={() => setOpen((v) => !v)} style={chipStyle}>
         {variant !== 'topbar' && <span aria-hidden>📍</span>}
         <span>{label}</span>
         <span style={{ opacity: 0.5, fontSize: variant === 'topbar' ? '8px' : '10px' }}>▾</span>
-      </button>
+      </Button>
       {open && (
         <div
           style={{
@@ -131,14 +132,15 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
               <div style={{ fontSize: 'var(--afa-text-small)', opacity: 0.5, padding: '6px 4px' }}>{t.location.noMatchingCities}</div>
             ) : (
               filteredCities.map((c) => (
-                <button
+                <Button
+                  variant="bare"
                   key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', border: 'none', background: c.city === location?.city ? FILL_SOLID_TINT : 'transparent', cursor: 'pointer', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', background: c.city === location?.city ? FILL_SOLID_TINT : undefined, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
                 >
                   {c.label}
-                </button>
+                </Button>
               ))
             )}
           </div>

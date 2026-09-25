@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import Button from "@/components/ui/Button"
 import VenuesGridClient from "./VenuesGridClient"
 import VenueOwnersGridEmbed from "@/components/VenueOwnersGridEmbed"
 import { useLocale } from "@/lib/i18n/translate"
@@ -52,21 +53,20 @@ export default function VenuesViewToggle({
         {tabs.map((t) => {
           const active = view === t.key
           return (
-            <button
+            <Button
               key={t.key}
+              variant="bare"
               onClick={() => setView(t.key)}
               className={`afa-view-tab${active ? " afa-view-tab-active" : ""}`}
               style={{
                 position: "relative",
                 paddingBottom: "16px",
                 marginBottom: "-1px",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
                 fontFamily: "var(--font-ui)",
                 fontSize: "var(--afa-text-subtitle)",
                 letterSpacing: "-0.01em",
                 transition: "color 0.2s ease",
+                color: undefined,
               }}
             >
               {t.label}
@@ -76,7 +76,7 @@ export default function VenuesViewToggle({
               {active && (
                 <span style={{ position: "absolute", left: 0, right: 0, bottom: "-1px", height: "2px", background: "var(--afa-fill-solid)" }} />
               )}
-            </button>
+            </Button>
           )
         })}
       </div>

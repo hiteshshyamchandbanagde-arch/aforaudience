@@ -369,13 +369,14 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                           Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
                         </p>
                         {walletBalance > 0 && (
-                          <button
+                          <Button
+                            variant="bare"
                             onClick={applyWalletCredit}
                             disabled={applyingWallet}
                             style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-gold)', background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: applyingWallet ? 0.6 : 1 }}
                           >
                             {applyingWallet ? 'Applying...' : `💰 Apply wallet credit (₹${walletBalance.toLocaleString('en-IN')} available)`}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     )}
@@ -411,13 +412,14 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                           Buy-in ₹{p.buyInAmount.toLocaleString('en-IN')} - {p.buyInRefundStatus === 'WALLET_CREDITED' ? 'kept as wallet credit' : 'marked as refunded to the artist'}
                         </span>
                         {p.buyInRefundStatus === 'REFUNDED' && (
-                          <button
+                          <Button
+                            variant="bare"
                             onClick={() => convertToWalletCredit(p.id)}
                             disabled={actingOn === p.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-sm)', padding: '5px var(--afa-space-3)', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
+                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-sm)', padding: '5px var(--afa-space-3)', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
                           >
                             {actingOn === p.id ? 'Updating...' : 'Keep as wallet credit instead'}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     )}
@@ -457,20 +459,22 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       {app.message && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: 'var(--afa-space-10px)' }}>{app.message}</p>}
                       {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
-                          <button
+                          <Button
+                            variant="bare"
                             onClick={() => reviewApplication(app.id, 'APPROVED')}
                             disabled={actingOn === app.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', border: 'none', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
                           >
                             Approve
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="bare"
                             onClick={() => reviewApplication(app.id, 'REJECTED')}
                             disabled={actingOn === app.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
+                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
                           >
                             Reject
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>

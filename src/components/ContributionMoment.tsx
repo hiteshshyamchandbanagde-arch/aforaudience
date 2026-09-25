@@ -168,12 +168,15 @@ export default function ContributionMoment(props: ContributionMomentProps) {
 
       {/* Desktop - centered modal over a dimmed backdrop, not full-page */}
       <div className="cm-desktop" style={{ position: 'fixed', inset: 0, zIndex: 1000, alignItems: 'center', justifyContent: 'center' }}>
-        <button
+        <Button
+          variant="bare"
           aria-label="Close"
           onClick={props.onClose}
           className="afa-backdrop-mount"
-          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer' }}
-        />
+          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }}
+        >
+          {null}
+        </Button>
         <div
           className="cm-modal-mount"
           style={{

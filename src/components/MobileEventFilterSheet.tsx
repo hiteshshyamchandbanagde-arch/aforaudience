@@ -22,7 +22,8 @@ type SortOption = "date" | "priceLowHigh" | "priceHighLow" | "fillingFast"
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button
+    <Button
+      variant="bare"
       type="button"
       onClick={onClick}
       style={{
@@ -36,11 +37,10 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
         padding: "8px 14px",
         fontFamily: "var(--font-mono)",
         fontSize: "var(--afa-text-small)",
-        cursor: "pointer",
       }}
     >
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -75,12 +75,15 @@ export default function MobileEventFilterSheet({
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-      <button
+      <Button
+        variant="bare"
         aria-label={tr.eventsPage.filterSheetCloseLabel}
         onClick={onClose}
         className="afa-backdrop-mount"
-        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer" }}
-      />
+        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }}
+      >
+        {null}
+      </Button>
       <div
         className="afa-sheet-mount no-scrollbar"
         style={{
@@ -172,24 +175,23 @@ export default function MobileEventFilterSheet({
         </section>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "28px 20px 0" }}>
-          <button
+          <Button
+            variant="bare"
             type="button"
             onClick={onReset}
             style={{
               borderRadius: "999px",
               border: "1px solid var(--afa-border-resting)",
-              background: "transparent",
               color: "rgba(245,245,240,0.7)",
               padding: "14px 20px",
               fontFamily: "var(--font-mono)",
               fontSize: "var(--afa-text-small)",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
-              cursor: "pointer",
             }}
           >
             {tr.eventsPage.filterSheetReset}
-          </button>
+          </Button>
           <Button type="button" variant="primary" fullWidth={false} onClick={onClose} style={{ flex: 1 }}>
             {tr.eventsPage.showingCount.replace("{n}", String(resultCount))}
           </Button>

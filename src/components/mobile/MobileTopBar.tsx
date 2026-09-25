@@ -9,6 +9,7 @@ import { LOCALES } from '@/lib/i18n/locales'
 import LocationChip from '@/components/LocationChip'
 import { FilterSlidersIcon } from '@/components/icons/EventIcons'
 import { TopBarSearchIcon, TopBarGlobeIcon } from '@/components/icons/MobileTopBarIcons'
+import Button from '@/components/ui/Button'
 
 // Mobile Nav v3, Phase A (GEN-2609-019) - global mobile top bar, ported
 // from the Figma Make "AFA Mobile App v3" export's TopBar.tsx (structure,
@@ -157,7 +158,8 @@ export default function MobileTopBar() {
           }}
         />
         {onEventsRoute && (
-          <button
+          <Button
+            variant="icon"
             type="button"
             onClick={handleOpenFilters}
             aria-label={t.eventsPage.filtersButtonLabel}
@@ -166,33 +168,28 @@ export default function MobileTopBar() {
               right: '6px',
               top: '50%',
               transform: 'translateY(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               width: '24px',
               height: '24px',
               borderRadius: '50%',
-              border: 'none',
-              background: 'transparent',
               color: 'var(--afa-amber)',
-              cursor: 'pointer',
             }}
           >
             <FilterSlidersIcon style={{ width: '15px', height: '15px' }} />
-          </button>
+          </Button>
         )}
       </div>
 
       <div ref={langRef} style={{ position: 'relative', flexShrink: 0 }}>
-        <button
+        <Button
+          variant="icon"
           type="button"
           onClick={() => setLangOpen((v) => !v)}
           aria-label={t.languagePicker.label}
           aria-expanded={langOpen}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '50%', border: 'none', background: 'transparent', color: 'var(--afa-text-secondary)', cursor: 'pointer' }}
+          style={{ width: '28px', height: '28px', borderRadius: '50%', color: 'var(--afa-text-secondary)' }}
         >
           <TopBarGlobeIcon style={{ width: '17px', height: '17px' }} />
-        </button>
+        </Button>
         {langOpen && (
           <div
             style={{
@@ -209,13 +206,14 @@ export default function MobileTopBar() {
             }}
           >
             {LOCALES.map((l) => (
-              <button
+              <Button
+                variant="bare"
                 key={l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', border: 'none', background: locale === l.id ? 'rgba(201,151,58,0.08)' : 'transparent', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500, cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
               >
                 {l.nativeLabel}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -223,12 +221,13 @@ export default function MobileTopBar() {
 
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: user ? '8px' : '5px' }}>
         {status === 'loading' ? null : user ? (
-          <button
+          <Button
+            variant="bare"
             onClick={() => signOut({ callbackUrl: '/' })}
-            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', padding: 0 }}
           >
             {t.nav.signOut}
-          </button>
+          </Button>
         ) : (
           <>
             {/* Narrower letter-spacing/padding than the signed-in Sign

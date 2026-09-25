@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
+import Button from "@/components/ui/Button"
 import Photo from "@/components/Photo"
 import VenueNoPhoto, { capacityTier } from "@/components/VenueNoPhoto"
 import { cityLabel } from "@/lib/country-codes"
@@ -133,39 +134,42 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
         </div>
 
         <div ref={cityRef} style={{ position: "relative", width: "256px", flexShrink: 0 }}>
-          <button
+          <Button
+            variant="bare"
             type="button"
             onClick={() => setCityOpen((o) => !o)}
             className="afa-city-filter-trigger"
-            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body-lg)", fontFamily: "var(--font-sans)", cursor: "pointer", textAlign: "left" }}
+            style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 16px", borderWidth: "1px", borderStyle: "solid", background: "var(--afa-surface-page)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-body-lg)", fontFamily: "var(--font-sans)", textAlign: "left" }}
           >
             <span style={{ opacity: selectedCity === "All Cities" ? 0.65 : 1 }}>
               {selectedCity === "All Cities" ? tr.venuesPage.filterAllCities : cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity}
             </span>
             <ChevronDownIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
-          </button>
+          </Button>
           {cityOpen && (
             <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
               <li>
-                <button
+                <Button
+                  variant="bare"
                   type="button"
                   onClick={() => { setSelectedCity("All Cities"); setCityOpen(false) }}
                   className="afa-city-filter-option"
-                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                  style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: selectedCity === "All Cities" ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                 >
                   {tr.venuesPage.filterAllCities}
-                </button>
+                </Button>
               </li>
               {cityOptions.map((c) => (
                 <li key={c.city}>
-                  <button
+                  <Button
+                    variant="bare"
                     type="button"
                     onClick={() => { setSelectedCity(c.city); setCityOpen(false) }}
                     className="afa-city-filter-option"
-                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", border: "none", cursor: "pointer", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
+                    style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", fontSize: "var(--afa-text-body)", fontFamily: "var(--font-sans)", textAlign: "left", color: c.city === selectedCity ? "var(--afa-amber)" : "var(--afa-text-primary)" }}
                   >
                     {c.label}
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>

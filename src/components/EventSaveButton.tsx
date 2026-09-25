@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { HeartIcon } from '@/components/icons/EventIcons'
+import Button from '@/components/ui/Button'
 
 // Mobile Redesign Phase 4b (GEN-2609-007) - self-contained follow/unfollow
 // island for a single event, mirroring useVenueFollow's shape
@@ -74,7 +75,8 @@ export function EventSaveHeartButton({
   const dims = size === 'card' ? 36 : 32
   const iconSize = size === 'card' ? 17 : 16
   return (
-    <button
+    <Button
+      variant="bare"
       onClick={async (e) => {
         e.stopPropagation()
         const next = await toggleSave()
@@ -98,13 +100,13 @@ export function EventSaveHeartButton({
         width: dims, height: dims, borderRadius: '50%', flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(4px)',
-        border: 'none', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
+        cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
       }}
     >
       <HeartIcon
         filled={saved}
         style={{ width: iconSize, height: iconSize, color: saved ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}
       />
-    </button>
+    </Button>
   )
 }

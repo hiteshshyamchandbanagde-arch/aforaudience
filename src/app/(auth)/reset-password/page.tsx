@@ -113,14 +113,15 @@ function ResetPasswordForm() {
                       onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                       style={{ width: "100%", padding: "12px 14px", paddingRight: "44px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                     />
-                    <button
+                    <Button
+                      variant="icon"
                       type="button"
                       onClick={() => setVisible({ ...visible, [field.name]: !visible[field.name as keyof typeof visible] })}
                       aria-label={visible[field.name as keyof typeof visible] ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "4px", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
                     >
                       <EyeIcon visible={visible[field.name as keyof typeof visible]} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

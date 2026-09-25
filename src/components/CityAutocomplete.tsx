@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Button from '@/components/ui/Button'
 
 interface PlacePrediction {
   placeId: string
@@ -137,7 +138,8 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
           }}
         >
           {predictions.map((p) => (
-            <button
+            <Button
+              variant="bare"
               key={p.placeId}
               type="button"
               onClick={() => handleSelect(p)}
@@ -146,9 +148,6 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
                 width: '100%',
                 textAlign: 'left',
                 padding: '10px 12px',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
                 fontSize: 'var(--afa-text-body)',
                 color: 'var(--afa-text-primary)',
               }}
@@ -158,7 +157,7 @@ export default function CityAutocomplete({ value, onChange, onResolved, inputSty
               {p.secondaryText && (
                 <span style={{ opacity: 0.55 }}> · {p.secondaryText}</span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
       )}

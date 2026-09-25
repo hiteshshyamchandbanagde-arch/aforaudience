@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useLocale } from "@/lib/i18n/translate"
 import { BellIcon, BellOffIcon } from "@/components/icons/VenueIcons"
+import Button from "@/components/ui/Button"
 
 // Same isolated-island pattern as VenueFollowButton - the organiser detail
 // page is otherwise a plain server component. Fetch/toggle logic is
@@ -70,7 +71,8 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
       <style>{`.afa-organiser-follow-cta:hover { filter: brightness(1.1); }`}</style>
-      <button
+      <Button
+        variant="bare"
         onClick={toggleFollow}
         disabled={busy}
         className="afa-organiser-follow-cta"
@@ -86,9 +88,10 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
         }}
       >
         {following ? tr.followButton.following : tr.followButton.follow}
-      </button>
+      </Button>
       {following && (
-        <button
+        <Button
+          variant="icon"
           onClick={toggleNotify}
           disabled={busy}
           aria-label={notifyEnabled ? tr.followButton.muteNotifications : tr.followButton.enableNotifications}
@@ -99,9 +102,6 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
             borderRadius: "50%",
             border: "1.5px solid rgba(245,245,240,0.2)",
             background: notifyEnabled ? "rgba(201,151,58,0.18)" : "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
@@ -111,7 +111,7 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
           ) : (
             <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
           )}
-        </button>
+        </Button>
       )}
     </div>
   )

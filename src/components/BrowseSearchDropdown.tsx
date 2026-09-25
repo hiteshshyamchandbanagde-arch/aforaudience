@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
 import { useLocale } from "@/lib/i18n/translate"
+import Button from "@/components/ui/Button"
 
 // Wraps a browse page's existing hero search <input> (+ its icon span,
 // passed as children) and adds a live results dropdown underneath - same
@@ -82,17 +83,18 @@ export default function BrowseSearchDropdown<T>({
             </div>
           ) : (
             visible.map((item) => (
-              <button
+              <Button
+                variant="bare"
                 key={getId(item)}
                 onClick={() => { setFocused(false); onSelect(item) }}
                 style={{
                   display: "block", width: "100%", textAlign: "left", padding: "10px 20px",
-                  border: "none", background: "transparent", cursor: "pointer", fontSize: "var(--afa-text-body)",
-                  color: "var(--afa-text-primary)", fontFamily: "var(--font-sans)",
+                  fontSize: "var(--afa-text-body)",
+                  color: "var(--afa-text-primary)",
                 }}
               >
                 {renderRow(item)}
-              </button>
+              </Button>
             ))
           )}
           {items.length > maxVisible && (

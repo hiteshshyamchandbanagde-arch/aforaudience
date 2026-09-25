@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import Button from '@/components/ui/Button'
 import { useToast } from '@/components/Toast'
 import { useLocale } from '@/lib/i18n/translate'
 
@@ -178,13 +179,13 @@ export default function MessageThreadPage() {
                 color: 'var(--afa-text-primary)',
               }}
             />
-            <button
+            <Button
+              variant="bare"
               onClick={handleSend}
               disabled={sending || !draft.trim()}
               style={{
                 padding: '10px 20px',
                 borderRadius: '20px',
-                border: 'none',
                 background: 'var(--afa-sage, #4a6741)',
                 color: 'var(--afa-white)',
                 fontWeight: 600,
@@ -193,7 +194,7 @@ export default function MessageThreadPage() {
               }}
             >
               {tr.messageThreadPage.sendBtn}
-            </button>
+            </Button>
           </div>
         ) : null}
       </div>

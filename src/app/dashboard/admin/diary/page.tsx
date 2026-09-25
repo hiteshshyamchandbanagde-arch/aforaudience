@@ -191,8 +191,9 @@ export default function AdminDiaryPage() {
                 )}
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {STATUS_ORDER.map((s) => (
-                    <button
+                    <Button
                       key={s}
+                      variant="bare"
                       onClick={() => handleStatusChange(entry.id, s)}
                       disabled={updatingId === entry.id || s === entry.status}
                       style={{
@@ -208,7 +209,7 @@ export default function AdminDiaryPage() {
                       }}
                     >
                       {STATUS_META[s].label}
-                    </button>
+                    </Button>
                   ))}
                   <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, marginLeft: 'auto' }}>
                     Updated {new Date(entry.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}

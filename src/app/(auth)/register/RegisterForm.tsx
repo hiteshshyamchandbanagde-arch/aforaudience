@@ -363,13 +363,14 @@ export default function RegisterForm() {
             >
               {loading ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
             </Button>
-            <button
+            <Button
+              variant="link"
               onClick={handleResendOtp}
               disabled={loading}
-              style={{ width: "100%", background: "transparent", color: "var(--afa-amber)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", border: "none", fontSize: "var(--afa-text-ui)", fontWeight: 500, cursor: "pointer", marginTop: "var(--afa-space-2)" }}
+              style={{ marginTop: "var(--afa-space-2)", opacity: 1 }}
             >
               {tr.loginPage.resendCodeButton}
-            </button>
+            </Button>
           </div>
         </div>
     )
@@ -397,14 +398,15 @@ export default function RegisterForm() {
               Google Cloud Console - same env gate as Login's button. */}
           {process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
             <>
-              <button
+              <Button
+                variant="bare"
                 type="button"
                 onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", background: "transparent", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600, cursor: "pointer" }}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}
               >
                 <GoogleIcon />
                 {tr.loginPage.continueWithGoogle}
-              </button>
+              </Button>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
                 <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
                 <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
@@ -448,6 +450,10 @@ export default function RegisterForm() {
                     {tr.registerPage.suggestedFromInitials}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--afa-space-2)", marginTop: "var(--afa-space-6px)", alignItems: "center" }}>
+                    {/* GEN-2609-096 - left raw deliberately: a translucent-tint
+                        utility chip (GEN-2609-066 precedent), the same
+                        architectural pattern as statusStyle.ts's selection
+                        pills, not a Button-shaped CTA. */}
                     {initialsSuggestions.map((suggestion) => (
                       <button
                         key={suggestion}
@@ -467,7 +473,8 @@ export default function RegisterForm() {
                         {suggestion}
                       </button>
                     ))}
-                    <button
+                    <Button
+                      variant="bare"
                       type="button"
                       onClick={() => fetchInitialsSuggestions(initialsSeed)}
                       disabled={initialsLoading}
@@ -476,14 +483,12 @@ export default function RegisterForm() {
                         fontSize: "var(--afa-text-small)",
                         color: "var(--afa-text-primary)",
                         opacity: initialsLoading ? 0.4 : 0.6,
-                        background: "none",
-                        border: "none",
                         cursor: initialsLoading ? "default" : "pointer",
                         padding: "var(--afa-space-1) var(--afa-space-2px)",
                       }}
                     >
                       {initialsLoading ? "…" : tr.registerPage.tryMoreButton}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -499,13 +504,14 @@ export default function RegisterForm() {
                 <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error)" }}>
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
-                    <button
+                    <Button
+                      variant="bare"
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-error)", textDecoration: "underline", background: "none", border: "none", cursor: "pointer", fontSize: "var(--afa-text-small)", padding: 0 }}
+                      style={{ color: "var(--afa-error)", textDecoration: "underline", fontSize: "var(--afa-text-small)", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
-                    </button>
+                    </Button>
                   )}
                 </p>
               )}
@@ -567,14 +573,15 @@ export default function RegisterForm() {
                   onChange={handleChange}
                   style={{ ...inputStyle(), paddingRight: "44px" }}
                 />
-                <button
+                <Button
+                  variant="icon"
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
                 >
                   <EyeIcon visible={showPassword} />
-                </button>
+                </Button>
               </div>
               {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - real
                   length + character-variety strength meter (passwordStrength
@@ -611,14 +618,15 @@ export default function RegisterForm() {
                   onChange={handleChange}
                   style={{ ...inputStyle(), paddingRight: "44px" }}
                 />
-                <button
+                <Button
+                  variant="icon"
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
                   aria-label={showConfirm ? tr.authCommon.hidePassword : tr.authCommon.showPassword}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)", display: "flex" }}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", padding: "var(--afa-space-1)", opacity: 0.5, lineHeight: 1, color: "var(--afa-text-primary)" }}
                 >
                   <EyeIcon visible={showConfirm} />
-                </button>
+                </Button>
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ import {
 } from '@/components/icons/MobileTabIcons'
 import { PinIcon, TrophyIcon } from '@/components/icons/EventIcons'
 import { useBadgeCounts, getShellDashboardLink, Icon as DashboardIcon, type IconName } from '@/components/DashboardShell'
+import Button from '@/components/ui/Button'
 
 // Mobile Nav v3, Phase B (GEN-2609-019) - this is Phase 1's
 // (GEN-2609-003) static 4-item MobileTabBar evolved in place into a
@@ -477,11 +478,12 @@ export default function MobileTabBar() {
         })}
 
         {moreItems.length > 0 && (
-          <button
+          <Button
+            variant="bare"
             type="button"
             onClick={() => setMoreOpen(true)}
             className="flex flex-1 flex-col items-center gap-1 py-1.5"
-            style={{ color: moreActive ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55, background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ color: moreActive ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: moreActive ? 1 : 0.55 }}
           >
             <DashboardIcon name="more" size={22} />
             <span
@@ -495,7 +497,7 @@ export default function MobileTabBar() {
             >
               More
             </span>
-          </button>
+          </Button>
         )}
       </nav>
 
@@ -508,13 +510,14 @@ export default function MobileTabBar() {
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--afa-tint-08)' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>More</span>
-              <button
+              <Button
+                variant="bare"
                 onClick={() => setMoreOpen(false)}
                 aria-label="Close"
-                style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
+                style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
               >
                 <DashboardIcon name="x" size={20} />
-              </button>
+              </Button>
             </div>
             <div className="p-2">
               {moreItems.map((item) => (

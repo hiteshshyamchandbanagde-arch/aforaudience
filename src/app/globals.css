@@ -250,6 +250,15 @@
   --afa-btn-padding-md: 9px 17px;
   --afa-btn-padding-lg: 12px 24px;
 
+  /* GEN-2609-096 - Button.tsx's pill-sm/pill-md size tokens kept their
+     own literal padding (see Button.tsx's own GEN-2609-075 comment -
+     deliberately never audited against the sm/md/lg scale, since
+     13px/14px are coincidences of the type scale, not the pill
+     shape's own design). Promoted to real tokens now so the pill
+     shape is admin-controlled too, same as sm/md/lg already are. */
+  --afa-btn-padding-pill-sm: 6px 14px;
+  --afa-btn-padding-pill-md: 10px 18px;
+
   /* GEN-2609-081 - scale extension: the 8/4/2 highest-frequency
      off-scale spacing/font-size/radius values from GEN-2609-079's own
      batch-1 migration (repo-wide precise count >= 50 non-tokenized

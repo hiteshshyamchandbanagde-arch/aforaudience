@@ -1,4 +1,5 @@
 import { ROTATE_MS } from "@/hooks/usePhotoRotation"
+import Button from "@/components/ui/Button"
 
 /**
  * Shared progress-dot row for a crossfading photo hero, extracted from
@@ -23,11 +24,12 @@ export default function PhotoRotationDots({
   return (
     <div style={{ marginTop: "56px", display: "flex", alignItems: "center", gap: "10px" }}>
       {photos.map((photo, i) => (
-        <button
+        <Button
+          variant="bare"
           key={photo.src}
           aria-label={`Photo ${i + 1} of ${photos.length}`}
           onClick={() => setActive(i)}
-          style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "999px", overflow: "hidden", border: "none", padding: 0, cursor: "pointer", transition: "width 0.3s ease", background: "rgba(245,245,240,0.25)" }}
+          style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "999px", overflow: "hidden", padding: 0, transition: "width 0.3s ease", background: "rgba(245,245,240,0.25)" }}
         >
           {i === active && !reduced && !paused && (
             <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />
@@ -35,7 +37,7 @@ export default function PhotoRotationDots({
           {i === active && (reduced || paused) && (
             <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)" }} />
           )}
-        </button>
+        </Button>
       ))}
       <style>{`
         @keyframes heroDrawLine {

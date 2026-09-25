@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { colorForZone } from '@/components/SeatLayoutPreview'
 import { FILL_SOLID_TINT } from '@/lib/statusStyle'
+import Button from '@/components/ui/Button'
 
 // §9.4 twenty-fourth amendment - audience seat-picker. Renders the same
 // x/y layout the Venue Owner builder saved, read-only except for click-
@@ -273,7 +274,8 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           Tap a seat to select it. Max {maxSeatsPerBooking} per booking. Pinch or use +/- to zoom in for easier tapping.
         </div>
         <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-          <button
+          <Button
+            variant="bare"
             type="button"
             onClick={() => zoomBy(1 / 1.5)}
             disabled={zoom <= MIN_ZOOM}
@@ -281,8 +283,9 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             −
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="bare"
             type="button"
             onClick={() => zoomBy(1.5)}
             disabled={zoom >= MAX_ZOOM}
@@ -290,15 +293,16 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             +
-          </button>
+          </Button>
           {zoom > 1 && (
-            <button
+            <Button
+              variant="bare"
               type="button"
               onClick={resetView}
-              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 600, cursor: 'pointer' }}
+              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 600 }}
             >
               Reset
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -315,19 +319,20 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
       {levels.length > 1 && (
         <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
           {levels.map((lvl) => (
-            <button
+            <Button
+              variant="bare"
               key={lvl}
               type="button"
               onClick={() => setActiveLevel(lvl)}
               style={{
-                fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: '6px', cursor: 'pointer',
+                fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: '6px',
                 border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)',
                 background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                 color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
               }}
             >
               {lvl || 'Main'}
-            </button>
+            </Button>
           ))}
         </div>
       )}

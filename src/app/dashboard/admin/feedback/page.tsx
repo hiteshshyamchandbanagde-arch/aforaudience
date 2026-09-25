@@ -10,6 +10,7 @@ import FeedbackTrends from '@/components/admin/FeedbackTrends'
 import FeedbackDetailPanel, { type FeedbackDetailItem } from '@/components/admin/FeedbackDetailPanel'
 import BrandLoader from '@/components/BrandLoader'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 // /dashboard/admin/feedback — Admin Dashboard v1 (design.md §9.1)
 //
@@ -122,17 +123,17 @@ function timeAgo(iso: string) {
 // a visible change.
 function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', border: 'none', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', cursor: 'pointer' }}>
+    <Button variant="bare" disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', opacity: 1 }}>
       Approve
-    </button>
+    </Button>
   )
 }
 
 function RejectButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <button disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', background: 'transparent', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', cursor: 'pointer' }}>
+    <Button variant="bare" disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', opacity: 1 }}>
       Reject
-    </button>
+    </Button>
   )
 }
 
@@ -599,12 +600,13 @@ function AdminFeedbackBoard() {
               f96a1262). Collapsible like Trends below, so an admin who
               just wants the feedback board isn't forced to scroll past
               it every time. */}
-          <button
+          <Button
+            variant="bare"
             onClick={() => setApprovalsOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {approvalsOpen ? '▾' : '▸'} Pending Approvals ({organisers.length + venueOwners.length})
-          </button>
+          </Button>
           {approvalsOpen && (
             <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 700, marginBottom: 'var(--afa-space-10px)' }}>
@@ -654,12 +656,13 @@ function AdminFeedbackBoard() {
               that shared list. The submitting artist's own profile
               already shows their genre regardless - this only gates the
               GLOBAL filter surface. */}
-          <button
+          <Button
+            variant="bare"
             onClick={() => setGenreRequestsOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {genreRequestsOpen ? '▾' : '▸'} Pending Genre Requests ({genreRequests.length})
-          </button>
+          </Button>
           {genreRequestsOpen && (
             <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-10px)' }}>
@@ -684,12 +687,13 @@ function AdminFeedbackBoard() {
               organiser-authored free text, never auto-visible. Approving
               shows it on the event's public page; rejecting requires a
               reason so the organiser knows what to fix. */}
-          <button
+          <Button
+            variant="bare"
             onClick={() => setEventNotesOpen((v) => !v)}
-            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
+            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-text-primary)', padding: 0, marginBottom: 'var(--afa-space-10px)', opacity: 0.7 }}
           >
             {eventNotesOpen ? '▾' : '▸'} Pending Event Notes ({eventNotes.length})
-          </button>
+          </Button>
           {eventNotesOpen && (
             <div style={{ marginBottom: 'var(--afa-space-28px)' }}>
               <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-10px)' }}>
@@ -721,22 +725,20 @@ function AdminFeedbackBoard() {
             Submitted via the support widget — both the manual form and questions the chatbot couldn&apos;t answer.
           </p>
 
-          <button
+          <Button
+            variant="bare"
             onClick={() => setTrendsOpen((v) => !v)}
             style={{
               fontSize: 'var(--afa-text-small)',
               fontWeight: 700,
               color: 'var(--afa-text-primary)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
               padding: 0,
               marginBottom: 'var(--afa-space-10px)',
               opacity: 0.7,
             }}
           >
             {trendsOpen ? '▾' : '▸'} Trends
-          </button>
+          </Button>
           {trendsOpen && <FeedbackTrends items={trendItems} />}
 
           {statusFocus && (
@@ -758,7 +760,8 @@ function AdminFeedbackBoard() {
               <span>
                 Showing: <strong>{labelize(statusFocus)}</strong> only ({filtered.length})
               </span>
-              <button
+              <Button
+                variant="bare"
                 onClick={clearStatusFocus}
                 style={{
                   fontSize: 'var(--afa-text-small)',
@@ -768,11 +771,10 @@ function AdminFeedbackBoard() {
                   border: '1px solid rgba(245,245,240,0.13)',
                   borderRadius: 'var(--afa-radius-pill)',
                   padding: '5px var(--afa-space-3)',
-                  cursor: 'pointer',
                 }}
               >
                 View full board
-              </button>
+              </Button>
             </div>
           )}
 

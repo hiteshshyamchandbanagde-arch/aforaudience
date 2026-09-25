@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
+import Button from '@/components/ui/Button'
 import { useLocale } from '@/lib/i18n/translate'
 import type { Dictionary } from '@/lib/i18n/translate'
 import { STATUS_TONE, type StatusToneStyle } from '@/lib/statusStyle'
@@ -195,13 +196,14 @@ function FeedbackDetailOverlay({
           <div style={{ fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.5)' }}>
             {tr.myFeedbackPage.ofTemplate.replace('{i}', String(index + 1)).replace('{n}', String(items.length))}
           </div>
-          <button
+          <Button
+            variant="icon"
             onClick={onClose}
             aria-label={tr.myFeedbackPage.closeLabel}
-            style={{ border: 'none', background: 'transparent', fontSize: 'var(--afa-text-subtitle)', cursor: 'pointer', lineHeight: 1, color: 'var(--afa-text-primary)' }}
+            style={{ fontSize: 'var(--afa-text-subtitle)', lineHeight: 1, color: 'var(--afa-text-primary)' }}
           >
             ✕
-          </button>
+          </Button>
         </div>
 
         <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
@@ -244,7 +246,8 @@ function FeedbackDetailOverlay({
         )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', gap: '12px' }}>
-          <button
+          <Button
+            variant="bare"
             onClick={guardedPrev}
             disabled={!hasPrev}
             style={{
@@ -256,11 +259,13 @@ function FeedbackDetailOverlay({
               color: hasPrev ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasPrev ? 'pointer' : 'default',
               fontWeight: 600,
+              opacity: 1,
             }}
           >
             {tr.myFeedbackPage.previous}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="bare"
             onClick={guardedNext}
             disabled={!hasNext}
             style={{
@@ -272,10 +277,11 @@ function FeedbackDetailOverlay({
               color: hasNext ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
               cursor: hasNext ? 'pointer' : 'default',
               fontWeight: 600,
+              opacity: 1,
             }}
           >
             {tr.myFeedbackPage.next}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -373,8 +379,9 @@ export default function MyFeedbackPage() {
             {items.map((item, i) => {
               const statusStyle = statusStyleFor(tr, item)
               return (
-                <button
+                <Button
                   key={item.id}
+                  variant="bare"
                   onClick={() => setSelectedIndex(i)}
                   style={{
                     background: 'var(--afa-surface-raised)',
@@ -382,10 +389,8 @@ export default function MyFeedbackPage() {
                     padding: '18px 20px',
                     border: '1px solid var(--afa-tint-08)',
                     textAlign: 'left',
-                    cursor: 'pointer',
                     width: '100%',
                     font: 'inherit',
-                    color: 'inherit',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
@@ -418,7 +423,7 @@ export default function MyFeedbackPage() {
                       {statusStyle.label}
                     </span>
                   </div>
-                </button>
+                </Button>
               )
             })}
           </div>

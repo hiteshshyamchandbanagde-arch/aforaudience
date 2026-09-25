@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useLocale } from '@/lib/i18n/translate'
 import { useHeldRoles } from '@/components/HeldRolesContext'
+import Button from '@/components/ui/Button'
 
 // Shared shell for the Audience-tier dashboard pages (Dashboard/My
 // Activity, Messages, Tickets). Desktop: persistent 220px left sidebar,
@@ -622,15 +623,16 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             )
           })}
           {roleSections.length > 0 && (
-            <button
+            <Button
+              variant="bare"
               onClick={() => setDrawerOpen(true)}
               aria-label="More"
               className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5"
-              style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
+              style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
             >
               <Icon name="more" size={20} />
               <span style={{ fontSize: 'var(--afa-text-caption)' }}>More</span>
-            </button>
+            </Button>
           )}
         </nav>
       )}
@@ -645,13 +647,14 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>My Roles</span>
-              <button
+              <Button
+                variant="bare"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close"
-                style={{ color: 'var(--afa-text-primary)', opacity: 0.7, background: 'transparent', border: 'none', cursor: 'pointer' }}
+                style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
               >
                 <Icon name="x" size={20} />
-              </button>
+              </Button>
             </div>
             <div className="p-4 space-y-5">
               {roleSections.map((section) => (

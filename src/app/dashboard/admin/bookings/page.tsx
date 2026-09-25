@@ -285,13 +285,13 @@ export default function AdminBookingsPage() {
 
                     {!isDelivered ? (
                       <div style={{ marginTop: '12px' }}>
-                        <button
+                        <Button
+                          variant="bare"
                           onClick={() => retry(b.id)}
                           disabled={retryingId === b.id}
                           style={{
                             padding: '8px 16px',
                             borderRadius: 'var(--afa-radius-pill)',
-                            border: 'none',
                             background: 'var(--afa-fill-solid)',
                             color: 'var(--afa-on-fill-solid)',
                             fontSize: 'var(--afa-text-ui)',
@@ -305,7 +305,7 @@ export default function AdminBookingsPage() {
                             : isErrored
                             ? 'Retry delivery'
                             : 'Attempt delivery'}
-                        </button>
+                        </Button>
                       </div>
                     ) : null}
                   </div>

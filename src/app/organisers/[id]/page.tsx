@@ -3,6 +3,7 @@ import { useEffect, useState, use } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 import BrandLoader from "@/components/BrandLoader"
+import Button from "@/components/ui/Button"
 import Photo from "@/components/Photo"
 import OrganiserFollowButton from "./OrganiserFollowButton"
 import { isPlaceholderImageUrl } from "@/lib/placeholder-image"
@@ -415,14 +416,15 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
               )}
             </div>
             {!pastExpanded && past.length > PAST_EVENTS_PAGE_SIZE && (
-              <button
+              <Button
+                variant="bare"
                 onClick={() => setPastExpanded(true)}
                 className="afa-organiser-view-all"
-                style={{ marginTop: "var(--afa-space-5)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}
+                style={{ marginTop: "var(--afa-space-5)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", padding: 0, fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-amber)" }}
               >
                 {tr.organiserDetailPage.viewAllPastTemplate.replace("{n}", String(past.length))}
                 <ArrowIcon style={{ width: "14px", height: "14px" }} />
-              </button>
+              </Button>
             )}
           </div>
         </section>

@@ -262,15 +262,16 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             ) : (
               <>
                 <div id="checkin-camera" style={{ width: '100%', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden' }} />
-                <button
+                <Button
+                  variant="bare"
                   onClick={() => setCameraOn(false)}
                   style={{
-                    width: '100%', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
-                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', cursor: 'pointer', marginTop: 'var(--afa-space-3)',
+                    width: '100%', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)',
+                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', marginTop: 'var(--afa-space-3)',
                   }}
                 >
                   Stop Camera
-                </button>
+                </Button>
               </>
             )}
             {cameraError && (
@@ -294,22 +295,24 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                   background: 'var(--afa-surface-raised)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)',
                 }}
               />
-              <button
+              <Button
+                variant="bare"
                 onClick={() => submitCode(manualCode)}
                 disabled={submitting || !manualCode.trim()}
                 style={{
                   fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)',
-                  border: 'none', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-5)', cursor: 'pointer',
+                  borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-5)', cursor: 'pointer',
                   opacity: submitting || !manualCode.trim() ? 0.5 : 1,
                 }}
               >
                 Check In
-              </button>
+              </Button>
             </div>
           </div>
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
-            <button
+            <Button
+              variant="bare"
               onClick={() => {
                 const next = !listOpen
                 setListOpen(next)
@@ -317,30 +320,31 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               }}
               style={{
                 width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent',
-                border: 'none', cursor: 'pointer', padding: 0,
+                fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)',
+                padding: 0,
               }}
             >
               <span>Attendee List</span>
               <span style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>{listOpen ? '▲ Hide' : '▼ Show'}</span>
-            </button>
+            </Button>
 
             {listOpen && (
               <div style={{ marginTop: 'var(--afa-space-4)' }}>
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-14px)' }}>
                   {(['all', 'checked_in', 'pending'] as const).map((f) => (
-                    <button
+                    <Button
                       key={f}
+                      variant="bare"
                       onClick={() => setListFilter(f)}
                       style={{
-                        flex: 1, padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, cursor: 'pointer',
+                        flex: 1, padding: 'var(--afa-space-2)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600,
                         border: listFilter === f ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                         background: listFilter === f ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: listFilter === f ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
                     >
                       {f === 'all' ? 'All' : f === 'checked_in' ? 'Checked In' : 'Pending'}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 

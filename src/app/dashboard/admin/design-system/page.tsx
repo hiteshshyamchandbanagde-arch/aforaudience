@@ -363,15 +363,16 @@ export default function AdminDesignSystemPage() {
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button
+                <Button
+                  variant="bare"
                   onClick={() => setShowHistory((v) => !v)}
                   style={secondaryBtnStyle}
                 >
                   {showHistory ? 'Hide' : 'Show'} version history
-                </button>
-                <button onClick={() => setConfirmingReset(true)} disabled={saving} style={secondaryBtnStyle}>
+                </Button>
+                <Button variant="bare" onClick={() => setConfirmingReset(true)} disabled={saving} style={{ ...secondaryBtnStyle, opacity: 1 }}>
                   Reset to defaults
-                </button>
+                </Button>
                 <Button
                   variant="solid"
                   size="md"
@@ -419,14 +420,15 @@ export default function AdminDesignSystemPage() {
                                 {v.creatorLabel && <> · by {v.creatorLabel}</>}
                               </div>
                             </div>
-                            <button
+                            <Button
+                              variant="bare"
                               onClick={() => handleRevert(v.id)}
                               disabled={saving || wouldRestore === 0}
                               title={wouldRestore === 0 ? 'Already matches the current live values' : `Would change ${wouldRestore} token(s) back to this version's values`}
                               style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 'var(--afa-text-small)', flexShrink: 0, opacity: wouldRestore === 0 ? 0.5 : 1 }}
                             >
                               {wouldRestore === 0 ? 'Already current' : `Revert (${wouldRestore})`}
-                            </button>
+                            </Button>
                           </div>
                           {changedByThisSave.length > 0 && (
                             <ul style={{ listStyle: 'none', padding: 0, margin: '6px 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -675,9 +677,9 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
         <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} style={secondaryBtnStyle}>
+          <Button variant="bare" onClick={onCancel} style={secondaryBtnStyle}>
             Cancel
-          </button>
+          </Button>
           <Button variant="solid" size="md" fullWidth={false} onClick={onConfirm}>
             {confirmLabel}
           </Button>

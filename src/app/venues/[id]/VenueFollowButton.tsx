@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useLocale } from "@/lib/i18n/translate"
 import { BellIcon, BellOffIcon, PlusIcon } from "@/components/icons/VenueIcons"
+import Button from "@/components/ui/Button"
 
 // Small, self-contained island of interactivity - the venue detail page
 // itself is a server component with no other client-side state, so this
@@ -94,7 +95,8 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
       <style>{`.afa-follow-cta:hover { filter: brightness(1.1); }`}</style>
-      <button
+      <Button
+        variant="bare"
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta"
@@ -110,9 +112,10 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
         }}
       >
         {following ? tr.venueDetailPage.following : tr.venueDetailPage.follow}
-      </button>
+      </Button>
       {following && (
-        <button
+        <Button
+          variant="icon"
           onClick={toggleNotify}
           disabled={busy}
           aria-label={notifyEnabled ? tr.venueDetailPage.muteNotifications : tr.venueDetailPage.enableNotifications}
@@ -123,9 +126,6 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
             borderRadius: "50%",
             border: "1.5px solid rgba(245,245,240,0.2)",
             background: notifyEnabled ? "rgba(201,151,58,0.18)" : "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}
@@ -135,7 +135,7 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
           ) : (
             <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
           )}
-        </button>
+        </Button>
       )}
     </div>
   )
@@ -154,7 +154,8 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
   return (
     <div style={{ marginTop: "20px" }}>
       <style>{`.afa-follow-cta-sidebar:hover { filter: brightness(1.1); }`}</style>
-      <button
+      <Button
+        variant="bare"
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta-sidebar"
@@ -176,7 +177,7 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
       >
         {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
         {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}
-      </button>
+      </Button>
       <p style={{ marginTop: "10px", textAlign: "center", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.5 }}>
         {tr.venueDetailPage.followCaption}
       </p>

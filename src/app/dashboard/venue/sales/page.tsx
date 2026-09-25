@@ -12,6 +12,7 @@ import RangePicker from '@/components/RangePicker'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import { PageHead, Card, EmptyState, IconChart } from '@/components/dashboard/VenuePortalUI'
+import Button from '@/components/ui/Button'
 
 interface VenueRow {
   id: string
@@ -254,13 +255,14 @@ export default function VenueOwnerSalesOverviewPage() {
                 </div>
 
                 {hasMoreVenues && !showAllVenues && (
-                  <button
+                  <Button
+                    variant="bare"
                     onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{ background: 'transparent', border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', cursor: 'pointer', marginBottom: showAllVenues ? '16px' : 0 }}
+                    style={{ border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: showAllVenues ? '16px' : 0 }}
                   >
                     View all {venues.length} venues
-                  </button>
+                  </Button>
                 )}
 
                 {(showAllVenues || !hasMoreVenues) && (
@@ -289,12 +291,13 @@ export default function VenueOwnerSalesOverviewPage() {
                       </Link>
                     ))}
                     {showAllVenues && (
-                      <button
+                      <Button
+                        variant="bare"
                         onClick={() => setShowAllVenues(false)}
-                        style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', padding: '4px 12px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+                        style={{ alignSelf: 'flex-start', padding: '4px 12px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', textDecoration: 'underline', textUnderlineOffset: '3px' }}
                       >
                         Show top {TOP_VENUES_SHOWN} only
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )}

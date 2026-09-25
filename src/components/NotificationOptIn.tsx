@@ -110,21 +110,19 @@ export default function NotificationOptIn() {
       >
         {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
       </Button>
-      <button
+      <Button
+        variant="bare"
         onClick={dismiss}
         aria-label={tr.notificationOptIn.dismissAriaLabel}
         style={{
-          background: 'transparent',
           color: 'rgba(247,243,238,0.6)',
-          border: 'none',
           fontSize: 'var(--afa-text-lead)',
           lineHeight: 1,
-          cursor: 'pointer',
           padding: '0 4px',
         }}
       >
         ×
-      </button>
+      </Button>
     </div>
   );
 }
