@@ -155,9 +155,10 @@ export default function AdminUsersPage() {
               ))}
             </select>
             <Button
-              variant="bare"
+              variant="outline-accent"
+              size="md"
+              fullWidth={false}
               type="submit"
-              style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(201,151,58,0.4)', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)' }}
             >
               Search
             </Button>
@@ -194,10 +195,12 @@ export default function AdminUsersPage() {
                   {u.role !== 'ADMIN' && (
                     u.isSuspended ? (
                       <Button
-                        variant="bare"
+                        variant="outline-success"
+                        size="md"
+                        fullWidth={false}
                         onClick={() => handleUnsuspend(u.id)}
                         disabled={actioningId === u.id}
-                        style={{ padding: '8px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-green-deep)', color: 'var(--afa-green-deep)', fontWeight: 700, fontSize: 'var(--afa-text-ui)', flexShrink: 0, opacity: 1 }}
+                        style={{ flexShrink: 0 }}
                       >
                         Unsuspend
                       </Button>

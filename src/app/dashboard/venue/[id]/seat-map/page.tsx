@@ -500,9 +500,11 @@ function RemoveGuidedRowButton({ onClick, ariaLabel }: { onClick: () => void; ar
 // duplicated between "Add another section" and "Add gangway" (the 3rd,
 // visually-similar "+ Add vertical aisle" button has a different
 // fontSize/padding, so it's a real distinct style, not this one).
+// GEN-2609-109 - now the shared `dashed` Button variant; "+ Add vertical
+// aisle" and "+ Add level" use the same variant directly.
 function AddDashedRowButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <Button variant="bare" onClick={onClick} style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-3)' }}>
+    <Button variant="dashed" size="sm" fullWidth={false} onClick={onClick}>
       {children}
     </Button>
   )
@@ -1482,16 +1484,11 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               )}
             </div>
             <Button
-              variant="bare"
+              variant={seatMapFrozen ? 'outline-neutral' : 'solid'}
+              size="md"
+              fullWidth={false}
               onClick={() => toggleFreeze(!seatMapFrozen)}
               disabled={freezing}
-              style={{
-                padding: 'var(--afa-space-2) var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, cursor: freezing ? 'default' : 'pointer',
-                opacity: freezing ? 0.6 : 1,
-                background: seatMapFrozen ? 'var(--afa-surface-raised)' : 'var(--afa-fill-solid)',
-                color: seatMapFrozen ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
-                ...(seatMapFrozen ? { border: '1px solid rgba(245,245,240,0.2)' } : {}),
-              }}
             >
               {freezing ? 'Working…' : seatMapFrozen ? 'Unfreeze' : 'Freeze this seat map'}
             </Button>
@@ -1507,7 +1504,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         {seatingMode === 'NUMBERED' && (
           <div style={{ marginBottom: 'var(--afa-space-5)' }}>
             {levels.length === 1 ? (
-              <Button variant="bare" onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, border: '1px dashed rgba(245,245,240,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-3)', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
+              <Button variant="dashed" size="sm" fullWidth={false} onClick={addLevel} disabled={seatMapFrozen}>
                 + This venue has more than one level (e.g. Balcony, 1st Floor)
               </Button>
             ) : (
@@ -1544,7 +1541,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       </Button>
                     </div>
                   ))}
-                  <Button variant="bare" onClick={addLevel} disabled={seatMapFrozen} style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: seatMapFrozen ? 0.3 : 0.6, border: '1px dashed rgba(245,245,240,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', cursor: seatMapFrozen ? 'default' : 'pointer' }}>
+                  <Button variant="dashed" size="sm" fullWidth={false} onClick={addLevel} disabled={seatMapFrozen}>
                     + Add level
                   </Button>
                 </div>
@@ -1757,7 +1754,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                                 <RemoveGuidedRowButton onClick={() => removeVerticalAisleFromGroup(rg.id, a.id)} ariaLabel="Remove vertical aisle" />
                               </div>
                             ))}
-                            <Button variant="bare" onClick={() => addVerticalAisleToGroup(rg.id)} style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px dashed rgba(245,245,240,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-1) var(--afa-space-10px)', marginTop: 'var(--afa-space-2px)' }}>
+                            <Button variant="dashed" size="sm" fullWidth={false} onClick={() => addVerticalAisleToGroup(rg.id)} style={{ marginTop: 'var(--afa-space-2px)' }}>
                               + Add vertical aisle
                             </Button>
                           </div>

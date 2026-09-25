@@ -212,9 +212,10 @@ export default function AdminArtistsPage() {
               ))}
             </select>
             <Button
-              variant="bare"
+              variant="outline-accent"
+              size="md"
+              fullWidth={false}
               type="submit"
-              style={{ padding: '10px 18px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid rgba(201,151,58,0.4)', color: 'var(--afa-amber)', fontWeight: 700, fontSize: 'var(--afa-text-body)' }}
             >
               Search
             </Button>
@@ -267,10 +268,11 @@ export default function AdminArtistsPage() {
                     <div className="lg:items-end" style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
                       {a.isSceneStatusHeadliner ? (
                         <Button
-                          variant="bare"
+                          variant="outline-neutral"
+                          size="sm"
+                          fullWidth={false}
                           onClick={() => handleHeadlinerToggle(a)}
                           disabled={actioningId === a.id}
-                          style={{ padding: '7px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', color: 'var(--afa-text-secondary)', fontWeight: 700, fontSize: 'var(--afa-text-small)', opacity: 1 }}
                         >
                           Remove Headliner
                         </Button>

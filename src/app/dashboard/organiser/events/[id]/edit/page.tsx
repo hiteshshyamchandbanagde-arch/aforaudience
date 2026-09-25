@@ -1020,11 +1020,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         {voteWeightSaving ? 'Saving…' : 'Save override'}
                       </Button>
                       <Button
-                        variant="bare"
+                        variant="outline-neutral"
+                        size="md"
+                        fullWidth={false}
                         type="button"
                         onClick={() => saveVoteWeights(true)}
                         disabled={voteWeightSaving}
-                        style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-2) var(--afa-space-4)', cursor: voteWeightSaving ? 'default' : 'pointer' }}
                       >
                         Use platform default
                       </Button>
@@ -1205,11 +1206,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               </Button>
               {event.status !== 'APPROVED' && (
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="lg"
+                  fullWidth={false}
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </Button>

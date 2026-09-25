@@ -153,11 +153,12 @@ export default function VenueOwnerEditPage() {
           </Card>
 
           <Button
-            variant="bare"
+            variant="solid"
+            size="lg"
+            fullWidth={false}
             onClick={save}
             disabled={saving}
             className="avp-btn-primary"
-            style={{ ...primaryLinkStyle, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Saving...' : 'Save Profile'}
           </Button>

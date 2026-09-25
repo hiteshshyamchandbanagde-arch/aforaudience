@@ -506,21 +506,23 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               </Button>
               {venue.isApproved ? (
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="lg"
+                  fullWidth={false}
                   type="button"
                   disabled={saving}
                   onClick={() => save(false)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save & Unpublish
                 </Button>
               ) : (
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="lg"
+                  fullWidth={false}
                   type="button"
                   disabled={saving}
                   onClick={() => save(undefined)}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-3) 26px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 >
                   Save as Draft
                 </Button>

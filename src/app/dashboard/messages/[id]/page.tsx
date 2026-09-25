@@ -180,18 +180,11 @@ export default function MessageThreadPage() {
               }}
             />
             <Button
-              variant="bare"
+              variant="success"
+              size="pill-md"
+              fullWidth={false}
               onClick={handleSend}
               disabled={sending || !draft.trim()}
-              style={{
-                padding: '10px 20px',
-                borderRadius: '20px',
-                background: 'var(--afa-sage, #4a6741)',
-                color: 'var(--afa-white)',
-                fontWeight: 600,
-                cursor: sending || !draft.trim() ? 'default' : 'pointer',
-                opacity: sending || !draft.trim() ? 0.6 : 1,
-              }}
             >
               {tr.messageThreadPage.sendBtn}
             </Button>

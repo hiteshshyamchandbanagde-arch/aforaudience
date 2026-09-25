@@ -263,12 +263,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               <>
                 <div id="checkin-camera" style={{ width: '100%', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden' }} />
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="md"
                   onClick={() => setCameraOn(false)}
-                  style={{
-                    width: '100%', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)',
-                    border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', marginTop: 'var(--afa-space-3)',
-                  }}
+                  style={{ marginTop: 'var(--afa-space-3)' }}
                 >
                   Stop Camera
                 </Button>
@@ -296,14 +294,11 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 }}
               />
               <Button
-                variant="bare"
+                variant="solid"
+                size="lg"
+                fullWidth={false}
                 onClick={() => submitCode(manualCode)}
                 disabled={submitting || !manualCode.trim()}
-                style={{
-                  fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)',
-                  borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px) var(--afa-space-5)', cursor: 'pointer',
-                  opacity: submitting || !manualCode.trim() ? 0.5 : 1,
-                }}
               >
                 Check In
               </Button>

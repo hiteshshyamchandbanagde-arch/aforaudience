@@ -364,13 +364,14 @@ export default function AdminDesignSystemPage() {
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="md"
+                  fullWidth={false}
                   onClick={() => setShowHistory((v) => !v)}
-                  style={secondaryBtnStyle}
                 >
                   {showHistory ? 'Hide' : 'Show'} version history
                 </Button>
-                <Button variant="bare" onClick={() => setConfirmingReset(true)} disabled={saving} style={{ ...secondaryBtnStyle, opacity: 1 }}>
+                <Button variant="outline-neutral" size="md" fullWidth={false} onClick={() => setConfirmingReset(true)} disabled={saving}>
                   Reset to defaults
                 </Button>
                 <Button
@@ -421,11 +422,13 @@ export default function AdminDesignSystemPage() {
                               </div>
                             </div>
                             <Button
-                              variant="bare"
+                              variant="outline-neutral"
+                              size="sm"
+                              fullWidth={false}
                               onClick={() => handleRevert(v.id)}
                               disabled={saving || wouldRestore === 0}
                               title={wouldRestore === 0 ? 'Already matches the current live values' : `Would change ${wouldRestore} token(s) back to this version's values`}
-                              style={{ ...secondaryBtnStyle, padding: '6px 12px', fontSize: 'var(--afa-text-small)', flexShrink: 0, opacity: wouldRestore === 0 ? 0.5 : 1 }}
+                              style={{ flexShrink: 0 }}
                             >
                               {wouldRestore === 0 ? 'Already current' : `Revert (${wouldRestore})`}
                             </Button>
@@ -677,7 +680,7 @@ function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { tit
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
         <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <Button variant="bare" onClick={onCancel} style={secondaryBtnStyle}>
+          <Button variant="outline-neutral" size="md" fullWidth={false} onClick={onCancel}>
             Cancel
           </Button>
           <Button variant="solid" size="md" fullWidth={false} onClick={onConfirm}>
@@ -708,13 +711,4 @@ const inputStyle: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
   color: 'var(--afa-text-primary)',
   border: '1px solid var(--afa-border-resting)',
-}
-const secondaryBtnStyle: React.CSSProperties = {
-  padding: '9px 17px',
-  fontSize: 'var(--afa-text-ui)',
-  fontWeight: 600,
-  background: 'transparent',
-  color: 'var(--afa-text-primary)',
-  border: '1px solid var(--afa-border-resting)',
-  cursor: 'pointer',
 }

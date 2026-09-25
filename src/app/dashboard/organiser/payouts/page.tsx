@@ -135,9 +135,10 @@ export default function OrganiserPayoutsPage() {
                 )}
 
                 <Button
-                  variant="bare"
+                  variant="outline-neutral"
+                  size="lg"
+                  fullWidth={false}
                   onClick={() => { setLoading(true); fetchPayout() }}
-                  style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', padding: '10px 20px', borderRadius: '8px' }}
                 >
                   Refresh status
                 </Button>
