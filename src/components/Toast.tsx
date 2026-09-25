@@ -148,7 +148,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </span>
               <span style={{ flex: 1, fontWeight: 500 }}>{t.message}</span>
               <Button
-                variant="bare"
+                variant="icon"
                 aria-label="Dismiss"
                 onClick={() => dismiss(t.id)}
                 style={{

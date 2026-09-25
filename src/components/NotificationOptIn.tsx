@@ -111,7 +111,7 @@ export default function NotificationOptIn() {
         {busy ? tr.notificationOptIn.enabling : tr.notificationOptIn.enable}
       </Button>
       <Button
-        variant="bare"
+        variant="icon"
         onClick={dismiss}
         aria-label={tr.notificationOptIn.dismissAriaLabel}
         style={{

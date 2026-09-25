@@ -417,18 +417,20 @@ export default function MyTicketsPage() {
                   </p>
                   <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                     <Button
-                      variant="bare"
+                      variant="outline-accent"
+                      size="sm"
+                      fullWidth={false}
                       onClick={() => respondToTag(t.id, true)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 700, color: 'var(--afa-amber)', border: '1px solid rgba(201,151,58,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', opacity: respondingTag === t.id ? 0.6 : 1 }}
                     >
                       {respondingTag === t.id ? tr.ticketsPage.confirmingEllipsis : tr.ticketsPage.confirmButton}
                     </Button>
                     <Button
-                      variant="bare"
+                      variant="outline-neutral"
+                      size="sm"
+                      fullWidth={false}
                       onClick={() => respondToTag(t.id, false)}
                       disabled={respondingTag === t.id}
-                      style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: respondingTag === t.id ? 0.4 : 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)' }}
                     >
                       {tr.ticketsPage.declineButton}
                     </Button>
@@ -688,17 +690,8 @@ export default function MyTicketsPage() {
                                 contextId={b.id}
                                 label={tr.ticketsPage.messageOrganiser}
                                 icon={<MessageIcon style={{ width: 13, height: 13 }} />}
-                                style={{
-                                  flex: '1 1 0',
-                                  minWidth: 0,
-                                  padding: 'var(--afa-space-1) var(--afa-space-10px)',
-                                  borderRadius: 'var(--afa-radius-sm)',
-                                  fontSize: 'var(--afa-text-small)',
-                                  fontWeight: 600,
-                                  border: '1px solid var(--afa-border-resting)',
-                                  color: 'var(--afa-text-secondary)',
-                                  fontFamily: 'var(--font-sans)',
-                                }}
+                                variant="outline-neutral"
+                                style={{ flex: '1 1 0', minWidth: 0 }}
                               />
                               {!isPastEvent(b) && (
                                 <Button

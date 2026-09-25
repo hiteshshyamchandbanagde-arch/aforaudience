@@ -651,20 +651,12 @@ function EventsPageContent() {
                     <DiscoverCarouselRow key={row.key} title={row.title} events={row.events} navigatingId={navigatingId} onOpen={goToEvent} />
                   ))}
                   <Button
-                    variant="bare"
+                    variant="outline-accent"
+                    size="pill-md"
+                    fullWidth={false}
                     type="button"
                     onClick={() => setMobileBrowseMode("list")}
-                    style={{
-                      alignSelf: "flex-start",
-                      borderRadius: "999px",
-                      border: "1px solid var(--afa-border-resting)",
-                      color: "var(--afa-amber)",
-                      padding: "10px 18px",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--afa-text-small)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                    }}
+                    style={{ alignSelf: "flex-start" }}
                   >
                     {tr.eventsPage.discoverSeeAllEvents}
                   </Button>

@@ -286,16 +286,10 @@ export default function RazorpayTestPage() {
               require an authenticated session.
             </p>
             <Button
-              variant="bare"
+              variant="solid"
+              size="lg"
+              fullWidth={false}
               onClick={() => signIn(undefined, { callbackUrl: "/dev/razorpay-test" })}
-              style={{
-                fontSize: "var(--afa-text-body)",
-                fontWeight: 600,
-                color: "var(--afa-on-fill-solid)",
-                background: EMBER,
-                padding: "12px 24px",
-                borderRadius: "6px",
-              }}
             >
               Sign in
             </Button>
@@ -349,7 +343,9 @@ export default function RazorpayTestPage() {
             </div>
 
             <Button
-              variant="bare"
+              variant="solid"
+              size="lg"
+              fullWidth={false}
               onClick={handlePay}
               disabled={
                 status.kind === "loading-script" ||
@@ -357,21 +353,6 @@ export default function RazorpayTestPage() {
                 status.kind === "awaiting-payment" ||
                 status.kind === "verifying"
               }
-              style={{
-                fontSize: "var(--afa-text-title)",
-                fontWeight: 600,
-                color: "var(--afa-on-fill-solid)",
-                background: EMBER,
-                padding: "16px 32px",
-                borderRadius: "6px",
-                opacity:
-                  status.kind === "loading-script" ||
-                  status.kind === "creating-order" ||
-                  status.kind === "awaiting-payment" ||
-                  status.kind === "verifying"
-                    ? 0.6
-                    : 1,
-              }}
             >
               Pay ₹{(amount / 100).toFixed(2)} (test)
             </Button>

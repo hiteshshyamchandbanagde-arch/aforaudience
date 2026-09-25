@@ -247,38 +247,22 @@ function FeedbackDetailOverlay({
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', gap: '12px' }}>
           <Button
-            variant="bare"
+            variant="outline-neutral"
+            size="md"
+            fullWidth={false}
             onClick={guardedPrev}
             disabled={!hasPrev}
-            style={{
-              flex: 1,
-              padding: '10px 16px',
-              borderRadius: 'var(--afa-radius-10px)',
-              border: '1px solid var(--afa-border-resting)',
-              background: 'var(--afa-surface-raised)',
-              color: hasPrev ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
-              cursor: hasPrev ? 'pointer' : 'default',
-              fontWeight: 600,
-              opacity: 1,
-            }}
+            style={{ flex: 1 }}
           >
             {tr.myFeedbackPage.previous}
           </Button>
           <Button
-            variant="bare"
+            variant="outline-neutral"
+            size="md"
+            fullWidth={false}
             onClick={guardedNext}
             disabled={!hasNext}
-            style={{
-              flex: 1,
-              padding: '10px 16px',
-              borderRadius: 'var(--afa-radius-10px)',
-              border: '1px solid var(--afa-border-resting)',
-              background: 'var(--afa-surface-raised)',
-              color: hasNext ? 'var(--afa-text-primary)' : 'rgba(245,245,240,0.3)',
-              cursor: hasNext ? 'pointer' : 'default',
-              fontWeight: 600,
-              opacity: 1,
-            }}
+            style={{ flex: 1 }}
           >
             {tr.myFeedbackPage.next}
           </Button>

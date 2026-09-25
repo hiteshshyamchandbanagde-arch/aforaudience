@@ -275,7 +275,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
         <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
           <Button
-            variant="bare"
+            variant="icon"
             type="button"
             onClick={() => zoomBy(1 / 1.5)}
             disabled={zoom <= MIN_ZOOM}
@@ -285,7 +285,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             −
           </Button>
           <Button
-            variant="bare"
+            variant="icon"
             type="button"
             onClick={() => zoomBy(1.5)}
             disabled={zoom >= MAX_ZOOM}

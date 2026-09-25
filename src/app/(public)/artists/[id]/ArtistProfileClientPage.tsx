@@ -498,17 +498,12 @@ export default function ArtistProfilePage({
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-4)", flexWrap: "wrap" }}>
               <Button
-                variant="bare"
+                variant={following ? "outline-neutral" : "solid"}
+                size="md"
+                fullWidth={false}
                 onClick={toggleFollow}
                 disabled={followBusy}
                 className={!following ? "afa-cta-solid" : undefined}
-                style={{
-                  fontSize: "var(--afa-text-ui)", fontWeight: 700, padding: "var(--afa-space-2) var(--afa-space-5)", borderRadius: "var(--afa-radius-sm)", cursor: "pointer",
-                  border: following ? "1.5px solid rgba(245,245,240,0.4)" : "none",
-                  background: following ? "transparent" : "var(--afa-fill-solid)",
-                  color: following ? "var(--afa-text-primary)" : "var(--afa-on-fill-solid)",
-                  opacity: followBusy ? 0.6 : 1,
-                }}
               >
                 {following ? "✓ Following" : "+ Follow"}
               </Button>
@@ -838,9 +833,9 @@ export default function ArtistProfilePage({
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>🏢 Corporate or Private Event?</div>
             <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "var(--afa-space-4)" }}>Send {displayName} a direct booking inquiry.</p>
             <Button
-              variant="bare"
+              variant="outline-neutral"
+              size="md"
               onClick={openCorporateInquiry}
-              style={{ display: "block", width: "100%", color: "var(--afa-text-primary)", border: "1.5px solid rgba(245,245,240,0.2)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", fontSize: "var(--afa-text-ui)", fontWeight: 600, textAlign: "center" }}
             >
               Send Inquiry
             </Button>

@@ -133,20 +133,22 @@ export default function CorporateInquiriesPage() {
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {inq.status !== 'CONTACTED' && (
                         <Button
-                          variant="bare"
+                          variant="outline-success"
+                          size="md"
+                          fullWidth={false}
                           onClick={() => updateStatus(inq.id, 'CONTACTED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-sage)', border: '1px solid rgba(74,103,65,0.3)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer', opacity: updating === inq.id ? 0.6 : 1 }}
                         >
                           Mark Contacted
                         </Button>
                       )}
                       {inq.status !== 'CLOSED' && (
                         <Button
-                          variant="bare"
+                          variant="outline-neutral"
+                          size="md"
+                          fullWidth={false}
                           onClick={() => updateStatus(inq.id, 'CLOSED')}
                           disabled={updating === inq.id}
-                          style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', opacity: updating === inq.id ? 0.5 : 0.6, border: '1px solid var(--afa-border-resting)', borderRadius: '6px', padding: '7px 14px', cursor: updating === inq.id ? 'default' : 'pointer' }}
                         >
                           Close
                         </Button>

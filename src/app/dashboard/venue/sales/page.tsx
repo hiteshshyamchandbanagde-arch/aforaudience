@@ -256,10 +256,12 @@ export default function VenueOwnerSalesOverviewPage() {
 
                 {hasMoreVenues && !showAllVenues && (
                   <Button
-                    variant="bare"
+                    variant="outline-neutral"
+                    size="md"
+                    fullWidth={false}
                     onClick={() => setShowAllVenues(true)}
                     className="avp-hover-border"
-                    style={{ border: '1px solid var(--afa-tint-08)', borderRadius: '8px', padding: '9px 14px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: showAllVenues ? '16px' : 0 }}
+                    style={{ marginBottom: showAllVenues ? '16px' : 0 }}
                   >
                     View all {venues.length} venues
                   </Button>

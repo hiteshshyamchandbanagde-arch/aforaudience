@@ -123,7 +123,7 @@ function timeAgo(iso: string) {
 // a visible change.
 function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <Button variant="bare" disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-green-deep)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', opacity: 1 }}>
+    <Button variant="success" size="md" fullWidth={false} disabled={disabled} onClick={onClick}>
       Approve
     </Button>
   )
@@ -131,7 +131,7 @@ function ApproveButton({ onClick, disabled }: { onClick: () => void; disabled?: 
 
 function RejectButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <Button variant="bare" disabled={disabled} onClick={onClick} style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid rgba(179,38,30,0.4)', borderRadius: 'var(--afa-radius-sm)', padding: '7px var(--afa-space-3)', opacity: 1 }}>
+    <Button variant="outline-error" size="md" fullWidth={false} disabled={disabled} onClick={onClick}>
       Reject
     </Button>
   )
@@ -761,17 +761,10 @@ function AdminFeedbackBoard() {
                 Showing: <strong>{labelize(statusFocus)}</strong> only ({filtered.length})
               </span>
               <Button
-                variant="bare"
+                variant="outline-neutral"
+                size="pill-sm"
+                fullWidth={false}
                 onClick={clearStatusFocus}
-                style={{
-                  fontSize: 'var(--afa-text-small)',
-                  fontWeight: 600,
-                  color: 'var(--afa-text-primary)',
-                  background: 'var(--afa-surface-raised)',
-                  border: '1px solid rgba(245,245,240,0.13)',
-                  borderRadius: 'var(--afa-radius-pill)',
-                  padding: '5px var(--afa-space-3)',
-                }}
               >
                 View full board
               </Button>

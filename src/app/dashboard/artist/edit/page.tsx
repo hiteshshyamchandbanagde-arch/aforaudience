@@ -317,19 +317,21 @@ export default function EditArtistProfilePage() {
                 <input type="date" value={stop.date} onChange={(e) => updateTourStop(stop.key, 'date', e.target.value)} style={inputStyle} />
                 <input type="url" value={stop.link} onChange={(e) => updateTourStop(stop.key, 'link', e.target.value)} placeholder="Link (optional)" style={inputStyle} />
                 <Button
-                  variant="bare"
+                  variant="outline-error"
+                  size="md"
                   onClick={() => removeTourStop(stop.key)}
                   aria-label="Remove tour stop"
-                  style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', border: '1px solid var(--afa-error-border)', borderRadius: '6px', padding: '10px 12px', width: '100%' }}
                 >
                   ✕ Remove
                 </Button>
               </div>
             ))}
             <Button
-              variant="bare"
+              variant="dashed"
+              size="md"
+              fullWidth={false}
               onClick={addTourStop}
-              style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', border: '1px dashed var(--afa-fill-solid)', borderRadius: '8px', padding: '10px 16px', marginTop: '4px' }}
+              style={{ marginTop: '4px' }}
             >
               + Add tour stop
             </Button>

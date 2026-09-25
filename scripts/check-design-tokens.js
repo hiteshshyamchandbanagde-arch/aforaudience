@@ -37,6 +37,11 @@
 // `token-ok` lines) and flags only the surplus. See that function's
 // own comments for the full mechanism.
 //
+// GEN-2609-109 - adds `bare-button` (`<Button variant="bare">`, the
+// reset-only escape hatch GEN-2609-096 introduced) on the same
+// diff-wide surplus mechanism - both are now flagged `countBased` - and
+// stops raw-button counting `<button` inside code comments.
+//
 // Deliberately diff-only: pre-existing literals elsewhere in src/ (e.g.
 // the hand-authored rgba() borders documented in
 // docs/afa-design-tokens-reference.md Section 1) are real, known debt
@@ -69,6 +74,25 @@ const HEAD_REF = process.env.HEAD_REF || 'HEAD'
 // and GEN-2609-057's design.md entry already established as this
 // project's deliberate choice over adding an ESLint plugin.
 // ---------------------------------------------------------------------
+
+// GEN-2609-109 - the count-based button rules (raw-button, bare-button)
+// must not count prose inside comments. Line-level, not a parser: a line
+// that opens as a comment (`//`, `/*`, or a `*` block continuation) is
+// dropped whole, closed `/* ... */` spans are removed, and a trailing
+// `// ...` is cut (unless preceded by `:`, so `https://` survives).
+function stripLineComments(line) {
+  const trimmed = line.trimStart()
+  if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*') && !trimmed.includes('*/')) return ''
+  return line
+    .replace(/\/\*.*?\*\//g, '')
+    .replace(/\/\*.*$/, '')
+    .replace(/(^|[^:])\/\/.*$/, '$1')
+}
+
+const RAW_BUTTON_JSX_RE = /<button(?=[\s>/]|$)/
+const BARE_BUTTON_SRC = String.raw`\bvariant=(?:"bare"|'bare'|\{\s*(["'\x60])bare\1\s*\})`
+const BARE_BUTTON_RE = new RegExp(BARE_BUTTON_SRC)
+const BARE_BUTTON_RE_G = new RegExp(BARE_BUTTON_SRC, 'g')
 
 // Matches `propName: value` where value is either a bare/unit-suffixed
 // number (React inline-style shorthand, e.g. `fontSize: 14` or
@@ -341,12 +365,37 @@ const RULES = [
   // not new debt. This was a design flaw in GEN-2609-078 itself, not in
   // those PRs, and it directly punished the exact migration work the
   // north star asks for.
+  //
+  // GEN-2609-109 - matches JSX only: the old bare `/<button\b/` also hit
+  // prose inside code comments (EventSaveButton.tsx's `// ... native
+  // <button> keyboard activation`, VenuePortalUI.tsx's `/* ... (Next
+  // <Link>, not <button>) */` section header), inflating the count by 2.
+  // Comments are stripped first (see stripLineComments), and the tag
+  // must be followed by whitespace, `>`, `/` or end-of-line - the only
+  // ways a real JSX opening tag can continue.
   {
     name: 'raw-button',
-    test: (line) => /<button\b/.test(line),
-    extract: (line) => (/<button\b/.test(line) ? ['<button>'] : []),
+    test: (line) => RAW_BUTTON_JSX_RE.test(stripLineComments(line)),
+    extract: (line) => (RAW_BUTTON_JSX_RE.test(stripLineComments(line)) ? ['<button>'] : []),
     isExemptFile: (file) => file === 'src/components/ui/Button.tsx',
     skipRelocatedCheck: true,
+    countBased: true,
+  },
+  // GEN-2609-109 - `<Button variant="bare">` is GEN-2609-096's reset-only
+  // escape hatch: routed through the shared component, but still styled
+  // entirely by the caller, so an admin edit in /dashboard/admin/design-
+  // system never reaches it. Phase 1 moved 162 raw buttons onto it (176
+  // uses); without a ratchet, `bare` would simply become the new raw
+  // <button>. Same diff-wide surplus mechanism as raw-button above (a
+  // restyle of an existing bare site is -1/+1 and nets to 0, and
+  // converting a bare site to a real variant is a pure -1), so only a
+  // genuine net increase fails. Counted per occurrence, not per line.
+  {
+    name: 'bare-button',
+    test: (line) => BARE_BUTTON_RE.test(stripLineComments(line)),
+    extract: (line) => stripLineComments(line).match(BARE_BUTTON_RE_G) || [],
+    skipRelocatedCheck: true,
+    countBased: true,
   },
 ]
 
@@ -521,15 +570,17 @@ function getDiff() {
 // for why: a retrofit edit to an existing raw button is 1 removed + 1
 // added line, and the old per-line "does this added line match" check
 // couldn't tell that apart from a genuinely new one).
-const RAW_BUTTON_RULE = RULES.find((r) => r.name === 'raw-button')
-const PER_LINE_RULES = RULES.filter((r) => r.name !== 'raw-button')
+//
+// GEN-2609-109 - generalized from raw-button alone to every rule marked
+// `countBased` (raw-button + bare-button), each with its own surplus.
+const COUNT_RULES = RULES.filter((r) => r.countBased)
+const PER_LINE_RULES = RULES.filter((r) => !r.countBased)
 
 function findOffenses(diffText) {
   const offenses = []
   const tokenOkUses = []
   let currentFile = null
   let checkCurrentFile = false
-  let rawButtonFileExempt = false
   let newLineNo = 0
 
   // GEN-2609-080 - accumulated across the WHOLE diff (every file the PR
@@ -540,15 +591,15 @@ function findOffenses(diffText) {
   // would wrongly flag as new debt. The whole-repo ratchet
   // (design-token-ratchet.js) is the actual backstop on the total count
   // regardless of how literals shuffle between files.
-  const rawButtonAdded = [] // { file, line, content }, in diff order
-  let rawButtonRemoved = 0
+  const countAdded = new Map(COUNT_RULES.map((r) => [r.name, []])) // rule -> [{ file, line, content }], in diff order
+  const countRemoved = new Map(COUNT_RULES.map((r) => [r.name, 0]))
+  const countFileExempt = (rule) => !!currentFile && !!rule.isExemptFile && rule.isExemptFile(currentFile)
 
   for (const rawLine of diffText.split('\n')) {
     if (rawLine.startsWith('+++ ')) {
       const p = rawLine.slice(4).trim()
       currentFile = p === '/dev/null' ? null : p.replace(/^b\//, '')
       checkCurrentFile = !!currentFile && isCheckedFile(currentFile) && !isExemptFile(currentFile)
-      rawButtonFileExempt = !!currentFile && RAW_BUTTON_RULE.isExemptFile && RAW_BUTTON_RULE.isExemptFile(currentFile)
       continue
     }
     if (rawLine.startsWith('@@')) {
@@ -577,15 +628,20 @@ function findOffenses(diffText) {
           offenses.push({ file: currentFile, line: newLineNo, rule: rule.name, content: content.trim() })
         }
       }
-      if (!rawButtonFileExempt && RAW_BUTTON_RULE.test(content)) {
-        rawButtonAdded.push({ file: currentFile, line: newLineNo, content: content.trim() })
+      for (const rule of COUNT_RULES) {
+        if (countFileExempt(rule)) continue
+        // one entry per occurrence, so two bare Buttons on one line count as 2
+        for (let i = 0; i < rule.extract(content).length; i++) {
+          countAdded.get(rule.name).push({ file: currentFile, line: newLineNo, content: content.trim() })
+        }
       }
       newLineNo++
     } else if (rawLine.startsWith('-')) {
       // removed line - doesn't occupy a line number in the new file
       const content = rawLine.slice(1)
-      if (!rawButtonFileExempt && RAW_BUTTON_RULE.test(content)) {
-        rawButtonRemoved++
+      for (const rule of COUNT_RULES) {
+        if (countFileExempt(rule)) continue
+        countRemoved.set(rule.name, countRemoved.get(rule.name) + rule.extract(content).length)
       }
     }
   }
@@ -598,10 +654,13 @@ function findOffenses(diffText) {
   // added lines is "the genuinely new one" vs. "a retrofit," so this
   // picks a deterministic, arbitrary-but-consistent subset rather than
   // either flagging all of them (the old, wrong behavior) or guessing.
-  const surplus = rawButtonAdded.length - rawButtonRemoved
-  if (surplus > 0) {
-    for (const entry of rawButtonAdded.slice(-surplus)) {
-      offenses.push({ file: entry.file, line: entry.line, rule: 'raw-button', content: entry.content })
+  for (const rule of COUNT_RULES) {
+    const added = countAdded.get(rule.name)
+    const surplus = added.length - countRemoved.get(rule.name)
+    if (surplus > 0) {
+      for (const entry of added.slice(-surplus)) {
+        offenses.push({ file: entry.file, line: entry.line, rule: rule.name, content: entry.content })
+      }
     }
   }
 
@@ -649,6 +708,7 @@ module.exports = {
   isKnownLiteralInBase,
   shouldFlag,
   tokenOkReason,
+  stripLineComments,
   findOffenses,
   extractPropValues,
   extractLengthTokensFromValue,

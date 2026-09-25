@@ -370,10 +370,11 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         </p>
                         {walletBalance > 0 && (
                           <Button
-                            variant="bare"
+                            variant="outline-accent"
+                            size="sm"
+                            fullWidth={false}
                             onClick={applyWalletCredit}
                             disabled={applyingWallet}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-gold)', background: 'rgba(201,151,58,0.1)', border: '1px solid rgba(201,151,58,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: applyingWallet ? 0.6 : 1 }}
                           >
                             {applyingWallet ? 'Applying...' : `💰 Apply wallet credit (₹${walletBalance.toLocaleString('en-IN')} available)`}
                           </Button>
@@ -413,10 +414,11 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                         </span>
                         {p.buyInRefundStatus === 'REFUNDED' && (
                           <Button
-                            variant="bare"
+                            variant="outline-neutral"
+                            size="sm"
+                            fullWidth={false}
                             onClick={() => convertToWalletCredit(p.id)}
                             disabled={actingOn === p.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)', borderRadius: 'var(--afa-radius-sm)', padding: '5px var(--afa-space-3)', cursor: 'pointer', opacity: actingOn === p.id ? 0.6 : 1 }}
                           >
                             {actingOn === p.id ? 'Updating...' : 'Keep as wallet credit instead'}
                           </Button>
@@ -460,18 +462,20 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       {(app.status === 'PENDING' || app.status === 'WAITLISTED') && (
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <Button
-                            variant="bare"
+                            variant="success"
+                            size="sm"
+                            fullWidth={false}
                             onClick={() => reviewApplication(app.id, 'APPROVED')}
                             disabled={actingOn === app.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-sage)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
                           >
                             Approve
                           </Button>
                           <Button
-                            variant="bare"
+                            variant="outline-error"
+                            size="sm"
+                            fullWidth={false}
                             onClick={() => reviewApplication(app.id, 'REJECTED')}
                             disabled={actingOn === app.id}
-                            style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-error)', border: '1px solid rgba(179,38,30,0.3)', borderRadius: 'var(--afa-radius-sm)', padding: 'var(--afa-space-6px) var(--afa-space-14px)', cursor: 'pointer', opacity: actingOn === app.id ? 0.6 : 1 }}
                           >
                             Reject
                           </Button>

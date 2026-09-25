@@ -399,10 +399,10 @@ export default function RegisterForm() {
           {process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
             <>
               <Button
-                variant="bare"
+                variant="outline-neutral"
+                size="lg"
                 type="button"
                 onClick={() => signIn("google", { callbackUrl: intendedRole ? `/profile?role=${intendedRole}` : "/" })}
-                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-10px)", color: "var(--afa-text-primary)", padding: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", fontWeight: 600 }}
               >
                 <GoogleIcon />
                 {tr.loginPage.continueWithGoogle}

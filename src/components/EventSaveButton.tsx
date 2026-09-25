@@ -76,7 +76,7 @@ export function EventSaveHeartButton({
   const iconSize = size === 'card' ? 17 : 16
   return (
     <Button
-      variant="bare"
+      variant="icon"
       onClick={async (e) => {
         e.stopPropagation()
         const next = await toggleSave()

@@ -286,19 +286,11 @@ export default function AdminBookingsPage() {
                     {!isDelivered ? (
                       <div style={{ marginTop: '12px' }}>
                         <Button
-                          variant="bare"
+                          variant="primary"
+                          size="pill-sm"
+                          fullWidth={false}
                           onClick={() => retry(b.id)}
                           disabled={retryingId === b.id}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: 'var(--afa-radius-pill)',
-                            background: 'var(--afa-fill-solid)',
-                            color: 'var(--afa-on-fill-solid)',
-                            fontSize: 'var(--afa-text-ui)',
-                            fontWeight: 600,
-                            cursor: retryingId === b.id ? 'default' : 'pointer',
-                            opacity: retryingId === b.id ? 0.6 : 1,
-                          }}
                         >
                           {retryingId === b.id
                             ? 'Retrying…'

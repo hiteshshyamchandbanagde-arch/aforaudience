@@ -17,13 +17,19 @@ interface MessageButtonProps {
    * pages) pass neither `icon` nor `style` and keep their current
    * emoji-prefixed look unchanged. */
   icon?: React.ReactNode
+  /** GEN-2609-109 - which shared Button look to use. Defaults to the
+   * sage `outline-success` pill every caller had before; /tickets/'s
+   * secondary-action row passes `outline-neutral` to match its
+   * Download/Cancel siblings (it used to get there by overriding colour/
+   * border/padding through `style`, which now only carries layout). */
+  variant?: 'outline-success' | 'outline-neutral'
 }
 
 // Drop this on any page that has a confirmed Performance / VenueBooking /
 // Booking record - it finds-or-creates the thread and takes the user
 // straight there. Idempotent server-side, so no need to check "does a
 // thread already exist" before rendering this.
-export default function MessageButton({ contextType, contextId, label = 'Message', style, icon }: MessageButtonProps) {
+export default function MessageButton({ contextType, contextId, label = 'Message', style, icon, variant = 'outline-success' }: MessageButtonProps) {
   const router = useRouter()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -51,24 +57,12 @@ export default function MessageButton({ contextType, contextId, label = 'Message
 
   return (
     <Button
-      variant="bare"
+      variant={variant}
+      size={variant === 'outline-neutral' ? 'sm' : 'pill-sm'}
+      fullWidth={false}
       onClick={handleClick}
       disabled={loading}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: icon ? 6 : 4,
-        padding: '8px 16px',
-        borderRadius: '18px',
-        border: '1px solid var(--afa-sage, #4a6741)',
-        color: 'var(--afa-sage, #4a6741)',
-        fontWeight: 600,
-        fontSize: 'var(--afa-text-ui)',
-        cursor: loading ? 'default' : 'pointer',
-        opacity: loading ? 0.6 : 1,
-        ...style,
-      }}
+      style={style}
     >
       {icon ?? '💬'} {label}
     </Button>

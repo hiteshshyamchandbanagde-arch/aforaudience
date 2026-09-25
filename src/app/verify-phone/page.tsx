@@ -146,10 +146,9 @@ function VerifyPhoneInner() {
                     {submitting ? tr.loginPage.verifyingEllipsis : tr.registerPage.verifyButton}
                   </Button>
                   <Button
-                    variant="bare"
+                    variant="link"
                     onClick={sendCode}
                     disabled={submitting}
-                    style={{ width: '100%', color: 'var(--afa-fill-solid)', padding: '10px', borderRadius: '8px', fontSize: 'var(--afa-text-ui)', fontWeight: 500, opacity: 1 }}
                   >
                     {tr.loginPage.resendCodeButton}
                   </Button>

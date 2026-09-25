@@ -648,7 +648,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: SIDEBAR_BORDER }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', color: 'var(--afa-text-primary)' }}>My Roles</span>
               <Button
-                variant="bare"
+                variant="icon"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close"
                 style={{ color: 'var(--afa-text-primary)', opacity: 0.7 }}
