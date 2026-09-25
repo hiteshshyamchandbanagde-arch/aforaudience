@@ -14,7 +14,7 @@ import HelpIcon from '@/components/HelpIcon'
 import { buildDirectionsUrl } from '@/lib/maps-url'
 import AddressAutocomplete from '@/components/AddressAutocomplete'
 import DashboardShell from '@/components/DashboardShell'
-import { PageHead, Card, SectionTitle, Button, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
+import { PageHead, Card, SectionTitle, ErrorBanner, IconSection, IconSeatGlyph, IconCheck } from '@/components/dashboard/VenuePortalUI'
 import SharedButton from '@/components/ui/Button'
 
 const inputStyle = {
@@ -543,13 +543,13 @@ export default function CreateVenuePage() {
             {/* Actions */}
             <div style={{ display: 'flex', gap: 'var(--afa-space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               {seatingChoice === 'GENERAL_ADMISSION' && (
-                <Button type="button" disabled={saving} onClick={() => submit(true)} style={{ padding: 'var(--afa-space-3) 26px', opacity: saving ? 0.6 : 1 }}>
+                <SharedButton variant="solid" size="md" fullWidth={false} type="button" disabled={saving} onClick={() => submit(true)}>
                   {saving ? 'Publishing...' : 'Publish Venue'}
-                </Button>
+                </SharedButton>
               )}
-              <Button variant="outline" type="button" disabled={saving} onClick={() => submit(false)} style={{ padding: 'var(--afa-space-3) 26px', opacity: saving ? 0.6 : 1 }}>
+              <SharedButton variant="outline-neutral" size="md" fullWidth={false} type="button" disabled={saving} onClick={() => submit(false)}>
                 Save as Draft
-              </Button>
+              </SharedButton>
               <Link href="/dashboard/venue" onClick={clearDraft} style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)', textDecoration: 'none', marginLeft: 'var(--afa-space-1)' }}>
                 Cancel
               </Link>
