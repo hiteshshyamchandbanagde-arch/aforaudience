@@ -1,3 +1,48 @@
+# Session Handoff — 25 Sept 2026 (CC — GEN-2609-105/106 font-size closeout + GEN-2609-096 Button phase 1, both complete, pushed, not merged)
+
+Template: `docs/HANDOFF_TEMPLATE.md`, delta-only. Session started at `qa@3bda985`. Branch: `feat/gen-2609-096-button-phase1` (stacked on the 105/106 commits, which are included in this branch since `qa` had not yet absorbed them when this branch was cut), pushed, **`NOT YET OPENED`** as a PR — no `gh` CLI / GITHUB_TOKEN on this machine. Compare URL: `https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...feat/gen-2609-096-button-phase1?expand=1`.
+
+**NORTH STAR (Hitesh, verbatim):** "UI UX Component (Button, Color, Font, Size) must be centrally controlled, and admin must be able to change it if need and must reflect immediately on whole website." Goal: **no hard coding at any page.**
+
+## 1. GEN-2609-105/106 — font-size closeout (done first, per the prior session's ordering decision)
+- 105: added a Tailwind `text-[length:var(--x)]`-hint matcher to `migrate-tokens.js` for the className-bracket font-size sites the plain-CSS matcher couldn't see.
+- 106: renamed `--afa-text-10px/15px/18px/20px` → `--afa-text-caption/body-lg/lead/subtitle`; added `--afa-text-subheading` (22px); rounded 8 off-scale sizes (9/9.5→caption, 10.5→micro, 11.5→small, 12.5→ui, 13.5→body, 17→title, 19→subtitle, 22→subheading) per the prior session's decisions. DB rename/insert SQL was previewed and run only after Hitesh's explicit "Yes, run it" approval.
+- Ratchet after: font-size-literal 142→13.
+
+## 2. GEN-2609-096 — Button phase 1 (all 4 steps of the dispatch complete)
+- **Step 1:** tokenized ~17 literals inside `Button.tsx`'s own variant styles.
+- **Step 2:** classified all 209 real raw-`<button>` JSX sites (docs-only, `docs/button-adoption-audit.md`) — **A=0, B=4, C=43, D=162, E=0** (2 sites later confirmed genuinely exempt during real conversion, see below; not counted as E in the original audit).
+- **Step 3:** added 3 new `Button` variants — `link`, `icon`, `bare` — each justified in `Button.tsx`'s own comments; adopted in 7 area-batch commits (app-root 24, public 35, dashboard 84, components 64 = **207 sites converted this session**, on top of earlier sessions' 105/106 work).
+- **Step 4:** `scripts/design-token-baseline.json` regenerated (`--update-baseline`): raw-button 211→4, spacing-literal 2029→2007 (incidental, from Button.tsx's own tokenization), every other category unchanged. `TOKEN_COVERAGE` needed no change — no token usages were added or removed, only their wrapping element.
+
+**Remaining raw-button count: 4**, all accounted for:
+- `src/app/(auth)/register/RegisterForm.tsx:458` — documented exempt (translucent-tint suggestion chip, not a Button-shaped CTA, same architectural pattern as `statusStyle.ts`'s selection pills).
+- `src/components/dashboard/VenuePortalUI.tsx:261` — that file's own local `Button` primitive (a parallel/pre-existing abstraction, deliberately not force-migrated onto `@/components/ui/Button`).
+- `src/components/ui/Button.tsx:522` — the shared `Button` component's own underlying native `<button>`, required.
+- (ratchet regex counts 4; only 3 were found by manual grep as real JSX — the 4th is within the ratchet's own counting, not independently re-derived this session.)
+
+**Visual deltas: none intended.** Every conversion preserved the original element's exact style object, `disabled`/`aria-*`/`onClick`/`type`/`ref` behavior; className-driven sites (2 found: `.afa-events-mode-tab`, `.afa-card-lift`) used `color: undefined` / `background: undefined` so the stylesheet's own `:hover`/`.active` rules still apply, per the established fix pattern from earlier `096` batches.
+
+## 3. Verification this session (components batch + end-to-end)
+- `tsc --noEmit`: clean.
+- `eslint` diff-checked file-by-file: all flagged errors/warnings pre-existing, confirmed outside every touched line range via `git diff --unified=0` hunk cross-check — zero new lint issues.
+- Real `npx next build`: succeeds across every route.
+- `design-token-ratchet.js`: no category above baseline; raw-button -207.
+- `e2e/login-code-case.spec.ts`: 4/4 pass (desktop + mobile).
+- `e2e/numbered-seat-booking.spec.ts`: blocked locally by the known MSG91 OTP env gap (registration never reaches the phone-verify step) — pre-existing local-env limitation, not a regression. Substituted a throwaway manual Playwright pass driving `SeatPicker.tsx`'s converted zoom-in/zoom-out/reset buttons and seat click-to-select directly against the real `qa-jaipur-event-0001` fixture (100-seat numbered venue) — all pass, desktop + mobile, screenshots confirmed seat-select math (₹250 + ₹20 fee = ₹270) and visuals unchanged. Spec files/screenshots were scratch-only, not committed.
+- Admin `FeedbackDetailPanel` could **not** be visually verified live — `/dashboard/admin/*` requires Hitesh's real Google-auth ADMIN account, unreachable from this session. Verified instead by full code review (disabled/opacity preserved, no className clobber risk) + `tsc`/build passing.
+
+## 4. Open, in priority order
+1. **Hitesh:** merge `feat/gen-2609-096-button-phase1` into `qa` via the compare URL above (10 commits: 105/106 + 096 phases 1-7).
+2. **Hitesh:** live-verify `/dashboard/admin/feedback`'s `FeedbackDetailPanel` post-merge (status/deploy-stage/severity pill rows, prev/next nav, confirm/cancel note flow) — this session couldn't reach it locally.
+3. Feedback-table: GEN-2609-096 → `BUILD_COMPLETE` for phase 1. Log a follow-up ticket for anything found in the post-merge admin live-verify.
+4. Next category per the standing order: radius (331 literals).
+
+## 5. Open PRs
+None against `qa` (no `gh` CLI). `feat/gen-2609-096-button-phase1` pushed, needs a human-opened PR via the compare URL above.
+
+---
+
 # Session Handoff — 24 Sept 2026, part 2 (chat — North Star proven end-to-end; plan + decisions)
 
 Delta-only. `qa@6ceb040`, no code changes this part.
