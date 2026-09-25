@@ -2,6 +2,7 @@
 import { Suspense, useEffect, useRef, useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import SiteNav from "@/components/SiteNav"
+import Button from "@/components/ui/Button"
 import BrowseSearchDropdown from "@/components/BrowseSearchDropdown"
 import OrganisersGridEmbed from "@/components/OrganisersGridEmbed"
 import { EventCard, TYPE_META, type EventItem } from "@/components/EventCard"
@@ -412,12 +413,12 @@ function EventsPageContent() {
             treatment (not pills) matching the Venues/Owners toggle
             convention elsewhere in the app. */}
         <div style={{ display: "flex", gap: "32px", marginTop: "40px", borderBottom: "1px solid var(--afa-tint-10)" }}>
-          <button className={`afa-events-mode-tab${contentMode === "events" ? " active" : ""}`} onClick={() => setContentMode("events")}>
+          <Button variant="bare" className={`afa-events-mode-tab${contentMode === "events" ? " active" : ""}`} onClick={() => setContentMode("events")} style={{ fontFamily: "var(--font-ui)", color: undefined }}>
             {tr.eventsPage.toggleEvents}
-          </button>
-          <button className={`afa-events-mode-tab${contentMode === "organisers" ? " active" : ""}`} onClick={() => setContentMode("organisers")}>
+          </Button>
+          <Button variant="bare" className={`afa-events-mode-tab${contentMode === "organisers" ? " active" : ""}`} onClick={() => setContentMode("organisers")} style={{ fontFamily: "var(--font-ui)", color: undefined }}>
             {tr.eventsPage.toggleOrganisers}
-          </button>
+          </Button>
         </div>
 
         {/* GEN-2609-019 (Mobile Nav v3, Phase A) - hidden below `lg`: the
@@ -489,14 +490,15 @@ function EventsPageContent() {
             {/* UPCOMING / PAST TAB */}
             <div style={{ display: "flex", gap: "24px", marginTop: "28px" }}>
               {(["upcoming", "past"] as const).map((t) => (
-                <button
+                <Button
                   key={t}
+                  variant="bare"
                   onClick={() => setTab(t)}
                   className="afa-events-price-filter"
-                  style={{ fontSize: "var(--afa-text-ui)", color: tab === t ? "var(--afa-amber)" : "rgba(245,245,240,0.4)" }}
+                  style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: tab === t ? "var(--afa-amber)" : "rgba(245,245,240,0.4)" }}
                 >
                   {t === "upcoming" ? tr.eventsPage.tabUpcoming : tr.eventsPage.tabPast}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -548,24 +550,28 @@ function EventsPageContent() {
 
             <div className="afa-desktop-filters" style={{ marginTop: "20px", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "20px" }}>
               <div className="events-type-row" style={{ marginBottom: "16px" }}>
-                <button
+                <Button
+                  variant="bare"
                   onClick={() => setSelectedType(null)}
                   className={`afa-events-type-filter${selectedType === null ? " active" : ""}`}
+                  style={{ fontFamily: "var(--font-mono)", color: undefined }}
                 >
                   {tr.eventsPage.filterAllNights}
-                </button>
+                </Button>
                 {TYPE_OPTIONS.map((type) => {
                   const typeKey = type as keyof typeof tr.eventTypes
                   const on = selectedType === type
                   return (
-                    <button
+                    <Button
                       key={type}
+                      variant="bare"
                       onClick={() => setSelectedType(on ? null : type)}
                       className={`afa-events-type-filter${on ? " active" : ""}`}
+                      style={{ fontFamily: "var(--font-mono)", color: undefined }}
                     >
                       <EventTypeIcon type={type} style={{ width: "14px", height: "14px", color: "currentColor" }} />
                       {tr.eventTypes[typeKey]}
-                    </button>
+                    </Button>
                   )
                 })}
               </div>
@@ -578,13 +584,15 @@ function EventsPageContent() {
 
                 <div style={{ display: "flex", gap: "16px" }}>
                   {["All", "Free", "Paid"].map((p) => (
-                    <button
+                    <Button
                       key={p}
+                      variant="bare"
                       onClick={() => setPriceFilter(p)}
                       className={`afa-events-price-filter${priceFilter === p ? " active" : ""}`}
+                      style={{ fontFamily: "var(--font-mono)", color: undefined }}
                     >
                       {p === "All" ? tr.eventsPage.filterAll : p === "Free" ? tr.eventsPage.filterFree : tr.eventsPage.filterPaid}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -601,12 +609,12 @@ function EventsPageContent() {
                 </select>
 
                 <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid var(--afa-border-resting)", borderRadius: "3px", padding: "3px" }}>
-                  <button onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`}>
+                  <Button variant="icon" onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`} style={{ color: undefined }}>
                     <GridViewIcon style={{ width: "16px", height: "16px" }} />
-                  </button>
-                  <button onClick={() => setView("list")} aria-pressed={view === "list"} aria-label={tr.eventsPage.listViewLabel} className={`afa-events-view-btn${view === "list" ? " active" : ""}`}>
+                  </Button>
+                  <Button variant="icon" onClick={() => setView("list")} aria-pressed={view === "list"} aria-label={tr.eventsPage.listViewLabel} className={`afa-events-view-btn${view === "list" ? " active" : ""}`} style={{ color: undefined }}>
                     <ListViewIcon style={{ width: "16px", height: "16px" }} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -642,25 +650,24 @@ function EventsPageContent() {
                   {carouselRows.map((row) => (
                     <DiscoverCarouselRow key={row.key} title={row.title} events={row.events} navigatingId={navigatingId} onOpen={goToEvent} />
                   ))}
-                  <button
+                  <Button
+                    variant="bare"
                     type="button"
                     onClick={() => setMobileBrowseMode("list")}
                     style={{
                       alignSelf: "flex-start",
                       borderRadius: "999px",
                       border: "1px solid var(--afa-border-resting)",
-                      background: "transparent",
                       color: "var(--afa-amber)",
                       padding: "10px 18px",
                       fontFamily: "var(--font-mono)",
                       fontSize: "var(--afa-text-small)",
                       textTransform: "uppercase",
                       letterSpacing: "0.1em",
-                      cursor: "pointer",
                     }}
                   >
                     {tr.eventsPage.discoverSeeAllEvents}
-                  </button>
+                  </Button>
                 </div>
 
                 <div className={showMobileCarousels ? "hidden lg:block" : "block"}>

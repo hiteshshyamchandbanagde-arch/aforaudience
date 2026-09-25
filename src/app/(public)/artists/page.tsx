@@ -270,8 +270,9 @@ export default function ArtistsPage() {
         {/* FILTERS - editorial underline row, not pill-chip buttons */}
         <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "baseline", marginBottom: "24px", borderBottom: "1px solid var(--afa-tint-10)", paddingBottom: "18px" }}>
           {["All", ...genres].map((g) => (
-            <button
+            <Button
               key={g}
+              variant="bare"
               onClick={() => setSelectedGenre(g)}
               className="afa-genre-filter"
               style={{
@@ -285,7 +286,7 @@ export default function ArtistsPage() {
               {selectedGenre === g && (
                 <span style={{ position: "absolute", left: 0, bottom: 0, height: "1px", width: "100%", background: "var(--afa-fill-solid)" }} />
               )}
-            </button>
+            </Button>
           ))}
         </div>
 

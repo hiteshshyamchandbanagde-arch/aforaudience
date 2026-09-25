@@ -61,7 +61,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
 // tier row, the General Admission fallback, and the free-event row.
 function SeatStepperButton({ onClick, glyph }: { onClick: () => void; glyph: '−' | '+' }) {
   return (
-    <button onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", background: "transparent", color: "var(--afa-text-primary)", cursor: "pointer" }}>{glyph}</button>
+    <Button variant="icon" onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", color: "var(--afa-text-primary)" }}>{glyph}</Button>
   )
 }
 

@@ -380,7 +380,8 @@ export default function ArtistProfilePage({
 
       {navOrder && navIndex >= 0 && (
         <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "var(--afa-space-10px) var(--afa-space-6) 0", display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--afa-space-4)" }}>
-          <button
+          <Button
+            variant="icon"
             onClick={goToPrevArtist}
             disabled={!prevArtistId}
             aria-label="Previous artist"
@@ -399,11 +400,12 @@ export default function ArtistProfilePage({
             }}
           >
             ‹
-          </button>
+          </Button>
           <span style={{ fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.5)" }}>
             Artist {navIndex + 1} of {navOrder.length}
           </span>
-          <button
+          <Button
+            variant="icon"
             onClick={goToNextArtist}
             disabled={!nextArtistId}
             aria-label="Next artist"
@@ -422,7 +424,7 @@ export default function ArtistProfilePage({
             }}
           >
             ›
-          </button>
+          </Button>
         </div>
       )}
 
@@ -495,7 +497,8 @@ export default function ArtistProfilePage({
               </p>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", marginBottom: "var(--afa-space-4)", flexWrap: "wrap" }}>
-              <button
+              <Button
+                variant="bare"
                 onClick={toggleFollow}
                 disabled={followBusy}
                 className={!following ? "afa-cta-solid" : undefined}
@@ -508,9 +511,10 @@ export default function ArtistProfilePage({
                 }}
               >
                 {following ? "✓ Following" : "+ Follow"}
-              </button>
+              </Button>
               {following && (
-                <button
+                <Button
+                  variant="icon"
                   onClick={toggleNotify}
                   disabled={followBusy}
                   aria-label={notifyEnabled ? "Mute new event notifications" : "Get notified of new events"}
@@ -519,7 +523,6 @@ export default function ArtistProfilePage({
                     width: "34px", height: "34px", borderRadius: "50%",
                     border: "1.5px solid var(--afa-text-muted)",
                     background: notifyEnabled ? "rgba(255,90,54,0.3)" : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: followBusy ? "default" : "pointer",
                     opacity: followBusy ? 0.6 : 1,
                   }}
@@ -529,7 +532,7 @@ export default function ArtistProfilePage({
                   ) : (
                     <BellOffIcon style={{ width: "15px", height: "15px", color: "var(--afa-text-primary)", opacity: 0.6 }} />
                   )}
-                </button>
+                </Button>
               )}
               <span style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.55)" }}>
                 {followerCount} {followerCount === 1 ? "follower" : "followers"}
@@ -622,13 +625,14 @@ export default function ArtistProfilePage({
         <div>
           <div style={{ display: "flex", gap: "0", marginBottom: "var(--afa-space-32px)", borderBottom: "2px solid var(--afa-tint-10)" }}>
             {(["about", "shows"] as const).map((tab) => (
-              <button
+              <Button
                 key={tab}
+                variant="bare"
                 onClick={() => setActiveTab(tab)}
-                style={{ padding: "var(--afa-space-3) var(--afa-space-6)", border: "none", background: "transparent", fontSize: "var(--afa-text-body)", fontWeight: 600, color: activeTab === tab ? "var(--afa-amber)" : "var(--afa-text-primary)", cursor: "pointer", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-amber)" : "transparent"}`, marginBottom: "-2px" }}
+                style={{ padding: "var(--afa-space-3) var(--afa-space-6)", fontSize: "var(--afa-text-body)", fontWeight: 600, color: activeTab === tab ? "var(--afa-amber)" : "var(--afa-text-primary)", borderBottom: `2px solid ${activeTab === tab ? "var(--afa-amber)" : "transparent"}`, marginBottom: "-2px" }}
               >
                 {TAB_LABEL[tab]}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -833,12 +837,13 @@ export default function ArtistProfilePage({
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>🏢 Corporate or Private Event?</div>
             <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "var(--afa-space-4)" }}>Send {displayName} a direct booking inquiry.</p>
-            <button
+            <Button
+              variant="bare"
               onClick={openCorporateInquiry}
-              style={{ display: "block", width: "100%", background: "transparent", color: "var(--afa-text-primary)", border: "1.5px solid rgba(245,245,240,0.2)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", fontSize: "var(--afa-text-ui)", fontWeight: 600, textAlign: "center", cursor: "pointer" }}
+              style={{ display: "block", width: "100%", color: "var(--afa-text-primary)", border: "1.5px solid rgba(245,245,240,0.2)", padding: "var(--afa-space-3)", borderRadius: "var(--afa-radius-md)", fontSize: "var(--afa-text-ui)", fontWeight: 600, textAlign: "center" }}
             >
               Send Inquiry
-            </button>
+            </Button>
           </div>
         </div>
       </div>

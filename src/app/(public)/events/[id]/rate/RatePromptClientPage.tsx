@@ -3,6 +3,7 @@ import { useState } from "react"
 import Link from "next/link"
 import SiteNav from "@/components/SiteNav"
 import AuthPromptSheet from "@/components/AuthPromptSheet"
+import Button from "@/components/ui/Button"
 import { useLocale } from "@/lib/i18n/translate"
 
 interface EventData {
@@ -17,15 +18,16 @@ function Stars({ value, onChange }: { value: number; onChange: (n: number) => vo
   return (
     <div style={{ display: "flex", gap: "6px" }}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <button
+        <Button
           key={n}
+          variant="bare"
           type="button"
           onClick={() => onChange(n)}
           aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: "var(--afa-text-page-title-lg)", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
+          style={{ fontSize: "var(--afa-text-page-title-lg)", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
         >
           {value >= n ? "★" : "☆"}
-        </button>
+        </Button>
       ))}
     </div>
   )
@@ -156,13 +158,14 @@ export default function RatePromptClientPage({
               style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
             {overallError && <p style={{ color: "var(--afa-error)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
-            <button
+            <Button
+              variant="bare"
               onClick={submitOverall}
               disabled={overallSubmitting}
-              style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", border: "none", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", fontSize: "var(--afa-text-body-lg)", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
+              style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", fontSize: "var(--afa-text-body-lg)", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
             >
               {overallSubmitting ? tr.ratePromptPage.submitting : tr.ratePromptPage.submitRating}
-            </button>
+            </Button>
           </div>
         ) : (
           <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "20px 28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)", display: "flex", alignItems: "center", gap: "12px" }}>
@@ -172,12 +175,13 @@ export default function RatePromptClientPage({
         )}
 
         {overallSubmitted && event.lineup.length > 0 && !showPerformers && (
-          <button
+          <Button
+            variant="bare"
             onClick={() => setShowPerformers(true)}
-            style={{ background: "none", border: "1px solid var(--afa-border-resting)", borderRadius: "8px", padding: "12px 20px", fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)", cursor: "pointer" }}
+            style={{ border: "1px solid var(--afa-border-resting)", borderRadius: "8px", padding: "12px 20px", fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}
           >
             {tr.ratePromptPage.rateSpecificPerformers}
-          </button>
+          </Button>
         )}
 
         {showPerformers && (
@@ -196,23 +200,25 @@ export default function RatePromptClientPage({
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <div style={{ display: "flex", gap: "2px" }}>
                         {[1, 2, 3, 4, 5].map((n) => (
-                          <button
+                          <Button
                             key={n}
+                            variant="bare"
                             onClick={() => setPerfDrafts((prev) => ({ ...prev, [p.id]: n }))}
                             aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
-                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "var(--afa-text-title)", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
+                            style={{ fontSize: "var(--afa-text-title)", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
                           >
                             {(perfDrafts[p.id] || 0) >= n ? "★" : "☆"}
-                          </button>
+                          </Button>
                         ))}
                       </div>
-                      <button
+                      <Button
+                        variant="bare"
                         onClick={() => submitPerformer(p.id)}
                         disabled={!perfDrafts[p.id] || perfSubmitting === p.id}
-                        style={{ fontSize: "var(--afa-text-small)", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", border: "none", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
+                        style={{ fontSize: "var(--afa-text-small)", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
                       >
                         {tr.ratePromptPage.rateBtn}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
