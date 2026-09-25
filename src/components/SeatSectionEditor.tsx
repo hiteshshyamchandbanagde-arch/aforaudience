@@ -225,7 +225,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               </label>
             </div>
             <Button
-              variant="bare"
+              variant="icon"
               type="button"
               onClick={() => removeSection(section.id)}
               aria-label="Remove section"
@@ -263,24 +263,12 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       })()}
 
       <Button
-        variant="bare"
+        variant="dashed"
+        size="md"
         type="button"
         onClick={addSection}
         className="ga-add-row"
-        style={{
-          marginTop: "14px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          border: "1px dashed rgba(245,245,240,0.3)",
-          borderRadius: "10px",
-          padding: "10px 18px",
-          fontSize: "var(--afa-text-body)",
-          fontWeight: 600,
-          color: "var(--afa-text-secondary)",
-          width: "100%",
-        }}
+        style={{ marginTop: "14px" }}
       >
         <IconSection size={16} /> Add another section
       </Button>

@@ -503,9 +503,10 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                     </Link>
                   ))}
                   <Button
-                    variant="bare"
+                    variant="solid"
+                    size="lg"
+                    fullWidth={false}
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", padding: "var(--afa-space-10px) 22px", borderRadius: "var(--afa-radius-sm)" }}
                   >
                     {t.nav.signOut}
                   </Button>

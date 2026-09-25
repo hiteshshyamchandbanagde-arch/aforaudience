@@ -130,7 +130,7 @@ export default function DisplayNameNudge() {
         Add name
       </Button>
       <Button
-        variant="bare"
+        variant="icon"
         onClick={onDismiss}
         aria-label="Dismiss"
         style={{

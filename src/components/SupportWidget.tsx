@@ -450,7 +450,7 @@ export default function SupportWidget() {
         }
       `}</style>
       <Button
-        variant="bare"
+        variant="icon"
         className="afa-support-chat-btn"
         onClick={() => setPanel(panel === 'closed' ? 'chat' : 'closed')}
         aria-label={panel === 'closed' ? 'Open support chat' : 'Close support chat'}
@@ -544,16 +544,10 @@ export default function SupportWidget() {
                     Please use the feedback form instead — the team reads these personally.
                   </div>
                   <Button
-                    variant="bare"
+                    variant="primary"
+                    size="pill-md"
+                    fullWidth={false}
                     onClick={switchToFeedbackPanel}
-                    style={{
-                      background: 'var(--afa-amber)',
-                      color: 'var(--afa-on-fill-solid)',
-                      borderRadius: 'var(--afa-radius-pill)',
-                      padding: 'var(--afa-space-2) var(--afa-space-4)',
-                      fontWeight: 600,
-                      fontSize: 'var(--afa-text-body)',
-                    }}
                   >
                     Go to feedback form
                   </Button>
@@ -588,17 +582,12 @@ export default function SupportWidget() {
                         {m.role === 'assistant' && m.suggestsFallback && (
                           <div style={{ clear: 'both', marginTop: 'var(--afa-space-1)' }}>
                             <Button
-                              variant="bare"
+                              variant="outline-accent"
+                              size="pill-sm"
+                              fullWidth={false}
                               onClick={() =>
                                 openFeedbackFromChat(chatMessages[i - 1]?.content ?? m.content)
                               }
-                              style={{
-                                fontSize: 'var(--afa-text-small)',
-                                color: 'var(--afa-amber)',
-                                border: '1px solid var(--afa-amber)',
-                                borderRadius: 'var(--afa-radius-pill)',
-                                padding: 'var(--afa-space-1) var(--afa-space-10px)',
-                              }}
                             >
                               Send this to the team →
                             </Button>

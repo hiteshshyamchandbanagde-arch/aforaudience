@@ -203,7 +203,7 @@ export default function FeedbackDetailPanel({
               {item.fromChatbot && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-taupe)' }}>via chatbot</span>}
             </div>
             <Button
-              variant="bare"
+              variant="icon"
               onClick={onClose}
               aria-label="Close"
               style={{ fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', lineHeight: 1, padding: 'var(--afa-space-1)' }}
@@ -215,7 +215,7 @@ export default function FeedbackDetailPanel({
           {position && (onPrev || onNext) && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--afa-space-4)' }}>
               <Button
-                variant="bare"
+                variant="icon"
                 onClick={guardedPrev}
                 disabled={!hasPrev}
                 aria-label="Previous"
@@ -237,7 +237,7 @@ export default function FeedbackDetailPanel({
                 {position.index} of {position.total}
               </span>
               <Button
-                variant="bare"
+                variant="icon"
                 onClick={guardedNext}
                 disabled={!hasNext}
                 aria-label="Next"
@@ -334,22 +334,24 @@ export default function FeedbackDetailPanel({
                 />
                 <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginTop: 'var(--afa-space-2)' }}>
                   <Button
-                    variant="bare"
+                    variant="primary"
+                    size="pill-sm"
+                    fullWidth={false}
                     disabled={busy || !noteDraft.trim()}
                     onClick={() => {
                       onSetStatus(pendingNoteStatus, noteDraft.trim())
                       setPendingNoteStatus(null)
                       setNoteDraft('')
                     }}
-                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', cursor: busy || !noteDraft.trim() ? 'default' : 'pointer', opacity: busy || !noteDraft.trim() ? 0.5 : 1 }}
                   >
                     Confirm
                   </Button>
                   <Button
-                    variant="bare"
+                    variant="outline-neutral"
+                    size="pill-sm"
+                    fullWidth={false}
                     disabled={busy}
                     onClick={() => { setPendingNoteStatus(null); setNoteDraft('') }}
-                    style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: 'var(--afa-space-6px) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-pill)', border: '1px solid var(--afa-border-resting)', color: 'var(--afa-text-primary)' }}
                   >
                     Cancel
                   </Button>

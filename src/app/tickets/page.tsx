@@ -690,17 +690,8 @@ export default function MyTicketsPage() {
                                 contextId={b.id}
                                 label={tr.ticketsPage.messageOrganiser}
                                 icon={<MessageIcon style={{ width: 13, height: 13 }} />}
-                                style={{
-                                  flex: '1 1 0',
-                                  minWidth: 0,
-                                  padding: 'var(--afa-space-1) var(--afa-space-10px)',
-                                  borderRadius: 'var(--afa-radius-sm)',
-                                  fontSize: 'var(--afa-text-small)',
-                                  fontWeight: 600,
-                                  border: '1px solid var(--afa-border-resting)',
-                                  color: 'var(--afa-text-secondary)',
-                                  fontFamily: 'var(--font-sans)',
-                                }}
+                                variant="outline-neutral"
+                                style={{ flex: '1 1 0', minWidth: 0 }}
                               />
                               {!isPastEvent(b) && (
                                 <Button

@@ -3,7 +3,6 @@ import { TYPE_META } from "@/components/EventCard"
 import { EventTypeIcon } from "@/components/icons/EventIcons"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
-import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
 
 // GEN-2609-004 (Mobile Redesign Phase 2) - mobile-only bottom sheet for
 // /events' filters (type/city/price/sort), replacing the desktop inline
@@ -23,21 +22,12 @@ type SortOption = "date" | "priceLowHigh" | "priceHighLow" | "fillingFast"
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <Button
-      variant="bare"
+      variant="toggle-pill"
+      size="pill-sm"
+      fullWidth={false}
+      selected={active}
       type="button"
       onClick={onClick}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        borderRadius: "999px",
-        border: active ? `1px solid ${FILL_SOLID_BORDER_TINT}` : "1px solid rgba(245,245,240,0.15)",
-        background: active ? FILL_SOLID_TINT : "var(--afa-surface-raised)",
-        color: active ? "var(--afa-fill-solid)" : "rgba(245,245,240,0.7)",
-        padding: "8px 14px",
-        fontFamily: "var(--font-mono)",
-        fontSize: "var(--afa-text-small)",
-      }}
     >
       {children}
     </Button>
@@ -176,19 +166,11 @@ export default function MobileEventFilterSheet({
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "28px 20px 0" }}>
           <Button
-            variant="bare"
+            variant="outline-neutral"
+            size="pill-md"
+            fullWidth={false}
             type="button"
             onClick={onReset}
-            style={{
-              borderRadius: "999px",
-              border: "1px solid var(--afa-border-resting)",
-              color: "rgba(245,245,240,0.7)",
-              padding: "14px 20px",
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--afa-text-small)",
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-            }}
           >
             {tr.eventsPage.filterSheetReset}
           </Button>
