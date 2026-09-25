@@ -247,8 +247,13 @@ export default function AdminBookingsPage() {
                           Payment: {b.payment.status}
                           {b.payment.razorpayPaymentId ? ` • ${b.payment.razorpayPaymentId}` : ''}
                         </span>
+                      ) : b.totalAmount === 0 ? (
+                        <span>Free event</span>
                       ) : (
-                        <span>No payment (free event)</span>
+                        // BUG-2609-060 - a priced booking with no Payment row is
+                        // an anomaly, not a free event; same amber warning tone
+                        // as "Pending delivery" above.
+                        <span style={{ color: 'var(--afa-amber)', fontWeight: 600 }}>No payment record</span>
                       )}
                     </div>
 
