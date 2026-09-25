@@ -2,6 +2,17 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* GEN-2609-111 - keep Tailwind's automatic source detection out of the
+   non-source trees (root markdown, docs/, ddoc/, e2e/, scripts/). Their
+   prose quotes arbitrary-value class names with placeholder values, which
+   Tailwind turned into invalid CSS that broke next dev. src/ stays
+   scanned. Paths are relative to this file. */
+@source not "../../*.md";
+@source not "../../docs";
+@source not "../../ddoc";
+@source not "../../e2e";
+@source not "../../scripts";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

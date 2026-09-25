@@ -155,6 +155,9 @@ export default function AdminDesignSystemPage() {
   const [saving, setSaving] = useState(false)
   const [confirmingLocked, setConfirmingLocked] = useState(false)
   const [confirmingReset, setConfirmingReset] = useState(false)
+  // BUG-2609-059 - the version a Restore click is waiting to confirm.
+  // A single accidental click used to apply site-wide immediately.
+  const [confirmingRevert, setConfirmingRevert] = useState<DesignTokenVersion | null>(null)
   const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
@@ -304,6 +307,7 @@ export default function AdminDesignSystemPage() {
       showToast('Revert failed.', 'error')
     } finally {
       setSaving(false)
+      setConfirmingRevert(null)
     }
   }
 
@@ -425,12 +429,12 @@ export default function AdminDesignSystemPage() {
                               variant="outline-neutral"
                               size="sm"
                               fullWidth={false}
-                              onClick={() => handleRevert(v.id)}
+                              onClick={() => setConfirmingRevert(v)}
                               disabled={saving || wouldRestore === 0}
                               title={wouldRestore === 0 ? 'Already matches the current live values' : `Would change ${wouldRestore} token(s) back to this version's values`}
                               style={{ flexShrink: 0 }}
                             >
-                              {wouldRestore === 0 ? 'Already current' : `Revert (${wouldRestore})`}
+                              {wouldRestore === 0 ? 'Already current' : `Restore this version (${wouldRestore})`}
                             </Button>
                           </div>
                           {changedByThisSave.length > 0 && (
@@ -575,6 +579,15 @@ export default function AdminDesignSystemPage() {
             onCancel={() => setConfirmingReset(false)}
           />
         )}
+        {confirmingRevert && (
+          <ConfirmDialog
+            title="Restore this version?"
+            body={<RestorePreview changes={diffSnapshots(confirmingRevert.snapshot, Object.fromEntries((tokens ?? []).map((t) => [t.key, t.value])))} />}
+            confirmLabel={saving ? 'Restoring…' : 'Yes, restore'}
+            onConfirm={() => handleRevert(confirmingRevert.id)}
+            onCancel={() => setConfirmingRevert(null)}
+          />
+        )}
       </DashboardShell>
     </>
   )
@@ -673,12 +686,38 @@ function TokenField({
   )
 }
 
-function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { title: string; body: string; confirmLabel: string; onConfirm: () => void; onCancel: () => void }) {
+// BUG-2609-059 - what a Restore would change, as `token: current → will
+// become`, capped at 10 rows so a large snapshot can't push the dialog's
+// buttons off-screen.
+const RESTORE_PREVIEW_MAX = 10
+function RestorePreview({ changes }: { changes: { key: string; from: string; to: string }[] }) {
+  const shown = changes.slice(0, RESTORE_PREVIEW_MAX)
+  return (
+    <>
+      <p style={{ marginBottom: 'var(--afa-space-10px)' }}>
+        This changes {changes.length} token{changes.length === 1 ? '' : 's'} site-wide, immediately. It is recorded as a new version, so it can be undone.
+      </p>
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-1)' }}>
+        {shown.map((c) => (
+          <li key={c.key} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', overflowWrap: 'anywhere' }}>
+            {c.key}: {c.from} → {c.to}
+          </li>
+        ))}
+      </ul>
+      {changes.length > shown.length && (
+        <p style={{ marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-small)' }}>+{changes.length - shown.length} more</p>
+      )}
+    </>
+  )
+}
+
+function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { title: string; body: React.ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 24, maxWidth: 440, width: '100%' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
-        <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</p>
+        {/* div, not p: body may be a ReactNode with block content (RestorePreview's list) */}
+        <div style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{body}</div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
           <Button variant="outline-neutral" size="md" fullWidth={false} onClick={onCancel}>
             Cancel

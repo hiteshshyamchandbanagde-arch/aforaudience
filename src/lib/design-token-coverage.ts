@@ -64,7 +64,7 @@
 //
 // GEN-2609-101/102 - regenerated for the 2 tokens the new className-
 // bracket and raw-<style>-block matchers actually reached: --afa-tint-08
-// 60->64 (the 4 auth pages GEN-2609-101 wired via `border-[var(...)]`),
+// 60->64 (the 4 auth pages GEN-2609-101 wired via `border-[var(--afa-tint-08)]`),
 // --afa-tint-10 36->39 (3 raw-<style>-block sites GEN-2609-102 wired -
 // VenuesGridClient.tsx, OrganisersGridEmbed.tsx, VenueOwnersGridEmbed.tsx).
 // No status change for either (both already site-wide). --afa-border-
