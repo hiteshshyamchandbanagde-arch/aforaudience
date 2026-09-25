@@ -466,10 +466,11 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             </span>
                           ) : (
                             <Button
-                              variant="bare"
+                              variant="outline-accent"
+                              size="sm"
+                              fullWidth={false}
                               onClick={() => confirmPlusOne(p.id)}
                               disabled={plusOneBusy === p.id}
-                              style={{ fontSize: "var(--afa-text-small)", fontWeight: 600, padding: "5px var(--afa-space-3)", borderRadius: "3px", border: "1.5px solid var(--afa-amber)", color: "var(--afa-amber)", cursor: plusOneBusy === p.id ? "default" : "pointer", opacity: plusOneBusy === p.id ? 0.6 : 1 }}
                             >
                               {plusOneBusy === p.id ? tr.eventDetailPage.plusOneConfirming : tr.eventDetailPage.plusOneIllBeThere.replace("{name}", performerName.split(" ")[0]).replace("{confirmed}", String(plusOneStatus[p.id].confirmedCount)).replace("{required}", String(plusOneStatus[p.id].required))}
                             </Button>
@@ -523,10 +524,12 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             ))}
                             {reviewDrafts[p.id]?.rating > 0 && (
                               <Button
-                                variant="bare"
+                                variant="solid"
+                                size="sm"
+                                fullWidth={false}
                                 onClick={() => submitReview(p.id)}
                                 disabled={reviewSubmitting === p.id}
-                                style={{ marginLeft: "var(--afa-space-2)", fontSize: "var(--afa-text-small)", fontWeight: 600, color: "var(--afa-on-fill-solid)", background: "var(--afa-fill-solid)", borderRadius: "3px", padding: "var(--afa-space-1) var(--afa-space-3)", cursor: "pointer", opacity: reviewSubmitting === p.id ? 0.6 : 1 }}
+                                style={{ marginLeft: "var(--afa-space-2)" }}
                               >
                                 {reviewSubmitting === p.id ? tr.eventDetailPage.ratingSubmitting : tr.eventDetailPage.ratePrompt}
                               </Button>

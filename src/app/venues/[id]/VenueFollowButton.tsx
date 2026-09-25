@@ -96,20 +96,12 @@ export function VenueFollowHeaderButton({ state }: { state: VenueFollowState }) 
     <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
       <style>{`.afa-follow-cta:hover { filter: brightness(1.1); }`}</style>
       <Button
-        variant="bare"
+        variant={following ? "outline-neutral" : "solid"}
+        size="md"
+        fullWidth={false}
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta"
-        style={{
-          padding: "10px 20px",
-          border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
-          background: following ? "transparent" : "var(--afa-fill-solid)",
-          color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
-          fontSize: "var(--afa-text-ui)",
-          fontWeight: 600,
-          cursor: busy ? "default" : "pointer",
-          opacity: busy ? 0.6 : 1,
-        }}
       >
         {following ? tr.venueDetailPage.following : tr.venueDetailPage.follow}
       </Button>
@@ -155,25 +147,11 @@ export function VenueFollowSidebarCta({ state }: { state: VenueFollowState }) {
     <div style={{ marginTop: "20px" }}>
       <style>{`.afa-follow-cta-sidebar:hover { filter: brightness(1.1); }`}</style>
       <Button
-        variant="bare"
+        variant={following ? "outline-neutral" : "solid"}
+        size="lg"
         onClick={toggleFollow}
         disabled={busy}
         className="afa-follow-cta-sidebar"
-        style={{
-          display: "flex",
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          padding: "14px",
-          border: following ? "1.5px solid var(--afa-fill-solid)" : "none",
-          background: following ? "transparent" : "var(--afa-fill-solid)",
-          color: following ? "var(--afa-fill-solid)" : "var(--afa-on-fill-solid)",
-          fontSize: "var(--afa-text-body)",
-          fontWeight: 600,
-          cursor: busy ? "default" : "pointer",
-          opacity: busy ? 0.6 : 1,
-        }}
       >
         {!following && <PlusIcon style={{ width: "16px", height: "16px" }} />}
         {following ? tr.venueDetailPage.followingThisVenue : tr.venueDetailPage.followThisVenue}

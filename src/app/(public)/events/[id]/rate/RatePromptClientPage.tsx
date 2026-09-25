@@ -159,10 +159,11 @@ export default function RatePromptClientPage({
             />
             {overallError && <p style={{ color: "var(--afa-error)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
             <Button
-              variant="bare"
+              variant="solid"
+              size="lg"
               onClick={submitOverall}
               disabled={overallSubmitting}
-              style={{ marginTop: "16px", width: "100%", padding: "14px", borderRadius: "8px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", fontSize: "var(--afa-text-body-lg)", fontWeight: 700, cursor: overallSubmitting ? "default" : "pointer", opacity: overallSubmitting ? 0.6 : 1 }}
+              style={{ marginTop: "16px" }}
             >
               {overallSubmitting ? tr.ratePromptPage.submitting : tr.ratePromptPage.submitRating}
             </Button>
@@ -176,9 +177,10 @@ export default function RatePromptClientPage({
 
         {overallSubmitted && event.lineup.length > 0 && !showPerformers && (
           <Button
-            variant="bare"
+            variant="outline-neutral"
+            size="lg"
+            fullWidth={false}
             onClick={() => setShowPerformers(true)}
-            style={{ border: "1px solid var(--afa-border-resting)", borderRadius: "8px", padding: "12px 20px", fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}
           >
             {tr.ratePromptPage.rateSpecificPerformers}
           </Button>
@@ -212,10 +214,11 @@ export default function RatePromptClientPage({
                         ))}
                       </div>
                       <Button
-                        variant="bare"
+                        variant="solid"
+                        size="sm"
+                        fullWidth={false}
                         onClick={() => submitPerformer(p.id)}
                         disabled={!perfDrafts[p.id] || perfSubmitting === p.id}
-                        style={{ fontSize: "var(--afa-text-small)", fontWeight: 700, padding: "6px 12px", borderRadius: "6px", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", cursor: "pointer", opacity: !perfDrafts[p.id] ? 0.4 : 1 }}
                       >
                         {tr.ratePromptPage.rateBtn}
                       </Button>
