@@ -12,14 +12,14 @@ export default function BrandLoader({ label = 'Loading...' }: { label?: string }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '64px 32px' }}>
       <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="64" height="64" rx="16" fill="#0E0C0A" />
-        <path d="M18 18h28v8H18z" fill="#C8441A">
+        <rect width="64" height="64" rx="16" fill="#0E0C0A" />{/* token-ok: pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}
+        <path d="M18 18h28v8H18z" fill="#C8441A">{/* token-ok: pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}
           <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0s" repeatCount="indefinite" />
         </path>
-        <path d="M18 30h20v8H18z" fill="#C9973A">
+        <path d="M18 30h20v8H18z" fill="#C9973A">{/* token-ok: pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}
           <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0.2s" repeatCount="indefinite" />
         </path>
-        <path d="M18 42h14v8H18z" fill="#F7F3EE">
+        <path d="M18 42h14v8H18z" fill="#F7F3EE">{/* token-ok: pixel copy of src/app/icon.svg; logo colours must not follow palette edits */}
           <animate attributeName="opacity" values="1;0.35;1" dur="1.2s" begin="0.4s" repeatCount="indefinite" />
         </path>
       </svg>
