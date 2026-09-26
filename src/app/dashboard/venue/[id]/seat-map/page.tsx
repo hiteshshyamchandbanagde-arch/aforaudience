@@ -1414,7 +1414,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></main></>)
+  if (error) return (<><SiteNav /><main style={{ minHeight: '100vh', background: 'var(--afa-surface-page)', fontFamily: 'var(--font-sans)' }}><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></main></>)
 
   return (
     <>
@@ -1763,7 +1763,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           + Add another section
                         </AddDashedRowButton>
                         {findDuplicateZoneNames(gridConfig.rowGroups).length > 0 && (
-                          <div style={{ marginTop: 'var(--afa-space-2)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', fontWeight: 600 }}>
+                          <div style={{ marginTop: 'var(--afa-space-2)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', fontWeight: 600 }}>
                             Section name{findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? '' : 's'} "{findDuplicateZoneNames(gridConfig.rowGroups).join('", "')}" {findDuplicateZoneNames(gridConfig.rowGroups).length === 1 ? 'is' : 'are'} used more than once - each section on this level needs a unique name.
                           </div>
                         )}
@@ -2202,7 +2202,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       onChange={(e) => setZonePrice(t, e.target.value)}
                     />
                     <FreeToggle checked={zoneIsFree(t)} onChange={(free) => setZoneFree(t, free)} />
-                    {noPriceSet && <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', fontWeight: 600 }}>No price set</span>}
+                    {noPriceSet && <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', fontWeight: 600 }}>No price set</span>}
                   </div>
                 )
               })}

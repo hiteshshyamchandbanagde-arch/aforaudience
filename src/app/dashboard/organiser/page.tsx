@@ -127,7 +127,7 @@ export default function OrganiserDashboard() {
               </h1>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>Create events, book venues, and review artist applications</p>
               {!!orgStatus?.walletBalance && orgStatus.walletBalance > 0 && (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-gold)', fontWeight: 600, marginTop: '6px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: '6px' }}>
                   💰 Wallet balance: ₹{orgStatus.walletBalance.toLocaleString('en-IN')} <span style={{ fontWeight: 400, opacity: 0.8 }}>(from cancelled Buy-in slots kept as credit)</span>
                 </p>
               )}
@@ -138,7 +138,7 @@ export default function OrganiserDashboard() {
                   </p>
                 ) : null
               ) : orgStatus.payoutAccountStatus !== 'activated' ? (
-                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-gold)', fontWeight: 600, marginTop: '6px' }}>
+                <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', fontWeight: 600, marginTop: '6px' }}>
                   ⏳ Payout account linked, not yet activated — <Link href="/dashboard/organiser/payouts" style={{ color: 'inherit' }}>check status</Link>
                 </p>
               ) : (

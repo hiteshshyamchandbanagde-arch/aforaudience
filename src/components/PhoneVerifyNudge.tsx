@@ -55,7 +55,7 @@ export default function PhoneVerifyNudge() {
       aria-label="Verify your phone"
       style={{
         background: 'rgba(179,38,30,0.1)',
-        color: 'var(--afa-error)',
+        color: 'var(--afa-error-bright)',
         borderBottom: '1px solid rgba(179,38,30,0.3)',
         display: 'flex',
         alignItems: 'center',

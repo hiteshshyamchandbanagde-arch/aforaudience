@@ -235,7 +235,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Venue not found</div></>)
 
   return (

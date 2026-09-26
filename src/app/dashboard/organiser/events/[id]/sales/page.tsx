@@ -112,7 +112,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   const { event, tiers, totals, timeline, recentBookings } = data
@@ -145,7 +145,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           {/* Summary cards */}

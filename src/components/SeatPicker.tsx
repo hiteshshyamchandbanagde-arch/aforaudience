@@ -233,7 +233,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
   }
 
   if (loading) return <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>Loading seat map...</p>
-  if (error) return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)' }}>{error}</p>
+  if (error) return <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)' }}>{error}</p>
   if (seats.length === 0) return <p style={{ fontSize: 'var(--afa-text-ui)', opacity: 0.6 }}>No seat map has been set up for this venue yet.</p>
 
   const levels = Array.from(new Set<string>(seats.map((s: SeatInfo) => s.level || '')))

@@ -152,7 +152,7 @@ export default function VenueOwnerSalesOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
-  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (error && !data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
   if (!data) return (<><SiteNav /><DashboardShell><div style={{ padding: '32px' }}>No data</div></DashboardShell></>)
 
   const { totals, previousTotals, venues, organisers, timeline } = data
@@ -176,7 +176,7 @@ export default function VenueOwnerSalesOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
@@ -346,7 +346,7 @@ function StatCard({ label, value, delta, sub }: { label: string; value: string; 
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: '0 0 8px' }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>{value}</p>
       {delta != null ? (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error)', marginTop: '6px', marginBottom: 0 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', color: delta >= 0 ? 'var(--afa-sage)' : 'var(--afa-error-bright)', marginTop: '6px', marginBottom: 0 }}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}% vs last period
         </p>
       ) : sub ? (

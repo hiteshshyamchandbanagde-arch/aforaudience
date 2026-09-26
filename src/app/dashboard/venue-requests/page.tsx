@@ -229,7 +229,7 @@ export default function VenueRequestsPage() {
                           variant="ghost"
                           onClick={() => act(r.id, 'decline')}
                           disabled={actingOn === r.id}
-                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', opacity: actingOn === r.id ? 0.6 : 1 }}
+                          style={{ padding: '8px 16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', opacity: actingOn === r.id ? 0.6 : 1 }}
                         >
                           Decline
                         </Button>

@@ -83,7 +83,7 @@ export default function AudienceActivityPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
 
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
   const totalSpend = confirmed.reduce((sum, b) => sum + b.totalAmount, 0)

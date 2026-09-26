@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
             </Button>
           </form>
 
-          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {users.length === 0 && !loading && (
@@ -182,11 +182,11 @@ export default function AdminUsersPage() {
                   <div>
                     <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
-                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error)', textTransform: 'uppercase' }}>Suspended</span>}
+                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error-bright)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: '6px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: '6px' }}>
                         Reason: {u.suspendReason}
                       </p>
                     )}

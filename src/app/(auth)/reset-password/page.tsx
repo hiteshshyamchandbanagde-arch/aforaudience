@@ -84,7 +84,7 @@ function ResetPasswordForm() {
 
       <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
         {!token ? (
-          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
             {tr.resetPasswordPage.resetLinkInvalidOrExpired} <Link href="/forgot-password" style={{ color: "var(--afa-amber)", fontWeight: 500 }}>{tr.resetPasswordPage.requestNewOneLink}</Link>.
           </p>
         ) : (

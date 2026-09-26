@@ -567,7 +567,7 @@ function ProfileContent() {
   ) => {
     if (!roleStatus?.hasProfile) return null
     if (!roleStatus.isApproved) {
-      return <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-gold)' }}>{tr.profilePage.pendingApproval}</div>
+      return <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-amber)' }}>{tr.profilePage.pendingApproval}</div>
     }
     if (roleStatus.isActive) {
       return (
@@ -737,7 +737,7 @@ function ProfileContent() {
                           display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
                           textAlign: 'left',
                           borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
-                          color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-primary)',
+                          color: row.danger ? 'var(--afa-error-bright)' : 'var(--afa-text-primary)',
                         }}
                       >
                         <span style={{ display: 'flex', flexShrink: 0, color: row.danger ? 'var(--afa-error)' : 'var(--afa-text-secondary)' }}>{row.icon}</span>

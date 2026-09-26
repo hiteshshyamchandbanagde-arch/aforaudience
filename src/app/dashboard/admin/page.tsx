@@ -268,7 +268,7 @@ export default function AdminCommandCenter() {
                     style={{
                       fontSize: 'var(--afa-text-ui)',
                       fontWeight: 700,
-                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)',
+                      color: a.tone === 'critical' ? 'var(--afa-error-bright)' : 'var(--afa-amber)',
                       background: a.tone === 'critical' ? 'rgba(179,38,30,0.15)' : 'rgba(201,151,58,0.15)',
                       borderRadius: 'var(--afa-radius-pill)',
                       padding: '2px 10px',

@@ -819,7 +819,7 @@ export default function SupportWidget() {
                     </div>
                   )}
                   {fbAttachmentError && (
-                    <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginBottom: 'var(--afa-space-3)' }}>
+                    <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-3)' }}>
                       {fbAttachmentError}
                     </div>
                   )}

@@ -231,7 +231,7 @@ export default function ArtistDashboard() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (error) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
   if (!profile) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>Profile not found</div></DashboardShell></>)
 
   const upcoming = profile.performances
@@ -301,7 +301,7 @@ export default function ArtistDashboard() {
             <div style={{ marginBottom: 'var(--afa-space-28px)', display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-14px)' }}>
               {tourInvites.map((inv) => (
                 <div key={inv.id} style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-gold)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)' }}>
-                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-gold)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 'var(--afa-space-2)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-amber)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 'var(--afa-space-2)' }}>
                     Tour invite
                   </p>
                   <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-1)' }}>{inv.tour.title}</h3>
@@ -414,7 +414,7 @@ export default function ArtistDashboard() {
                 </div>
                 <div>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-1)' }}>Net</p>
-                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error)' }}>
+                  <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: netFigure >= 0 ? 'var(--afa-green-bright)' : 'var(--afa-error-bright)' }}>
                     {netFigure >= 0 ? '+' : '−'}₹{Math.abs(netFigure).toLocaleString('en-IN')}
                   </p>
                 </div>

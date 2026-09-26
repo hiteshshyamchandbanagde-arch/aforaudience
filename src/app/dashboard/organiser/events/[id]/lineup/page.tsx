@@ -136,7 +136,7 @@ function SortableRow({
           whiteSpace: 'nowrap',
           border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.15)',
           background: item.isFeaturedVouch ? 'rgba(201,151,58,0.15)' : 'transparent',
-          color: item.isFeaturedVouch ? 'var(--afa-gold)' : 'rgba(245,245,240,0.5)',
+          color: item.isFeaturedVouch ? 'var(--afa-amber)' : 'rgba(245,245,240,0.5)',
         }}
       >
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
@@ -281,7 +281,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   return (
@@ -300,7 +300,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           </p>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>
           )}
 
           {lineup.length > 0 && (

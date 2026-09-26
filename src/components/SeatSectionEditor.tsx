@@ -245,7 +245,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       </div>
 
       {duplicateNames.size > 0 && (
-        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)", fontWeight: 600 }}>
+        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
           Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
         </p>
       )}

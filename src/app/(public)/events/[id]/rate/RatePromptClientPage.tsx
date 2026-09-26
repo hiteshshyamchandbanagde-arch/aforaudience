@@ -157,7 +157,7 @@ export default function RatePromptClientPage({
               placeholder={tr.ratePromptPage.commentPlaceholder}
               style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
-            {overallError && <p style={{ color: "var(--afa-error)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
+            {overallError && <p style={{ color: "var(--afa-error-bright)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
             <Button
               variant="solid"
               size="lg"

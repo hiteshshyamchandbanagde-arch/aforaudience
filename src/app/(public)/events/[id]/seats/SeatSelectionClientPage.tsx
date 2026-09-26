@@ -357,7 +357,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
               )}
 
               {bookingError && (
-                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error)", marginBottom: "12px" }}>{bookingError}</div>
+                <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)", marginBottom: "12px" }}>{bookingError}</div>
               )}
 
               {totalAmount > 0 ? (

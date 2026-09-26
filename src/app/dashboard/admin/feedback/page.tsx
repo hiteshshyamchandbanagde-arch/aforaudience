@@ -79,7 +79,7 @@ const CATEGORY_BADGE = { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' 
 const SEVERITY_BADGE: Record<string, { bg: string; color: string }> = {
   LOW: { bg: 'rgba(22,101,52,0.15)', color: 'var(--afa-green-deep)' },
   MEDIUM: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
-  HIGH: { bg: 'rgba(179,38,30,0.15)', color: 'var(--afa-error)' },
+  HIGH: { bg: 'rgba(179,38,30,0.15)', color: 'var(--afa-error-bright)' },
   CRITICAL: { bg: 'var(--afa-red-alt)', color: 'var(--afa-on-fill-solid)' },
 }
 

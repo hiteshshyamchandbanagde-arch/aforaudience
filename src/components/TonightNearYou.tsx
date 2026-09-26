@@ -83,7 +83,7 @@ export default function TonightNearYou() {
     <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.tonightRailHeading}</h4>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-amber)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
       </div>
 
       {events === null && (

@@ -231,7 +231,7 @@ export default function AdminArtistsPage() {
             {sortButton('featuredOrganiserCount', 'Featured Progress')}
           </div>
 
-          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {sorted.length === 0 && !loading && (

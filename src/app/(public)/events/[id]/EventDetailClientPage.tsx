@@ -476,7 +476,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                             </Button>
                           )}
                           {plusOneError && (
-                            <div style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-error)" }}>{plusOneError}</div>
+                            <div style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-micro)", color: "var(--afa-error-bright)" }}>{plusOneError}</div>
                           )}
                         </div>
                       )}
@@ -544,7 +544,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               style={{ width: "100%", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-border-resting)", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", boxSizing: "border-box" }}
                             />
                           )}
-                          {reviewError && <p style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error)", marginTop: "var(--afa-space-6px)" }}>{reviewError}</p>}
+                          {reviewError && <p style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)", marginTop: "var(--afa-space-6px)" }}>{reviewError}</p>}
                         </div>
                       )}
                     </div>

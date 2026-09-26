@@ -40,7 +40,7 @@ export interface StatusToneStyle {
 // text color automatically - this was never a per-page bug, it was the
 // shared tone definition itself.
 export const STATUS_TONE: Record<'gold' | 'sage' | 'error' | 'muted' | 'orange', StatusToneStyle> = {
-  gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+  gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
   sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage-bright)' },
   error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error-bright)' },
   muted: { bg: 'rgba(245,245,240,0.08)', color: 'var(--afa-text-primary)' },

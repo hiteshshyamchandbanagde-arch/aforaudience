@@ -649,7 +649,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!event) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Event not found</div></>)
 
   return (
@@ -813,7 +813,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     </div>
                   )}
                   {specialNotesStatus === 'REJECTED' && specialNotesRejectionReason && (
-                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: 'var(--afa-space-2)' }}>
+                    <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-2)' }}>
                       Reason: {specialNotesRejectionReason}
                     </p>
                   )}

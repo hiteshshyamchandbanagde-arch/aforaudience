@@ -110,7 +110,7 @@ export default function RegisterForm() {
   const strengthColor =
     passwordStrength === 3 ? "var(--afa-green-dark)" :
     passwordStrength === 2 ? "var(--afa-amber)" :
-    passwordStrength === 1 ? "var(--afa-error)" :
+    passwordStrength === 1 ? "var(--afa-error-bright)" :
     "rgba(245,245,240,0.12)"
   const strengthLabel =
     passwordStrength === 3 ? tr.registerPage.passwordStrengthStrong :
@@ -516,19 +516,19 @@ export default function RegisterForm() {
                 </p>
               )}
               {usernameStatus === "invalid" && !fieldErrors.username && (
-                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error)" }}>
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)" }}>
                   {tr.authErrors.USERNAME_INVALID}
                 </p>
               )}
               {usernameStatus === "taken" && (
-                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error)" }}>
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error-bright)" }}>
                   {tr.registerPage.takenLabel}{" "}
                   {usernameSuggestion && (
                     <Button
                       variant="bare"
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, username: usernameSuggestion }))}
-                      style={{ color: "var(--afa-error)", textDecoration: "underline", fontSize: "var(--afa-text-small)", padding: 0 }}
+                      style={{ color: "var(--afa-error-bright)", textDecoration: "underline", fontSize: "var(--afa-text-small)", padding: 0 }}
                     >
                       {tr.registerPage.useInsteadTemplate.replace('{username}', usernameSuggestion)}
                     </Button>
@@ -536,7 +536,7 @@ export default function RegisterForm() {
                 </p>
               )}
               {fieldErrors.username && (
-                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.username}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>{fieldErrors.username}</p>
               )}
             </div>
 
@@ -551,7 +551,7 @@ export default function RegisterForm() {
                 style={inputStyle(!!fieldErrors.email)}
               />
               {fieldErrors.email && (
-                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.email}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>{fieldErrors.email}</p>
               )}
             </div>
 
@@ -578,7 +578,7 @@ export default function RegisterForm() {
                 {tr.registerPage.otpHint}
               </p>
               {fieldErrors.phone && (
-                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>{fieldErrors.phone}</p>
+                <p style={{ marginTop: "var(--afa-space-2)", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>{fieldErrors.phone}</p>
               )}
             </div>
 

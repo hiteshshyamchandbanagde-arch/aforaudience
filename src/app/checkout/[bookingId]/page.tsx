@@ -356,7 +356,7 @@ export default function CheckoutPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', marginBottom: 'var(--afa-space-4)' }}>
             {tr.checkoutPage.somethingWrongTitle}
           </h1>
-          <p style={{ color: 'var(--afa-error)', marginBottom: 'var(--afa-space-6)' }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
+          <p style={{ color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-6)' }}>{error || tr.checkoutPage.bookingNotFoundFallback}</p>
           <Link href="/events" style={{ color: 'var(--afa-fill-solid)', fontWeight: 600 }}>
             {tr.nav.backToEvents}
           </Link>
@@ -764,7 +764,7 @@ export default function CheckoutPage() {
           )}
 
           {companionError && (
-            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: 'var(--afa-space-2)' }}>{companionError}</div>
+            <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-2)' }}>{companionError}</div>
           )}
         </div>
 
@@ -772,7 +772,7 @@ export default function CheckoutPage() {
           <div
             style={{
               background: 'rgba(179,38,30,0.08)',
-              color: 'var(--afa-error)',
+              color: 'var(--afa-error-bright)',
               padding: 'var(--afa-space-10px) var(--afa-space-14px)',
               borderRadius: 'var(--afa-radius-md)',
               fontSize: 'var(--afa-text-ui)',

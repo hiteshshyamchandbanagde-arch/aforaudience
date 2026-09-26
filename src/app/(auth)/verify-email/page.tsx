@@ -67,7 +67,7 @@ function VerifyEmailContent() {
           </>
         )}
         {status === "error" && (
-          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>{error}</p>
+          <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>{error}</p>
         )}
       </div>
     </div>

@@ -262,7 +262,7 @@ export default function ArtistsPage() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
             {error}
           </div>
         )}

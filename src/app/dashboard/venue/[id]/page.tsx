@@ -101,7 +101,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   const sections = venue.seatMap?.sections || []
@@ -239,7 +239,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               style={{
                                 fontSize: 'var(--afa-text-micro)',
                                 fontWeight: 700,
-                                color: 'var(--afa-gold)',
+                                color: 'var(--afa-amber)',
                                 background: 'rgba(201,151,58,0.15)',
                                 padding: '3px 8px',
                                 borderRadius: 'var(--afa-radius-xs)',
@@ -285,7 +285,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                             style={{
                               fontSize: 'var(--afa-text-micro)',
                               fontWeight: 700,
-                              color: 'var(--afa-gold)',
+                              color: 'var(--afa-amber)',
                               background: 'rgba(201,151,58,0.15)',
                               padding: '3px 8px',
                               borderRadius: 'var(--afa-radius-xs)',

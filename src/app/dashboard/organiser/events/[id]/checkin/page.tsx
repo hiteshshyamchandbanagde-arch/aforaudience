@@ -204,7 +204,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{loadError}</div></>)
+  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{loadError}</div></>)
 
   return (
     <>
@@ -274,7 +274,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               </>
             )}
             {cameraError && (
-              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
             )}
           </div>
 

@@ -58,7 +58,7 @@ export default function PosterShareCard({ src, filename, title }: { src: string;
       >
         {sharing ? 'Preparing...' : 'Share / Download'}
       </Button>
-      {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: '8px' }}>{error}</p>}
+      {error && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: '8px' }}>{error}</p>}
     </div>
   )
 }

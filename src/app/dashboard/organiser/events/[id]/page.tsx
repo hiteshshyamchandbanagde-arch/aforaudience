@@ -247,7 +247,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
 
   if (status === 'loading' || loading) return (<><SiteNav /><DashboardShell><BrandLoader /></DashboardShell></>)
   if (!session) return (<><SiteNav /><DashboardShell>{null}</DashboardShell></>)
-  if (error && !event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></DashboardShell></>)
+  if (error && !event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></DashboardShell></>)
   if (!event) return (<><SiteNav /><DashboardShell><div style={{ padding: 'var(--afa-space-32px)' }}>Event not found</div></DashboardShell></>)
 
   const statusStyle = STATUS_STYLE[event.status] || STATUS_STYLE.DRAFT

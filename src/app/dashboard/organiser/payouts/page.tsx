@@ -21,7 +21,7 @@ interface PayoutStatus {
 const STATUS_COPY: Record<string, { label: string; color: string; detail: string }> = {
   created: {
     label: 'Created, not yet activated',
-    color: 'var(--afa-gold)',
+    color: 'var(--afa-amber)',
     detail: 'Bank details are still being verified on Razorpay\u2019s side. This can take a moment in test mode — refresh to check again.',
   },
   activated: {
@@ -31,12 +31,12 @@ const STATUS_COPY: Record<string, { label: string; color: string; detail: string
   },
   verification_failed: {
     label: 'Verification failed',
-    color: 'var(--afa-error)',
+    color: 'var(--afa-error-bright)',
     detail: 'Razorpay couldn\u2019t verify the bank details on this account. Check the account in the Razorpay Dashboard and re-link once it\u2019s fixed.',
   },
   under_review: {
     label: 'Under review',
-    color: 'var(--afa-gold)',
+    color: 'var(--afa-amber)',
     detail: 'Razorpay is reviewing this account. Refresh to check again shortly.',
   },
 }
@@ -129,7 +129,7 @@ export default function OrganiserPayoutsPage() {
                   <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>{statusInfo.detail}</p>
                 )}
                 {payout.refreshError && (
-                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-gold)', marginBottom: '20px' }}>
+                  <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-amber)', marginBottom: '20px' }}>
                     Couldn't refresh the latest status from Razorpay just now — showing the last known value.
                   </p>
                 )}

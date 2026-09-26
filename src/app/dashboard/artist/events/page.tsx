@@ -50,7 +50,7 @@ function isEventFull(event: EventItem): boolean {
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   PENDING: { label: '✓ Applied - pending review', color: 'var(--afa-sage)' },
   APPROVED: { label: "✓ You're in the lineup!", color: 'var(--afa-sage)' },
-  WAITLISTED: { label: '⏳ Waitlisted', color: 'var(--afa-gold)' },
+  WAITLISTED: { label: '⏳ Waitlisted', color: 'var(--afa-amber)' },
   REJECTED: { label: 'Not selected this time', color: 'var(--afa-text-primary)' },
 }
 

@@ -603,7 +603,7 @@ export default function AdminSettingsPage() {
             </div>
           ))}
           {Number(minFeeRupees) > Number(feeRupees) || Number(feeRupees) > Number(maxFeeRupees) ? (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error)', marginBottom: 'var(--afa-space-2)' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-2)' }}>
               Min must be ≤ standard, and standard must be ≤ max.
             </p>
           ) : null}
@@ -923,7 +923,7 @@ export default function AdminSettingsPage() {
               <input type="number" inputMode="numeric" min={0} step="1" value={celebrityWeight} onChange={(e) => setCelebrityWeight(e.target.value)} style={{ width: '100%', padding: '10px var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body-lg)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }} />
             </div>
           </div>
-          <p style={{ fontSize: 'var(--afa-text-micro)', color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error)', marginBottom: 'var(--afa-space-4)' }}>
+          <p style={{ fontSize: 'var(--afa-text-micro)', color: voteWeightsSum === 100 ? 'var(--afa-text-secondary)' : 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-4)' }}>
             Sum: {voteWeightsSum} / 100{voteWeightsSum !== 100 ? ' — must equal 100' : ''}
           </p>
 
