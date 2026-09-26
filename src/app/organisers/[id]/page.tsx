@@ -221,7 +221,7 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
 function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
   // Reuses the exact status-pill chrome documented in
   // docs/afa-design-tokens-reference.md §5 (padding/fontSize/weight/
-  // uppercase/letterSpacing) - minus its borderRadius: 999px, since that
+  // uppercase/letterSpacing) - minus its pill radius (--afa-radius-pill), since that
   // rounded-pill treatment is the dashboard family's own convention
   // (same doc, §7) and this is a public directory page under the
   // sharp-corner rule everywhere else on it.

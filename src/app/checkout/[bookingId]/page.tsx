@@ -524,7 +524,7 @@ export default function CheckoutPage() {
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 14,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-5)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -656,7 +656,7 @@ export default function CheckoutPage() {
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 14,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-5)',
             marginBottom: 'var(--afa-space-5)',
           }}

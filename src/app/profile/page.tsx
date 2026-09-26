@@ -636,7 +636,7 @@ function ProfileContent() {
             <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
               {tr.profilePage.quickLinksLabel}
             </p>
-            <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ borderRadius: 'var(--afa-radius-lg)', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
               {[
                 { icon: <DashboardIcon style={{ width: 18, height: 18 }} />, title: tr.nav.dashboard, badge: pendingCount, href: dashboardHref },
                 { icon: <MessageIcon style={{ width: 18, height: 18 }} />, title: tr.nav.messages, badge: unreadCount, href: '/dashboard/messages' },
@@ -673,7 +673,7 @@ function ProfileContent() {
               same cards/handlers the desktop column already has. */}
           {isAudience && (
             <div className="lg:hidden" style={{ marginBottom: 'var(--afa-space-28px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: '14px', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
                 {avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--afa-tint-10)' }} />
@@ -727,7 +727,7 @@ function ProfileContent() {
                   <p style={{ margin: '0 0 var(--afa-space-2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)' }}>
                     {group.label}
                   </p>
-                  <div style={{ borderRadius: '14px', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
+                  <div style={{ borderRadius: 'var(--afa-radius-lg)', overflow: 'hidden', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)' }}>
                     {group.rows.map((row, i) => (
                       <Button
                         key={row.title}
