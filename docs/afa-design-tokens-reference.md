@@ -19,7 +19,8 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 
 --afa-text-primary:    #F5F5F0;
 --afa-text-secondary:  rgba(245, 245, 240, 0.65);
---afa-text-muted:      rgba(245, 245, 240, 0.4);
+--afa-text-muted:      rgba(245, 245, 240, 0.5);   /* GEN-2609-113: was 0.4 (3.6:1 on surface-page, fails AA); 0.5 = 4.95:1 */
+--afa-text-soft:       rgba(245, 245, 240, 0.8);   /* GEN-2609-113, new: absorbs 0.75-0.85 */
 --afa-text-inverse:    #F5F5F0;  /* pre-existing gap, fixed by GEN-2609-075 — defined in globals.css since before GEN-2609-074, 3 real consumers (src/app/page.tsx, for-artists/page.tsx, FourRooms.tsx), just never had a row in this table. Not caused by -074, which only added its own -on-image row correctly. */
 
 --afa-text-on-image:   rgba(255, 255, 255, 0.5);  /* GEN-2609-074 — hero-subtitle text over a PHOTOGRAPH, not a flat surface; a cooler/purer white than --afa-text-secondary's warm cream tint, tuned for legibility across a photo's unpredictable luminance rather than reused for token-count tidiness */
@@ -73,6 +74,39 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-tint-08: rgba(245, 245, 240, 0.08);
 --afa-tint-10: rgba(245, 245, 240, 0.1);
 ```
+
+**GEN-2609-113 — colour closeout (26 Sep).** Every remaining `rgba()`/hex literal in `src/` was mapped onto the ladder below (decision record: `docs/decisions/2026-09-26-radius-colour-scale.md` §2). Tints are literal `rgba()` values, never `color-mix()`, so an admin editing one edits exactly what they see. The near-identical cream `rgba(247,243,238,a)` and white `rgba(255,255,255,a)` overlays fold into the `245,245,240` ladder. `--afa-error-border` (#F5C2C0, light-theme leftover, 0 consumers) was removed.
+
+```css
+/* cream surfaces + borders (tint ladder) */
+--afa-tint-04: rgba(245, 245, 240, 0.04);   /* absorbs 0.02-0.05 */
+--afa-tint-06: rgba(245, 245, 240, 0.06);   /* 0.06, 0.07 */
+--afa-tint-08 / --afa-tint-10               /* existing */
+--afa-tint-12: rgba(245, 245, 240, 0.12);   /* 0.12, 0.13 */
+--afa-border-resting                        /* existing 0.15; absorbs 0.14-0.16 */
+--afa-tint-20: rgba(245, 245, 240, 0.2);    /* 0.20, 0.25 */
+--afa-tint-30: rgba(245, 245, 240, 0.3);    /* 0.30+ when NOT text */
+/* cream text: muted 0.35-0.50, secondary 0.55-0.70, soft 0.75-0.85 (see above) */
+
+/* tone tints */
+--afa-amber-wash:   rgba(201, 151, 58, 0.08);
+--afa-amber-tint:   rgba(201, 151, 58, 0.15);  /* 0.10-0.20 */
+--afa-amber-border: rgba(201, 151, 58, 0.4);   /* 0.25-0.50 */
+--afa-amber-strong: rgba(201, 151, 58, 0.6);   /* 0.55, 0.60; 0.80 -> solid --afa-amber */
+--afa-error-tint:   rgba(179, 38, 30, 0.1);    /* 0.08-0.15 */
+--afa-error-edge:   rgba(179, 38, 30, 0.3);    /* 0.30, 0.40 */
+--afa-sage-tint:    rgba(74, 103, 65, 0.12);
+--afa-success-tint: rgba(39, 103, 73, 0.15);   /* --afa-green-dark; also absorbs green-deep 22,101,52 */
+--afa-fill-tint:    rgba(255, 90, 54, 0.2);    /* 0.20, 0.30 */
+--afa-blue-tint:    rgba(74, 111, 165, 0.15);
+
+/* dark overlays + shadows */
+--afa-shadow:       rgba(0, 0, 0, 0.3);        /* box/text shadows up to 0.5 */
+--afa-scrim:        rgba(10, 10, 10, 0.7);     /* black/ink overlays 0.4-0.7 */
+--afa-scrim-strong: rgba(10, 10, 10, 0.9);     /* 0.85-0.95 */
+```
+
+**Error text:** plain `--afa-error` as *text* on a dark surface is 2.5-2.8:1; error text uses `--afa-error-bright` (5.7-6.4:1). `--afa-error` stays for fills, borders and icons. **Gold text:** `STATUS_TONE.gold` text is now `--afa-amber` (4.88:1 on its own tint; `--afa-gold` was 2.55:1).
 
 **Admin-controlled runtime layer (GEN-2609-075, 19 Sep).** Every token in this section, plus `--font-display`/`--font-ui`/`--font-sans`/`--font-mono`, is now also a row in the `DesignToken` table (`aforaudience-qa`) and editable at `/dashboard/admin/design-system` — an admin change is cached (tag `"design-tokens"`) and takes effect on the next page load, no deploy, falling back to the static values in this file/`globals.css` if the DB is empty or unreachable. `globals.css` stays the authoritative *default* (and the only thing that matters for a fresh environment before the table is seeded); the DB is a runtime override layer on top of it, not a replacement. 5 tokens (`--afa-surface-page`, `--afa-surface-raised`, `--afa-amber`, `--afa-fill-solid`, `--afa-on-fill-solid`) are "locked" in the admin UI — still editable, gated behind a confirm dialog — unrelated to this section's own CI-enforced locked-palette rule below, which keeps blocking raw literals in application *code* regardless of what the DB holds. Full reasoning in `docs/design.md`'s `GEN-2609-075` entry.
 
@@ -191,10 +225,10 @@ The visible "PUBLISHED" label in data (venue `status` field, per `docs/design.md
 Section 1's "core tokens" list undersells what's real and load-bearing: `STATUS_TONE` in [src/lib/statusStyle.ts](../src/lib/statusStyle.ts) is a second, equally-governed palette — 5 tones, each a `{ bg, color }` pair — that every status-badge site in the app is meant to draw from, rather than hand-typing its own `rgba()`/hex pair per status. It's exempt from `check-design-tokens.js`'s literal-check for exactly this reason (Section 1 above already lists it among the exemptions) — this is where new tone literals are *supposed* to live, not a gap in the checker.
 
 ```js
-gold:   { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' }         // pending / draft / awaiting-action
-sage:   { bg: 'rgba(74,103,65,0.12)',  color: 'var(--afa-sage)' }         // approved / published / confirmed / accepted
-error:  { bg: 'rgba(179,38,30,0.1)',   color: 'var(--afa-error)' }        // cancelled / declined / failed
-muted:  { bg: 'rgba(245,245,240,0.08)',color: 'var(--afa-text-primary)' }// completed / neutral end-state
+gold:   { bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' }        // pending / draft / awaiting-action (GEN-2609-113: text was --afa-gold, 2.55:1)
+sage:   { bg: 'var(--afa-sage-tint)',  color: 'var(--afa-sage-bright)' }  // approved / published / confirmed / accepted
+error:  { bg: 'var(--afa-error-tint)', color: 'var(--afa-error-bright)' } // cancelled / declined / failed
+muted:  { bg: 'var(--afa-tint-08)',    color: 'var(--afa-text-primary)' } // completed / neutral end-state
 orange: { bg: 'rgba(255,90,54,0.1)',   color: 'var(--afa-fill-solid)' }   // declined-with-emphasis (fill-solid hue, not error's red)
 ```
 

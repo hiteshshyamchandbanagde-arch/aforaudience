@@ -284,13 +284,36 @@ function radiusTokenFor(value, def) {
 // ticket's 5 known values need. If a spaced form ever appears in
 // application code in the future, add it as its own key here (same
 // "byte/value-identical only" convention), not by changing the matcher.
+//
+// GEN-2609-113 - one exact entry per new colour token (decision record
+// section 2). `rgba(245,245,240,0.4)` left this map: --afa-text-muted is
+// now 0.5, so 0.4 is a ROUND (see COLOR_ROUND below), not an equivalence.
 const COLOR_MAP = {
   '#FFF': '--afa-white',
   'rgba(245,245,240,0.65)': '--afa-text-secondary',
-  'rgba(245,245,240,0.4)': '--afa-text-muted',
+  'rgba(245,245,240,0.5)': '--afa-text-muted',
+  'rgba(245,245,240,0.8)': '--afa-text-soft',
   'rgba(245,245,240,0.15)': '--afa-border-resting',
+  'rgba(245,245,240,0.04)': '--afa-tint-04',
+  'rgba(245,245,240,0.06)': '--afa-tint-06',
   'rgba(245,245,240,0.08)': '--afa-tint-08',
   'rgba(245,245,240,0.1)': '--afa-tint-10',
+  'rgba(245,245,240,0.12)': '--afa-tint-12',
+  'rgba(245,245,240,0.2)': '--afa-tint-20',
+  'rgba(245,245,240,0.3)': '--afa-tint-30',
+  'rgba(201,151,58,0.08)': '--afa-amber-wash',
+  'rgba(201,151,58,0.15)': '--afa-amber-tint',
+  'rgba(201,151,58,0.4)': '--afa-amber-border',
+  'rgba(201,151,58,0.6)': '--afa-amber-strong',
+  'rgba(179,38,30,0.1)': '--afa-error-tint',
+  'rgba(179,38,30,0.3)': '--afa-error-edge',
+  'rgba(74,103,65,0.12)': '--afa-sage-tint',
+  'rgba(39,103,73,0.15)': '--afa-success-tint',
+  'rgba(255,90,54,0.2)': '--afa-fill-tint',
+  'rgba(74,111,165,0.15)': '--afa-blue-tint',
+  'rgba(0,0,0,0.3)': '--afa-shadow',
+  'rgba(10,10,10,0.7)': '--afa-scrim',
+  'rgba(10,10,10,0.9)': '--afa-scrim-strong',
 }
 
 // GEN-2609-090 - one definition per --categories name, so `mapFor()` can

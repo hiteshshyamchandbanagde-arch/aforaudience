@@ -126,7 +126,7 @@ t('processLine: `bg` (a non-DOM status-map key) still exact-matches, not compoun
 })
 
 t('processLine: Recharts `fill` prop exact-matches', () => {
-  const line = "                      tick={{ fill: 'rgba(245,245,240,0.4)' }}"
+  const line = "                      tick={{ fill: 'rgba(245,245,240,0.5)' }}"
   const out = processLine(line, false, DEFAULT_DEFS)
   assert.equal(out, "                      tick={{ fill: 'var(--afa-text-muted)' }}")
 })
@@ -163,7 +163,7 @@ t('GEN-2609-101: a `--categories` run that excludes colour never touches classNa
 })
 
 t('GEN-2609-102: processLine converts an unquoted whole-value colour inside a raw <style> block', () => {
-  const line = '        .afa-events-type-filter { color: rgba(245,245,240,0.4); background: none; }'
+  const line = '        .afa-events-type-filter { color: rgba(245,245,240,0.5); background: none; }'
   const out = processLine(line, true, DEFAULT_DEFS)
   assert.equal(out, '        .afa-events-type-filter { color: var(--afa-text-muted); background: none; }')
 })
