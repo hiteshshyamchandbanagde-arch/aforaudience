@@ -609,7 +609,7 @@ export default function CheckoutPage() {
                   padding: 'var(--afa-space-10px) 0 var(--afa-space-1)',
                   fontSize: 'var(--afa-text-ui)',
                   opacity: 0.75,
-                  borderTop: '1px dashed rgba(245,245,240,0.12)',
+                  borderTop: '1px dashed var(--afa-tint-12)',
                   marginTop: 'var(--afa-space-6px)',
                 }}
               >
@@ -771,7 +771,7 @@ export default function CheckoutPage() {
         {error && (
           <div
             style={{
-              background: 'rgba(179,38,30,0.08)',
+              background: 'var(--afa-error-tint)',
               color: 'var(--afa-error-bright)',
               padding: 'var(--afa-space-10px) var(--afa-space-14px)',
               borderRadius: 'var(--afa-radius-md)',

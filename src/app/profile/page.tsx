@@ -110,8 +110,8 @@ const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
   borderRadius: 'var(--afa-radius-lg)',
   padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
-  border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.07)',
-  boxShadow: active ? '0 0 0 4px rgba(201,151,58,0.12)' : 'none',
+  border: active ? '1.5px solid var(--afa-amber)' : '1px solid var(--afa-tint-06)',
+  boxShadow: active ? '0 0 0 4px var(--afa-amber-tint)' : 'none',
   transition: 'border-color 400ms ease, box-shadow 400ms ease',
 })
 
@@ -614,8 +614,8 @@ function ProfileContent() {
             .afa-profile-page-container textarea:focus,
             .afa-profile-page-container select:focus {
               outline: none;
-              border-color: rgba(201,151,58,0.5) !important;
-              box-shadow: 0 0 0 3px rgba(201,151,58,0.08);
+              border-color: var(--afa-amber-border) !important;
+              box-shadow: 0 0 0 3px var(--afa-amber-wash);
             }
           `}</style>
 
@@ -647,7 +647,7 @@ function ProfileContent() {
                   style={{
                     display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
                     textDecoration: 'none',
-                    borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
+                    borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
                     color: 'var(--afa-text-primary)',
                   }}
                 >
@@ -678,7 +678,7 @@ function ProfileContent() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--afa-tint-10)' }} />
                 ) : (
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid rgba(201,151,58,0.3)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700 }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-amber-border)', color: 'var(--afa-amber)', fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700 }}>
                     {(initialDisplayName || user?.name || '?').trim().slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -736,7 +736,7 @@ function ProfileContent() {
                         style={{
                           display: 'flex', alignItems: 'center', width: '100%', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-14px) var(--afa-space-4)',
                           textAlign: 'left',
-                          borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
+                          borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
                           color: row.danger ? 'var(--afa-error-bright)' : 'var(--afa-text-primary)',
                         }}
                       >

@@ -10,14 +10,14 @@ import { useLocale } from "@/lib/i18n/translate"
 function JourneyStep({ n, title, detail }: { n: number; title: string; detail: string }) {
   return (
     <div style={{ display: "flex", gap: "24px", padding: "32px 0", borderBottom: "1px solid var(--afa-tint-08)" }}>
-      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-title)", color: "var(--afa-amber)" }}>
+      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", border: "1px solid var(--afa-amber-border)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-title)", color: "var(--afa-amber)" }}>
         {n}
       </div>
       <div>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 600, color: "var(--afa-text-inverse)", margin: "0 0 8px" }}>
           {title}
         </h3>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "rgba(245,245,240,0.75)", margin: 0, maxWidth: "560px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-soft)", margin: 0, maxWidth: "560px" }}>
           {detail}
         </p>
       </div>
@@ -112,7 +112,7 @@ export default function ForArtistsPage() {
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 500, color: "var(--afa-text-inverse)", margin: "0 0 16px" }}>
           {tr.forArtistsPage.finalCtaHeading}
         </h2>
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "rgba(245,245,240,0.75)", maxWidth: "480px", margin: "0 auto 32px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.6, color: "var(--afa-text-soft)", maxWidth: "480px", margin: "0 auto 32px" }}>
           {tr.forArtistsPage.finalCtaSubtitle}
         </p>
         <Link

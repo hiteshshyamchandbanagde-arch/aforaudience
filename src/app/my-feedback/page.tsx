@@ -66,7 +66,7 @@ const STATUS_KEY: Record<Exclude<FeedbackStatus, 'RESOLVED'>, { key: keyof Dicti
   BUILD_COMPLETE: { key: 'statusInProgress', ...STATUS_TONE.orange },
   IN_TEST: { key: 'statusBeingTested', ...STATUS_TONE.orange },
   REOPENED: { key: 'statusReopened', ...STATUS_TONE.orange },
-  REJECTED: { key: 'statusNotPlanned', bg: STATUS_TONE.muted.bg, color: 'rgba(245,245,240,0.6)' },
+  REJECTED: { key: 'statusNotPlanned', bg: STATUS_TONE.muted.bg, color: 'var(--afa-text-secondary)' },
 }
 
 function statusStyleFor(tr: Dictionary, item: FeedbackItem): { label: string } & StatusToneStyle {
@@ -177,7 +177,7 @@ function FeedbackDetailOverlay({
     >
       <div
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(245,245,240,0.45)' }}
+        style={{ position: 'absolute', inset: 0, background: 'var(--afa-tint-30)' }}
       />
       <div
         onTouchStart={handleTouchStart}
@@ -189,11 +189,11 @@ function FeedbackDetailOverlay({
           background: 'var(--afa-surface-raised)',
           padding: '28px 24px',
           overflowY: 'auto',
-          boxShadow: '-8px 0 24px rgba(0,0,0,0.15)',
+          boxShadow: '-8px 0 24px var(--afa-shadow)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-          <div style={{ fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.5)' }}>
+          <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-muted)' }}>
             {tr.myFeedbackPage.ofTemplate.replace('{i}', String(index + 1)).replace('{n}', String(items.length))}
           </div>
           <Button
@@ -206,7 +206,7 @@ function FeedbackDetailOverlay({
           </Button>
         </div>
 
-        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
           {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
           {item.displayId && <> · {item.displayId}</>}
         </div>
@@ -232,15 +232,15 @@ function FeedbackDetailOverlay({
 
         {item.latestNote && (
           <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
-            <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
-            <p style={{ margin: 0, fontSize: 'var(--afa-text-body)', fontStyle: 'italic', color: 'rgba(245,245,240,0.75)' }}>&quot;{item.latestNote}&quot;</p>
+            <p style={{ margin: 0, fontSize: 'var(--afa-text-body)', fontStyle: 'italic', color: 'var(--afa-text-soft)' }}>&quot;{item.latestNote}&quot;</p>
           </div>
         )}
 
         {item.resolvedAt && (
-          <div style={{ marginTop: '16px', fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.55)' }}>
+          <div style={{ marginTop: '16px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>
             {tr.myFeedbackPage.resolvedTemplate.replace('{date}', formatDateTime(item.resolvedAt))}
           </div>
         )}
@@ -330,12 +330,12 @@ export default function MyFeedbackPage() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, marginBottom: '4px', color: 'var(--afa-text-primary)' }}>
           {tr.myFeedbackPage.heading}
         </h1>
-        <p style={{ color: 'rgba(245,245,240,0.6)', marginBottom: '28px' }}>
+        <p style={{ color: 'var(--afa-text-secondary)', marginBottom: '28px' }}>
           {tr.myFeedbackPage.subtitle}
         </p>
 
         {error && (
-          <div style={{ padding: '16px', background: '#FFEBEE', borderRadius: 'var(--afa-radius-lg)', color: '#C62828', marginBottom: '20px' }}>
+          <div style={{ padding: '16px', background: 'var(--afa-error-tint)', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-error-bright)', marginBottom: '20px' }}>
             {error}
           </div>
         )}
@@ -352,7 +352,7 @@ export default function MyFeedbackPage() {
               border: '1px solid var(--afa-tint-08)',
             }}
           >
-            <p style={{ color: 'rgba(245,245,240,0.6)', margin: 0 }}>
+            <p style={{ color: 'var(--afa-text-secondary)', margin: 0 }}>
               {tr.myFeedbackPage.emptyState}
             </p>
           </div>
@@ -379,7 +379,7 @@ export default function MyFeedbackPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      <div style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                         {tr.myFeedbackPage[CATEGORY_KEY[item.category]]} · {formatDate(item.createdAt)}
                         {item.displayId && <> · {item.displayId}</>}
                       </div>

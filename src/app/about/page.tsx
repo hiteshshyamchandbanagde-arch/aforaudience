@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const INK = "var(--afa-text-primary)"
 const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
-const MIST = "rgba(245,245,240,0.12)"
+const MIST = "var(--afa-tint-12)"
 // BUG-2609-047 - this comment above already said the intent was to
 // reuse the site's real brand vocabulary, not hardcode - but these 3
 // consts did exactly that, missed by the dispatch's exact-string-match

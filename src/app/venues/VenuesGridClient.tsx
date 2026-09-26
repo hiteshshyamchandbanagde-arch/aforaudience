@@ -94,7 +94,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
            win - an inline style's border would always beat a stylesheet
            :hover rule regardless of specificity tricks. */
         .afa-venue-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
-        .afa-venue-card:hover { border-color: rgba(201,151,58,0.6); }
+        .afa-venue-card:hover { border-color: var(--afa-amber-strong); }
         .afa-venue-card-title { color: var(--afa-text-primary); transition: color 0.3s ease; }
         .afa-venue-card:hover .afa-venue-card-title { color: var(--afa-amber); }
         .afa-venue-card-arrow { opacity: 0; }
@@ -103,9 +103,9 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
            listbox trigger/option hover states, same inline-style-can't-
            :hover reasoning as the card border above. */
         .afa-city-filter-trigger { border-color: var(--afa-border-resting); }
-        .afa-city-filter-trigger:hover { border-color: rgba(201,151,58,0.4); }
+        .afa-city-filter-trigger:hover { border-color: var(--afa-amber-border); }
         .afa-city-filter-option { background: transparent; }
-        .afa-city-filter-option:hover { background: rgba(245,245,240,0.06); }
+        .afa-city-filter-option:hover { background: var(--afa-tint-06); }
       `}</style>
 
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-start" }}>
@@ -144,10 +144,10 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
             <span style={{ opacity: selectedCity === "All Cities" ? 0.65 : 1 }}>
               {selectedCity === "All Cities" ? tr.venuesPage.filterAllCities : cityOptions.find((c) => c.city === selectedCity)?.label ?? selectedCity}
             </span>
-            <ChevronDownIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
+            <ChevronDownIcon style={{ width: "16px", height: "16px", color: "var(--afa-text-muted)", flexShrink: 0, transition: "transform 0.2s ease", transform: cityOpen ? "rotate(180deg)" : "none" }} />
           </Button>
           {cityOpen && (
-            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
+            <ul style={{ position: "absolute", zIndex: 20, top: "calc(100% + 4px)", left: 0, right: 0, margin: 0, padding: "4px 0", listStyle: "none", background: "var(--afa-surface-page)", border: "1px solid var(--afa-border-resting)", boxShadow: "0 12px 40px var(--afa-shadow)" }}>
               <li>
                 <Button
                   variant="bare"
@@ -214,7 +214,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               transition: "opacity 0.15s ease",
             }}
           >
-            <SpinnerOverlay isNavigating={isNavigatingThis} size={24} accentColor="var(--afa-fill-solid)" scrimBackground="rgba(20,20,20,0.7)" />
+            <SpinnerOverlay isNavigating={isNavigatingThis} size={24} accentColor="var(--afa-fill-solid)" scrimBackground="var(--afa-scrim)" />
 
             <div style={{ position: "relative", width: "100%", aspectRatio: "4 / 3", overflow: "hidden" }}>
               {photo ? (
@@ -242,8 +242,8 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "1px solid rgba(245,245,240,0.2)",
-                  background: "rgba(10,10,10,0.4)",
+                  border: "1px solid var(--afa-tint-20)",
+                  background: "var(--afa-scrim)",
                   backdropFilter: "blur(4px)",
                   color: "var(--afa-text-primary)",
                   transition: "opacity 0.3s ease",
@@ -257,7 +257,7 @@ export default function VenuesGridClient({ venues, defaultCity }: { venues: Venu
               <h2 className="afa-venue-card-title" style={{ fontFamily: "var(--font-display)", fontSize: "26px", lineHeight: 1.05, letterSpacing: "-0.01em", marginBottom: "6px" }}>
                 {v.name}
               </h2>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
                 <span>{cityLabel(v.city, v.country)}</span>
                 <span style={{ opacity: 0.5 }}>·</span>
                 <span>{v.capacity.toLocaleString("en-IN")} {tr.venuesPage.seatsLabel}</span>

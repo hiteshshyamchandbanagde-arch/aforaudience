@@ -245,7 +245,7 @@ function PerfDivider() {
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
       <div style={{ position: 'absolute', left: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
-      <div style={{ flex: 1, borderTop: '1px dashed rgba(245,245,240,0.12)' }} />
+      <div style={{ flex: 1, borderTop: '1px dashed var(--afa-tint-12)' }} />
       <div style={{ position: 'absolute', right: -12, width: 20, height: 20, borderRadius: '50%', background: 'var(--afa-surface-page)' }} />
     </div>
   )
@@ -564,14 +564,14 @@ export default function MyTicketsPage() {
                     overflow: 'hidden',
                     background: 'var(--afa-surface-raised)',
                     borderRadius: 'var(--afa-radius-xl)',
-                    border: isGhosted ? '1px solid rgba(245,245,240,0.06)' : '1px solid rgba(245,245,240,0.1)',
+                    border: isGhosted ? '1px solid var(--afa-tint-06)' : '1px solid var(--afa-tint-10)',
                     cursor: isGhosted ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
                     opacity: (isGhosted ? 0.55 : 1) * (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.85 : 1),
                     transition: 'opacity 0.15s ease',
                   }}
                 >
                   {isNavigating && (
-                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'rgba(10,10,10,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '3px solid var(--afa-border-resting)', borderTopColor: 'var(--afa-amber)', animation: 'afa-spin 0.7s linear infinite' }} />
                     </div>
                   )}
@@ -588,7 +588,7 @@ export default function MyTicketsPage() {
                     <div
                       style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, rgba(10,10,10,0.88) 100%)',
+                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, var(--afa-scrim-strong) 100%)',
                       }}
                     />
                     <div style={{ position: 'absolute', right: 10, top: 10 }}>

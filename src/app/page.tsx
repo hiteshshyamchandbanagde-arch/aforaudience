@@ -79,7 +79,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
             left: size === "strip" ? "28px" : "20px",
             top: "16px",
             display: "inline-flex",
-            background: "rgba(10,10,10,0.7)",
+            background: "var(--afa-scrim)",
             backdropFilter: "blur(4px)",
             padding: "5px 9px",
             borderRadius: "var(--afa-radius-xs)",
@@ -93,7 +93,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
           {tr.homePage.bentoIllustrativeLabel}
         </span>
       )}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.88) 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, var(--afa-scrim-strong) 100%)" }} />
       <div style={{ position: "absolute", left: size === "strip" ? "28px" : "20px", right: "20px", bottom: "20px" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
           {typeLabel} · {event.venue ? event.venue.city : tr.eventsPage.venueTBD}
@@ -103,7 +103,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)" }}>
           <LineupChips lineup={event.lineup} size={24} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.75)" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-soft)" }}>
             {event.isFree ? tr.eventsPage.freeBadge : event.ticketPrice ? `from ₹${event.ticketPrice}` : "—"}
           </span>
         </div>
@@ -208,7 +208,7 @@ export default function Home() {
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-inverse)", marginBottom: "var(--afa-space-3)" }}>
                 <span style={{ color: "var(--afa-brand-mark)" }}>A</span>forAudience
               </div>
-              <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "rgba(247,243,238,0.45)", lineHeight: 1.65, maxWidth: "280px" }}>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-muted)", lineHeight: 1.65, maxWidth: "280px" }}>
                 {tr.homePage.footerTagline}
               </p>
             </div>
@@ -245,13 +245,13 @@ export default function Home() {
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-body)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-5)" }}>{col.title}</div>
                 <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                   {col.links.map((link) => (
-                    <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "rgba(247,243,238,0.5)", textDecoration: "none" }}>{link.label}</Link></li>
+                    <li key={link.label}><Link href={link.href} style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-muted)", textDecoration: "none" }}>{link.label}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "rgba(247,243,238,0.3)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "32px", borderTop: "1px solid var(--afa-tint-08)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)", flexWrap: "wrap", gap: "var(--afa-space-2)" }}>
             <span>{tr.homePage.footerCopyright}</span>
             <span>{tr.homePage.footerMadeWith}</span>
           </div>
