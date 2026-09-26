@@ -1,3 +1,24 @@
+# Session Handoff — 26 Sept 2026, part 7 (chat — #708 colour merged, DB applied)
+
+Delta-only. `qa` code at `b401ecc` (#708).
+
+## 1. Done
+- **#708 GEN-2609-113** squash-merged (head `4f61e34`). **Ratchet: hex 0, rgba 0** (10 token-ok). Branch left for cleanup.
+- **Preview status was `failure` at merge**: a transient Google Fonts fetch (`schibsted_grotesk` module-not-found), not the PR. The `qa` build of the merge commit went READY. **Process fix (chat):** the merge step must gate on the commit *status* as well as check-runs. It gated only on check-runs this time; that was a chat error.
+- **QA DB:** `--afa-text-muted` → 0.5, `--afa-error-border` deleted, 19 new colour tokens inserted (65 colour rows, 109 total).
+- **Cache gap found:** tokens are cached (`unstable_cache`, tag `design-tokens`, no expiry) and only an editor save clears it. Chat SQL after a merge is invisible until then. Vercel's tag purge doesn't reach the Next data cache. Logged on GEN-2609-108 (guardrails) as a required "refresh token cache" action.
+- GEN-2609-113 → IN_TEST. Logged **GEN-2609-114** (colour follow-ups: cream modal backdrops → scrim, sage text ~2:1, 14 SVG-attribute var()s, grey poster placeholder to confirm).
+
+## 2. Hitesh
+- Editor save to refresh the token cache (see chat), then eyeball dashboards per HANDOFF part 6 §8.
+
+## 3. Next
+Editor guardrails (GEN-2609-108, including cache refresh) → button phase 3 (110) → spacing (107).
+
+**Ratchet on qa:** hex 0, rgba 0, font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 6 (CC — GEN-2609-113 colour closeout, pushed, needs merge + DB SQL)
 
 Delta-only. Branch `chore/gen-2609-113-colour-closeout` off `qa@9d04d6b`, pushed, **not merged**.
