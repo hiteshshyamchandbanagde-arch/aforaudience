@@ -12,7 +12,7 @@ import Button from '@/components/ui/Button'
 import { CONTRAST_PAIRS, composeRgba, planRestore, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
-import { COLOR_SECTIONS, tokenMeta, tokenMatches } from '@/lib/design-token-meta'
+import { COLOR_SECTIONS, tokenMeta, tokenMatches, tokenOrder } from '@/lib/design-token-meta'
 
 // /dashboard/admin/design-system — GEN-2609-075
 //
@@ -584,7 +584,7 @@ export default function AdminDesignSystemPage() {
             {GROUP_ORDER.map((group) => {
               const allGroupTokens = tokensByGroup.get(group) ?? []
               if (allGroupTokens.length === 0) return null
-              const groupTokens = allGroupTokens.filter((t) => tokenMatches(t.key, query))
+              const groupTokens = allGroupTokens.filter((t) => tokenMatches(t.key, query)).sort((a, b) => tokenOrder(a.key) - tokenOrder(b.key))
               if (groupTokens.length === 0) return null
               const coverage = groupCoverage(allGroupTokens)
               const groupDisabled = coverage === 'unused'

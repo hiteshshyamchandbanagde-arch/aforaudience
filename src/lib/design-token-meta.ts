@@ -168,3 +168,10 @@ export function tokenMatches(key: string, query: string): boolean {
   const m = tokenMeta(key)
   return key.toLowerCase().includes(q) || m.label.toLowerCase().includes(q) || m.usedFor.toLowerCase().includes(q)
 }
+
+// Position in TOKEN_META, which lists each colour subsection in reading
+// order (page before raised, primary text before muted, ...).
+const ORDER = new Map(Object.keys(TOKEN_META).map((k, i) => [k, i]))
+export function tokenOrder(key: string): number {
+  return ORDER.get(key) ?? Number.MAX_SAFE_INTEGER
+}
