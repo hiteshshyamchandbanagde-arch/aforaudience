@@ -1,3 +1,28 @@
+# Session Handoff — 26 Sept 2026 (chat — #705 merged + verified, decisions taken, radius dispatched)
+
+Delta-only. `qa` code at `6c5a315` (#705); docs after.
+
+## 1. Done
+- **#705** (GEN-2609-111, BUG-2609-058/059/060) squash-merged, Vercel READY, 0 runtime errors. Hitesh's click-through passed (restore confirm + undo; 1 version row each; radius tokens back at 8px/999px). All 4 RESOLVED/DEPLOYED_QA.
+- Stale tint-tokens handoff: already merged as #697 on 22 Sep. Nothing to do.
+- Logged **BUG-2609-061** (LOW): revert note nests the target's note and reports its token count, not the restore's diff.
+
+## 2. Decisions (chat, delegated by Hitesh — vetoable)
+- Full record: `docs/decisions/2026-09-26-radius-colour-scale.md`.
+- **Radius scale:** sharp 0 / xs 3 / sm 6 / md 8 / lg 12 / xl 16 / 2xl 20 / pill 999; `radius-10px` retired, `radius-12px` → `lg`.
+- **Colour:** cream tint ladder (04–30) + text ladder (muted/secondary/soft); **`--afa-text-muted` 0.40 → 0.50** (3.6:1 fails AA; 4.95:1 passes); tone tints for amber/error/sage/success/fill/blue; shadow/scrim tokens; hex mapped; `BrandLoader` exempt; `--afa-error-border` removed.
+- **Sequence:** radius (112) → bug batch (053/054/050) → colour (113) → **editor guardrails (108) ahead of** button phase 3 (110) → spacing (107, hidden from editor).
+
+## 3. Queued for CC
+- `docs/cc-dispatches/cc-prompt-radius-112.md` — radius 310 → 0. ~175 sites already map to existing tokens (radius category was never applied); ~33 bare numbers need a matcher extension. DB SQL goes in the handoff; chat applies after merge.
+
+## 4. Chat owes next
+- Bug-batch dispatch (053, 054, 050) and colour dispatch (113), written after radius merges.
+
+**Ratchet on qa:** hex 51, rgba 543, font-family 0, font-size 13, spacing 1929, radius 310, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 25 Sept 2026, part 3 (chat — admin click-through, 2 bugs, dispatch queued). END OF SESSION
 
 Delta-only. `qa` code is unchanged since `f81221d` (#704).
