@@ -444,7 +444,7 @@ export default function ArtistProfilePage({
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: "var(--afa-space-32px)" }}>
             <div style={{ display: "flex", gap: "var(--afa-space-2)", marginBottom: "var(--afa-space-4)", flexWrap: "wrap" }}>
               {artist.genre.map((g) => (
-                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "var(--afa-text-micro)", fontWeight: 600, padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "4px" }}>{g.toUpperCase()}</span>
+                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "var(--afa-text-micro)", fontWeight: 600, padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "var(--afa-radius-xs)" }}>{g.toUpperCase()}</span>
               ))}
             </div>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "var(--afa-text-primary)", lineHeight: 1.05, marginBottom: "var(--afa-space-3)", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", flexWrap: "wrap" }}>
@@ -535,7 +535,7 @@ export default function ArtistProfilePage({
             </div>
             <div style={{ display: "flex", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
               {artist.styleTag.map((tag) => (
-                <span key={tag} style={{ background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "99px", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
+                <span key={tag} style={{ background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
               ))}
             </div>
           </div>

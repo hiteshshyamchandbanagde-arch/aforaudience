@@ -61,7 +61,7 @@ function isPastEvent(e: { date: string; startTime: string }): boolean {
 // tier row, the General Admission fallback, and the free-event row.
 function SeatStepperButton({ onClick, glyph }: { onClick: () => void; glyph: '−' | '+' }) {
   return (
-    <Button variant="icon" onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "3px", border: "1px solid rgba(245,245,240,0.2)", color: "var(--afa-text-primary)" }}>{glyph}</Button>
+    <Button variant="icon" onClick={onClick} style={{ width: "26px", height: "26px", padding: 0, borderRadius: "var(--afa-radius-xs)", border: "1px solid rgba(245,245,240,0.2)", color: "var(--afa-text-primary)" }}>{glyph}</Button>
   )
 }
 
@@ -260,7 +260,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
           </p>
         )}
 
-        <div style={{ borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "20px" }}>
+        <div style={{ borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "20px" }}>
           {contributionMoment ? null : isPast ? (
             <div>
               <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
@@ -348,7 +348,7 @@ export default function SeatSelectionClientPage({ event }: { event: EventData | 
               {!event.isFree && !isNumbered && event.ticketTiers.length > 1 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
                   {event.ticketTiers.map((t) => (
-                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "var(--afa-tint-08)", padding: "4px 10px", borderRadius: "999px" }}>
+                    <span key={t.id} style={{ display: "inline-flex", alignItems: "center", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-primary)", background: "var(--afa-tint-08)", padding: "4px 10px", borderRadius: "var(--afa-radius-pill)" }}>
                       <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: colorForZone(t.sectionName, event.ticketTiers.map((tier) => tier.sectionName)), marginRight: "6px" }} />
                       {t.sectionName} · ₹{t.price}
                     </span>

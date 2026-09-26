@@ -262,7 +262,7 @@ export default function ArtistsPage() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "8px", color: "var(--afa-error)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
             {error}
           </div>
         )}
@@ -292,7 +292,7 @@ export default function ArtistsPage() {
 
         {/* FEATURED / RISING STAR */}
         {risingStar && (
-          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "16px", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
+          <div className="afa-featured-artist-card" style={{ background: "var(--afa-surface-raised)", border: "1px solid var(--afa-tint-10)", borderRadius: "var(--afa-radius-xl)", overflow: "hidden", marginBottom: "24px", display: "grid", gridTemplateColumns: "minmax(240px, 1.1fr) 1fr" }}>
             <div className="afa-featured-artist-photo" style={{ position: "relative", minHeight: "260px" }}>
               {risingStarPortraitUrl && !risingStarPhotoFailed ? (
                 <Photo src={risingStarPortraitUrl} alt={risingStar.user.displayName || risingStar.user.name} onError={() => setRisingStarPhotoFailed(true)} />
@@ -371,7 +371,7 @@ export default function ArtistsPage() {
                   className="afa-artist-card afa-focusable"
                   style={{
                     background: "var(--afa-surface-raised)",
-                    borderRadius: "10px",
+                    borderRadius: "var(--afa-radius-lg)",
                     overflow: "hidden",
                     border: "1px solid var(--afa-tint-10)",
                     position: "relative",
@@ -434,7 +434,7 @@ export default function ArtistsPage() {
                           fontSize: "var(--afa-text-caption)",
                           fontWeight: 700,
                           padding: "3px 10px",
-                          borderRadius: "99px",
+                          borderRadius: "var(--afa-radius-pill)",
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
                           background: CARD_BADGE[artist.sceneStatus]!.bg,
@@ -459,7 +459,7 @@ export default function ArtistsPage() {
                     <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "10px" }}>{displayName}</div>
                     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
                       {artist.styleTag.map((tag) => (
-                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "99px", fontWeight: 500 }}>{tag}</span>
+                        <span key={tag} style={{ fontFamily: "var(--font-sans)", background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-micro)", padding: "3px 10px", borderRadius: "var(--afa-radius-pill)", fontWeight: 500 }}>{tag}</span>
                       ))}
                     </div>
                   </div>

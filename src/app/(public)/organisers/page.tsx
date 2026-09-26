@@ -76,7 +76,7 @@ export default function OrganisersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tr.organisersPage.searchPlaceholder}
-              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "10px", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "18px 56px 18px 20px", borderRadius: "var(--afa-radius-lg)", border: "none", fontSize: "var(--afa-text-title)", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box" }}
             />
             <span style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)", fontSize: "var(--afa-text-subtitle)" }}>🔍</span>
           </BrowseSearchDropdown>
@@ -119,7 +119,7 @@ export default function OrganisersPage() {
                   className="hover-lift-card afa-focusable"
                   style={{
                     background: "var(--afa-surface-raised)",
-                    borderRadius: "3px",
+                    borderRadius: "var(--afa-radius-xs)",
                     overflow: "hidden",
                     border: "1px solid var(--afa-tint-10)",
                     position: "relative",

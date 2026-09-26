@@ -356,8 +356,8 @@ function EventsPageContent() {
         .afa-events-price-filter { font-family: var(--font-mono); font-size: var(--afa-text-small); text-transform: uppercase; letter-spacing: 0.1em; background: none; border: none; cursor: pointer; color: var(--afa-text-muted); padding: 0; transition: color 0.2s ease; }
         .afa-events-price-filter:hover { color: rgba(245,245,240,0.7); }
         .afa-events-price-filter.active { color: var(--afa-amber); }
-        .afa-events-select { padding: 8px 12px; border-radius: 3px; border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
-        .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 2px; border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
+        .afa-events-select { padding: 8px 12px; border-radius: var(--afa-radius-xs); border: 1px solid var(--afa-border-resting); font-size: var(--afa-text-ui); color: var(--afa-text-primary); background: var(--afa-surface-raised); cursor: pointer; outline: none; }
+        .afa-events-view-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--afa-radius-xs); border: none; cursor: pointer; background: transparent; color: rgba(245,245,240,0.5); transition: color 0.2s ease, background 0.2s ease; }
         .afa-events-view-btn:hover { color: var(--afa-text-primary); }
         /* GEN-2609-073 (resolved) - Hitesh's call: background moves to
            --afa-surface-raised, a normal "selected chip on a raised panel"
@@ -608,7 +608,7 @@ function EventsPageContent() {
                   <option value="fillingFast">{tr.eventsPage.sortFillingFast}</option>
                 </select>
 
-                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid var(--afa-border-resting)", borderRadius: "3px", padding: "3px" }}>
+                <div className="afa-events-view-toggle" style={{ marginLeft: "auto", display: "flex", gap: "4px", border: "1px solid var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "3px" }}>
                   <Button variant="icon" onClick={() => setView("grid")} aria-pressed={view === "grid"} aria-label={tr.eventsPage.gridViewLabel} className={`afa-events-view-btn${view === "grid" ? " active" : ""}`} style={{ color: undefined }}>
                     <GridViewIcon style={{ width: "16px", height: "16px" }} />
                   </Button>
@@ -627,7 +627,7 @@ function EventsPageContent() {
             {loading ? (
               <div style={{ textAlign: "center", padding: "80px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.eventsPage.loadingEvents}</div>
             ) : filtered.length === 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "3px", padding: "96px 20px", textAlign: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", border: "1px dashed var(--afa-border-resting)", borderRadius: "var(--afa-radius-xs)", padding: "96px 20px", textAlign: "center" }}>
                 <TheaterMark style={{ width: "40px", height: "40px", color: "rgba(201,151,58,0.6)" }} />
                 <p style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", color: "var(--afa-text-primary)", margin: 0 }}>
                   {tab === "past" ? tr.eventsPage.emptyNoPastTitle : events.length === 0 ? tr.eventsPage.emptyNoneYetTitle : tr.eventsPage.emptyNoneFoundTitle}

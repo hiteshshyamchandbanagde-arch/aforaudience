@@ -148,14 +148,14 @@ export default function RatePromptClientPage({
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-page-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "32px" }}>{event.title}</h1>
 
         {!overallSubmitted ? (
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)" }}>
             <p style={{ fontSize: "var(--afa-text-body-lg)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "16px" }}>{tr.ratePromptPage.rateOverall}</p>
             <Stars value={overallRating} onChange={setOverallRating} />
             <textarea
               value={overallComment}
               onChange={(e) => setOverallComment(e.target.value)}
               placeholder={tr.ratePromptPage.commentPlaceholder}
-              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "8px", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
+              style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
             {overallError && <p style={{ color: "var(--afa-error)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
             <Button
@@ -169,7 +169,7 @@ export default function RatePromptClientPage({
             </Button>
           </div>
         ) : (
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "20px 28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "20px 28px", marginBottom: "24px", border: "1px solid var(--afa-tint-10)", display: "flex", alignItems: "center", gap: "12px" }}>
             <span style={{ fontSize: "var(--afa-text-heading)", color: "var(--afa-amber)" }}>✓</span>
             <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)" }}>{tr.ratePromptPage.thanksForRating}</p>
           </div>
@@ -194,7 +194,7 @@ export default function RatePromptClientPage({
             {event.lineup.map((p) => {
               const rated = ratedIds.includes(p.id)
               return (
-                <div key={p.id} style={{ background: "var(--afa-surface-raised)", borderRadius: "3px", padding: "16px 20px", border: "1px solid var(--afa-tint-10)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+                <div key={p.id} style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xs)", padding: "16px 20px", border: "1px solid var(--afa-tint-10)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
                   <span style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{p.artist.user.displayName || p.artist.user.name}</span>
                   {rated ? (
                     <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)", fontWeight: 600 }}>{tr.ratePromptPage.rated}</span>
