@@ -15,7 +15,7 @@ async function requireAdmin() {
   const session = await getServerSession(authOptions)
   if (!session?.user) return null
   const user = await prisma.user.findUnique({
-    where: { id: (session.user as any).id },
+    where: { id: (session.user as { id?: string }).id },
     select: { id: true, role: true },
   })
   if (!user || user.role !== 'ADMIN') return null

@@ -342,8 +342,8 @@ export default function AdminDesignSystemPage() {
       const skipped = data.skipped?.length ?? 0
       showToast(`Restored ${data.changed} token(s).${skipped ? ` ${skipped} out-of-range value(s) left as they are.` : ''}`, 'success')
       loadVersionsQuiet()
-    } catch (err: any) {
-      showToast(err.message || 'Revert failed.', 'error')
+    } catch (err) {
+      showToast(err instanceof Error && err.message ? err.message : 'Revert failed.', 'error')
     } finally {
       setSaving(false)
       setConfirmingRevert(null)
