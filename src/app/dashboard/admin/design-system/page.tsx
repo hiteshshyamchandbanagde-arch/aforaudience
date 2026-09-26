@@ -143,6 +143,7 @@ export default function AdminDesignSystemPage() {
   const [confirmingRevert, setConfirmingRevert] = useState<DesignTokenVersion | null>(null)
   const [showHistory, setShowHistory] = useState(false)
   const [query, setQuery] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -312,6 +313,21 @@ export default function AdminDesignSystemPage() {
     }
   }
 
+  // GEN-2609-108 - clears the site's token cache without saving, for DB
+  // changes made outside this editor.
+  async function handleRefreshCache() {
+    setRefreshing(true)
+    try {
+      const res = await fetch('/api/admin/design-tokens/revalidate', { method: 'POST' })
+      if (!res.ok) throw new Error('Refresh failed')
+      showToast('Site cache cleared. The next page load uses the current database values.', 'success')
+    } catch {
+      showToast('Could not refresh the site cache.', 'error')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   async function handleRevert(versionId: string) {
     setSaving(true)
     try {
@@ -393,6 +409,16 @@ export default function AdminDesignSystemPage() {
                   onClick={() => setShowHistory((v) => !v)}
                 >
                   {showHistory ? 'Hide' : 'Show'} version history
+                </Button>
+                <Button
+                  variant="outline-neutral"
+                  size="md"
+                  fullWidth={false}
+                  onClick={handleRefreshCache}
+                  disabled={refreshing}
+                  title="Re-read tokens from the database now. Use after changes made outside this editor; otherwise the site picks them up within 5 minutes."
+                >
+                  {refreshing ? 'Refreshing…' : 'Refresh site cache'}
                 </Button>
                 <Button variant="outline-neutral" size="md" fullWidth={false} onClick={() => setConfirmingReset(true)} disabled={saving}>
                   Reset to defaults
