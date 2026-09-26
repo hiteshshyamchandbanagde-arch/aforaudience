@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
               </p>
 
               {error && (
-                <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
+                <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
                   {error}
                 </div>
               )}

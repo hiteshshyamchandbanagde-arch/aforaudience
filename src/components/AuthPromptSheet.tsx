@@ -125,7 +125,7 @@ export default function AuthPromptSheet({
         </div>
 
         {error && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}

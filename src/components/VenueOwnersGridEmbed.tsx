@@ -62,7 +62,7 @@ export default function VenueOwnersGridEmbed() {
   }
 
   if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.venueOwnersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error)", fontSize: "var(--afa-text-body)" }}>{error}</div>
+  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (owners.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.venueOwnersEmbed.emptyNone}</p>
 
   const filtered = owners.filter((o) => (o.user.displayName || o.user.name).toLowerCase().includes(search.toLowerCase()))

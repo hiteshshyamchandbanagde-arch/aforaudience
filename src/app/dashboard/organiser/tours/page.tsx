@@ -9,6 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 interface TourItem {
   id: string
@@ -22,9 +23,9 @@ interface TourItem {
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   DRAFT: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Draft' },
-  PENDING_CONSENT: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Awaiting artist consent' },
-  LIVE: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Live' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
+  PENDING_CONSENT: { ...STATUS_TONE.gold, label: 'Awaiting artist consent' },
+  LIVE: { ...STATUS_TONE.sage, label: 'Live' },
+  CANCELLED: { ...STATUS_TONE.error, label: 'Cancelled' },
   COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 

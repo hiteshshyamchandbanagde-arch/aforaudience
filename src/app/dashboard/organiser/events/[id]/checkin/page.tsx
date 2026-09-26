@@ -20,6 +20,7 @@ type ScanResult = {
 
 type Attendee = {
   bookingId: string
+  ticketCode: string | null
   name: string
   seats: Record<string, number>
   // Display-only, deterministic-not-real seat label for NUMBERED bookings
@@ -279,7 +280,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
           <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-2)', color: 'var(--afa-text-primary)' }}>
-              Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(booking ID printed on the ticket)</span>
+              Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(ticket ref printed on the ticket)</span>
             </label>
             <div style={{ display: 'flex', gap: 'var(--afa-space-10px)' }}>
               <input
@@ -287,7 +288,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') submitCode(manualCode) }}
-                placeholder="e.g., ckabc123..."
+                placeholder="e.g., AFA-7K3M-Q9TX"
                 style={{
                   flex: 1, padding: 'var(--afa-space-10px) var(--afa-space-3)', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)',
                   background: 'var(--afa-surface-raised)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)',
@@ -371,6 +372,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
                                 </p>
                                 {seatsSummary(a.seats) && (
                                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>{seatsSummary(a.seats)}</p>
+                                )}
+                                {a.ticketCode && (
+                                  <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, fontFamily: 'var(--font-mono)' }}>{a.ticketCode}</p>
                                 )}
                               </div>
                               <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: a.checkedInAt ? 'var(--afa-sage)' : 'var(--afa-text-primary)', opacity: a.checkedInAt ? 1 : 0.4 }}>

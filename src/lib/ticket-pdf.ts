@@ -42,6 +42,10 @@ const PAGE_H = 842
 
 export type TicketData = {
   bookingId: string
+  // BUG-2609-053 - printed as TICKET REF (what the customer reads out at
+  // the door or quotes to support). The QR still encodes bookingId so
+  // tickets issued before this keep scanning; check-in accepts either.
+  ticketCode: string | null
   eventTitle: string
   eventDate: Date
   eventStartTime: string
@@ -305,7 +309,7 @@ export async function generateTicketPdf(t: TicketData): Promise<Uint8Array> {
     cursorY -= 54
   }
 
-  drawDetail(page, sansBold, sans, col1X, cursorY, "BOOKING ID", t.bookingId, 9)
+  drawDetail(page, sansBold, sans, col1X, cursorY, "TICKET REF", t.ticketCode ?? t.bookingId, t.ticketCode ? 13 : 9)
 
   // ── Going with (companion tags), if any ─────────────────────────────
   // Only PENDING/ACCEPTED shown - a DECLINED tag means that person isn't

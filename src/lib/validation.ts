@@ -13,3 +13,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export function isValidEmailFormat(email: string): boolean {
   return typeof email === "string" && EMAIL_RE.test(email)
 }
+
+// BUG-2609-054 - the one username rule, shared by the register route,
+// /api/auth/username-check and RegisterForm so the live check can never
+// say "Available" for a name the server will then reject. 3-20 chars,
+// ASCII letters/digits/underscore. Pure, so it's safe in client code.
+export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/
+
+export function isValidUsernameFormat(username: string): boolean {
+  return typeof username === "string" && USERNAME_RE.test(username)
+}

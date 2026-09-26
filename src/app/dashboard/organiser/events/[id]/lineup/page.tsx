@@ -26,6 +26,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import BrandLoader from '@/components/BrandLoader'
 import MessageButton from '@/components/MessageButton'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 interface LineupSlot {
   id: string
@@ -50,9 +51,9 @@ interface EventInfo {
 }
 
 const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
-  PAID: { label: 'Paid', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
+  PAID: { label: 'Paid', ...STATUS_TONE.sage },
   FREE: { label: 'Free', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' },
-  BUY_IN: { label: 'Buy-in', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+  BUY_IN: { label: 'Buy-in', ...STATUS_TONE.gold },
 }
 
 function SortableRow({

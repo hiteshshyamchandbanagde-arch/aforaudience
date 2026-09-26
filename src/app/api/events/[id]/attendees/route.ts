@@ -68,6 +68,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
       return {
         bookingId: b.id,
+        ticketCode: b.ticketCode,
         name: b.user.displayName || b.user.name,
         seats: b.seats,
         seatLabel: bookerSeatLabel ?? null,

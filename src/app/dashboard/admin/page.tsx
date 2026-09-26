@@ -290,7 +290,9 @@ export default function AdminCommandCenter() {
               borderLeft: '4px solid var(--afa-green-deep)',
               borderRadius: 'var(--afa-radius-lg)',
               padding: '14px 18px',
-              color: 'var(--afa-green-deep)',
+              // BUG-2609-050 - green-deep text on this tint was 2.15:1.
+              // No STATUS_TONE matches this green bg, so text only.
+              color: 'var(--afa-sage-bright)',
               fontSize: 'var(--afa-text-ui)',
               fontWeight: 600,
             }}

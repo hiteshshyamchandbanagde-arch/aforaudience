@@ -5,13 +5,15 @@
 /* GEN-2609-111 - keep Tailwind's automatic source detection out of the
    non-source trees (root markdown, docs/, ddoc/, e2e/, scripts/). Their
    prose quotes arbitrary-value class names with placeholder values, which
-   Tailwind turned into invalid CSS that broke next dev. src/ stays
-   scanned. Paths are relative to this file. */
+   Tailwind turned into invalid CSS that broke next dev. The untracked
+   Figma/ export is excluded too: its .tsx leaked a stray rounded-[12px]
+   into the built CSS. src/ stays scanned. Paths are relative to this file. */
 @source not "../../*.md";
 @source not "../../docs";
 @source not "../../ddoc";
 @source not "../../e2e";
 @source not "../../scripts";
+@source not "../../Figma";
 
 @custom-variant dark (&:is(.dark *));
 

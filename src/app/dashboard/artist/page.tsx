@@ -7,7 +7,7 @@ import Link from 'next/link'
 import SiteNav from '@/components/SiteNav'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
-import { fillSolidTint, FILL_SOLID_TINT } from '@/lib/statusStyle'
+import { fillSolidTint, FILL_SOLID_TINT, STATUS_TONE } from '@/lib/statusStyle'
 import Button from '@/components/ui/Button'
 
 interface Application {
@@ -84,9 +84,9 @@ interface ArtistProfile {
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  REJECTED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
+  PENDING: { ...STATUS_TONE.gold },
+  APPROVED: { ...STATUS_TONE.sage },
+  REJECTED: { ...STATUS_TONE.error },
 }
 
 export default function ArtistDashboard() {

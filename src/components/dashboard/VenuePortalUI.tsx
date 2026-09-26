@@ -1,4 +1,5 @@
 import type { ReactNode, ButtonHTMLAttributes, CSSProperties } from 'react'
+import { STATUS_TONE } from '@/lib/statusStyle'
 export { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 
 // Shared visual layer for the Venue Owner Portal (dashboard/venue/*,
@@ -197,9 +198,9 @@ export function IconPhoneGlyph({ size = 16, style }: GlyphProps) {
 export type StatusPillTone = 'gold' | 'sage' | 'error' | 'muted'
 
 const TONE_STYLE: Record<StatusPillTone, { bg: string; color: string }> = {
-  gold: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  sage: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  error: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
+  gold: { ...STATUS_TONE.gold },
+  sage: { ...STATUS_TONE.sage },
+  error: { ...STATUS_TONE.error },
   muted: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)' },
 }
 

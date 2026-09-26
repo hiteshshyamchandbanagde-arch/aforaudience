@@ -12,6 +12,7 @@ import { useToast } from '@/components/Toast'
 import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 interface Application {
   id: string
@@ -60,23 +61,23 @@ interface EventDetail {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  DRAFT: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Draft' },
-  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)', label: 'Published' },
-  PENDING_APPROVAL: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)', label: 'Pending' },
-  CANCELLED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)', label: 'Cancelled' },
+  DRAFT: { ...STATUS_TONE.gold, label: 'Draft' },
+  APPROVED: { ...STATUS_TONE.sage, label: 'Published' },
+  PENDING_APPROVAL: { ...STATUS_TONE.gold, label: 'Pending' },
+  CANCELLED: { ...STATUS_TONE.error, label: 'Cancelled' },
   COMPLETED: { bg: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', label: 'Completed' },
 }
 
 const APPLICATION_STYLE: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
-  APPROVED: { bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
-  REJECTED: { bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' },
+  PENDING: { ...STATUS_TONE.gold },
+  APPROVED: { ...STATUS_TONE.sage },
+  REJECTED: { ...STATUS_TONE.error },
   // Applied when the lineup was full at application time (Hitesh's own
   // admin note, 22 Jul) - a real FCFS queue instead of a hard rejection.
   // No auto-promotion on cancellation exists yet (separate gap), so an
   // Organiser promotes manually the same way as any pending applicant -
   // the Approve/Reject UI below is enabled for WAITLISTED too.
-  WAITLISTED: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' },
+  WAITLISTED: { ...STATUS_TONE.gold },
 }
 
 function describeDefaultCompensation(event: EventDetail): string {
@@ -357,8 +358,8 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       style={{
                         fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
                         padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)',
-                        background: event.venueBooking.status === 'CONFIRMED' ? 'rgba(74,103,65,0.12)' : event.venueBooking.status === 'CANCELLED' ? 'rgba(179,38,30,0.1)' : 'rgba(201,151,58,0.15)',
-                        color: event.venueBooking.status === 'CONFIRMED' ? 'var(--afa-sage)' : event.venueBooking.status === 'CANCELLED' ? 'var(--afa-error)' : 'var(--afa-gold)',
+                        background: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).bg,
+                        color: (event.venueBooking.status === 'CONFIRMED' ? STATUS_TONE.sage : event.venueBooking.status === 'CANCELLED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
                     >
                       Booking {event.venueBooking.status.toLowerCase()}

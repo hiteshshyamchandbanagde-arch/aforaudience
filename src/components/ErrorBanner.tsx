@@ -19,7 +19,7 @@ export function ErrorBanner({ children, style }: { children: ReactNode; style?: 
         background: 'rgba(179,38,30,0.1)',
         border: '1px solid rgba(179,38,30,0.3)',
         borderRadius: 'var(--afa-radius-md)',
-        color: 'var(--afa-error)',
+        color: 'var(--afa-error-bright)',
         fontSize: 'var(--afa-text-body)',
         ...style,
       }}
@@ -37,7 +37,7 @@ export function SuccessBanner({ children, style }: { children: ReactNode; style?
         background: 'rgba(74,103,65,0.12)',
         border: '1px solid rgba(74,103,65,0.3)',
         borderRadius: 'var(--afa-radius-md)',
-        color: 'var(--afa-sage)',
+        color: 'var(--afa-sage-bright)',
         fontSize: 'var(--afa-text-body)',
         ...style,
       }}

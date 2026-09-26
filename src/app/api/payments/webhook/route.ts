@@ -5,6 +5,7 @@ import {
   verifyWebhookSignature,
 } from '@/lib/razorpay'
 import { deliverTicket } from '@/lib/ticket-delivery'
+import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
 // POST /api/payments/webhook
 //
@@ -207,6 +208,7 @@ export async function POST(req: Request) {
         },
       }),
     ])
+    await ensureTicketCode(payment.bookingId)
 
     // Trigger ticket delivery. Idempotent — if the browser confirm path
     // already fired this, deliverTicket() no-ops on its atomic

@@ -5,7 +5,7 @@ import { isUsernameAvailable } from "@/lib/auth-helpers"
 import { generateAndSendOtp } from "@/lib/otp"
 import { generateResetToken } from "@/lib/tokens" // generic sha256 token - reused for email verification too
 import { sendEmailVerificationEmail } from "@/lib/email"
-import { isValidEmailFormat } from "@/lib/validation"
+import { isValidEmailFormat, isValidUsernameFormat } from "@/lib/validation"
 
 // Browse-first model: registration never accepts a role. Every account is
 // created as AUDIENCE. Artist / Organiser / Venue Owner are opt-in upgrades
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(normalizedUsername)) {
+    if (!isValidUsernameFormat(normalizedUsername)) {
       return NextResponse.json(
         {
           error: "Username must be 3-20 characters, letters/numbers/underscore only",

@@ -8,6 +8,7 @@ import {
 } from '@/lib/razorpay'
 import { getPlatformSettings } from '@/lib/platform-settings'
 import { deliverTicket } from '@/lib/ticket-delivery'
+import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
 // PENDING bookings expire after this window if payment doesn't complete.
 // Keeps abandoned checkouts from permanently eating capacity. 15 minutes
@@ -348,6 +349,7 @@ export async function POST(req: Request) {
         where: { id: booking.id },
         data: { status: 'CONFIRMED', expiresAt: null },
       })
+      const ticketCode = await ensureTicketCode(booking.id)
       // Fire ticket delivery via after() — same reasoning as the paid
       // confirm route: the audience response shouldn't block on Resend/
       // PDF generation, but a bare un-awaited call risks Vercel freezing
@@ -356,7 +358,7 @@ export async function POST(req: Request) {
       after(() => deliverTicket(booking.id))
       return NextResponse.json(
         {
-          booking: confirmed,
+          booking: { ...confirmed, ticketCode },
           message: "You're in! Free entry confirmed.",
         },
         { status: 201 }

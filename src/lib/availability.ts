@@ -1,3 +1,5 @@
+import { STATUS_TONE } from '@/lib/statusStyle'
+
 // Shared "how full is this event" status, used on the events listing
 // cards and the event detail page so both stay in sync on the same
 // definition rather than each hand-rolling their own threshold.
@@ -45,5 +47,5 @@ export function getAvailabilityStatus(totalSeats: number, availableSeats: number
 export const AVAILABILITY_BADGE: Record<AvailabilityStatus, { label: string; bg: string; color: string }> = {
   'sold-out': { label: 'Sold Out', bg: 'var(--afa-brown-black)', color: 'var(--afa-cream)' },
   'filling-fast': { label: 'Filling Fast', bg: 'var(--afa-error)', color: 'var(--afa-cream)' },
-  available: { label: 'Spots Available', bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' },
+  available: { label: 'Spots Available', ...STATUS_TONE.sage },
 }

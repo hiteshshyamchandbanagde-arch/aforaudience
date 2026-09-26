@@ -10,6 +10,7 @@ import BrandLoader from '@/components/BrandLoader'
 import DashboardShell from '@/components/DashboardShell'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 interface EventItem {
   id: string
@@ -30,10 +31,10 @@ interface EventItem {
 
 function compensationBadge(event: EventItem): { label: string; bg: string; color: string } {
   if (event.defaultCompensationType === 'PAID') {
-    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' }
+    return { label: `You're paid: ₹${event.defaultFeeAmount?.toLocaleString('en-IN') ?? '—'}`, ...STATUS_TONE.sage }
   }
   if (event.defaultCompensationType === 'BUY_IN') {
-    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, bg: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' }
+    return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, ...STATUS_TONE.error }
   }
   return { label: 'Free / Exposure slot', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' }
 }
