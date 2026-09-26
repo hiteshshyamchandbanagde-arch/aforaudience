@@ -161,7 +161,7 @@ export default function VenueRequestsPage() {
                   </div>
 
                   {r.offers.length > 0 && (
-                    <div style={{ background: '#171717', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', margin: '16px 0' }}>
+                    <div style={{ background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', margin: '16px 0' }}>
                       {r.offers.map((o) => (
                         <div key={o.id} style={{ padding: '4px 0' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)' }}>
@@ -197,7 +197,7 @@ export default function VenueRequestsPage() {
                           min="1"
                           max="10000000"
                           className="avp-field"
-                          style={{ flex: 1, padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
+                          style={{ flex: 1, padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ marginBottom: '12px' }}>
@@ -208,7 +208,7 @@ export default function VenueRequestsPage() {
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [r.id]: e.target.value.slice(0, 300) }))}
                           maxLength={300}
                           className="avp-field"
-                          style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: '#171717', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
+                          style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

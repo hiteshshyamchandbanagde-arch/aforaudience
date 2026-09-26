@@ -260,7 +260,7 @@ export default function VenueDashboard() {
 
                   <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--afa-tint-08)', paddingTop: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <IconUsers size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
+                      <IconUsers size={16} style={{ color: 'var(--afa-amber)' }} />
                       <div>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{venue.capacity}</p>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Capacity</p>
@@ -268,7 +268,7 @@ export default function VenueDashboard() {
                     </div>
                     {venue.seatingMode === 'NUMBERED' ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
+                        <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
                         <div>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{priceRange(venue)}</p>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Per seat</p>
@@ -276,7 +276,7 @@ export default function VenueDashboard() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <IconTag size={16} style={{ color: 'rgba(201,151,58,0.8)' }} />
+                        <IconTag size={16} style={{ color: 'var(--afa-amber)' }} />
                         <div>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', margin: 0 }}>{rateTypeLabel(venue)}</p>
                           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', margin: 0 }}>Rate Type</p>

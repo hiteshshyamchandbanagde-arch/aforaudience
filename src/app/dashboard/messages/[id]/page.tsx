@@ -137,7 +137,7 @@ export default function MessageThreadPage() {
                 style={{
                   alignSelf: mine ? 'flex-end' : 'flex-start',
                   maxWidth: '75%',
-                  background: mine ? 'var(--afa-sage, #4a6741)' : 'rgba(245,245,240,0.06)',
+                  background: mine ? 'var(--afa-sage)' : 'var(--afa-tint-06)',
                   color: mine ? 'var(--afa-white)' : 'var(--afa-text-primary)',
                   borderRadius: 'var(--afa-radius-lg)',
                   padding: '8px 12px',
@@ -172,7 +172,7 @@ export default function MessageThreadPage() {
                 flex: 1,
                 padding: '10px 12px',
                 borderRadius: 'var(--afa-radius-2xl)',
-                border: '1px solid rgba(245,245,240,0.2)',
+                border: '1px solid var(--afa-tint-20)',
                 fontFamily: 'var(--font-sans)',
                 fontSize: 'var(--afa-text-body)',
                 background: 'var(--afa-surface-raised)',

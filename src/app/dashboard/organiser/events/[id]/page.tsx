@@ -365,7 +365,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
                       Booking {event.venueBooking.status.toLowerCase()}
                     </span>
                     {!!event.venueBooking.platformFeeAmount && event.venueBooking.platformFeeAmount > 0 && (
-                      <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
+                      <div style={{ marginTop: 'var(--afa-space-3)', paddingTop: 'var(--afa-space-3)', borderTop: '1px solid var(--afa-tint-06)' }}>
                         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: walletBalance > 0 ? '8px' : 0 }}>
                           Platform fee remaining: ₹{event.venueBooking.platformFeeAmount.toLocaleString('en-IN')}
                         </p>
@@ -498,19 +498,19 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/lineup`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
               🎤 Lineup
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/checkin`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
               🎟 Check-In
             </Link>
             <Link
               href={`/dashboard/organiser/events/${event.id}/sales`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: 'var(--afa-space-3) var(--afa-space-6)', borderRadius: 'var(--afa-radius-md)' }}
             >
               📊 Sales
             </Link>
@@ -528,7 +528,7 @@ export default function OrganiserEventDetailPage({ params }: { params: Promise<{
               style={{
                 color: event.status === 'APPROVED' ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                 background: event.status === 'APPROVED' ? 'transparent' : undefined,
-                border: event.status === 'APPROVED' ? '1px solid rgba(245,245,240,0.2)' : 'none',
+                border: event.status === 'APPROVED' ? '1px solid var(--afa-tint-20)' : 'none',
                 opacity: toggling ? 0.6 : 1,
               }}
             >

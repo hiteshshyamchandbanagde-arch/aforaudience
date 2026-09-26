@@ -713,7 +713,7 @@ function RestorePreview({ changes }: { changes: { key: string; from: string; to:
 
 function ConfirmDialog({ title, body, confirmLabel, onConfirm, onCancel }: { title: string; body: React.ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-border-resting)', padding: 24, maxWidth: 440, width: '100%' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', color: 'var(--afa-text-primary)', marginBottom: 10 }}>{title}</h3>
         {/* div, not p: body may be a ReactNode with block content (RestorePreview's list) */}

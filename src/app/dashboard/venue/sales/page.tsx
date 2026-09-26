@@ -195,11 +195,11 @@ export default function VenueOwnerSalesOverviewPage() {
                   <AreaChart data={timeline} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#c9973a" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="#c9973a" stopOpacity={0} />
+                        <stop offset="0%" style={{ stopColor: 'var(--afa-amber)' }} stopOpacity={0.35} />
+                        <stop offset="100%" style={{ stopColor: 'var(--afa-amber)' }} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid stroke="rgba(245,245,240,0.06)" vertical={false} />
+                    <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} vertical={false} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={formatBucketLabel}
@@ -215,14 +215,14 @@ export default function VenueOwnerSalesOverviewPage() {
                       tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }}
                     />
                     <Tooltip
-                      cursor={{ stroke: 'rgba(201,151,58,0.4)', strokeDasharray: '3 3' }}
-                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
-                      labelStyle={{ color: 'rgba(245,245,240,0.5)' }}
+                      cursor={{ style: { stroke: 'var(--afa-amber-border)' }, strokeDasharray: '3 3' }}
+                      contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
+                      labelStyle={{ color: 'var(--afa-text-muted)' }}
                       labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
-                      itemStyle={{ color: '#c9973a' }}
+                      itemStyle={{ color: 'var(--afa-amber)' }}
                       formatter={(v: any) => [money(Number(v)), 'Revenue']}
                     />
-                    <Area type="monotone" dataKey="revenue" stroke="#c9973a" strokeWidth={2} fill="url(#revFill)" dot={false} activeDot={{ r: 4, fill: '#c9973a' }} />
+                    <Area type="monotone" dataKey="revenue" style={{ stroke: 'var(--afa-amber)' }} strokeWidth={2} fill="url(#revFill)" dot={false} activeDot={{ r: 4, style: { fill: 'var(--afa-amber)' } }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -237,17 +237,17 @@ export default function VenueOwnerSalesOverviewPage() {
                 <div style={{ height: `${topVenues.length * 44 + 20}px`, width: '100%', marginBottom: '20px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topVenues} layout="vertical" margin={{ left: 8, right: 24 }}>
-                      <CartesianGrid stroke="rgba(245,245,240,0.06)" horizontal={false} />
+                      <CartesianGrid style={{ stroke: 'var(--afa-tint-06)' }} horizontal={false} />
                       <XAxis type="number" tickFormatter={compactMoney} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-muted)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
-                        cursor={{ fill: 'rgba(245,245,240,0.03)' }}
-                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
+                        cursor={{ style: { fill: 'var(--afa-tint-04)' } }}
+                        contentStyle={{ background: 'var(--afa-surface-inverse)', border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                         formatter={(v: any) => [money(Number(v)), 'Revenue']}
                       />
                       <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
                         {topVenues.map((v, i) => (
-                          <Cell key={v.id} fill={i === 0 ? '#c9973a' : 'rgba(201,151,58,0.45)'} />
+                          <Cell key={v.id} style={{ fill: i === 0 ? 'var(--afa-amber)' : 'var(--afa-amber-border)' }} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -282,7 +282,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         className="avp-hover-border"
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: '#171717', borderRadius: 'var(--afa-radius-md)',
+                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-inverse)', borderRadius: 'var(--afa-radius-md)',
                           border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
@@ -316,13 +316,13 @@ export default function VenueOwnerSalesOverviewPage() {
             {organisers.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden', border: '1px solid var(--afa-tint-06)' }}>
                 {organisers.map((o) => (
                   <div
                     key={o.organiserId}
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
-                      fontSize: 'var(--afa-text-ui)', padding: '9px 12px', background: 'rgba(245,245,240,0.02)', color: 'var(--afa-text-secondary)',
+                      fontSize: 'var(--afa-text-ui)', padding: '9px 12px', background: 'var(--afa-tint-04)', color: 'var(--afa-text-secondary)',
                     }}
                   >
                     <span style={{ color: 'var(--afa-text-primary)' }}>{o.orgName}</span>

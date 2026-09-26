@@ -964,7 +964,7 @@ export default function AdminSettingsPage() {
                     gap: 10,
                     marginBottom: 14,
                     paddingBottom: 14,
-                    borderBottom: '1px solid rgba(245,245,240,0.06)',
+                    borderBottom: '1px solid var(--afa-tint-06)',
                   }}
                 >
                   <div style={{ width: 92, fontSize: 'var(--afa-text-body)', flexShrink: 0 }}>

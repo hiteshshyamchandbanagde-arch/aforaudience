@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
                 key={u.id}
                 style={{
                   background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
-                  border: u.isSuspended ? '1px solid rgba(179,38,30,0.4)' : '1px solid rgba(245,245,240,0.08)',
+                  border: u.isSuspended ? '1px solid var(--afa-error-edge)' : '1px solid var(--afa-tint-08)',
                 }}
               >
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '10px' }}>

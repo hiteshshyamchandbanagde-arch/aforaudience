@@ -43,9 +43,9 @@ interface ArtistRow {
 type SortKey = 'name' | 'gigsPerformed' | 'hypeScore' | 'firstGigDate' | 'organiserAvgRating' | 'verifiedAttendees' | 'featuredOrganiserCount'
 
 const TIER_STYLE: Record<string, { label: string; bg: string; color: string }> = {
-  NEW_EMERGING: { label: 'New / Emerging', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-secondary)' },
-  RISING: { label: 'Rising', bg: 'rgba(22,101,52,0.15)', color: 'var(--afa-green-deep)' },
-  FEATURED: { label: 'Featured', bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
+  NEW_EMERGING: { label: 'New / Emerging', bg: 'var(--afa-tint-06)', color: 'var(--afa-text-secondary)' },
+  RISING: { label: 'Rising', bg: 'var(--afa-success-tint)', color: 'var(--afa-green-deep)' },
+  FEATURED: { label: 'Featured', bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' },
   HEADLINER: { label: '★ Headliner', bg: 'var(--afa-amber)', color: 'var(--afa-on-fill-solid)' },
 }
 
@@ -244,7 +244,7 @@ export default function AdminArtistsPage() {
                   key={a.id}
                   style={{
                     background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
-                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
+                    border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
                   }}
                 >
                   <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '12px' }}>
@@ -302,12 +302,12 @@ export default function AdminArtistsPage() {
                   </div>
 
                   {expandedNote === a.id && a.headlinerNote && (
-                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'rgba(201,151,58,0.08)', borderRadius: 'var(--afa-radius-sm)' }}>
+                    <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7, marginTop: '10px', padding: '8px 10px', background: 'var(--afa-amber-wash)', borderRadius: 'var(--afa-radius-sm)' }}>
                       &quot;{a.headlinerNote}&quot;
                     </p>
                   )}
 
-                  <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
+                  <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--afa-tint-06)' }}>
                     <Stat label="Gigs Performed" value={a.gigsPerformed} />
                     <Stat
                       label="Hype Score"

@@ -29,9 +29,9 @@ interface DiaryEntry {
 }
 
 const STATUS_META: Record<DiaryStatus, { label: string; color: string; bg: string }> = {
-  PENDING: { label: 'Pending', color: 'var(--afa-amber)', bg: 'rgba(201,151,58,0.15)' },
-  IN_PROGRESS: { label: 'In Progress', color: 'var(--afa-blue)', bg: 'rgba(74,111,165,0.15)' },
-  COMPLETED: { label: 'Completed', color: 'var(--afa-green-deep)', bg: 'rgba(22,101,52,0.15)' },
+  PENDING: { label: 'Pending', color: 'var(--afa-amber)', bg: 'var(--afa-amber-tint)' },
+  IN_PROGRESS: { label: 'In Progress', color: 'var(--afa-blue)', bg: 'var(--afa-blue-tint)' },
+  COMPLETED: { label: 'Completed', color: 'var(--afa-green-deep)', bg: 'var(--afa-success-tint)' },
 }
 
 const STATUS_ORDER: DiaryStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED']
@@ -177,7 +177,7 @@ export default function AdminDiaryPage() {
                 key={entry.id}
                 style={{
                   padding: '16px 20px',
-                  borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : 'none',
+                  borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : 'none',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: entry.notes ? '6px' : '0' }}>
@@ -201,7 +201,7 @@ export default function AdminDiaryPage() {
                         fontWeight: 600,
                         padding: '5px 12px',
                         borderRadius: 'var(--afa-radius-pill)',
-                        border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid rgba(245,245,240,0.12)',
+                        border: s === entry.status ? `1px solid ${STATUS_META[s].color}` : '1px solid var(--afa-tint-12)',
                         background: s === entry.status ? STATUS_META[s].bg : 'var(--afa-surface-raised)',
                         color: s === entry.status ? STATUS_META[s].color : 'var(--afa-text-secondary)',
                         opacity: s === entry.status ? 1 : 0.7,

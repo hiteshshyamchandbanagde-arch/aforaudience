@@ -99,8 +99,8 @@ export default function MessagesInboxPage() {
                       gap: '12px',
                       padding: '16px',
                       borderRadius: 'var(--afa-radius-lg)',
-                      border: t.unread ? '1px solid rgba(201,151,58,0.18)' : '1px solid rgba(245,245,240,0.06)',
-                      background: t.unread ? 'rgba(201,151,58,0.07)' : 'var(--afa-surface-raised)',
+                      border: t.unread ? '1px solid var(--afa-amber-tint)' : '1px solid var(--afa-tint-06)',
+                      background: t.unread ? 'var(--afa-amber-wash)' : 'var(--afa-surface-raised)',
                       textDecoration: 'none',
                       color: 'var(--afa-text-primary)',
                     }}
@@ -134,7 +134,7 @@ export default function MessagesInboxPage() {
                             letterSpacing: '0.04em',
                             padding: '2px 6px',
                             borderRadius: 'var(--afa-radius-xs)',
-                            background: 'rgba(201,151,58,0.15)',
+                            background: 'var(--afa-amber-tint)',
                             color: 'var(--afa-amber)',
                           }}
                         >

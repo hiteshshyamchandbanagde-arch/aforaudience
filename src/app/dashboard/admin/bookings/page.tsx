@@ -263,8 +263,8 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '12px',
                           padding: '10px 12px',
-                          background: 'rgba(179,38,30,0.12)',
-                          border: '1px solid rgba(179,38,30,0.3)',
+                          background: 'var(--afa-error-tint)',
+                          border: '1px solid var(--afa-error-edge)',
                           borderRadius: 'var(--afa-radius-md)',
                           fontSize: 'var(--afa-text-ui)',
                           color: 'var(--afa-error-bright)',

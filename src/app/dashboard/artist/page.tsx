@@ -358,7 +358,7 @@ export default function ArtistDashboard() {
           )}
 
           {completionPercent < 100 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: '1px solid rgba(255,90,54,0.2)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', marginBottom: 'var(--afa-space-6)', border: '1px solid var(--afa-fill-tint)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--afa-space-10px)', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
                 <span style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)' }}>Profile {completionPercent}% complete</span>
                 <Link href="/dashboard/artist/edit" style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-fill-solid)', textDecoration: 'none' }}>
@@ -456,13 +456,13 @@ export default function ArtistDashboard() {
                       </p>
 
                       {reply ? (
-                        <div style={{ marginTop: 'var(--afa-space-1)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
+                        <div style={{ marginTop: 'var(--afa-space-1)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid var(--afa-tint-06)' }}>
                           <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.85, lineHeight: 1.5 }}>
                             <strong>Your reply:</strong> {reply.text}
                           </p>
                         </div>
                       ) : (
-                        <div style={{ marginTop: 'var(--afa-space-10px)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid rgba(245,245,240,0.06)', display: 'flex', gap: 'var(--afa-space-2)' }}>
+                        <div style={{ marginTop: 'var(--afa-space-10px)', paddingTop: 'var(--afa-space-10px)', borderTop: '1px solid var(--afa-tint-06)', display: 'flex', gap: 'var(--afa-space-2)' }}>
                           <input
                             type="text"
                             placeholder="Write a reply..."
@@ -612,7 +612,7 @@ export default function ArtistDashboard() {
                             inset: 0,
                             zIndex: 2,
                             borderRadius: 'var(--afa-radius-lg)',
-                            background: 'rgba(255,255,255,0.7)',
+                            background: 'var(--afa-tint-30)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',

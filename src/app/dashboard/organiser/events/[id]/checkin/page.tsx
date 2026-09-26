@@ -221,7 +221,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
             padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
             background: lastResult.ok ? 'var(--afa-forest)' : 'var(--afa-error)',
-            color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+            color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px var(--afa-shadow)',
             cursor: 'pointer',
           }}
         >

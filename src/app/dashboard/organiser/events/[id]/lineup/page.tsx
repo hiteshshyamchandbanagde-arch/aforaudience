@@ -52,7 +52,7 @@ interface EventInfo {
 
 const COMP_LABEL: Record<string, { label: string; bg: string; color: string }> = {
   PAID: { label: 'Paid', ...STATUS_TONE.sage },
-  FREE: { label: 'Free', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' },
+  FREE: { label: 'Free', bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' },
   BUY_IN: { label: 'Buy-in', ...STATUS_TONE.gold },
 }
 
@@ -113,7 +113,7 @@ function SortableRow({
           {item.artistName}
         </p>
         {item.startLabel && item.endLabel && (
-          <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>{item.startLabel} – {item.endLabel}</p>
+          <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>{item.startLabel} – {item.endLabel}</p>
         )}
       </div>
 
@@ -134,9 +134,9 @@ function SortableRow({
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
           whiteSpace: 'nowrap',
-          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.15)',
-          background: item.isFeaturedVouch ? 'rgba(201,151,58,0.15)' : 'transparent',
-          color: item.isFeaturedVouch ? 'var(--afa-amber)' : 'rgba(245,245,240,0.5)',
+          border: item.isFeaturedVouch ? '1px solid var(--afa-gold)' : '1px solid var(--afa-border-resting)',
+          background: item.isFeaturedVouch ? 'var(--afa-amber-tint)' : 'transparent',
+          color: item.isFeaturedVouch ? 'var(--afa-amber)' : 'var(--afa-text-muted)',
         }}
       >
         {item.isFeaturedVouch ? '★ Featured' : '☆ Vouch Featured'}
@@ -153,7 +153,7 @@ function SortableRow({
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
           style={{ width: '56px', padding: '6px 8px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
-        <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>min</span>
+        <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>min</span>
       </div>
 
       <MessageButton contextType="PERFORMANCE" contextId={item.id} label="Message" />
@@ -294,7 +294,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginTop: '12px', marginBottom: '6px' }}>
             🎤 {event.title} — Lineup
           </h1>
-          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'rgba(245,245,240,0.55)', marginBottom: '24px' }}>
+          <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: '24px' }}>
             Drag ⠿ to reorder. Set each artist's duration in minutes — start/end times recalculate automatically from the event's start time ({event.startTime}).
             {event.maxPerformers !== null && ` Max ${event.maxPerformers} performer${event.maxPerformers === 1 ? '' : 's'}.`}
           </p>
@@ -305,7 +305,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
 
           {lineup.length > 0 && (
             <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
-              <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
+              <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'var(--afa-text-secondary)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -330,8 +330,8 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '32px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)' }}>
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.6)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '32px', textAlign: 'center', border: '1px solid var(--afa-tint-06)' }}>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-secondary)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>
             </div>
@@ -356,7 +356,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                 onClick={handleSave}
                 disabled={!dirty || saving}
                 style={{
-                  background: dirty ? undefined : 'rgba(245,245,240,0.3)',
+                  background: dirty ? undefined : 'var(--afa-tint-30)',
                   cursor: dirty && !saving ? 'pointer' : 'not-allowed',
                   opacity: 1,
                 }}

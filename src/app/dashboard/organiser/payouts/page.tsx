@@ -168,7 +168,7 @@ export default function OrganiserPayoutsPage() {
                     value={accountIdInput}
                     onChange={(e) => setAccountIdInput(e.target.value)}
                     placeholder="acc_XXXXXXXXXXXXXX"
-                    style={{ flex: 1, fontSize: 'var(--afa-text-body)', fontFamily: 'var(--font-mono)', padding: '10px 12px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                    style={{ flex: 1, fontSize: 'var(--afa-text-body)', fontFamily: 'var(--font-mono)', padding: '10px 12px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                   />
                   <Button
                     variant="primary"

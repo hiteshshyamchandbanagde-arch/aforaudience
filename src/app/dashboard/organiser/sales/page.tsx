@@ -114,7 +114,7 @@ export default function OrganiserSalesOverviewPage() {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               Sales Overview
             </h1>
-            <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>
+            <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 30s` : ''}
             </span>
           </div>
@@ -136,13 +136,13 @@ export default function OrganiserSalesOverviewPage() {
 
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No confirmed sales in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed sales in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
-                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -153,10 +153,10 @@ export default function OrganiserSalesOverviewPage() {
 
           <Section title="By event">
             {events.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No events yet.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No events yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'rgba(245,245,240,0.5)', padding: '0 12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--afa-text-muted)', padding: '0 12px' }}>
                   <span>Event</span>
                   <span>Revenue</span>
                   <span>Tickets</span>
@@ -169,7 +169,7 @@ export default function OrganiserSalesOverviewPage() {
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
                       fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
-                      border: '1px solid rgba(245,245,240,0.06)', textDecoration: 'none', color: 'var(--afa-text-primary)',
+                      border: '1px solid var(--afa-tint-06)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -191,7 +191,7 @@ export default function OrganiserSalesOverviewPage() {
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
-      <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
     </div>
   )
@@ -199,7 +199,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid var(--afa-tint-06)' }}>
       <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

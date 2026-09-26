@@ -891,7 +891,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         disabled={celebrityInviting}
                       />
                       {celebritySearchResults.length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid var(--afa-shadow)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {celebritySearchResults.map((u) => (
                             <Button
                               key={u.id}
@@ -949,7 +949,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         disabled={panelistInviting}
                       />
                       {panelistSearchResults.length > 0 && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid rgba(14,12,10,0.15)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid var(--afa-shadow)', borderRadius: 'var(--afa-radius-md)', marginTop: 'var(--afa-space-1)', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
                           {panelistSearchResults.map((u) => (
                             <Button
                               key={u.id}
@@ -1056,7 +1056,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         </div>
                       )}
                       {venueSections.filter((s) => (s.level || '') === lvl).map((s) => (
-                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid rgba(245,245,240,0.06)' }}>
+                        <div key={tierKey(s)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', padding: 'var(--afa-space-3) 0', borderBottom: '1px solid var(--afa-tint-06)' }}>
                           <div>
                             <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
                               {selectedVenue?.seatingMode === 'NUMBERED' && (

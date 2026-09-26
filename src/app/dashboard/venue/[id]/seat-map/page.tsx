@@ -50,7 +50,7 @@ type MarkerDraft = {
 }
 const MARKER_META: Record<MarkerType, { glyph: string; color: string; name: string }> = {
   GATE: { glyph: 'G', color: 'var(--afa-blue-dark)', name: 'Gate' },
-  FIRE_EXTINGUISHER: { glyph: 'F', color: 'var(--afa-error, #b3261e)', name: 'Fire Extinguisher' },
+  FIRE_EXTINGUISHER: { glyph: 'F', color: 'var(--afa-error)', name: 'Fire Extinguisher' },
   STAGE_DISTANCE_REF: { glyph: 'S', color: 'var(--afa-plum)', name: 'Stage-Distance Reference' },
 }
 
@@ -278,21 +278,21 @@ const inputStyle = {
 const SECTION_TIER_FILLS: { fill: string; marker: string | null; labelDark: boolean }[] = [
   { fill: 'var(--afa-fill-solid)', marker: null, labelDark: false }, // Front - full-saturation orange
   { fill: fillSolidTint(0.48), marker: null, labelDark: false }, // Middle - muted orange
-  { fill: 'rgba(245,245,240,0.14)', marker: 'var(--afa-amber)', labelDark: true }, // Rear - neutral + amber marker
+  { fill: 'var(--afa-border-resting)', marker: 'var(--afa-amber)', labelDark: true }, // Rear - neutral + amber marker
   { fill: fillSolidTint(0.24), marker: null, labelDark: false }, // Upper - fainter orange
-  { fill: 'rgba(245,245,240,0.07)', marker: 'var(--afa-amber)', labelDark: true }, // Rooftop - faintest neutral + amber marker
+  { fill: 'var(--afa-tint-06)', marker: 'var(--afa-amber)', labelDark: true }, // Rooftop - faintest neutral + amber marker
 ]
 function tierFill(tierLabel: string, tierOrder: string[]) {
   const idx = tierOrder.indexOf(tierLabel)
   if (idx < 0) return SECTION_TIER_FILLS[0]
   if (idx < SECTION_TIER_FILLS.length) return SECTION_TIER_FILLS[idx]
-  // Beyond the table: keep alternating orange/neutral, opacity roughly
-  // halving each extra step past the last defined tier.
+  // Beyond the table: keep alternating orange/neutral, orange opacity roughly halving each
+  // extra step; the neutral steps only reached 0.03-0.035, i.e. --afa-tint-04 (GEN-2609-113).
   const extra = idx - SECTION_TIER_FILLS.length + 1
   const opacity = Math.max(0.03, 0.07 / (extra + 1))
   return extra % 2 === 0
     ? { fill: fillSolidTint(opacity), marker: null, labelDark: false }
-    : { fill: `rgba(245,245,240,${opacity})`, marker: 'var(--afa-amber)', labelDark: true }
+    : { fill: 'var(--afa-tint-04)', marker: 'var(--afa-amber)', labelDark: true }
 }
 function colorForTier(tierLabel: string, tierOrder: string[]) {
   return tierFill(tierLabel, tierOrder).fill
@@ -1472,8 +1472,8 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               padding: 'var(--afa-space-3) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', marginBottom: 'var(--afa-space-18px)',
               // Frozen = amber tone-pair (matches Figma's lock/warning
               // treatment - amber as accent, never a large orange fill).
-              background: seatMapFrozen ? 'rgba(201,151,58,0.12)' : 'rgba(245,245,240,0.03)',
-              border: seatMapFrozen ? '1px solid rgba(201,151,58,0.35)' : '1px dashed rgba(245,245,240,0.2)',
+              background: seatMapFrozen ? 'var(--afa-amber-tint)' : 'var(--afa-tint-04)',
+              border: seatMapFrozen ? '1px solid var(--afa-amber-border)' : '1px dashed var(--afa-tint-20)',
             }}
           >
             <div style={{ fontSize: 'var(--afa-text-ui)', color: seatMapFrozen ? 'var(--afa-amber)' : 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)' }}>
@@ -1581,7 +1581,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startDrawMyself}
               style={{
                 flex: '1 1 300px', textAlign: 'left', padding: '22px',
-                borderRadius: 'var(--afa-radius-lg)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)',
+                borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
@@ -1611,7 +1611,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
 
               {isMobile ? (
-                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-14px)' }}>
+                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-14px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-1)' }}>
                     Viewing only on this screen
                   </p>
@@ -1637,7 +1637,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       variant="icon"
                       onClick={() => setShowTerminologyPanel(true)}
                       title="What Section / Aisle / Level / Seat mean, and how the live preview behaves"
-                      style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(245,245,240,0.25)', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', fontWeight: 700 }}
+                      style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--afa-tint-20)', color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', fontWeight: 700 }}
                     >
                       ?
                     </Button>
@@ -1650,7 +1650,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       title={manualPlacement ? 'Clicking the canvas places a new seat - click to turn off' : 'Canvas clicks are safe (no new seats) - click to enable manual placement'}
                       style={{
                         padding: '9px var(--afa-space-4)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                        border: manualPlacement ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)',
+                        border: manualPlacement ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)',
                         background: manualPlacement ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                         color: manualPlacement ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                       }}
@@ -1689,15 +1689,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           What's your seating shape?
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
-                          <Button variant="bare" onClick={() => setWizardShape('rows')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape !== 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardShape !== 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="bare" onClick={() => setWizardShape('rows')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape !== 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardShape !== 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape !== 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Straight rows facing the stage
                           </Button>
-                          <Button variant="bare" onClick={() => setWizardShape('other')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape === 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardShape === 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="bare" onClick={() => setWizardShape('other')} style={{ padding: 'var(--afa-space-2) var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardShape === 'other' ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardShape === 'other' ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardShape === 'other' ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Curved rows, round tables, or a U-shape
                           </Button>
                         </div>
                         {wizardShape === 'other' && (
-                          <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>
+                          <div style={{ marginTop: 'var(--afa-space-10px)', padding: 'var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>
                             Guided Setup only builds straight rows for now — curved and round layouts aren't supported yet. Draw that shape by hand below (turn on Manual placement), or keep using the straight-row fields here as a starting point and adjust by hand afterward.
                           </div>
                         )}
@@ -1713,15 +1713,15 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                           <IconSection size={13} style={{ opacity: 0.6 }} /> Sections
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-10px)' }}>
-                          <Button variant="bare" onClick={() => setMultiZone(false)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === false ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === false ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="bare" onClick={() => setMultiZone(false)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === false ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardMultiZone === false ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === false ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             One section for everything
                           </Button>
-                          <Button variant="bare" onClick={() => setMultiZone(true)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === true ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: wizardMultiZone === true ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                          <Button variant="bare" onClick={() => setMultiZone(true)} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, border: wizardMultiZone === true ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: wizardMultiZone === true ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: wizardMultiZone === true ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                             Multiple sections
                           </Button>
                         </div>
                         {gridConfig.rowGroups.map((rg, i) => (
-                          <div key={rg.id} style={{ border: '1px solid rgba(245,245,240,0.12)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', background: 'var(--afa-surface-raised)' }}>
+                          <div key={rg.id} style={{ border: '1px solid var(--afa-tint-12)', borderRadius: 'var(--afa-radius-md)', padding: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-2)', background: 'var(--afa-surface-raised)' }}>
                             <div style={{ display: 'flex', gap: 'var(--afa-space-2)', alignItems: 'center', marginBottom: 'var(--afa-space-2)', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: 'var(--afa-text-micro)', opacity: 0.6, minWidth: '55px' }}>Section {i + 1}:</span>
                               <label style={{ fontSize: 'var(--afa-text-small)' }}>Rows:</label>
@@ -1733,7 +1733,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                               <label style={{ fontSize: 'var(--afa-text-small)' }}>Price:</label>
                               <input
                                 type="number"
-                                style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
+                                style={{ ...inputStyle, width: '80px', ...(zoneIsFree(rg.zoneName) ? { opacity: 0.5, background: 'var(--afa-tint-04)' } : {}) }}
                                 placeholder="₹"
                                 disabled={zoneIsFree(rg.zoneName)}
                                 value={zonePrices[rg.zoneName] || ''}
@@ -1776,7 +1776,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         </label>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
                           {(['left', 'center', 'right'] as const).map((opt) => (
-                            <Button variant="bare" key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)', background: gridConfig.rowAlignment === opt ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
+                            <Button variant="bare" key={opt} onClick={() => setGridConfig((g) => ({ ...g, rowAlignment: opt }))} style={{ padding: '7px var(--afa-space-14px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, textTransform: 'capitalize', border: gridConfig.rowAlignment === opt ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-20)', background: gridConfig.rowAlignment === opt ? FILL_SOLID_TINT : 'var(--afa-surface-raised)', color: gridConfig.rowAlignment === opt ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)' }}>
                               {opt}
                             </Button>
                           ))}
@@ -1895,7 +1895,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 <label
                   style={{
                     padding: '7px var(--afa-space-3)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-small)', fontWeight: 600, cursor: underlayUploading ? 'default' : 'pointer',
-                    border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
+                    border: '1px solid var(--afa-tint-20)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)',
                     opacity: underlayUploading ? 0.6 : 1,
                   }}
                 >
@@ -1952,7 +1952,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <label style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600 }}>Price:</label>
                     <input
                       type="number"
-                      style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
+                      style={{ ...inputStyle, width: '90px', ...(zoneIsFree(activeTier) ? { opacity: 0.5, background: 'var(--afa-tint-04)' } : {}) }}
                       placeholder="₹"
                       disabled={zoneIsFree(activeTier)}
                       value={zonePrices[activeTier] || ''}
@@ -2195,7 +2195,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                     <span style={{ fontSize: 'var(--afa-text-ui)' }}>{t}: {seats.filter((s) => s.tierLabel === t).length}</span>
                     <input
                       type="number"
-                      style={{ ...inputStyle, width: '80px', ...(zoneIsFree(t) ? { opacity: 0.5, background: 'rgba(245,245,240,0.04)' } : {}) }}
+                      style={{ ...inputStyle, width: '80px', ...(zoneIsFree(t) ? { opacity: 0.5, background: 'var(--afa-tint-04)' } : {}) }}
                       placeholder="₹"
                       disabled={zoneIsFree(t)}
                       value={raw || ''}
@@ -2254,7 +2254,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}
+      style={{ position: 'fixed', inset: 0, background: 'var(--afa-scrim)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -2271,7 +2271,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         </p>
         <div style={{ borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)' }}>
           {rows.map((r, i) => (
-            <div key={r.term} style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-14px)', borderTop: i === 0 ? 'none' : '1px solid rgba(245,245,240,0.08)' }}>
+            <div key={r.term} style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-14px)', borderTop: i === 0 ? 'none' : '1px solid var(--afa-tint-08)' }}>
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>
                 {r.glyph}
               </span>
@@ -2283,7 +2283,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.06)', border: '1px solid rgba(245,245,240,0.16)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5, color: 'var(--afa-text-primary)' }}>
+        <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-06)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5, color: 'var(--afa-text-primary)' }}>
           <div style={{ fontWeight: 600, marginBottom: 'var(--afa-space-1)' }}>Live-preview behaviour (builder)</div>
           Guided answers that change <b>counts or structure</b> (rows, seats, sections) regenerate the map — seats fade/scale in (180ms) so the change is legible. Answers that only shift position (aisle width, alignment) <b>snap</b> instantly with no animation, so fine-tuning feels direct. Manual edits (select, reassign, remove) never animate — they apply on click.
         </div>
