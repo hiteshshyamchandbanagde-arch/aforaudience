@@ -8,6 +8,7 @@ import BackLink from '@/components/BackLink'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
+import { STATUS_TONE } from '@/lib/statusStyle'
 
 const inputStyle = {
   width: '100%',
@@ -380,7 +381,7 @@ export default function TourDetailPage() {
                         {new Date(stop.date).toLocaleDateString()} · {stop.venue ? `${stop.venue.name}, ${stop.venue.city}` : 'No venue'}
                       </p>
                     </div>
-                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: stop.status === 'APPROVED' ? 'rgba(74,103,65,0.12)' : 'rgba(201,151,58,0.15)', color: stop.status === 'APPROVED' ? 'var(--afa-sage)' : 'var(--afa-gold)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '5px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-pill)', background: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).bg, color: (stop.status === 'APPROVED' ? STATUS_TONE.sage : STATUS_TONE.gold).color }}>
                       {stop.status === 'APPROVED' ? 'Live' : stop.status.replace('_', ' ')}
                     </span>
                   </div>

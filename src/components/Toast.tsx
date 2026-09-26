@@ -96,7 +96,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           // don't have.
           const accent = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-green-mid)'
           const bg = t.kind === 'error' ? 'rgba(179,38,30,0.1)' : t.kind === 'info' ? 'rgba(201,151,58,0.12)' : 'rgba(74,103,65,0.12)'
-          const text = t.kind === 'error' ? 'var(--afa-error)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage)'
+          const text = t.kind === 'error' ? 'var(--afa-error-bright)' : t.kind === 'info' ? 'var(--afa-amber)' : 'var(--afa-sage-bright)'
           // BUG-2609-043: the badge glyph's color was a hardcoded 'white'
           // literal - only actually legible against 2 of these 3 dynamic
           // `accent` backgrounds (measured ~6.5:1 on error/green, but only

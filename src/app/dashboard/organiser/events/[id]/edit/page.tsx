@@ -802,11 +802,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         padding: 'var(--afa-space-1) var(--afa-space-10px)',
                         borderRadius: 'var(--afa-radius-pill)',
                         marginBottom: 'var(--afa-space-2)',
-                        ...(specialNotesStatus === 'APPROVED'
-                          ? { background: 'rgba(74,103,65,0.12)', color: 'var(--afa-sage)' }
-                          : specialNotesStatus === 'REJECTED'
-                            ? { background: 'rgba(179,38,30,0.1)', color: 'var(--afa-error)' }
-                            : { background: 'rgba(201,151,58,0.15)', color: 'var(--afa-gold)' }),
+                        // BUG-2609-050 - from STATUS_TONE, not re-typed: the
+                        // copy used --afa-sage / --afa-error text on the tint,
+                        // which fails contrast; the shared tone uses -bright.
+                        background: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).bg,
+                        color: (specialNotesStatus === 'APPROVED' ? STATUS_TONE.sage : specialNotesStatus === 'REJECTED' ? STATUS_TONE.error : STATUS_TONE.gold).color,
                       }}
                     >
                       {specialNotesStatus === 'APPROVED' ? '✓ Approved — visible on your event page' : specialNotesStatus === 'REJECTED' ? '✕ Rejected' : '⏳ Pending review'}
