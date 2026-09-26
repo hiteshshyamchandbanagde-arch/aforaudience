@@ -30,6 +30,8 @@ const {
   CATEGORY_DEFS,
   DEFAULT_CATEGORIES,
   migrateTailwindRadiusBracket,
+  RADIUS_MAP,
+  RADIUS_ROUND,
 } = require('./migrate-tokens')
 
 let passed = 0
@@ -314,7 +316,6 @@ t('GEN-2609-112: RADIUS_ROUND values convert to their decided step, exact matche
 })
 
 t('GEN-2609-112: RADIUS_ROUND never overlaps RADIUS_MAP (a key is exact OR rounded, never both)', () => {
-  const { RADIUS_MAP, RADIUS_ROUND } = require('./migrate-tokens')
   for (const k of Object.keys(RADIUS_ROUND)) assert.ok(!(k in RADIUS_MAP), `${k} is in both maps`)
 })
 
