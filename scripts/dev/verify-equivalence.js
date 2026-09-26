@@ -136,6 +136,17 @@ function literalPx(part) {
 }
 
 let radiusEquivCount = 0
+let baseRadiusCache = null
+function baseRadius() {
+  if (!baseRadiusCache) {
+    const css = execFileSync('git', ['show', `${BASE}:src/app/globals.css`], { encoding: 'utf8' })
+    baseRadiusCache = {}
+    const re = /(--afa-radius-[a-zA-Z0-9-]+):\s*([0-9.]+)px\s*;/g
+    let m
+    while ((m = re.exec(css))) baseRadiusCache[m[1]] = parseFloat(m[2])
+  }
+  return baseRadiusCache
+}
 function checkRadiusSites(file, liveRadius, rounded) {
   let oldText
   try {
@@ -169,20 +180,19 @@ function checkRadiusSites(file, liveRadius, rounded) {
         }
         continue
       }
-      if (/^var\(/.test(before[j].text)) {
-        if (before[j].text !== after[j].text) {
-          console.error(`  RADIUS MISMATCH ${file}:${i + 1}: token changed '${before[j].text}' -> '${after[j].text}'`)
-          ok = false
-        }
-        continue
-      }
+      // A var() on the base side (a token renamed/retired in this
+      // branch, e.g. --afa-radius-12px -> lg) resolves against the base
+      // ref's own globals.css, then goes through the same equivalence /
+      // rounded / mismatch classification as a literal.
+      const bm = /^var\((--afa-radius-[a-z0-9-]+)\)$/.exec(before[j].text)
+      if (bm && before[j].text === after[j].text) continue
       const token = tm[1]
-      const px = literalPx(before[j])
+      const px = bm ? baseRadius()[bm[1]] ?? null : literalPx(before[j])
       const live = liveRadius[token]
       if (px === null || live === undefined) {
         console.error(`  RADIUS MISMATCH ${file}:${i + 1}: '${before[j].text}' -> ${token} (${live === undefined ? 'token not in globals.css' : 'literal is not a px length'})`)
         ok = false
-      } else if (!/px$/.test(before[j].text) && px !== 0 && !before[j].bare) {
+      } else if (!bm && !/px$/.test(before[j].text) && px !== 0 && !before[j].bare) {
         console.error(`  RADIUS MISMATCH ${file}:${i + 1}: quoted unitless '${before[j].text}' was invalid CSS (never rendered) - converting it changes the page`)
         ok = false
       } else if (px === live) {
