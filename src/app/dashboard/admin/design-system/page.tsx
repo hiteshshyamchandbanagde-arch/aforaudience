@@ -476,7 +476,7 @@ export default function AdminDesignSystemPage() {
             <div style={{ ...panelStyle, marginBottom: 24 }}>
               <h2 style={sectionTitleStyle}>Live preview</h2>
               <p style={{ color: 'var(--afa-text-secondary)', fontSize: 'var(--afa-text-ui)', marginBottom: 16 }}>
-                Reflects unsaved edits below, using the real Button component.
+                Reflects unsaved edits below: the real Button component, then a sample card. Nothing outside this box changes until you save.
               </p>
               <div style={{ ...previewStyle, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: 20, background: 'var(--afa-surface-page)' }}>
                 <Button variant="primary" fullWidth={false} size={36}>Primary</Button>
@@ -506,6 +506,7 @@ export default function AdminDesignSystemPage() {
                   <Button variant="primary" fullWidth={false} size="md">Md</Button>
                   <Button variant="primary" fullWidth={false} size="lg">Lg</Button>
                 </div>
+                <PreviewCard />
               </div>
             </div>
 
@@ -731,6 +732,85 @@ function TokenField({
         </span>
       )}
 
+    </div>
+  )
+}
+
+// GEN-2609-108 - a sample card for the live preview, so unsaved edits
+// show on more than buttons. Rendered inside the previewStyle wrapper,
+// so it reads every token through normal var() inheritance: pending
+// values here, saved values everywhere else on the page.
+const PREVIEW_TONES: { tone: keyof typeof STATUS_TONE; label: string }[] = [
+  { tone: 'sage', label: 'Confirmed' },
+  { tone: 'gold', label: 'Pending' },
+  { tone: 'error', label: 'Cancelled' },
+  { tone: 'muted', label: 'Draft' },
+  { tone: 'orange', label: 'Declined' },
+]
+
+function PreviewCard() {
+  return (
+    <div
+      style={{
+        flexBasis: '100%',
+        background: 'var(--afa-surface-raised)',
+        border: '1px solid var(--afa-border-resting)',
+        borderRadius: 'var(--afa-radius-lg)',
+        padding: 'var(--afa-space-5)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--afa-space-3)',
+        fontFamily: 'var(--font-sans)',
+      }}
+    >
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--afa-amber)' }}>
+        Sample card
+      </span>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-heading)', color: 'var(--afa-text-primary)', margin: 0 }}>Friday night open mic</h3>
+      <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', margin: 0 }}>
+        Body text: ten performers, one room, and a crowd that listens.
+      </p>
+      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', margin: 0 }}>Secondary text: The Blue Door, Bandra West</p>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', margin: 0 }}>Muted text: updated 2 hours ago</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--afa-space-2)' }}>
+        {PREVIEW_TONES.map(({ tone, label }) => (
+          <span
+            key={tone}
+            style={{
+              fontSize: 'var(--afa-text-micro)',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              padding: 'var(--afa-space-1) var(--afa-space-10px)',
+              borderRadius: 'var(--afa-radius-pill)',
+              color: STATUS_TONE[tone].color,
+              background: STATUS_TONE[tone].bg,
+            }}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+      <input
+        type="text"
+        readOnly
+        aria-label="Sample input"
+        value="Sample input"
+        style={{
+          fontSize: 'var(--afa-text-ui)',
+          padding: 'var(--afa-space-2) var(--afa-space-3)',
+          background: 'var(--afa-surface-page)',
+          color: 'var(--afa-text-primary)',
+          border: '1px solid var(--afa-tint-12)',
+          borderRadius: 'var(--afa-radius-md)',
+        }}
+      />
+      <div style={{ padding: 'var(--afa-space-3)', background: 'var(--afa-amber-wash)', border: '1px solid var(--afa-amber-border)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-soft)' }}>
+        Tinted border: amber wash with an amber border.
+      </div>
+      <div style={{ padding: 'var(--afa-space-3)', background: 'var(--afa-error-tint)', border: '1px solid var(--afa-error-edge)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)' }}>
+        Error notice: tint, border and text.
+      </div>
     </div>
   )
 }
