@@ -1,3 +1,10 @@
+# Session Handoff — 26 Sept 2026, part 8 (chat — guardrails dispatched)
+
+- Queued for CC: `docs/cc-dispatches/cc-prompt-editor-guardrails-108.md` (GEN-2609-108 + BUG-2609-061): value ranges + ordered radius scale, contrast guard on save, plain labels + colour subsections + search, spacing hidden from editor, type-aware inputs (alpha slider), preview card, token cache `revalidate: 300` + refresh button, revert-note fix.
+- Hitesh screenshot 26 Sep 13:49 IST showed pre-#707 pixels (banner `#166534`), though qa code and DB are correct. Likely browser cache; if a hard reload doesn't fix it, check the `qa.aforaudience.com` domain is on the latest `qa` deployment. The editor save to refresh the token cache was still not done at this point.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 7 (chat — #708 colour merged, DB applied)
 
 Delta-only. `qa` code at `b401ecc` (#708).
