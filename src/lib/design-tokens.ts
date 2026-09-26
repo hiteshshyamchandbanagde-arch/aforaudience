@@ -422,6 +422,22 @@ export function parseCssColor(value: string): [number, number, number, number] |
   return parseRgb(value)
 }
 
+// GEN-2609-108 - the editor's alpha slider writes values back in the
+// same spaced form the DB and globals.css use: rgba(245, 245, 240, 0.5).
+// Alpha is rounded to 2 places (the slider's step) with trailing zeros
+// dropped, so 0.50 -> 0.5 and 1.00 -> 1.
+export function formatAlpha(a: number): string {
+  return String(Math.round(Math.min(Math.max(a, 0), 1) * 100) / 100)
+}
+
+export function composeRgba(r: number, g: number, b: number, a: number): string {
+  return `rgba(${r}, ${g}, ${b}, ${formatAlpha(a)})`
+}
+
+export function rgbToHex([r, g, b]: [number, number, number, number]): string {
+  return "#" + [r, g, b].map((c) => Math.round(c).toString(16).padStart(2, "0")).join("").toUpperCase()
+}
+
 function parseRgb(value: string): [number, number, number, number] | null {
   const m = value.match(RGB_COLOR)
   if (!m) return null

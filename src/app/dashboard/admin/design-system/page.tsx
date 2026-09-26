@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { CONTRAST_PAIRS, contrastFailures, contrastMinimum, pairRatio, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { CONTRAST_PAIRS, composeRgba, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches } from '@/lib/design-token-meta'
@@ -674,7 +674,6 @@ function TokenField({
 }) {
   const invalid = error !== null
   const meta = tokenMeta(token.key)
-  const isSimpleHex = /^#[0-9a-fA-F]{6}$/.test(value)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, opacity: disabled ? 0.55 : 1 }}>
@@ -699,22 +698,7 @@ function TokenField({
       {meta.usedFor && <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: 'calc(-1 * var(--afa-space-1))' }}>{meta.usedFor}</span>}
       <span style={{ fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', color: 'var(--afa-text-muted)', marginTop: 'calc(-1 * var(--afa-space-1))' }}>{token.key}</span>
 
-      {token.type === 'color' && (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          {isSimpleHex ? (
-            <input type="color" value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} style={{ width: 32, height: 32, padding: 0, border: 'none', background: 'none', cursor: disabled ? 'not-allowed' : 'pointer' }} />
-          ) : (
-            <div style={{ width: 32, height: 32, flexShrink: 0, background: value, border: '1px solid var(--afa-border-resting)' }} />
-          )}
-          <input
-            type="text"
-            value={value}
-            disabled={disabled}
-            onChange={(e) => onChange(e.target.value)}
-            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
-          />
-        </div>
-      )}
+      {token.type === 'color' && <ColorInput value={value} onChange={onChange} disabled={disabled} invalid={invalid} />}
 
       {token.type === 'font-family' && (
         <select value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, cursor: disabled ? 'not-allowed' : 'pointer' }}>
@@ -727,27 +711,18 @@ function TokenField({
       )}
 
       {token.type === 'dimension' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <input
-            type="number"
-            value={parseFloat(value) || 0}
-            disabled={disabled}
-            onChange={(e) => onChange(`${e.target.value}px`)}
-            style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
-          />
-          <span style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>px</span>
-        </div>
+        <PxInput
+          tokenKey={token.key}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          invalid={invalid}
+          withSlider={token.group === 'radius' || token.group === 'size'}
+        />
       )}
 
       {token.type === 'dimension-shorthand' && (
-        <input
-          type="text"
-          value={value}
-          disabled={disabled}
-          placeholder="e.g. 9px 17px"
-          onChange={(e) => onChange(e.target.value)}
-          style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', fontFamily: 'var(--font-mono)', cursor: disabled ? 'not-allowed' : 'text' }}
-        />
+        <ShorthandInput tokenKey={token.key} value={value} onChange={onChange} disabled={disabled} invalid={invalid} />
       )}
 
       {error && (
@@ -756,6 +731,145 @@ function TokenField({
         </span>
       )}
 
+    </div>
+  )
+}
+
+// GEN-2609-108 - type-aware inputs. Each keeps a raw text/number field
+// so any value the validator accepts can still be typed directly.
+
+// Hex: native picker + text (as before). rgba(): base-colour picker +
+// alpha slider, composed back into the DB's spaced rgba() form. var()
+// and short hex forms: swatch + text only.
+function ColorInput({ value, onChange, disabled, invalid }: { value: string; onChange: (v: string) => void; disabled: boolean; invalid: boolean }) {
+  const isSimpleHex = /^#[0-9a-fA-F]{6}$/.test(value)
+  const rgba = /^rgba?\(/.test(value) ? parseCssColor(value) : null
+  const cursor = disabled ? 'not-allowed' : 'pointer'
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)' }}>
+      <div style={{ display: 'flex', gap: 'var(--afa-space-6px)', alignItems: 'center' }}>
+        {isSimpleHex ? (
+          <input type="color" aria-label="Pick colour" value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} style={{ ...swatchStyle, padding: 0, border: 'none', background: 'none', cursor }} />
+        ) : rgba ? (
+          <input
+            type="color"
+            aria-label="Pick base colour"
+            value={rgbToHex(rgba)}
+            disabled={disabled}
+            onChange={(e) => {
+              const base = parseCssColor(e.target.value)
+              if (base) onChange(composeRgba(base[0], base[1], base[2], rgba[3]))
+            }}
+            style={{ ...swatchStyle, padding: 0, border: 'none', background: 'none', cursor }}
+          />
+        ) : (
+          <div style={{ ...swatchStyle, flexShrink: 0, background: value, border: '1px solid var(--afa-border-resting)' }} />
+        )}
+        <input
+          type="text"
+          value={value}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
+        />
+      </div>
+      {rgba && (
+        <div style={{ display: 'flex', gap: 'var(--afa-space-2)', alignItems: 'center' }}>
+          {/* The picker above shows the base hue at full strength; this
+              swatch shows the real translucent value over the page. */}
+          <div style={{ ...swatchStyle, flexShrink: 0, background: `linear-gradient(${value}, ${value}), var(--afa-surface-page)`, border: '1px solid var(--afa-border-resting)' }} />
+          <input
+            type="range"
+            aria-label="Opacity"
+            min={0}
+            max={1}
+            step={0.01}
+            value={rgba[3]}
+            disabled={disabled}
+            onChange={(e) => onChange(composeRgba(rgba[0], rgba[1], rgba[2], Number(e.target.value)))}
+            style={{ flex: 1, minWidth: 0, accentColor: 'var(--afa-amber)', cursor }}
+          />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', minWidth: '4ch', textAlign: 'right' }}>{formatAlpha(rgba[3])}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// One px dimension: number input with min/max from the range table and
+// the unit shown; optional slider (radius and font size).
+function PxInput({ tokenKey, value, onChange, disabled, invalid, withSlider }: { tokenKey: string; value: string; onChange: (v: string) => void; disabled: boolean; invalid: boolean; withSlider: boolean }) {
+  const range = rangeFor(tokenKey)
+  const raw = value.replace(/px$/, '')
+  const px = parsePx(value)
+  // The pill range runs to 9999px; the slider stops at 999 so it stays
+  // usable. The number field still takes anything in range.
+  const sliderMax = range ? Math.min(range.max, 999) : 100
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-6px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
+        <input
+          type="number"
+          inputMode="decimal"
+          value={raw}
+          min={range?.min}
+          max={range?.max}
+          step="any"
+          disabled={disabled}
+          onChange={(e) => onChange(`${e.target.value}px`)}
+          style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
+        />
+        <span style={{ color: 'var(--afa-text-muted)', fontSize: 'var(--afa-text-small)' }}>px</span>
+      </div>
+      {withSlider && range && (
+        <input
+          type="range"
+          aria-label="Adjust"
+          min={range.min}
+          max={sliderMax}
+          step={1}
+          value={px === null ? range.min : Math.min(Math.max(px, range.min), sliderMax)}
+          disabled={disabled}
+          onChange={(e) => onChange(`${e.target.value}px`)}
+          style={{ width: '100%', accentColor: 'var(--afa-amber)', cursor: disabled ? 'not-allowed' : 'pointer' }}
+        />
+      )}
+      {range && (
+        <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>
+          {range.min}–{range.max}px
+        </span>
+      )}
+    </div>
+  )
+}
+
+// Button padding: one px field per part (top/bottom and left/right for
+// the two-part values every padding token uses).
+function ShorthandInput({ tokenKey, value, onChange, disabled, invalid }: { tokenKey: string; value: string; onChange: (v: string) => void; disabled: boolean; invalid: boolean }) {
+  const range = rangeFor(tokenKey)
+  const parts = value.trim().split(/\s+/)
+  const names = parts.length === 2 ? ['Top/bottom', 'Left/right'] : parts.map((_, i) => `Part ${i + 1}`)
+  return (
+    <div style={{ display: 'flex', gap: 'var(--afa-space-2)' }}>
+      {parts.map((part, i) => (
+        <label key={i} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 'var(--afa-space-2px)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)' }}>
+          {names[i]}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              value={part.replace(/px$/, '')}
+              min={range?.min}
+              max={range?.max}
+              step="any"
+              disabled={disabled}
+              onChange={(e) => onChange(parts.map((p, j) => (j === i ? `${e.target.value}px` : p)).join(' '))}
+              style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', cursor: disabled ? 'not-allowed' : 'text' }}
+            />
+            <span style={{ fontSize: 'var(--afa-text-small)' }}>px</span>
+          </span>
+        </label>
+      ))}
     </div>
   )
 }
@@ -835,6 +949,7 @@ const sectionTitleStyle: React.CSSProperties = {
   color: 'var(--afa-text-primary)',
   marginBottom: 4,
 }
+const swatchStyle: React.CSSProperties = { width: 'var(--afa-space-32px)', height: 'var(--afa-space-32px)' }
 const inputStyle: React.CSSProperties = {
   flex: 1,
   minWidth: 0,

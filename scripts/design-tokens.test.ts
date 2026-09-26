@@ -11,12 +11,16 @@ import {
   RADIUS_ORDER,
   CONTRAST_PAIRS,
   contrastFailures,
+  composeRgba,
   contrastMinimum,
   contrastRatio,
+  formatAlpha,
   isValidTokenValue,
   pairRatio,
+  parseCssColor,
   radiusOrderErrors,
   rangeFor,
+  rgbToHex,
   tokenValueError,
   type TokenType,
 } from '../src/lib/design-tokens'
@@ -259,6 +263,39 @@ test('search matches label, raw key and used-for, case-insensitively', () => {
   assert.ok(tokenMatches('--afa-text-muted', 'timestamps'))
   assert.ok(!tokenMatches('--afa-text-muted', 'pill'))
   assert.ok(tokenMatches('--afa-text-muted', '  '))
+})
+
+// --- D. rgba composition --------------------------------------------------------
+
+test('composeRgba writes the DB spaced form, alpha trimmed to 2 places', () => {
+  assert.equal(composeRgba(245, 245, 240, 0.5), 'rgba(245, 245, 240, 0.5)')
+  assert.equal(composeRgba(245, 245, 240, 0.08), 'rgba(245, 245, 240, 0.08)')
+  assert.equal(composeRgba(0, 0, 0, 1), 'rgba(0, 0, 0, 1)')
+  assert.equal(composeRgba(0, 0, 0, 0), 'rgba(0, 0, 0, 0)')
+  assert.equal(composeRgba(0, 0, 0, 0.3000000004), 'rgba(0, 0, 0, 0.3)')
+  assert.equal(formatAlpha(1.4), '1')
+  assert.equal(formatAlpha(-1), '0')
+})
+
+test('every composed value round-trips through the validator and parser', () => {
+  for (let i = 0; i <= 100; i++) {
+    const v = composeRgba(201, 151, 58, i / 100)
+    assert.ok(isValidTokenValue('color', v, '--afa-amber-tint'), v)
+    assert.equal(parseCssColor(v)![3], Number(formatAlpha(i / 100)))
+  }
+})
+
+test('every default rgba token already is in composeRgba form', () => {
+  for (const [k, v] of Object.entries(DEFAULT_TOKEN_VALUES)) {
+    if (!v.startsWith('rgba(')) continue
+    const [r, g, b, a] = parseCssColor(v)!
+    assert.equal(composeRgba(r, g, b, a), v, k)
+  }
+})
+
+test('rgbToHex feeds the native picker', () => {
+  assert.equal(rgbToHex([245, 245, 240, 0.5]), '#F5F5F0')
+  assert.equal(rgbToHex([0, 10, 255, 1]), '#000AFF')
 })
 
 console.log(`\n${passed} passed`)
