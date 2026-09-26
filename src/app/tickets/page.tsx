@@ -408,7 +408,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-body)', margin: '0 0 var(--afa-space-10px)' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
@@ -452,7 +452,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
@@ -654,7 +654,7 @@ export default function MyTicketsPage() {
                         </div>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)', alignItems: 'flex-start' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-12px)', background: 'var(--afa-cream)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-cream)' }}>
                               <TicketQr value={b.id} size={60} />
                             </div>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>

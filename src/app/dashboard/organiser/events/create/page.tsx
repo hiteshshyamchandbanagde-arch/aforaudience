@@ -559,7 +559,7 @@ export default function CreateEventPage() {
 
           <form onSubmit={(e) => e.preventDefault()}>
             {/* Event details */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-2)' }}>
                 Event Details
               </h2>
@@ -710,7 +710,7 @@ export default function CreateEventPage() {
               </label>
 
               {isCompetitionShow && (
-                <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)' }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', padding: 'var(--afa-space-5)', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)' }}>
                   <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-4)' }}>
                     Panelists and a celebrity guest are invited by their AFA account (not typed freely) once
                     the event is saved, from Edit Event — they'll need to accept before appearing publicly.
@@ -735,7 +735,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Venue booking - moved before pricing since section pricing depends on the selected venue's seat map */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Book a Venue
               </h2>
@@ -785,7 +785,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Seats & pricing */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Seats & Ticket Price
               </h2>
@@ -862,7 +862,7 @@ export default function CreateEventPage() {
             </section>
 
             {/* Lineup & approvals */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-18px)' }}>
                 Lineup &amp; Approvals
               </h2>

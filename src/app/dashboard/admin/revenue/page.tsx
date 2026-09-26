@@ -229,7 +229,7 @@ export default function AdminRevenueOverviewPage() {
             )}
           </Section>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-10px)', padding: '14px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '14px 18px' }}>
             <div>
               <p style={{ fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', marginBottom: '4px' }}>
                 Current booking fee
@@ -249,7 +249,7 @@ export default function AdminRevenueOverviewPage() {
 
 function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-10px)', padding: '16px' }}>
+    <div style={{ background: 'var(--afa-surface-page)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
       <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginTop: '4px' }}>{sub}</p>}
@@ -259,7 +259,7 @@ function SummaryCard({ label, value, sub }: { label: string; value: string; sub?
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-12px)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
       <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

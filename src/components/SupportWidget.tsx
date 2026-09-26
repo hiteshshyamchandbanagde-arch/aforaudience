@@ -568,7 +568,7 @@ export default function SupportWidget() {
                             display: 'inline-block',
                             maxWidth: '85%',
                             padding: 'var(--afa-space-2) var(--afa-space-3)',
-                            borderRadius: 'var(--afa-radius-12px)',
+                            borderRadius: 'var(--afa-radius-lg)',
                             fontSize: 'var(--afa-text-body)',
                             lineHeight: 1.4,
                             background: m.role === 'user' ? 'var(--afa-amber)' : 'var(--afa-surface-page)',

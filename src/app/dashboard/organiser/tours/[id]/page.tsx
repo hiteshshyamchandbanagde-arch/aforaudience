@@ -240,7 +240,7 @@ export default function TourDetailPage() {
         </div>
 
         {/* Artist consent status */}
-        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-6)' }}>
+        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-6)' }}>
           <h2 style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-3)' }}>Artist consent</h2>
           {tour.consents.length === 0 ? (
             <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No artists invited yet - add a stop and place artists in the lineup below.</p>
@@ -268,7 +268,7 @@ export default function TourDetailPage() {
         </div>
 
         {showAddStop && (
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-6)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-5)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--afa-space-14px)', marginBottom: 'var(--afa-space-14px)' }}>
               <div>
                 <label style={labelStyle}>Stop title</label>
@@ -372,7 +372,7 @@ export default function TourDetailPage() {
                 return q.length > 0 && name.includes(q) && !alreadyIn
               })
               return (
-                <div key={stop.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
+                <div key={stop.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) var(--afa-space-6)', border: '1px solid var(--afa-tint-08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-10px)', gap: 'var(--afa-space-10px)' }}>
                     <div>
                       <h3 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>

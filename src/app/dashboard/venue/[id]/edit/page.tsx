@@ -253,7 +253,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
           </p>
 
           <form onSubmit={(e) => e.preventDefault()}>
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-5)' }}>
                 Basic Details
               </h2>
@@ -354,7 +354,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                 now (session 39 finding, Hitesh) - an owner had no way to
                 update their rate, including day-wise overrides, after
                 venue creation. Mirrors venue create page's section exactly. */}
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Rental Rate
               </h2>
@@ -445,7 +445,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
             </section>
 
-            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+            <section style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-28px)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: 'var(--afa-space-6px)' }}>
                 Seating & Pricing
               </h2>
@@ -457,7 +457,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
-                  <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Have real numbered seats instead?</div>
                       <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -475,7 +475,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {venue.seatingMode === 'NUMBERED' && (
-                <div style={{ padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+                <div style={{ padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>This venue uses Numbered Seating</div>
                     <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>

@@ -1428,7 +1428,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
             fork as the Register Venue wizard's Seating & Pricing step -
             reuses the same .afa-glow-orange pattern already established
             there and on the Guided Setup panel below. */}
-        <div className="afa-glow-orange" style={{ padding: 'var(--afa-space-5)', margin: 'var(--afa-space-10px) -20px var(--afa-space-5)', borderRadius: 'var(--afa-radius-12px)' }}>
+        <div className="afa-glow-orange" style={{ padding: 'var(--afa-space-5)', margin: 'var(--afa-space-10px) -20px var(--afa-space-5)', borderRadius: 'var(--afa-radius-lg)' }}>
           <h1 style={{ fontSize: 'var(--afa-text-heading)', fontWeight: 700, margin: '0 0 var(--afa-space-1)', color: 'var(--afa-text-primary)' }}>Seat Map Builder</h1>
           <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.65, marginBottom: 'var(--afa-space-6px)' }}>
             General Admission is section/quantity based, same as today. Numbered Seating lets you place real seats on a canvas matching your venue's actual shape.
@@ -1469,7 +1469,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
           <div
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap',
-              padding: 'var(--afa-space-3) var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', marginBottom: 'var(--afa-space-18px)',
+              padding: 'var(--afa-space-3) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', marginBottom: 'var(--afa-space-18px)',
               // Frozen = amber tone-pair (matches Figma's lock/warning
               // treatment - amber as accent, never a large orange fill).
               background: seatMapFrozen ? 'rgba(201,151,58,0.12)' : 'rgba(245,245,240,0.03)',
@@ -1554,14 +1554,14 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
         )}
 
         {seatingMode === 'NUMBERED' && effectivePath === 'choose' && !isMobile && (
-          <div className="afa-glow-orange" style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', maxWidth: '780px', padding: 'var(--afa-space-5)', margin: '0 -20px', borderRadius: 'var(--afa-radius-12px)' }}>
+          <div className="afa-glow-orange" style={{ display: 'flex', gap: 'var(--afa-space-4)', flexWrap: 'wrap', maxWidth: '780px', padding: 'var(--afa-space-5)', margin: '0 -20px', borderRadius: 'var(--afa-radius-lg)' }}>
             <Button
               variant="bare"
               onClick={startWizard}
               className="afa-card-lift"
               style={{
                 flex: '1 1 300px', textAlign: 'left', padding: '22px',
-                borderRadius: 'var(--afa-radius-12px)', border: `1px solid ${fillSolidTint(0.5)}`,
+                borderRadius: 'var(--afa-radius-lg)', border: `1px solid ${fillSolidTint(0.5)}`,
                 background: undefined,
               }}
             >
@@ -1581,7 +1581,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               onClick={startDrawMyself}
               style={{
                 flex: '1 1 300px', textAlign: 'left', padding: '22px',
-                borderRadius: 'var(--afa-radius-12px)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)',
+                borderRadius: 'var(--afa-radius-lg)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-10px)', marginBottom: 'var(--afa-space-10px)' }}>
@@ -1611,7 +1611,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
               </div>
 
               {isMobile ? (
-                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-14px)' }}>
+                <div style={{ padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-14px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', margin: '0 0 var(--afa-space-1)' }}>
                     Viewing only on this screen
                   </p>
@@ -1674,7 +1674,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                       effectivePath for why this can't safely be a live
                       replace-on-keystroke the way the Figma mock does it). */}
                   {guidedPanelOpen && (
-                    <div className="afa-glow-orange" style={{ marginBottom: 'var(--afa-space-18px)', padding: 'var(--afa-space-18px)', borderRadius: 'var(--afa-radius-12px)', border: `1px solid ${fillSolidTint(0.18)}` }}>
+                    <div className="afa-glow-orange" style={{ marginBottom: 'var(--afa-space-18px)', padding: 'var(--afa-space-18px)', borderRadius: 'var(--afa-radius-lg)', border: `1px solid ${fillSolidTint(0.18)}` }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', marginBottom: 'var(--afa-space-1)' }}>
                         <span style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)' }}>Guided Setup</span>
                       </div>
@@ -1824,7 +1824,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: 'var(--afa-space-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Live preview — {wizardPreviewSeats.length} seats across {gridConfig.rowGroups.reduce((s, r) => s + r.rows, 0)} rows
                         </div>
-                        <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-10px) 0' }}>
+                        <div style={{ maxWidth: '100%', maxHeight: '220px', overflow: 'auto', display: 'flex', background: 'var(--afa-surface-page)', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-10px) 0' }}>
                           <div style={{ position: 'relative', flexShrink: 0, margin: '0 auto', width: `${previewBounds(wizardPreviewSeats).width}px`, height: `${previewBounds(wizardPreviewSeats).height}px` }}>
                             <div style={{ position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)', width: '60%', padding: 'var(--afa-space-6px) 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)', background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                               Stage
@@ -1975,7 +1975,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 </p>
               )}
 
-              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-10px)', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
+              <div style={{ maxWidth: '100%', maxHeight: '70vh', overflow: 'auto', border: '1px solid var(--afa-border-resting)', borderRadius: 'var(--afa-radius-lg)', touchAction: isMobile ? 'pinch-zoom pan-x pan-y' : 'auto' }}>
                 <div
                   ref={canvasRef}
                   onClick={handleCanvasClick}
@@ -2269,7 +2269,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
         <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-5)' }}>
           Section not Zone. Aisle not Walkway/Gangway. Each concept carries a small glyph so meaning survives translation and non-native English.
         </p>
-        <div style={{ borderRadius: 'var(--afa-radius-12px)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)' }}>
+        <div style={{ borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-10)', background: 'var(--afa-surface-raised)' }}>
           {rows.map((r, i) => (
             <div key={r.term} style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-14px)', borderTop: i === 0 ? 'none' : '1px solid rgba(245,245,240,0.08)' }}>
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', flexShrink: 0, borderRadius: 'var(--afa-radius-md)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-secondary)' }}>
@@ -2283,7 +2283,7 @@ function TerminologyPanel({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-10px)', background: 'rgba(245,245,240,0.06)', border: '1px solid rgba(245,245,240,0.16)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5, color: 'var(--afa-text-primary)' }}>
+        <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-14px) var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.06)', border: '1px solid rgba(245,245,240,0.16)', fontSize: 'var(--afa-text-ui)', lineHeight: 1.5, color: 'var(--afa-text-primary)' }}>
           <div style={{ fontWeight: 600, marginBottom: 'var(--afa-space-1)' }}>Live-preview behaviour (builder)</div>
           Guided answers that change <b>counts or structure</b> (rows, seats, sections) regenerate the map — seats fade/scale in (180ms) so the change is legible. Answers that only shift position (aisle width, alignment) <b>snap</b> instantly with no animation, so fine-tuning feels direct. Manual edits (select, reassign, remove) never animate — they apply on click.
         </div>

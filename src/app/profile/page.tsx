@@ -108,7 +108,7 @@ const SWITCH_ROLE_VALUE: Record<'artist' | 'organiser' | 'venue', string> = {
 // scrollIntoView happened to land them.
 const cardStyle = (active?: boolean) => ({
   background: 'var(--afa-surface-raised)',
-  borderRadius: 'var(--afa-radius-12px)',
+  borderRadius: 'var(--afa-radius-lg)',
   padding: 'var(--afa-space-28px) var(--afa-space-28px) var(--afa-space-6)',
   border: active ? '1.5px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.07)',
   boxShadow: active ? '0 0 0 4px rgba(201,151,58,0.12)' : 'none',

@@ -221,12 +221,20 @@ const FONT_SIZE_MAP = {
 // globals.css at all - a genuine typo (token renamed/removed, or an
 // unrelated key pointing at the wrong token entirely) still fails.
 const FONT_SIZE_ROUNDED_KEYS = new Set(['9', '9.5', '10.5', '11.5', '12.5', '13.5', '17', '19'])
+// GEN-2609-112 - exact-value entries only, one per step of the final
+// 8-step radius scale (docs/decisions/2026-09-26-radius-colour-scale.md
+// section 1). --afa-radius-10px is retired and --afa-radius-12px renamed
+// to lg, so 10 is no longer an exact match for anything - off-scale
+// values live in RADIUS_ROUND below, never here, so verify-equivalence.js
+// can keep this map to "byte/value-identical" entries only.
 const RADIUS_MAP = {
   0: '--afa-radius-sharp',
+  3: '--afa-radius-xs',
   6: '--afa-radius-sm',
   8: '--afa-radius-md',
-  10: '--afa-radius-10px',
-  12: '--afa-radius-12px',
+  12: '--afa-radius-lg',
+  16: '--afa-radius-xl',
+  20: '--afa-radius-2xl',
   999: '--afa-radius-pill',
 }
 // GEN-2609-090 - exact-string colour map (case-insensitive key lookup,

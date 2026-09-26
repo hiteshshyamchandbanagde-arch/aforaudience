@@ -254,7 +254,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </p>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             {!cameraOn ? (
               <Button variant="primary" size="lg" fullWidth={true} onClick={() => { setCameraError(''); setCameraOn(true) }}>
                 📷 Start Camera Scan
@@ -277,7 +277,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             )}
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', marginBottom: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <label style={{ display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, marginBottom: 'var(--afa-space-2)', color: 'var(--afa-text-primary)' }}>
               Manual entry <span style={{ fontWeight: 400, opacity: 0.6 }}>(booking ID printed on the ticket)</span>
             </label>
@@ -305,7 +305,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5)', border: '1px solid var(--afa-tint-08)' }}>
             <Button
               variant="bare"
               onClick={() => {

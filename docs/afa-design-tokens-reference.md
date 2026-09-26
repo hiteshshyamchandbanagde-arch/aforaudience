@@ -33,6 +33,12 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-radius-md:       8px;    /* Button md/lg size tier, form-submit */
 --afa-radius-pill:     999px;  /* primary, outline, toggle-pill, pill-sm/pill-md */
 
+/* GEN-2609-112 (26 Sep) - radius closeout, full 8-step scale */
+--afa-radius-xs:       3px;    /* new - absorbs 2/3/4px (EventCard's 3px signature, small chips) */
+--afa-radius-lg:       12px;   /* renamed from --afa-radius-12px; absorbs 10/12/14px (dashboard cards) */
+--afa-radius-xl:       16px;   /* new - auth cards, sheets, modals */
+--afa-radius-2xl:      20px;   /* new - absorbs 20/24px (bottom-sheet tops) */
+
 --afa-btn-padding-sm:  4px 10px;
 --afa-btn-padding-md:  9px 17px;
 --afa-btn-padding-lg:  12px 24px;
@@ -57,8 +63,8 @@ Defined in [globals.css](../src/app/globals.css#L51). Current default theme is *
 --afa-text-subtitle:   20px;
 --afa-text-subheading: 22px;  /* new, GEN-2609-106 */
 
---afa-radius-10px: 10px;
---afa-radius-12px: 12px;
+/* --afa-radius-10px / --afa-radius-12px: removed 26 Sep (GEN-2609-112) -
+   10px retired into --afa-radius-lg (10 -> 12px), 12px renamed to lg. */
 ```
 
 **GEN-2609-099 — general-purpose translucent tints (new tokens, wired on adoption).** The 2 `rgba(245,245,240,*)` alpha values (of `--afa-text-primary`'s own base RGB) that clear `GEN-2609-081`'s 50-occurrence bar — see `docs/design.md`'s `GEN-2609-099` entry for the full occurrence count and the naming rationale (checked real property context: both are border-dominant but genuinely mixed with background usage, not a single role, hence `--afa-tint-*` rather than `--afa-border-*`/`--afa-text-*`). Unlike `GEN-2609-081`'s tokens, these had real, immediate adoption in the same PR that defined them (49 literal sites across 31 files) — not "tokens only":
