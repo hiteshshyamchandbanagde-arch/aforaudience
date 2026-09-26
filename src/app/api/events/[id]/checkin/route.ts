@@ -3,10 +3,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { ensureFollowing } from '@/lib/follow'
+import { normalizeTicketCode } from '@/lib/ticket-code'
 
-// Check-in/scan flow (EPIC N). The QR on the ticket PDF (and the "BOOKING ID"
-// text printed alongside it, for manual entry) encodes booking.id as-is -
-// see src/lib/ticket-pdf.ts. This endpoint is the actual anti-forgery gate:
+// Check-in/scan flow (EPIC N). The QR on the ticket PDF encodes booking.id
+// as-is - see src/lib/ticket-pdf.ts. Manual entry takes the printed TICKET
+// REF (Booking.ticketCode, BUG-2609-053) in any case/spacing, or a raw id. This endpoint is the actual anti-forgery gate:
 // the QR value itself isn't signed, but it can only be redeemed once, only
 // against the event it belongs to, and only by that event's Organiser/Admin.
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -42,8 +43,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ ok: false, reason: 'EMPTY', message: 'Scan a ticket or enter a booking code.' }, { status: 400 })
     }
 
+    const ticketCode = normalizeTicketCode(code)
     const booking = await prisma.booking.findUnique({
-      where: { id: code },
+      where: ticketCode ? { ticketCode } : { id: code },
       include: { user: true },
     })
 

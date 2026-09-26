@@ -99,6 +99,9 @@ export type TicketEmailInput = {
   subtotalAmount: number
   bookingFeeAmount: number
   bookingId: string
+  // BUG-2609-053 - the customer-facing reference (AFA-XXXX-XXXX). Null
+  // only if assignment failed; the raw booking id is shown instead.
+  ticketCode: string | null
   ticketPdf: Uint8Array
 }
 
@@ -197,8 +200,8 @@ export async function sendTicketEmail(input: TicketEmailInput) {
           ${amountRows}
           <tr>
             <td style="padding: 8px 0;">
-              <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">BOOKING ID</div>
-              <div style="font-size: 12px; font-family: 'SF Mono', Menlo, Consolas, monospace;">${escapeHtml(input.bookingId)}</div>
+              <div style="font-size: 10px; font-weight: 700; color: #C8441A; letter-spacing: 0.06em; margin-bottom: 4px;">TICKET REF</div>
+              <div style="font-size: 14px; font-family: 'SF Mono', Menlo, Consolas, monospace;">${escapeHtml(input.ticketCode ?? input.bookingId)}</div>
             </td>
           </tr>
         </table>
@@ -218,7 +221,7 @@ export async function sendTicketEmail(input: TicketEmailInput) {
     `,
     attachments: [
       {
-        filename: `aforaudience-ticket-${input.bookingId}.pdf`,
+        filename: `aforaudience-ticket-${input.ticketCode ?? input.bookingId}.pdf`,
         content: Buffer.from(input.ticketPdf).toString("base64"),
       },
     ],

@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { after } from 'next/server'
 import { deliverTicket } from '@/lib/ticket-delivery'
 import { sendPushToUser, notifyAfterResponse } from '@/lib/push'
+import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
 export async function getPlusOneStatus(userId: string | null, performanceId: string) {
   const performance = await prisma.performance.findUnique({
@@ -77,6 +78,7 @@ export async function confirmPlusOne(userId: string, performanceId: string) {
         status: 'CONFIRMED',
       },
     })
+    await ensureTicketCode(booking.id)
     isNewBooking = true
   }
 

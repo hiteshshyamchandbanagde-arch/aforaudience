@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { verifyPaymentSignature } from '@/lib/razorpay'
 import { deliverTicket } from '@/lib/ticket-delivery'
+import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
 // POST /api/bookings/[id]/confirm
 //
@@ -180,6 +181,7 @@ export async function POST(
         },
       }),
     ])
+    await ensureTicketCode(booking.id)
 
     // Fire ticket delivery via after() rather than a bare un-awaited
     // call — the user is staring at a spinner right now so this still

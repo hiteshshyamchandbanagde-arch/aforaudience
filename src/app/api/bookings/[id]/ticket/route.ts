@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { generateTicketPdf, type TicketData } from '@/lib/ticket-pdf'
 import { formatSeatLabels } from '@/lib/seat-labels'
+import { ensureTicketCode } from '@/lib/assign-ticket-code'
 
 // GET /api/bookings/[id]/ticket
 //
@@ -64,8 +65,10 @@ export async function GET(
       )
     }
 
+    const ticketCode = booking.ticketCode ?? (await ensureTicketCode(booking.id))
     const data: TicketData = {
       bookingId: booking.id,
+      ticketCode,
       eventTitle: booking.event.title,
       eventDate: booking.event.date,
       eventStartTime: booking.event.startTime,
@@ -92,7 +95,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="aforaudience-ticket-${booking.id}.pdf"`,
+        'Content-Disposition': `attachment; filename="aforaudience-ticket-${ticketCode ?? booking.id}.pdf"`,
         'Cache-Control': 'private, no-store',
       },
     })

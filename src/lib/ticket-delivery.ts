@@ -3,6 +3,7 @@ import { generateTicketPdf, TicketData } from "@/lib/ticket-pdf"
 import { formatSeatLabels } from "@/lib/seat-labels"
 import { sendTicketEmail } from "@/lib/email"
 import { sendPushToUser } from "@/lib/push"
+import { ensureTicketCode } from "@/lib/assign-ticket-code"
 
 // ---------------------------------------------------------------------------
 // Ticket delivery orchestrator.
@@ -68,6 +69,10 @@ export async function deliverTicket(bookingId: string): Promise<void> {
       return
     }
 
+    // Safety net for bookings confirmed before BUG-2609-053 (admin
+    // redelivery) - the confirm paths already assigned one.
+    await ensureTicketCode(bookingId)
+
     // Load the booking + user + event for the email/PDF.
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
@@ -104,6 +109,7 @@ export async function deliverTicket(bookingId: string): Promise<void> {
 
     const ticketData: TicketData = {
       bookingId: booking.id,
+      ticketCode: booking.ticketCode,
       eventTitle: booking.event.title,
       eventDate: booking.event.date,
       eventStartTime: booking.event.startTime,
@@ -153,6 +159,7 @@ export async function deliverTicket(bookingId: string): Promise<void> {
         subtotalAmount: ticketData.subtotalAmount,
         bookingFeeAmount: ticketData.bookingFeeAmount,
         bookingId: ticketData.bookingId,
+        ticketCode: ticketData.ticketCode,
         ticketPdf: pdfBytes,
       })
     } catch (err) {

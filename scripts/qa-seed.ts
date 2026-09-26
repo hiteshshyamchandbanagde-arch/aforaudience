@@ -15,6 +15,7 @@ import { PrismaPg } from "@prisma/adapter-pg"
 import { Pool } from "pg"
 import { fakerEN_IN as faker } from "@faker-js/faker"
 import bcrypt from "bcryptjs"
+import { generateTicketCode } from "../src/lib/ticket-code"
 
 // ---------------------------------------------------------------------------
 // Hard guard — must run before any DB connection object is constructed.
@@ -447,6 +448,7 @@ async function seedGeneralEvents(
             subtotalAmount: subtotal,
             bookingFeeAmount: 0,
             status: BookingStatus.CONFIRMED,
+            ticketCode: generateTicketCode(),
             checkedInAt: isPastEvent ? daysFromNow(plan.dateOffsetDays) : null,
             checkedInByUserId: isPastEvent ? organiser.id : null,
           },
@@ -815,6 +817,7 @@ async function seedGoldenScenario(
       subtotalAmount: 400,
       bookingFeeAmount: 0,
       status: BookingStatus.CONFIRMED,
+      ticketCode: generateTicketCode(),
       checkedInAt: eventDate,
       checkedInByUserId: goldenOrganiser.id,
     },
@@ -1321,6 +1324,7 @@ async function seedDemoPersonas(
         subtotalAmount: subtotal,
         bookingFeeAmount: 0,
         status: BookingStatus.CONFIRMED,
+        ticketCode: generateTicketCode(),
         checkedInAt: b.isPast ? daysFromNow(b.dayOffset) : null,
         checkedInByUserId: b.isPast ? omkarId : null,
       },

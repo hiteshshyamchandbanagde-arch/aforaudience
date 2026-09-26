@@ -26,6 +26,7 @@ import Button from '@/components/ui/Button'
 
 interface BookingItem {
   id: string
+  ticketCode: string | null
   status: string
   totalAmount: number
   subtotalAmount: number
@@ -225,7 +226,7 @@ export default function AdminBookingsPage() {
                           {displayName} — {b.user.email}
                         </div>
                         <div style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>
-                          {b.id}
+                          {b.ticketCode ? `${b.ticketCode} · ${b.id}` : b.id}
                         </div>
                       </div>
                       <div className="text-left lg:text-right" style={{ fontSize: 'var(--afa-text-ui)', flexShrink: 0 }}>
