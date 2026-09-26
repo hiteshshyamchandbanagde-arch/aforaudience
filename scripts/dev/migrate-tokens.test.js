@@ -32,6 +32,10 @@ const {
   migrateTailwindRadiusBracket,
   RADIUS_MAP,
   RADIUS_ROUND,
+  COLOR_ROUND,
+  canonColor,
+  colorContext,
+  resolveColor,
 } = require('./migrate-tokens')
 
 let passed = 0
@@ -150,7 +154,8 @@ t('GEN-2609-101: processLine converts a Tailwind arbitrary-value colour bracket 
 })
 
 t('GEN-2609-101: an unrelated className value with no COLOR_MAP entry stays literal', () => {
-  const line = '      <div className="shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">'
+  // GEN-2609-113 - was rgba(0,0,0,0.35), which now rounds to --afa-shadow
+  const line = '      <div className="shadow-[0_8px_32px_-4px_rgba(1,2,3,0.35)]">'
   const out = processLine(line, false, DEFAULT_DEFS)
   assert.equal(out, line)
 })
@@ -191,11 +196,12 @@ t('GEN-2609-102: an unrelated raw-CSS property (no COLOR_MAP match, not even a c
 })
 
 t('processLine: an unrelated rgba value not in COLOR_MAP stays literal inside a compound prop', () => {
-  const line = "                  <div style={{ background: 'rgba(245,245,240,0.03)', border: '1px solid rgba(245,245,240,0.08)' }}>"
+  const line = "                  <div style={{ background: 'rgba(12,34,56,0.03)', border: '1px solid rgba(245,245,240,0.08)' }}>"
   const out = processLine(line, false, DEFAULT_DEFS)
-  // background: 0.03 has no COLOR_MAP entry and must stay exactly as-is;
+  // GEN-2609-113 - was cream 0.03, which now rounds to --afa-tint-04.
+  // background has no mapping and must stay exactly as-is;
   // only the border's 0.08 (which does) converts.
-  assert.equal(out, "                  <div style={{ background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)' }}>")
+  assert.equal(out, "                  <div style={{ background: 'rgba(12,34,56,0.03)', border: '1px solid var(--afa-tint-08)' }}>")
 })
 
 t('COMPOUND_COLOR_PROPS is a subset of colour category props (mapFor() can actually find them)', () => {
@@ -331,6 +337,100 @@ t('GEN-2609-112: an off-map Tailwind radius bracket stays literal', () => {
 t('GEN-2609-112: the radius className pass is skipped when radius is not a selected category', () => {
   const line = '<div className="rounded-[16px]">'
   assert.equal(processLine(line, false, [CATEGORY_DEFS.colour]), line)
+})
+
+// ---------------------------------------------------------------------
+// GEN-2609-113 - COLOR_ROUND, context classification, the colour pass.
+// ---------------------------------------------------------------------
+
+t('GEN-2609-113: canonColor strips spaces, lowercases hex, normalises alpha', () => {
+  assert.equal(canonColor('rgba(245, 245, 240, 0.50)'), 'rgba(245,245,240,0.5)')
+  assert.equal(canonColor('rgba(245,245,240,.5)'), 'rgba(245,245,240,0.5)')
+  assert.equal(canonColor('#C9973A'), '#c9973a')
+  assert.equal(canonColor('rgb(10, 10, 10)'), 'rgb(10,10,10)')
+})
+
+t('GEN-2609-113: COLOR_ROUND and COLOR_MAP never share a context-free key', () => {
+  const exact = new Set(Object.keys(COLOR_MAP).map(canonColor))
+  for (const [k, v] of Object.entries(COLOR_ROUND)) {
+    if (typeof v === 'string') assert.ok(!exact.has(canonColor(k)), `${k} is in both maps`)
+  }
+})
+
+t('GEN-2609-113: colorContext reads the property, Tailwind utility, attribute or assigned name', () => {
+  const at = (line) => colorContext(line, line.indexOf('rgba'))
+  assert.equal(at("color: 'rgba(245,245,240,0.4)'"), 'text')
+  assert.equal(at("background: 'rgba(245,245,240,0.4)'"), 'surface')
+  assert.equal(at("boxShadow: '0 8px 24px rgba(0,0,0,0.5)'"), 'shadow')
+  assert.equal(at('<div className="text-[rgba(245,245,240,0.4)] bg-black">'), 'text')
+  assert.equal(at('<div className="shadow-[0_8px_rgba(0,0,0,0.5)]">'), 'shadow')
+  assert.equal(at('<Spinner scrimBackground="rgba(20,20,20,0.7)" />'), 'surface')
+  assert.equal(at("el.style.background = 'rgba(247,243,238,0.05)'"), 'surface')
+  assert.equal(at("tick={{ fill: 'rgba(245,245,240,0.4)' }}"), 'text')
+  assert.equal(at("const MIST = 'rgba(245,245,240,0.12)'"), null)
+})
+
+t('GEN-2609-113: a ternary branch name is not mistaken for the property', () => {
+  const line = "background: on ? strengthColor : 'rgba(245,245,240,0.4)',"
+  assert.equal(colorContext(line, line.indexOf('rgba')), 'surface')
+})
+
+t('GEN-2609-113: cream 0.35 rounds to text-muted as text, tint-30 otherwise', () => {
+  assert.equal(resolveColor('rgba(245,245,240,0.35)', 'text').token, '--afa-text-muted')
+  assert.equal(resolveColor('rgba(245,245,240,0.35)', 'surface').token, '--afa-tint-30')
+  assert.deepEqual(resolveColor('rgba(245,245,240,0.35)', null).ambiguous.sort(), ['--afa-text-muted', '--afa-tint-30'])
+})
+
+t('GEN-2609-113: an exact text-ladder value used as a surface still goes to the surface ladder', () => {
+  assert.equal(resolveColor('rgba(245,245,240,0.5)', 'text').token, '--afa-text-muted')
+  assert.equal(resolveColor('rgba(245,245,240,0.5)', 'surface').token, '--afa-tint-30')
+})
+
+t('GEN-2609-113: context-free rounds and warm-cream folding', () => {
+  assert.equal(resolveColor('rgba(245,245,240,0.03)', null).token, '--afa-tint-04')
+  assert.equal(resolveColor('rgba(247,243,238,0.12)', null).token, '--afa-tint-12')
+  assert.equal(resolveColor('rgba(201,151,58,0.8)', 'text').token, '--afa-amber')
+  assert.equal(resolveColor('#a89880', 'text').token, '--afa-text-secondary')
+  assert.equal(resolveColor('rgba(10,10,10,0)', 'surface'), null)
+})
+
+t('GEN-2609-113: black 0.5 is a shadow in a shadow, a scrim as an overlay', () => {
+  assert.equal(resolveColor('rgba(0,0,0,0.5)', 'shadow').token, '--afa-shadow')
+  assert.equal(resolveColor('rgba(0,0,0,0.5)', 'surface').token, '--afa-scrim')
+})
+
+t('GEN-2609-113: processLine converts both branches of a ternary', () => {
+  const line = "        color: tab === t ? 'var(--afa-amber)' : 'rgba(245,245,240,0.4)',"
+  assert.equal(processLine(line, false, DEFAULT_DEFS), "        color: tab === t ? 'var(--afa-amber)' : 'var(--afa-text-muted)',")
+})
+
+t('GEN-2609-113: Tailwind text-[colour] gets the color: hint, other utilities a bare var()', () => {
+  const line = '      <p className="text-[rgba(245,245,240,0.6)] border-[rgba(245,245,240,0.12)]">'
+  assert.equal(processLine(line, false, DEFAULT_DEFS), '      <p className="text-[color:var(--afa-text-secondary)] border-[var(--afa-tint-12)]">')
+})
+
+t('GEN-2609-113: an unknown context leaves a context-dependent value literal and reports it', () => {
+  const line = "const MIST = 'rgba(245,245,240,0.45)'"
+  const unresolved = []
+  assert.equal(processLine(line, false, DEFAULT_DEFS, unresolved), line)
+  assert.equal(unresolved.length, 1)
+  assert.match(unresolved[0].why, /context unknown/)
+})
+
+t('GEN-2609-113: a dynamic template alpha stays literal', () => {
+  const line = '    : { fill: `rgba(245,245,240,${opacity})` }'
+  assert.equal(processLine(line, false, DEFAULT_DEFS), line)
+})
+
+t('GEN-2609-113: outside a raw block, a colour must be inside quotes to convert', () => {
+  const line = '  x = rgba(245,245,240,0.08)'
+  assert.equal(processLine(line, false, DEFAULT_DEFS), line)
+})
+
+t('GEN-2609-113: a hex inside quotes converts; an HTML entity never does', () => {
+  assert.equal(processLine("  background: '#1F1F1F',", false, DEFAULT_DEFS), "  background: 'var(--afa-surface-raised)',")
+  const ent = "  label: 'A &#123; B',"
+  assert.equal(processLine(ent, false, DEFAULT_DEFS), ent)
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)
