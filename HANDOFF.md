@@ -1,3 +1,13 @@
+# Session Handoff — 26 Sept 2026, part 10 (chat — #709 guardrails merged)
+
+- **#709** (GEN-2609-108 + BUG-2609-061) squash-merged, `qa` @ `e0ebede`. Merge gated on check-runs **and** Vercel commit status (the new rule). READY, 0 runtime errors. Both tickets → IN_TEST. Token cache now expires every 5 min, so the manual editor-save refresh is no longer needed.
+- **Hitesh click-through outstanding:** HANDOFF part 9 §6, steps 2–6 (admin-session API paths CC couldn't sign in to test).
+- **CC's label questions, decided by chat → GEN-2609-115:** delete `--afa-terracotta` (0 uses); fold `--afa-text-inverse` → `--afa-text-primary` (same value); fold `--afa-red-alt` → `--afa-error-bright` (one error red); add a "Seat map" subsection; restores get the same contrast check as saves.
+- **Brand decision for Hitesh:** CTA text is cream on `--afa-fill-solid` at **2.84:1** (fails AA on every primary button). Options: ink text on orange (6.29:1, keeps the orange); darker orange `#B83A12` with cream text (5.26:1); or accept it, since the button labels are bold and short.
+- **Next:** GEN-2609-115 dispatch → button phase 3 (GEN-2609-110) → spacing (GEN-2609-107).
+
+---
+
 # Session Handoff — 26 Sept 2026, part 9 (CC — GEN-2609-108 editor guardrails + BUG-2609-061, pushed, needs merge)
 
 Branch `feat/gen-2609-108-editor-guardrails` off `origin/qa` at `1dac607`. **Not merged.** No DB changes needed.
