@@ -1,3 +1,136 @@
+# Session Handoff — 26 Sept 2026, part 6 (CC — GEN-2609-113 colour closeout, pushed, needs merge + DB SQL)
+
+Delta-only. Branch `chore/gen-2609-113-colour-closeout` off `qa@9d04d6b`, pushed, **not merged**.
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-113-colour-closeout?expand=1
+
+## 1. Result
+- **hex 51 → 0, rgba 512 (baseline 543) → 0.** 10 `token-ok` exemptions (§5). Nothing else in the ratchet moved.
+- Ratchet before → after: hex 51 → **0**, rgba 543 → **0**, font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91. The ratchet already skips `token-ok` lines, so the baseline is 0, not the exemption count.
+- `verify-equivalence --base=origin/qa` over all 120 touched src files: **273 equivalences, 264 rounded, 84 decided swaps, 1 hand conversion, 10 exemptions, 7 comment rewordings, 0 mismatches.**
+
+## 2. Commits (in order)
+1. `129b4a5` step 1: tokens (globals.css, DEFAULT_TOKEN_VALUES, reference doc, COLOR_MAP); `--afa-text-muted` 0.4 → 0.5; `--afa-error-border` removed (0 consumers, re-checked)
+2. `0d46546` step 2: gold + error text contrast
+3. `55deee2` step 3: context-aware matcher (`COLOR_ROUND`, one colour pass), verify-equivalence colour check, tests
+4. `7bb61f4` / `9b085fa` / `6a2fdc8` / `b31a886` step 4 apply: public+auth (15 files) / dashboard (31) / app root (14) / components+lib (55, incl. `statusStyle.ts`). Every dry run reviewed first.
+5. `56a0395` step 3b: matcher guards the dashboard dry run exposed (var() fallbacks, SVG attributes)
+6. `a8546e6` step 5 hex, `900bf9b` step 6 shadows/gradients, `6f630c2` step 7 comments
+7. `6980cfa` verify reads multi-line comments
+8. `ebb10d4` step 8: TOKEN_COVERAGE (109 keys: 104 site-wide / 5 button-only / 0 unused) + ratchet baseline
+9. `4f61e34` CI: #707's `ticket-code` + `username` tests now run in the design-token job (`npx --yes tsx@^4.23.1 …`; both import only dependency-free `src/lib` files, so no `npm ci` needed)
+
+## 3. Intentional colour changes (step 2)
+**Gold text → `--afa-amber`** (2.55:1 → 4.88:1 on the gold tint; measured): `STATUS_TONE.gold` (`src/lib/statusStyle.ts:43`) plus 17 sites: `dashboard/artist/events/page.tsx:53`, `dashboard/artist/page.tsx:304`, `dashboard/organiser/events/[id]/lineup/page.tsx:139`, `dashboard/organiser/page.tsx:130,141`, `dashboard/organiser/payouts/page.tsx:24,39,132`, `dashboard/organiser/tours/[id]/page.tsx:53`, `dashboard/venue/[id]/page.tsx:242,288`, `profile/page.tsx:570`, `components/ArtistsNearYou.tsx:88,154`, `NearYouTabs.tsx:121`, `TonightNearYou.tsx:86`, `AudienceChoiceVoting.tsx:175`. Gold **borders/fills stay gold** (artist/page:303, lineup:137, AudienceChoiceVoting:174, VenuePortalUI NavBadge, SeatLayoutPreview tiers).
+
+**Error text → `--afa-error-bright`** (2.5–2.8:1 → 5.7–6.4:1): 66 sites — every `color:` use of `--afa-error` (form/field errors, error banners, admin/organiser/venue load errors, Button `outline-error` text, password-strength label). Full list: `git show 0d46546`. **Kept on `--afa-error`** (fills, borders, icons): venue bookings calendar dot, FeedbackTrends BUG series, FeedbackDetailPanel CRITICAL fill, Toast accent bar, `availability` filling-fast fill, profile danger-row icon, seat-map × remove glyphs (495, 1537), all `border*`/`background` uses. Note: the password-strength colour is used for both the bar and its label, so the bar is brighter too.
+
+## 4. Rounded sites per value (intentional, from verify-equivalence)
+Plus the token-level change **`--afa-text-muted` 0.4 → 0.5**, which moves every existing muted consumer.
+
+| From | To | Sites |
+|---|---|---|
+| cream 0.60 / 0.55 / 0.70 text | text-secondary | 28 / 20 / 5 |
+| `#a89880` (near-you rails) | text-secondary | 15 |
+| cream 0.75 / 0.85 text | text-soft | 8 / 6 |
+| cream 0.35 / 0.40 / 0.45 text; warm cream 0.30 / 0.45 / 0.50 text | text-muted | 2 / 2 / 7; 1 / 1 / 1 |
+| warm cream 0.60 text | text-secondary | 1 |
+| cream 0.02 / 0.03 / 0.05; warm cream 0.05 | tint-04 | 1 / 9 / 4; 10 |
+| cream 0.07 | tint-06 | 2 |
+| warm cream 0.08; white 0.08 / 0.10 | tint-08 / tint-08 / tint-10 | 4 / 1 / 1 |
+| cream 0.13; warm cream 0.12 | tint-12 | 6; 6 |
+| cream 0.14 / 0.16; warm cream 0.15 | border-resting | 1 / 2; 3 |
+| cream 0.25 | tint-20 | 5 |
+| cream 0.35 / 0.45 non-text; white 0.70 | tint-30 | 2 / 3; 1 |
+| `#171717` (inputs) | surface-inverse | 8 |
+| amber 0.07 | amber-wash | 1 |
+| amber 0.10 / 0.12 / 0.18 / 0.20 | amber-tint | 2 / 7 / 5 / 1 |
+| amber 0.25 / 0.30 / 0.35 / 0.45 / 0.50 | amber-border | 2 / 6 / 2 / 2 / 3 |
+| amber 0.55 | amber-strong | 1 |
+| amber 0.80 | `--afa-amber` | 3 |
+| error 0.08 / 0.12 / 0.15; `#FFEBEE` | error-tint | 1 / 1 / 2; 1 |
+| error 0.40 | error-edge | 1 |
+| `#C62828` | error-bright | 1 |
+| green-deep 0.12 / 0.15 | success-tint | 1 / 3 |
+| sage 0.30 (SuccessBanner border) | sage-tint | 1 |
+| fill 0.30 | fill-tint | 1 |
+| fill 0.50 (venue create active chip border) | `--afa-fill-solid` | 1 |
+| black 0.14 / 0.15 / 0.18 / 0.20 / 0.25 / 0.32 / 0.35 / 0.40 / 0.50 in shadows; ink `14,12,10` 0.15 | shadow | 1/1/1/2/4/1/6/4/2; 2 |
+| black 0.5 / 0.6 overlays; `10,10,10` 0.40–0.60; `20,20,20` 0.70 | scrim | 1 / 6; 1+1+1+1+4; 4 |
+| `10,10,10` 0.92 / 0.94; `20,20,20` 0.92 / 0.95 | scrim-strong | 1 / 1; 1 / 2 |
+| `31,31,31` 0.40; `#241a10` | surface-raised | 1; 1 |
+
+Hand conversion: `dashboard/venue/[id]/seat-map/page.tsx:295` built `rgba(245,245,240,${opacity})` at runtime; the neutral tiers only ever reach 0.03–0.035, so it's now `--afa-tint-04`.
+
+**Judgement calls where the decision record is silent** (all follow its rules: nearest step, toss-up → better contrast):
+- Cream ≥ 0.30 used as a **non-text** colour always → `tint-30` (the record says so only for 0.30/0.35). This covers three **modal backdrops at cream 0.45** (my-feedback, AuthPromptSheet, CorporateInquiryModal), the HeroRotator top wash (0.7), and the artist dashboard's white 0.7 loading overlay. The backdrops and the white overlay look like light-theme leftovers (an ink scrim mechanically swapped to cream). They now whiten slightly less. Hitesh may want `--afa-scrim` for them instead: one-line change each.
+- Black in a **shadow** up to 0.5 → `shadow`, above that (or as an overlay) → `scrim`. Black 0.14–0.18 shadows round **up** to 0.3, the only step.
+- Fill 0.50 border → solid `--afa-fill-solid`, because `fill-tint` (0.2) equals that chip's own background and the border would disappear. Sage 0.30 border → `sage-tint`: there's no sage edge token, so the SuccessBanner border now matches its background. `--afa-sage-edge` would fix that if wanted.
+- `rgba(0,0,0,0.3)` as the artists-page error banner **background** → `--afa-shadow` (exact value, odd role).
+- Organiser event edit: 2 venue/artist autocomplete dropdowns still have `background: 'white'` (light-theme leftover; their `rgba(14,12,10,0.15)` border → shadow as decided). Not fixed, flagged.
+
+## 5. Exemptions (`token-ok`, 10)
+- `src/components/BrandLoader.tsx:15,16,19,22` — "pixel copy of src/app/icon.svg; logo colours must not follow palette edits"
+- Transparent fade ends, "structural": `src/app/page.tsx:96`, `src/app/tickets/page.tsx:591`, `src/components/HeroRotator.tsx:63` (`245,245,240,0`), `src/components/PhotoCrossfadeBackdrop.tsx:46` (`201,151,58,0`), `:51`, `:60`
+- Not counted, unchanged: `src/lib/statusStyle.ts` stays checker-exempt. Its 4 `STATUS_TONE` tints are now tokens, but `orange` bg 0.1, `FILL_SOLID_TINT` 0.08, `FILL_SOLID_BORDER_TINT` 0.25 and `fillSolidTint(alpha)` have no decided token (fill-tint only absorbs 0.20/0.30).
+
+## 6. DB SQL — NOT RUN. Apply to aforaudience-qa after merge.
+```sql
+BEGIN;
+UPDATE "DesignToken" SET "value" = 'rgba(245, 245, 240, 0.5)', "updatedAt" = now() WHERE "key" = '--afa-text-muted';
+DELETE FROM "DesignToken" WHERE "key" = '--afa-error-border';
+INSERT INTO "DesignToken" ("key", "value", "group", "type", "locked", "updatedAt") VALUES
+('--afa-text-soft',     'rgba(245, 245, 240, 0.8)',  'color', 'color', false, now()),
+('--afa-tint-04',       'rgba(245, 245, 240, 0.04)', 'color', 'color', false, now()),
+('--afa-tint-06',       'rgba(245, 245, 240, 0.06)', 'color', 'color', false, now()),
+('--afa-tint-12',       'rgba(245, 245, 240, 0.12)', 'color', 'color', false, now()),
+('--afa-tint-20',       'rgba(245, 245, 240, 0.2)',  'color', 'color', false, now()),
+('--afa-tint-30',       'rgba(245, 245, 240, 0.3)',  'color', 'color', false, now()),
+('--afa-amber-wash',    'rgba(201, 151, 58, 0.08)',  'color', 'color', false, now()),
+('--afa-amber-tint',    'rgba(201, 151, 58, 0.15)',  'color', 'color', false, now()),
+('--afa-amber-border',  'rgba(201, 151, 58, 0.4)',   'color', 'color', false, now()),
+('--afa-amber-strong',  'rgba(201, 151, 58, 0.6)',   'color', 'color', false, now()),
+('--afa-error-tint',    'rgba(179, 38, 30, 0.1)',    'color', 'color', false, now()),
+('--afa-error-edge',    'rgba(179, 38, 30, 0.3)',    'color', 'color', false, now()),
+('--afa-sage-tint',     'rgba(74, 103, 65, 0.12)',   'color', 'color', false, now()),
+('--afa-success-tint',  'rgba(39, 103, 73, 0.15)',   'color', 'color', false, now()),
+('--afa-fill-tint',     'rgba(255, 90, 54, 0.2)',    'color', 'color', false, now()),
+('--afa-blue-tint',     'rgba(74, 111, 165, 0.15)',  'color', 'color', false, now()),
+('--afa-shadow',        'rgba(0, 0, 0, 0.3)',        'color', 'color', false, now()),
+('--afa-scrim',         'rgba(10, 10, 10, 0.7)',     'color', 'color', false, now()),
+('--afa-scrim-strong',  'rgba(10, 10, 10, 0.9)',     'color', 'color', false, now())
+ON CONFLICT ("key") DO NOTHING;
+COMMIT;
+```
+Until this runs the app is still correct: new keys fall back to globals.css. The one catch: **a DB row for `--afa-text-muted` still at 0.4 overrides the new 0.5 default**, so the muted-text contrast fix doesn't go live on QA until the UPDATE runs. The values pass `isValidTokenValue`'s rgba pattern (checked against the regex in `design-tokens.ts`).
+
+## 7. Visual check (390 + 1280, origin/qa vs branch, production builds, pixel-diffed)
+Pages: `/`, `/events`, `/events/qa-general-event-08`, `/login`, `/register`, `/tickets` (logged in as Atul), 3 scroll positions each. `/login` and `/register` at 1280 are **pixel-identical**.
+Expected changes, all seen: muted/secondary text slightly brighter everywhere; near-you rail meta text now neutral; gold/error text brighter.
+**Not on the dispatch's expected list — call-outs:**
+1. **No-poster placeholder art is now grey, not warm brown** (`#241a10` → `--afa-surface-raised`, decision 2d). This is the biggest visible change: every event card without a poster on `/events` and `/`, the event-detail hero, and every `/tickets` card header.
+2. **Top nav bars slightly darker/more opaque**: SiteNav (`rgba(20,20,20,0.92/0.95)`) and MobileTopBar (0.95) → `--afa-scrim-strong` (`rgba(10,10,10,0.9)`). It's the only diff on `/login` and `/register` at 390px.
+3. Input backgrounds `#171717` → inverse only live on dashboard pages (venue create, venue-requests, venue sales, FacilitiesPicker, VenuePortalUI), none of the 6 screenshotted pages.
+
+## 8. Dashboard pages that change (Hitesh, admin login)
+Priority (most visible): `/dashboard/venue/sales` (charts: colours moved from SVG attributes to `style`, verified in Chromium: grid, area, gradient stops, bars, tooltip cursor, active dot all resolve), `/dashboard/venue/create` (inputs darker, active chip border now solid orange), `/dashboard/venue/[id]/seat-map`, `/dashboard/artist` (white loading overlay → tint-30), `/dashboard/admin` (alert tints), `/dashboard/organiser/events/[id]/edit` (white dropdowns, flagged §4).
+All touched: admin (`/`, artists, bookings, design-system, diary, feedback, revenue, settings, users), artist (`/`, events), audience, messages (`/`, `[id]`), organiser (`/`, payouts, sales, tours/[id], events/create, events/[id] + checkin/edit/lineup/sales), venue (`/`, bookings, create, sales, `[id]` + edit/sales/seat-map), venue-requests.
+
+## 9. Verification
+- `tsc` clean. `next build` passes; the compiled CSS has `--afa-text-muted:#f5f5f080` (0.5), `--afa-scrim-strong`, the `shadow-[…_var(--afa-shadow)]` class, and no `--afa-error-border`. The Tailwind forms (`text-[color:var()]`, `border-[var()]`, `bg-[var()]`, `shadow-[…var()]`) were checked with `@tailwindcss/node`.
+- `check-design-tokens.js` vs origin/qa: no new literals (the 10 token-ok lines are printed). Ratchet: all at baseline.
+- Self-tests: checker 70/70, migrate-tokens **62/62** (16 new), ticket-code 5/5, username 4/4.
+- ESLint before/after on the 125 touched `src`/`scripts` files: **346 → 346, identical per file per rule.**
+
+## 10. Worth knowing
+- **Matcher premise, again:** the old colour passes only matched `prop: 'value'` pairs, so ternaries (`color: on ? 'x' : 'rgba(…)'`), JSX props like `scrimBackground=`, `el.style.x = '…'` and `const bg = '…'` were invisible. That's why "script-convertible" estimates kept undercounting. The new single pass reaches them all and prints every literal it leaves.
+- Found and fixed during dry runs: a hex inside a `var(--x, #hex)` fallback would have become `var(--x, var(--x))`.
+- Pre-existing, **not** touched: 14 `var()` values still sit in SVG presentation attributes (`FeedbackTrends` ×5, `layout.tsx` ×3, `RegisterForm`, `SupportWidget`, and 4 Recharts `tick={{ fill: 'var(…)' }}` on venue sales). They're not literals, so the checker doesn't see them. They render in Chromium today, but that's the same class the decision record calls unreliable. A small follow-up can move them into `style`.
+- Sage **text** (`--afa-sage` #4A6741) on dark is ~2:1, the same bug as gold/error: e.g. payouts "Activated", tours ACCEPTED, venue sales delta. Not in this dispatch's scope, so not changed. The fix would be `--afa-sage-bright`.
+
+**Ratchet on branch:** hex 0, rgba 0, font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 5 (chat — #707 bug batch merged, backfill run, colour dispatched)
 
 Delta-only. `qa` code at `19e23c6` (#707).
