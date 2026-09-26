@@ -25,7 +25,7 @@ export default function HelpIcon({ text }: { text: string }) {
           width: '16px',
           height: '16px',
           borderRadius: '50%',
-          border: '1px solid rgba(245,245,240,0.35)',
+          border: '1px solid var(--afa-tint-30)',
           color: 'var(--afa-text-primary)',
           opacity: 0.7,
           fontSize: 'var(--afa-text-caption)',
@@ -54,7 +54,7 @@ export default function HelpIcon({ text }: { text: string }) {
             borderRadius: 'var(--afa-radius-sm)',
             width: '230px',
             zIndex: 30,
-            boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+            boxShadow: '0 4px 14px var(--afa-shadow)',
           }}
         >
           {text}

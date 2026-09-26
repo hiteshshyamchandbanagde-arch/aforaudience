@@ -89,7 +89,7 @@ export default function AuthPromptSheet({
       {/* Overlay — click to dismiss, resuming guest browsing (no forced login) */}
       <div
         onClick={onClose}
-        style={{ position: "absolute", inset: 0, background: "rgba(245,245,240,0.45)", animation: "authSheetFadeIn 0.15s ease-out" }}
+        style={{ position: "absolute", inset: 0, background: "var(--afa-tint-30)", animation: "authSheetFadeIn 0.15s ease-out" }}
       />
 
       <div
@@ -100,7 +100,7 @@ export default function AuthPromptSheet({
           background: "var(--afa-surface-raised)",
           borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)",
           padding: "8px 24px 28px",
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
+          boxShadow: "0 -8px 40px var(--afa-shadow)",
           animation: "authSheetSlideUp 0.22s ease-out",
           maxHeight: "88vh",
           overflowY: "auto",
@@ -125,7 +125,7 @@ export default function AuthPromptSheet({
         </div>
 
         {error && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}

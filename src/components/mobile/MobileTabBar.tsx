@@ -419,7 +419,7 @@ export default function MobileTabBar() {
       <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 flex items-stretch justify-around"
         style={{
-          background: 'rgba(10,10,10,0.92)',
+          background: 'var(--afa-scrim-strong)',
           backdropFilter: 'blur(12px)',
           borderTop: '1px solid var(--afa-tint-08)',
           zIndex: 40,
@@ -503,7 +503,7 @@ export default function MobileTabBar() {
 
       {moreOpen && moreItems.length > 0 && (
         <div className="lg:hidden fixed inset-0" style={{ zIndex: 50 }}>
-          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setMoreOpen(false)} />
+          <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setMoreOpen(false)} />
           <div
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}
@@ -529,7 +529,7 @@ export default function MobileTabBar() {
                   className="flex items-center gap-3 rounded-lg px-3 py-3"
                   style={{
                     color: item.id === activeId ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
-                    background: item.id === activeId ? 'rgba(201,151,58,0.12)' : 'transparent',
+                    background: item.id === activeId ? 'var(--afa-amber-tint)' : 'transparent',
                     fontWeight: item.id === activeId ? 600 : 400,
                     textDecoration: 'none',
                   }}

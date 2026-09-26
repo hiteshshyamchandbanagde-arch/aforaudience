@@ -171,7 +171,7 @@ export default function AudienceChoiceVoting({ eventId, isCompetitionShow }: { e
             A separate, audience-weighted result — not the organiser's own decision. Blended from Audience/Panelist/Celebrity votes ({results.voterCounts?.AUDIENCE || 0} / {results.voterCounts?.PANELIST || 0} / {results.voterCounts?.CELEBRITY || 0} voters).
           </p>
           {(results.ranking || []).map((r, i) => (
-            <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '12px 16px', marginBottom: '8px', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid rgba(245,245,240,0.08)' }}>
+            <div key={r.performanceId} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '12px 16px', marginBottom: '8px', border: i === 0 ? '1px solid var(--afa-gold)' : '1px solid var(--afa-tint-08)' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: i === 0 ? 'var(--afa-amber)' : 'var(--afa-text-primary)', opacity: i === 0 ? 1 : 0.4, width: '28px' }}>
                 {i + 1}
               </div>

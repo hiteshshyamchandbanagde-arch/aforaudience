@@ -39,7 +39,7 @@ export function FeeSheet({
         variant="bare"
         aria-label="Close"
         onClick={onClose}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.6)' }}
+        style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
       >
         {null}
       </Button>
@@ -89,7 +89,7 @@ export function FeeSheet({
               key={r.label}
               style={{
                 display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16, padding: '12px 16px',
-                borderTop: i > 0 ? '1px solid rgba(245,245,240,0.06)' : undefined,
+                borderTop: i > 0 ? '1px solid var(--afa-tint-06)' : undefined,
               }}
             >
               <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.8 }}>{r.label}</span>
@@ -102,7 +102,7 @@ export function FeeSheet({
         <div
           style={{
             margin: '16px 20px 0', padding: '16px', borderRadius: 'var(--afa-radius-xl)',
-            border: '1px solid rgba(201,151,58,0.3)', background: 'rgba(201,151,58,0.08)',
+            border: '1px solid var(--afa-amber-border)', background: 'var(--afa-amber-wash)',
           }}
         >
           <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)', color: 'var(--afa-amber)' }}>

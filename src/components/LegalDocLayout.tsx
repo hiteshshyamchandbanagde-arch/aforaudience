@@ -6,7 +6,7 @@ import SiteNav from "@/components/SiteNav"
 const INK = "var(--afa-text-primary)"
 const PAPER = "var(--afa-surface-page)"
 const EMBER = "var(--afa-fill-solid)"
-const MIST = "rgba(245,245,240,0.12)"
+const MIST = "var(--afa-tint-12)"
 const SERIF = "var(--font-display)"
 const SANS = "var(--font-sans)"
 
@@ -35,7 +35,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
             marginBottom: "32px",
             padding: "16px 20px",
             borderRadius: "var(--afa-radius-lg)",
-            background: "rgba(201,151,58,0.15)",
+            background: "var(--afa-amber-tint)",
             border: "1px solid var(--afa-amber)",
           }}
         >
@@ -95,7 +95,7 @@ export function LI({ children }: { children: React.ReactNode }) {
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
+    <span style={{ background: "var(--afa-amber-tint)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
       {children}
     </span>
   )

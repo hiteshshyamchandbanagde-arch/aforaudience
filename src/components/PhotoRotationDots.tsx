@@ -29,7 +29,7 @@ export default function PhotoRotationDots({
           key={photo.src}
           aria-label={`Photo ${i + 1} of ${photos.length}`}
           onClick={() => setActive(i)}
-          style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "var(--afa-radius-pill)", overflow: "hidden", padding: 0, transition: "width 0.3s ease", background: "rgba(245,245,240,0.25)" }}
+          style={{ position: "relative", height: "4px", width: i === active ? "40px" : "16px", borderRadius: "var(--afa-radius-pill)", overflow: "hidden", padding: 0, transition: "width 0.3s ease", background: "var(--afa-tint-20)" }}
         >
           {i === active && !reduced && !paused && (
             <span style={{ position: "absolute", inset: 0, background: "var(--afa-amber)", transformOrigin: "left", animation: `heroDrawLine ${ROTATE_MS}ms linear` }} />

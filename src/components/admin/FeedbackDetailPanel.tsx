@@ -181,8 +181,8 @@ export default function FeedbackDetailPanel({
       }}
     >
       <style>{`
-        .fb-detail-backdrop { position: absolute; inset: 0; background: rgba(245,245,240,0.35); }
-        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px rgba(245,245,240,0.12); overflow-y: auto; }
+        .fb-detail-backdrop { position: absolute; inset: 0; background: var(--afa-tint-30); }
+        .fb-detail-panel { position: relative; width: 440px; max-width: 100%; height: 100%; background: var(--afa-surface-raised); box-shadow: -8px 0 24px var(--afa-tint-12); overflow-y: auto; }
         @media (max-width: 780px) {
           .fb-detail-panel { width: 100%; }
         }
@@ -221,7 +221,7 @@ export default function FeedbackDetailPanel({
                 aria-label="Previous"
                 style={{
                   background: 'var(--afa-surface-raised)',
-                  border: '1px solid rgba(245,245,240,0.13)',
+                  border: '1px solid var(--afa-tint-12)',
                   borderRadius: 'var(--afa-radius-pill)',
                   width: '32px',
                   height: '32px',
@@ -243,7 +243,7 @@ export default function FeedbackDetailPanel({
                 aria-label="Next"
                 style={{
                   background: 'var(--afa-surface-raised)',
-                  border: '1px solid rgba(245,245,240,0.13)',
+                  border: '1px solid var(--afa-tint-12)',
                   borderRadius: 'var(--afa-radius-pill)',
                   width: '32px',
                   height: '32px',
@@ -449,7 +449,7 @@ export default function FeedbackDetailPanel({
                   color: 'var(--afa-text-primary)',
                   opacity: 0.75,
                   padding: 'var(--afa-space-2) 0',
-                  borderTop: '1px solid rgba(245,245,240,0.06)',
+                  borderTop: '1px solid var(--afa-tint-06)',
                 }}
               >
                 <span style={{ fontWeight: 600 }}>{labelize(entry.field)}</span>:{' '}

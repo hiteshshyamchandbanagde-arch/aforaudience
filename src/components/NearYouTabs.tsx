@@ -115,7 +115,7 @@ export default function NearYouTabs() {
   const loading = isEvents ? events === null : artists === null
 
   return (
-    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.nearYouHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-amber)', letterSpacing: '0.1em' }}>
@@ -123,18 +123,18 @@ export default function NearYouTabs() {
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid var(--afa-border-resting)' }}>
         <Button
           variant="bare"
           onClick={() => setTab('events')}
-          style={{ padding: '0 0 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: isEvents ? '#F7F3EE' : '#a89880', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
+          style={{ padding: '0 0 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: isEvents ? 'var(--afa-cream)' : 'var(--afa-text-secondary)', borderBottom: isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabEvents}
         </Button>
         <Button
           variant="bare"
           onClick={() => setTab('artists')}
-          style={{ padding: '0 10px 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: !isEvents ? '#F7F3EE' : '#a89880', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
+          style={{ padding: '0 10px 6px', fontSize: 'var(--afa-text-small)', fontWeight: 700, color: !isEvents ? 'var(--afa-cream)' : 'var(--afa-text-secondary)', borderBottom: !isEvents ? '2px solid var(--afa-amber)' : '2px solid transparent' }}
         >
           {tr.homePage.nearYouTabArtists}
         </Button>
@@ -148,7 +148,7 @@ export default function NearYouTabs() {
               style={{
                 height: '38px',
                 borderRadius: 'var(--afa-radius-sm)',
-                background: 'linear-gradient(90deg, rgba(247,243,238,0.05) 0%, rgba(247,243,238,0.12) 50%, rgba(247,243,238,0.05) 100%)',
+                background: 'linear-gradient(90deg, var(--afa-tint-04) 0%, var(--afa-tint-12) 50%, var(--afa-tint-04) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'railShimmer 1.6s ease-in-out infinite',
                 animationDelay: `${i * 120}ms`,
@@ -160,16 +160,16 @@ export default function NearYouTabs() {
       )}
 
       {isEvents && events !== null && events.length === 0 && (
-        <p style={{ fontSize: 'var(--afa-text-small)', color: '#a89880', lineHeight: 1.6 }}>{tr.homePage.tonightRailEmpty}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>{tr.homePage.tonightRailEmpty}</p>
       )}
       {!isEvents && artists !== null && artists.length === 0 && (
-        <p style={{ fontSize: 'var(--afa-text-small)', color: '#a89880', lineHeight: 1.6 }}>{tr.homePage.artistsRailEmpty}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>{tr.homePage.artistsRailEmpty}</p>
       )}
 
       {isEvents && events !== null && events.length > 0 && (
         <>
           {!eventsCity && (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.tonightRailCityFallbackNote}
             </p>
           )}
@@ -177,13 +177,13 @@ export default function NearYouTabs() {
             <Link
               key={ev.id}
               href={`/events/${ev.id}`}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(247,243,238,0.05)' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
-                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(ev.date, ev.startTime)}
@@ -196,7 +196,7 @@ export default function NearYouTabs() {
       {!isEvents && artists !== null && artists.length > 0 && (
         <>
           {!artistsCity && (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.artistsRailCityFallbackNote}
             </p>
           )}
@@ -204,21 +204,21 @@ export default function NearYouTabs() {
             <Link
               key={a.id}
               href={`/artists/${a.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(247,243,238,0.05)' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               {a.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={a.avatar} alt="" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
               ) : (
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(247,243,238,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--afa-tint-12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--afa-text-caption)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                   {initials(a.name)}
                 </div>
               )}
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[a.eventType]}{a.genre ? ` · ${a.genre}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(a.eventDate, a.eventStartTime)}

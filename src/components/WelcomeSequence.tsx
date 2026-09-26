@@ -205,7 +205,7 @@ export default function WelcomeSequence() {
                 </p>
                 {otp.error && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: 16 }}>{otp.error}</p>}
                 {otp.devOtp && (
-                  <div style={{ background: 'rgba(201,151,58,0.08)', border: '1px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                  <div style={{ background: 'var(--afa-amber-wash)', border: '1px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                     QA Mode — dev OTP: <strong>{otp.devOtp}</strong>
                   </div>
                 )}

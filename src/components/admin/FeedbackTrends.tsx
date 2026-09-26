@@ -314,7 +314,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
-            <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'rgba(245,245,240,0.06)', overflow: 'hidden' }}>
+            <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-06)', overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',

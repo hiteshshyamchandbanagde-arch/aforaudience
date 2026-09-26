@@ -13,7 +13,7 @@ const RANGES: { value: string; label: string }[] = [
 
 export default function RangePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div style={{ display: 'inline-flex', gap: '4px', background: 'rgba(245,245,240,0.05)', padding: '4px', borderRadius: 'var(--afa-radius-md)' }}>
+    <div style={{ display: 'inline-flex', gap: '4px', background: 'var(--afa-tint-04)', padding: '4px', borderRadius: 'var(--afa-radius-md)' }}>
       {RANGES.map((r) => (
         <Button
           variant="bare"

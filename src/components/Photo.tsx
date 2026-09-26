@@ -86,7 +86,7 @@ export default function Photo({
       />
       <div
         aria-hidden
-        style={{ position: "absolute", inset: 0, backgroundColor: "#C9973A", opacity: 0.48, mixBlendMode: "multiply" }}
+        style={{ position: "absolute", inset: 0, backgroundColor: "var(--afa-amber)", opacity: 0.48, mixBlendMode: "multiply" }}
       />
     </div>
   )

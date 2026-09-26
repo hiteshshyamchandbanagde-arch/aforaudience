@@ -63,7 +63,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
         <span style={{ position: "absolute", left: "24px", top: "20px", fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "56px", color: "var(--afa-border-resting)" }}>
           {room.n}
         </span>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "84px", height: "84px", borderRadius: "50%", border: "1px solid rgba(201,151,58,0.35)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "84px", height: "84px", borderRadius: "50%", border: "1px solid var(--afa-amber-border)" }}>
           <RoomIcon persona={room.personaKey} />
         </div>
       </div>
@@ -82,10 +82,10 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
         <ol style={{ listStyle: "none", margin: "32px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "var(--afa-space-3)" }}>
           {room.steps.map((step, i) => (
             <li key={step} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-4)" }}>
-              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid rgba(201,151,58,0.4)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-amber)" }}>
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", flexShrink: 0, borderRadius: "50%", border: "1px solid var(--afa-amber-border)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-amber)" }}>
                 {i + 1}
               </span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", color: "rgba(245,245,240,0.85)" }}>{step}</span>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-soft)" }}>{step}</span>
             </li>
           ))}
         </ol>
@@ -176,7 +176,7 @@ export default function FourRooms() {
             {tr.homePage.fourRoomsHeadingLine1}<br />
             <em style={{ fontStyle: "italic", color: "var(--afa-amber)" }}>{tr.homePage.fourRoomsHeadingEmphasis}</em>{tr.homePage.fourRoomsHeadingSuffix}
           </h2>
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "rgba(245,245,240,0.75)", margin: 0 }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-title)", lineHeight: 1.65, color: "var(--afa-text-soft)", margin: 0 }}>
             {tr.homePage.fourRoomsSubtitle}
           </p>
         </div>

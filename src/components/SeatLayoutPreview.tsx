@@ -77,7 +77,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 onClick={() => setActiveLevel(lvl)}
                 style={{
                   fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: 'var(--afa-radius-sm)',
-                  border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
+                  border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid var(--afa-border-resting)',
                   background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                   color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
                 }}

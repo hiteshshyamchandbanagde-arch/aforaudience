@@ -57,17 +57,17 @@ export default function PlatformGrowthStrip() {
   return (
     <section style={{ background: 'var(--afa-surface-inverse)' }}>
       <div className="growth-strip" style={{ maxWidth: '1360px', margin: '0 auto', padding: '40px 48px' }}>
-        <p className="growth-strip-tagline" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(18px, 2.2vw, 24px)', color: '#F7F3EE', margin: 0, lineHeight: 1.4 }}>
+        <p className="growth-strip-tagline" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(18px, 2.2vw, 24px)', color: 'var(--afa-cream)', margin: 0, lineHeight: 1.4 }}>
           {tr.homePage.growthTagline}
         </p>
         {statItems.length > 0 && (
           <div className="growth-strip-stats" style={{ display: 'flex', gap: '36px', flexShrink: 0 }}>
             {statItems.map((s) => (
               <div key={s.label}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: '#F7F3EE' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--afa-cream)' }}>
                   {s.value!.toLocaleString('en-IN')}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: '#a89880', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   {s.label}
                 </div>
               </div>

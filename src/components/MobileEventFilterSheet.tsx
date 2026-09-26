@@ -70,7 +70,7 @@ export default function MobileEventFilterSheet({
         aria-label={tr.eventsPage.filterSheetCloseLabel}
         onClick={onClose}
         className="afa-backdrop-mount"
-        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }}
+        style={{ position: "absolute", inset: 0, background: "var(--afa-scrim)" }}
       >
         {null}
       </Button>

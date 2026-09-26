@@ -82,7 +82,7 @@ const ROLE_BADGE_STYLE: CSSProperties = {
   borderRadius: "var(--afa-radius-pill)",
   border: "1px solid var(--afa-border-resting)",
   background: "transparent",
-  color: "rgba(245,245,240,0.6)",
+  color: "var(--afa-text-secondary)",
   whiteSpace: "nowrap",
 }
 
@@ -309,7 +309,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
         left: isHome ? 0 : undefined,
         right: isHome ? 0 : undefined,
         zIndex: 100,
-        background: isHome ? "rgba(20,20,20,0.92)" : "rgba(20,20,20,0.95)",
+        background: isHome ? "var(--afa-scrim-strong)" : "var(--afa-scrim-strong)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--afa-tint-08)",
       }}
@@ -446,13 +446,13 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                   {locale.toUpperCase()}
                 </Button>
                 {langMenuOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', boxShadow: '0 8px 24px var(--afa-shadow)', padding: 'var(--afa-space-6px)', minWidth: '160px', zIndex: 20 }}>
                     {LOCALES.map((l) => (
                       <Button
                         variant="bare"
                         key={l.id}
                         onClick={() => { setLocale(l.id); setLangMenuOpen(false) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', width: '100%', textAlign: 'left', padding: '9px var(--afa-space-10px)', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'var(--afa-amber-wash)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
                       >
                         {l.nativeLabel}
                       </Button>
@@ -481,7 +481,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                       aria-label={l.label}
                       aria-current={l.isActive ? "page" : undefined}
                       className="sitenav-icon-link"
-                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.1)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
+                      style={{ color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-amber-tint)" : "transparent", textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "var(--afa-radius-md)" }}
                     >
                       <NavIcon navKey={l.key} />
                       {l.key === "dashboard" && pendingCount > 0 && (
@@ -572,7 +572,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                 </Button>
 
                 {menuOpen && (
-                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
+                  <div role="menu" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: "230px", overflow: "hidden", borderRadius: "var(--afa-radius-lg)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-inverse)", boxShadow: "0 12px 32px var(--afa-shadow)", padding: "var(--afa-space-2) 0", zIndex: 20 }}>
                     {user ? (
                       <>
                         <div style={{ padding: "var(--afa-space-6px) var(--afa-space-4) var(--afa-space-10px)", display: "flex", alignItems: "center", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
@@ -591,7 +591,7 @@ export default function SiteNav({ active, variant = "page", backHref, backLabel 
                             href={l.href}
                             onClick={() => setMenuOpen(false)}
                             aria-current={l.isActive ? "page" : undefined}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "rgba(201,151,58,0.08)" : "transparent", textDecoration: "none" }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px var(--afa-space-4)", fontSize: "var(--afa-text-body)", fontWeight: l.isActive ? 600 : 400, color: l.accent || l.isActive ? "var(--afa-amber)" : "var(--afa-text-primary)", background: l.isActive ? "var(--afa-amber-wash)" : "transparent", textDecoration: "none" }}
                           >
                             {l.label}
                             {l.badge > 0 && (
