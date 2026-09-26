@@ -1,3 +1,70 @@
+# Session Handoff — 26 Sept 2026, part 2 (CC — GEN-2609-112 radius closeout, pushed, needs merge + DB SQL)
+
+Delta-only. Branch `chore/gen-2609-112-radius-closeout` off `qa@8b0265a`, pushed, **not merged**.
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...chore/gen-2609-112-radius-closeout?expand=1
+
+## 1. Result
+- **`radius-literal` 310 → 0, no `token-ok` exemptions.** Nothing else in the ratchet went up.
+- Ratchet before → after: hex 51 → 51, rgba 543 → 543, font-family 0 → 0, font-size 13 → 13, spacing 1931 → 1929 (the baseline catching up with qa's live 1929, not this branch), **radius 310 → 0**, raw-button 2 → 2, bare-button 91 → 91.
+- Final scale shipped exactly as decided: sharp 0 / xs 3 / sm 6 / md 8 / lg 12 / xl 16 / 2xl 20 / pill 999. `--afa-radius-10px` retired, `--afa-radius-12px` renamed to `lg`.
+
+## 2. Commits (in order)
+1. `41898c3` tokens: globals.css, DEFAULT_TOKEN_VALUES, RADIUS_MAP and the reference doc; 29 `var(--afa-radius-10px)` + 51 `var(--afa-radius-12px)` refs moved to `lg`
+2. `f144861` matcher: unitless guard, Tailwind `rounded-[Npx]` pass, `verify-equivalence --base=<ref>` per-site check, 13 tests
+3. `7090b2a` `RADIUS_ROUND` (separate from `RADIUS_MAP`), 3 tests
+4. `df96d83` verify-equivalence resolves a base-side `var()` through the base ref's globals.css (so the step-1 renames classify correctly)
+5. `43d76f2` / `6446df5` / `ffdefe4` / `5a0f0de` apply: public (16 files) / dashboard (30) / app-root (10) / components (48). Each dry run was reviewed before applying.
+6. `c7cba36` TOKEN_COVERAGE regenerated (91 keys: 85 site-wide / 5 button-only / 1 unused) + ratchet baseline
+7. `f4c3603` test-file lint tidy
+
+## 3. Rounded sites (intentional value changes, from `verify-equivalence --base=origin/qa`)
+| From | To | Literal sites | + former token consumers | Total |
+|---|---|---|---|---|
+| 10px | lg (12px) | 26 | 29 (`--afa-radius-10px`) | 55 |
+| 2px | xs (3px) | 15 | – | 15 |
+| 4px | xs (3px) | 12 | – | 12 |
+| 14px | lg (12px) | 7 | – | 7 |
+| 99px | pill (999px) | 3 | – | 3 |
+| 5px | sm (6px) | 3 | – | 3 |
+| 24px | 2xl (20px) | 2 | – | 2 (FeeSheet's top corners, the "4px on 2 sites" from the decision) |
+| 7px | sm (6px) | 1 | – | 1 |
+
+310 literals = 240 exact equivalences + 69 rounded + 1 prose hit in a code comment (`organisers/[id]/page.tsx`, reworded to name the token). Separately, 16 unitless `0` corners inside shorthands (`'8px 8px 0 0'`) became `--afa-radius-sharp`. The checker allowlists 0, so those were never part of the 310.
+
+## 4. DB SQL — NOT RUN. Apply to aforaudience-qa after merge.
+```sql
+BEGIN;
+-- rename, keeping whatever value the row currently holds
+UPDATE "DesignToken" SET "key" = '--afa-radius-lg', "updatedAt" = now() WHERE "key" = '--afa-radius-12px';
+-- retire
+DELETE FROM "DesignToken" WHERE "key" = '--afa-radius-10px';
+-- new steps
+INSERT INTO "DesignToken" ("key", "value", "group", "type", "locked", "updatedAt") VALUES
+('--afa-radius-xs', '3px', 'radius', 'dimension', false, now()),
+('--afa-radius-xl', '16px', 'radius', 'dimension', false, now()),
+('--afa-radius-2xl', '20px', 'radius', 'dimension', false, now())
+ON CONFLICT ("key") DO NOTHING;
+COMMIT;
+```
+Until this runs, the app is still correct: the 4 new keys fall back to their globals.css defaults, and the 2 old rows emit unused custom properties. The only thing missing is admin control of xs/lg/xl/2xl.
+Revert safety: I checked `versions/[id]/revert/route.ts`. Old snapshots that still hold `-10px`/`-12px` skip keys missing from the live table, so reverting won't bring them back. It also means an old snapshot's 12px value won't carry over to `lg`. That's fine at the default 12px.
+
+## 5. Verification
+- tsc clean. `check-design-tokens.js` vs origin/qa: no new literals. Ratchet: all at/below baseline. Self-tests: migrate-tokens 46/46, checker 70/70.
+- `verify-equivalence --base=origin/qa` over every touched src file: 0 mismatches. The only "skipped" files were the token-definition data files (`design-tokens.ts` and `design-token-coverage.ts`, whose line counts changed).
+- ESLint before vs after on the 119 touched files: net 0 (+1 `no-require-imports` for `child_process` in the CJS verify script, matching its existing requires; −1 pre-existing unused `inRawBlock` param removed).
+- `next build` passes. The compiled CSS has `.rounded-\[var\(--afa-radius-xl\)\]{border-radius:var(--afa-radius-xl)}`.
+- `next dev`: `/`, `/events`, `/login` are 200. **Bare `/dashboard` is 404 on qa too**: there is no `src/app/dashboard/page.tsx`. The 5 role dashboards (`/dashboard/audience|organiser|admin|venue|artist`) are all 200.
+- Screenshots at 390px, `origin/qa` vs branch, pixel-diffed: `/login` and `/events/qa-general-event-08` are **pixel-identical**. `/` differs only in the hero "Live, right now" dot, which is a `50%` circle (untouched) with an infinite `heroPing` animation, so the difference is the animation frame, not radius. No visible change beyond corner radii.
+
+## 6. Things that looked wrong / worth knowing
+- **Dispatch premise, step 2:** bare `borderRadius: 12` was already handled. `migrateValue()` defaults a missing unit to px, and the bare-number regex branch already reached those values. The real bug was the opposite case: the matcher also converted unitless values inside a *quoted string* (`'12'`) or a raw `<style>` block (`12;`). That's invalid CSS the browser drops, so converting it would change the page. It's now guarded; unitless `0` is still allowed. No such site existed in this batch, so this is prevention only.
+- **`rounded-[var(...)]` is not ambiguous** (unlike `text-[var(...)]`). I checked with `@tailwindcss/node`, then removed `rounded` from verify-equivalence's ambiguity check. The unhinted form from the dispatch is correct.
+- **Tailwind still scans the untracked `Figma/` folder.** The build CSS contains `.rounded-\[12px\]` from `Figma/Review prompt details/src/components/ui.tsx`. It's harmless, but GEN-2609-111's `@source not` list misses `Figma/`. One-line follow-up if wanted.
+- Biggest visible change is 10 → 12px on 55 sites, mostly dashboard cards/panels: 2px per corner, within the decision's "≤2px". The dashboards weren't screenshotted (they need auth and the dispatch didn't ask), so Hitesh's click-through there is the real check.
+
+---
+
 # Session Handoff — 26 Sept 2026 (chat — #705 merged + verified, decisions taken, radius dispatched)
 
 Delta-only. `qa` code at `6c5a315` (#705); docs after.
