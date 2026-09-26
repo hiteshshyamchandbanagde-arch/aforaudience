@@ -335,7 +335,7 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
             {devOtp && (
               <div style={{ background: "rgba(201,151,58,0.15)", border: "1px solid var(--afa-amber)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
@@ -390,7 +390,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
           {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
               Name per docs/design.md. QST-2607-009 backend is merged so the
               call is wired for real, but it only actually completes once
@@ -595,7 +595,7 @@ export default function RegisterForm() {
                         style={{
                           flex: 1,
                           height: "4px",
-                          borderRadius: "2px",
+                          borderRadius: "var(--afa-radius-xs)",
                           background: i < passwordStrength ? strengthColor : "rgba(245,245,240,0.12)",
                         }}
                       />

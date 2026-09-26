@@ -38,7 +38,7 @@ function TicketQr({ value, size = 64 }: { value: string; size?: number }) {
   }, [value, size])
   if (!dataUrl) return <div style={{ width: size, height: size, background: 'var(--afa-tint-08)', borderRadius: 'var(--afa-radius-sm)' }} />
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 4 }} />
+  return <img src={dataUrl} alt="" width={size} height={size} style={{ display: 'block', borderRadius: 'var(--afa-radius-xs)' }} />
 }
 
 // Companion Tagging Phase 1 (reputation epic §7) - tags where the
@@ -408,7 +408,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youveBeenTagged}
               </h2>
               {pendingTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', border: `1px solid ${FILL_SOLID_BORDER_TINT}`, borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-14px) var(--afa-space-4)', marginBottom: 'var(--afa-space-10px)' }}>
                   <p style={{ fontSize: 'var(--afa-text-body)', margin: '0 0 var(--afa-space-10px)' }}>
                     <strong>{t.taggedBy.displayName || t.taggedBy.name}</strong>{' '}
                     {tr.ticketsPage.taggedYouAsCompanionForTemplate
@@ -452,7 +452,7 @@ export default function MyTicketsPage() {
                 {tr.ticketsPage.youreGoingAsGuest}
               </h2>
               {acceptedTags.map((t) => (
-                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-12px)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
+                <div key={t.id} style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-5) 22px', marginBottom: 'var(--afa-space-14px)', border: '1px solid var(--afa-tint-08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--afa-space-2)' }}>
                     <Link href={`/events/${t.booking.event.id}`} style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-title)', fontWeight: 600, color: 'var(--afa-text-primary)', textDecoration: 'none' }}>
                       {t.booking.event.title}
@@ -475,7 +475,7 @@ export default function MyTicketsPage() {
 
           {bookings.length === 0 && acceptedTags.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-4)', padding: '64px var(--afa-space-32px)', textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 16, border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-raised)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)', background: 'var(--afa-surface-raised)' }}>
                 <TicketIcon style={{ width: 28, height: 28, color: 'var(--afa-text-muted)' }} />
               </div>
               <div>
@@ -563,7 +563,7 @@ export default function MyTicketsPage() {
                     position: 'relative',
                     overflow: 'hidden',
                     background: 'var(--afa-surface-raised)',
-                    borderRadius: '16px',
+                    borderRadius: 'var(--afa-radius-xl)',
                     border: isGhosted ? '1px solid rgba(245,245,240,0.06)' : '1px solid rgba(245,245,240,0.1)',
                     cursor: isGhosted ? 'default' : navigatingId && !isNavigating ? 'default' : 'pointer',
                     opacity: (isGhosted ? 0.55 : 1) * (navigatingId && !isNavigating ? 0.5 : 1) * (used ? 0.85 : 1),
@@ -654,7 +654,7 @@ export default function MyTicketsPage() {
                         </div>
                         <div style={{ display: 'flex', gap: 'var(--afa-space-14px)', padding: 'var(--afa-space-3) var(--afa-space-14px) var(--afa-space-14px)', alignItems: 'flex-start' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--afa-space-6px)', flexShrink: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-12px)', background: 'var(--afa-cream)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-cream)' }}>
                               <TicketQr value={b.id} size={60} />
                             </div>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--afa-text-muted)', textAlign: 'center' }}>

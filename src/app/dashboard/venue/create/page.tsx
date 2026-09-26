@@ -485,7 +485,7 @@ export default function CreateVenuePage() {
                   Pricing fork (GEN-2608-082). Negative side/bottom margin
                   bleeds it to the card's own edges; top stays flush under
                   SectionTitle. */}
-              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: 'var(--afa-space-1) var(--afa-space-28px) var(--afa-space-28px)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-12px) var(--afa-radius-12px)' }}>
+              <div className="afa-glow-orange" style={{ margin: '0 -28px -28px', padding: 'var(--afa-space-1) var(--afa-space-28px) var(--afa-space-28px)', borderRadius: 'var(--afa-radius-sharp) var(--afa-radius-sharp) var(--afa-radius-lg) var(--afa-radius-lg)' }}>
                 <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)', marginBottom: 'var(--afa-space-2px)' }}>
                   How is this venue's seating arranged? Pick how your audience will choose where to sit.
                 </p>
@@ -596,7 +596,7 @@ function PathCard({
       className={`afa-path-card${active ? ' afa-path-card-active afa-card-lift' : ''}`}
       style={{
         textAlign: 'left',
-        borderRadius: 'var(--afa-radius-12px)',
+        borderRadius: 'var(--afa-radius-lg)',
         border: active ? '1px solid rgba(255,90,54,0.5)' : '1px solid rgba(245,245,240,0.12)',
         background: active ? undefined : 'var(--afa-surface-page)',
         padding: 'var(--afa-space-5)',

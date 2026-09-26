@@ -433,7 +433,7 @@ export default function ArtistProfilePage({
           on the right. Replaces the old small circular avatar treatment. */}
       <div style={{ padding: "40px var(--afa-space-48px) 0" }}>
         <div className="artist-hero-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gap: "40px" }}>
-          <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "var(--afa-radius-12px)", overflow: "hidden", border: "1px solid var(--afa-tint-10)" }}>
+          <div style={{ position: "relative", aspectRatio: "4 / 5", minHeight: "320px", borderRadius: "var(--afa-radius-lg)", overflow: "hidden", border: "1px solid var(--afa-tint-10)" }}>
             {portraitUrl && !portraitFailed ? (
               <Photo src={portraitUrl} alt={displayName} onError={() => setPortraitFailed(true)} />
             ) : (
@@ -444,7 +444,7 @@ export default function ArtistProfilePage({
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: "var(--afa-space-32px)" }}>
             <div style={{ display: "flex", gap: "var(--afa-space-2)", marginBottom: "var(--afa-space-4)", flexWrap: "wrap" }}>
               {artist.genre.map((g) => (
-                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "var(--afa-text-micro)", fontWeight: 600, padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "4px" }}>{g.toUpperCase()}</span>
+                <span key={g} style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", fontSize: "var(--afa-text-micro)", fontWeight: 600, padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "var(--afa-radius-xs)" }}>{g.toUpperCase()}</span>
               ))}
             </div>
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, color: "var(--afa-text-primary)", lineHeight: 1.05, marginBottom: "var(--afa-space-3)", letterSpacing: "-1px", display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", flexWrap: "wrap" }}>
@@ -535,7 +535,7 @@ export default function ArtistProfilePage({
             </div>
             <div style={{ display: "flex", gap: "var(--afa-space-2)", flexWrap: "wrap" }}>
               {artist.styleTag.map((tag) => (
-                <span key={tag} style={{ background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "99px", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
+                <span key={tag} style={{ background: "var(--afa-tint-08)", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-small)", padding: "var(--afa-space-1) var(--afa-space-3)", borderRadius: "var(--afa-radius-pill)", border: "1px solid var(--afa-border-resting)" }}>{tag}</span>
               ))}
             </div>
           </div>
@@ -551,7 +551,7 @@ export default function ArtistProfilePage({
           <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(245,245,240,0.55)", marginBottom: "var(--afa-space-4)" }}>
             Vouched for by
           </h2>
-          <div style={{ border: "1px solid rgba(201,151,58,0.25)", borderRadius: "var(--afa-radius-12px)", background: "var(--afa-surface-page)", overflow: "hidden" }}>
+          <div style={{ border: "1px solid rgba(201,151,58,0.25)", borderRadius: "var(--afa-radius-lg)", background: "var(--afa-surface-page)", overflow: "hidden" }}>
             <div style={{ display: "flex", gap: "var(--afa-space-4)", padding: "var(--afa-space-5)", borderBottom: "1px solid var(--afa-tint-10)" }}>
               <CheckSealIcon style={{ width: "28px", height: "28px", color: "var(--afa-amber)", flexShrink: 0, marginTop: "var(--afa-space-2px)" }} />
               <div>
@@ -669,7 +669,7 @@ export default function ArtistProfilePage({
                       <Link
                         key={stop.id}
                         href={`/events/${stop.id}`}
-                        style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-sage)", textDecoration: "none" }}
+                        style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-sage)", textDecoration: "none" }}
                       >
                         <span style={{ fontSize: "var(--afa-text-lead)" }}>🎟️</span>
                         <div style={{ flex: 1 }}>
@@ -699,7 +699,7 @@ export default function ArtistProfilePage({
                   </h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)" }}>
                     {artist.tourStops.map((stop) => (
-                      <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
+                      <div key={stop.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-3) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
                         <span style={{ fontSize: "var(--afa-text-lead)" }}>📍</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "var(--afa-text-body)", fontWeight: 600, color: "var(--afa-text-primary)" }}>{stop.city}, {stop.country}</div>
@@ -744,7 +744,7 @@ export default function ArtistProfilePage({
                   {pastShows.map((p, i) => (
                     <div key={p.id} style={{ position: "relative", marginBottom: "var(--afa-space-5)" }}>
                       <div style={{ position: "absolute", left: "-20px", top: "4px", width: "10px", height: "10px", borderRadius: "50%", background: i === 0 ? "var(--afa-amber)" : "rgba(245,245,240,0.2)" }} />
-                      <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-10px)", padding: "var(--afa-space-14px) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
+                      <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-14px) var(--afa-space-4)", border: "1px solid var(--afa-tint-10)" }}>
                         <div style={{ fontWeight: 600, fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-1)" }}>{p.event.title}</div>
                         <div style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5 }}>{p.event.venue ? `${p.event.venue.name} · ${p.event.venue.city}` : "Venue TBD"} · {new Date(p.event.date).toLocaleDateString()}</div>
                       </div>
@@ -759,7 +759,7 @@ export default function ArtistProfilePage({
         {/* RIGHT SIDEBAR */}
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-4)" }}>
           {socialEntries.length > 0 && (
-            <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
+            <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-4)" }}>Connect</div>
               {socialEntries.map(([platform, handle]) => (
                 <a key={platform} href={handle} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-10px)", marginBottom: "var(--afa-space-10px)", textDecoration: "none" }}>
@@ -770,7 +770,7 @@ export default function ArtistProfilePage({
             </div>
           )}
 
-          <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)" }}>
+          <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-5)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>🎤 Book for your event</div>
 
             {sessionStatus === "authenticated" && userRole === "ORGANISER" ? (
@@ -829,7 +829,7 @@ export default function ArtistProfilePage({
           {/* FEAT-2608-046 - corporate/private booking, inquiry-only.
               Login required as of 11 Aug (Hitesh's rule) - same gate as
               Follow. */}
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-12px)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-5)", border: "1px solid var(--afa-tint-10)" }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-2)" }}>🏢 Corporate or Private Event?</div>
             <p style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)", opacity: 0.6, lineHeight: 1.6, marginBottom: "var(--afa-space-4)" }}>Send {displayName} a direct booking inquiry.</p>
             <Button

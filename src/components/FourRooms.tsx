@@ -92,7 +92,7 @@ function RoomRow({ room, personaLabel, flip }: { room: Room; personaLabel: strin
 
         <Link
           href={room.href}
-          style={{ marginTop: "36px", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "999px", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", fontWeight: 700, textDecoration: "none" }}
+          style={{ marginTop: "36px", alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: "var(--afa-space-2)", background: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)", padding: "12px 24px", borderRadius: "var(--afa-radius-pill)", fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", fontWeight: 700, textDecoration: "none" }}
         >
           {room.cta}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">

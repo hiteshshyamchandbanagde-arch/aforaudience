@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
+        <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
           {submitted ? (
             <div>
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subheading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "12px" }}>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
               </p>
 
               {error && (
-                <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
+                <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-error)" }}>
                   {error}
                 </div>
               )}
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
 
               <Button

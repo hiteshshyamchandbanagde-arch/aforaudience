@@ -64,7 +64,7 @@ export default function SearchBox() {
         placeholder={t.search.placeholder}
         className="afa-search-input"
         style={{
-          width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "999px",
+          width: "100%", maxWidth: "220px", padding: "8px 14px", borderRadius: "var(--afa-radius-pill)",
           border: "1.5px solid var(--afa-border-resting)", fontSize: "var(--afa-text-ui)",
           background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)", outline: "none", boxSizing: "border-box",
         }}
@@ -72,7 +72,7 @@ export default function SearchBox() {
       {open && query.trim().length >= 2 && (
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", right: 0, width: "320px",
-          background: "var(--afa-surface-raised)", borderRadius: "12px", boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+          background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
           border: "1px solid var(--afa-tint-10)", zIndex: 200, maxHeight: "420px", overflowY: "auto",
           padding: hasResults || loading ? "10px 0" : "16px",
         }}>

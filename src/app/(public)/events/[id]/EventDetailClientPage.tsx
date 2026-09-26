@@ -114,8 +114,8 @@ function HypeStat({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, value))
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
-      <div style={{ width: "64px", height: "4px", borderRadius: "2px", overflow: "hidden", background: "var(--afa-tint-10)" }}>
-        <div style={{ height: "100%", borderRadius: "2px", background: "var(--afa-amber)", width: `${pct}%` }} />
+      <div style={{ width: "64px", height: "4px", borderRadius: "var(--afa-radius-xs)", overflow: "hidden", background: "var(--afa-tint-10)" }}>
+        <div style={{ height: "100%", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-amber)", width: `${pct}%` }} />
       </div>
       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>{value.toFixed(1)}</span>
     </div>
@@ -276,7 +276,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         @media (min-width: 640px) { .afa-event-detail-container { padding: 40px 32px 112px; } }
         .afa-event-hero-grid { display: grid; grid-template-columns: 1fr; gap: var(--afa-space-32px); }
         @media (min-width: 1024px) { .afa-event-hero-grid { grid-template-columns: minmax(0, 0.9fr) 1.1fr; gap: var(--afa-space-48px); } }
-        .afa-event-hero-poster { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 3px; }
+        .afa-event-hero-poster { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--afa-radius-xs); }
         @media (min-width: 1024px) { .afa-event-hero-poster-wrap { position: sticky; top: 32px; } }
         .afa-event-meta-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }
         @media (min-width: 640px) { .afa-event-meta-grid { grid-template-columns: 1fr 1fr; } }
@@ -287,7 +287,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
         .afa-event-facility-grid { display: grid; grid-template-columns: 1fr; column-gap: 40px; }
         @media (min-width: 640px) { .afa-event-facility-grid { grid-template-columns: 1fr 1fr; } }
         @media (min-width: 1024px) { .afa-event-facility-grid { grid-template-columns: repeat(3, 1fr); } }
-        .afa-book-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--afa-space-2); width: 100%; background: var(--afa-fill-solid); color: var(--afa-on-fill-solid); padding: var(--afa-space-14px); border-radius: 3px; border: none; font-size: var(--afa-text-body); font-weight: 600; cursor: pointer; transition: filter 0.2s ease; }
+        .afa-book-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--afa-space-2); width: 100%; background: var(--afa-fill-solid); color: var(--afa-on-fill-solid); padding: var(--afa-space-14px); border-radius: var(--afa-radius-xs); border: none; font-size: var(--afa-text-body); font-weight: 600; cursor: pointer; transition: filter 0.2s ease; }
         .afa-book-btn:hover { filter: brightness(1.08); }
         /* GEN-2609-011 - reserves room below 1024px (this file's existing
            lg breakpoint) so the fixed sticky CTA bar never permanently
@@ -350,7 +350,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 slider + Book button (see that route's own
                 SeatSelectionClientPage.tsx - this used to all live here,
                 relocated wholesale, not rewritten). */}
-            <div style={{ marginTop: "var(--afa-space-28px)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
+            <div style={{ marginTop: "var(--afa-space-28px)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
               {isPast ? (
                 <div>
                   <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-lead)", color: "var(--afa-text-primary)" }}>{tr.eventDetailPage.eventEnded}</div>
@@ -413,7 +413,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   </ul>
                 )}
                 {event.specialNotesStatus === 'APPROVED' && event.specialNotes && (
-                  <div style={{ marginTop: "var(--afa-space-4)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
+                  <div style={{ marginTop: "var(--afa-space-4)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
                     <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-6px)" }}>{tr.eventDetailPage.specialNoteLabel}</div>
                     <div style={{ fontSize: "var(--afa-text-body)", color: "rgba(245,245,240,0.85)", lineHeight: 1.6 }}>{event.specialNotes}</div>
                   </div>
@@ -541,7 +541,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                               placeholder={tr.eventDetailPage.commentPlaceholder}
                               value={reviewDrafts[p.id]?.comment || ""}
                               onChange={(e) => setReviewDrafts((prev) => ({ ...prev, [p.id]: { rating: prev[p.id]?.rating || 0, comment: e.target.value } }))}
-                              style={{ width: "100%", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "3px", border: "1px solid var(--afa-border-resting)", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", boxSizing: "border-box" }}
+                              style={{ width: "100%", padding: "var(--afa-space-6px) var(--afa-space-10px)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-border-resting)", background: "transparent", color: "var(--afa-text-primary)", fontSize: "var(--afa-text-ui)", boxSizing: "border-box" }}
                             />
                           )}
                           {reviewError && <p style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-error)", marginTop: "var(--afa-space-6px)" }}>{reviewError}</p>}
@@ -580,7 +580,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                   { rank: tr.eventDetailPage.secondPrize, value: event.competitionPrizeSecond, top: false },
                   { rank: tr.eventDetailPage.thirdPrize, value: event.competitionPrizeThird, top: false },
                 ].filter((p) => p.value).map((p) => (
-                  <div key={p.rank} style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
+                  <div key={p.rank} style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-3)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-5)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-2)" }}>
                       <TrophyIcon style={{ width: "20px", height: "20px", color: p.top ? "var(--afa-amber)" : "var(--afa-text-muted)" }} />
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(245,245,240,0.5)" }}>{p.rank}</span>
@@ -594,7 +594,7 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
             {event.celebrities && event.celebrities.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: "var(--afa-space-10px)", marginTop: "var(--afa-space-5)" }}>
                 {event.celebrities.map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
+                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-14px)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px) var(--afa-space-4)" }}>
                     <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {c.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -617,8 +617,8 @@ export default function EventDetailPage({ event, canReview }: { event: EventData
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", textTransform: "uppercase", letterSpacing: "0.2em", color: "var(--afa-text-muted)", marginBottom: "var(--afa-space-10px)" }}>{tr.eventDetailPage.panelists}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--afa-space-3)" }}>
                   {event.panelists.map((p) => (
-                    <div key={p.id} style={{ display: "flex", gap: "var(--afa-space-3)", borderRadius: "3px", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px)" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "3px", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div key={p.id} style={{ display: "flex", gap: "var(--afa-space-3)", borderRadius: "var(--afa-radius-xs)", border: "1px solid var(--afa-tint-10)", background: "var(--afa-surface-raised)", padding: "var(--afa-space-14px)" }}>
+                      <div style={{ width: "40px", height: "40px", borderRadius: "var(--afa-radius-xs)", overflow: "hidden", flexShrink: 0, background: "var(--afa-surface-inverse)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {p.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={p.photoUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.25) brightness(0.9)" }} />

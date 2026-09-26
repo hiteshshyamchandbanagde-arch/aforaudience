@@ -120,7 +120,7 @@ export default function AudienceActivityPage() {
             </p>
 
             {confirmed.length === 0 && (
-              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid rgba(245,245,240,0.06)', textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid rgba(245,245,240,0.06)', textAlign: 'center', marginBottom: '24px' }}>
                 <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
                   {tr.audienceActivityPage.noConfirmedBookings}
                 </p>

@@ -51,7 +51,7 @@ export default function HelpIcon({ text }: { text: string }) {
             fontWeight: 400,
             lineHeight: 1.45,
             padding: '8px 11px',
-            borderRadius: '7px',
+            borderRadius: 'var(--afa-radius-sm)',
             width: '230px',
             zIndex: 30,
             boxShadow: '0 4px 14px rgba(0,0,0,0.18)',

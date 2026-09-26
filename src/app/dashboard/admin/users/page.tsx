@@ -148,7 +148,7 @@ export default function AdminUsersPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>{r || 'All roles'}</option>
@@ -174,7 +174,7 @@ export default function AdminUsersPage() {
               <div
                 key={u.id}
                 style={{
-                  background: 'var(--afa-surface-page)', borderRadius: '10px', padding: '16px',
+                  background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
                   border: u.isSuspended ? '1px solid rgba(179,38,30,0.4)' : '1px solid rgba(245,245,240,0.08)',
                 }}
               >
@@ -210,7 +210,7 @@ export default function AdminUsersPage() {
                           value={reasonDraft[u.id] || ''}
                           onChange={(e) => setReasonDraft({ ...reasonDraft, [u.id]: e.target.value })}
                           placeholder="Reason..."
-                          style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
+                          style={{ padding: '8px 10px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', width: '160px', background: 'var(--afa-surface-inverse)', color: 'var(--afa-text-primary)' }}
                         />
                         <Button variant="solid" size="md" fullWidth={false} onClick={() => handleSuspend(u.id)} disabled={actioningId === u.id}>
                           Suspend

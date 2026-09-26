@@ -82,7 +82,7 @@ export default function ArtistsNearYou() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: '12px', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.artistsRailHeading}</h4>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.artistsRailBadge}</span>
@@ -95,7 +95,7 @@ export default function ArtistsNearYou() {
               key={i}
               style={{
                 height: '38px',
-                borderRadius: '6px',
+                borderRadius: 'var(--afa-radius-sm)',
                 background: 'linear-gradient(90deg, rgba(247,243,238,0.05) 0%, rgba(247,243,238,0.12) 50%, rgba(247,243,238,0.05) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'railShimmer 1.6s ease-in-out infinite',
@@ -122,7 +122,7 @@ export default function ArtistsNearYou() {
             <Link
               key={a.id}
               href={`/artists/${a.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 8px', margin: '0 -8px', borderRadius: '6px', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(247,243,238,0.05)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >

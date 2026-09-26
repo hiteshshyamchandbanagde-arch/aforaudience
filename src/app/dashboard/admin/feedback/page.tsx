@@ -515,7 +515,7 @@ function AdminFeedbackBoard() {
 
   const cardStyle: React.CSSProperties = {
     background: 'var(--afa-surface-page)',
-    borderRadius: 'var(--afa-radius-12px)',
+    borderRadius: 'var(--afa-radius-lg)',
     padding: 'var(--afa-space-4)',
     border: '1px solid var(--afa-tint-08)',
     marginBottom: 'var(--afa-space-10px)',
@@ -614,7 +614,7 @@ function AdminFeedbackBoard() {
               </h2>
               {organisers.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: 'var(--afa-space-18px)' }}>Nothing pending.</p>}
               {organisers.map((o) => (
-                <div key={o.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={o.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{o.orgName}</div>
@@ -634,7 +634,7 @@ function AdminFeedbackBoard() {
               </h2>
               {venueOwners.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {venueOwners.map((v) => (
-                <div key={v.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={v.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: '200px' }}>
                       <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{v.user.name}</div>
@@ -670,7 +670,7 @@ function AdminFeedbackBoard() {
               </p>
               {genreRequests.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {genreRequests.map((g) => (
-                <div key={g.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={g.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600 }}>{g.value}</div>
                     <div style={{ display: 'flex', gap: 'var(--afa-space-2)', flexShrink: 0 }}>
@@ -701,7 +701,7 @@ function AdminFeedbackBoard() {
               </p>
               {eventNotes.length === 0 && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>Nothing pending.</p>}
               {eventNotes.map((n) => (
-                <div key={n.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
+                <div key={n.id} style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: 'var(--afa-space-4)', border: '1px solid var(--afa-tint-08)', marginBottom: 'var(--afa-space-10px)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--afa-space-4)', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, marginBottom: 'var(--afa-space-2px)' }}>{n.title}</div>
@@ -750,7 +750,7 @@ function AdminFeedbackBoard() {
                 gap: 'var(--afa-space-10px)',
                 background: 'rgba(201,151,58,0.15)',
                 border: '1px solid rgba(245,245,240,0.13)',
-                borderRadius: 'var(--afa-radius-10px)',
+                borderRadius: 'var(--afa-radius-lg)',
                 padding: 'var(--afa-space-10px) var(--afa-space-14px)',
                 marginBottom: 'var(--afa-space-3)',
                 fontSize: 'var(--afa-text-ui)',

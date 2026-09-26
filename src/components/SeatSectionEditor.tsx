@@ -121,7 +121,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
   const inputStyle: CSSProperties = {
     width: "100%",
     padding: "10px 12px",
-    borderRadius: "10px",
+    borderRadius: "var(--afa-radius-lg)",
     border: "1px solid var(--afa-border-resting)",
     background: "var(--afa-surface-page)",
     fontSize: "var(--afa-text-body)",
@@ -164,7 +164,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
               alignItems: "center",
               padding: "12px",
               background: "var(--afa-surface-raised)",
-              borderRadius: "8px",
+              borderRadius: "var(--afa-radius-md)",
               border: `1px solid ${borderColor}`,
             }}
           >
@@ -282,7 +282,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             padding: "14px 18px",
             background: "var(--afa-surface-page)",
             border: "1px solid rgba(255,90,54,0.2)",
-            borderRadius: "10px",
+            borderRadius: "var(--afa-radius-lg)",
           }}
         >
           <div>

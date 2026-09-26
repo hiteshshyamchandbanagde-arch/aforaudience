@@ -190,7 +190,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                 <h2 style={{ fontSize: 'var(--afa-text-body)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '10px' }}>Facilities</h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {venue.facilities.map((facility) => (
-                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: '999px', color: 'var(--afa-text-primary)' }}>
+                    <span key={facility} style={{ fontSize: 'var(--afa-text-ui)', padding: '5px 12px', background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-pill)', color: 'var(--afa-text-primary)' }}>
                       {facility}
                     </span>
                   ))}
@@ -217,7 +217,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                           justifyContent: 'space-between',
                           padding: '12px 16px',
                           background: 'var(--afa-surface-page)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--afa-radius-md)',
                           fontSize: 'var(--afa-text-body)',
                         }}
                       >
@@ -242,7 +242,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                                 color: 'var(--afa-gold)',
                                 background: 'rgba(201,151,58,0.15)',
                                 padding: '3px 8px',
-                                borderRadius: '4px',
+                                borderRadius: 'var(--afa-radius-xs)',
                                 letterSpacing: '0.02em',
                               }}
                             >
@@ -266,7 +266,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                         justifyContent: 'space-between',
                         padding: '12px 16px',
                         background: 'var(--afa-surface-page)',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--afa-radius-md)',
                         fontSize: 'var(--afa-text-body)',
                       }}
                     >
@@ -288,7 +288,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               color: 'var(--afa-gold)',
                               background: 'rgba(201,151,58,0.15)',
                               padding: '3px 8px',
-                              borderRadius: '4px',
+                              borderRadius: 'var(--afa-radius-xs)',
                               letterSpacing: '0.02em',
                             }}
                           >
@@ -306,13 +306,13 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link
               href={`/dashboard/venue/${venue.id}/edit`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
             >
               Edit Venue
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: '8px' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
             >
               📊 Revenue
             </Link>

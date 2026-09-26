@@ -83,7 +83,7 @@ function SortableRow({
         gap: '12px',
         padding: '14px',
         background: 'var(--afa-surface-raised)',
-        borderRadius: '10px',
+        borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
       }}
     >
@@ -129,7 +129,7 @@ function SortableRow({
           alignItems: 'center',
           gap: '4px',
           padding: '5px 10px',
-          borderRadius: '999px',
+          borderRadius: 'var(--afa-radius-pill)',
           fontSize: 'var(--afa-text-micro)',
           fontWeight: 700,
           whiteSpace: 'nowrap',
@@ -150,7 +150,7 @@ function SortableRow({
           max={180}
           value={item.duration}
           onChange={(e) => onDurationChange(item.id, Number(e.target.value))}
-          style={{ width: '56px', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+          style={{ width: '56px', padding: '6px 8px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', textAlign: 'center', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
         />
         <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>min</span>
       </div>
@@ -303,7 +303,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length > 0 && (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '16px', marginBottom: '16px', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, color: 'rgba(245,245,240,0.6)', marginBottom: '8px' }}>
                 Message the whole lineup — sent as a private message to each artist individually, replies stay private.
               </p>
@@ -312,7 +312,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
                   value={broadcastDraft}
                   onChange={(e) => setBroadcastDraft(e.target.value.slice(0, 2000))}
                   placeholder="e.g. Load-in is now 6pm, not 6:30..."
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                 />
                 <Button
                   variant="primary"
@@ -329,7 +329,7 @@ export default function LineupBuilderPage({ params }: { params: Promise<{ id: st
           )}
 
           {lineup.length === 0 ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '32px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '32px', textAlign: 'center', border: '1px solid rgba(245,245,240,0.06)' }}>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.6)' }}>
                 No approved performers yet. Approve an Artist application to add them to the lineup.
               </p>

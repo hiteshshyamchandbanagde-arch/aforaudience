@@ -115,7 +115,7 @@ export default function OrganiserPayoutsPage() {
             <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)', marginBottom: '20px' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)', marginBottom: '20px' }}>
             {payout?.linked ? (
               <>
                 <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '4px' }}>Linked account</p>
@@ -168,7 +168,7 @@ export default function OrganiserPayoutsPage() {
                     value={accountIdInput}
                     onChange={(e) => setAccountIdInput(e.target.value)}
                     placeholder="acc_XXXXXXXXXXXXXX"
-                    style={{ flex: 1, fontSize: 'var(--afa-text-body)', fontFamily: 'var(--font-mono)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+                    style={{ flex: 1, fontSize: 'var(--afa-text-body)', fontFamily: 'var(--font-mono)', padding: '10px 12px', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
                   />
                   <Button
                     variant="primary"

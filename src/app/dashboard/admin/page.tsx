@@ -112,7 +112,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
       style={{
         position: 'relative',
         background: 'var(--afa-surface-raised)',
-        borderRadius: '10px',
+        borderRadius: 'var(--afa-radius-lg)',
         border: '1px solid var(--afa-tint-08)',
         display: 'flex',
         alignItems: 'stretch',
@@ -253,7 +253,7 @@ export default function AdminCommandCenter() {
                   href={a.href}
                   style={{
                     background: 'var(--afa-surface-raised)',
-                    borderRadius: '10px',
+                    borderRadius: 'var(--afa-radius-lg)',
                     border: '1px solid var(--afa-tint-08)',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -270,7 +270,7 @@ export default function AdminCommandCenter() {
                       fontWeight: 700,
                       color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)',
                       background: a.tone === 'critical' ? 'rgba(179,38,30,0.15)' : 'rgba(201,151,58,0.15)',
-                      borderRadius: '999px',
+                      borderRadius: 'var(--afa-radius-pill)',
                       padding: '2px 10px',
                     }}
                   >
@@ -288,7 +288,7 @@ export default function AdminCommandCenter() {
               background: 'rgba(22,101,52,0.12)',
               border: '1px solid var(--afa-tint-08)',
               borderLeft: '4px solid var(--afa-green-deep)',
-              borderRadius: '10px',
+              borderRadius: 'var(--afa-radius-lg)',
               padding: '14px 18px',
               color: 'var(--afa-green-deep)',
               fontSize: 'var(--afa-text-ui)',
@@ -324,7 +324,7 @@ export default function AdminCommandCenter() {
         <div
           style={{
             background: 'var(--afa-surface-raised)',
-            borderRadius: '14px',
+            borderRadius: 'var(--afa-radius-lg)',
             border: '1px solid var(--afa-tint-08)',
             padding: '20px 22px',
             marginBottom: '26px',
@@ -350,11 +350,11 @@ export default function AdminCommandCenter() {
                   <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '108px', width: '100%', justifyContent: 'center' }}>
                     <div
                       title={`Opened: ${d.opened}`}
-                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-amber)', borderRadius: '3px 3px 0 0' }}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.opened / maxDaily) * 108)}px`, background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
                     />
                     <div
                       title={`Resolved: ${d.resolved}`}
-                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: '3px 3px 0 0' }}
+                      style={{ flex: '1 1 0', maxWidth: '10px', height: `${Math.max(2, (d.resolved / maxDaily) * 108)}px`, background: 'var(--afa-green-deep)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }}
                     />
                   </div>
                   <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', marginTop: '6px', visibility: i === 0 || i === arr.length - 1 ? 'visible' : 'hidden' }}>
@@ -366,10 +366,10 @@ export default function AdminCommandCenter() {
           </div>
           <div style={{ display: 'flex', gap: '16px', marginTop: '14px', fontSize: 'var(--afa-text-small)' }}>
             <span style={{ color: 'var(--afa-amber)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
+              <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-amber)', display: 'inline-block' }} /> Opened
             </span>
             <span style={{ color: 'var(--afa-green-deep)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
+              <span style={{ width: '8px', height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-green-deep)', display: 'inline-block' }} /> Resolved
             </span>
           </div>
         </div>

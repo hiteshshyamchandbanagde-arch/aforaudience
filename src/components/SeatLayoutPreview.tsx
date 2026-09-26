@@ -76,7 +76,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 type="button"
                 onClick={() => setActiveLevel(lvl)}
                 style={{
-                  fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: '6px',
+                  fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '4px 10px', borderRadius: 'var(--afa-radius-sm)',
                   border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.15)',
                   background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                   color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
@@ -88,8 +88,8 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
           </div>
         )}
       </div>
-      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: '10px', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
-        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: '6px', padding: '4px 0', marginBottom: '14px' }}>
+      <div style={{ border: '1px solid var(--afa-tint-10)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-surface-page)', padding: '16px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', textAlign: 'center', fontSize: 'var(--afa-text-micro)', fontWeight: 700, letterSpacing: '1px', borderRadius: 'var(--afa-radius-sm)', padding: '4px 0', marginBottom: '14px' }}>
           STAGE
         </div>
         <div style={{ position: 'relative', width: '100%', height: '160px' }}>
@@ -103,7 +103,7 @@ export default function SeatLayoutPreview({ seats, zoneOrder }: { seats: Preview
                 top: `${((s.y - minY) / rangeY) * 84 + 8}%`,
                 width: '6px',
                 height: '6px',
-                borderRadius: '2px',
+                borderRadius: 'var(--afa-radius-xs)',
                 background: colorForZone(s.tierLabel, zoneOrder),
                 transform: 'translate(-50%, -50%)',
               }}

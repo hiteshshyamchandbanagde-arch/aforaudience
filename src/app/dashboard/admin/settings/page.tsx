@@ -550,7 +550,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
           }}
         >
@@ -620,7 +620,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginTop: 'var(--afa-space-5)',
           }}
@@ -677,7 +677,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -760,7 +760,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -795,7 +795,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -831,7 +831,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -897,7 +897,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginBottom: 'var(--afa-space-5)',
           }}
@@ -936,7 +936,7 @@ export default function AdminSettingsPage() {
           style={{
             background: 'var(--afa-surface-page)',
             border: '1px solid var(--afa-tint-08)',
-            borderRadius: 12,
+            borderRadius: 'var(--afa-radius-lg)',
             padding: 'var(--afa-space-6)',
             marginTop: 'var(--afa-space-5)',
           }}

@@ -34,14 +34,14 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     padding: '5px 10px',
-    borderRadius: '999px',
+    borderRadius: 'var(--afa-radius-pill)',
     whiteSpace: 'nowrap',
   },
   'status-compact': {
     fontSize: 'var(--afa-text-micro)',
     fontWeight: 700,
     padding: '4px 10px',
-    borderRadius: '999px',
+    borderRadius: 'var(--afa-radius-pill)',
     whiteSpace: 'nowrap',
   },
   // admin/feedback's category/severity badges. The two real call sites
@@ -53,7 +53,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     fontSize: 'var(--afa-text-caption)',
     fontWeight: 700,
     padding: '2px 8px',
-    borderRadius: '999px',
+    borderRadius: 'var(--afa-radius-pill)',
   },
   // admin/bookings' "FREE" tag - deliberately not folded into `status`/
   // `status-compact` conceptually either: it's a fixed fact about an
@@ -63,7 +63,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     fontSize: 'var(--afa-text-micro)',
     fontWeight: 500,
     padding: '2px 8px',
-    borderRadius: '999px',
+    borderRadius: 'var(--afa-radius-pill)',
   },
   // artist/events' compensation pill + "Lineup full" pill - identical
   // chrome on both real call sites, no per-site override needed.
@@ -71,7 +71,7 @@ const CHROME: Record<BadgeVariant, React.CSSProperties> = {
     fontSize: 'var(--afa-text-ui)',
     fontWeight: 700,
     padding: '5px 12px',
-    borderRadius: '999px',
+    borderRadius: 'var(--afa-radius-pill)',
   },
 }
 

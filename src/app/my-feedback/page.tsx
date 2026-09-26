@@ -231,7 +231,7 @@ function FeedbackDetailOverlay({
         </p>
 
         {item.latestNote && (
-          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-10px)', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 600, color: 'rgba(245,245,240,0.5)', textTransform: 'uppercase', marginBottom: '4px' }}>
               {tr.myFeedbackPage.noteFromTeam}
             </div>
@@ -335,7 +335,7 @@ export default function MyFeedbackPage() {
         </p>
 
         {error && (
-          <div style={{ padding: '16px', background: '#FFEBEE', borderRadius: 'var(--afa-radius-10px)', color: '#C62828', marginBottom: '20px' }}>
+          <div style={{ padding: '16px', background: '#FFEBEE', borderRadius: 'var(--afa-radius-lg)', color: '#C62828', marginBottom: '20px' }}>
             {error}
           </div>
         )}
@@ -346,7 +346,7 @@ export default function MyFeedbackPage() {
           <div
             style={{
               background: 'var(--afa-surface-raised)',
-              borderRadius: 'var(--afa-radius-12px)',
+              borderRadius: 'var(--afa-radius-lg)',
               padding: '32px 24px',
               textAlign: 'center',
               border: '1px solid var(--afa-tint-08)',
@@ -369,7 +369,7 @@ export default function MyFeedbackPage() {
                   onClick={() => setSelectedIndex(i)}
                   style={{
                     background: 'var(--afa-surface-raised)',
-                    borderRadius: 'var(--afa-radius-12px)',
+                    borderRadius: 'var(--afa-radius-lg)',
                     padding: '18px 20px',
                     border: '1px solid var(--afa-tint-08)',
                     textAlign: 'left',

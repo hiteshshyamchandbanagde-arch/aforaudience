@@ -257,6 +257,17 @@
   --afa-radius-md: 8px;
   --afa-radius-pill: 999px;
 
+  /* GEN-2609-112 - radius closeout: full 8-step scale per
+     docs/decisions/2026-09-26-radius-colour-scale.md section 1. xs/xl/2xl
+     are new; lg replaces the pixel-named --afa-radius-12px (same 12px
+     value), and --afa-radius-10px is retired into lg (10 -> 12px,
+     accepted). Off-scale literals round onto these steps: 2/3/4 -> xs,
+     5/7 -> sm, 10/14 -> lg, 24 -> 2xl, 99 -> pill. */
+  --afa-radius-xs: 3px;
+  --afa-radius-lg: 12px;
+  --afa-radius-xl: 16px;
+  --afa-radius-2xl: 20px;
+
   --afa-btn-padding-sm: 4px 10px;
   --afa-btn-padding-md: 9px 17px;
   --afa-btn-padding-lg: 12px 24px;
@@ -308,9 +319,6 @@
   --afa-text-body-lg: 15px;
   --afa-text-lead: 18px;
   --afa-text-subtitle: 20px;
-
-  --afa-radius-10px: 10px;
-  --afa-radius-12px: 12px;
 
   /* Repointed to the app's real dark-theme tokens (BUG-2609-043) - .dark
      (below) is never applied to <html>/<body> anywhere in this app, so

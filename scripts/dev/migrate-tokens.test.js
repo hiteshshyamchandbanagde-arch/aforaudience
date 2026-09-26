@@ -29,6 +29,9 @@ const {
   processLine,
   CATEGORY_DEFS,
   DEFAULT_CATEGORIES,
+  migrateTailwindRadiusBracket,
+  RADIUS_MAP,
+  RADIUS_ROUND,
 } = require('./migrate-tokens')
 
 let passed = 0
@@ -178,11 +181,11 @@ t('GEN-2609-102: same raw-CSS text outside a raw block (inRawBlock=false) stays 
 })
 
 t('GEN-2609-102: an unrelated raw-CSS property (no COLOR_MAP match, not even a colour prop) stays literal', () => {
-  const line = '        .afa-events-select { padding: 8px 12px; border-radius: 3px; }'
+  const line = '        .afa-events-select { padding: 8px 12px; border-radius: 50%; }'
   const out = processLine(line, true, DEFAULT_DEFS)
-  // padding/border-radius already convert via the existing dimension
-  // path (8px/12px have no SPACING_MAP entry, 3px has no RADIUS_MAP
-  // entry either) - this line is a genuine full no-op, proving the new
+  // padding is outside DEFAULT_CATEGORIES and a % radius is never a
+  // scale value (GEN-2609-112 changed this fixture from 3px, which is
+  // now --afa-radius-xs) - this line is a genuine full no-op, proving the new
   // raw-colour pass doesn't misfire on non-colour props.
   assert.equal(out, line)
 })
@@ -241,6 +244,93 @@ t('GEN-2609-105: never runs inside a raw <style> block - a className attribute c
   const line = '        .afa-events-mode-tab { text-decoration: none; }' // not a real className scenario, just proves the block is skipped when inRawBlock=true
   const out = processLine(line, true, DEFAULT_DEFS)
   assert.equal(out, line)
+})
+
+// GEN-2609-112 - radius: bare JS numbers, the unitless guard, and the
+// Tailwind `rounded-[Npx]` bracket pass.
+const RADIUS_DEFS = [CATEGORY_DEFS.radius]
+
+t('GEN-2609-112: a bare JS number borderRadius is px (React appends it) and becomes a quoted var()', () => {
+  const out = processLine('        borderRadius: 12,', false, RADIUS_DEFS)
+  assert.equal(out, "        borderRadius: 'var(--afa-radius-lg)',")
+})
+
+t('GEN-2609-112: a bare corner longhand converts the same way', () => {
+  const out = processLine('      borderTopLeftRadius: 20,', false, RADIUS_DEFS)
+  assert.equal(out, "      borderTopLeftRadius: 'var(--afa-radius-2xl)',")
+})
+
+t('GEN-2609-112: bare numbers inline with other props - only the radius one changes', () => {
+  const line = "<div style={{ height: 4, width: 40, borderRadius: 999, background: 'var(--afa-border-resting)' }} />"
+  const out = processLine(line, false, RADIUS_DEFS)
+  assert.equal(out, "<div style={{ height: 4, width: 40, borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-border-resting)' }} />")
+})
+
+t('GEN-2609-112: a radius-only run never touches a bare spacing or font-size number', () => {
+  const line = "<div style={{ padding: 16, fontSize: 12, borderRadius: 8 }}>"
+  const out = processLine(line, false, RADIUS_DEFS)
+  assert.equal(out, "<div style={{ padding: 16, fontSize: 12, borderRadius: 'var(--afa-radius-md)' }}>")
+})
+
+t('GEN-2609-112: a QUOTED unitless radius is invalid CSS (never rendered) and stays literal', () => {
+  const line = "        borderRadius: '12',"
+  assert.equal(processLine(line, false, RADIUS_DEFS), line)
+})
+
+t('GEN-2609-112: an unitless radius inside a raw <style> block stays literal', () => {
+  const line = '        .x { border-radius: 12; }'
+  assert.equal(processLine(line, true, RADIUS_DEFS), line)
+})
+
+t('GEN-2609-112: a unitless 0 inside a quoted multi-value shorthand still converts', () => {
+  const out = processLine("        borderRadius: '8px 8px 0 0',", false, RADIUS_DEFS)
+  assert.equal(out, "        borderRadius: 'var(--afa-radius-md) var(--afa-radius-md) var(--afa-radius-sharp) var(--afa-radius-sharp)',")
+})
+
+t('GEN-2609-112: a px radius inside a raw <style> block converts unquoted', () => {
+  const out = processLine('        .x { border-radius: 16px; }', true, RADIUS_DEFS)
+  assert.equal(out, '        .x { border-radius: var(--afa-radius-xl); }')
+})
+
+t('GEN-2609-112: % and negative radii stay literal', () => {
+  const line = "<span style={{ borderRadius: '50%' }} />"
+  assert.equal(processLine(line, false, RADIUS_DEFS), line)
+  const neg = '        borderRadius: -4,'
+  assert.equal(processLine(neg, false, RADIUS_DEFS), neg)
+})
+
+t('GEN-2609-112: Tailwind rounded-[16px] inside className becomes rounded-[var(--afa-radius-xl)], rest untouched', () => {
+  const line = '<div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10">'
+  assert.equal(processLine(line, false, RADIUS_DEFS), '<div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10">')
+})
+
+t('GEN-2609-112: Tailwind side-prefixed rounded-t-[8px] keeps its side prefix', () => {
+  assert.equal(migrateTailwindRadiusBracket('rounded-t-[8px] block', CATEGORY_DEFS.radius), 'rounded-t-[var(--afa-radius-md)] block')
+})
+
+t('GEN-2609-112: RADIUS_ROUND values convert to their decided step, exact matches still win', () => {
+  assert.equal(processLine("        borderRadius: '10px',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-lg)',")
+  assert.equal(processLine('        borderTopRightRadius: 24,', false, RADIUS_DEFS), "        borderTopRightRadius: 'var(--afa-radius-2xl)',")
+  assert.equal(processLine("        borderRadius: '99px',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-pill)',")
+  assert.equal(processLine("        borderRadius: '2px 2px 0 0',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)',")
+})
+
+t('GEN-2609-112: RADIUS_ROUND never overlaps RADIUS_MAP (a key is exact OR rounded, never both)', () => {
+  for (const k of Object.keys(RADIUS_ROUND)) assert.ok(!(k in RADIUS_MAP), `${k} is in both maps`)
+})
+
+t('GEN-2609-112: RADIUS_ROUND is radius-only - a spacing run never rounds', () => {
+  const line = "<div style={{ padding: '5px' }}>"
+  assert.equal(processLine(line, false, [CATEGORY_DEFS.spacing]), line)
+})
+
+t('GEN-2609-112: an off-map Tailwind radius bracket stays literal', () => {
+  assert.equal(migrateTailwindRadiusBracket('rounded-[13px]', CATEGORY_DEFS.radius), null)
+})
+
+t('GEN-2609-112: the radius className pass is skipped when radius is not a selected category', () => {
+  const line = '<div className="rounded-[16px]">'
+  assert.equal(processLine(line, false, [CATEGORY_DEFS.colour]), line)
 })
 
 console.log(`\n${passed} passed, ${failed} failed.`)

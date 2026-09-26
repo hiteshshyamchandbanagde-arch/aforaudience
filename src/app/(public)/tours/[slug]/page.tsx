@@ -59,7 +59,7 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
         )}
 
         {tour.stops.length === 0 ? (
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '40px 24px', textAlign: 'center', border: '1px solid var(--afa-tint-08)' }}>
             <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>No stops are open for booking yet - check back soon.</p>
           </div>
         ) : (
@@ -68,12 +68,12 @@ export default async function TourLandingPage({ params }: { params: Promise<{ sl
               <Link
                 key={stop.id}
                 href={`/events/${stop.id}`}
-                style={{ display: 'block', background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '22px 24px', border: '1px solid var(--afa-tint-08)', textDecoration: 'none' }}
+                style={{ display: 'block', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '22px 24px', border: '1px solid var(--afa-tint-08)', textDecoration: 'none' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-subtitle)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{stop.title}</h3>
                   {stop.status === 'COMPLETED' && (
-                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: '999px', background: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-tint-08)', color: 'var(--afa-text-primary)', whiteSpace: 'nowrap' }}>
                       Completed
                     </span>
                   )}

@@ -206,7 +206,7 @@ export default function AdminBookingsPage() {
                     key={b.id}
                     style={{
                       background: 'var(--afa-surface-page)',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--afa-radius-lg)',
                       padding: '18px 20px',
                       border: '1px solid var(--afa-tint-08)',
                     }}
@@ -264,7 +264,7 @@ export default function AdminBookingsPage() {
                           padding: '10px 12px',
                           background: 'rgba(179,38,30,0.12)',
                           border: '1px solid rgba(179,38,30,0.3)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--afa-radius-md)',
                           fontSize: 'var(--afa-text-ui)',
                           color: 'var(--afa-error)',
                           fontFamily: 'var(--font-mono)',

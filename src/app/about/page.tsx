@@ -598,7 +598,7 @@ export default function AboutPage() {
                 color: "var(--afa-on-fill-solid)",
                 background: EMBER,
                 padding: "14px 28px",
-                borderRadius: "6px",
+                borderRadius: "var(--afa-radius-sm)",
                 textDecoration: "none",
               }}
             >
@@ -613,7 +613,7 @@ export default function AboutPage() {
                 color: INK,
                 background: "transparent",
                 padding: "14px 28px",
-                borderRadius: "6px",
+                borderRadius: "var(--afa-radius-sm)",
                 textDecoration: "none",
                 border: `1.5px solid ${INK}`,
               }}

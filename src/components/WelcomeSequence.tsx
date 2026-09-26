@@ -155,7 +155,7 @@ export default function WelcomeSequence() {
           width: '100%',
           maxWidth: 440,
           background: 'var(--afa-surface-raised)',
-          borderRadius: 16,
+          borderRadius: 'var(--afa-radius-xl)',
           border: '1px solid var(--afa-tint-08)',
           padding: 40,
           textAlign: 'center',
@@ -205,7 +205,7 @@ export default function WelcomeSequence() {
                 </p>
                 {otp.error && <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: 16 }}>{otp.error}</p>}
                 {otp.devOtp && (
-                  <div style={{ background: 'rgba(201,151,58,0.08)', border: '1px solid var(--afa-amber)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                  <div style={{ background: 'rgba(201,151,58,0.08)', border: '1px solid var(--afa-amber)', borderRadius: 'var(--afa-radius-md)', padding: '10px 14px', marginBottom: 16, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                     QA Mode — dev OTP: <strong>{otp.devOtp}</strong>
                   </div>
                 )}
@@ -218,7 +218,7 @@ export default function WelcomeSequence() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    borderRadius: 8,
+                    borderRadius: 'var(--afa-radius-md)',
                     border: '1px solid var(--afa-border-resting)',
                     fontSize: 'var(--afa-text-lead)',
                     letterSpacing: '0.3em',

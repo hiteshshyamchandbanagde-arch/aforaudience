@@ -15,7 +15,7 @@ import Button from '@/components/ui/Button'
 const inputStyle = {
   width: '100%',
   padding: '14px 16px',
-  borderRadius: '8px',
+  borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-border-resting)',
   fontSize: 'var(--afa-text-lead)',
   letterSpacing: '0.3em',
@@ -95,7 +95,7 @@ function VerifyPhoneInner() {
           </h1>
 
           {alreadyVerified ? (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body-lg)', color: 'var(--afa-text-primary)', marginBottom: '16px' }}>
                 {tr.verifyPhonePage.alreadyVerifiedMessage}
               </p>
@@ -104,7 +104,7 @@ function VerifyPhoneInner() {
               </Link>
             </div>
           ) : (
-            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.7, marginBottom: '20px' }}>
                 {tr.verifyPhonePage.introPrefix} <strong>{phone || tr.verifyPhonePage.phoneOnFileFallback}</strong>{tr.verifyPhonePage.introSuffix}
               </p>
@@ -113,7 +113,7 @@ function VerifyPhoneInner() {
                 <ErrorBanner style={{ marginBottom: '18px', fontSize: 'var(--afa-text-ui)' }}>{error}</ErrorBanner>
               )}
               {devOtp && (
-                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: '8px', padding: '12px 16px', marginBottom: '18px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
+                <div style={{ background: FILL_SOLID_TINT, border: '1px solid var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-md)', padding: '12px 16px', marginBottom: '18px', fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>
                   QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
                 </div>
               )}

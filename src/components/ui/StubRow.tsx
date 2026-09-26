@@ -23,7 +23,7 @@ export default function StubRow({ cells, style }: { cells: StubCell[]; style?: R
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        borderRadius: 8,
+        borderRadius: 'var(--afa-radius-md)',
         background: 'var(--afa-surface-inverse)',
         padding: '8px 12px',
         ...style,

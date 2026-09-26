@@ -280,7 +280,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             onClick={() => zoomBy(1 / 1.5)}
             disabled={zoom <= MIN_ZOOM}
             aria-label="Zoom out"
-            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+            style={{ width: '28px', height: '28px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom <= MIN_ZOOM ? 'default' : 'pointer', opacity: zoom <= MIN_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             −
           </Button>
@@ -290,7 +290,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
             onClick={() => zoomBy(1.5)}
             disabled={zoom >= MAX_ZOOM}
             aria-label="Zoom in"
-            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
+            style={{ width: '28px', height: '28px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-title)', fontWeight: 700, cursor: zoom >= MAX_ZOOM ? 'default' : 'pointer', opacity: zoom >= MAX_ZOOM ? 0.4 : 1, lineHeight: 1 }}
           >
             +
           </Button>
@@ -299,7 +299,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
               variant="bare"
               type="button"
               onClick={resetView}
-              style={{ padding: '0 10px', height: '28px', borderRadius: '6px', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 600 }}
+              style={{ padding: '0 10px', height: '28px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid rgba(245,245,240,0.2)', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-micro)', fontWeight: 600 }}
             >
               Reset
             </Button>
@@ -309,7 +309,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
       {zonePrices.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
           {zonePrices.map(({ zone, price }) => (
-            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: '4px 10px', borderRadius: '999px' }}>
+            <span key={zone} style={{ display: 'inline-flex', alignItems: 'center', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', background: 'var(--afa-surface-raised)', padding: '4px 10px', borderRadius: 'var(--afa-radius-pill)' }}>
               <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', background: colorForZone(zone, zoneOrder), marginRight: '6px' }} />
               {zone} — {price ? `₹${price}` : 'not on sale'}
             </span>
@@ -325,7 +325,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
               type="button"
               onClick={() => setActiveLevel(lvl)}
               style={{
-                fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: '6px',
+                fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: 'var(--afa-radius-sm)',
                 border: activeLevel === lvl ? '2px solid var(--afa-fill-solid)' : '1px solid rgba(245,245,240,0.2)',
                 background: activeLevel === lvl ? FILL_SOLID_TINT : 'var(--afa-surface-raised)',
                 color: activeLevel === lvl ? 'var(--afa-fill-solid)' : 'var(--afa-text-primary)',
@@ -349,7 +349,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
           aspectRatio: `${aspect}`,
           background: 'var(--afa-surface-raised)',
           border: '1px solid var(--afa-border-resting)',
-          borderRadius: '10px',
+          borderRadius: 'var(--afa-radius-lg)',
           overflow: 'hidden',
           containerType: 'inline-size',
           // Without this, the browser's own native touch scroll/zoom
@@ -372,7 +372,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         <div
           style={{
             position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
-            width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: '6px',
+            width: '60%', padding: '6px 0', textAlign: 'center', borderRadius: 'var(--afa-radius-sm)',
             background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontSize: 'var(--afa-text-caption)', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', pointerEvents: 'none', zIndex: 1,
           }}
@@ -433,7 +433,7 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
                 // MAX_ASPECT clamped it - in that rare case this is a
                 // deliberate near-enough approximation, not a bug.
                 marginTop: `-${seatWidthPct / 2}%`,
-                borderRadius: '5px',
+                borderRadius: 'var(--afa-radius-sm)',
                 background: bg,
                 // Selected seats get their own visual weight (scale + white
                 // ring + larger, bold text) rather than relying on the same
@@ -461,8 +461,8 @@ export default function SeatPicker({ eventId, maxSeatsPerBooking, selected, onCh
         </div>
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.7 }}>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'var(--afa-fill-solid)', marginRight: '4px' }} />Selected</span>
-        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '3px', background: 'rgba(245,245,240,0.12)', marginRight: '4px' }} />Taken</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-fill-solid)', marginRight: '4px' }} />Selected</span>
+        <span><span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: 'var(--afa-radius-xs)', background: 'rgba(245,245,240,0.12)', marginRight: '4px' }} />Taken</span>
       </div>
     </div>
   )

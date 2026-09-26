@@ -204,7 +204,7 @@ export default function AdminArtistsPage() {
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-10px)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
+              style={{ padding: '10px 12px', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', background: 'var(--afa-surface-page)', color: 'var(--afa-text-primary)' }}
             >
               <option value="">All tiers</option>
               {Object.entries(TIER_STYLE).map(([key, s]) => (
@@ -243,7 +243,7 @@ export default function AdminArtistsPage() {
                 <div
                   key={a.id}
                   style={{
-                    background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-10px)', padding: '16px',
+                    background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
                     border: a.isSceneStatusHeadliner ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
                   }}
                 >

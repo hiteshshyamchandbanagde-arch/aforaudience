@@ -52,13 +52,13 @@ function VerifyEmailContent() {
         </Link>
       </div>
 
-      <div className="bg-[var(--afa-surface-raised)] rounded-[16px] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)] text-center">
+      <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)] text-center">
         {status === "checking" && (
           <p style={{ fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.verifyEmailPage.verifyingEmailEllipsis}</p>
         )}
         {status === "ok" && (
           <>
-            <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+            <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "12px 16px", marginBottom: "20px", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
               {tr.verifyEmailPage.emailVerifiedBanner}
             </div>
             <Link href="/" style={{ color: "var(--afa-amber)", fontWeight: 500, fontSize: "var(--afa-text-body)" }}>
