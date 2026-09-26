@@ -241,7 +241,16 @@ const RADIUS_MAP = {
 // scale step by the decision record (never an exact-value match, which
 // is why this is separate from RADIUS_MAP: verify-equivalence.js reports
 // every site converted through here as an intentional value change).
-const RADIUS_ROUND = {}
+const RADIUS_ROUND = {
+  2: '--afa-radius-xs',
+  4: '--afa-radius-xs',
+  5: '--afa-radius-sm',
+  7: '--afa-radius-sm',
+  10: '--afa-radius-lg',
+  14: '--afa-radius-lg',
+  24: '--afa-radius-2xl',
+  99: '--afa-radius-pill',
+}
 
 // GEN-2609-112 - lookup for the Tailwind radius-bracket pass, same
 // map-then-round order as migrateValue().

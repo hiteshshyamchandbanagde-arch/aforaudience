@@ -306,6 +306,23 @@ t('GEN-2609-112: Tailwind side-prefixed rounded-t-[8px] keeps its side prefix', 
   assert.equal(migrateTailwindRadiusBracket('rounded-t-[8px] block', CATEGORY_DEFS.radius), 'rounded-t-[var(--afa-radius-md)] block')
 })
 
+t('GEN-2609-112: RADIUS_ROUND values convert to their decided step, exact matches still win', () => {
+  assert.equal(processLine("        borderRadius: '10px',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-lg)',")
+  assert.equal(processLine('        borderTopRightRadius: 24,', false, RADIUS_DEFS), "        borderTopRightRadius: 'var(--afa-radius-2xl)',")
+  assert.equal(processLine("        borderRadius: '99px',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-pill)',")
+  assert.equal(processLine("        borderRadius: '2px 2px 0 0',", false, RADIUS_DEFS), "        borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)',")
+})
+
+t('GEN-2609-112: RADIUS_ROUND never overlaps RADIUS_MAP (a key is exact OR rounded, never both)', () => {
+  const { RADIUS_MAP, RADIUS_ROUND } = require('./migrate-tokens')
+  for (const k of Object.keys(RADIUS_ROUND)) assert.ok(!(k in RADIUS_MAP), `${k} is in both maps`)
+})
+
+t('GEN-2609-112: RADIUS_ROUND is radius-only - a spacing run never rounds', () => {
+  const line = "<div style={{ padding: '5px' }}>"
+  assert.equal(processLine(line, false, [CATEGORY_DEFS.spacing]), line)
+})
+
 t('GEN-2609-112: an off-map Tailwind radius bracket stays literal', () => {
   assert.equal(migrateTailwindRadiusBracket('rounded-[13px]', CATEGORY_DEFS.radius), null)
 })
