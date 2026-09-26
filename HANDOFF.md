@@ -1,3 +1,27 @@
+# Session Handoff — 26 Sept 2026, part 5 (chat — #707 bug batch merged, backfill run, colour dispatched)
+
+Delta-only. `qa` code at `19e23c6` (#707).
+
+## 1. Done
+- **#706 radius:** Hitesh eyeballed admin Overview; GEN-2609-112 RESOLVED/DEPLOYED_QA.
+- **#707** (BUG-2609-053/054/050 + `Figma/` exclusion) squash-merged (head pinned `615d40e`), CI green, branch deleted, Vercel READY, 0 runtime errors. Chat reviewed the ticket-code generator (crypto `randomInt`, race-safe `WHERE ticketCode IS NULL`, never throws) and confirmed check-in lookup is still event-scoped.
+- **Backfill run on QA:** 28 CONFIRMED bookings got `AFA-XXXX-XXXX` codes; 0 remaining; all 28 match the format regex. Preview showed all were QA-persona bookings.
+- 053/054/050 → IN_TEST. 053 still needs one live QA booking to prove the new-booking path writes a code.
+
+## 2. Logged onto GEN-2609-113
+`STATUS_TONE.gold` text 2.55:1 → use `--afa-amber` (4.88:1); `--afa-error` text 2.5–2.8:1 → `--afa-error-bright` (5.7–6.4:1).
+
+## 3. Queued for CC
+- `docs/cc-dispatches/cc-prompt-colour-113.md` — rgba 512 + hex 51 → 0 per the decision record, plus the two contrast fixes. DB SQL to chat.
+
+## 4. Hitesh (non-blocking)
+- One free booking on QA (any persona) → check its ticket shows a REF code.
+- Refund-tier fee question (7–14 days refunds part of the fee; 14+ keeps it).
+
+**Ratchet on qa (live):** hex 51, rgba 512 (baseline file still 543), font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 4 (CC — bug batch 053/054/050 + Figma exclusion, pushed, needs merge + backfill SQL)
 
 Delta-only. Branch `fix/bug-batch-053-054-050` off `qa@d0c1b2d`, pushed, **not merged**.
