@@ -237,6 +237,22 @@ const RADIUS_MAP = {
   20: '--afa-radius-2xl',
   999: '--afa-radius-pill',
 }
+// GEN-2609-112 - off-scale radius values, each DEFINED as its nearest
+// scale step by the decision record (never an exact-value match, which
+// is why this is separate from RADIUS_MAP: verify-equivalence.js reports
+// every site converted through here as an intentional value change).
+const RADIUS_ROUND = {}
+
+// GEN-2609-112 - lookup for the Tailwind radius-bracket pass, same
+// map-then-round order as migrateValue().
+function radiusTokenFor(value, def) {
+  if (value < 0) return null
+  const key = String(value)
+  if (Object.prototype.hasOwnProperty.call(def.map, key)) return def.map[key]
+  if (def.round && Object.prototype.hasOwnProperty.call(def.round, key)) return def.round[key]
+  return null
+}
+
 // GEN-2609-090 - exact-string colour map (case-insensitive key lookup,
 // see migrateExactStringValue()), same "byte/value-identical only" convention
 // as the 3 dimension maps above and as check-design-tokens.js's own
@@ -294,7 +310,7 @@ const CATEGORY_DEFS = {
   },
   'font-size': { props: FONT_SIZE_PROPS, map: FONT_SIZE_MAP, kind: 'dimension', units: ['px'] },
   'font-family': { props: FONT_FAMILY_PROPS, map: FONT_FAMILY_MAP, kind: 'exact-string' },
-  radius: { props: RADIUS_PROPS, map: RADIUS_MAP, kind: 'dimension', units: ['px'] },
+  radius: { props: RADIUS_PROPS, map: RADIUS_MAP, round: RADIUS_ROUND, kind: 'dimension', units: ['px'] },
   spacing: { props: SPACING_PROPS, map: SPACING_MAP, kind: 'dimension', units: ['px'] },
 }
 const ALL_CATEGORIES = Object.keys(CATEGORY_DEFS)
@@ -446,6 +462,31 @@ function migrateTailwindFontSizeBracket(raw, map, units) {
   return result
 }
 
+// GEN-2609-112 - Tailwind arbitrary-value RADIUS bracket inside a
+// className="..." attribute (`rounded-[16px]`, `rounded-t-[8px]`) - same
+// className-only gap GEN-2609-105 closed for font-size, and the same
+// side-prefix shape check-design-tokens.js's own radius-literal rule
+// counts (`rounded(?:-[tbrl]{1,2})?-[Npx]`). Unlike `text-[...]`, a bare
+// `rounded-[var(...)]` is NOT ambiguous: `rounded-*` has only one
+// arbitrary-value type (border-radius), no colour utility shares the
+// prefix. Verified with the installed @tailwindcss/node compile():
+// `rounded-[var(--afa-radius-xl)]` -> `border-radius: var(--afa-radius-xl)`,
+// so no `length:` hint is added.
+const MATCH_RE_TW_RADIUS_BRACKET = /\b(rounded(?:-[tbrl]{1,2})?)-\[(-?\d+(?:\.\d+)?)(px)\]/g
+
+function migrateTailwindRadiusBracket(raw, def) {
+  MATCH_RE_TW_RADIUS_BRACKET.lastIndex = 0
+  let changed = false
+  const result = raw.replace(MATCH_RE_TW_RADIUS_BRACKET, (whole, utility, numStr) => {
+    const token = radiusTokenFor(parseFloat(numStr), def)
+    if (!token) return whole
+    changed = true
+    return `${utility}-[var(${token})]`
+  })
+  if (!changed) return null
+  return result
+}
+
 function isCommentLine(line) {
   const t = line.trim()
   return t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')
@@ -458,7 +499,18 @@ function tokenOkReason(line) {
 // Replace exact-match parts of a whitespace-separated value (a single
 // value or a multi-value CSS shorthand like "4px 9px"). Returns null if
 // nothing in it changed - callers use that to skip a no-op splice.
-function migrateValue(raw, map, units, inRawBlock) {
+//
+// GEN-2609-112 - `bareJsNumber`: a unitless number is only px when it is
+// a bare JS number in a style object (`borderRadius: 12` - React appends
+// px). Unitless text inside a quoted string (`borderRadius: '12'`) or a
+// raw <style> block (`border-radius: 12;`) is invalid CSS the browser
+// drops, so converting it to a var() would CHANGE the rendering, not
+// preserve it - left literal. 0 is the one unitless length CSS accepts
+// everywhere, so it is always allowed (the `"8px 8px 0 0"` shorthand).
+//
+// GEN-2609-112 - `round` (optional) is a category's rounding map
+// (RADIUS_ROUND), consulted only after an exact `map` miss.
+function migrateValue(raw, map, units, bareJsNumber, round) {
   const parts = raw.split(/(\s+)/) // keep whitespace so we can rejoin exactly
   let changed = false
   const out = parts.map((part) => {
@@ -467,13 +519,17 @@ function migrateValue(raw, map, units, inRawBlock) {
     const m = /^(-?\d+(?:\.\d+)?)(px|rem|em|%)?$/.exec(part)
     if (!m) return part
     const value = parseFloat(m[1])
+    if (!m[2] && value !== 0 && !bareJsNumber) return part
     const unit = m[2] || 'px'
     if (value < 0) return part // negative values (e.g. negative margins) always stay literal
     if (!units.includes(unit)) return part
     const key = String(value)
-    if (!Object.prototype.hasOwnProperty.call(map, key)) return part
+    const token = Object.prototype.hasOwnProperty.call(map, key)
+      ? map[key]
+      : round && Object.prototype.hasOwnProperty.call(round, key) ? round[key] : null
+    if (!token) return part
     changed = true
-    return `var(${map[key]})`
+    return `var(${token})`
   })
   if (!changed) return null
   return out.join('')
@@ -618,7 +674,7 @@ function processLine(line, inRawBlock, activeDefs) {
       // Bare numeric value (unquoted) - e.g. `fontSize: 14` (JS, always
       // a single token) or `padding: 16px 20px !important;` (raw CSS,
       // may be a multi-value shorthand - see MATCH_RE_CSS's own comment).
-      const migrated = migrateValue(m[3], target.map, target.units, inRawBlock)
+      const migrated = migrateValue(m[3], target.map, target.units, !inRawBlock, target.round)
       if (migrated === null) continue
       const start = m.index + prefixLen
       const end = start + m[3].length
@@ -630,7 +686,7 @@ function processLine(line, inRawBlock, activeDefs) {
       edits.push({ start, end, replacement })
     } else if (m[5] !== undefined) {
       // Quoted value - may be a single value or a multi-value shorthand.
-      const migrated = migrateValue(m[5], target.map, target.units, inRawBlock)
+      const migrated = migrateValue(m[5], target.map, target.units, false, target.round)
       if (migrated === null) continue
       const start = m.index + prefixLen + 1 // +1 to skip the opening quote
       const end = start + m[5].length
@@ -704,6 +760,22 @@ function processLine(line, inRawBlock, activeDefs) {
     }
   }
 
+  // GEN-2609-112 - radius className-bracket pass, same scoping as the
+  // font-size one above.
+  if (!inRawBlock && activeDefs.includes(CATEGORY_DEFS.radius)) {
+    MATCH_RE_JSX_CLASSNAME.lastIndex = 0
+    let jm
+    while ((jm = MATCH_RE_JSX_CLASSNAME.exec(line))) {
+      const rawValue = jm[2]
+      const migrated = migrateTailwindRadiusBracket(rawValue, CATEGORY_DEFS.radius)
+      if (migrated === null) continue
+      const start = jm.index + jm[0].indexOf(rawValue)
+      const end = start + rawValue.length
+      if (edits.some((e) => start < e.end && end > e.start)) continue
+      edits.push({ start, end, replacement: migrated })
+    }
+  }
+
   if (edits.length === 0) return line
   let result = line
   for (const e of edits.sort((a, b) => b.start - a.start)) {
@@ -760,6 +832,7 @@ module.exports = {
   SPACING_MAP,
   FONT_SIZE_MAP,
   RADIUS_MAP,
+  RADIUS_ROUND,
   COLOR_MAP,
   FONT_FAMILY_MAP,
   CATEGORY_DEFS,
@@ -775,4 +848,8 @@ module.exports = {
   MATCH_RE_TW_FONTSIZE_BRACKET,
   migrateTailwindFontSizeBracket,
   FONT_SIZE_ROUNDED_KEYS,
+  migrateValue,
+  MATCH_RE_TW_RADIUS_BRACKET,
+  migrateTailwindRadiusBracket,
+  RADIUS_PROPS,
 }
