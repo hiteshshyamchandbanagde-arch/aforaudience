@@ -25,6 +25,7 @@
 - `dashboard/organiser/events/[id]/edit/page.tsx` ~L805–808 re-types the badge colours and uses `--afa-sage`/`--afa-error` for text on the tinted background (a WCAG failure).
 - Render it from `STATUS_TONE` (sage/error/gold) instead of re-typing. The bg values are already identical, so only the text colour changes (to the `-bright` variants).
 - Grep for other hand-typed copies of `STATUS_TONE` backgrounds with non-bright text; fix any in the same commit and list them.
+- **Also (found by Hitesh, 26 Sep):** the admin Overview "Nothing needs attention right now — all clear." banner (`dashboard/admin/page.tsx` ~L284–299) uses `--afa-green-deep` text on `rgba(22,101,52,0.12)`, which measures 2.15:1. Use `--afa-sage-bright` (5.6:1) for the text, via `STATUS_TONE` if a matching tone exists. Keep the left accent border as is.
 
 ## 4. Tailwind: exclude `Figma/`
 - Add `@source not "../../Figma";` to the GEN-2609-111 block in `src/app/globals.css`. Confirm the stray `rounded-[12px]` class is gone from the built CSS.
