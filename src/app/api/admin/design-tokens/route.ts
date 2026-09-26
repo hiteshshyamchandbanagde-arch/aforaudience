@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { isValidTokenValue, LOCKED_TOKEN_KEYS, type TokenType } from '@/lib/design-tokens'
+import { tokenValueError, radiusOrderErrors, LOCKED_TOKEN_KEYS, type TokenType } from '@/lib/design-tokens'
 import { revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // GET /api/admin/design-tokens — every token row + recent version history
@@ -91,20 +91,36 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: `Unknown token key(s): ${unknown.join(', ')}` }, { status: 400 })
   }
 
+  // GEN-2609-108 - shape + range per value, then the radius order over
+  // the full resulting set. Checked before the locked-token confirm so
+  // a bad value is reported even when the save also touches a locked key.
+  const valueErrors: { key: string; message: string }[] = []
+  for (const change of body.changes) {
+    const token = existingByKey.get(change.key)!
+    const message = typeof change.value === 'string' ? tokenValueError(change.key, token.type as TokenType, change.value) : 'Not a string.'
+    if (message) valueErrors.push({ key: change.key, message })
+  }
+  if (valueErrors.length === 0) {
+    const allRows = await prisma.designToken.findMany({ select: { key: true, value: true } })
+    const after: Record<string, string> = Object.fromEntries(allRows.map((r) => [r.key, r.value]))
+    for (const c of body.changes) after[c.key] = c.value
+    valueErrors.push(...radiusOrderErrors(after, keys))
+  }
+  if (valueErrors.length > 0) {
+    return NextResponse.json(
+      { error: valueErrors.map((e) => `${e.key}: ${e.message}`).join(' '), code: 'invalid', errors: valueErrors },
+      { status: 400 },
+    )
+  }
+
   const touchesLocked = body.changes.some((c) => LOCKED_TOKEN_KEYS.has(c.key))
   if (touchesLocked && !body.confirmLocked) {
     return NextResponse.json(
-      { error: 'One or more changed tokens are locked — resubmit with confirmLocked: true after showing the confirm dialog', lockedKeys: body.changes.filter((c) => LOCKED_TOKEN_KEYS.has(c.key)).map((c) => c.key) },
+      { error: 'One or more changed tokens are locked — resubmit with confirmLocked: true after showing the confirm dialog', code: 'locked', lockedKeys: body.changes.filter((c) => LOCKED_TOKEN_KEYS.has(c.key)).map((c) => c.key) },
       { status: 409 },
     )
   }
 
-  for (const change of body.changes) {
-    const token = existingByKey.get(change.key)!
-    if (!isValidTokenValue(token.type as TokenType, change.value)) {
-      return NextResponse.json({ error: `Invalid value for ${change.key}: ${change.value}` }, { status: 400 })
-    }
-  }
 
   const now = new Date()
   await prisma.$transaction(

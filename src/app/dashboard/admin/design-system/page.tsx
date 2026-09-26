@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { contrastRatio, isValidTokenValue, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { contrastRatio, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 
@@ -208,6 +208,23 @@ export default function AdminDesignSystemPage() {
 
   const dirtyTouchesLocked = dirty.some((d) => tokens?.find((t) => t.key === d.key)?.locked)
 
+  // GEN-2609-108 - same checks the API runs (tokenValueError per value,
+  // then the radius order over the full pending set), keyed by token so
+  // each field can show its own message.
+  const fieldErrors = useMemo(() => {
+    const errors = new Map<string, string>()
+    if (!tokens) return errors
+    for (const d of dirty) {
+      const type = tokens.find((t) => t.key === d.key)?.type
+      const message = type ? tokenValueError(d.key, type, d.value) : 'Unknown token.'
+      if (message) errors.set(d.key, message)
+    }
+    if (errors.size === 0) {
+      for (const e of radiusOrderErrors(Object.fromEntries(pending), dirty.map((d) => d.key))) errors.set(e.key, e.message)
+    }
+    return errors
+  }, [tokens, dirty, pending])
+
   function setValue(key: string, value: string) {
     setPending((prev) => {
       const next = new Map(prev)
@@ -260,12 +277,9 @@ export default function AdminDesignSystemPage() {
 
   async function handleSave() {
     if (dirty.length === 0) return
-    const invalid = dirty.find((d) => {
-      const type = tokens?.find((t) => t.key === d.key)?.type
-      return !type || !isValidTokenValue(type, d.value)
-    })
-    if (invalid) {
-      showToast(`"${invalid.key}" has an invalid value for its type.`, 'error')
+    const [firstError] = fieldErrors.entries()
+    if (firstError) {
+      showToast(`${firstError[0]}: ${firstError[1]}`, 'error')
       return
     }
     if (dirtyTouchesLocked) {
@@ -552,6 +566,7 @@ export default function AdminDesignSystemPage() {
                         onChange={(v) => setValue(token.key, v)}
                         disabled={groupDisabled || tokenCoverage(token.key) === 'unused'}
                         coverage={tokenCoverage(token.key)}
+                        error={fieldErrors.get(token.key) ?? null}
                       />
                     ))}
                   </div>
@@ -599,14 +614,16 @@ function TokenField({
   onChange,
   disabled,
   coverage,
+  error,
 }: {
   token: DesignToken
   value: string
   onChange: (v: string) => void
   disabled: boolean
   coverage: CoverageStatus
+  error: string | null
 }) {
-  const invalid = !isValidTokenValue(token.type, value)
+  const invalid = error !== null
   const isSimpleHex = /^#[0-9a-fA-F]{6}$/.test(value)
 
   return (
@@ -679,6 +696,12 @@ function TokenField({
           onChange={(e) => onChange(e.target.value)}
           style={{ ...inputStyle, borderColor: invalid ? 'var(--afa-error)' : 'var(--afa-border-resting)', fontFamily: 'var(--font-mono)', cursor: disabled ? 'not-allowed' : 'text' }}
         />
+      )}
+
+      {error && (
+        <span role="alert" style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)' }}>
+          {error}
+        </span>
       )}
 
       {token.group === 'font' && <span style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-muted)' }}>{FONT_ROLE_LABEL[token.key] ?? ''}</span>}

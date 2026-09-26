@@ -81,12 +81,81 @@ export const FONT_ALLOWLIST = [
 ] as const
 
 const HEX_COLOR = /^#[0-9a-fA-F]{3,4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/
-const RGB_COLOR = /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/
+// GEN-2609-108 - channels 0-255 with no leading zeros (the old `\d{1,3}`
+// took 999), alpha 0-1. The regex fixes the shape; parseRgb checks the
+// numeric bounds.
+const RGB_COLOR = /^rgba?\(\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*,\s*(0|[1-9]\d{0,2})\s*(?:,\s*(0|1|1\.0+|0?\.\d+)\s*)?\)$/
 const COLOR_VAR_REF = /^var\(--afa-[a-z0-9-]+\)$/
-const DIMENSION = /^0$|^-?\d+(\.\d+)?(px|rem|em|%)$/
-const DIMENSION_SHORTHAND = /^\d+(\.\d+)?px(\s+\d+(\.\d+)?px){0,3}$/
+// No leading zeros (`0100000px` was saved once on QA), no bare `.5px`,
+// no sign. A token that genuinely needs a negative value goes in
+// NEGATIVE_ALLOWED_KEYS below.
+const DIMENSION = /^0$|^(0|[1-9]\d*)(\.\d+)?(px|rem|em|%)$/
+const DIMENSION_SHORTHAND = /^(0|[1-9]\d*)(\.\d+)?px(\s+(0|[1-9]\d*)(\.\d+)?px){0,3}$/
 
-export function isValidTokenValue(type: TokenType, value: string): boolean {
+// GEN-2609-108 - no token takes a negative value today. An explicit set
+// so allowing one later is a deliberate, reviewed edit.
+export const NEGATIVE_ALLOWED_KEYS = new Set<string>()
+
+// GEN-2609-108 - value ranges, px only. Every QA DB value sat inside
+// these on 26 Sep, so none of them rejects a value that is live today.
+// Lookup: exact key first (KEY_RANGES), then the key's group.
+export type TokenRange = { min: number; max: number }
+
+export const GROUP_RANGES = {
+  radius: { min: 0, max: 40 },
+  size: { min: 10, max: 72 },
+  spacing: { min: 0, max: 64 },
+  button: { min: 0, max: 64 },
+} satisfies Record<string, TokenRange>
+
+export const KEY_RANGES: Record<string, TokenRange> = {
+  // Below ~100px a tall pill starts showing flat sides.
+  "--afa-radius-pill": { min: 100, max: 9999 },
+  // Running-text roles (micro is the label size). Caption (10px badge
+  // micro-labels) stays on the group range: its default is under 11.
+  "--afa-text-micro": { min: 11, max: 24 },
+  "--afa-text-small": { min: 11, max: 24 },
+  "--afa-text-ui": { min: 11, max: 24 },
+  "--afa-text-body": { min: 11, max: 24 },
+  "--afa-text-body-lg": { min: 11, max: 24 },
+}
+
+// The radius scale must stay ordered. The pill is not part of it.
+export const RADIUS_ORDER = [
+  "--afa-radius-sharp",
+  "--afa-radius-xs",
+  "--afa-radius-sm",
+  "--afa-radius-md",
+  "--afa-radius-lg",
+  "--afa-radius-xl",
+  "--afa-radius-2xl",
+] as const
+
+// Group from the key's prefix, so validation needs only the key.
+// `--afa-text-*` colour tokens never reach the range check (type gate).
+export function rangeGroupForKey(key: string): keyof typeof GROUP_RANGES | null {
+  if (key.startsWith("--afa-radius-")) return "radius"
+  if (key.startsWith("--afa-space-")) return "spacing"
+  if (key.startsWith("--afa-btn-padding-")) return "button"
+  if (key.startsWith("--afa-text-")) return "size"
+  return null
+}
+
+export function rangeFor(key: string): TokenRange | null {
+  if (KEY_RANGES[key]) return KEY_RANGES[key]
+  const g = rangeGroupForKey(key)
+  return g ? GROUP_RANGES[g] : null
+}
+
+export function parsePx(part: string): number | null {
+  if (part === "0") return 0
+  const m = part.match(/^(-?\d+(?:\.\d+)?)px$/)
+  return m ? Number(m[1]) : null
+}
+
+// Shape only - what every stored value must satisfy before it goes near
+// the <style> tag. No key-specific rules.
+function isValidShape(type: TokenType, value: string): boolean {
   if (typeof value !== "string" || value.length === 0 || value.length > 120) return false
   // Belt-and-braces: none of these characters are ever legitimate inside
   // a single CSS custom property value in this app, and every one of
@@ -95,7 +164,7 @@ export function isValidTokenValue(type: TokenType, value: string): boolean {
 
   switch (type) {
     case "color":
-      return HEX_COLOR.test(value) || RGB_COLOR.test(value) || COLOR_VAR_REF.test(value)
+      return HEX_COLOR.test(value) || parseRgb(value) !== null || COLOR_VAR_REF.test(value)
     case "dimension":
       return DIMENSION.test(value)
     case "dimension-shorthand":
@@ -105,6 +174,64 @@ export function isValidTokenValue(type: TokenType, value: string): boolean {
     default:
       return false
   }
+}
+
+// Why a value can't be saved for this key, or null if it can. Shared by
+// the API (authoritative) and the editor (inline errors) so the two
+// can't disagree.
+export function tokenValueError(key: string, type: TokenType, value: string): string | null {
+  const isDim = type === "dimension" || type === "dimension-shorthand"
+  const negativeAllowed = isDim && NEGATIVE_ALLOWED_KEYS.has(key)
+  const shapeValue = negativeAllowed ? value.replace(/(^|\s)-/g, "$1") : value
+  if (!isValidShape(type, shapeValue)) {
+    if (isDim && /(^|\s)-/.test(value)) return "Negative values are not allowed."
+    if (isDim && /(^|\s)0\d/.test(value)) return "Remove the leading zero."
+    if (isDim) return "Use a px value, e.g. 12px."
+    if (type === "color") return "Use #hex, or rgba(r, g, b, a) with channels 0–255 and alpha 0–1."
+    return "Not an allowed value."
+  }
+  if (!isDim) return null
+  const range = rangeFor(key)
+  if (!range) return null
+  for (const part of value.trim().split(/\s+/)) {
+    const px = parsePx(part)
+    if (px === null) return "Use px for this token."
+    if (px < range.min || px > range.max) return `Must be between ${range.min}px and ${range.max}px.`
+  }
+  return null
+}
+
+// Pass `key` wherever it's known (every write path does). Without it
+// only the shape is checked: that's buildDesignTokenCss's defence-in-
+// depth pass, which must not drop a stored value just because a range
+// was tightened after it was saved.
+export function isValidTokenValue(type: TokenType, value: string, key?: string): boolean {
+  if (key === undefined) return isValidShape(type, value)
+  return tokenValueError(key, type, value) === null
+}
+
+// GEN-2609-108 - checks the full resulting value set (saved values with
+// edits applied) and names the neighbour each out-of-order radius
+// crosses. Only pairs touching `changed` are reported, so a scale that's
+// already out of order in the DB doesn't block an unrelated save.
+export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
+  const changedSet = changed ? new Set(changed) : null
+  const errors: { key: string; message: string }[] = []
+  for (let i = 0; i < RADIUS_ORDER.length - 1; i++) {
+    const lo = RADIUS_ORDER[i]
+    const hi = RADIUS_ORDER[i + 1]
+    const a = values[lo] !== undefined ? parsePx(values[lo]) : null
+    const b = values[hi] !== undefined ? parsePx(values[hi]) : null
+    if (a === null || b === null || a <= b) continue
+    if (changedSet && !changedSet.has(lo) && !changedSet.has(hi)) continue
+    // Blame whichever side moved; if both did, the lower one.
+    if (!changedSet || changedSet.has(lo)) {
+      errors.push({ key: lo, message: `Can't be larger than ${hi} (${values[hi]}).` })
+    } else {
+      errors.push({ key: hi, message: `Can't be smaller than ${lo} (${values[lo]}).` })
+    }
+  }
+  return errors
 }
 
 export function isTokenGroup(v: string): v is TokenGroup {
@@ -292,11 +419,17 @@ export function parseCssColor(value: string): [number, number, number, number] |
     const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1
     return [r, g, b, a]
   }
-  const rgb = value.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(0|1|0?\.\d+)\s*)?\)$/)
-  if (rgb) {
-    return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3]), rgb[4] !== undefined ? Number(rgb[4]) : 1]
-  }
-  return null
+  return parseRgb(value)
+}
+
+function parseRgb(value: string): [number, number, number, number] | null {
+  const m = value.match(RGB_COLOR)
+  if (!m) return null
+  const [r, g, b] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (r > 255 || g > 255 || b > 255) return null
+  const a = m[4] !== undefined ? Number(m[4]) : 1
+  if (a > 1) return null
+  return [r, g, b, a]
 }
 
 function relativeLuminance([r, g, b]: [number, number, number, number]): number {
