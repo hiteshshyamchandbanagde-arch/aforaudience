@@ -10,7 +10,7 @@ import { ErrorBanner, SuccessBanner } from '@/components/ErrorBanner'
 import Button, { variantStyle } from '@/components/ui/Button'
 
 const labelStyle = { display: 'block', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', marginBottom: '6px' }
-const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-body)', boxSizing: 'border-box' as const, fontFamily: 'inherit', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }
 
 // Session 62, design.md §9.5. First edit surface for Organiser.orgName/bio -
 // previously these could only be set once, at apply-time. Powers the new
@@ -143,7 +143,7 @@ export default function OrganiserEditPage() {
             <ErrorBanner style={{ marginBottom: '20px', color: 'var(--afa-red-alt)' }}>{error}</ErrorBanner>
           )}
 
-          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
+          <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', marginBottom: '20px', border: '1px solid var(--afa-tint-08)' }}>
             <div style={{ marginBottom: '18px' }}>
               <label style={labelStyle}>Profile Picture</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '10px' }}>

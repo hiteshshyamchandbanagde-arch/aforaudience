@@ -1832,7 +1832,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                             {wizardPreviewSeats.map((s, i) => {
                               const tf = tierFill(s.tierLabel, Array.from(new Set(wizardPreviewSeats.map((p) => p.tierLabel))))
                               return (
-                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: '5px', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: 'var(--afa-text-caption)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="afa-seat-anim" style={{ position: 'absolute', left: s.x - SEAT_SIZE / 2, top: s.y - SEAT_SIZE / 2, width: `${SEAT_SIZE}px`, height: `${SEAT_SIZE}px`, borderRadius: 'var(--afa-radius-sm)', background: tf.fill, boxShadow: tf.marker ? `inset -5px 5px 0 -2.5px ${tf.marker}` : undefined, color: tf.labelDark ? 'var(--afa-brown-black)' : 'var(--afa-cream)', fontSize: 'var(--afa-text-caption)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {s.row}{s.number}
                                 </div>
                               )
@@ -2039,7 +2039,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                         top: s.y - SEAT_SIZE / 2,
                         width: `${SEAT_SIZE}px`,
                         height: `${SEAT_SIZE}px`,
-                        borderRadius: '5px',
+                        borderRadius: 'var(--afa-radius-sm)',
                         background: tf.fill,
                         // Amber-tier seats use a light neutral fill (see
                         // SECTION_TIER_FILLS) - a corner marker instead of
@@ -2191,7 +2191,7 @@ export default function SeatMapBuilderPage({ params }: { params: Promise<{ id: s
                 const noPriceSet = !zoneIsFree(t) && (!raw || raw.trim() === '')
                 return (
                   <div key={t} style={{ display: 'flex', gap: 'var(--afa-space-2)', alignItems: 'center', flexWrap: 'wrap', marginBottom: 'var(--afa-space-2)' }}>
-                    <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: colorForTier(t, tierOrder), display: 'inline-block', flexShrink: 0 }} />
+                    <span style={{ width: '10px', height: '10px', borderRadius: 'var(--afa-radius-xs)', background: colorForTier(t, tierOrder), display: 'inline-block', flexShrink: 0 }} />
                     <span style={{ fontSize: 'var(--afa-text-ui)' }}>{t}: {seats.filter((s) => s.tierLabel === t).length}</span>
                     <input
                       type="number"

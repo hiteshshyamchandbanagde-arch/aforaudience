@@ -110,7 +110,7 @@ function groupCoverage(tokens: DesignToken[]): CoverageStatus {
 function CoverageBadge({ status }: { status: CoverageStatus }) {
   const meta = COVERAGE_META[status]
   return (
-    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 999, color: meta.color, background: meta.bg }}>
+    <span style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '3px 8px', borderRadius: 'var(--afa-radius-pill)', color: meta.color, background: meta.bg }}>
       {meta.label}
     </span>
   )

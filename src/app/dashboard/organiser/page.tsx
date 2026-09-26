@@ -158,7 +158,7 @@ export default function OrganiserDashboard() {
           )}
 
           {events.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: '12px', border: '1px solid var(--afa-tint-08)' }}>
+            <div style={{ textAlign: 'center', padding: '64px 24px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', border: '1px solid var(--afa-tint-08)' }}>
               <p style={{ fontSize: 'var(--afa-text-title)', color: 'var(--afa-text-primary)', marginBottom: '8px' }}>No events yet</p>
               <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.6, marginBottom: '20px' }}>Create your first event to start booking venues and artists</p>
               <Button variant="primary" size="lg" fullWidth={false} href="/dashboard/organiser/events/create">
@@ -174,7 +174,7 @@ export default function OrganiserDashboard() {
                   <div
                     key={event.id}
                     onClick={() => router.push(`/dashboard/organiser/events/${event.id}`)}
-                    style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
+                    style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)', cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '10px' }}>
                       <div>
@@ -198,14 +198,14 @@ export default function OrganiserDashboard() {
                       <Link
                         href={`/dashboard/organiser/events/${event.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', border: '1px solid var(--afa-border-resting)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
                       >
                         View
                       </Link>
                       <Link
                         href={`/dashboard/organiser/events/${event.id}/edit`}
                         onClick={(e) => e.stopPropagation()}
-                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '9px 0', borderRadius: '8px' }}
+                        style={{ flex: 1, textAlign: 'center', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '9px 0', borderRadius: 'var(--afa-radius-md)' }}
                       >
                         Edit
                       </Link>

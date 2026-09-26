@@ -819,7 +819,7 @@ export default function CreateEventPage() {
                           <div>
                             <div style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', display: 'flex', alignItems: 'center', gap: 'var(--afa-space-6px)' }}>
                               {selectedVenue?.seatingMode === 'NUMBERED' && (
-                                <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
+                                <span style={{ width: '9px', height: '9px', borderRadius: 'var(--afa-radius-xs)', background: colorForZone(s.name, Array.from(new Set(venueSections.map((v) => v.name)))), display: 'inline-block', flexShrink: 0 }} />
                               )}
                               {s.name}
                             </div>

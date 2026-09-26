@@ -234,7 +234,7 @@ export default function VenueDashboard() {
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--afa-amber)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {venue.country && COUNTRY_FLAGS[venue.country] && (() => {
                           const Flag = COUNTRY_FLAGS[venue.country]
-                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: '2px', flexShrink: 0, boxShadow: '0 0 0 1px var(--afa-tint-10)' }} />
+                          return <Flag title={venue.country} style={{ width: '15px', height: 'auto', borderRadius: 'var(--afa-radius-xs)', flexShrink: 0, boxShadow: '0 0 0 1px var(--afa-tint-10)' }} />
                         })()}
                         {venue.city}
                       </p>

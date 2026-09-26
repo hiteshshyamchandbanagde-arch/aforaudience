@@ -98,7 +98,7 @@ export default function MessagesInboxPage() {
                       alignItems: 'flex-start',
                       gap: '12px',
                       padding: '16px',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--afa-radius-lg)',
                       border: t.unread ? '1px solid rgba(201,151,58,0.18)' : '1px solid rgba(245,245,240,0.06)',
                       background: t.unread ? 'rgba(201,151,58,0.07)' : 'var(--afa-surface-raised)',
                       textDecoration: 'none',
@@ -133,7 +133,7 @@ export default function MessagesInboxPage() {
                             fontWeight: 500,
                             letterSpacing: '0.04em',
                             padding: '2px 6px',
-                            borderRadius: '4px',
+                            borderRadius: 'var(--afa-radius-xs)',
                             background: 'rgba(201,151,58,0.15)',
                             color: 'var(--afa-amber)',
                           }}

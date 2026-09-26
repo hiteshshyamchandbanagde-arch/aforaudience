@@ -172,8 +172,8 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
                       <span style={{ fontWeight: 600, color: 'var(--afa-text-primary)' }}>{t.sectionName} {t.price > 0 ? `· ₹${t.price}` : '· Free'}</span>
                       <span style={{ color: 'rgba(245,245,240,0.6)' }}>{t.sold} / {t.totalSeats}</span>
                     </div>
-                    <div style={{ height: '8px', borderRadius: '4px', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: 'var(--afa-sage)', borderRadius: '4px', transition: 'width 0.3s' }} />
+                    <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'var(--afa-tint-08)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'var(--afa-sage)', borderRadius: 'var(--afa-radius-xs)', transition: 'width 0.3s' }} />
                     </div>
                   </div>
                 )
@@ -189,7 +189,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${t.seats} seats, ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
-                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: '3px 3px 0 0' }} />
+                    <div style={{ width: '18px', height: `${Math.max(4, (t.seats / maxTimelineSeats) * 90)}px`, background: 'var(--afa-fill-solid)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
                     <span style={{ fontSize: 'var(--afa-text-caption)', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
@@ -206,7 +206,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: '8px', border: '1px solid rgba(245,245,240,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--afa-text-ui)', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.name}</span>
                     <span style={{ color: 'rgba(245,245,240,0.6)' }}>
                       {Object.entries(b.seats).map(([s, q]) => `${q}× ${s}`).join(', ')}
@@ -226,7 +226,7 @@ function EventSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
-    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: '10px', padding: '16px' }}>
+    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
       <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
       {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
@@ -236,7 +236,7 @@ function SummaryCard({ label, value, sub, muted }: { label: string; value: strin
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
       <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

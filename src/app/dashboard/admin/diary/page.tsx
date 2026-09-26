@@ -113,7 +113,7 @@ export default function AdminDiaryPage() {
   const inputStyle: CSSProperties = {
     width: '100%',
     padding: '12px 14px',
-    borderRadius: '10px',
+    borderRadius: 'var(--afa-radius-lg)',
     border: '1px solid var(--afa-tint-10)',
     fontSize: 'var(--afa-text-body)',
     boxSizing: 'border-box',
@@ -126,7 +126,7 @@ export default function AdminDiaryPage() {
       style={{
         background: 'var(--afa-surface-page)',
         border: '1px solid var(--afa-tint-08)',
-        borderRadius: '16px',
+        borderRadius: 'var(--afa-radius-xl)',
         padding: '20px',
       }}
     >
@@ -157,7 +157,7 @@ export default function AdminDiaryPage() {
       style={{
         background: 'var(--afa-surface-page)',
         border: '1px solid var(--afa-tint-08)',
-        borderRadius: '16px',
+        borderRadius: 'var(--afa-radius-xl)',
         overflow: 'hidden',
       }}
     >

@@ -12,7 +12,7 @@ import Button from '@/components/ui/Button'
 const inputStyle = {
   width: '100%',
   padding: '10px 12px',
-  borderRadius: '6px',
+  borderRadius: 'var(--afa-radius-sm)',
   border: '1px solid var(--afa-border-resting)',
   background: 'var(--afa-surface-raised)',
   fontSize: 'var(--afa-text-body)',
@@ -71,7 +71,7 @@ export default function CreateTourPage() {
           Start with the basics. You'll add stops, fixed lineup, and open local slots once the Tour exists.
         </p>
 
-        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: '12px', padding: '24px', border: '1px solid var(--afa-tint-08)' }}>
+        <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '24px', border: '1px solid var(--afa-tint-08)' }}>
           <div style={{ marginBottom: '20px' }}>
             <label style={labelStyle}>Tour title</label>
             <input

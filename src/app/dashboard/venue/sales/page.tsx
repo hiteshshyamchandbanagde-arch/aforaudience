@@ -216,7 +216,7 @@ export default function VenueOwnerSalesOverviewPage() {
                     />
                     <Tooltip
                       cursor={{ stroke: 'rgba(201,151,58,0.4)', strokeDasharray: '3 3' }}
-                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
+                      contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                       labelStyle={{ color: 'rgba(245,245,240,0.5)' }}
                       labelFormatter={(label) => (typeof label === 'string' ? formatBucketLabel(label) : String(label ?? ''))}
                       itemStyle={{ color: '#c9973a' }}
@@ -242,7 +242,7 @@ export default function VenueOwnerSalesOverviewPage() {
                       <YAxis type="category" dataKey="name" width={140} tickLine={false} axisLine={false} tick={{ fill: 'var(--afa-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)' }} />
                       <Tooltip
                         cursor={{ fill: 'rgba(245,245,240,0.03)' }}
-                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
+                        contentStyle={{ background: '#0a0a0a', border: '1px solid rgba(245,245,240,0.12)', borderRadius: 'var(--afa-radius-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-small)' }}
                         formatter={(v: any) => [money(Number(v)), 'Revenue']}
                       />
                       <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={22}>
@@ -282,7 +282,7 @@ export default function VenueOwnerSalesOverviewPage() {
                         className="avp-hover-border"
                         style={{
                           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center',
-                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: '#171717', borderRadius: '8px',
+                          fontSize: 'var(--afa-text-ui)', padding: '12px', background: '#171717', borderRadius: 'var(--afa-radius-md)',
                           border: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'var(--afa-text-primary)',
                         }}
                       >
@@ -316,7 +316,7 @@ export default function VenueOwnerSalesOverviewPage() {
             {organisers.length === 0 ? (
               <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>No bookings in this range.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', borderRadius: 'var(--afa-radius-md)', overflow: 'hidden', border: '1px solid rgba(245,245,240,0.06)' }}>
                 {organisers.map((o) => (
                   <div
                     key={o.organiserId}

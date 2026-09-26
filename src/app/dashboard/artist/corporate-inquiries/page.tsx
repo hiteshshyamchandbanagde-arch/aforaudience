@@ -107,13 +107,13 @@ export default function CorporateInquiriesPage() {
               {inquiries.map((inq) => {
                 const meta = STATUS_META[inq.status]
                 return (
-                  <div key={inq.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
+                  <div key={inq.id} style={{ background: 'white', borderRadius: 'var(--afa-radius-lg)', padding: '20px', border: '1px solid var(--afa-tint-08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
                       <div>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-lead)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{inq.companyName}</div>
                         <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.55 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                       </div>
-                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: '999px', background: meta.bg, color: meta.color }}>{meta.label}</span>
+                      <span style={{ fontSize: 'var(--afa-text-small)', fontWeight: 600, padding: '5px 12px', borderRadius: 'var(--afa-radius-pill)', background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
 
                     <div style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', lineHeight: 1.8, marginBottom: '10px' }}>
@@ -125,7 +125,7 @@ export default function CorporateInquiriesPage() {
                     </div>
 
                     {inq.message && (
-                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'var(--afa-surface-raised)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', opacity: 0.7, background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', padding: '10px 12px', marginBottom: '12px', whiteSpace: 'pre-wrap' }}>
                         {inq.message}
                       </p>
                     )}
