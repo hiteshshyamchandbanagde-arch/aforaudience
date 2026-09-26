@@ -80,10 +80,10 @@ export default function TonightNearYou() {
   }, [])
 
   return (
-    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: '#F7F3EE', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(247,243,238,0.15)' }}>
+    <div style={{ background: 'var(--afa-surface-inverse)', padding: '34px 24px', borderRadius: 'var(--afa-radius-lg)', color: 'var(--afa-cream)', height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid var(--afa-border-resting)' }}>
         <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-body)', margin: 0 }}>{tr.homePage.tonightRailHeading}</h4>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-gold)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-amber)', letterSpacing: '0.1em' }}>{tr.homePage.tonightRailLive}</span>
       </div>
 
       {events === null && (
@@ -94,7 +94,7 @@ export default function TonightNearYou() {
               style={{
                 height: '38px',
                 borderRadius: 'var(--afa-radius-sm)',
-                background: 'linear-gradient(90deg, rgba(247,243,238,0.05) 0%, rgba(247,243,238,0.12) 50%, rgba(247,243,238,0.05) 100%)',
+                background: 'linear-gradient(90deg, var(--afa-tint-04) 0%, var(--afa-tint-12) 50%, var(--afa-tint-04) 100%)',
                 backgroundSize: '200% 100%',
                 animation: 'railShimmer 1.6s ease-in-out infinite',
                 animationDelay: `${i * 120}ms`,
@@ -106,13 +106,13 @@ export default function TonightNearYou() {
       )}
 
       {events !== null && events.length === 0 && (
-        <p style={{ fontSize: 'var(--afa-text-small)', color: '#a89880', lineHeight: 1.6 }}>{tr.homePage.tonightRailEmpty}</p>
+        <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', lineHeight: 1.6 }}>{tr.homePage.tonightRailEmpty}</p>
       )}
 
       {events !== null && events.length > 0 && (
         <>
           {!matchedCity && (
-            <p style={{ fontSize: 'var(--afa-text-micro)', color: '#a89880', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 'var(--afa-text-micro)', color: 'var(--afa-text-secondary)', marginBottom: '12px', lineHeight: 1.5, fontStyle: 'italic' }}>
               {tr.homePage.tonightRailCityFallbackNote}
             </p>
           )}
@@ -120,13 +120,13 @@ export default function TonightNearYou() {
             <Link
               key={ev.id}
               href={`/events/${ev.id}`}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid rgba(247,243,238,0.08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(247,243,238,0.05)' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '11px 8px', margin: '0 -8px', borderRadius: 'var(--afa-radius-sm)', borderBottom: '1px solid var(--afa-tint-08)', textDecoration: 'none', color: 'inherit', transition: 'background 150ms ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--afa-tint-04)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-ui)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</div>
-                <div style={{ fontSize: 'var(--afa-text-caption)', color: '#a89880', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
+                <div style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-secondary)', fontFamily: 'var(--font-sans)' }}>{TYPE_LABEL[ev.type]}{ev.venue ? ` · ${ev.venue.city}` : ''}</div>
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', color: 'var(--afa-fill-solid)', textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                 {formatEventDate(ev.date, ev.startTime)}

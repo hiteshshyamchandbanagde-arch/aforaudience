@@ -22,7 +22,7 @@ const inputStyle = {
   padding: 'var(--afa-space-10px) var(--afa-space-14px)',
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-08)',
-  background: '#171717',
+  background: 'var(--afa-surface-inverse)',
   fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',
   color: 'var(--afa-text-primary)',
@@ -406,8 +406,8 @@ export default function CreateVenuePage() {
                     onClick={() => setRateType(t)}
                     style={{
                       flex: 1, padding: 'var(--afa-space-10px)', borderRadius: 'var(--afa-radius-md)', fontSize: 'var(--afa-text-ui)', fontWeight: 600,
-                      border: rateType === t ? '1px solid var(--afa-amber)' : '1px solid rgba(245,245,240,0.08)',
-                      background: rateType === t ? 'rgba(201,151,58,0.12)' : '#171717',
+                      border: rateType === t ? '1px solid var(--afa-amber)' : '1px solid var(--afa-tint-08)',
+                      background: rateType === t ? 'var(--afa-amber-tint)' : 'var(--afa-surface-inverse)',
                       color: rateType === t ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
                     }}
                   >
@@ -455,7 +455,7 @@ export default function CreateVenuePage() {
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid var(--afa-tint-04)' }}>
                           <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
                             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>₹</span>
@@ -597,7 +597,7 @@ function PathCard({
       style={{
         textAlign: 'left',
         borderRadius: 'var(--afa-radius-lg)',
-        border: active ? '1px solid rgba(255,90,54,0.5)' : '1px solid rgba(245,245,240,0.12)',
+        border: active ? '1px solid var(--afa-fill-solid)' : '1px solid var(--afa-tint-12)',
         background: active ? undefined : 'var(--afa-surface-page)',
         padding: 'var(--afa-space-5)',
         cursor: 'pointer',
@@ -613,7 +613,7 @@ function PathCard({
             width: '40px',
             height: '40px',
             borderRadius: 'var(--afa-radius-md)',
-            background: active ? 'rgba(255,90,54,0.2)' : 'rgba(245,245,240,0.08)',
+            background: active ? 'var(--afa-fill-tint)' : 'var(--afa-tint-08)',
             color: active ? 'var(--afa-fill-solid)' : 'var(--afa-text-secondary)',
           }}
         >

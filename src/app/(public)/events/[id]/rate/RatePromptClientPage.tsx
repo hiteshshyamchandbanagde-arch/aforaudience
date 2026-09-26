@@ -24,7 +24,7 @@ function Stars({ value, onChange }: { value: number; onChange: (n: number) => vo
           type="button"
           onClick={() => onChange(n)}
           aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
-          style={{ fontSize: "var(--afa-text-page-title-lg)", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
+          style={{ fontSize: "var(--afa-text-page-title-lg)", lineHeight: 1, padding: 0, color: value >= n ? "var(--afa-amber)" : "var(--afa-tint-20)" }}
         >
           {value >= n ? "★" : "☆"}
         </Button>
@@ -157,7 +157,7 @@ export default function RatePromptClientPage({
               placeholder={tr.ratePromptPage.commentPlaceholder}
               style={{ width: "100%", marginTop: "16px", padding: "12px", borderRadius: "var(--afa-radius-md)", border: "1px solid var(--afa-border-resting)", fontSize: "var(--afa-text-body)", fontFamily: "inherit", minHeight: "70px", resize: "vertical", background: "var(--afa-surface-raised)", color: "var(--afa-text-primary)" }}
             />
-            {overallError && <p style={{ color: "var(--afa-error)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
+            {overallError && <p style={{ color: "var(--afa-error-bright)", fontSize: "var(--afa-text-ui)", marginTop: "8px" }}>{overallError}</p>}
             <Button
               variant="solid"
               size="lg"
@@ -207,7 +207,7 @@ export default function RatePromptClientPage({
                             variant="bare"
                             onClick={() => setPerfDrafts((prev) => ({ ...prev, [p.id]: n }))}
                             aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
-                            style={{ fontSize: "var(--afa-text-title)", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "rgba(245,245,240,0.25)" }}
+                            style={{ fontSize: "var(--afa-text-title)", lineHeight: 1, padding: 0, color: (perfDrafts[p.id] || 0) >= n ? "var(--afa-amber)" : "var(--afa-tint-20)" }}
                           >
                             {(perfDrafts[p.id] || 0) >= n ? "★" : "☆"}
                           </Button>

@@ -173,7 +173,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           aria-label="Close"
           onClick={props.onClose}
           className="afa-backdrop-mount"
-          style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }}
+          style={{ position: 'absolute', inset: 0, background: 'var(--afa-scrim)' }}
         >
           {null}
         </Button>
@@ -182,7 +182,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           style={{
             position: 'relative', width: '100%', maxWidth: 440, margin: '0 20px',
             background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-2xl)',
-            padding: '24px 24px 28px', boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            padding: '24px 24px 28px', boxShadow: '0 20px 60px var(--afa-shadow)',
           }}
         >
           <ContributionBody {...props} />

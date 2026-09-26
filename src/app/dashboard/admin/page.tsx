@@ -139,7 +139,7 @@ function TicketTile({ icon, value, label, accent, href }: { icon: React.ReactNod
           justifyContent: 'center',
           background: `${accent}14`,
           color: accent,
-          borderRight: '1px dashed rgba(245,245,240,0.13)',
+          borderRight: '1px dashed var(--afa-tint-12)',
         }}
       >
         {icon}
@@ -268,8 +268,8 @@ export default function AdminCommandCenter() {
                     style={{
                       fontSize: 'var(--afa-text-ui)',
                       fontWeight: 700,
-                      color: a.tone === 'critical' ? 'var(--afa-error)' : 'var(--afa-amber)',
-                      background: a.tone === 'critical' ? 'rgba(179,38,30,0.15)' : 'rgba(201,151,58,0.15)',
+                      color: a.tone === 'critical' ? 'var(--afa-error-bright)' : 'var(--afa-amber)',
+                      background: a.tone === 'critical' ? 'var(--afa-error-tint)' : 'var(--afa-amber-tint)',
                       borderRadius: 'var(--afa-radius-pill)',
                       padding: '2px 10px',
                     }}
@@ -285,7 +285,7 @@ export default function AdminCommandCenter() {
           <div
             style={{
               marginBottom: '28px',
-              background: 'rgba(22,101,52,0.12)',
+              background: 'var(--afa-success-tint)',
               border: '1px solid var(--afa-tint-08)',
               borderLeft: '4px solid var(--afa-green-deep)',
               borderRadius: 'var(--afa-radius-lg)',

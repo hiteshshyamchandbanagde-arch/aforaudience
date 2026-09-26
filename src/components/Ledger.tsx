@@ -4,10 +4,10 @@ import { type ReactNode } from "react"
 import { useLocale } from "@/lib/i18n/translate"
 
 function FeeRow({ label, value, accent, muted, bold }: { label: string; value: string; accent?: boolean; muted?: boolean; bold?: boolean }) {
-  const color = accent ? "var(--afa-fill-solid)" : muted ? "rgba(245,245,240,0.5)" : "var(--afa-text-primary)"
+  const color = accent ? "var(--afa-fill-solid)" : muted ? "var(--afa-text-muted)" : "var(--afa-text-primary)"
   return (
     <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--afa-space-6)", padding: "4px 0" }}>
-      <span style={{ color: "rgba(245,245,240,0.6)" }}>{label}</span>
+      <span style={{ color: "var(--afa-text-secondary)" }}>{label}</span>
       <span style={{ color, fontWeight: bold ? 700 : 400 }}>{value}</span>
     </div>
   )
@@ -41,21 +41,21 @@ export default function Ledger({ eyebrow, headline }: { eyebrow: string; headlin
         <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: "var(--afa-text-subheading)", lineHeight: 1.35, color: "var(--afa-text-primary)" }}>
           {headline}
         </div>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", lineHeight: 1.6, color: "rgba(245,245,240,0.5)", borderLeft: "2px solid rgba(201,151,58,0.5)", paddingLeft: "var(--afa-space-4)", marginTop: "var(--afa-space-5)", maxWidth: "420px" }}>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", lineHeight: 1.6, color: "var(--afa-text-muted)", borderLeft: "2px solid var(--afa-amber-border)", paddingLeft: "var(--afa-space-4)", marginTop: "var(--afa-space-5)", maxWidth: "420px" }}>
           {tr.homePage.feeTaxDisclaimer}
         </p>
         <div className="ledger-stats" style={{ display: "flex", gap: "32px", marginTop: "var(--afa-space-6)" }}>
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--afa-text-page-title-lg)", color: "var(--afa-fill-solid)" }}>0%</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeCommissionLabel}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>{tr.homePage.feeCommissionLabel}</div>
           </div>
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--afa-text-page-title-lg)", color: "var(--afa-fill-solid)" }}>0%</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeHiddenFeesLabel}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>{tr.homePage.feeHiddenFeesLabel}</div>
           </div>
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "var(--afa-text-page-title-lg)", color: "var(--afa-fill-solid)" }}>100%</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.6)" }}>{tr.homePage.feeArtistVenueShareLabel}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>{tr.homePage.feeArtistVenueShareLabel}</div>
           </div>
         </div>
       </div>

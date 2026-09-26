@@ -204,7 +204,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{loadError}</div></>)
+  if (loadError) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{loadError}</div></>)
 
   return (
     <>
@@ -221,7 +221,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
             padding: 'var(--afa-space-18px) var(--afa-space-5)', paddingTop: 'calc(18px + env(safe-area-inset-top, 0px))',
             background: lastResult.ok ? 'var(--afa-forest)' : 'var(--afa-error)',
-            color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+            color: 'var(--afa-on-fill-solid)', boxShadow: '0 4px 16px var(--afa-shadow)',
             cursor: 'pointer',
           }}
         >
@@ -274,7 +274,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
               </>
             )}
             {cameraError && (
-              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
+              <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginTop: 'var(--afa-space-10px)' }}>{cameraError}</p>
             )}
           </div>
 

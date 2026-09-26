@@ -464,15 +464,15 @@ export default function SupportWidget() {
           borderRadius: '50%',
           background: 'var(--afa-amber)',
           color: 'var(--afa-on-fill-solid)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+          boxShadow: '0 6px 20px var(--afa-shadow)',
           fontSize: 'var(--afa-text-heading)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 26px rgba(0,0,0,0.32)' }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)' }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 26px var(--afa-shadow)' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px var(--afa-shadow)' }}
       >
         {panel === 'closed' ? <ChatIcon size={26} pulse /> : <CloseIcon size={22} />}
       </Button>
@@ -492,7 +492,7 @@ export default function SupportWidget() {
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
             borderRadius: 'var(--afa-radius-xl)',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+            boxShadow: '0 10px 40px var(--afa-shadow)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -603,8 +603,8 @@ export default function SupportWidget() {
                     {capReached && (
                       <div
                         style={{
-                          background: 'rgba(201,151,58,0.15)',
-                          border: '1px solid rgba(201,151,58,0.3)',
+                          background: 'var(--afa-amber-tint)',
+                          border: '1px solid var(--afa-amber-border)',
                           borderRadius: 'var(--afa-radius-md)',
                           padding: 'var(--afa-space-10px)',
                           fontSize: 'var(--afa-text-ui)',
@@ -686,7 +686,7 @@ export default function SupportWidget() {
                       marginBottom: 'var(--afa-space-3)',
                       cursor: 'pointer',
                       appearance: 'none',
-                      // Chevron stroke inlined as rgba(245,245,240,0.65) - the
+                      // Chevron stroke inlined as a literal colour - the
                       // same value as --afa-text-secondary - since a data-URI
                       // can't reference a CSS custom property. Same technique
                       // as profile/page.tsx's display-currency select.
@@ -819,7 +819,7 @@ export default function SupportWidget() {
                     </div>
                   )}
                   {fbAttachmentError && (
-                    <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginBottom: 'var(--afa-space-3)' }}>
+                    <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginBottom: 'var(--afa-space-3)' }}>
                       {fbAttachmentError}
                     </div>
                   )}

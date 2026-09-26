@@ -30,10 +30,10 @@ function StatTile({ label, value, icon, sub }: { label: string; value: string; i
     ),
   }
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid rgba(245,245,240,0.06)' }} className="rounded-xl p-5">
+    <div style={{ background: 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-06)' }} className="rounded-xl p-5">
       <div className="flex items-start justify-between mb-4">
         <span style={{ color: 'var(--afa-text-primary)', opacity: 0.6, fontSize: 'var(--afa-text-small)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{label}</span>
-        <span style={{ color: 'var(--afa-amber)', backgroundColor: 'rgba(201,151,58,0.12)' }} className="w-8 h-8 rounded-lg flex items-center justify-center">
+        <span style={{ color: 'var(--afa-amber)', backgroundColor: 'var(--afa-amber-tint)' }} className="w-8 h-8 rounded-lg flex items-center justify-center">
           {icons[icon]}
         </span>
       </div>
@@ -83,7 +83,7 @@ export default function AudienceActivityPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
 
   const confirmed = bookings.filter((b) => b.status === 'CONFIRMED')
   const totalSpend = confirmed.reduce((sum, b) => sum + b.totalAmount, 0)
@@ -120,7 +120,7 @@ export default function AudienceActivityPage() {
             </p>
 
             {confirmed.length === 0 && (
-              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid rgba(245,245,240,0.06)', textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '28px', border: '1px solid var(--afa-tint-06)', textAlign: 'center', marginBottom: '24px' }}>
                 <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', opacity: 0.5, marginBottom: '16px' }}>
                   {tr.audienceActivityPage.noConfirmedBookings}
                 </p>

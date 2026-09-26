@@ -52,7 +52,7 @@ export default function VenueOwnerDetailPage({ params }: { params: Promise<{ id:
 
       <div style={{ background: "var(--afa-surface-raised)", padding: "48px 24px", borderBottom: "1px solid var(--afa-tint-10)" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid rgba(245,245,240,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
+          <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "var(--afa-tint-10)", border: "3px solid var(--afa-tint-20)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", fontWeight: 700, color: "var(--afa-text-primary)", flexShrink: 0, overflow: "hidden" }}>
             {owner.user.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={owner.user.avatar} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />

@@ -130,7 +130,7 @@ function SectionHeader({ eyebrow, count }: { eyebrow: string; count: number }) {
 
 function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "rgba(31,31,31,0.4)", padding: "56px var(--afa-space-6)", textAlign: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--afa-space-4)", border: "1px dashed var(--afa-border-resting)", background: "var(--afa-surface-raised)", padding: "56px var(--afa-space-6)", textAlign: "center" }}>
       <span style={{ color: "var(--afa-amber)" }}>{icon}</span>
       <div>
         <h3 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-subtitle)", fontWeight: 500, color: "var(--afa-text-primary)" }}>{title}</h3>
@@ -182,7 +182,7 @@ function EventDateCard({ event, tr, navigatingId, onNavigate }: { event: Organis
       }}
     >
       {isNavigatingThis && (
-        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
         </div>
       )}
@@ -235,7 +235,7 @@ function TourStatusBadge({ status, tr }: { status: string; tr: Dictionary }) {
     whiteSpace: "nowrap",
   }
   if (status === "LIVE") {
-    return <span style={{ ...chrome, background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStatusOnSale}</span>
+    return <span style={{ ...chrome, background: "var(--afa-amber-tint)", color: "var(--afa-amber)" }}>{tr.organiserDetailPage.tourStatusOnSale}</span>
   }
   return <span style={{ ...chrome, background: "var(--afa-tint-08)", color: "var(--afa-text-primary)" }}>{tr.organiserDetailPage.tourStatusCompleted}</span>
 }
@@ -339,7 +339,7 @@ export default function OrganiserPage({ params }: { params: Promise<{ id: string
         .afa-organiser-breadcrumb-link { transition: color 0.2s ease; }
         .afa-organiser-breadcrumb-link:hover { color: var(--afa-amber) !important; }
         .afa-organiser-event-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
-        .afa-organiser-event-card:hover { border-color: rgba(201,151,58,0.6); }
+        .afa-organiser-event-card:hover { border-color: var(--afa-amber-strong); }
         .afa-organiser-event-card:hover .afa-organiser-event-title { color: var(--afa-amber); }
         .afa-organiser-event-card:hover .afa-organiser-event-details { text-decoration: underline; text-underline-offset: 3px; }
         .afa-organiser-view-all:hover { opacity: 0.8; }

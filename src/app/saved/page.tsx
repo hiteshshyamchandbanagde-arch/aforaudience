@@ -64,7 +64,7 @@ export default function SavedPage() {
           </h1>
 
           {error && (
-            <p style={{ color: 'var(--afa-error)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{error}</p>
+            <p style={{ color: 'var(--afa-error-bright)', fontSize: 'var(--afa-text-body)', marginBottom: 20 }}>{error}</p>
           )}
 
           {events.length === 0 ? (

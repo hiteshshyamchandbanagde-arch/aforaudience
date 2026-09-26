@@ -284,13 +284,288 @@ function radiusTokenFor(value, def) {
 // ticket's 5 known values need. If a spaced form ever appears in
 // application code in the future, add it as its own key here (same
 // "byte/value-identical only" convention), not by changing the matcher.
+//
+// GEN-2609-113 - one exact entry per new colour token (decision record
+// section 2). `rgba(245,245,240,0.4)` left this map: --afa-text-muted is
+// now 0.5, so 0.4 is a ROUND (see COLOR_ROUND below), not an equivalence.
 const COLOR_MAP = {
   '#FFF': '--afa-white',
   'rgba(245,245,240,0.65)': '--afa-text-secondary',
-  'rgba(245,245,240,0.4)': '--afa-text-muted',
+  'rgba(245,245,240,0.5)': '--afa-text-muted',
+  'rgba(245,245,240,0.8)': '--afa-text-soft',
   'rgba(245,245,240,0.15)': '--afa-border-resting',
+  'rgba(245,245,240,0.04)': '--afa-tint-04',
+  'rgba(245,245,240,0.06)': '--afa-tint-06',
   'rgba(245,245,240,0.08)': '--afa-tint-08',
   'rgba(245,245,240,0.1)': '--afa-tint-10',
+  'rgba(245,245,240,0.12)': '--afa-tint-12',
+  'rgba(245,245,240,0.2)': '--afa-tint-20',
+  'rgba(245,245,240,0.3)': '--afa-tint-30',
+  'rgba(201,151,58,0.08)': '--afa-amber-wash',
+  'rgba(201,151,58,0.15)': '--afa-amber-tint',
+  'rgba(201,151,58,0.4)': '--afa-amber-border',
+  'rgba(201,151,58,0.6)': '--afa-amber-strong',
+  'rgba(179,38,30,0.1)': '--afa-error-tint',
+  'rgba(179,38,30,0.3)': '--afa-error-edge',
+  'rgba(74,103,65,0.12)': '--afa-sage-tint',
+  'rgba(39,103,73,0.15)': '--afa-success-tint',
+  'rgba(255,90,54,0.2)': '--afa-fill-tint',
+  'rgba(74,111,165,0.15)': '--afa-blue-tint',
+  'rgba(0,0,0,0.3)': '--afa-shadow',
+  'rgba(10,10,10,0.7)': '--afa-scrim',
+  'rgba(10,10,10,0.9)': '--afa-scrim-strong',
+  // Hex whose value IS a token (decision record section 2d). rgb(10,10,10)
+  // is #0A0A0A written as rgb().
+  '#F7F3EE': '--afa-cream',
+  '#C9973A': '--afa-amber',
+  '#0E0C0A': '--afa-ink',
+  '#1F1F1F': '--afa-surface-raised',
+  '#0A0A0A': '--afa-surface-inverse',
+  '#4A6741': '--afa-sage',
+  'rgb(10,10,10)': '--afa-surface-inverse',
+}
+
+// GEN-2609-113 - off-scale colours, each DEFINED as a scale step by the
+// decision record (docs/decisions/2026-09-26-radius-colour-scale.md
+// section 2) or, where the record is silent, by its own rules (nearest
+// step; a toss-up goes toward better contrast). Separate from COLOR_MAP
+// for the same reason RADIUS_ROUND is separate from RADIUS_MAP:
+// verify-equivalence.js reports every site converted through here as an
+// intentional value change, not an equivalence.
+//
+// A string value applies in any context. An object value depends on what
+// the colour is doing at that site (see colorContext()): `text`, `shadow`
+// (box-shadow/text-shadow/Tailwind shadow-), or `surface` (everything
+// else: backgrounds, borders, fills, strokes). `shadow` falls back to
+// `surface` when absent. The cream ladder is context-dependent from 0.30
+// up: text rounds onto --afa-text-*, anything else onto --afa-tint-30.
+// Context-dependent entries also cover the exact-value keys that sit on
+// the text ladder (0.3/0.5/0.65/0.8), so a 0.5 background never becomes
+// --afa-text-muted just because the numbers match.
+const CREAM_TEXT = (textToken) => ({ text: textToken, surface: '--afa-tint-30' })
+const COLOR_ROUND = {
+  // cream surface/border ladder (context-free below 0.30)
+  'rgba(245,245,240,0.02)': '--afa-tint-04',
+  'rgba(245,245,240,0.03)': '--afa-tint-04',
+  'rgba(245,245,240,0.05)': '--afa-tint-04',
+  'rgba(245,245,240,0.07)': '--afa-tint-06',
+  'rgba(245,245,240,0.13)': '--afa-tint-12',
+  'rgba(245,245,240,0.14)': '--afa-border-resting',
+  'rgba(245,245,240,0.16)': '--afa-border-resting',
+  'rgba(245,245,240,0.25)': '--afa-tint-20',
+  // cream, context-dependent from 0.30 up
+  'rgba(245,245,240,0.3)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(245,245,240,0.35)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(245,245,240,0.4)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(245,245,240,0.45)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(245,245,240,0.5)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(245,245,240,0.55)': CREAM_TEXT('--afa-text-secondary'),
+  'rgba(245,245,240,0.6)': CREAM_TEXT('--afa-text-secondary'),
+  'rgba(245,245,240,0.65)': CREAM_TEXT('--afa-text-secondary'),
+  'rgba(245,245,240,0.7)': CREAM_TEXT('--afa-text-secondary'),
+  'rgba(245,245,240,0.75)': CREAM_TEXT('--afa-text-soft'),
+  'rgba(245,245,240,0.8)': CREAM_TEXT('--afa-text-soft'),
+  'rgba(245,245,240,0.85)': CREAM_TEXT('--afa-text-soft'),
+  // near-identical warm cream rgba(247,243,238,a) folds into the same ladder
+  'rgba(247,243,238,0.05)': '--afa-tint-04',
+  'rgba(247,243,238,0.08)': '--afa-tint-08',
+  'rgba(247,243,238,0.12)': '--afa-tint-12',
+  'rgba(247,243,238,0.15)': '--afa-border-resting',
+  'rgba(247,243,238,0.3)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(247,243,238,0.45)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(247,243,238,0.5)': CREAM_TEXT('--afa-text-muted'),
+  'rgba(247,243,238,0.6)': CREAM_TEXT('--afa-text-secondary'),
+  // white overlays fold into the cream ladder too
+  'rgba(255,255,255,0.08)': '--afa-tint-08',
+  'rgba(255,255,255,0.1)': '--afa-tint-10',
+  'rgba(255,255,255,0.7)': CREAM_TEXT('--afa-text-secondary'),
+  // amber tone
+  'rgba(201,151,58,0.07)': '--afa-amber-wash',
+  'rgba(201,151,58,0.1)': '--afa-amber-tint',
+  'rgba(201,151,58,0.12)': '--afa-amber-tint',
+  'rgba(201,151,58,0.18)': '--afa-amber-tint',
+  'rgba(201,151,58,0.2)': '--afa-amber-tint',
+  'rgba(201,151,58,0.25)': '--afa-amber-border',
+  'rgba(201,151,58,0.3)': '--afa-amber-border',
+  'rgba(201,151,58,0.35)': '--afa-amber-border',
+  'rgba(201,151,58,0.45)': '--afa-amber-border',
+  'rgba(201,151,58,0.5)': '--afa-amber-border',
+  'rgba(201,151,58,0.55)': '--afa-amber-strong',
+  'rgba(201,151,58,0.8)': '--afa-amber',
+  // error / success / sage / fill tones
+  'rgba(179,38,30,0.08)': '--afa-error-tint',
+  'rgba(179,38,30,0.12)': '--afa-error-tint',
+  'rgba(179,38,30,0.15)': '--afa-error-tint',
+  'rgba(179,38,30,0.4)': '--afa-error-edge',
+  'rgba(22,101,52,0.12)': '--afa-success-tint',
+  'rgba(22,101,52,0.15)': '--afa-success-tint',
+  'rgba(74,103,65,0.3)': '--afa-sage-tint',
+  'rgba(255,90,54,0.3)': '--afa-fill-tint',
+  'rgba(255,90,54,0.5)': '--afa-fill-solid',
+  // dark overlays and shadows: shadows up to 0.5 -> --afa-shadow, darker
+  // overlays -> scrim / scrim-strong
+  'rgba(0,0,0,0.14)': '--afa-shadow',
+  'rgba(0,0,0,0.15)': '--afa-shadow',
+  'rgba(0,0,0,0.18)': '--afa-shadow',
+  'rgba(0,0,0,0.2)': '--afa-shadow',
+  'rgba(0,0,0,0.25)': '--afa-shadow',
+  'rgba(0,0,0,0.32)': '--afa-shadow',
+  'rgba(0,0,0,0.35)': '--afa-shadow',
+  'rgba(0,0,0,0.4)': '--afa-shadow',
+  'rgba(0,0,0,0.5)': { shadow: '--afa-shadow', surface: '--afa-scrim' },
+  'rgba(0,0,0,0.6)': '--afa-scrim',
+  'rgba(14,12,10,0.15)': '--afa-shadow',
+  'rgba(10,10,10,0.4)': '--afa-scrim',
+  'rgba(10,10,10,0.45)': '--afa-scrim',
+  'rgba(10,10,10,0.5)': '--afa-scrim',
+  'rgba(10,10,10,0.55)': '--afa-scrim',
+  'rgba(10,10,10,0.6)': '--afa-scrim',
+  'rgba(10,10,10,0.85)': '--afa-scrim-strong',
+  'rgba(10,10,10,0.88)': '--afa-scrim-strong',
+  'rgba(10,10,10,0.92)': '--afa-scrim-strong',
+  'rgba(10,10,10,0.94)': '--afa-scrim-strong',
+  'rgba(20,20,20,0.7)': '--afa-scrim',
+  'rgba(20,20,20,0.92)': '--afa-scrim-strong',
+  'rgba(20,20,20,0.95)': '--afa-scrim-strong',
+  'rgba(31,31,31,0.4)': '--afa-surface-raised',
+  // hex (decision record section 2d)
+  '#A89880': '--afa-text-secondary',
+  '#171717': '--afa-surface-inverse',
+  '#FFEBEE': '--afa-error-tint',
+  '#C62828': '--afa-error-bright',
+  '#241A10': '--afa-surface-raised',
+}
+
+// Canonical form of a colour literal: no whitespace, lowercase, alpha as a
+// plain number (`0.50`/`.5` -> `0.5`). Map keys and source literals are
+// both compared in this form.
+function canonColor(lit) {
+  const s = lit.replace(/\s+/g, '').toLowerCase()
+  const m = /^(rgba?)\((\d+),(\d+),(\d+)(?:,([\d.]+))?\)$/.exec(s)
+  if (!m) return s
+  return m[5] === undefined ? `${m[1]}(${m[2]},${m[3]},${m[4]})` : `rgba(${m[2]},${m[3]},${m[4]},${Number(m[5])})`
+}
+const canonTable = (map) => Object.fromEntries(Object.entries(map).map(([k, v]) => [canonColor(k), v]))
+const COLOR_MAP_CANON = canonTable(COLOR_MAP)
+const COLOR_ROUND_CANON = canonTable(COLOR_ROUND)
+
+// What a colour literal is doing at `idx` on `line`: 'text', 'shadow',
+// 'surface', or null when nothing on the line says (a ternary branch on
+// its own line, `const MIST = ...`). Looks at the nearest Tailwind
+// bracket utility, else the nearest property / JSX attribute / assigned
+// name before the literal. A ternary's `cond ? a : b` is skipped so
+// `background: on ? strengthColor : '...'` still resolves to background.
+const TEXT_NAMES = new Set(['color', 'caretcolor', 'textdecorationcolor', 'webkittextfillcolor'])
+function nameContext(name, line) {
+  const n = name.replace(/-/g, '').toLowerCase()
+  if (TEXT_NAMES.has(n)) return 'text'
+  if (n === 'fill' && /\btick\s*[=:]/.test(line)) return 'text' // Recharts axis tick label
+  if (/shadow/.test(n)) return 'shadow'
+  if (/background|^bg$|border|outline|^fill$|stroke|stopcolor|scrim|divider/.test(n)) return 'surface'
+  return null
+}
+function colorContext(line, idx) {
+  const before = line.slice(0, idx)
+  const tw = /([a-z][a-z-]*)-\[[^\]\s"'`]*$/.exec(before)
+  if (tw) {
+    const u = tw[1]
+    if (u === 'text' || u === 'caret' || u === 'decoration' || u.startsWith('placeholder')) return 'text'
+    if (/shadow/.test(u)) return 'shadow'
+    return 'surface'
+  }
+  const re = /([A-Za-z_-]+)\s*(?::(?!:)|=(?![=>]))/g
+  let m
+  let found = null
+  while ((m = re.exec(before))) {
+    const pre = before.slice(0, m.index).trimEnd()
+    if (pre.endsWith('?')) continue // `cond ? name : ...` - a ternary branch, not a property
+    found = m[1]
+  }
+  return found ? nameContext(found, line) : null
+}
+
+// Token for a colour literal in a given context. Returns
+//   { token }           - convert to var(token)
+//   { ambiguous: [...] } - context-dependent value, context unknown
+//   null                - no mapping (stays literal)
+function resolveColor(lit, ctx) {
+  const key = canonColor(lit)
+  const r = COLOR_ROUND_CANON[key]
+  if (r && typeof r === 'object') {
+    const pick = ctx === 'shadow' ? r.shadow || r.surface : ctx ? r[ctx] || r.surface : null
+    if (pick) return { token: pick }
+    return { ambiguous: [...new Set(Object.values(r))] }
+  }
+  if (COLOR_MAP_CANON[key]) return { token: COLOR_MAP_CANON[key] }
+  if (typeof r === 'string') return { token: r }
+  return null
+}
+
+// Every colour literal on a line that the checker counts and that sits
+// somewhere a var() can replace it: inside a quoted string (JS/JSX), or
+// anywhere in a raw <style> block. Returns { start, end, lit, ctx }.
+const COLOR_LITERAL_RE = /rgba?\([^()]*\)|#[0-9a-fA-F]{3,8}\b/g
+function quoteSpans(line) {
+  const spans = []
+  const re = /(['"`])([^'"`]*)\1/g
+  let m
+  while ((m = re.exec(line))) spans.push([m.index + 1, m.index + 1 + m[2].length])
+  return spans
+}
+function colorLiterals(line, inRawBlock) {
+  const spans = inRawBlock ? null : quoteSpans(line)
+  const out = []
+  COLOR_LITERAL_RE.lastIndex = 0
+  let m
+  while ((m = COLOR_LITERAL_RE.exec(line))) {
+    const start = m.index
+    const end = start + m[0].length
+    if (m[0][0] === '#' && /&$/.test(line.slice(0, start))) continue // HTML entity
+    if (spans && !spans.some(([a, b]) => start >= a && end <= b)) continue
+    out.push({ start, end, lit: m[0], ctx: colorContext(line, start) })
+  }
+  return out
+}
+
+const SVG_ATTR_BEFORE_RE = /\b(?:fill|stroke|stopColor|floodColor|lightingColor)=(?:["']|\{[^{}]*)$/
+
+// The colour pass itself. `unresolved` (optional array) collects literals
+// left in place, with the reason, for the dry-run report.
+function migrateColorLiterals(line, inRawBlock, edits, unresolved) {
+  for (const c of colorLiterals(line, inRawBlock)) {
+    if (edits.some((e) => c.start < e.end && c.end > e.start)) continue
+    if (c.lit.includes('${')) {
+      if (unresolved) unresolved.push({ ...c, why: 'dynamic value' })
+      continue
+    }
+    // A literal that is only a var() fallback (`var(--afa-sage, #4a6741)`)
+    // is dropped with its comma: the token is always defined in globals.css.
+    const fb = /,\s*$/.exec(line.slice(0, c.start))
+    if (fb && /var\(--[\w-]+\s*,\s*$/.test(line.slice(0, c.start)) && line[c.end] === ')') {
+      edits.push({ start: fb.index, end: c.end, replacement: '' })
+      continue
+    }
+    // SVG presentation attributes don't reliably resolve var(); those sites
+    // move the colour into style={{ ... }} by hand (decision record 2d).
+    if (SVG_ATTR_BEFORE_RE.test(line.slice(0, c.start))) {
+      if (unresolved) unresolved.push({ ...c, why: 'SVG presentation attribute - move to style by hand' })
+      continue
+    }
+    const res = resolveColor(c.lit, c.ctx)
+    if (!res) {
+      if (unresolved) unresolved.push({ ...c, why: 'no mapping' })
+      continue
+    }
+    if (res.ambiguous) {
+      if (unresolved) unresolved.push({ ...c, why: `context unknown: ${res.ambiguous.join(' | ')}` })
+      continue
+    }
+    // Tailwind `text-[<colour>]` needs the `color:` type hint (see
+    // MATCH_RE_TW_FONTSIZE_BRACKET's comment: unhinted text-[var()] is
+    // ambiguous); every other bracket utility takes a bare var().
+    const hinted = /\btext-\[$/.test(line.slice(0, c.start)) && line[c.end] === ']'
+    edits.push({ start: c.start, end: c.end, replacement: `${hinted ? 'color:' : ''}var(${res.token})` })
+  }
 }
 
 // GEN-2609-090 - one definition per --categories name, so `mapFor()` can
@@ -639,7 +914,7 @@ function migrateCompoundStringValue(raw, map) {
   return result
 }
 
-function processLine(line, inRawBlock, activeDefs) {
+function processLine(line, inRawBlock, activeDefs, unresolved) {
   if (isCommentLine(line) || tokenOkReason(line)) return line
 
   const MATCH_RE = inRawBlock ? MATCH_RE_CSS : MATCH_RE_JS
@@ -653,6 +928,10 @@ function processLine(line, inRawBlock, activeDefs) {
     const norm = propRaw.replace(/-/g, '').toLowerCase()
     const target = mapFor(norm, activeDefs)
     if (!target) continue
+    // GEN-2609-113 - colour goes through migrateColorLiterals() below,
+    // which reaches every literal (ternaries, JSX attributes, className
+    // brackets, raw CSS) and applies COLOR_ROUND by context.
+    if (target === CATEGORY_DEFS.colour) continue
 
     const prefixLen = m[1].length + m[2].length
     // GEN-2609-100 - checked BEFORE `target.kind === 'exact-string'`
@@ -703,54 +982,10 @@ function processLine(line, inRawBlock, activeDefs) {
     }
   }
 
-  // GEN-2609-102 - second pass, raw <style> blocks only: catches the
-  // unquoted-colour declarations the main loop above structurally can't
-  // (see MATCH_RE_CSS_RAW_COLOR's own header). Runs after the main loop
-  // so `edits` already reflects it, letting the overlap guard below
-  // avoid ever double-editing the same span (belt-and-braces - in
-  // practice the two loops never target the same characters, since
-  // anything the main loop already caught wouldn't still be unmatched
-  // colour text here).
-  if (inRawBlock && activeDefs.includes(CATEGORY_DEFS.colour)) {
-    MATCH_RE_CSS_RAW_COLOR.lastIndex = 0
-    let cm
-    while ((cm = MATCH_RE_CSS_RAW_COLOR.exec(line))) {
-      const norm = cm[1].replace(/-/g, '').toLowerCase()
-      const target = mapFor(norm, activeDefs)
-      if (target !== CATEGORY_DEFS.colour) continue
-      const rawValue = cm[3]
-      if (/^var\(/i.test(rawValue.trim())) continue // already a token, nothing to do
-      const prefixLen = cm[1].length + cm[2].length
-      const start = cm.index + prefixLen
-      const end = start + rawValue.length
-      if (edits.some((e) => start < e.end && end > e.start)) continue
-      const migrated = target.compoundProps && target.compoundProps.has(norm)
-        ? migrateCompoundStringValue(rawValue, target.map)
-        : migrateExactStringValue(rawValue, target.map)
-      if (migrated === null) continue
-      edits.push({ start, end, replacement: migrated })
-    }
-  }
-
-  // GEN-2609-101 - className-only pass, never inside a raw <style>
-  // block (a className attribute can't appear there). Reuses
-  // migrateCompoundStringValue() directly against the whole className
-  // string, same substring-splice behaviour a `border`/`boxShadow`
-  // shorthand already gets - a className string IS just another
-  // compound value with one small literal substring worth replacing.
-  if (!inRawBlock && activeDefs.includes(CATEGORY_DEFS.colour)) {
-    MATCH_RE_JSX_CLASSNAME.lastIndex = 0
-    let jm
-    while ((jm = MATCH_RE_JSX_CLASSNAME.exec(line))) {
-      const rawValue = jm[2]
-      const migrated = migrateCompoundStringValue(rawValue, COLOR_MAP)
-      if (migrated === null) continue
-      const start = jm.index + jm[0].indexOf(rawValue)
-      const end = start + rawValue.length
-      if (edits.some((e) => start < e.end && end > e.start)) continue
-      edits.push({ start, end, replacement: migrated })
-    }
-  }
+  // GEN-2609-113 - one colour pass for every shape (replaces the
+  // GEN-2609-101 className pass and the GEN-2609-102 raw-<style> pass,
+  // which only knew COLOR_MAP's exact keys).
+  if (activeDefs.includes(CATEGORY_DEFS.colour)) migrateColorLiterals(line, inRawBlock, edits, unresolved)
 
   // GEN-2609-105 - font-size className-bracket pass, same
   // never-inside-a-raw-<style>-block scoping as colour's className pass
@@ -802,13 +1037,16 @@ function run() {
   const lines = original.split('\n')
   let inRawBlock = false
   const out = []
-  for (const line of lines) {
+  const unresolved = []
+  for (const [i, line] of lines.entries()) {
     if (inRawBlock && line.includes('`}</style>')) {
       inRawBlock = false
       out.push(line)
       continue
     }
-    out.push(processLine(line, inRawBlock, activeDefs))
+    const before = unresolved.length
+    out.push(processLine(line, inRawBlock, activeDefs, unresolved))
+    for (const u of unresolved.slice(before)) u.line = i + 1
     if (!inRawBlock && line.includes('<style>{`')) {
       inRawBlock = true
     }
@@ -826,11 +1064,13 @@ function run() {
       }
     }
     console.log(`\n${changedLines} line(s) would change (dry run - pass --apply to write).`)
+    for (const u of unresolved) console.log(`  left literal  line ${u.line}  ${u.lit}  (${u.why})`)
     return
   }
 
   fs.writeFileSync(file, migrated)
   console.log(`applied migration to ${file}`)
+  for (const u of unresolved) console.log(`  left literal  line ${u.line}  ${u.lit}  (${u.why})`)
 }
 
 if (require.main === module) {
@@ -861,4 +1101,10 @@ module.exports = {
   MATCH_RE_TW_RADIUS_BRACKET,
   migrateTailwindRadiusBracket,
   RADIUS_PROPS,
+  COLOR_ROUND,
+  canonColor,
+  colorContext,
+  colorLiterals,
+  resolveColor,
+  migrateColorLiterals,
 }

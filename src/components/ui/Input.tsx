@@ -38,7 +38,7 @@ export const INPUT_STYLES: Record<InputVariant, React.CSSProperties> = {
   compact: {
     padding: '6px 8px',
     borderRadius: 'var(--afa-radius-xs)',
-    border: '1px solid rgba(245,245,240,0.2)',
+    border: '1px solid var(--afa-tint-20)',
     fontSize: 'var(--afa-text-body)',
     fontFamily: FONT_FAMILY,
     color: 'var(--afa-cream)',

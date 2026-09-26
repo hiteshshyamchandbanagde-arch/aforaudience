@@ -99,7 +99,7 @@ export function EventSaveHeartButton({
       style={{
         width: dims, height: dims, borderRadius: '50%', flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(4px)',
+        background: 'var(--afa-scrim)', backdropFilter: 'blur(4px)',
         cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
       }}
     >

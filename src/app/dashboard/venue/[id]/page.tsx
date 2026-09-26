@@ -101,7 +101,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: '32px' }}>Venue not found</div></>)
 
   const sections = venue.seatMap?.sections || []
@@ -239,8 +239,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                               style={{
                                 fontSize: 'var(--afa-text-micro)',
                                 fontWeight: 700,
-                                color: 'var(--afa-gold)',
-                                background: 'rgba(201,151,58,0.15)',
+                                color: 'var(--afa-amber)',
+                                background: 'var(--afa-amber-tint)',
                                 padding: '3px 8px',
                                 borderRadius: 'var(--afa-radius-xs)',
                                 letterSpacing: '0.02em',
@@ -285,8 +285,8 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
                             style={{
                               fontSize: 'var(--afa-text-micro)',
                               fontWeight: 700,
-                              color: 'var(--afa-gold)',
-                              background: 'rgba(201,151,58,0.15)',
+                              color: 'var(--afa-amber)',
+                              background: 'var(--afa-amber-tint)',
                               padding: '3px 8px',
                               borderRadius: 'var(--afa-radius-xs)',
                               letterSpacing: '0.02em',
@@ -312,7 +312,7 @@ export default function VenueDetailPage({ params }: { params: Promise<{ id: stri
             </Link>
             <Link
               href={`/dashboard/venue/${venue.id}/sales`}
-              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid rgba(245,245,240,0.2)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
+              style={{ fontSize: 'var(--afa-text-body)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'transparent', border: '1px solid var(--afa-tint-20)', textDecoration: 'none', padding: '12px 24px', borderRadius: 'var(--afa-radius-md)' }}
             >
               📊 Revenue
             </Link>

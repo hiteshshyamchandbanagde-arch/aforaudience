@@ -2,7 +2,7 @@
 // markup, previously duplicated across VenuesGridClient.tsx's inline
 // venue card and EventCard.tsx's EventCard/EventRow. The three sites
 // were NOT byte-identical on closer inspection - ring size (24 vs 26px),
-// scrim darkness (rgba(10,10,10,0.6) vs rgba(20,20,20,0.7)) and accent
+// scrim darkness (two near-black alphas, now both --afa-scrim) and accent
 // color (--afa-amber vs --afa-fill-solid) all differed - so this takes
 // those as props rather than hardcoding one look, preserving each
 // site's exact current appearance (no visual change is the bar).

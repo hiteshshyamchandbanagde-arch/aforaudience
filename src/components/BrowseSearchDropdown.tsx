@@ -70,7 +70,7 @@ export default function BrowseSearchDropdown<T>({
         <div
           style={{
             position: "absolute", top: "calc(100% + 8px)", left: 0, right: 0,
-            background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+            background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-lg)", boxShadow: "0 12px 40px var(--afa-shadow)",
             border: "1px solid var(--afa-tint-10)", zIndex: 50, maxHeight: "360px", overflowY: "auto",
             padding: visible.length ? "8px 0" : "16px 20px", textAlign: "left",
           }}

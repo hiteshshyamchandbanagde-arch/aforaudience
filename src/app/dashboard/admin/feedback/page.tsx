@@ -71,15 +71,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 // treatment for all categories (matches the v4 design spec's own Badge
 // usage, which colors every feedback category identically and reserves
 // distinct color for severity instead).
-const CATEGORY_BADGE = { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' }
+const CATEGORY_BADGE = { bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' }
 
 // Severity IS a real urgency axis, so it keeps a graduated scale — low to
 // high maps green -> amber -> tinted red -> solid red, using only tokens
 // already in the locked palette.
 const SEVERITY_BADGE: Record<string, { bg: string; color: string }> = {
-  LOW: { bg: 'rgba(22,101,52,0.15)', color: 'var(--afa-green-deep)' },
-  MEDIUM: { bg: 'rgba(201,151,58,0.15)', color: 'var(--afa-amber)' },
-  HIGH: { bg: 'rgba(179,38,30,0.15)', color: 'var(--afa-error)' },
+  LOW: { bg: 'var(--afa-success-tint)', color: 'var(--afa-green-deep)' },
+  MEDIUM: { bg: 'var(--afa-amber-tint)', color: 'var(--afa-amber)' },
+  HIGH: { bg: 'var(--afa-error-tint)', color: 'var(--afa-error-bright)' },
   CRITICAL: { bg: 'var(--afa-red-alt)', color: 'var(--afa-on-fill-solid)' },
 }
 
@@ -748,8 +748,8 @@ function AdminFeedbackBoard() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: 'var(--afa-space-10px)',
-                background: 'rgba(201,151,58,0.15)',
-                border: '1px solid rgba(245,245,240,0.13)',
+                background: 'var(--afa-amber-tint)',
+                border: '1px solid var(--afa-tint-12)',
                 borderRadius: 'var(--afa-radius-lg)',
                 padding: 'var(--afa-space-10px) var(--afa-space-14px)',
                 marginBottom: 'var(--afa-space-3)',

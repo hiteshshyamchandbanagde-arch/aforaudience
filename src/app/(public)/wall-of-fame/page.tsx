@@ -53,8 +53,8 @@ function InitialsChip({ name }: { name: string }) {
         width: "64px",
         height: "64px",
         borderRadius: "50%",
-        background: "rgba(201,151,58,0.18)",
-        border: "1.5px solid rgba(201,151,58,0.6)",
+        background: "var(--afa-amber-tint)",
+        border: "1.5px solid var(--afa-amber-strong)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -99,7 +99,7 @@ function MonthCardHeader({
           top: "16px",
           zIndex: 1,
           display: "inline-flex",
-          background: "rgba(10,10,10,0.7)",
+          background: "var(--afa-scrim)",
           backdropFilter: "blur(4px)",
           padding: "6px 10px",
           borderRadius: "var(--afa-radius-xs)",
@@ -220,7 +220,7 @@ export default function WallOfFamePage() {
               }}
             >
               {navigatingKey === "artist-of-month" && (
-                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 </div>
               )}
@@ -279,7 +279,7 @@ export default function WallOfFamePage() {
               }}
             >
               {navigatingKey === "event-of-month" && (
-                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(10,10,10,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
                 </div>
               )}
@@ -353,7 +353,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "var(--afa-radius-sm)",
-                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid rgba(245,245,240,0.1)" : "none",
+                            borderBottom: i < data.topOrganisers.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -366,7 +366,7 @@ export default function WallOfFamePage() {
                                 inset: 0,
                                 zIndex: 2,
                                 borderRadius: "var(--afa-radius-sm)",
-                                background: "rgba(10,10,10,0.7)",
+                                background: "var(--afa-scrim)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -424,7 +424,7 @@ export default function WallOfFamePage() {
                             gap: "12px",
                             padding: "8px 4px",
                             borderRadius: "var(--afa-radius-sm)",
-                            borderBottom: i < data.topVenues.length - 1 ? "1px solid rgba(245,245,240,0.1)" : "none",
+                            borderBottom: i < data.topVenues.length - 1 ? "1px solid var(--afa-tint-10)" : "none",
                             cursor: navigatingKey ? "default" : "pointer",
                             opacity: navigatingKey && !isNavigatingThis ? 0.5 : 1,
                             transition: "opacity 0.15s ease, background 0.15s ease",
@@ -437,7 +437,7 @@ export default function WallOfFamePage() {
                                 inset: 0,
                                 zIndex: 2,
                                 borderRadius: "var(--afa-radius-sm)",
-                                background: "rgba(10,10,10,0.7)",
+                                background: "var(--afa-scrim)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",

@@ -106,7 +106,7 @@ export default function AdminRevenueOverviewPage() {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   const { totals, organisers, events, timeline, currentFeeSettingRupees } = data
@@ -143,7 +143,7 @@ export default function AdminRevenueOverviewPage() {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
@@ -188,7 +188,7 @@ export default function AdminRevenueOverviewPage() {
                     style={{
                       alignItems: 'center',
                       fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
-                      border: '1px solid rgba(245,245,240,0.06)',
+                      border: '1px solid var(--afa-tint-06)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{o.orgName}</span>
@@ -217,7 +217,7 @@ export default function AdminRevenueOverviewPage() {
                     style={{
                       display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', alignItems: 'center',
                       fontSize: 'var(--afa-text-ui)', padding: '12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)',
-                      border: '1px solid rgba(245,245,240,0.06)',
+                      border: '1px solid var(--afa-tint-06)',
                     }}
                   >
                     <span style={{ fontWeight: 600 }}>{e.title}</span>
@@ -259,7 +259,7 @@ function SummaryCard({ label, value, sub }: { label: string; value: string; sub?
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid var(--afa-tint-06)' }}>
       <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

@@ -36,7 +36,7 @@ function compensationBadge(event: EventItem): { label: string; bg: string; color
   if (event.defaultCompensationType === 'BUY_IN') {
     return { label: `Buy-in required: ₹${event.defaultBuyInAmount?.toLocaleString('en-IN') ?? '—'}`, ...STATUS_TONE.error }
   }
-  return { label: 'Free / Exposure slot', bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' }
+  return { label: 'Free / Exposure slot', bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }
 }
 
 // Full lineups no longer hard-block applying - they queue as WAITLISTED
@@ -50,7 +50,7 @@ function isEventFull(event: EventItem): boolean {
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   PENDING: { label: '✓ Applied - pending review', color: 'var(--afa-sage)' },
   APPROVED: { label: "✓ You're in the lineup!", color: 'var(--afa-sage)' },
-  WAITLISTED: { label: '⏳ Waitlisted', color: 'var(--afa-gold)' },
+  WAITLISTED: { label: '⏳ Waitlisted', color: 'var(--afa-amber)' },
   REJECTED: { label: 'Not selected this time', color: 'var(--afa-text-primary)' },
 }
 
@@ -240,7 +240,7 @@ export default function BrowseEventsToApplyPage() {
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
                       <Badge variant="pill" tone={comp}>{comp.label}</Badge>
                       {full && !existingStatus && (
-                        <Badge variant="pill" tone={{ bg: 'rgba(245,245,240,0.06)', color: 'var(--afa-text-primary)' }}>
+                        <Badge variant="pill" tone={{ bg: 'var(--afa-tint-06)', color: 'var(--afa-text-primary)' }}>
                           Lineup full - waitlist only
                         </Badge>
                       )}
@@ -296,7 +296,7 @@ export default function BrowseEventsToApplyPage() {
                             fontSize: 'var(--afa-text-ui)',
                             color: full ? 'var(--afa-text-primary)' : 'var(--afa-on-fill-solid)',
                             background: full ? 'transparent' : undefined,
-                            border: full ? '1.5px solid rgba(245,245,240,0.2)' : 'none',
+                            border: full ? '1.5px solid var(--afa-tint-20)' : 'none',
                             padding: '8px 20px',
                             opacity: applying === event.id ? 0.6 : 1,
                           }}

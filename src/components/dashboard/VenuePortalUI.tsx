@@ -254,7 +254,7 @@ export function Button({
   }
   const variants: Record<ButtonVariant, CSSProperties> = {
     primary: { background: 'var(--afa-fill-solid)', color: 'var(--afa-on-fill-solid)', fontWeight: 600, border: 'none' },
-    outline: { background: 'transparent', color: 'var(--afa-text-primary)', border: '1px solid rgba(245,245,240,0.2)' },
+    outline: { background: 'transparent', color: 'var(--afa-text-primary)', border: '1px solid var(--afa-tint-20)' },
     ghost: { background: 'transparent', color: 'var(--afa-text-secondary)', border: 'none' },
   }
   const cls = { primary: 'avp-btn-primary', outline: 'avp-btn-outline', ghost: 'avp-btn-ghost' }[variant]
@@ -308,7 +308,7 @@ export function EmptyState({ icon, caption, action }: { icon: ReactNode; caption
         textAlign: 'center',
       }}
     >
-      <div style={{ color: 'rgba(201,151,58,0.55)', marginBottom: '24px' }}>{icon}</div>
+      <div style={{ color: 'var(--afa-amber-strong)', marginBottom: '24px' }}>{icon}</div>
       <p
         style={{
           fontFamily: 'var(--font-mono)',
@@ -459,7 +459,7 @@ export const outlineLinkStyle: CSSProperties = {
   background: 'transparent',
   color: 'var(--afa-text-primary)',
   textDecoration: 'none',
-  border: '1px solid rgba(245,245,240,0.2)',
+  border: '1px solid var(--afa-tint-20)',
 }
 
 export const navPillStyle: CSSProperties = {
@@ -512,7 +512,7 @@ const fieldStyle: CSSProperties = {
   width: '100%',
   borderRadius: 'var(--afa-radius-md)',
   border: '1px solid var(--afa-tint-08)',
-  background: '#171717',
+  background: 'var(--afa-surface-inverse)',
   padding: '10px 14px',
   fontSize: 'var(--afa-text-body)',
   fontFamily: 'var(--font-sans)',

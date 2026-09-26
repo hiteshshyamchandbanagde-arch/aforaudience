@@ -31,7 +31,7 @@ interface ArtistItem {
 // noise across a whole grid, so it's intentionally left off cards.
 const CARD_BADGE: Partial<Record<SceneStatusTier, { label: string; bg: string; color: string; border?: string }>> = {
   HEADLINER: { label: "★ Headliner", bg: "var(--afa-fill-solid)", color: "var(--afa-on-fill-solid)" },
-  FEATURED: { label: "Featured", bg: "rgba(201,151,58,0.18)", color: "var(--afa-amber)", border: "1px solid var(--afa-amber)" },
+  FEATURED: { label: "Featured", bg: "var(--afa-amber-tint)", color: "var(--afa-amber)", border: "1px solid var(--afa-amber)" },
 }
 
 const SCENE_STATUS_RANK: Record<SceneStatusTier, number> = {
@@ -150,7 +150,7 @@ export default function ArtistsPage() {
     <main style={{ minHeight: "100vh", background: "var(--afa-surface-page)", fontFamily: "var(--font-sans)" }}>
       <style>{`
         .afa-artist-card { transition: transform 0.25s ease, border-color 0.25s ease; }
-        .afa-artist-card:hover, .afa-artist-card:focus-visible { transform: translateY(-3px); border-color: rgba(201,151,58,0.45) !important; outline: none; }
+        .afa-artist-card:hover, .afa-artist-card:focus-visible { transform: translateY(-3px); border-color: var(--afa-amber-border) !important; outline: none; }
         .afa-genre-filter { position: relative; padding-bottom: 4px; background: none; border: none; cursor: pointer; }
         .afa-genre-filter::after { content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%; background: var(--afa-amber); opacity: 0.5; transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; }
         .afa-genre-filter:hover::after { transform: scaleX(1); }
@@ -262,7 +262,7 @@ export default function ArtistsPage() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
         {error && (
-          <div style={{ padding: "14px 16px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
+          <div style={{ padding: "14px 16px", background: "var(--afa-shadow)", border: "1px solid var(--afa-error)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)", marginBottom: "24px" }}>
             {error}
           </div>
         )}
@@ -279,7 +279,7 @@ export default function ArtistsPage() {
                 fontFamily: "var(--font-ui)",
                 fontStyle: "italic",
                 fontSize: "var(--afa-text-title)",
-                color: selectedGenre === g ? "var(--afa-text-primary)" : "rgba(245,245,240,0.4)",
+                color: selectedGenre === g ? "var(--afa-text-primary)" : "var(--afa-text-muted)",
               }}
             >
               {g === "All" ? tr.artistsPage.filterAll : g}
@@ -301,7 +301,7 @@ export default function ArtistsPage() {
               )}
               <div style={{ position: "absolute", top: "16px", left: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <SparkIcon style={{ width: "16px", height: "16px", color: "var(--afa-fill-solid)" }} />
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-caption)", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--afa-text-primary)", textShadow: "0 1px 6px var(--afa-scrim)" }}>
                   {tr.artistsPage.topArtistNow}
                 </span>
               </div>
@@ -311,7 +311,7 @@ export default function ArtistsPage() {
                 <div style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 600, color: "var(--afa-text-primary)", marginBottom: "6px" }}>
                   {risingStar.user.displayName || risingStar.user.name}
                 </div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.6)" }}>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-secondary)" }}>
                   {risingStar._count.performances} {risingStar._count.performances === 1 ? tr.artistsPage.showsSingular : tr.artistsPage.showsPlural}
                 </div>
               </div>
@@ -386,7 +386,7 @@ export default function ArtistsPage() {
                         position: "absolute",
                         inset: 0,
                         zIndex: 2,
-                        background: "rgba(10,10,10,0.7)",
+                        background: "var(--afa-scrim)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

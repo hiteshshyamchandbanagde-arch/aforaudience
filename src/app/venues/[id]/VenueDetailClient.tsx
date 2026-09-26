@@ -152,7 +152,7 @@ export default function VenueDetailClient({ venue }: { venue: VenueDetailData | 
               href={venue.directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid rgba(201,151,58,0.5)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 20px", border: "1.5px solid var(--afa-amber-border)", fontSize: "var(--afa-text-ui)", fontWeight: 600, color: "var(--afa-amber)", textDecoration: "none" }}
             >
               <DirectionsIcon style={{ width: "14px", height: "14px" }} />
               {tr.venueDetailPage.getDirections}

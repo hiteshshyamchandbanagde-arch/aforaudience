@@ -18,7 +18,7 @@ import Button from '@/components/ui/Button'
 // (5 Sep 2026), ported from the Figma Make export's Sidebar/
 // MobileBottomBar/MobileDrawer.
 //
-const SIDEBAR_BORDER = '1px solid rgba(245,245,240,0.08)'
+const SIDEBAR_BORDER = '1px solid var(--afa-tint-08)'
 
 export type IconName =
   | 'dashboard' | 'ticket' | 'message' | 'user' | 'calendar' | 'plus'
@@ -374,7 +374,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       href={href}
       className={compact ? 'flex items-center gap-3 rounded-lg px-3 text-left transition-colors' : 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors'}
       style={{
-        background: active ? 'rgba(201,151,58,0.12)' : 'transparent',
+        background: active ? 'var(--afa-amber-tint)' : 'transparent',
         color: active ? 'var(--afa-amber)' : 'var(--afa-text-primary)',
         opacity: active ? 1 : 0.75,
         fontWeight: active ? 600 : 400,
@@ -640,7 +640,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       {/* Mobile "More" drawer - role sections only, matches desktop grouping */}
       {drawerOpen && (
         <div className="lg:hidden fixed inset-0" style={{ zIndex: 50 }}>
-          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setDrawerOpen(false)} />
+          <div className="absolute inset-0" style={{ background: 'var(--afa-scrim)' }} onClick={() => setDrawerOpen(false)} />
           <div
             className="absolute bottom-0 left-0 right-0 rounded-t-2xl overflow-y-auto"
             style={{ background: 'var(--afa-surface-inverse)', maxHeight: '75vh', paddingBottom: 'env(safe-area-inset-bottom)' }}

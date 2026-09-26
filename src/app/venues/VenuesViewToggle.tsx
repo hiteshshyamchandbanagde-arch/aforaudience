@@ -45,8 +45,8 @@ export default function VenuesViewToggle({
            inline style can't express :hover at all (same bug pattern as
            BUG-2608-072 gap 4 / BUG-2608-073 gap 4), so the class controls
            color instead and the inline style only sets layout. */
-        .afa-view-tab { color: rgba(245,245,240,0.45); }
-        .afa-view-tab:hover { color: rgba(245,245,240,0.7); }
+        .afa-view-tab { color: var(--afa-text-muted); }
+        .afa-view-tab:hover { color: var(--afa-text-secondary); }
         .afa-view-tab.afa-view-tab-active, .afa-view-tab.afa-view-tab-active:hover { color: var(--afa-text-primary); }
       `}</style>
       <div style={{ display: "flex", alignItems: "center", gap: "32px", borderBottom: "1px solid var(--afa-border-resting)", marginBottom: "32px" }}>
@@ -70,7 +70,7 @@ export default function VenuesViewToggle({
               }}
             >
               {t.label}
-              <span style={{ marginLeft: "8px", verticalAlign: "super", fontSize: "var(--afa-text-micro)", fontWeight: 400, fontFamily: "var(--font-mono)", color: "rgba(245,245,240,0.45)" }}>
+              <span style={{ marginLeft: "8px", verticalAlign: "super", fontSize: "var(--afa-text-micro)", fontWeight: 400, fontFamily: "var(--font-mono)", color: "var(--afa-text-muted)" }}>
                 {t.count}
               </span>
               {active && (

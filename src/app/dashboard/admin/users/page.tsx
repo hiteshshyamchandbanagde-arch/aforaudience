@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
             </Button>
           </form>
 
-          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error}</div>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {users.length === 0 && !loading && (
@@ -175,18 +175,18 @@ export default function AdminUsersPage() {
                 key={u.id}
                 style={{
                   background: 'var(--afa-surface-page)', borderRadius: 'var(--afa-radius-lg)', padding: '16px',
-                  border: u.isSuspended ? '1px solid rgba(179,38,30,0.4)' : '1px solid rgba(245,245,240,0.08)',
+                  border: u.isSuspended ? '1px solid var(--afa-error-edge)' : '1px solid var(--afa-tint-08)',
                 }}
               >
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start" style={{ gap: '10px' }}>
                   <div>
                     <p style={{ fontSize: 'var(--afa-text-body-lg)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
                       {u.displayName || u.name}
-                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error)', textTransform: 'uppercase' }}>Suspended</span>}
+                      {u.isSuspended && <span style={{ marginLeft: '8px', fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-error-bright)', textTransform: 'uppercase' }}>Suspended</span>}
                     </p>
                     <p style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-secondary)' }}>{u.email} · {u.role}</p>
                     {u.isSuspended && u.suspendReason && (
-                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error)', marginTop: '6px' }}>
+                      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-error-bright)', marginTop: '6px' }}>
                         Reason: {u.suspendReason}
                       </p>
                     )}

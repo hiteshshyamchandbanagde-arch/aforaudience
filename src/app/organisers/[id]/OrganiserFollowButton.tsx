@@ -92,8 +92,8 @@ export default function OrganiserFollowButton({ organiserId }: { organiserId: st
             width: "34px",
             height: "34px",
             borderRadius: "50%",
-            border: "1.5px solid rgba(245,245,240,0.2)",
-            background: notifyEnabled ? "rgba(201,151,58,0.18)" : "transparent",
+            border: "1.5px solid var(--afa-tint-20)",
+            background: notifyEnabled ? "var(--afa-amber-tint)" : "transparent",
             cursor: busy ? "default" : "pointer",
             opacity: busy ? 0.6 : 1,
           }}

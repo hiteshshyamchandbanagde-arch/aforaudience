@@ -324,7 +324,7 @@ function variantBaseStyle(variant: ButtonVariant, fullWidth: boolean, size: numb
         gap: 'var(--afa-space-2)',
         width: fullWidth ? '100%' : undefined,
         background: 'var(--afa-surface-raised)',
-        color: 'var(--afa-error)',
+        color: 'var(--afa-error-bright)',
         border: '1px solid var(--afa-error)',
         padding: 'var(--afa-btn-padding-md)',
         borderRadius: 'var(--afa-radius-md)',

@@ -15,7 +15,7 @@ interface SearchInputBoxProps {
 export default function SearchInputBox({ value, onChange, placeholder, className, style }: SearchInputBoxProps) {
   return (
     <label className={`afa-search-box${className ? ` ${className}` : ""}`} style={style}>
-      <SearchIcon style={{ width: "16px", height: "16px", color: "rgba(245,245,240,0.45)", flexShrink: 0 }} />
+      <SearchIcon style={{ width: "16px", height: "16px", color: "var(--afa-text-muted)", flexShrink: 0 }} />
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}

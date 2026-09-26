@@ -38,12 +38,21 @@
 // can't see this: it proves the maps are transcribed right, not that
 // every edited site landed on the token its map entry names.
 //
+// GEN-2609-113 - `--base` also runs a per-site COLOUR check with the
+// same line pairing: every colour literal that became var(--afa-*) is an
+// EQUIVALENCE (same RGBA as the token's live globals.css value), ROUNDED
+// (resolveColor() maps it to that token for its context - a COLOR_ROUND
+// entry, or either side of a context-dependent entry when the line
+// itself doesn't say), or a MISMATCH. A var() that became a different
+// var() must be one of the decided contrast swaps (SWAPS). Lines that
+// gained a token-ok comment are counted as exemptions, not checked.
+//
 // Usage: node scripts/dev/verify-equivalence.js [--base=<ref>] [--list-rounded] <file...>
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
 
-const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, RADIUS_ROUND, COLOR_MAP, FONT_SIZE_ROUNDED_KEYS, RADIUS_PROPS } = require('./migrate-tokens')
+const { SPACING_MAP, FONT_SIZE_MAP, RADIUS_MAP, RADIUS_ROUND, COLOR_MAP, COLOR_ROUND, FONT_SIZE_ROUNDED_KEYS, RADIUS_PROPS, colorContext, resolveColor } = require('./migrate-tokens')
 
 const baseArg = process.argv.find((a) => a.startsWith('--base='))
 const BASE = baseArg ? baseArg.slice('--base='.length) : null
@@ -238,7 +247,22 @@ function checkMap(name, map, liveTokens, roundedKeys) {
 // pipeline - see migrate-tokens.js's own migrateExactStringValue()
 // comment for why that's deliberate).
 function normalizeColorValue(v) {
-  return v.replace(/\s+/g, '').toLowerCase()
+  const rgba = parseRGBA(v)
+  return rgba ? rgba.join(',') : v.replace(/\s+/g, '').toLowerCase()
+}
+
+// GEN-2609-113 - hex and rgb()/rgba() to [r,g,b,a], so #0A0A0A equals
+// rgb(10,10,10) and #F7F3EE equals #f7f3ee.
+function parseRGBA(v) {
+  const s = v.replace(/\s+/g, '').toLowerCase()
+  let m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(s)
+  if (m) {
+    const h = m[1].length === 3 ? m[1].split('').map((c) => c + c).join('') : m[1]
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1]
+  }
+  m = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d.]+))?\)$/.exec(s)
+  if (m) return [Number(m[1]), Number(m[2]), Number(m[3]), m[4] === undefined ? 1 : Number(m[4])]
+  return null
 }
 
 function checkColorMap(name, map, liveColors) {
@@ -256,6 +280,180 @@ function checkColorMap(name, map, liveColors) {
     }
   }
   return ok
+}
+
+// GEN-2609-113 - per-site colour check (see header).
+// Every --afa-* colour token in a globals.css text, var() references
+// resolved, as { token: [r,g,b,a] }.
+function colorTokenTable(css) {
+  const raw = {}
+  const re = /(--afa-[a-zA-Z0-9-]+):\s*([^;{}]+);/g
+  let m
+  while ((m = re.exec(css))) if (!(m[1] in raw)) raw[m[1]] = m[2].trim()
+  const out = {}
+  const resolve = (v, depth) => {
+    const ref = /^var\((--afa-[a-zA-Z0-9-]+)\)$/.exec(v)
+    if (ref && depth < 5 && raw[ref[1]] !== undefined) return resolve(raw[ref[1]], depth + 1)
+    return parseRGBA(v)
+  }
+  for (const [k, v] of Object.entries(raw)) {
+    const rgba = resolve(v, 0)
+    if (rgba) out[k] = rgba
+  }
+  return out
+}
+const liveColorTable = colorTokenTable(fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'app', 'globals.css'), 'utf8'))
+let baseColorTableCache = null
+function baseColorTable() {
+  if (!baseColorTableCache) baseColorTableCache = colorTokenTable(execFileSync('git', ['show', `${BASE}:src/app/globals.css`], { encoding: 'utf8' }))
+  return baseColorTableCache
+}
+
+// The decided var() -> var() swaps (GEN-2609-113 step 2 contrast fixes).
+const SWAPS = new Set(['--afa-gold -> --afa-amber', '--afa-error -> --afa-error-bright'])
+
+const COLOR_ITEM_RE = /var\((--afa-[a-zA-Z0-9-]+)(?:\s*,[^()]*)?\)|rgba?\([^()]*\)|#[0-9a-fA-F]{3,8}\b/g
+function colorItems(line, isColorToken) {
+  const items = []
+  COLOR_ITEM_RE.lastIndex = 0
+  let m
+  while ((m = COLOR_ITEM_RE.exec(line))) {
+    if (m[1]) {
+      if (isColorToken(m[1])) items.push({ token: m[1], pos: m.index })
+    } else if (m[0][0] === '#' && /&$/.test(line.slice(0, m.index))) {
+      continue
+    } else if (parseRGBA(m[0]) || m[0].includes('${')) {
+      items.push({ lit: m[0], pos: m.index })
+    }
+  }
+  return items
+}
+const isCommentish = (l) => /^\s*(\/\/|\*|\/\*)/.test(l)
+const hasTokenOk = (l) => /\/\/\s*token-ok:|\{\/\*\s*token-ok:/.test(l)
+
+const colorStats = { equiv: 0, rounded: [], swaps: [], exempt: [], removed: [], dynamic: [] }
+function checkColorSites(file) {
+  let oldText
+  try {
+    oldText = execFileSync('git', ['show', `${BASE}:${file.replace(/\\/g, '/')}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  } catch {
+    return true
+  }
+  const oldLines = oldText.split(/\r?\n/)
+  const newLines = fs.readFileSync(file, 'utf8').split(/\r?\n/)
+  if (oldLines.length !== newLines.length) {
+    console.error(`  COLOUR CHECK SKIPPED in ${file}: line count changed (${oldLines.length} -> ${newLines.length}) - review by hand`)
+    return false
+  }
+  const base = baseColorTable()
+  const isColorToken = (t) => t in liveColorTable || t in base
+  // lines that sit inside a multi-line /* ... */ (incl. JSX {/* ... */})
+  // on the base side, which isCommentish() can't see line by line
+  const inBlock = []
+  let open = false
+  for (const l of oldLines) {
+    inBlock.push(open)
+    // a comment opener starts the line or follows whitespace / `{` -
+    // `accept="image/*"` is not one
+    let o = -1
+    for (const m of l.matchAll(/(^|[\s{])\/\*/g)) o = m.index + m[1].length
+    const c = l.lastIndexOf('*/')
+    if (o > c) open = true
+    else if (c > o) open = false
+  }
+  let ok = true
+  for (let i = 0; i < newLines.length; i++) {
+    const before = oldLines[i]
+    const after = newLines[i]
+    if (before === after) continue
+    const site = `${file}:${i + 1}`
+    const b = colorItems(before, isColorToken)
+    if ((isCommentish(after) && isCommentish(before)) || (inBlock[i] && !before.includes('*/'))) {
+      if (b.some((x) => x.lit)) colorStats.removed.push(site)
+      continue
+    }
+    if (hasTokenOk(after) && !hasTokenOk(before)) {
+      colorStats.exempt.push(site)
+      continue
+    }
+    const a = colorItems(after, isColorToken)
+    if (b.length !== a.length) {
+      console.error(`  COLOUR MISMATCH ${site}: ${b.length} colour item(s) before, ${a.length} after`)
+      ok = false
+      continue
+    }
+    for (let j = 0; j < a.length; j++) {
+      const x = b[j]
+      const y = a[j]
+      if (x.token && y.token) {
+        if (x.token === y.token) continue
+        const swap = `${x.token} -> ${y.token}`
+        if (SWAPS.has(swap)) colorStats.swaps.push({ site, swap })
+        else {
+          console.error(`  COLOUR MISMATCH ${site}: var(${x.token}) became var(${y.token}), not a decided swap`)
+          ok = false
+        }
+        continue
+      }
+      if (x.lit && y.lit) {
+        if (x.lit !== y.lit) {
+          console.error(`  COLOUR MISMATCH ${site}: '${x.lit}' became '${y.lit}'`)
+          ok = false
+        }
+        continue
+      }
+      if (x.token && y.lit) {
+        console.error(`  COLOUR MISMATCH ${site}: var(${x.token}) became literal '${y.lit}'`)
+        ok = false
+        continue
+      }
+      if (x.lit.includes('${')) {
+        // a runtime-built colour (template alpha) replaced by hand - nothing
+        // to compare statically, so it is listed for review instead
+        colorStats.dynamic.push({ site, from: x.lit, to: y.token })
+        continue
+      }
+      const live = liveColorTable[y.token]
+      const litRGBA = parseRGBA(x.lit)
+      if (live && litRGBA && live.join(',') === litRGBA.join(',')) {
+        colorStats.equiv++
+        continue
+      }
+      const ctx = colorContext(before, x.pos)
+      const res = resolveColor(x.lit, ctx)
+      if (res && (res.token === y.token || (res.ambiguous && res.ambiguous.includes(y.token)))) {
+        colorStats.rounded.push({ site, from: x.lit.replace(/\s+/g, ''), to: y.token, ctx: res.ambiguous ? 'by hand' : ctx || 'any' })
+      } else {
+        console.error(`  COLOUR MISMATCH ${site}: '${x.lit}' (${ctx || 'no context'}) -> ${y.token}, not an exact or COLOR_ROUND mapping`)
+        ok = false
+      }
+    }
+  }
+  return ok
+}
+
+function printColorReport() {
+  const c = colorStats
+  console.log(`colour vs ${BASE}: ${c.equiv} equivalence(s), ${c.rounded.length} rounded site(s), ${c.swaps.length} decided swap(s), ${c.exempt.length} token-ok exemption(s), ${c.removed.length} comment rewording(s).`)
+  const per = {}
+  for (const r of c.rounded) per[`${r.from} -> ${r.to}`] = (per[`${r.from} -> ${r.to}`] || 0) + 1
+  for (const [k, n] of Object.entries(per).sort((p, q) => q[1] - p[1])) console.log(`  rounded ${n}x  ${k}`)
+  const sw = {}
+  for (const r of c.swaps) sw[r.swap] = (sw[r.swap] || 0) + 1
+  for (const [k, n] of Object.entries(sw)) console.log(`  swap ${n}x  ${k}`)
+  for (const d of c.dynamic) console.log(`  by hand (dynamic): ${d.site}  ${d.from} -> ${d.to}`)
+  // A token whose own value changed (--afa-text-muted 0.4 -> 0.5) moves
+  // every consumer at once - listed, not a per-site mismatch.
+  const base = baseColorTable()
+  for (const [t, v] of Object.entries(liveColorTable)) {
+    if (base[t] && base[t].join(',') !== v.join(',')) console.log(`  token value changed: ${t} rgba(${base[t]}) -> rgba(${v})`)
+  }
+  if (process.argv.includes('--list-rounded')) {
+    for (const r of c.rounded) console.log(`    ${r.site}  ${r.from} -> ${r.to}  [${r.ctx}]`)
+    for (const r of c.swaps) console.log(`    ${r.site}  ${r.swap}`)
+    for (const s of c.exempt) console.log(`    ${s}  token-ok`)
+    for (const s of c.removed) console.log(`    ${s}  comment reworded`)
+  }
 }
 
 function checkClassNames(file) {
@@ -287,11 +485,21 @@ allOk = checkMap('RADIUS_MAP', RADIUS_MAP, liveTokens) && allOk
 // so only "target token exists" is checked for it.
 allOk = checkMap('RADIUS_ROUND', RADIUS_ROUND, liveTokens, new Set(Object.keys(RADIUS_ROUND))) && allOk
 allOk = checkColorMap('COLOR_MAP', COLOR_MAP, liveColorTokens) && allOk
+// GEN-2609-113 - every COLOR_ROUND target must exist as a colour token.
+for (const v of Object.values(COLOR_ROUND)) {
+  for (const t of typeof v === 'string' ? [v] : Object.values(v)) {
+    if (!(t in liveColorTable)) {
+      console.error(`  MISMATCH [COLOR_ROUND]: ${t} not found in globals.css at all`)
+      allOk = false
+    }
+  }
+}
 const liveRadius = loadRadiusTokens(liveTokens)
 const roundedSites = []
 for (const file of files) {
   allOk = checkClassNames(file) && allOk
   if (BASE) allOk = checkRadiusSites(file, liveRadius, roundedSites) && allOk
+  if (BASE) allOk = checkColorSites(file) && allOk
 }
 
 if (BASE) {
@@ -304,6 +512,8 @@ if (BASE) {
   for (const [k, n] of Object.entries(perValue).sort((a, b) => b[1] - a[1])) console.log(`  rounded ${n}x  ${k}`)
   if (process.argv.includes('--list-rounded')) for (const r of roundedSites) console.log(`    ${r.site}  ${r.from}px -> ${r.to}`)
 }
+
+if (BASE) printColorReport()
 
 if (allOk) {
   const mapEntryCount = Object.keys(SPACING_MAP).length + Object.keys(FONT_SIZE_MAP).length + Object.keys(RADIUS_MAP).length + Object.keys(RADIUS_ROUND).length + Object.keys(COLOR_MAP).length

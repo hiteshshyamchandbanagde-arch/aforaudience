@@ -160,7 +160,7 @@ export default function AdminBookingsPage() {
 
   const rowState = (b: BookingItem): { label: string; color: string } => {
     if (b.deliveredAt) return { label: 'Delivered', color: 'var(--afa-green-deep)' }
-    if (b.deliveryError) return { label: 'Delivery failed', color: 'var(--afa-error)' }
+    if (b.deliveryError) return { label: 'Delivery failed', color: 'var(--afa-error-bright)' }
     return { label: 'Pending delivery', color: 'var(--afa-amber)' }
   }
 
@@ -263,11 +263,11 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '12px',
                           padding: '10px 12px',
-                          background: 'rgba(179,38,30,0.12)',
-                          border: '1px solid rgba(179,38,30,0.3)',
+                          background: 'var(--afa-error-tint)',
+                          border: '1px solid var(--afa-error-edge)',
                           borderRadius: 'var(--afa-radius-md)',
                           fontSize: 'var(--afa-text-ui)',
-                          color: 'var(--afa-error)',
+                          color: 'var(--afa-error-bright)',
                           fontFamily: 'var(--font-mono)',
                           whiteSpace: 'pre-wrap',
                           wordBreak: 'break-word',
@@ -282,7 +282,7 @@ export default function AdminBookingsPage() {
                         style={{
                           marginTop: '10px',
                           fontSize: 'var(--afa-text-ui)',
-                          color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : 'var(--afa-error)',
+                          color: retryMessage.kind === 'ok' ? 'var(--afa-green-deep)' : 'var(--afa-error-bright)',
                         }}
                       >
                         {retryMessage.text}

@@ -55,8 +55,8 @@ export function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]
               height: size,
               marginLeft: i === 0 ? 0 : -size * 0.28,
               borderRadius: "50%",
-              background: "var(--afa-surface-raised, #1F1F1F)",
-              border: "1px solid rgba(245,245,240,0.2)",
+              background: "var(--afa-surface-raised)",
+              border: "1px solid var(--afa-tint-20)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -77,14 +77,14 @@ export function LineupChips({ lineup, size = 26 }: { lineup: EventItem["lineup"]
             height: size,
             marginLeft: -size * 0.28,
             borderRadius: "50%",
-            background: "var(--afa-surface-raised, #1F1F1F)",
-            border: "1px solid rgba(245,245,240,0.2)",
+            background: "var(--afa-surface-raised)",
+            border: "1px solid var(--afa-tint-20)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: size * 0.3,
             fontFamily: "var(--font-mono)",
-            color: "rgba(245,245,240,0.6)",
+            color: "var(--afa-text-secondary)",
             flexShrink: 0,
           }}
         >
@@ -115,7 +115,7 @@ export const TYPE_META: Record<string, { emoji: string; color: string; label: st
 // detail hero and directory filter row use it bare.
 export function EventTypeBadge({ type, typeLabel, size = 16, style }: { type: string; typeLabel: string; size?: number; style?: React.CSSProperties }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "rgba(245,245,240,0.7)", ...style }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--afa-text-secondary)", ...style }}>
       <EventTypeIcon type={type} style={{ width: size, height: size, color: "var(--afa-amber)" }} />
       {typeLabel}
     </span>
@@ -136,8 +136,8 @@ export function EventTypeBadge({ type, typeLabel, size = 16, style }: { type: st
 export function IllustratedEventFallback({ type, typeLabel, hideCaption = false }: { type: string; typeLabel: string; hideCaption?: boolean }) {
   const { t: tr } = useLocale()
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#241a10" }}>
-      <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "rgba(201,151,58,0.25)" }} fill="none" stroke="currentColor" strokeWidth="0.6">
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "var(--afa-surface-raised)" }}>
+      <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "var(--afa-amber-border)" }} fill="none" stroke="currentColor" strokeWidth="0.6">
         {Array.from({ length: 7 }).map((_, i) => (
           <circle key={i} cx="100" cy="118" r={22 + i * 20} />
         ))}
@@ -188,7 +188,7 @@ export function EventPoster({ posterImage, title, type, typeLabel, hideCaption =
 export function SeatStateDot({ totalSeats, availableSeats, showCount = false }: { totalSeats: number; availableSeats: number; showCount?: boolean }) {
   const { t: tr } = useLocale()
   const status = getAvailabilityStatus(totalSeats, availableSeats)
-  const color = status === "filling-fast" ? "var(--afa-fill-solid)" : status === "sold-out" ? "rgba(245,245,240,0.35)" : "rgba(245,245,240,0.55)"
+  const color = status === "filling-fast" ? "var(--afa-fill-solid)" : status === "sold-out" ? "var(--afa-text-muted)" : "var(--afa-text-secondary)"
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "var(--afa-text-ui)", color }}>
       <span style={{ position: "relative", display: "inline-flex", width: "8px", height: "8px", flexShrink: 0 }}>
@@ -261,11 +261,11 @@ export function EventCard({
         padding: view === "list" ? "16px" : 0,
       }}
     >
-      <SpinnerOverlay isNavigating={isNavigating} size={26} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
+      <SpinnerOverlay isNavigating={isNavigating} size={26} accentColor="var(--afa-amber)" scrimBackground="var(--afa-scrim)" />
 
       <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "var(--afa-radius-xs)", flexShrink: 0 }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} />
-        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "rgba(10,10,10,0.7)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "var(--afa-radius-xs)" }}>
+        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "var(--afa-scrim)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "var(--afa-radius-xs)" }}>
           <EventTypeBadge type={event.type} typeLabel={typeLabel} size={14} />
         </span>
         <span style={{ position: "absolute", right: "12px", top: "12px" }}>
@@ -293,9 +293,9 @@ export function EventCard({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--afa-tint-10)", paddingTop: "12px", marginTop: "6px" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.8)" }}>{priceLabel}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-soft)" }}>{priceLabel}</span>
             {tab === "past" ? (
-              <span style={{ fontSize: "var(--afa-text-ui)", color: "rgba(245,245,240,0.5)" }}>{tr.eventsPage.ended}</span>
+              <span style={{ fontSize: "var(--afa-text-ui)", color: "var(--afa-text-muted)" }}>{tr.eventsPage.ended}</span>
             ) : (
               <SeatStateDot totalSeats={event.totalSeats} availableSeats={event.availableSeats} showCount={view === "list"} />
             )}
@@ -360,7 +360,7 @@ export function EventRow({
         transition: "opacity 0.15s ease",
       }}
     >
-      <SpinnerOverlay isNavigating={isNavigating} size={24} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
+      <SpinnerOverlay isNavigating={isNavigating} size={24} accentColor="var(--afa-amber)" scrimBackground="var(--afa-scrim)" />
 
       <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "var(--afa-radius-md)" }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
@@ -374,7 +374,7 @@ export function EventRow({
           <h3 style={{ marginTop: "4px", fontFamily: "var(--font-display)", fontSize: "var(--afa-text-title)", fontWeight: 700, lineHeight: 1.2, color: "var(--afa-text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {event.title}
           </h3>
-          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "6px", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.55)" }}>
+          <div style={{ marginTop: "5px", display: "flex", alignItems: "center", gap: "6px", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-secondary)" }}>
             <ClockIcon style={{ width: "12px", height: "12px", flexShrink: 0 }} />
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {new Date(event.date).toLocaleDateString(undefined, { day: "numeric", month: "short" })}, {event.startTime}
@@ -382,7 +382,7 @@ export function EventRow({
             </span>
           </div>
         </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "rgba(245,245,240,0.45)" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)" }}>
           {priceLabel}
         </div>
       </div>

@@ -142,7 +142,7 @@ export default function AddressAutocomplete({ value, onChange, onResolved, onMan
             background: 'var(--afa-surface-raised)',
             border: '1px solid var(--afa-border-resting)',
             borderRadius: 'var(--afa-radius-md)',
-            boxShadow: '0 4px 16px rgba(245,245,240,0.12)',
+            boxShadow: '0 4px 16px var(--afa-tint-12)',
             zIndex: 20,
             maxHeight: '220px',
             overflowY: 'auto',

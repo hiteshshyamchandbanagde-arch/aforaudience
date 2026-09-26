@@ -88,7 +88,7 @@ export default function NotificationOptIn() {
       style={{
         background: 'var(--afa-fill-solid)',
         color: 'var(--afa-on-fill-solid)',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid var(--afa-tint-10)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -115,7 +115,7 @@ export default function NotificationOptIn() {
         onClick={dismiss}
         aria-label={tr.notificationOptIn.dismissAriaLabel}
         style={{
-          color: 'rgba(247,243,238,0.6)',
+          color: 'var(--afa-text-secondary)',
           fontSize: 'var(--afa-text-lead)',
           lineHeight: 1,
           padding: '0 4px',

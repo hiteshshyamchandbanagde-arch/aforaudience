@@ -153,7 +153,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
           // badge). Conflating the two is what caused the badge to show
           // on untouched rows - see isIncompleteSection's note above.
           const isFree = section.price !== '' && Number(section.price) === 0
-          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'rgba(245,245,240,0.08)'
+          const borderColor = isDuplicate ? 'var(--afa-error)' : isPartial ? 'var(--afa-amber)' : 'var(--afa-tint-08)'
           return (
           <div
             key={section.id}
@@ -182,7 +182,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                 const normalized = normalizeWhitespace(e.target.value)
                 if (normalized !== e.target.value) updateSection(section.id, "name", normalized)
               }}
-              style={{ ...inputStyle, ...(borderColor !== 'rgba(245,245,240,0.08)' ? { border: `1px solid ${borderColor}` } : {}) }}
+              style={{ ...inputStyle, ...(borderColor !== 'var(--afa-tint-08)' ? { border: `1px solid ${borderColor}` } : {}) }}
             />
             <input
               type="number"
@@ -209,7 +209,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
                   style={{
                     ...inputStyle,
                     paddingLeft: "26px",
-                    ...(isFree ? { opacity: 0.5, background: "rgba(245,245,240,0.04)" } : {}),
+                    ...(isFree ? { opacity: 0.5, background: "var(--afa-tint-04)" } : {}),
                     ...(isPartial && section.price === '' ? { border: `1px solid ${borderColor}` } : {}),
                   }}
                 />
@@ -245,7 +245,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
       </div>
 
       {duplicateNames.size > 0 && (
-        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)", fontWeight: 600 }}>
+        <p style={{ marginTop: "10px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)", fontWeight: 600 }}>
           Section name{duplicateNames.size === 1 ? '' : 's'} "{Array.from(duplicateNames).join('", "')}" {duplicateNames.size === 1 ? 'is' : 'are'} used more than once — each section needs a unique name.
         </p>
       )}
@@ -281,7 +281,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             gap: "28px",
             padding: "14px 18px",
             background: "var(--afa-surface-page)",
-            border: "1px solid rgba(255,90,54,0.2)",
+            border: "1px solid var(--afa-fill-tint)",
             borderRadius: "var(--afa-radius-lg)",
           }}
         >
@@ -289,7 +289,7 @@ export default function SeatSectionEditor({ sections, onChange }: Props) {
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>{totalSeats}</div>
             <div style={{ fontSize: "var(--afa-text-micro)", color: "var(--afa-text-muted)", marginTop: "2px" }}>total seats</div>
           </div>
-          <div style={{ width: "1px", background: "rgba(245,245,240,0.12)" }} />
+          <div style={{ width: "1px", background: "var(--afa-tint-12)" }} />
           <div>
             <div style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subheading)", color: "var(--afa-text-primary)" }}>
               {prices.length ? (minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice}–₹${maxPrice}`) : "—"}

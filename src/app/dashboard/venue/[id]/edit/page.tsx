@@ -235,7 +235,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!venue) return (<><SiteNav /><div style={{ padding: 'var(--afa-space-32px)' }}>Venue not found</div></>)
 
   return (
@@ -412,7 +412,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {rateType !== 'FLEXIBLE' && (
-                <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid rgba(245,245,240,0.06)' }}>
+                <div style={{ marginTop: 'var(--afa-space-4)', paddingTop: 'var(--afa-space-4)', borderTop: '1px solid var(--afa-tint-06)' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-2)', fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-primary)', marginBottom: useDayOverrides ? '14px' : 0 }}>
                     <input type="checkbox" checked={useDayOverrides} onChange={(e) => setUseDayOverrides(e.target.checked)} />
                     Charge differently on specific days <span style={{ fontWeight: 400, opacity: 0.6 }}>(e.g., a weekend premium)</span>
@@ -424,7 +424,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                         Leave a day blank to use your base rate above for that day.
                       </p>
                       {(['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const).map((day) => (
-                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid rgba(245,245,240,0.05)' }}>
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--afa-space-2) 0', borderBottom: '1px solid var(--afa-tint-04)' }}>
                           <span style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)' }}>{day.charAt(0) + day.slice(1).toLowerCase()}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--afa-space-1)' }}>
                             <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.5 }}>₹</span>
@@ -457,7 +457,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
                   </p>
                   <SeatSectionEditor sections={sections} onChange={setSections} />
 
-                  <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: 'var(--afa-space-5)', padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>Have real numbered seats instead?</div>
                       <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>
@@ -475,7 +475,7 @@ export default function VenueEditPage({ params }: { params: Promise<{ id: string
               )}
 
               {venue.seatingMode === 'NUMBERED' && (
-                <div style={{ padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'rgba(245,245,240,0.03)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
+                <div style={{ padding: 'var(--afa-space-4)', borderRadius: 'var(--afa-radius-lg)', background: 'var(--afa-tint-04)', border: '1px solid var(--afa-tint-08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--afa-space-3)', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: 'var(--afa-text-ui)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>This venue uses Numbered Seating</div>
                     <div style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-primary)', opacity: 0.6 }}>

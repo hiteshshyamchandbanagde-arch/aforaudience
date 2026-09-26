@@ -106,7 +106,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
   if (status === 'loading' || loading) return (<><SiteNav /><BrandLoader /></>)
   if (!session) return <SiteNav />
-  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error)' }}>{error}</div></>)
+  if (error && !data) return (<><SiteNav /><div style={{ padding: '32px', color: 'var(--afa-error-bright)' }}>{error}</div></>)
   if (!data) return (<><SiteNav /><div style={{ padding: '32px' }}>No data</div></>)
 
   const { venue, totals, timeline, recentBookings } = data
@@ -128,7 +128,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--afa-text-page-title)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>
               📊 {venue.name} — Revenue
             </h1>
-            <span style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)' }}>
+            <span style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)' }}>
               {refreshedAt ? `Updated ${timeAgo(refreshedAt.toISOString())} · refreshes every 20s` : ''}
             </span>
           </div>
@@ -138,7 +138,7 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           {error && (
-            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error)', marginBottom: '16px' }}>{error} (showing last good data)</div>
+            <div style={{ fontSize: 'var(--afa-text-ui)', color: 'var(--afa-error-bright)', marginBottom: '16px' }}>{error} (showing last good data)</div>
           )}
 
           {/* Summary cards */}
@@ -157,13 +157,13 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Timeline */}
           <Section title="Revenue over time">
             {timeline.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No confirmed bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No confirmed bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '120px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {timeline.map((t) => (
                   <div key={t.date} title={`${t.date}: ${money(t.revenue)}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '28px' }}>
                     <div style={{ width: '18px', height: `${Math.max(4, (t.revenue / maxTimelineRevenue) * 90)}px`, background: 'var(--afa-sage)', borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)' }} />
-                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'rgba(245,245,240,0.5)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                    <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-text-muted)', marginTop: '4px', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
                       {t.date.slice(5)}
                     </span>
                   </div>
@@ -175,14 +175,14 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
           {/* Recent bookings */}
           <Section title="Recent bookings">
             {recentBookings.length === 0 ? (
-              <p style={{ fontSize: 'var(--afa-text-body)', color: 'rgba(245,245,240,0.5)' }}>No bookings in this range.</p>
+              <p style={{ fontSize: 'var(--afa-text-body)', color: 'var(--afa-text-muted)' }}>No bookings in this range.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recentBookings.map((b) => (
-                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: 'var(--afa-text-ui)', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid rgba(245,245,240,0.06)' }}>
+                  <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: 'var(--afa-text-ui)', padding: '10px 12px', background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-md)', border: '1px solid var(--afa-tint-06)' }}>
                     <span style={{ fontWeight: 600 }}>{b.organiserName}</span>
-                    <span style={{ color: 'rgba(245,245,240,0.6)' }}>{b.eventTitle || 'No linked event'}</span>
-                    <span style={{ color: 'rgba(245,245,240,0.6)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{b.eventTitle || 'No linked event'}</span>
+                    <span style={{ color: 'var(--afa-text-secondary)' }}>{shortDate(b.fromDate)} – {shortDate(b.toDate)}</span>
                     <span style={{ fontWeight: 600 }}>{money(b.amount)}</span>
                     <span style={{ color: 'var(--afa-text-muted)' }}>{timeAgo(b.createdAt)}</span>
                   </div>
@@ -198,17 +198,17 @@ function VenueSalesPageInner({ params }: { params: Promise<{ id: string }> }) {
 
 function SummaryCard({ label, value, sub, muted }: { label: string; value: string; sub?: string; muted?: boolean }) {
   return (
-    <div style={{ background: muted ? 'rgba(245,245,240,0.03)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
-      <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.55)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
+    <div style={{ background: muted ? 'var(--afa-tint-04)' : 'var(--afa-surface-raised)', border: '1px solid var(--afa-tint-08)', borderRadius: 'var(--afa-radius-lg)', padding: '16px' }}>
+      <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-secondary)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</p>
       <p style={{ fontSize: 'var(--afa-text-subheading)', fontWeight: 700, color: 'var(--afa-text-primary)' }}>{value}</p>
-      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'rgba(245,245,240,0.5)', marginTop: '4px' }}>{sub}</p>}
+      {sub && <p style={{ fontSize: 'var(--afa-text-small)', color: 'var(--afa-text-muted)', marginTop: '4px' }}>{sub}</p>}
     </div>
   )
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid rgba(245,245,240,0.06)' }}>
+    <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-lg)', padding: '20px', marginBottom: '20px', border: '1px solid var(--afa-tint-06)' }}>
       <h2 style={{ fontSize: 'var(--afa-text-title)', fontWeight: 700, color: 'var(--afa-text-primary)', marginBottom: '14px' }}>{title}</h2>
       {children}
     </div>

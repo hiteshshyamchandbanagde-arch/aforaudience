@@ -100,7 +100,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
   }
 
   if (loading) return <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--afa-text-primary)", opacity: 0.5 }}>{tr.organisersEmbed.loading}</div>
-  if (error) return <div style={{ padding: "14px 16px", background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
+  if (error) return <div style={{ padding: "14px 16px", background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", color: "var(--afa-error-bright)", fontSize: "var(--afa-text-body)" }}>{error}</div>
   if (organisers.length === 0) return <p style={{ fontSize: "var(--afa-text-body-lg)", color: "var(--afa-text-primary)", opacity: 0.6 }}>{tr.organisersEmbed.emptyNoneFound}</p>
 
   const filtered = organisers.filter((o) => o.orgName.toLowerCase().includes(search.toLowerCase()))
@@ -113,7 +113,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
           Values copied verbatim from VenuesGridClient's .afa-venue-card. */}
       <style>{`
         .afa-organisers-embed-card { border: 1px solid var(--afa-tint-10); transition: border-color 0.3s ease; }
-        .afa-organisers-embed-card:hover { border-color: rgba(201,151,58,0.6); }
+        .afa-organisers-embed-card:hover { border-color: var(--afa-amber-strong); }
       `}</style>
 
       {!hideSearchBar && (
@@ -164,7 +164,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
             }}
           >
             {isNavigatingThis && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "rgba(20,20,20,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "var(--afa-scrim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ width: "24px", height: "24px", borderRadius: "50%", border: "3px solid var(--afa-border-resting)", borderTopColor: "var(--afa-fill-solid)", animation: "afa-spin 0.7s linear infinite" }} />
               </div>
             )}
@@ -181,7 +181,7 @@ export default function OrganisersGridEmbed({ search: controlledSearch, hideSear
             <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-secondary)", marginBottom: "10px", lineHeight: 1.5, fontStyle: org.bio ? "normal" : "italic" }}>
               {org.bio || tr.organisersEmbed.noBioYet}
             </p>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "rgba(245,245,240,0.6)" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-small)", color: "var(--afa-text-secondary)" }}>
               {org._count.events} {org._count.events === 1 ? tr.organisersEmbed.eventSingular : tr.organisersEmbed.eventPlural}
             </div>
           </div>

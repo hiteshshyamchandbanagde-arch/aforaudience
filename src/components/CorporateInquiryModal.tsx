@@ -168,9 +168,9 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
 
   return (
     <div role="dialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "rgba(245,245,240,0.45)" }} />
+      <div onClick={handleClose} style={{ position: "absolute", inset: 0, background: "var(--afa-tint-30)" }} />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)", padding: "8px 24px 28px", boxShadow: "0 -8px 40px rgba(0,0,0,0.2)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: "480px", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)", padding: "8px 24px 28px", boxShadow: "0 -8px 40px var(--afa-shadow)", maxHeight: "94vh", overflowY: "auto", boxSizing: "border-box" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "6px 0" }}>
           <div style={{ width: "36px", height: "4px", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-border-resting)" }} />
         </div>
@@ -200,7 +200,7 @@ export default function CorporateInquiryModal({ open, onClose, artistId, artistN
             </div>
 
             {error && (
-              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "14px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
+              <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "14px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error-bright)" }}>
                 {error}
               </div>
             )}

@@ -91,10 +91,10 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
   // size TopBar.tsx's own Figma reference uses for this exact spot.
   const chipStyle: React.CSSProperties =
     variant === 'mobile'
-      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body-lg)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
+      ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body-lg)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid var(--afa-tint-06)', width: '100%', textAlign: 'left' }
       : variant === 'topbar'
       ? { display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 'var(--afa-radius-pill)', opacity: saving ? 0.6 : 1 }
+      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'var(--afa-tint-04)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 'var(--afa-radius-pill)', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>

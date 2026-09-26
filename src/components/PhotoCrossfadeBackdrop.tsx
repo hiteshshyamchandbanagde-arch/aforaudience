@@ -43,21 +43,21 @@ export default function PhotoCrossfadeBackdrop({
           style={{
             position: "absolute",
             inset: 0,
-            background: "radial-gradient(140% 140% at 18% 0%, var(--afa-ink) 0%, var(--afa-surface-inverse) 60%), linear-gradient(135deg, rgba(201,151,58,0.08) 0%, rgba(201,151,58,0) 50%)",
+            background: "radial-gradient(140% 140% at 18% 0%, var(--afa-ink) 0%, var(--afa-surface-inverse) 60%), linear-gradient(135deg, var(--afa-amber-wash) 0%, rgba(201,151,58,0) 50%)", // token-ok: transparent end of a gradient fade, structural
           }}
         />
       )}
-      <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, var(--afa-surface-inverse) 5%, rgba(10,10,10,0.45) 45%, rgba(10,10,10,0.7) 100%)" }} />
-      <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(10,10,10,0.85), rgba(10,10,10,0) 55%)" }} />
+      <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, var(--afa-surface-inverse) 5%, var(--afa-scrim) 45%, var(--afa-scrim) 100%)" }} />
+      <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, var(--afa-scrim-strong), rgba(10,10,10,0) 55%)" }} />{/* token-ok: transparent end of an image fade, structural */}
       {/* BUG-2608-071: HomeHeader floats position:absolute over this
           backdrop with no guaranteed contrast layer behind it, so a
           bright section of the active crossfade photo can wash out nav
           text/icons. Same technique as the bottom gradient above
-          (var(--afa-surface-inverse) / its literal rgb(10,10,10), same
+          (var(--afa-surface-inverse) fading to fully transparent, same
           opaque-anchor-then-fading-rgba shape), just compressed to the
           top ~20% instead of spanning the full height, so it fades out
           well before the "Live, right now" eyebrow lower in the hero. */}
-      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, var(--afa-surface-inverse) 0%, rgba(10,10,10,0.5) 8%, rgba(10,10,10,0) 20%)" }} />
+      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(180deg, var(--afa-surface-inverse) 0%, var(--afa-scrim) 8%, rgba(10,10,10,0) 20%)" }} />{/* token-ok: transparent end of an image fade, structural */}
     </div>
   )
 }

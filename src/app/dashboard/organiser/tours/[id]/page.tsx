@@ -50,9 +50,9 @@ interface VenueOption { id: string; name: string; city: string }
 interface ArtistOption { id: string; user: { name: string; displayName: string | null } }
 
 const CONSENT_LABEL: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'Awaiting response', color: 'var(--afa-gold)' },
+  PENDING: { label: 'Awaiting response', color: 'var(--afa-amber)' },
   ACCEPTED: { label: 'Accepted', color: 'var(--afa-sage)' },
-  DECLINED: { label: 'Declined', color: 'var(--afa-error)' },
+  DECLINED: { label: 'Declined', color: 'var(--afa-error-bright)' },
 }
 
 export default function TourDetailPage() {

@@ -122,7 +122,7 @@ export default function MobileTopBar() {
         zIndex: 100,
         gap: '10px',
         padding: '10px 14px',
-        background: 'rgba(20,20,20,0.95)',
+        background: 'var(--afa-scrim-strong)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--afa-tint-08)',
       }}
@@ -150,7 +150,7 @@ export default function MobileTopBar() {
             boxSizing: 'border-box',
             padding: onEventsRoute ? '8px 30px 8px 26px' : '8px 8px 8px 26px',
             borderRadius: 'var(--afa-radius-pill)',
-            border: '1px solid rgba(245,245,240,0.12)',
+            border: '1px solid var(--afa-tint-12)',
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
             fontSize: 'var(--afa-text-ui)',
@@ -199,7 +199,7 @@ export default function MobileTopBar() {
               background: 'var(--afa-surface-raised)',
               border: '1px solid var(--afa-tint-10)',
               borderRadius: 'var(--afa-radius-lg)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              boxShadow: '0 8px 24px var(--afa-shadow)',
               padding: '6px',
               minWidth: '150px',
               zIndex: 20,
@@ -210,7 +210,7 @@ export default function MobileTopBar() {
                 variant="bare"
                 key={l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'var(--afa-amber-wash)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
               >
                 {l.nativeLabel}
               </Button>
