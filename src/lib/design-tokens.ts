@@ -214,6 +214,52 @@ export function isValidTokenValue(type: TokenType, value: string, key?: string):
 // edits applied) and names the neighbour each out-of-order radius
 // crosses. Only pairs touching `changed` are reported, so a scale that's
 // already out of order in the DB doesn't block an unrelated save.
+// GEN-2609-108 / BUG-2609-061 - what restoring a version would really
+// do, computed the same way by the confirm dialog and the API:
+// - changes: snapshot values that differ from live and still pass
+//   today's rules (the note's count is changes.length);
+// - skipped: snapshot values today's rules reject (older versions on QA
+//   hold `0px` pills and `200px` md radii), left as they are;
+// - newerKeys: live tokens the snapshot predates, left as they are.
+// Snapshot keys that no longer exist as tokens are ignored.
+export type RestorePlan = {
+  changes: { key: string; from: string; to: string }[]
+  skipped: { key: string; value: string; reason: string }[]
+  newerKeys: string[]
+  after: Record<string, string>
+}
+
+export function planRestore(snapshot: Record<string, unknown>, live: { key: string; value: string; type: TokenType }[]): RestorePlan {
+  const changes: RestorePlan["changes"] = []
+  const skipped: RestorePlan["skipped"] = []
+  const newerKeys: string[] = []
+  const after: Record<string, string> = Object.fromEntries(live.map((t) => [t.key, t.value]))
+  for (const t of live) {
+    if (!(t.key in snapshot)) {
+      newerKeys.push(t.key)
+      continue
+    }
+    const to = snapshot[t.key]
+    if (typeof to !== "string") {
+      skipped.push({ key: t.key, value: String(to), reason: "Not a string." })
+      continue
+    }
+    if (to === t.value) continue
+    const reason = tokenValueError(t.key, t.type, to)
+    if (reason) {
+      skipped.push({ key: t.key, value: to, reason })
+      continue
+    }
+    changes.push({ key: t.key, from: t.value, to })
+    after[t.key] = to
+  }
+  return { changes, skipped, newerKeys, after }
+}
+
+export function restoreNote(versionId: string, changed: number): string {
+  return `Restored version ${versionId} (${changed} token(s) changed)`
+}
+
 export function radiusOrderErrors(values: Record<string, string>, changed?: Iterable<string>): { key: string; message: string }[] {
   const changedSet = changed ? new Set(changed) : null
   const errors: { key: string; message: string }[] = []

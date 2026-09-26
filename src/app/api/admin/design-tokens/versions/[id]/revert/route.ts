@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { isValidTokenValue, type TokenType } from '@/lib/design-tokens'
+import { planRestore, radiusOrderErrors, restoreNote, type TokenType } from '@/lib/design-tokens'
 import { revalidateDesignTokens } from '@/lib/design-tokens.server'
 
 // POST /api/admin/design-tokens/versions/:id/revert — apply an older
@@ -33,49 +33,54 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Version not found' }, { status: 404 })
   }
 
-  const snapshot = version.snapshot as Record<string, string>
-  const currentTokens = await prisma.designToken.findMany({ select: { key: true, type: true } })
-  const typeByKey = new Map(currentTokens.map((t) => [t.key, t.type as TokenType]))
+  // GEN-2609-108 / BUG-2609-061 - planRestore (shared with the confirm
+  // dialog) decides what actually changes. Tokens added after this
+  // version, snapshot keys that no longer exist, and snapshot values
+  // today's rules reject are all left as they are.
+  const snapshot = (version.snapshot ?? {}) as Record<string, unknown>
+  const live = await prisma.designToken.findMany({ select: { key: true, value: true, type: true } })
+  const plan = planRestore(snapshot, live.map((t) => ({ key: t.key, value: t.value, type: t.type as TokenType })))
 
-  // The snapshot can only contain keys that were real tokens at save
-  // time — but a key could since have been removed from the live table
-  // (schema evolved) or, defense in depth, the stored value could no
-  // longer pass validation (type definitions changed). Either way,
-  // silently skip rather than fail the whole revert over one stale key.
-  const applicable = Object.entries(snapshot).filter(([key, value]) => {
-    const type = typeByKey.get(key)
-    return type !== undefined && isValidTokenValue(type, value)
-  })
+  if (plan.changes.length === 0) {
+    return NextResponse.json({ error: 'Nothing to restore: this version already matches the live values', skipped: plan.skipped }, { status: 400 })
+  }
 
-  if (applicable.length === 0) {
-    return NextResponse.json({ error: 'Nothing in this version applies to the current token set' }, { status: 400 })
+  const orderErrors = radiusOrderErrors(plan.after, plan.changes.map((c) => c.key))
+  if (orderErrors.length > 0) {
+    return NextResponse.json(
+      { error: `Restoring this version would put the radius scale out of order: ${orderErrors.map((e) => `${e.key}: ${e.message}`).join(' ')}`, code: 'invalid', errors: orderErrors },
+      { status: 400 },
+    )
   }
 
   const now = new Date()
   await prisma.$transaction(
     [
-      ...applicable.map(([key, value]) =>
+      ...plan.changes.map((c) =>
         prisma.designToken.update({
-          where: { key },
-          data: { value, updatedBy: admin.id, updatedAt: now },
+          where: { key: c.key },
+          data: { value: c.to, updatedBy: admin.id, updatedAt: now },
         }),
       ),
       prisma.designTokenVersion.create({
         data: {
-          snapshot,
+          // The full live set after the restore, not the target's own
+          // snapshot: the target may predate tokens that still exist.
+          snapshot: plan.after,
           createdBy: admin.id,
-          note: `Reverted to version ${version.id} (${version.note ?? 'no note'})`,
+          // Was "Reverted to version X (<target's note>)", which nested
+          // on every restore-of-a-restore and reported the target's count.
+          note: restoreNote(version.id, plan.changes.length),
         },
       }),
     ],
-    // GEN-2609-076 - a revert can touch up to all 93 tokens too (a
-    // snapshot can be a full set), same round-trip-timeout risk and
-    // fix as reset/route.ts.
+    // GEN-2609-076 - a revert can touch up to every token, same
+    // round-trip-timeout risk and fix as reset/route.ts.
     { timeout: 20000, maxWait: 5000 },
   )
 
   revalidateDesignTokens()
 
   const tokens = await prisma.designToken.findMany({ orderBy: { key: 'asc' } })
-  return NextResponse.json({ tokens })
+  return NextResponse.json({ tokens, changed: plan.changes.length, skipped: plan.skipped })
 }

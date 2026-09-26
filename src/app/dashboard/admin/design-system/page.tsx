@@ -9,7 +9,7 @@ import DashboardShell from '@/components/DashboardShell'
 import BrandLoader from '@/components/BrandLoader'
 import { useToast } from '@/components/Toast'
 import Button from '@/components/ui/Button'
-import { CONTRAST_PAIRS, composeRgba, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
+import { CONTRAST_PAIRS, composeRgba, planRestore, type RestorePlan, contrastFailures, contrastMinimum, formatAlpha, pairRatio, parseCssColor, parsePx, rangeFor, rgbToHex, tokenValueError, radiusOrderErrors, FONT_ALLOWLIST, type ContrastFailure, type TokenGroup, type TokenType } from '@/lib/design-tokens'
 import { TOKEN_COVERAGE, appliesTo, type CoverageStatus } from '@/lib/design-token-coverage'
 import { STATUS_TONE } from '@/lib/statusStyle'
 import { COLOR_SECTIONS, tokenMeta, tokenMatches } from '@/lib/design-token-meta'
@@ -332,14 +332,18 @@ export default function AdminDesignSystemPage() {
     setSaving(true)
     try {
       const res = await fetch(`/api/admin/design-tokens/versions/${versionId}/revert`, { method: 'POST' })
-      if (!res.ok) throw new Error('Revert failed')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Revert failed.')
+      }
       const data = await res.json()
       setTokens(data.tokens)
       setPending(new Map(data.tokens.map((t: DesignToken) => [t.key, t.value])))
-      showToast('Reverted.', 'success')
+      const skipped = data.skipped?.length ?? 0
+      showToast(`Restored ${data.changed} token(s).${skipped ? ` ${skipped} out-of-range value(s) left as they are.` : ''}`, 'success')
       loadVersionsQuiet()
-    } catch {
-      showToast('Revert failed.', 'error')
+    } catch (err: any) {
+      showToast(err.message || 'Revert failed.', 'error')
     } finally {
       setSaving(false)
       setConfirmingRevert(null)
@@ -458,8 +462,9 @@ export default function AdminDesignSystemPage() {
                       // change, compared to the CURRENTLY LIVE token
                       // values (not this list's snapshots) - the real
                       // answer to "what does this button do right now."
-                      const currentValues = Object.fromEntries((tokens ?? []).map((t) => [t.key, t.value]))
-                      const wouldRestore = diffSnapshots(v.snapshot, currentValues).length
+                      // GEN-2609-108 - planRestore is what the API runs, so
+                      // this count is exactly what the restore will write.
+                      const wouldRestore = planRestore(v.snapshot, tokens ?? []).changes.length
                       return (
                         <li key={v.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--afa-border-resting)' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
@@ -673,7 +678,7 @@ export default function AdminDesignSystemPage() {
         {confirmingRevert && (
           <ConfirmDialog
             title="Restore this version?"
-            body={<RestorePreview changes={diffSnapshots(confirmingRevert.snapshot, Object.fromEntries((tokens ?? []).map((t) => [t.key, t.value])))} />}
+            body={<RestorePreview plan={planRestore(confirmingRevert.snapshot, tokens ?? [])} />}
             confirmLabel={saving ? 'Restoring…' : 'Yes, restore'}
             onConfirm={() => handleRevert(confirmingRevert.id)}
             onCancel={() => setConfirmingRevert(null)}
@@ -984,7 +989,8 @@ function ShorthandInput({ tokenKey, value, onChange, disabled, invalid }: { toke
 // become`, capped at 10 rows so a large snapshot can't push the dialog's
 // buttons off-screen.
 const RESTORE_PREVIEW_MAX = 10
-function RestorePreview({ changes }: { changes: { key: string; from: string; to: string }[] }) {
+function RestorePreview({ plan }: { plan: RestorePlan }) {
+  const { changes, skipped, newerKeys } = plan
   const shown = changes.slice(0, RESTORE_PREVIEW_MAX)
   return (
     <>
@@ -1000,6 +1006,17 @@ function RestorePreview({ changes }: { changes: { key: string; from: string; to:
       </ul>
       {changes.length > shown.length && (
         <p style={{ marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-small)' }}>+{changes.length - shown.length} more</p>
+      )}
+      {/* GEN-2609-108 / BUG-2609-061 - what the restore leaves alone. */}
+      {newerKeys.length > 0 && (
+        <p style={{ marginTop: 'var(--afa-space-10px)', fontSize: 'var(--afa-text-small)' }}>
+          {newerKeys.length} newer token{newerKeys.length === 1 ? ' is' : 's are'} not in this version and stay{newerKeys.length === 1 ? 's' : ''} as {newerKeys.length === 1 ? 'it is' : 'they are'}.
+        </p>
+      )}
+      {skipped.length > 0 && (
+        <p style={{ marginTop: 'var(--afa-space-6px)', fontSize: 'var(--afa-text-small)' }}>
+          {skipped.length} value{skipped.length === 1 ? '' : 's'} in this version {skipped.length === 1 ? 'is' : 'are'} outside today&apos;s limits and stay{skipped.length === 1 ? 's' : ''} as {skipped.length === 1 ? 'it is' : 'they are'}: {skipped.map((k) => `${k.key} ${k.value}`).join(', ')}.
+        </p>
       )}
     </>
   )

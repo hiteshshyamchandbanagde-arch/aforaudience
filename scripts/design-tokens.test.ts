@@ -18,7 +18,9 @@ import {
   isValidTokenValue,
   pairRatio,
   parseCssColor,
+  planRestore,
   radiusOrderErrors,
+  restoreNote,
   rangeFor,
   rgbToHex,
   tokenValueError,
@@ -296,6 +298,50 @@ test('every default rgba token already is in composeRgba form', () => {
 test('rgbToHex feeds the native picker', () => {
   assert.equal(rgbToHex([245, 245, 240, 0.5]), '#F5F5F0')
   assert.equal(rgbToHex([0, 10, 255, 1]), '#000AFF')
+})
+
+// --- G. restore (BUG-2609-061) -------------------------------------------------
+
+const LIVE = Object.entries(DEFAULT_TOKEN_VALUES).map(([key, value]) => ({ key, value, type: typeOf(key) }))
+
+test('restore note is flat and uses the real diff count', () => {
+  assert.equal(restoreNote('cmuhmxlcc000004jnnx0hiypl', 2), 'Restored version cmuhmxlcc000004jnnx0hiypl (2 token(s) changed)')
+})
+
+test('restore: only differing keys change; the count is the real diff', () => {
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-amber': '#D0A040', '--afa-radius-md': '10px' }
+  const plan = planRestore(snapshot, LIVE)
+  assert.deepEqual(plan.changes.map((c) => c.key).sort(), ['--afa-amber', '--afa-radius-md'])
+  assert.equal(plan.after['--afa-amber'], '#D0A040')
+  assert.deepEqual(plan.skipped, [])
+  assert.deepEqual(plan.newerKeys, [])
+})
+
+test('restore: tokens newer than the snapshot are reported and left untouched', () => {
+  const snapshot: Record<string, string> = { ...DEFAULT_TOKEN_VALUES, '--afa-amber': '#D0A040' }
+  delete snapshot['--afa-scrim']
+  delete snapshot['--afa-tint-30']
+  const live = LIVE.map((t) => (t.key === '--afa-scrim' ? { ...t, value: 'rgba(10, 10, 10, 0.6)' } : t))
+  const plan = planRestore(snapshot, live)
+  assert.deepEqual(plan.newerKeys.sort(), ['--afa-scrim', '--afa-tint-30'])
+  assert.equal(plan.after['--afa-scrim'], 'rgba(10, 10, 10, 0.6)')
+  assert.equal(plan.changes.length, 1)
+  // the new version row gets the full live set, newer keys included
+  assert.equal(Object.keys(plan.after).length, LIVE.length)
+})
+
+test('restore: values today\'s rules reject are skipped (real QA snapshot values)', () => {
+  const snapshot = { ...DEFAULT_TOKEN_VALUES, '--afa-radius-pill': '0100000px', '--afa-radius-md': '200px', '--afa-amber': '#D0A040' }
+  const plan = planRestore(snapshot, LIVE)
+  assert.deepEqual(plan.skipped.map((s) => s.key).sort(), ['--afa-radius-md', '--afa-radius-pill'])
+  assert.deepEqual(plan.changes.map((c) => c.key), ['--afa-amber'])
+  assert.equal(plan.after['--afa-radius-md'], '8px')
+})
+
+test('restore: snapshot keys that are no longer tokens are ignored', () => {
+  const plan = planRestore({ ...DEFAULT_TOKEN_VALUES, '--afa-radius-10px': '10px' }, LIVE)
+  assert.equal(plan.changes.length, 0)
+  assert.equal('--afa-radius-10px' in plan.after, false)
 })
 
 console.log(`\n${passed} passed`)
