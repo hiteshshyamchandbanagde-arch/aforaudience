@@ -1,3 +1,105 @@
+# Session Handoff — 26 Sept 2026, part 4 (CC — bug batch 053/054/050 + Figma exclusion, pushed, needs merge + backfill SQL)
+
+Delta-only. Branch `fix/bug-batch-053-054-050` off `qa@d0c1b2d`, pushed, **not merged**.
+**Compare:** https://github.com/hiteshshyamchandbanagde-arch/aforaudience/compare/qa...fix/bug-batch-053-054-050?expand=1
+
+## 1. Commits (in order)
+1. `9e59788` BUG-2609-053: ticket REF code
+2. `bc0332c` BUG-2609-054: one username rule
+3. `047ab86` BUG-2609-050: status badges + banners
+4. `84ca420` Tailwind `@source not "../../Figma"`
+5. `615d40e` BUG-2609-050 addendum: admin all-clear banner (`bf76b33` landed on qa mid-run, so it's a separate commit)
+
+## 2. BUG-2609-053: ticket REF
+- **Why it was null:** nothing ever wrote it. `Booking.ticketCode` and its unique index (`Booking_ticketCode_key`, confirmed live on QA) have existed since the init migration, but no code path set the column. `CodeCounter` / `nextSequentialCode` exist, but I didn't reuse them (see format).
+- **Format:** `AFA-XXXX-XXXX`, 8 random chars from `23456789ABCDEFGHJKMNPQRSTVWXYZ` (no 0/O, 1/I/L, U). Random rather than a CodeCounter sequence for two reasons: a numeric sequence brings 0 and 1 back, and check-in now accepts this code by hand, so it must not be guessable from a neighbour's ticket. There are 30^8 ≈ 6.6e11 combinations, and collisions retry on the unique index.
+- **Assigned on every CONFIRMED path:** free auto-confirm (`POST /api/bookings`), browser payment confirm, Razorpay webhook, and the +1 booking (`lib/plus-one.ts`). `ensureTicketCode()` writes `WHERE ticketCode IS NULL`, so a confirm and webhook racing each other can't overwrite each other's code. It never throws. `deliverTicket` and the PDF download also call it as a safety net. There is **no admin path that confirms a `Booking`** (the venue dashboard's CONFIRMED is the separate `VenueBooking` model). The refund-failure rollback restores CONFIRMED on a row that already has its code.
+- **Other surfaces updated:**
+  - Ticket PDF: "BOOKING ID" → "TICKET REF". The QR still encodes `booking.id`, so tickets already sent keep scanning.
+  - Confirmation email: TICKET REF, and the attachment filename uses the code.
+  - PDF download filename.
+  - Admin bookings: shows `code · id`.
+  - Organiser check-in: manual entry accepts the code in any case, with or without dashes or the `AFA` prefix; the placeholder and label are updated, and the attendee list shows the ref.
+  - `/tickets` stub already reads `ticketCode`.
+  - `qa-seed` now gives seeded CONFIRMED bookings a code.
+- **No migration needed** (the unique index already exists).
+- **Backfill: NOT RUN.** Preview on aforaudience-qa: **28 CONFIRMED rows, all 28 null** (PENDING 3, CANCELLED 1, REFUNDED 1 are left alone). 5 samples, newest first:
+
+| id | createdAt | total | event |
+|---|---|---|---|
+| cmtyqdto1000104i6i86evdxu | 2026-09-12 18:41 | 820 | One-Act Play Festival |
+| cmty00edj0003zoi7be1gjjg9 | 2026-09-12 06:22 | 0 | Nimbahera Showcase #1 |
+| cmty0037c0002zoi7wcr429ur | 2026-09-12 06:22 | 0 | Nimbahera Showcase #1 |
+| cmtxzvvg70001zoi7vbqw85w7 | 2026-09-12 06:19 | 0 | Nimbahera Showcase #1 |
+| cmtxzvenu0000zoi7eyxw6r52 | 2026-09-12 06:18 | 0 | Nimbahera Showcase #1 |
+
+```sql
+-- BUG-2609-053 backfill. Same alphabet/format as src/lib/ticket-code.ts.
+-- pgcrypto lives in the `extensions` schema on QA (checked).
+BEGIN;
+DO $$
+DECLARE r RECORD; s TEXT; code TEXT;
+BEGIN
+  FOR r IN SELECT id FROM "Booking" WHERE status = 'CONFIRMED' AND "ticketCode" IS NULL LOOP
+    LOOP
+      SELECT string_agg(substr('23456789ABCDEFGHJKMNPQRSTVWXYZ', 1 + (get_byte(extensions.gen_random_bytes(1), 0) % 30), 1), '')
+        INTO s FROM generate_series(1, 8);
+      code := 'AFA-' || substr(s, 1, 4) || '-' || substr(s, 5, 4);
+      EXIT WHEN NOT EXISTS (SELECT 1 FROM "Booking" WHERE "ticketCode" = code);
+    END LOOP;
+    UPDATE "Booking" SET "ticketCode" = code WHERE id = r.id;
+  END LOOP;
+END $$;
+-- expect 0:
+SELECT count(*) FROM "Booking" WHERE status = 'CONFIRMED' AND "ticketCode" IS NULL;
+COMMIT;
+```
+I dry-ran only the code expression, as a pure SELECT (it produced `AFA-SD72-38X9`). `% 30` on a random byte has a tiny bias; that's fine for a reference code.
+
+## 3. BUG-2609-054: username
+- `USERNAME_RE` / `isValidUsernameFormat` in `src/lib/validation.ts` (pure). It's used by the register route, `/api/auth/username-check` (which now returns `{available:false, invalid:true, code:"USERNAME_INVALID"}` for a bad format) and `RegisterForm`. The form checks format before calling the API, shows the message inline, blocks submit, and sets `autoComplete="username"`.
+- **Deviation:** I added no new locale string. `authErrors.USERNAME_INVALID` already exists in all 11 dictionaries with exactly this message, so I reused it.
+- Verified in a real browser at 390px: `foo@bar.com`, `ab` and 21 chars each show "Username must be 3-20 characters…", and `valid_name` shows "Available" (a real DB check). `autocomplete="username"` is present.
+
+## 4. BUG-2609-050 + other STATUS_TONE copies
+- Premise checked by value: `--afa-sage` #4A6741 / `--afa-error` #B3261E on the tinted #1F1F1F surface come out at about 2:1. `-bright` is about 4.8:1 / 4.6:1.
+- **Rebuilt from `STATUS_TONE`:**
+  - special-notes badge (event edit)
+  - artist corporate-inquiries
+  - artist events compensation badge
+  - artist dashboard applications
+  - organiser lineup comp labels
+  - organiser event page (event status, applications, venue-booking pill)
+  - organiser tours list and tour stops
+  - `VenuePortalUI` StatusPill (it was a local copy of the palette)
+  - `lib/availability` "Spots Available"
+- **Text colour only:**
+  - `ErrorBanner` / `SuccessBanner`
+  - Toast error/success text
+  - 8 inline error banners: login ×2, register ×2, forgot and reset password, AuthPromptSheet, CorporateInquiryModal, Organisers/VenueOwners grid embeds
+  - admin all-clear banner (→ `--afa-sage-bright`; no STATUS_TONE match for its green bg)
+- **Not fixed, flagged for GEN-2609-113:**
+  - **`STATUS_TONE.gold` itself** (`--afa-gold` #8A6A1F) measures about 2.6:1 on its own tint. Every gold badge is below AA, including the ones this batch moved onto STATUS_TONE.
+  - Plain `--afa-error` text on the dark card, with no tint (register "taken" / field errors, and the new format message, which matches them), is about 2.5:1.
+  - Amber-text chips on the gold tint were left alone (they aren't STATUS_TONE copies).
+
+## 5. Figma exclusion
+- `@source not "../../Figma";` was added with a comment. Built CSS: 0 × `rounded-[12px]`. Control build with the line removed: 1 hit. So `Figma/` really was the source.
+
+## 6. Verification
+- tsc clean. `next build` passes (the first try failed on a stale `next/font` Turbopack cache, "queries have exactly one entry"; `rm -rf .next` fixed it).
+- `check-design-tokens.js` vs origin/qa: no new literals. **Ratchet:** hex 51, **rgba 543 → 512**, font-family 0, font-size 13, spacing 1929, radius 0, raw-button 2, bare-button 91. The baseline is not regenerated; chat can lock in the −31.
+- Tests: checker 70/70, migrate-tokens 46/46, new `scripts/ticket-code.test.ts` 5/5 and `scripts/username.test.ts` 4/4 (run with `npx tsx`; **not yet wired into CI**).
+- ESLint before/after on all touched files: 74 → 74, identical rules per file.
+- `next dev`: `/`, `/register/`, `/tickets/` are all 200. The one console error is the pre-existing `#intro-splash` hydration mismatch from the root layout; it shows on `/` too and this branch doesn't touch it.
+- Ticket PDF rendered locally: TICKET REF prints the code and the QR is unchanged.
+- **Not live-tested:** a real confirm (free/paid/webhook) that writes a code to the DB. Only the pure helpers are unit-tested, because writing to QA was out of scope before merge. Worth one free booking on QA after merge + backfill.
+
+## 7. Not in scope (flag only)
+- Refund tiers: 7–14 days refunds 50% of the total **including** the booking fee, while 14+ days keeps the fee. The code comment in `bookings/[id]/route.ts` already calls this an assumption for Hitesh. Unchanged.
+
+---
+
 # Session Handoff — 26 Sept 2026, part 3 (chat — #706 radius merged, DB applied, bug batch dispatched)
 
 Delta-only. `qa` code at `136192b` (#706).
