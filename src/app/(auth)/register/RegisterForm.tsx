@@ -8,6 +8,7 @@ import EnvBadge from "@/components/EnvBadge"
 import { useLocale } from "@/lib/i18n/translate"
 import Button from "@/components/ui/Button"
 import { FILL_SOLID_TINT, FILL_SOLID_BORDER_TINT } from "@/lib/statusStyle"
+import { isValidUsernameFormat } from "@/lib/validation"
 
 const inputStyle = (hasError?: boolean) => ({
   width: "100%",
@@ -84,7 +85,7 @@ export default function RegisterForm() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string; username?: string }>({})
   const [form, setForm] = useState({ fullName: "", username: "", email: "", phoneNumber: "", password: "", confirm: "" })
 
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle")
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle")
   const [usernameSuggestion, setUsernameSuggestion] = useState<string | null>(null)
 
   // Feedback widget request (cmrlxz35q): let users verify what they typed
@@ -177,12 +178,22 @@ export default function RegisterForm() {
       setUsernameStatus("idle")
       return
     }
+    // BUG-2609-054 - same rule as the server; don't ask about availability
+    // for a name that can't be registered at all.
+    if (!isValidUsernameFormat(form.username.trim())) {
+      setUsernameStatus("invalid")
+      setUsernameSuggestion(null)
+      return
+    }
     setUsernameStatus("checking")
     const timeout = setTimeout(async () => {
       try {
         const res = await fetch(`/api/auth/username-check?value=${encodeURIComponent(form.username)}`)
         const data = await res.json()
-        if (data.available) {
+        if (data.invalid) {
+          setUsernameStatus("invalid")
+          setUsernameSuggestion(null)
+        } else if (data.available) {
           setUsernameStatus("available")
           setUsernameSuggestion(null)
         } else {
@@ -215,6 +226,9 @@ export default function RegisterForm() {
     }
     if (usernameStatus === "taken") {
       setError(tr.registerPage.pleaseChooseAvailableUsername); return
+    }
+    if (usernameStatus === "invalid") {
+      setFieldErrors({ username: tr.authErrors.USERNAME_INVALID }); return
     }
     if (!/^\d{10}$/.test(form.phoneNumber)) {
       setFieldErrors({ phone: tr.registerPage.invalidPhoneNumber }); return
@@ -439,10 +453,11 @@ export default function RegisterForm() {
               <input
                 name="username"
                 type="text"
+                autoComplete="username"
                 placeholder={tr.registerPage.usernamePlaceholder}
                 value={form.username}
                 onChange={handleChange}
-                style={inputStyle(!!fieldErrors.username || usernameStatus === "taken")}
+                style={inputStyle(!!fieldErrors.username || usernameStatus === "taken" || usernameStatus === "invalid")}
               />
               {usernameStatus === "idle" && initialsSuggestions.length > 0 && (
                 <div style={{ marginTop: "var(--afa-space-2)" }}>
@@ -498,6 +513,11 @@ export default function RegisterForm() {
               {usernameStatus === "available" && (
                 <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-green-dark)", display: "flex", alignItems: "center" }}>
                   <CheckCircleIcon />{tr.registerPage.availableLabel}
+                </p>
+              )}
+              {usernameStatus === "invalid" && !fieldErrors.username && (
+                <p style={{ marginTop: "var(--afa-space-6px)", fontSize: "var(--afa-text-small)", color: "var(--afa-error)" }}>
+                  {tr.authErrors.USERNAME_INVALID}
                 </p>
               )}
               {usernameStatus === "taken" && (
@@ -649,7 +669,7 @@ export default function RegisterForm() {
           <Button
             variant="form-submit"
             onClick={handleRegister}
-            disabled={loading || usernameStatus === "taken"}
+            disabled={loading || usernameStatus === "taken" || usernameStatus === "invalid"}
             style={{ marginTop: "var(--afa-space-6)" }}
           >
             {loading ? tr.registerPage.creatingAccountEllipsis : tr.registerPage.createAccountButton}
