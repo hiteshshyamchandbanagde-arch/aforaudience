@@ -150,23 +150,23 @@ function LoginForm() {
         </p>
       </div>
 
-      <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_rgba(0,0,0,0.35)]">
+      <div className="bg-[var(--afa-surface-raised)] rounded-[var(--afa-radius-xl)] p-8 sm:p-10 border border-[var(--afa-tint-08)] shadow-[0_8px_32px_-4px_var(--afa-shadow)]">
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--afa-text-heading)", fontWeight: 700, color: "var(--afa-text-primary)", marginBottom: "var(--afa-space-6)" }}>
           {tr.loginPage.signInHeading}
         </h2>
 
         {registered && (
-          <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+          <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
             {tr.loginPage.accountCreatedBanner}
           </div>
         )}
         {justReset && (
-          <div style={{ background: "rgba(39,103,73,0.15)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
+          <div style={{ background: "var(--afa-success-tint)", border: "1px solid var(--afa-green-dark)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-green-dark)" }}>
             {tr.loginPage.passwordUpdatedBanner}
           </div>
         )}
         {wasSuspended && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
             {tr.authCommon.accountSuspendedMessage}
           </div>
         )}
@@ -176,12 +176,12 @@ function LoginForm() {
           </div>
         )}
         {error && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+          <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
             {error}
           </div>
         )}
         {devOtp && mode === "otp-verify" && (
-          <div style={{ background: "rgba(201,151,58,0.08)", border: "1px solid rgba(201,151,58,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)" }}>
+          <div style={{ background: "var(--afa-amber-wash)", border: "1px solid var(--afa-amber-border)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-amber)" }}>
             QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
           </div>
         )}
@@ -196,7 +196,7 @@ function LoginForm() {
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder={tr.loginPage.identifierPlaceholder}
               onKeyDown={(e) => e.key === "Enter" && mode === "password" && handleLogin()}
-              style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+              style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
             />
           </div>
         )}
@@ -214,7 +214,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", paddingRight: "44px", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
                 />
                 <Button
                   variant="icon"
@@ -274,7 +274,7 @@ function LoginForm() {
                 onChange={(e) => setOtpCode(e.target.value)}
                 maxLength={6}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid rgba(245,245,240,0.12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "var(--afa-space-3) var(--afa-space-14px)", borderRadius: "var(--afa-radius-md)", border: "1.5px solid var(--afa-tint-12)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", background: "transparent", outline: "none", boxSizing: "border-box" }}
               />
             </div>
             <Button
@@ -304,9 +304,9 @@ function LoginForm() {
         {mode !== "otp-verify" && process.env.NEXT_PUBLIC_GOOGLE_LOGIN_ENABLED === "true" && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
-              <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+              <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
               <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
-              <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+              <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
             </div>
             <Button
               variant="outline-neutral"

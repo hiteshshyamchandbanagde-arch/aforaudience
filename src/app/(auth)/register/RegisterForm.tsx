@@ -14,7 +14,7 @@ const inputStyle = (hasError?: boolean) => ({
   width: "100%",
   padding: "var(--afa-space-3) var(--afa-space-14px)",
   borderRadius: "var(--afa-radius-md)",
-  border: `1.5px solid ${hasError ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`,
+  border: `1.5px solid ${hasError ? "var(--afa-error)" : "var(--afa-tint-12)"}`,
   fontSize: "var(--afa-text-body)",
   color: "var(--afa-text-primary)",
   background: "transparent",
@@ -111,7 +111,7 @@ export default function RegisterForm() {
     passwordStrength === 3 ? "var(--afa-green-dark)" :
     passwordStrength === 2 ? "var(--afa-amber)" :
     passwordStrength === 1 ? "var(--afa-error-bright)" :
-    "rgba(245,245,240,0.12)"
+    "var(--afa-tint-12)"
   const strengthLabel =
     passwordStrength === 3 ? tr.registerPage.passwordStrengthStrong :
     passwordStrength === 2 ? tr.registerPage.passwordStrengthMedium :
@@ -349,14 +349,14 @@ export default function RegisterForm() {
             </p>
           </div>
 
-          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
+          <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
             {devOtp && (
-              <div style={{ background: "rgba(201,151,58,0.15)", border: "1px solid var(--afa-amber)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>
+              <div style={{ background: "var(--afa-amber-tint)", border: "1px solid var(--afa-amber)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-ui)", color: "var(--afa-text-primary)" }}>
                 QA Mode — dev OTP: <strong>{devOtp}</strong> (never shown in production)
               </div>
             )}
             {error && (
-              <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+              <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
                 {error}
               </div>
             )}
@@ -404,7 +404,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.35)" }}>
+        <div style={{ background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "40px", border: "1px solid var(--afa-tint-08)", boxShadow: "0 8px 32px -4px var(--afa-shadow)" }}>
           {/* Auth Pages Dark Theme Redesign (4 Sep 2026) - new, above Full
               Name per docs/design.md. QST-2607-009 backend is merged so the
               call is wired for real, but it only actually completes once
@@ -422,15 +422,15 @@ export default function RegisterForm() {
                 {tr.loginPage.continueWithGoogle}
               </Button>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--afa-space-3)", margin: "var(--afa-space-5) 0" }}>
-                <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+                <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
                 <span style={{ fontSize: "var(--afa-text-small)", color: "var(--afa-text-primary)", opacity: 0.5, textTransform: "uppercase" }}>{tr.loginPage.orDivider}</span>
-                <div style={{ flex: 1, height: "1px", background: "rgba(245,245,240,0.12)" }} />
+                <div style={{ flex: 1, height: "1px", background: "var(--afa-tint-12)" }} />
               </div>
             </>
           )}
 
           {error && (
-            <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
+            <div style={{ background: "var(--afa-error-tint)", border: "1px solid var(--afa-error-edge)", borderRadius: "var(--afa-radius-md)", padding: "var(--afa-space-3) var(--afa-space-4)", marginBottom: "var(--afa-space-5)", fontSize: "var(--afa-text-body)", color: "var(--afa-error-bright)" }}>
               {error}
             </div>
           )}
@@ -561,8 +561,8 @@ export default function RegisterForm() {
                   bordered container replacing the old two-separate-boxes
                   look; +91 prefix and the number input now share one
                   border with an internal divider, per Figma. */}
-              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-error)" : "rgba(245,245,240,0.12)"}`, borderRadius: "var(--afa-radius-md)", overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", padding: "0 var(--afa-space-14px)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid rgba(245,245,240,0.12)" }}>
+              <div style={{ display: "flex", alignItems: "stretch", border: `1.5px solid ${fieldErrors.phone ? "var(--afa-error)" : "var(--afa-tint-12)"}`, borderRadius: "var(--afa-radius-md)", overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", padding: "0 var(--afa-space-14px)", fontSize: "var(--afa-text-body)", color: "var(--afa-text-primary)", opacity: 0.7, borderRight: "1px solid var(--afa-tint-12)" }}>
                   +91
                 </div>
                 <input
@@ -616,7 +616,7 @@ export default function RegisterForm() {
                           flex: 1,
                           height: "4px",
                           borderRadius: "var(--afa-radius-xs)",
-                          background: i < passwordStrength ? strengthColor : "rgba(245,245,240,0.12)",
+                          background: i < passwordStrength ? strengthColor : "var(--afa-tint-12)",
                         }}
                       />
                     ))}
