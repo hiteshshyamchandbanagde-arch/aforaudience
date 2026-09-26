@@ -347,6 +347,20 @@ function checkColorSites(file) {
   }
   const base = baseColorTable()
   const isColorToken = (t) => t in liveColorTable || t in base
+  // lines that sit inside a multi-line /* ... */ (incl. JSX {/* ... */})
+  // on the base side, which isCommentish() can't see line by line
+  const inBlock = []
+  let open = false
+  for (const l of oldLines) {
+    inBlock.push(open)
+    // a comment opener starts the line or follows whitespace / `{` -
+    // `accept="image/*"` is not one
+    let o = -1
+    for (const m of l.matchAll(/(^|[\s{])\/\*/g)) o = m.index + m[1].length
+    const c = l.lastIndexOf('*/')
+    if (o > c) open = true
+    else if (c > o) open = false
+  }
   let ok = true
   for (let i = 0; i < newLines.length; i++) {
     const before = oldLines[i]
@@ -354,7 +368,7 @@ function checkColorSites(file) {
     if (before === after) continue
     const site = `${file}:${i + 1}`
     const b = colorItems(before, isColorToken)
-    if (isCommentish(after) && isCommentish(before)) {
+    if ((isCommentish(after) && isCommentish(before)) || (inBlock[i] && !before.includes('*/'))) {
       if (b.some((x) => x.lit)) colorStats.removed.push(site)
       continue
     }
