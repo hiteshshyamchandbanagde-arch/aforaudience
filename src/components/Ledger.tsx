@@ -26,7 +26,7 @@ function FeeRow({ label, value, accent, muted, bold }: { label: string; value: s
 export default function Ledger({ eyebrow, headline }: { eyebrow: string; headline: ReactNode }) {
   const { t: tr } = useLocale()
   return (
-    <div className="ledger-grid" style={{ gap: "32px", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "16px", padding: "36px" }}>
+    <div className="ledger-grid" style={{ gap: "32px", alignItems: "center", background: "var(--afa-surface-raised)", borderRadius: "var(--afa-radius-xl)", padding: "36px" }}>
       <style>{`
         .ledger-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
         .ledger-stats { flex-wrap: wrap; }
@@ -59,7 +59,7 @@ export default function Ledger({ eyebrow, headline }: { eyebrow: string; headlin
           </div>
         </div>
       </div>
-      <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "12px", padding: "var(--afa-space-5)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)" }}>
+      <div style={{ background: "var(--afa-surface-inverse)", borderRadius: "var(--afa-radius-lg)", padding: "var(--afa-space-5)", fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-ui)" }}>
         <FeeRow label={tr.homePage.feeBaseLabel} value="₹500" />
         <FeeRow label={tr.homePage.feeArtistVenueShareLabel} value="100%" accent />
         <FeeRow label={tr.homePage.feeCommissionLabel} value="₹0" accent />

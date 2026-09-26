@@ -34,7 +34,7 @@ export default function LegalDocLayout({ title, lastUpdated, children }: LegalDo
             marginTop: "24px",
             marginBottom: "32px",
             padding: "16px 20px",
-            borderRadius: "10px",
+            borderRadius: "var(--afa-radius-lg)",
             background: "rgba(201,151,58,0.15)",
             border: "1px solid var(--afa-amber)",
           }}
@@ -95,7 +95,7 @@ export function LI({ children }: { children: React.ReactNode }) {
 
 export function Placeholder({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "4px", fontWeight: 600 }}>
+    <span style={{ background: "rgba(201,151,58,0.15)", color: "var(--afa-amber)", padding: "1px 6px", borderRadius: "var(--afa-radius-xs)", fontWeight: 600 }}>
       {children}
     </span>
   )

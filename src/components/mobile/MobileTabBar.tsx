@@ -451,7 +451,7 @@ export default function MobileTabBar() {
                       fontWeight: 700,
                       color: 'var(--afa-on-fill-solid)',
                       background: 'var(--afa-fill-solid)',
-                      borderRadius: 999,
+                      borderRadius: 'var(--afa-radius-pill)',
                       padding: '1px 5px',
                       minWidth: 15,
                       textAlign: 'center',

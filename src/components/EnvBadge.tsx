@@ -27,7 +27,7 @@ export default function EnvBadge() {
         letterSpacing: "0.02em",
         color: fg,
         background: bg,
-        borderRadius: "999px",
+        borderRadius: "var(--afa-radius-pill)",
         verticalAlign: "middle",
         fontFamily: "var(--font-sans)",
       }}

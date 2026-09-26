@@ -117,7 +117,7 @@ export default function InstallPrompt() {
         zIndex: 50,
         background: 'var(--afa-fill-solid)',
         color: 'var(--afa-on-fill-solid)',
-        borderRadius: 16,
+        borderRadius: 'var(--afa-radius-xl)',
         boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
         padding: 16,
         display: 'flex',

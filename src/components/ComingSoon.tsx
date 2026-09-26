@@ -43,7 +43,7 @@ export default function ComingSoon({ title, description }: ComingSoonProps) {
             textDecoration: "none",
             background: "var(--afa-fill-solid)",
             padding: "12px 28px",
-            borderRadius: "6px",
+            borderRadius: "var(--afa-radius-sm)",
           }}
         >
           {tr.comingSoon.backHome}

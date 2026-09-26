@@ -386,7 +386,7 @@ function SidebarLink({ href, label, icon, active, badge, compact }: { href: stri
       {badge && badge > 0 ? (
         <span
           className="ml-auto"
-          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '2px 7px', lineHeight: 1.3 }}
+          style={{ fontSize: 'var(--afa-text-micro)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: '2px 7px', lineHeight: 1.3 }}
         >
           {badge}
         </span>
@@ -612,7 +612,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                       every user whose count is genuinely zero. */}
                   {!!item.badge && item.badge > 0 && (
                     <span
-                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-caption)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 999, padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
+                      style={{ position: 'absolute', top: -4, right: -6, fontSize: 'var(--afa-text-caption)', fontWeight: 700, color: 'var(--afa-on-fill-solid)', background: 'var(--afa-amber)', borderRadius: 'var(--afa-radius-pill)', padding: '1px 5px', minWidth: 15, textAlign: 'center', lineHeight: 1.4 }}
                     >
                       {item.badge}
                     </span>

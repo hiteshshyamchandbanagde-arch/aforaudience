@@ -93,7 +93,7 @@ function ContributionBody({
         </div>
       </div>
 
-      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 16, padding: 16 }}>
+      <div style={{ background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-xl)', padding: 16 }}>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--afa-amber)', marginBottom: 8 }}>
           YOUR CONTRIBUTION
         </div>
@@ -181,7 +181,7 @@ export default function ContributionMoment(props: ContributionMomentProps) {
           className="cm-modal-mount"
           style={{
             position: 'relative', width: '100%', maxWidth: 440, margin: '0 20px',
-            background: 'var(--afa-surface-raised)', borderRadius: 20,
+            background: 'var(--afa-surface-raised)', borderRadius: 'var(--afa-radius-2xl)',
             padding: '24px 24px 28px', boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
           }}
         >

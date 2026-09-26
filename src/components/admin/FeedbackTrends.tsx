@@ -151,7 +151,7 @@ function buildKPIs(items: TrendFeedbackItem[]) {
 
 const kpiCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
-  borderRadius: '12px',
+  borderRadius: 'var(--afa-radius-lg)',
   border: '1px solid var(--afa-tint-08)',
   padding: '14px 16px',
   flex: '1 1 120px',
@@ -172,7 +172,7 @@ const kpiLabel: React.CSSProperties = {
 
 const chartCard: React.CSSProperties = {
   background: 'var(--afa-surface-raised)',
-  borderRadius: '12px',
+  borderRadius: 'var(--afa-radius-lg)',
   border: '1px solid var(--afa-tint-08)',
   padding: '18px',
 }
@@ -314,13 +314,13 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
               <span style={{ color: 'var(--afa-text-primary)', opacity: 0.75 }}>{CATEGORY_LABELS[c.category] || c.category}</span>
               <span style={{ color: 'var(--afa-taupe)' }}>{c.count}</span>
             </div>
-            <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(245,245,240,0.06)', overflow: 'hidden' }}>
+            <div style={{ height: '8px', borderRadius: 'var(--afa-radius-xs)', background: 'rgba(245,245,240,0.06)', overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',
                   width: `${(c.count / maxCatCount) * 100}%`,
                   background: CATEGORY_COLORS[c.category] || 'var(--afa-taupe)',
-                  borderRadius: '4px',
+                  borderRadius: 'var(--afa-radius-xs)',
                 }}
               />
             </div>
@@ -343,7 +343,7 @@ export default function FeedbackTrends({ items }: { items: TrendFeedbackItem[] }
                   height: `${Math.max(4, (b.count / maxAgeCount) * 80)}px`,
                   background: b.label === '14d+' ? 'var(--afa-error)' : 'var(--afa-fill-solid)',
                   opacity: b.label === '14d+' ? 1 : 0.6 + 0.1 * AGE_BUCKETS.findIndex((ab) => ab.label === b.label),
-                  borderRadius: '4px 4px 0 0',
+                  borderRadius: 'var(--afa-radius-xs) var(--afa-radius-xs) var(--afa-radius-sharp) var(--afa-radius-sharp)',
                 }}
               />
               <span style={{ fontSize: 'var(--afa-text-caption)', color: 'var(--afa-taupe)', marginTop: '5px' }}>{b.label}</span>

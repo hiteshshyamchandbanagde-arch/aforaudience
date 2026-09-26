@@ -80,15 +80,15 @@ export default function MobileEventFilterSheet({
           position: "relative",
           maxHeight: "85vh",
           overflowY: "auto",
-          borderTopLeftRadius: "20px",
-          borderTopRightRadius: "20px",
+          borderTopLeftRadius: "var(--afa-radius-2xl)",
+          borderTopRightRadius: "var(--afa-radius-2xl)",
           borderTop: "1px solid var(--afa-tint-10)",
           background: "var(--afa-surface-page)",
           paddingBottom: "32px",
         }}
       >
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div style={{ width: "40px", height: "4px", borderRadius: "999px", background: "var(--afa-border-resting)" }} />
+          <div style={{ width: "40px", height: "4px", borderRadius: "var(--afa-radius-pill)", background: "var(--afa-border-resting)" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 4px" }}>
           <h2 style={{ fontFamily: "var(--font-ui)", fontSize: "var(--afa-text-subtitle)", fontWeight: 700, color: "var(--afa-cream)", margin: 0 }}>

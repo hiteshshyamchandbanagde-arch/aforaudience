@@ -47,7 +47,7 @@ export default function HeroRotator() {
       style={{
         position: 'relative',
         width: '100%',
-        borderRadius: '16px',
+        borderRadius: 'var(--afa-radius-xl)',
         overflow: 'hidden',
         background: 'var(--afa-fill-solid)',
       }}

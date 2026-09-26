@@ -94,7 +94,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
       ? { display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--afa-text-body-lg)', fontWeight: 500, color: 'var(--afa-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '12px 0', borderBottom: '1px solid rgba(245,245,240,0.06)', width: '100%', textAlign: 'left' }
       : variant === 'topbar'
       ? { display: 'flex', alignItems: 'center', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--afa-text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: saving ? 0.6 : 1 }
-      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', opacity: saving ? 0.6 : 1 }
+      : { display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: 'var(--afa-text-ui)', fontWeight: 600, color: 'var(--afa-text-primary)', background: 'rgba(245,245,240,0.05)', border: 'none', cursor: 'pointer', padding: '6px 12px', borderRadius: 'var(--afa-radius-pill)', opacity: saving ? 0.6 : 1 }
 
   return (
     <div ref={containerRef} style={{ position: 'relative', marginTop: variant === 'topbar' ? '3px' : 0 }}>
@@ -112,7 +112,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             right: variant === 'mobile' || variant === 'topbar' ? 0 : 0,
             background: 'var(--afa-surface-raised)',
             border: '1px solid var(--afa-border-resting)',
-            borderRadius: '10px',
+            borderRadius: 'var(--afa-radius-lg)',
             boxShadow: '0 8px 24px var(--afa-border-resting)',
             zIndex: 40,
             width: '240px',
@@ -125,7 +125,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.location.searchCityPlaceholder}
             autoFocus
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: 'var(--afa-radius-sm)', border: '1px solid var(--afa-border-resting)', fontSize: 'var(--afa-text-ui)', marginBottom: '8px', outline: 'none', background: 'var(--afa-surface-raised)', color: 'var(--afa-text-primary)' }}
           />
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {filteredCities.length === 0 ? (
@@ -137,7 +137,7 @@ export default function LocationChip({ variant = 'desktop' }: { variant?: 'deskt
                   key={c.city}
                   type="button"
                   onClick={() => handleSelect(c)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', background: c.city === location?.city ? FILL_SOLID_TINT : undefined, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', borderRadius: '6px' }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 8px', background: c.city === location?.city ? FILL_SOLID_TINT : undefined, fontSize: 'var(--afa-text-ui)', color: 'var(--afa-text-primary)', borderRadius: 'var(--afa-radius-sm)' }}
                 >
                   {c.label}
                 </Button>

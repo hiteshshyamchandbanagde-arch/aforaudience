@@ -149,7 +149,7 @@ export default function MobileTopBar() {
             width: '100%',
             boxSizing: 'border-box',
             padding: onEventsRoute ? '8px 30px 8px 26px' : '8px 8px 8px 26px',
-            borderRadius: '999px',
+            borderRadius: 'var(--afa-radius-pill)',
             border: '1px solid rgba(245,245,240,0.12)',
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
@@ -198,7 +198,7 @@ export default function MobileTopBar() {
               right: 0,
               background: 'var(--afa-surface-raised)',
               border: '1px solid var(--afa-tint-10)',
-              borderRadius: '10px',
+              borderRadius: 'var(--afa-radius-lg)',
               boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
               padding: '6px',
               minWidth: '150px',
@@ -210,7 +210,7 @@ export default function MobileTopBar() {
                 variant="bare"
                 key={l.id}
                 onClick={() => { setLocale(l.id); setLangOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: '6px', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', textAlign: 'left', padding: '9px 10px', borderRadius: 'var(--afa-radius-sm)', background: locale === l.id ? 'rgba(201,151,58,0.08)' : undefined, color: 'var(--afa-text-primary)', fontSize: 'var(--afa-text-ui)', fontWeight: locale === l.id ? 700 : 500 }}
               >
                 {l.nativeLabel}
               </Button>
@@ -239,7 +239,7 @@ export default function MobileTopBar() {
             </Link>
             <Link
               href="/register"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: '999px' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--afa-text-caption)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--afa-on-fill-solid)', background: 'var(--afa-fill-solid)', textDecoration: 'none', padding: '5px 7px', borderRadius: 'var(--afa-radius-pill)' }}
             >
               {t.nav.signUp}
             </Link>

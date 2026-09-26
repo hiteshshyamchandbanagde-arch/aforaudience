@@ -47,8 +47,8 @@ export function FeeSheet({
         style={{
           position: 'relative',
           borderTop: '1px solid var(--afa-tint-10)',
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
+          borderTopLeftRadius: 'var(--afa-radius-2xl)',
+          borderTopRightRadius: 'var(--afa-radius-2xl)',
           background: 'var(--afa-surface-raised)',
           paddingBottom: 32,
           maxWidth: 560,
@@ -57,7 +57,7 @@ export function FeeSheet({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12 }}>
-          <div style={{ height: 4, width: 40, borderRadius: 999, background: 'var(--afa-border-resting)' }} />
+          <div style={{ height: 4, width: 40, borderRadius: 'var(--afa-radius-pill)', background: 'var(--afa-border-resting)' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 4px' }}>
           <h2 style={{ fontFamily: 'var(--font-ui)', fontSize: 'var(--afa-text-subheading)', fontWeight: 800, color: 'var(--afa-text-primary)', margin: 0 }}>
@@ -71,7 +71,7 @@ export function FeeSheet({
           On a {formatDisplayMoney(ticketFaceValue, currency)} ticket, here&rsquo;s exactly where the money goes.
         </p>
 
-        <div style={{ margin: '20px 20px 0', overflow: 'hidden', borderRadius: 16, border: '1px solid var(--afa-tint-08)' }}>
+        <div style={{ margin: '20px 20px 0', overflow: 'hidden', borderRadius: 'var(--afa-radius-xl)', border: '1px solid var(--afa-tint-08)' }}>
           <div
             style={{
               display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16,
@@ -101,7 +101,7 @@ export function FeeSheet({
 
         <div
           style={{
-            margin: '16px 20px 0', padding: '16px', borderRadius: 16,
+            margin: '16px 20px 0', padding: '16px', borderRadius: 'var(--afa-radius-xl)',
             border: '1px solid rgba(201,151,58,0.3)', background: 'rgba(201,151,58,0.08)',
           }}
         >

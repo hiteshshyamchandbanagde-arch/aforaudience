@@ -491,7 +491,7 @@ export default function SupportWidget() {
             height: 460,
             background: 'var(--afa-surface-raised)',
             color: 'var(--afa-text-primary)',
-            borderRadius: 16,
+            borderRadius: 'var(--afa-radius-xl)',
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             display: 'flex',
             flexDirection: 'column',

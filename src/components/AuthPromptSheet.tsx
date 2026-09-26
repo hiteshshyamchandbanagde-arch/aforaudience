@@ -98,7 +98,7 @@ export default function AuthPromptSheet({
           width: "100%",
           maxWidth: "480px",
           background: "var(--afa-surface-raised)",
-          borderRadius: "20px 20px 0 0",
+          borderRadius: "var(--afa-radius-2xl) var(--afa-radius-2xl) var(--afa-radius-sharp) var(--afa-radius-sharp)",
           padding: "8px 24px 28px",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
           animation: "authSheetSlideUp 0.22s ease-out",
@@ -114,7 +114,7 @@ export default function AuthPromptSheet({
 
         {/* Grab handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "10px 0" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--afa-border-resting)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "var(--afa-radius-xs)", background: "var(--afa-border-resting)" }} />
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
@@ -125,7 +125,7 @@ export default function AuthPromptSheet({
         </div>
 
         {error && (
-          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "8px", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>
+          <div style={{ background: "rgba(179,38,30,0.1)", border: "1px solid rgba(179,38,30,0.3)", borderRadius: "var(--afa-radius-md)", padding: "10px 14px", marginBottom: "16px", fontSize: "var(--afa-text-ui)", color: "var(--afa-error)" }}>
             {error}
           </div>
         )}

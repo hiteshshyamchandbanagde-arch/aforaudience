@@ -254,7 +254,7 @@ export function EventCard({
         gap: view === "list" ? "20px" : 0,
         overflow: "hidden",
         background: "var(--afa-surface-raised)",
-        borderRadius: "3px",
+        borderRadius: "var(--afa-radius-xs)",
         cursor: disabled ? "default" : "pointer",
         opacity: disabled && !isNavigating ? 0.5 : 1,
         transition: "opacity 0.15s ease",
@@ -263,9 +263,9 @@ export function EventCard({
     >
       <SpinnerOverlay isNavigating={isNavigating} size={26} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
 
-      <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "3px", flexShrink: 0 }}>
+      <div className="afa-event-card-poster" style={{ position: "relative", overflow: "hidden", borderRadius: "var(--afa-radius-xs)", flexShrink: 0 }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} />
-        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "rgba(10,10,10,0.7)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "2px" }}>
+        <span style={{ position: "absolute", left: "12px", top: "12px", display: "inline-flex", background: "rgba(10,10,10,0.7)", backdropFilter: "blur(4px)", padding: "6px 10px", borderRadius: "var(--afa-radius-xs)" }}>
           <EventTypeBadge type={event.type} typeLabel={typeLabel} size={14} />
         </span>
         <span style={{ position: "absolute", right: "12px", top: "12px" }}>
@@ -353,7 +353,7 @@ export function EventRow({
         overflow: "hidden",
         background: "var(--afa-surface-raised)",
         border: "1px solid var(--afa-tint-08)",
-        borderRadius: "12px",
+        borderRadius: "var(--afa-radius-lg)",
         padding: "10px",
         cursor: disabled ? "default" : "pointer",
         opacity: disabled && !isNavigating ? 0.5 : 1,
@@ -362,7 +362,7 @@ export function EventRow({
     >
       <SpinnerOverlay isNavigating={isNavigating} size={24} accentColor="var(--afa-amber)" scrimBackground="rgba(10,10,10,0.6)" />
 
-      <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "8px" }}>
+      <div style={{ position: "relative", width: "74px", height: "92px", flexShrink: 0, overflow: "hidden", borderRadius: "var(--afa-radius-md)" }}>
         <EventPoster posterImage={event.posterImage} title={event.title} type={event.type} typeLabel={typeLabel} hideCaption />
       </div>
 
