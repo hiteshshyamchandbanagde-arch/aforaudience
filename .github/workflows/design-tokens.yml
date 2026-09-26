@@ -46,6 +46,12 @@ jobs:
       - name: Migration-script self-tests
         run: node scripts/dev/migrate-tokens.test.js
 
+      # GEN-2609-113 - #707's pure-helper tests (ticket REF code, username
+      # format). Both import only src/lib files with no npm deps, so npx
+      # fetches tsx without a full npm ci.
+      - name: Ticket-code + username self-tests
+        run: npx --yes tsx@^4.23.1 scripts/ticket-code.test.ts && npx --yes tsx@^4.23.1 scripts/username.test.ts
+
       - name: Check for new hardcoded design-token literals (diff-only)
         env:
           BASE_REF: origin/${{ github.base_ref }}
