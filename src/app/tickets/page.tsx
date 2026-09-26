@@ -588,7 +588,7 @@ export default function MyTicketsPage() {
                     <div
                       style={{
                         position: 'absolute', inset: 0,
-                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, var(--afa-scrim-strong) 100%)',
+                        background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, var(--afa-scrim-strong) 100%)', // token-ok: transparent end of an image fade, structural
                       }}
                     />
                     <div style={{ position: 'absolute', right: 10, top: 10 }}>

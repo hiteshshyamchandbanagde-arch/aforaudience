@@ -93,7 +93,7 @@ function BentoTile({ event, size }: { event: EventItem; size: "large" | "medium"
           {tr.homePage.bentoIllustrativeLabel}
         </span>
       )}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, var(--afa-scrim-strong) 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0) 40%, var(--afa-scrim-strong) 100%)" }} />{/* token-ok: transparent end of an image fade, structural */}
       <div style={{ position: "absolute", left: size === "strip" ? "28px" : "20px", right: "20px", bottom: "20px" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: "var(--afa-text-micro)", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--afa-amber)", marginBottom: "var(--afa-space-2)" }}>
           {typeLabel} · {event.venue ? event.venue.city : tr.eventsPage.venueTBD}

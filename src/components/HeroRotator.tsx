@@ -60,7 +60,7 @@ export default function HeroRotator() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, var(--afa-tint-30) 0%, var(--afa-tint-10) 40%, rgba(245,245,240,0) 55%)',
+          background: 'linear-gradient(180deg, var(--afa-tint-30) 0%, var(--afa-tint-10) 40%, rgba(245,245,240,0) 55%)', // token-ok: transparent end of an image fade, structural
           pointerEvents: 'none',
         }}
       />
