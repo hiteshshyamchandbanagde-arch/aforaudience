@@ -8121,8 +8121,8 @@ Not re-verified (same gap `GEN-2609-075`'s own entry already flagged and for the
 
 **BUG-2609-058 — correction to the GEN-2609-109 finding:** venue/create used VenuePortalUI's *local* `Button`, whose `outline` has a faint 20% cream border. The shared `Button` `outline` variant is correct as designed (both uses sit on `--afa-fill-solid` ember). venue/create now uses shared `solid md` (Publish Venue) and `outline-neutral md` (Save as Draft). `venue-requests:221` and `venue/bookings:266` still use the local VenuePortalUI outline — left for a VenuePortalUI migration.
 
-**BUG-2609-059 — design-system Revert:** button reads "Restore this version (N)"; click opens `ConfirmDialog` ("Restore this version?" / "Yes, restore") listing `token: current → will become`, max 10 rows then "+N more". No request until confirm. `ConfirmDialog` body now accepts rich content. **Pending Hitesh admin click-through** before RESOLVED.
+**BUG-2609-059 — design-system Revert:** button reads "Restore this version (N)"; click opens `ConfirmDialog` ("Restore this version?" / "Yes, restore") listing `token: current → will become`, max 10 rows then "+N more". No request until confirm. `ConfirmDialog` body now accepts rich content. Hitesh admin click-through passed 26 Sep: confirm-restore (radius-md/pill) and undo each wrote exactly 1 version row; tokens back at 8px/999px. Follow-up: `BUG-2609-061` (LOW) — revert note nests the target's note and reports the target's token count, not the restore's diff.
 
 **BUG-2609-060 — admin bookings payment label:** "Free event" only when total is 0; amber (`--afa-amber`) "No payment record" when total > 0 and no payment; payment line unchanged otherwise.
 
-Feedback: all 4 → `IN_TEST`. Vercel READY, 0 runtime errors.
+Feedback: all 4 → `RESOLVED` / `DEPLOYED_QA`. Vercel READY, 0 runtime errors.
